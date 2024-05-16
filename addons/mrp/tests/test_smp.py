@@ -154,14 +154,17 @@ class TestMrpSerialMassProduce(TestMrpCommon):
             'name': 'Tracked Product',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         component = self.env['product.product'].create({
             'name': 'Component',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         byproduct = self.env['product.product'].create({
             'name': 'Byproduct',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         # create a BoM
         bom = self.env['mrp.bom'].create({

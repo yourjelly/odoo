@@ -16,6 +16,7 @@ class StockGenerateCommon(TransactionCase):
             'name': 'Tracked by SN',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
 
@@ -311,6 +312,7 @@ class StockGenerateCommon(TransactionCase):
             'name': 'Tracked by Lots',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         lot_id = self.env['stock.lot'].create({
             'product_id': product_lot.id,

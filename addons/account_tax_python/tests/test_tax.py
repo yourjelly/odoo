@@ -59,6 +59,7 @@ class TestTaxPython(TestTaxCommon):
         product1 = self.env['product.product'].create({
             'name': "product1",
             'volume': 200.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         tax3 = self.python_tax("result = product['volume'] > 100 and 10 or 5")
         tests.append(self._prepare_taxes_computation_test(
@@ -77,6 +78,7 @@ class TestTaxPython(TestTaxCommon):
         product2 = self.env['product.product'].create({
             'name': "product1",
             'volume': 50.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         tests.append(self._prepare_taxes_computation_test(
             tax3,

@@ -29,6 +29,7 @@ class TestProductMargin(AccountTestInvoicingCommon):
             'name': 'Ipad',
             'standard_price': 500.0,
             'list_price': 750.0,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         invoices = self.env['account.move'].create([

@@ -18,32 +18,56 @@ class TestRepair(common.TransactionCase):
         cls.res_partner_address_1 = cls.env['res.partner'].create({'name': 'Willie Burke', 'parent_id': cls.res_partner_1.id})
         cls.res_partner_12 = cls.env['res.partner'].create({'name': 'Partner 12'})
 
+        # Category
+        cls.cat = cls.env['product.category'].create({
+            'name': 'cat',
+        })
+
         # Products
-        cls.product_product_3 = cls.env['product.product'].create({'name': 'Desk Combination'})
+        cls.product_product_3 = cls.env['product.product'].create({
+            'name': 'Desk Combination',
+            'categ_id': cls.cat.id,
+        })
         cls.product_product_11 = cls.env['product.product'].create({
             'name': 'Conference Chair',
             'lst_price': 30.0,
-            })
-        cls.product_product_5 = cls.env['product.product'].create({'name': 'Product 5'})
-        cls.product_product_6 = cls.env['product.product'].create({'name': 'Large Cabinet'})
-        cls.product_product_12 = cls.env['product.product'].create({'name': 'Office Chair Black'})
-        cls.product_product_13 = cls.env['product.product'].create({'name': 'Corner Desk Left Sit'})
+            'categ_id': cls.cat.id,
+        })
+        cls.product_product_5 = cls.env['product.product'].create({
+            'name': 'Product 5',
+            'categ_id': cls.cat.id,
+        })
+        cls.product_product_6 = cls.env['product.product'].create({
+            'name': 'Large Cabinet',
+            'categ_id': cls.cat.id,
+        })
+        cls.product_product_12 = cls.env['product.product'].create({
+            'name': 'Office Chair Black',
+            'categ_id': cls.cat.id,
+        })
+        cls.product_product_13 = cls.env['product.product'].create({
+            'name': 'Corner Desk Left Sit',
+            'categ_id': cls.cat.id,
+        })
 
         # Storable products
         cls.product_storable_no = cls.env['product.product'].create({
             'name': 'Product Storable No Tracking',
             'type': 'product',
             'tracking': 'none',
+            'categ_id': cls.cat.id,
         })
         cls.product_storable_serial = cls.env['product.product'].create({
             'name': 'Product Storable Serial',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': cls.cat.id,
         })
         cls.product_storable_lot = cls.env['product.product'].create({
             'name': 'Product Storable Lot',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': cls.cat.id,
         })
 
         # 'Create Repair' Products
@@ -51,16 +75,19 @@ class TestRepair(common.TransactionCase):
             'name': 'Repair Consumable',
             'type': 'consu',
             'create_repair': True,
+            'categ_id': cls.cat.id,
         })
         cls.product_storable_order_repair = cls.env['product.product'].create({
             'name': 'Repair Storable',
             'type': 'product',
             'create_repair': True,
+            'categ_id': cls.cat.id,
         })
         cls.product_service_order_repair = cls.env['product.product'].create({
             'name': 'Repair Service',
             'type': 'service',
             'create_repair': True,
+            'categ_id': cls.cat.id,
         })
 
         # Location
@@ -545,6 +572,7 @@ class TestRepair(common.TransactionCase):
         product = self.env['product.product'].create({
             'name': 'Test Product',
             'type': 'product',
+            'categ_id': self.cat.id,
         })
         self.env['stock.quant']._update_available_quantity(product, self.stock_location_14, 1)
         picking_form = Form(self.env['stock.picking'])
@@ -640,6 +668,7 @@ class TestRepair(common.TransactionCase):
             'detailed_type': 'product',
             'tracking': 'serial',
             'create_repair': True,
+            'categ_id': self.cat.id,
         })
 
         sale_order = self.env['sale.order'].create({

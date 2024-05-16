@@ -28,6 +28,7 @@ class TestSaleDropshippingFlows(TestMrpSubcontractingCommon):
             'type': 'consu',
             'route_ids': [(6, 0, [self.dropship_route.id])],
             'seller_ids': [(0, 0, {'partner_id': seller.id})],
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for name, seller in zip(['Compo01', 'Compo02', 'Compo03', 'Kit'], partners)])
 
         self.env['mrp.bom'].create({
@@ -79,6 +80,7 @@ class TestSaleDropshippingFlows(TestMrpSubcontractingCommon):
             'type': 'consu',
             'route_ids': [(6, 0, [self.dropship_route.id])],
             'seller_ids': [(0, 0, {'partner_id': self.supplier.id})],
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for n in ['Compo', 'Kit']])
 
         self.env['mrp.bom'].create({
@@ -135,6 +137,7 @@ class TestSaleDropshippingFlows(TestMrpSubcontractingCommon):
             'type': 'consu',
             'route_ids': [(6, 0, [self.dropship_route.id])],
             'seller_ids': [(0, 0, {'partner_id': self.supplier.id})],
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for n in ['Compo', 'Kit']])
 
         self.env['mrp.bom'].create({
@@ -224,6 +227,7 @@ class TestSaleDropshippingFlows(TestMrpSubcontractingCommon):
             'type': 'consu',
             'route_ids': [(6, 0, [self.dropship_route.id])],
             'seller_ids': [(0, 0, {'partner_id': self.supplier.id})],
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for n in ['Compo', 'Kit']])
 
         self.env['mrp.bom'].create({
@@ -257,6 +261,7 @@ class TestSaleDropshippingFlows(TestMrpSubcontractingCommon):
         compo01, compo02, kit = self.env['product.product'].create([{
             'name': n,
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for n in ['compo01', 'compo02', 'super kit']])
 
         compo02.write({

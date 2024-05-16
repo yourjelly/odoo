@@ -37,6 +37,7 @@ class TestSaleProjectCommon(TestSaleCommon):
             'sequence': 1,
             'project_ids': [(4, cls.project_template.id)]
         })
+        cls.cat = cls.env['product.category'].create({'name': 'cat'})
 
         # -- manual (delivered, manual)
         cls.product_delivery_manual1 = cls.env['product.product'].create({
@@ -53,6 +54,7 @@ class TestSaleProjectCommon(TestSaleCommon):
             'project_id': False,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_delivery_manual2 = cls.env['product.product'].create({
             'name': "Service delivered, create task in global project",
@@ -68,6 +70,7 @@ class TestSaleProjectCommon(TestSaleCommon):
             'project_id': cls.project_global.id,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_delivery_manual3 = cls.env['product.product'].create({
             'name': "Service delivered, create task in new project",
@@ -83,6 +86,7 @@ class TestSaleProjectCommon(TestSaleCommon):
             'project_id': False,  # will create a project
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_delivery_manual4 = cls.env['product.product'].create({
             'name': "Service delivered, create project only",
@@ -98,6 +102,7 @@ class TestSaleProjectCommon(TestSaleCommon):
             'project_id': False,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_delivery_manual5 = cls.env['product.product'].create({
             'name': "Service delivered, create project only with template",
@@ -114,6 +119,7 @@ class TestSaleProjectCommon(TestSaleCommon):
             'project_template_id': cls.project_template.id,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         price_vals = {
             'standard_price': 11,
@@ -135,27 +141,32 @@ class TestSaleProjectCommon(TestSaleCommon):
             **service_vals,
             'invoice_policy': 'order',
             'service_type': 'manual',
+            'categ_id': cls.cat.id,
         }, {
             'name': "Service milestone",
             **price_vals,
             **service_vals,
             'invoice_policy': 'delivery',
             'service_type': 'milestones',
+            'categ_id': cls.cat.id,
         }, {
             'name': "Service manual",
             **price_vals,
             **service_vals,
             'invoice_policy': 'delivery',
             'service_type': 'manual',
+            'categ_id': cls.cat.id,
         }, {
             'name': "Consumable",
             **price_vals,
             'type': 'consu',
             'invoice_policy': 'order',
+            'categ_id': cls.cat.id,
         }])
         # -- devliered_milestones (delivered, milestones)
         product_milestone_vals = {
             'type': 'service',
+            'categ_id': cls.cat.id,
             'invoice_policy': 'delivery',
             'uom_id': cls.uom_hour.id,
             'uom_po_id': cls.uom_hour.id,

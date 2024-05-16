@@ -13,6 +13,7 @@ class TestStockLot(TestStockCommon):
     def setUpClass(cls):
         super().setUpClass()
         # Creates a tracked product using expiration dates.
+        cls.category = cls.env['product.category'].create({'name': 'category'})
         cls.product_apple = cls.ProductObj.create({
             'name': 'Apple',
             'type': 'product',
@@ -22,6 +23,7 @@ class TestStockLot(TestStockCommon):
             'use_time': 5,
             'removal_time': 8,
             'alert_time': 4,
+            'categ_id': cls.category.id,
         })
         # Creates an apple lot.
         lot_form = Form(cls.LotObj)
@@ -41,6 +43,7 @@ class TestStockLot(TestStockCommon):
         cls.product_apple_pie = cls.ProductObj.create({
             'name': 'Apple Pie',
             'type': 'product',
+            'categ_id': cls.category.id,
         })
         cls.bom_apple_pie = cls.env['mrp.bom'].create({
             'product_id': cls.product_apple_pie.id,

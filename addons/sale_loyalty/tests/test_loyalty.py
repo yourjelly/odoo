@@ -19,11 +19,14 @@ class TestLoyalty(TestSaleCouponCommon):
 
         cls.partner_a = cls.env['res.partner'].create({'name': 'Jean Jacques'})
 
+        cls.cat = cls.env['product.category'].create({'name': 'cat'})
+
         cls.product_a = cls.env['product.product'].create({
             'name': 'Product C',
             'list_price': 100,
             'sale_ok': True,
             'taxes_id': [(6, 0, [])],
+            'categ_id': cls.cat.id,
         })
 
         cls.ewallet_program = cls.env['loyalty.program'].create({
@@ -159,12 +162,14 @@ class TestLoyalty(TestSaleCouponCommon):
                 'list_price': 100,
                 'sale_ok': True,
                 'taxes_id': [Command.set(self.tax_15pc_excl.ids)],
+                'categ_id': self.cat.id,
             },
             {
                 'name': 'Product B',
                 'list_price': 100,
                 'sale_ok': True,
                 'taxes_id': [Command.set(self.tax_15pc_excl.ids)],
+                'categ_id': self.cat.id,
             },
         ])
 
@@ -323,6 +328,7 @@ class TestLoyalty(TestSaleCouponCommon):
             'list_price': 100,
             'sale_ok': True,
             'taxes_id': [],
+            'categ_id': self.cat.id,
         })
 
         coupon_program = self.env['loyalty.program'].create([{
@@ -501,6 +507,7 @@ class TestLoyalty(TestSaleCouponCommon):
             'list_price': 100,
             'sale_ok': True,
             'taxes_id': [],
+            'categ_id': self.cat.id,
         })
 
         promotion_program = self.env['loyalty.program'].create([{
@@ -544,6 +551,7 @@ class TestLoyalty(TestSaleCouponCommon):
             'list_price': 100,
             'sale_ok': True,
             'taxes_id': [],
+            'categ_id': self.cat.id,
         })
 
         giftcard_program = self.env['loyalty.program'].create([{

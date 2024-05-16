@@ -12,7 +12,12 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.iPadMini = cls.env['product.product'].create({'name': 'Large Cabinet', 'list_price': 320.0})
+        cls.product_category = cls.env.ref('delivery.product_category_deliveries')
+        cls.iPadMini = cls.env['product.product'].create({
+            'name': 'Large Cabinet',
+            'list_price': 320.0,
+            'categ_id': cls.product_category.id,
+        })
         tax_15pc_excl = cls.env['account.tax'].create({
             'name': "15% Tax excl",
             'amount_type': 'percent',
@@ -21,7 +26,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
         cls.product_delivery_poste = cls.env['product.product'].create({
             'name': 'The Poste',
             'type': 'service',
-            'categ_id': cls.env.ref('delivery.product_category_deliveries').id,
+            'categ_id': cls.product_category.id,
             'sale_ok': False,
             'purchase_ok': False,
             'list_price': 20.0,
@@ -339,6 +344,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
             'type': 'consu',
             'list_price': 200.0,
             'invoice_policy': 'delivery',
+            'categ_id': self.product_category.id,
         })
         order = self.empty_order
         self.env['sale.order.line'].create({

@@ -23,6 +23,7 @@ class TestWebsiteSaleStockMultilang(HttpCase):
             'website_published': True,
             'list_price': 123.45,
             'out_of_stock_message': 'Out of stock',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         unavailable_product.update_field_translations('out_of_stock_message', {
             'fr_FR': {'Out of stock': 'Hors-stock'},

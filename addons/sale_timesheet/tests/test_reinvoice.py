@@ -304,6 +304,7 @@ class TestReInvoice(TestCommonSaleTimesheet):
             'project_id': self.project_global.id,
             'taxes_id': False,
             'property_account_income_id': self.account_sale.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         today = Date.context_today(self.env.user)
 

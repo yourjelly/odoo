@@ -26,6 +26,7 @@ class TestWebsiteSaleStockDeliveryController(PaymentCommon, SaleCommon):
             'sale_ok': True,
             'type': 'product',
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         carriers = self.env['delivery.carrier'].search([])
         carriers.write({'website_published': False})

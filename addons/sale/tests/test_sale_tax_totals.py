@@ -14,6 +14,7 @@ class SaleTestTaxTotals(TestTaxTotals):
         cls.so_product = cls.env['product.product'].create({
             'name': 'Odoo course',
             'type': 'service',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
     def _create_document_for_tax_totals_test(self, lines_data):

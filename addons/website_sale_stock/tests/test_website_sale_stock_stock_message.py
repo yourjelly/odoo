@@ -19,6 +19,7 @@ class TestWebsiteSaleStockProductConfigurator(TestProductConfiguratorCommon, Htt
             'available_threshold': 5000,
             'allow_out_of_stock_order': False,
             'type':'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.product_product_conf_chair.website_published = True
         self.env['stock.quant'].create({
@@ -38,6 +39,7 @@ class TestWebsiteSaleStockProductConfigurator(TestProductConfiguratorCommon, Htt
             'available_threshold': 5000,
             'allow_out_of_stock_order': False,
             'detailed_type':'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['stock.quant'].create({
             'product_id': product_product_without_options.id,

@@ -33,6 +33,7 @@ class TestProductPictureController(HttpCase):
             'standard_price': 70.0,
             'list_price': 79.0,
             'website_published': True,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
 
         cls.attachments = cls.env['ir.attachment'].create([
@@ -106,6 +107,7 @@ class TestProductPictureController(HttpCase):
         product_template = self.env['product.template'].create({
             "name": "test product",
             "website_published": True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         product_template_attribute_line = self.env['product.template.attribute.line'].create({
             "attribute_id": product_attribute.id,

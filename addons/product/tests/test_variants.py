@@ -43,6 +43,7 @@ class TestVariantsSearch(ProductVariantsCommon):
         self.product_slip_template = self.env['product.template'].create({
             'name': 'Slip',
             'default_code': 'ABC',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         res = self.env['product.product'].name_search('Shirt', [], 'not ilike', None)
         res_ids = [r[0] for r in res]
@@ -80,6 +81,7 @@ class TestVariants(ProductVariantsCommon):
     def test_variants_creation_mono(self):
         test_template = self.env['product.template'].create({
             'name': 'Sofa',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
             'attribute_line_ids': [Command.create({
@@ -97,6 +99,7 @@ class TestVariants(ProductVariantsCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': self.color_attribute.id,
                 'value_ids': [Command.link(self.color_attribute_blue.id)],
@@ -115,6 +118,7 @@ class TestVariants(ProductVariantsCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': self.color_attribute.id,
@@ -150,6 +154,7 @@ class TestVariants(ProductVariantsCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': self.color_attribute.id,
@@ -189,6 +194,7 @@ class TestVariants(ProductVariantsCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': self.color_attribute.id,
                 'value_ids': [Command.link(self.color_attribute_red.id), Command.link(self.color_attribute_blue.id)],
@@ -207,6 +213,7 @@ class TestVariants(ProductVariantsCommon):
     def test_variants_copy(self):
         template = self.env['product.template'].create({
             'name': 'Test Copy',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': self.size_attribute.id,
                 'value_ids': [Command.link(self.size_attribute_s.id), Command.link(self.size_attribute_m.id)],
@@ -236,6 +243,7 @@ class TestVariants(ProductVariantsCommon):
         # test copy of variant with dynamic attribute
         template_dyn = self.env['product.template'].create({
             'name': 'Test Dynamical',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [(0, 0, {
                 'attribute_id': self.color_attr.id,
                 'value_ids': [(4, self.color_attr_value_r.id), (4, self.color_attr_value_b.id)],
@@ -283,7 +291,8 @@ class TestVariants(ProductVariantsCommon):
     @mute_logger('odoo.models.unlink')
     def test_archive_variant(self):
         template = self.env['product.template'].create({
-            'name': 'template'
+            'name': 'template',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.assertEqual(len(template.product_variant_ids), 1)
 
@@ -312,6 +321,7 @@ class TestVariants(ProductVariantsCommon):
         template = self.env['product.template'].create({
             'name': 'template',
             'barcode': 'test',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.assertEqual(len(template.product_variant_ids), 1)
         self.assertEqual(template.barcode, 'test')
@@ -351,7 +361,8 @@ class TestVariants(ProductVariantsCommon):
     @mute_logger('odoo.models.unlink')
     def test_archive_all_variants(self):
         template = self.env['product.template'].create({
-            'name': 'template'
+            'name': 'template',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.assertEqual(len(template.product_variant_ids), 1)
 
@@ -390,6 +401,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': self.size_attribute.id,
                 'value_ids': [Command.link(self.size_attribute_s.id)],
@@ -404,6 +416,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.assertEqual(len(template.product_variant_ids), 1)
 
@@ -422,6 +435,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': self.size_attribute.id,
                 'value_ids': [Command.set(self.size_attribute.value_ids.ids)],
@@ -436,6 +450,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.assertEqual(len(template.product_variant_ids), 1)
 
@@ -454,6 +469,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({ # no variants for this one
                     'attribute_id': self.size_attribute.id,
@@ -478,6 +494,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.assertEqual(len(template.product_variant_ids), 1)
 
@@ -505,6 +522,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({ # no variants for this one
                     'attribute_id': self.size_attribute.id,
@@ -529,6 +547,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
             'name': 'Sofa',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.assertEqual(len(template.product_variant_ids), 1)
 
@@ -556,6 +575,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
             'name': 'Sofax',
             'uom_id': self.uom_unit.id,
             'uom_po_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({ # one variant for this one
                     'attribute_id': self.color_attribute.id,
@@ -585,6 +605,7 @@ class TestVariantsNoCreate(ProductAttributesCommon):
         })
         first_product = self.env['product.template'].create({
             'name': 'Sofa',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [(0, 0, {
                 'attribute_id': product_attribut.id,
                 'value_ids': [(6, 0, [attr_value.id])],
@@ -626,6 +647,7 @@ class TestVariantsManyAttributes(TransactionCase):
     def test_01_create_no_variant(self):
         toto = self.env['product.template'].create({
             'name': 'Toto',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': attribute.id,
                 'value_ids': [(6, 0, attribute.value_ids.ids)],
@@ -639,6 +661,7 @@ class TestVariantsManyAttributes(TransactionCase):
         self.attributes.write({'create_variant': 'dynamic'})
         toto = self.env['product.template'].create({
             'name': 'Toto',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': attribute.id,
                 'value_ids': [(6, 0, attribute.value_ids.ids)],
@@ -653,6 +676,7 @@ class TestVariantsManyAttributes(TransactionCase):
         with self.assertRaises(UserError):
             self.env['product.template'].create({
                 'name': 'Toto',
+                'categ_id': self.env.ref('product.product_category_services').id,
                 'attribute_line_ids': [Command.create({
                     'attribute_id': attribute.id,
                     'value_ids': [(6, 0, attribute.value_ids.ids)],
@@ -663,6 +687,7 @@ class TestVariantsManyAttributes(TransactionCase):
         self.attributes[:5].write({'create_variant': 'dynamic'})
         toto = self.env['product.template'].create({
             'name': 'Toto',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': attribute.id,
                 'value_ids': [(6, 0, attribute.value_ids.ids)],
@@ -676,6 +701,7 @@ class TestVariantsManyAttributes(TransactionCase):
         self.attributes[:2].write({'create_variant': 'always'})
         toto = self.env['product.template'].create({
             'name': 'Toto',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': attribute.id,
                 'value_ids': [(6, 0, attribute.value_ids.ids)],
@@ -690,6 +716,7 @@ class TestVariantsManyAttributes(TransactionCase):
         self.attributes[5:].write({'create_variant': 'always'})
         toto = self.env['product.template'].create({
             'name': 'Toto',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': attribute.id,
                 'value_ids': [(6, 0, attribute.value_ids.ids)],
@@ -704,6 +731,7 @@ class TestVariantsManyAttributes(TransactionCase):
         self.attributes[6:].write({'create_variant': 'always'})
         toto = self.env['product.template'].create({
             'name': 'Toto',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': attribute.id,
                 'value_ids': [(6, 0, attribute.value_ids.ids)],
@@ -733,6 +761,7 @@ class TestVariantsImages(ProductVariantsCommon):
 
         cls.template = cls.env['product.template'].create({
             'name': 'template',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         color_values = cls.env['product.attribute.value'].create([{
@@ -830,6 +859,7 @@ class TestVariantsArchive(ProductVariantsCommon):
 
         cls.template = cls.env['product.template'].create({
             'name': 'consume product',
+            'categ_id': cls.env.ref('product.product_category_services').id,
             'attribute_line_ids': cls._get_add_all_attributes_command(),
         })
         cls.ptal_color = cls.template.attribute_line_ids.filtered(
@@ -1086,6 +1116,7 @@ class TestVariantsArchive(ProductVariantsCommon):
         })
         template = self.env['product.template'].create({
             'name': 'cimanyd',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': dynamic_attr.id,
                 'value_ids': [Command.link(dynamic_attr.value_ids[0].id)],
@@ -1160,6 +1191,7 @@ class TestVariantsArchive(ProductVariantsCommon):
         # Define a template with only color attribute & white value
         template = self.env['product.template'].create({
             'name': 'test product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': pa_color.id,
                 'value_ids': [(6, 0, [pav_color_white.id])],
@@ -1199,6 +1231,7 @@ class TestVariantsArchive(ProductVariantsCommon):
             'product_tmpl_id': template.id,
             'product_template_attribute_value_ids': [(6, 0, [ptav_white.id])],
             'active': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         # Reset archiving for the next assert
         template.write({
@@ -1369,7 +1402,11 @@ class TestVariantsArchive(ProductVariantsCommon):
 class TestVariantWrite(TransactionCase):
 
     def test_active_one2many(self):
-        template = self.env['product.template'].create({'name': 'Foo', 'description': 'Foo'})
+        template = self.env['product.template'].create({
+            'name': 'Foo',
+            'description': 'Foo',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         self.assertEqual(len(template.product_variant_ids), 1)
 
         # check the consistency of one2many field product_variant_ids w.r.t. active variants
@@ -1387,7 +1424,11 @@ class TestVariantWrite(TransactionCase):
         self.assertEqual(template.product_variant_ids, variant2)
 
     def test_write_inherited_field(self):
-        product = self.env['product.product'].create({'name': 'Foo', 'sequence': 1})
+        product = self.env['product.product'].create({
+            'name': 'Foo',
+            'sequence': 1,
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         self.assertEqual(product.name, 'Foo')
         self.assertEqual(product.sequence, 1)
 
@@ -1423,6 +1464,7 @@ class TestVariantsExclusion(ProductAttributesCommon):
         super().setUpClass()
         cls.smartphone = cls.env['product.template'].create({
             'name': 'Smartphone',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         cls.storage_attr = cls.env['product.attribute'].create({'name': 'Storage'})

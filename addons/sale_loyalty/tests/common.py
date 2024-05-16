@@ -66,12 +66,16 @@ class TestSaleCouponCommon(TestSaleProductAttributeValueCommon):
             'price_include': False,
         })
 
+        # category
+        cls.cat = cls.env['product.category'].create({'name': 'cat'})
+
         #products
         cls.product_A = cls.env['product.product'].create({
             'name': 'Product A',
             'list_price': 100,
             'sale_ok': True,
             'taxes_id': [(6, 0, [cls.tax_15pc_excl.id])],
+            'categ_id': cls.cat.id,
         })
 
         cls.product_B = cls.env['product.product'].create({
@@ -79,6 +83,7 @@ class TestSaleCouponCommon(TestSaleProductAttributeValueCommon):
             'list_price': 5,
             'sale_ok': True,
             'taxes_id': [(6, 0, [cls.tax_15pc_excl.id])],
+            'categ_id': cls.cat.id,
         })
 
         cls.product_C = cls.env['product.product'].create({
@@ -86,6 +91,7 @@ class TestSaleCouponCommon(TestSaleProductAttributeValueCommon):
             'list_price': 100,
             'sale_ok': True,
             'taxes_id': [(6, 0, [])],
+            'categ_id': cls.cat.id,
         })
 
         cls.product_gift_card = cls.env['product.product'].create({
@@ -94,6 +100,7 @@ class TestSaleCouponCommon(TestSaleProductAttributeValueCommon):
             'list_price': 50,
             'sale_ok': True,
             'taxes_id': False,
+            'categ_id': cls.cat.id,
         })
 
         # Immediate Program By A + B: get B free
@@ -224,30 +231,36 @@ class TestSaleCouponNumbersCommon(TestSaleCouponCommon):
     def setUpClass(cls):
         super().setUpClass()
 
+        cls.cat = cls.env['product.category'].create({'name': 'cat'})
         cls.largeCabinet = cls.env['product.product'].create({
             'name': 'Large Cabinet',
             'list_price': 320.0,
             'taxes_id': False,
+            'categ_id': cls.cat.id,
         })
         cls.conferenceChair = cls.env['product.product'].create({
             'name': 'Conference Chair',
             'list_price': 16.5,
             'taxes_id': False,
+            'categ_id': cls.cat.id,
         })
         cls.pedalBin = cls.env['product.product'].create({
             'name': 'Pedal Bin',
             'list_price': 47.0,
             'taxes_id': False,
+            'categ_id': cls.cat.id,
         })
         cls.drawerBlack = cls.env['product.product'].create({
             'name': 'Drawer Black',
             'list_price': 25.0,
             'taxes_id': False,
+            'categ_id': cls.cat.id,
         })
         cls.largeMeetingTable = cls.env['product.product'].create({
             'name': 'Large Meeting Table',
             'list_price': 40000.0,
             'taxes_id': False,
+            'categ_id': cls.cat.id,
         })
 
         cls.steve = cls.env['res.partner'].create({

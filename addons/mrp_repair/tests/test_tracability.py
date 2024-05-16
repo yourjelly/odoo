@@ -20,6 +20,7 @@ class TestRepairTraceability(TestMrpCommon):
         product_to_repair = self.env['product.product'].create({
             'name': 'product first serial to act repair',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         ptrepair_lot = self.env['stock.lot'].create({
             'name': 'A1',
@@ -28,6 +29,7 @@ class TestRepairTraceability(TestMrpCommon):
         product_to_remove = self.env['product.product'].create({
             'name': 'other first serial to remove with repair',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         ptremove_lot = self.env['stock.lot'].create({
             'name': 'B2',
@@ -105,10 +107,12 @@ class TestRepairTraceability(TestMrpCommon):
         finished, component = self.env['product.product'].create([{
             'name': 'Finished Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'SN Componentt',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         sn_lot = self.env['stock.lot'].create({
@@ -143,10 +147,12 @@ class TestRepairTraceability(TestMrpCommon):
         finished, component = self.env['product.product'].create([{
             'name': 'Finished Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'SN Componentt',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         sn_lot = self.env['stock.lot'].create({

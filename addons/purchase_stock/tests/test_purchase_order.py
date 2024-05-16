@@ -19,8 +19,16 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.product_id_1 = cls.env['product.product'].create({'name': 'Large Desk', 'purchase_method': 'purchase'})
-        cls.product_id_2 = cls.env['product.product'].create({'name': 'Conference Chair', 'purchase_method': 'purchase'})
+        cls.product_id_1 = cls.env['product.product'].create({
+            'name': 'Large Desk',
+            'purchase_method': 'purchase',
+            'categ_id': cls.stock_account_product_categ.id,
+        })
+        cls.product_id_2 = cls.env['product.product'].create({
+            'name': 'Conference Chair',
+            'purchase_method': 'purchase',
+            'categ_id': cls.stock_account_product_categ.id,
+        })
 
         cls.po_vals = {
             'partner_id': cls.partner_a.id,
@@ -491,6 +499,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
                 'product_code': 'C01',
                 'product_name': 'Name01',
                 'sequence': 1,
+                'categ_id': self.stock_account_product_categ.id,
             }), (0, 0, {
                 'partner_id': self.partner_a.id,
                 'min_qty': 20,
@@ -621,6 +630,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         product = self.env['product.product'].create({
             'name': 'Product A',
             'type': 'product',
+            'categ_id': self.stock_account_product_categ.id,
         })
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner_a
@@ -713,6 +723,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         product = self.env['product.product'].create({
             'name': 'Super product',
             'type': 'product',
+            'categ_id': self.stock_account_product_categ.id,
             'seller_ids': [Command.create({
                 'partner_id': self.partner_a.id,
                 'price': 100.0,

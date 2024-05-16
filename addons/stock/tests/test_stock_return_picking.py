@@ -61,6 +61,7 @@ class TestReturnPicking(TestStockCommon):
             'name': 'Tracked by SN',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         serial1 = self.env['stock.lot'].create({
             'name': 'serial1',

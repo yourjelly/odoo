@@ -104,6 +104,7 @@ class TestWebsiteSaleComparisonUi(HttpCase):
             'name': "Château Margaux",
             'website_published': True,
             'list_price': 0,
+            'categ_id': cls.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': cls.attribute_vintage.id,

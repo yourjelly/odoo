@@ -268,6 +268,7 @@ class TestKitPicking(common.TestMrpCommon):
             p = Form(cls.env['product.product'])
             p.name = name
             p.detailed_type = 'product'
+            p.categ_id = cls.env.ref('product.product_category_services')
             return p.save()
 
         # Create a kit 'kit_parent' :
@@ -439,7 +440,11 @@ class TestKitPicking(common.TestMrpCommon):
         self.bom_4.type = 'phantom'
         kit = self.bom_4.product_id
         compo = self.bom_4.bom_line_ids.product_id
-        product = self.env['product.product'].create({'name': 'Super Product', 'type': 'product'})
+        product = self.env['product.product'].create({
+            'name': 'Super Product',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
 
         receipt = self.env['stock.picking'].create({
             'picking_type_id': in_type.id,
@@ -483,6 +488,7 @@ class TestKitPicking(common.TestMrpCommon):
             'name': name,
             'type': 'product',
             'uom_id': uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for name in ['Kit', 'Kit Component 1', 'Kit Component 2', 'Not Kit 1', 'Not Kit 2']])
 
         bom_kit = self.env['mrp.bom'].create({

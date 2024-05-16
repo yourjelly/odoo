@@ -70,6 +70,7 @@ class TestUi(AccountTestInvoicingCommon, odoo.tests.HttpCase):
             'standard_price': 600.0,
             'list_price': 147.0,
             'detailed_type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         new_tax = self.env['account.tax'].create({
             'name': '10% Tour Tax',

@@ -37,6 +37,7 @@ class TestPERF(TransactionCaseWithUserDemo):
             'name': 'Product %s' % i,
             'list_price': 1 + 10 * i,
             'type': 'service',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         } for i in range(10)])
 
         cls.partners = cls.env['res.partner'].create([{

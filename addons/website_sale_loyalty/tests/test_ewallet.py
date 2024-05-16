@@ -22,6 +22,7 @@ class TestEwallet(HttpCase, WebsiteSaleCommon):
             'name': 'Ewallet Top up',
             'list_price': 50.0,
             'website_published': True,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         cls.ewallet_program = cls.env['loyalty.program'].create([{

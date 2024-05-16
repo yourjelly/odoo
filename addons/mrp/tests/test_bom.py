@@ -225,8 +225,10 @@ class TestBoM(TestMrpCommon):
 
         self.product_9, self.product_10 = self.env['product.product'].create([{
             'name': 'Paper',  # product_9
+            'categ_id': self.env.ref('product.product_category_office').id,
         }, {
             'name': 'Stone',  # product_10
+            'categ_id': self.env.ref('product.product_category_office').id,
         }])
 
         #check recursion
@@ -277,6 +279,7 @@ class TestBoM(TestMrpCommon):
         # Create Template Product
         product_template = self.env['product.template'].create({
             'name': 'Sofa',
+            'categ_id': self.env.ref('product.product_category_office').id,
             'attribute_line_ids': [
                 (0, 0, {
                     'attribute_id': att_color.id,
@@ -297,9 +300,13 @@ class TestBoM(TestMrpCommon):
 
         # Create components Of BOM
         product_A = Product.create({
-            'name': 'Wood'})
+            'name': 'Wood',
+            'categ_id': self.env.ref('product.product_category_office').id,
+        })
         product_B = Product.create({
-            'name': 'Clothes'})
+            'name': 'Clothes',
+            'categ_id': self.env.ref('product.product_category_office').id,
+        })
 
         # Create BOM
         self.env['mrp.bom'].create({
@@ -376,11 +383,13 @@ class TestBoM(TestMrpCommon):
             'name': 'Test units',
             'type': 'product',
             'uom_id': uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         product_dozens = self.env['product.product'].create({
             'name': 'Test dozens',
             'type': 'product',
             'uom_id': uom_dozens.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.env['mrp.bom'].create({
@@ -442,11 +451,13 @@ class TestBoM(TestMrpCommon):
             'name': 'Test units',
             'type': 'product',
             'uom_id': uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         product_dozens = self.env['product.product'].create({
             'name': 'Test dozens',
             'type': 'product',
             'uom_id': uom_dozens.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.env['mrp.bom'].create({
@@ -471,6 +482,7 @@ class TestBoM(TestMrpCommon):
             'name': 'No Kit',
             'type': 'product',
             'uom_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.env['mrp.bom'].create({
             'product_id': kit_products.id,
@@ -496,6 +508,7 @@ class TestBoM(TestMrpCommon):
             'name': 'No Kit',
             'type': 'product',
             'uom_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.assertFalse(no_kit_products.is_kits)
         self.assertFalse(no_kit_products.product_tmpl_id.is_kits)
@@ -526,6 +539,7 @@ class TestBoM(TestMrpCommon):
             'name': 'No Kit',
             'type': 'product',
             'uom_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.env['mrp.bom'].create({
             'product_tmpl_id': kit_products.product_tmpl_id.id,
@@ -550,6 +564,7 @@ class TestBoM(TestMrpCommon):
             'name': 'No Kit',
             'type': 'product',
             'uom_id': self.uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.assertFalse(no_kit_products.is_kits)
         self.assertFalse(no_kit_products.product_tmpl_id.is_kits)
@@ -586,20 +601,23 @@ class TestBoM(TestMrpCommon):
             'type': 'product',
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         butter = self.env['product.product'].create({
             'name': 'Butter',
             'type': 'product',
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
-            'standard_price': 7.01
+            'standard_price': 7.01,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         biscuit = self.env['product.product'].create({
             'name': 'Biscuit',
             'type': 'product',
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
-            'standard_price': 1.5
+            'standard_price': 1.5,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         bom_form_crumble = Form(self.env['mrp.bom'])
         bom_form_crumble.product_tmpl_id = crumble.product_tmpl_id
@@ -685,6 +703,7 @@ class TestBoM(TestMrpCommon):
         cheese_cake = self.env['product.product'].create({
             'name': 'Cheese Cake 300g',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         cream = self.env['product.product'].create({
             'name': 'cream',
@@ -692,6 +711,7 @@ class TestBoM(TestMrpCommon):
             'uom_id': uom_litre.id,
             'uom_po_id': uom_litre.id,
             'standard_price': 5.17,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         bom_form_cheese_cake = Form(self.env['mrp.bom'])
         bom_form_cheese_cake.product_tmpl_id = cheese_cake.product_tmpl_id
@@ -760,13 +780,15 @@ class TestBoM(TestMrpCommon):
             'type': 'product',
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         screw = self.env['product.product'].create({
             'name': 'screw',
             'type': 'product',
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
-            'standard_price': 7.01
+            'standard_price': 7.01,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         bom_form_drawer = Form(self.env['mrp.bom'])
@@ -827,6 +849,7 @@ class TestBoM(TestMrpCommon):
         # Create a product template car with attributes gps(yes, no), color(red, blue)
         self.car = self.env['product.template'].create({
             'name': 'Car',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         self.gps_attribute = self.env['product.attribute'].create({'name': 'GPS', 'sequence': 1})
         self.gps_yes = self.env['product.attribute.value'].create({
@@ -873,7 +896,8 @@ class TestBoM(TestMrpCommon):
         self.paint = self.env['product.template'].create({
             'name': 'Paint',
             'uom_id': uom_litre.id,
-            'uom_po_id': uom_litre.id
+            'uom_po_id': uom_litre.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         self.paint_color_attribute_line = self.env['product.template.attribute.line'].create({
             'product_tmpl_id': self.paint.id,
@@ -888,6 +912,7 @@ class TestBoM(TestMrpCommon):
         self.dashboard = self.env['product.template'].create({
             'name': 'Dashboard',
             'standard_price': 1000,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         self.dashboard_gps_attribute_line = self.env['product.template.attribute.line'].create({
@@ -909,6 +934,7 @@ class TestBoM(TestMrpCommon):
         self.gps = self.env['product.product'].create({
             'name': 'GPS',
             'standard_price': 700,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         bom_form_car = Form(self.env['mrp.bom'])
@@ -1034,6 +1060,7 @@ class TestBoM(TestMrpCommon):
             'type': 'product',
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         semi_finished = self.env['product.product'].create({
@@ -1041,6 +1068,7 @@ class TestBoM(TestMrpCommon):
             'type': 'product',
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         assembly = self.env['product.product'].create({
@@ -1048,6 +1076,7 @@ class TestBoM(TestMrpCommon):
             'type': 'product',
             'uom_id': uom_dozen.id,
             'uom_po_id': uom_dozen.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         raw_material = self.env['product.product'].create({
@@ -1056,6 +1085,7 @@ class TestBoM(TestMrpCommon):
             'uom_id': uom_litre.id,
             'uom_po_id': uom_litre.id,
             'standard_price': 5,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         #Create bom
@@ -1097,17 +1127,20 @@ class TestBoM(TestMrpCommon):
         target = self.env['product.product'].create({
             'name': 'Target',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         product_one = self.env['product.product'].create({
             'name': 'Component one',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         self.env['stock.quant']._update_available_quantity(product_one, location, 3.0)
 
         product_two = self.env['product.product'].create({
             'name': 'Component two',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         self.env['stock.quant']._update_available_quantity(product_two, location, 4.0)
 
@@ -1163,8 +1196,16 @@ class TestBoM(TestMrpCommon):
         """
         location = self.env.ref('stock.stock_location_stock')
         uom_unit = self.env.ref('uom.product_uom_unit')
-        final_product_tmpl = self.env['product.template'].create({'name': 'Final Product', 'type': 'product'})
-        component_product = self.env['product.product'].create({'name': 'Compo 1', 'type': 'product'})
+        final_product_tmpl = self.env['product.template'].create({
+            'name': 'Final Product',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
+        })
+        component_product = self.env['product.product'].create({
+            'name': 'Compo 1',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
+        })
 
         self.env['stock.quant']._update_available_quantity(component_product, location, 3.0)
 
@@ -1214,6 +1255,7 @@ class TestBoM(TestMrpCommon):
             'type': 'product',
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         bom_finished = Form(self.env['mrp.bom'])
         bom_finished.product_tmpl_id = finished.product_tmpl_id
@@ -1289,6 +1331,7 @@ class TestBoM(TestMrpCommon):
             'uom_id': uom_gram.id,
             'uom_po_id': uom_gram.id,
             'route_ids': [(4, manufacturing_route_id)],
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         # We create a BoM that manufactures 2kg of product
         self.env['mrp.bom'].create({
@@ -1320,7 +1363,10 @@ class TestBoM(TestMrpCommon):
         Checks the generated BoM has the expected BoM lines, by-products and operations.
         """
         # Creates some products.
-        common_vals = {'type': "product"}
+        common_vals = {
+            'type': "product",
+            'categ_id': self.env.ref('product.product_category_consumable').id,
+        }
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Monster"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Jar"))
@@ -1431,7 +1477,10 @@ class TestBoM(TestMrpCommon):
         uom_unit = self.env.ref('uom.product_uom_unit')
         uom_dozen = self.env.ref('uom.product_uom_dozen')
         # Creates some products.
-        common_vals = {'type': "product"}
+        common_vals = {
+            'type': "product",
+            'categ_id': self.env.ref('product.product_category_consumable').id,
+        }
         finished_product = self.env['product.product'].create(dict(common_vals, name="CO² Molecule"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Carbon Molecule"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Oxygen Molecule"))
@@ -1467,7 +1516,10 @@ class TestBoM(TestMrpCommon):
         """
         self.env.user.groups_id += self.env.ref('mrp.group_mrp_byproducts')  # Enables by-products.
         # Creates some products.
-        common_vals = {'type': "product"}
+        common_vals = {
+            'type': "product",
+            'categ_id': self.env.ref('product.product_category_consumable').id,
+        }
         finished_product = self.env['product.product'].create(dict(common_vals, name="Banana Bread"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Banana"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Sugar, Spice and Everything Nice"))
@@ -1523,7 +1575,10 @@ class TestBoM(TestMrpCommon):
         """
         self.env.user.groups_id += self.env.ref('mrp.group_mrp_byproducts')
         # Creates a BoM.
-        common_vals = {'type': "product"}
+        common_vals = {
+            'type': "product",
+            'categ_id': self.env.ref('product.product_category_consumable').id,
+        }
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Monster"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Jar"))
@@ -1642,7 +1697,10 @@ class TestBoM(TestMrpCommon):
         uom_unit = self.env.ref('uom.product_uom_unit')
         uom_dozen = self.env.ref('uom.product_uom_dozen')
         # Creates a BoM.
-        common_vals = {'type': "product"}
+        common_vals = {
+            'type': "product",
+            'categ_id': self.env.ref('product.product_category_consumable').id,
+        }
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Monster"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Jar"))
@@ -1742,7 +1800,10 @@ class TestBoM(TestMrpCommon):
         and checks the moves' operation/workorder are correctly updated too.
         """
         # Creates a BoM.
-        common_vals = {'type': "product"}
+        common_vals = {
+            'type': "product",
+            'categ_id': self.env.ref('product.product_category_consumable').id,
+        }
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
         component_1 = self.env['product.product'].create(dict(common_vals, name="Monster"))
         component_2 = self.env['product.product'].create(dict(common_vals, name="Jar"))
@@ -1860,6 +1921,7 @@ class TestBoM(TestMrpCommon):
         # Create create a product with 4 variants
         product_template = self.env['product.template'].create({
             'name': 'Sofa',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
             'attribute_line_ids': [
                 (0, 0, {
                     'attribute_id': att_color.id,
@@ -1964,7 +2026,8 @@ class TestBoM(TestMrpCommon):
         Hence this new BoM should raise an error.
         """
         product_A, product_B, product_C, product_D = self.env['product.product'].create([{
-            'name': '%s' % i
+            'name': '%s' % i,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         } for i in range(4)])
         self.env['mrp.bom'].create([{
             'product_id': finished.id,
@@ -2007,7 +2070,8 @@ class TestBoM(TestMrpCommon):
         will create a cycle: A -> B -> C -> A
         """
         product_A, product_B, product_C, product_D, product_E = self.env['product.product'].create([{
-            'name': '%s' % i
+            'name': '%s' % i,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         } for i in range(5)])
         boms = self.env['mrp.bom'].create([{
             'product_id': finished.id,
@@ -2173,11 +2237,13 @@ class TestBoM(TestMrpCommon):
             'name': 'Product',
             'type': 'product',
             'uom_id': uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product_two = self.env['product.product'].create({
             'name': 'Component',
             'type': 'product',
             'uom_id': uom_unit.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         self.env['stock.quant']._update_available_quantity(product_two, location, 4.0)
 
@@ -2220,6 +2286,7 @@ class TestTourBoM(HttpCase):
         product = self.env['product.product'].create({
             'name': 'test1',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         bom = self.env['mrp.bom'].create({
             'product_id': product.id,

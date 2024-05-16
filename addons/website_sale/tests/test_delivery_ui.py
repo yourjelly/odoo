@@ -32,6 +32,7 @@ class TestUi(odoo.tests.HttpCase):
         self.env['product.product'].create({
             'name': 'Office Chair Black TEST',
             'list_price': 12.50,
+            'categ_id': self.env.ref('delivery.product_category_deliveries').id,
         })
         self.env.ref("delivery.free_delivery_carrier").write({
             'name': 'Delivery Now Free Over 10',

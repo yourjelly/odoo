@@ -17,6 +17,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'available_in_pos': True,
             'type': 'product',
             'lst_price': 10.0,
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
 
         self.component_a = self.env['product.product'].create({
@@ -26,6 +27,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'uom_id': self.env.ref('uom.product_uom_gram').id,
             'uom_po_id': self.env.ref('uom.product_uom_gram').id,
             'lst_price': 10.0,
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
         self.location = self.env['stock.location'].create({
             'name': 'Test location',
@@ -93,6 +95,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'type': 'product',
             'lst_price': 10,
             'taxes_id': [odoo.Command.clear()],
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
         product2 = self.env['product.product'].create({
             'name': 'product2',
@@ -100,6 +103,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'type': 'product',
             'lst_price': 11,
             'taxes_id': [odoo.Command.clear()],
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
         partner_1 = self.env['res.partner'].create({'name': 'Test Partner 1'})
         partner_2 = self.env['res.partner'].create({'name': 'Test Partner 2'})
@@ -126,12 +130,14 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'available_in_pos': True,
             'type': 'product',
             'lst_price': 10.0,
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
         product_b = self.env['product.product'].create({
             'name': 'Product B',
             'available_in_pos': True,
             'type': 'product',
             'lst_price': 10.0,
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
         #create a sale order with 2 lines
         sale_order = self.env['sale.order'].create({
@@ -190,6 +196,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'name': 'Down Payment',
             'available_in_pos': True,
             'type': 'service',
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
         self.main_pos_config.write({
             'down_payment_product_id': self.downpayment_product.id,
@@ -283,6 +290,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'available_in_pos': True,
             'type': 'product',
             'lst_price': 10.0,
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
         #create a sale order with 2 lines
         sale_order = self.env['sale.order'].create({
@@ -324,6 +332,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'lst_price': 10.0,
             'uom_id': uom.id,
             'uom_po_id': uom.id,
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
         #create a sale order with product_a
         sale_order = self.env['sale.order'].create({

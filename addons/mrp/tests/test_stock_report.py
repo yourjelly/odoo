@@ -14,14 +14,17 @@ class TestMrpStockReports(TestReportsCommon):
         product_chocolate = self.env['product.product'].create({
             'name': 'Chocolate',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product_chococake = self.env['product.product'].create({
             'name': 'Choco Cake',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product_double_chococake = self.env['product.product'].create({
             'name': 'Double Choco Cake',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         # Creates two BOM: one creating a regular slime, one using regular slimes.
@@ -98,10 +101,12 @@ class TestMrpStockReports(TestReportsCommon):
         product_apple_pie = self.env['product.product'].create({
             'name': 'Apple Pie',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product_apple = self.env['product.product'].create({
             'name': 'Apple',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         bom = self.env['mrp.bom'].create({
             'product_id': product_apple_pie.id,
@@ -160,10 +165,12 @@ class TestMrpStockReports(TestReportsCommon):
         product_banana = self.env['product.product'].create({
             'name': 'Banana',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product_chocolate = self.env['product.product'].create({
             'name': 'Chocolate',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         # We create 2 identical MO
@@ -200,6 +207,7 @@ class TestMrpStockReports(TestReportsCommon):
         compo01, compo02, compo03, subkit, superkit = self.env['product.product'].create([{
             'name': n,
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for n in ['Compo 01', 'Compo 02', 'Compo 03', 'Sub Kit', 'Super Kit']])
 
         self.env['mrp.bom'].create([{

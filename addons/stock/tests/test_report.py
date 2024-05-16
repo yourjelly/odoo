@@ -17,11 +17,12 @@ class TestReportsCommon(TransactionCase):
         cls.picking_type_out = cls.env['stock.picking.type'].browse(cls.ModelDataObj._xmlid_to_res_id('stock.picking_type_out'))
         cls.supplier_location = cls.env['stock.location'].browse(cls.ModelDataObj._xmlid_to_res_id('stock.stock_location_suppliers'))
         cls.stock_location = cls.env['stock.location'].browse(cls.ModelDataObj._xmlid_to_res_id('stock.stock_location_stock'))
+        cls.product_category = cls.env['product.category'].create({'name': 'Product Category'})
 
         cls.product1 = cls.env['product.product'].create({
             'name': 'Mellohi"',
             'type': 'product',
-            'categ_id': cls.env.ref('product.product_category_services').id,
+            'categ_id': cls.product_category.id,
             'tracking': 'lot',
             'default_code': 'C4181234""154654654654',
             'barcode': 'scan""me'
@@ -30,6 +31,7 @@ class TestReportsCommon(TransactionCase):
         product_form = Form(cls.env['product.product'])
         product_form.detailed_type = 'product'
         product_form.name = 'Product'
+        product_form.categ_id = cls.product_category
         cls.product = product_form.save()
         cls.product_template = cls.product.product_tmpl_id
         cls.wh_2 = cls.env['stock.warehouse'].create({
@@ -106,9 +108,11 @@ class TestReports(TestReportsCommon):
         self.assertEqual(qweb_type, 'text', 'the report type is not good')
 
     def test_report_quantity_1(self):
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_form = Form(self.env['product.product'])
         product_form.detailed_type = 'product'
         product_form.name = 'Product'
+        product_form.categ_id = product_category
         product = product_form.save()
 
         warehouse = self.env['stock.warehouse'].search([], limit=1)
@@ -225,9 +229,11 @@ class TestReports(TestReportsCommon):
     def test_report_quantity_2(self):
         """ Not supported case.
         """
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_form = Form(self.env['product.product'])
         product_form.detailed_type = 'product'
         product_form.name = 'Product'
+        product_form.categ_id = product_category
         product = product_form.save()
 
         warehouse = self.env['stock.warehouse'].search([], limit=1)
@@ -285,9 +291,11 @@ class TestReports(TestReportsCommon):
         self.assertEqual(sum(product_qty for state, product_qty in report_records if state == 'forecast'), 40.0)
 
     def test_report_quantity_3(self):
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_form = Form(self.env['product.product'])
         product_form.detailed_type = 'product'
         product_form.name = 'Product'
+        product_form.categ_id = product_category
         product = product_form.save()
 
         warehouse = self.env['stock.warehouse'].search([], limit=1)
@@ -912,6 +920,7 @@ class TestReports(TestReportsCommon):
         product_template = self.env['product.template'].create({
             'name': 'Game Joy',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 (0, 0, {
                     'attribute_id': product_attr_color.id,

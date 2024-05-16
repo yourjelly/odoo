@@ -28,6 +28,7 @@ class WebsiteSaleShopPriceListCompareListPriceDispayTests(AccountTestInvoicingHt
             'website_published': True,
             'list_price': 1000,
             'company_id': cls.env.company.id,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.test_product_with_compare_list_price = ProductTemplate.create({
             'name': 'test_product_with_compare_list_price',
@@ -35,12 +36,14 @@ class WebsiteSaleShopPriceListCompareListPriceDispayTests(AccountTestInvoicingHt
             'list_price': 2000,
             'compare_list_price': 2500,
             'company_id': cls.env.company.id,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.test_product_with_pricelist = ProductTemplate.create({
             'name': 'test_product_with_pricelist',
             'website_published': True,
             'list_price': 2000,
             'company_id': cls.env.company.id,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.test_product_with_pricelist_and_compare_list_price = ProductTemplate.create({
             'name': 'test_product_with_pricelist_and_compare_list_price',
@@ -48,6 +51,7 @@ class WebsiteSaleShopPriceListCompareListPriceDispayTests(AccountTestInvoicingHt
             'list_price': 4000,
             'compare_list_price': 4500,
             'company_id': cls.env.company.id,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         # Three pricelists

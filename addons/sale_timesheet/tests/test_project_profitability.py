@@ -503,6 +503,7 @@ class TestSaleTimesheetProjectProfitability(TestCommonSaleTimesheet):
             'service_tracking': 'task_global_project',
             'project_id': self.project_task_rate.id,
             'service_type': 'manual',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         saleorder_revenue = self.env['sale.order']
         saleOrderLine_revenue = self.env['sale.order.line']

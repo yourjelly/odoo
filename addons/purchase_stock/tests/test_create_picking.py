@@ -13,9 +13,10 @@ class TestCreatePicking(common.TestProductCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.category = cls.env.ref('product.product_category_services')
         cls.partner_id = cls.env['res.partner'].create({'name': 'Wood Corner Partner'})
-        cls.product_id_1 = cls.env['product.product'].create({'name': 'Large Desk'})
-        cls.product_id_2 = cls.env['product.product'].create({'name': 'Conference Chair'})
+        cls.product_id_1 = cls.env['product.product'].create({'name': 'Large Desk', 'categ_id': cls.category.id})
+        cls.product_id_2 = cls.env['product.product'].create({'name': 'Conference Chair', 'categ_id': cls.category.id})
 
         cls.user_purchase_user = mail_new_test_user(
             cls.env,
@@ -118,7 +119,7 @@ class TestCreatePicking(common.TestProductCommon):
             'type': 'product',
             'route_ids': [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('purchase_stock.route_warehouse0_buy'))],
             'seller_ids': [(6, 0, [seller.id])],
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
             'supplier_taxes_id': [(6, 0, [])],
         })
 
@@ -255,7 +256,7 @@ class TestCreatePicking(common.TestProductCommon):
             'type': 'product',
             'route_ids': [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('purchase_stock.route_warehouse0_buy'))],
             'seller_ids': [(6, 0, [seller.id])],
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
         })
 
         # A picking is require since only moves inside the same picking are merged.
@@ -403,6 +404,7 @@ class TestCreatePicking(common.TestProductCommon):
             'type': 'product',
             'uom_id': unit,
             'uom_po_id': unit,
+            'categ_id': self.category.id,
             'seller_ids': [(6, 0, [supplier_info1.id])],
             'route_ids': [(6, 0, [route_buy.id, route_mto.id])]
         })
@@ -559,7 +561,7 @@ class TestCreatePicking(common.TestProductCommon):
             'type': 'product',
             'route_ids': [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('purchase_stock.route_warehouse0_buy'))],
             'seller_ids': [(6, 0, [seller.id])],
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
             'supplier_taxes_id': [(6, 0, [])],
         })
 

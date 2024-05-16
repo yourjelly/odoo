@@ -694,6 +694,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
             'type': 'consu',
             'invoice_policy': 'order',
             'list_price': 55.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         # Creates a sale order for 3 products invoiced on qty. delivered.
         sale_order = self._get_new_sale_order(amount=3)
@@ -786,6 +787,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
             'type': 'consu',
             'invoice_policy': 'order',
             'list_price': 55.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         # Create a sale order.
         sale_order = self._get_new_sale_order()
@@ -966,6 +968,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         product = self.env['product.product'].create({
             'name': 'Product with packaging',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         packOf10 = self.env['product.packaging'].create({
@@ -1054,6 +1057,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
             'name': 'Test Product',
             'uom_id': self.env.ref('uom.product_uom_meter').id,
             'uom_po_id': yards_uom.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         so = self.env['sale.order'].create({
             'partner_id': self.partner_a.id,

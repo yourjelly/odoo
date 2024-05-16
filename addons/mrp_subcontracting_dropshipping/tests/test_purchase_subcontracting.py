@@ -156,11 +156,13 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
             'name': 'Finished Product',
             'type': 'product',
             'seller_ids': [(0, 0, {'partner_id': subcontractor.id})],
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Component',
             'type': 'consu',
             'seller_ids': [(0, 0, {'partner_id': vendor.id})],
-            'route_ids': [(6, 0, dropship_subcontractor_route.ids)]
+            'route_ids': [(6, 0, dropship_subcontractor_route.ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         self.env['mrp.bom'].create({
@@ -205,9 +207,11 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
             'name': 'Finished Product',
             'type': 'product',
             'seller_ids': [(0, 0, {'partner_id': subcontractor.id})],
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Component',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         bom = self.env['mrp.bom'].create({
@@ -301,13 +305,16 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
             'name': 'Super Product',
             'type': 'product',
             'seller_ids': [(0, 0, {'partner_id': super_subcontractor.id})],
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Product',
             'type': 'product',
             'seller_ids': [(0, 0, {'partner_id': subcontractor.id})],
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Component',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         _, bom_product = self.env['mrp.bom'].create([{
@@ -374,6 +381,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
             'type': 'product',
             'seller_ids': [(0, 0, {'partner_id': vendor.id})],
             'route_ids': [(6, 0, routes)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for name, vendor, routes in [
             ('SuperProduct 01', subcontractor01, []),
             ('SuperProduct 02', subcontractor02, []),
@@ -421,6 +429,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
             'type': 'product',
             'seller_ids': [Command.create({'partner_id': self.subcontractor_partner1.parent_id.id})],
             'route_ids': [Command.set(routes)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for name, routes in [
             ('Compo DROP', [route_buy.id, route_dropship.id]),
             ('Compo RR', [route_buy.id]),

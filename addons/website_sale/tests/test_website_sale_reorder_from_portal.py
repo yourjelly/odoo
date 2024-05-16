@@ -18,11 +18,13 @@ class TestWebsiteSaleReorderFromPortal(HttpCase):
                 'name': 'Reorder Product 1',
                 'sale_ok': True,
                 'website_published': True,
+                'categ_id': self.env.ref('product.product_category_office').id,
             },
             {
                 'name': 'Reorder Product 2',
                 'sale_ok': True,
                 'website_published': True,
+                'categ_id': self.env.ref('product.product_category_office').id,
             },
         ])
         no_variant_attribute = self.env['product.attribute'].create({
@@ -37,6 +39,7 @@ class TestWebsiteSaleReorderFromPortal(HttpCase):
         s, _m, l = no_variant_attribute.value_ids
         no_variant_template = self.env['product.template'].create({
             'name': 'Sofa',
+            'categ_id': self.env.ref('product.product_category_office').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': no_variant_attribute.id,
                 'value_ids': [Command.set(no_variant_attribute.value_ids.ids)],

@@ -326,6 +326,7 @@ class TestPurchase(AccountTestInvoicingCommon):
         product_data = {
             'name': 'SuperProduct',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'uom_id': uom_units.id,
             'uom_po_id': uom_pairs.id,
             'standard_price': 100
@@ -378,6 +379,7 @@ class TestPurchase(AccountTestInvoicingCommon):
             'uom_id': self.env.ref('uom.product_uom_unit').id,
             'lst_price': 10.0,
             'standard_price': 0.12345,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         currency = self.env['res.currency'].create({
             'name': 'Dark Chocolate Coin',
@@ -427,6 +429,7 @@ class TestPurchase(AccountTestInvoicingCommon):
 
         product_b = self.env['product.product'].with_company(company_a).create({
             'name': 'product_2',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'uom_id': self.env.ref('uom.product_uom_unit').id,
             'standard_price': 0.0,
         })
@@ -476,6 +479,7 @@ class TestPurchase(AccountTestInvoicingCommon):
         #create a product that use the delivery address as vendor
         product = self.env['product.product'].create({
             'name': 'Product A',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(0, 0, {
                 'partner_id': delivery_address.id,
                 'min_qty': 1.0,
@@ -502,6 +506,7 @@ class TestPurchase(AccountTestInvoicingCommon):
         company_b = self.company_data_2['company']
         product = self.env['product.product'].create({
             'name': 'product_test',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         # create a purchase order in the company A
         self.env['purchase.order'].with_company(company_a).create({
@@ -635,6 +640,7 @@ class TestPurchase(AccountTestInvoicingCommon):
         #         |----> Branch X
         #                   |----> Branch XX
         company = self.env.company
+        category = self.env.ref('product.product_category_services')
         branch_x = self.env['res.company'].create({
             'name': 'Branch X',
             'country_id': company.country_id.id,
@@ -691,18 +697,22 @@ class TestPurchase(AccountTestInvoicingCommon):
         # create several products with different taxes combination
         product_all_taxes = self.env['product.product'].create({
             'name': 'Product all taxes',
+            'categ_id': category.id,
             'supplier_taxes_id': [Command.set((tax_a + tax_b + tax_x + tax_xx).ids)],
         })
         product_no_xx_tax = self.env['product.product'].create({
             'name': 'Product no tax from XX',
+            'categ_id': category.id,
             'supplier_taxes_id': [Command.set((tax_a + tax_b + tax_x).ids)],
         })
         product_no_branch_tax = self.env['product.product'].create({
             'name': 'Product no tax from branch',
+            'categ_id': category.id,
             'supplier_taxes_id': [Command.set((tax_a + tax_b).ids)],
         })
         product_no_tax = self.env['product.product'].create({
             'name': 'Product no tax',
+            'categ_id': category.id,
             'supplier_taxes_id': [],
         })
         # create a PO from Branch XX

@@ -40,6 +40,7 @@ class TestLeadTime(TestCommonSalePurchaseNoChart):
         product = self.env['product.product'].create({
             'name': 'corpse starch',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(6, 0, seller.ids)],
             'route_ids': [(6, 0, (self.mto_route + self.buy_route).ids)],
         })

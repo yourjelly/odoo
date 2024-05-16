@@ -40,6 +40,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
 
         # Create service products
         uom_hour = cls.env.ref('uom.product_uom_hour')
+        cls.cat = cls.env['product.category'].create({'name': 'cat'})
 
         cls.product_order_service1 = cls.env['product.product'].create({
             'name': "Service Ordered, create no task",
@@ -52,6 +53,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             'default_code': 'SERV-ORDERED1',
             'service_tracking': 'no',
             'project_id': False,
+            'categ_id': cls.cat.id,
         })
         cls.product_order_service2 = cls.env['product.product'].create({
             'name': "Service Ordered, create task in global project",
@@ -64,6 +66,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             'default_code': 'SERV-ORDERED2',
             'service_tracking': 'task_global_project',
             'project_id': cls.project_global.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_order_service3 = cls.env['product.product'].create({
             'name': "Service Ordered, create task in new project",
@@ -76,6 +79,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             'default_code': 'SERV-ORDERED3',
             'service_tracking': 'task_in_project',
             'project_id': False,  # will create a project
+            'categ_id': cls.cat.id,
         })
         cls.product_order_service4 = cls.env['product.product'].create({
             'name': "Service Ordered, create project only",
@@ -88,6 +92,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             'default_code': 'SERV-ORDERED4',
             'service_tracking': 'project_only',
             'project_id': False,
+            'categ_id': cls.cat.id,
         })
 
         # Create partner
@@ -265,18 +270,21 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
                 'lst_price': 100.0,
                 'detailed_type': 'service',
                 'service_tracking': 'task_in_project',
+                'categ_id': self.cat.id,
             },
             {
                 'name': 'product_B',
                 'lst_price': 100.0,
                 'detailed_type': 'service',
                 'service_tracking': 'task_in_project',
+                'categ_id': self.cat.id,
             },
             {
                 'name': 'product_C',
                 'lst_price': 100.0,
                 'detailed_type': 'service',
                 'service_tracking': 'task_in_project',
+                'categ_id': self.cat.id,
             },
         ])
         sale_order_first, sale_order_second = self.env['sale.order'].create([
@@ -527,6 +535,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             'type': 'service',
             'service_tracking': 'task_global_project',
             'project_id':project_A.id,
+            'categ_id': self.cat.id,
         })
         product_B = self.env['product.product'].create({
             'name': 'product B',
@@ -534,6 +543,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             'type': 'service',
             'service_tracking': 'task_global_project',
             'project_id':project_B.id,
+            'categ_id': self.cat.id,
         })
 
         sale_order = self.env['sale.order'].with_context(tracking_disable=True).create({
@@ -669,6 +679,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             'service_tracking': 'task_in_project',
             'project_id': False,  # will create a project,
             'project_template_id': False, # no project template
+            'categ_id': self.cat.id,
         })
         sale_order_line = self.env['sale.order.line'].create({
             'order_id': sale_order.id,
@@ -693,6 +704,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             'invoice_policy': 'order',
             'uom_id': self.env.ref('uom.product_uom_hour').id,
             'uom_po_id': self.env.ref('uom.product_uom_hour').id,
+            'categ_id': self.cat.id,
         })
         sale_line_id, sale_line_name = self.env['sale.order.line'].with_context(
             default_partner_id=self.partner.id,
@@ -768,6 +780,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
             'invoice_policy': 'order',
             'service_tracking': 'task_in_project',
             'project_template_id': self.archived_project_template.id,
+            'categ_id': self.cat.id,
         })
 
         # Create SO with the service product

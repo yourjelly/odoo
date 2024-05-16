@@ -134,11 +134,13 @@ class TestProcurement(TestMrpCommon):
         # create a product with manufacture route
         product_1 = self.env['product.product'].create({
             'name': 'AAA',
-            'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))]
+            'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         component_1 = self.env['product.product'].create({
             'name': 'component',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.env['mrp.bom'].create({
@@ -196,11 +198,13 @@ class TestProcurement(TestMrpCommon):
         """Check state of finished move on cancellation of raw moves. """
         product_bottle = self.env['product.product'].create({
             'name': 'Plastic Bottle',
-            'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))]
+            'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))],
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         component_mold = self.env['product.product'].create({
             'name': 'Plastic Mold',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.env['mrp.bom'].create({
@@ -242,7 +246,8 @@ class TestProcurement(TestMrpCommon):
         route_mto = self.warehouse.mto_pull_id.route_id.id
         product = self.env['product.product'].create({
             'name': 'Clafoutis',
-            'route_ids': [(6, 0, [route_manufacture, route_mto])]
+            'route_ids': [(6, 0, [route_manufacture, route_mto])],
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         self.env['mrp.bom'].create({
             'product_id': product.id,
@@ -269,6 +274,7 @@ class TestProcurement(TestMrpCommon):
 
         comp1 = self.env['product.product'].create({
             'name': 'egg',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         move_values = production._get_move_raw_values(comp1, 40.0, self.env.ref('uom.product_uom_unit'))
         self.env['stock.move'].create(move_values)
@@ -298,16 +304,19 @@ class TestProcurement(TestMrpCommon):
         product_1 = self.env['product.product'].create({
             'name': 'Cake',
             'type': 'product',
-            'route_ids': [(6, 0, [route_manufacture.id])]
+            'route_ids': [(6, 0, [route_manufacture.id])],
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product_2 = self.env['product.product'].create({
             'name': 'Cake Mix',
             'type': 'product',
-            'route_ids': [(6, 0, [route_manufacture.id])]
+            'route_ids': [(6, 0, [route_manufacture.id])],
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product_3 = self.env['product.product'].create({
             'name': 'Flour',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         bom1 = self.env['mrp.bom'].create({
@@ -335,11 +344,13 @@ class TestProcurement(TestMrpCommon):
         product_4 = self.env['product.product'].create({
             'name': 'Flavor Enchancer',
             'type': 'product',
-            'route_ids': [(6, 0, [route_manufacture.id])]
+            'route_ids': [(6, 0, [route_manufacture.id])],
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product_5 = self.env['product.product'].create({
             'name': 'MSG',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         self.env['mrp.bom'].create({
@@ -485,12 +496,12 @@ class TestProcurement(TestMrpCommon):
             'name': 'product',
             'type': 'product',
             'route_ids': [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('mrp.route_warehouse0_manufacture'))],
-            'categ_id': self.env.ref('product.product_category_services').id
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         component = self.env['product.product'].create({
             'name': 'component',
             'type': 'product',
-            'categ_id': self.env.ref('product.product_category_services').id
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['mrp.bom'].create({
             'product_id': product.id,
@@ -541,21 +552,25 @@ class TestProcurement(TestMrpCommon):
         product_1 = self.env['product.product'].create({
             'name': 'Product A',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(6, 0, [route_manufacture.id])]
         })
         product_2 = self.env['product.product'].create({
             'name': 'Product B',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(6, 0, [route_manufacture.id, route_mto.id])]
         })
         product_3 = self.env['product.product'].create({
             'name': 'Product B',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(6, 0, [route_manufacture.id])]
         })
         product_4 = self.env['product.product'].create({
             'name': 'Product C',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         op1 = self.env['stock.warehouse.orderpoint'].create({
@@ -643,13 +658,16 @@ class TestProcurement(TestMrpCommon):
         compo01, compo02, finished = self.env['product.product'].create([{
             'name': 'compo 01',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'compo 02',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'finished',
             'type': 'product',
             'route_ids': [(6, 0, manu_route.ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         bom01_form = Form(self.env['mrp.bom'])
@@ -709,7 +727,8 @@ class TestProcurement(TestMrpCommon):
         # add a third component, should reflect in picking
         comp3 = self.env['product.product'].create({
             'name': 'Comp3',
-            'type': 'product'
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         mo.write({
             'move_raw_ids': [(0, 0, {
@@ -744,14 +763,17 @@ class TestProcurement(TestMrpCommon):
         super_product = self.env['product.product'].create({
             'name': 'Super Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         comp1 = self.env['product.product'].create({
             'name': 'Comp1',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         comp2 = self.env['product.product'].create({
             'name': 'Comp2',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         bom = self.env['mrp.bom'].create({
             'product_id': super_product.id,
@@ -795,7 +817,8 @@ class TestProcurement(TestMrpCommon):
         # add new comp3
         comp3 = self.env['product.product'].create({
             'name': 'Comp3',
-            'type': 'product'
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         mo.write({
             'move_raw_ids': [(0, 0, {

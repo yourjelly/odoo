@@ -22,6 +22,7 @@ class TestMoveCancelPropagation(PurchaseTestCommon):
             'type': 'product',
             'route_ids': [(4, cls.route_mto), (4, cls.route_buy)],
             'seller_ids': [(6, 0, [seller.id])],
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.picking_out = cls.env['stock.picking'].create({
             'location_id': cls.warehouse.out_type_id.default_location_src_id.id,

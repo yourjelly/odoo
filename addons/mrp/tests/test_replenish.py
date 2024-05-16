@@ -49,7 +49,8 @@ class TestMrpReplenish(TestMrpCommon):
         product_1 = self.env['product.product'].create({
             'name': 'Cake',
             'type': 'product',
-            'route_ids': [(6, 0, [route_manufacture.id])]
+            'categ_id': self.env.ref('product.product_category_consumable').id,
+            'route_ids': [(6, 0, [route_manufacture.id])],
         })
 
         self.env['mrp.bom'].create({

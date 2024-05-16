@@ -305,11 +305,19 @@ class StockMove(TransactionCase):
         Unlock the picking and set the initial demand of a product in stock to zero.
         Ensure the state is correct
         """
-        productA, productB, productC = self.env['product.product'].create([
-            {'name': 'Product A', 'type': 'product'},
-            {'name': 'Product B', 'type': 'product'},
-            {'name': 'Product C (out of stock)', 'type': 'product'},
-        ])
+        productA, productB, productC = self.env['product.product'].create([{
+            'name': 'Product A',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        }, {
+            'name': 'Product B',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        }, {
+            'name': 'Product C (out of stock)',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        }])
         # make some stock
         self.env['stock.quant']._update_available_quantity(productA, self.stock_location, 1)
         self.env['stock.quant']._update_available_quantity(productB, self.stock_location, 1)
@@ -5020,6 +5028,7 @@ class StockMove(TransactionCase):
         product02 = self.env['product.product'].create({
             'name': 'SuperProduct',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.env['stock.quant']._update_available_quantity(product01, self.stock_location, 3)
@@ -6276,7 +6285,8 @@ class StockMove(TransactionCase):
             'name': 'product1',
             'type': 'product',
             'uom_id': uom_kg.id,
-            'uom_po_id': uom_kg.id
+            'uom_po_id': uom_kg.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         move.product_id = product1
         self.assertEqual(move.product_uom, product1.uom_id)

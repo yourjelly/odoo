@@ -53,6 +53,7 @@ class TestPointOfSale(TransactionCase):
             'list_price': 100,
             'taxes_id': False,
             'available_in_pos': True,
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
 
         product_1_combo_line = self.env["pos.combo.line"].create({

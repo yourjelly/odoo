@@ -33,6 +33,7 @@ def setup_pos_combo_items(self):
             "available_in_pos": True,
             "list_price": 10,
             "taxes_id": [(6, 0, [tax10.id])],
+            "categ_id": self.env.ref("product.product_category_office").id,
         }
     )
 
@@ -43,6 +44,7 @@ def setup_pos_combo_items(self):
             "available_in_pos": True,
             "list_price": 11,
             "taxes_id": [(6, 0, [tax20in.id])],
+            "categ_id": self.env.ref("product.product_category_office").id,
         }
     )
 
@@ -53,6 +55,7 @@ def setup_pos_combo_items(self):
             "available_in_pos": True,
             "list_price": 16,
             "taxes_id": [(6, 0, [tax30.id])],
+            "categ_id": self.env.ref("product.product_category_office").id,
         }
     )
 
@@ -101,6 +104,7 @@ def setup_pos_combo_items(self):
             "available_in_pos": True,
             "list_price": 20,
             "taxes_id": [(6, 0, [tax10.id])],
+            "categ_id": self.env.ref("product.product_category_office").id,
         }
     )
 
@@ -111,6 +115,7 @@ def setup_pos_combo_items(self):
             "available_in_pos": True,
             "list_price": 25,
             "taxes_id": [(6, 0, [tax20in.id])],
+            "categ_id": self.env.ref("product.product_category_office").id,
         }
     )
 
@@ -144,6 +149,7 @@ def setup_pos_combo_items(self):
             "available_in_pos": True,
             "list_price": 30,
             "taxes_id": [(6, 0, [tax30.id])],
+            "categ_id": self.env.ref("product.product_category_office").id,
         }
     )
 
@@ -154,6 +160,7 @@ def setup_pos_combo_items(self):
             "available_in_pos": True,
             "list_price": 32,
             "taxes_id": [(6, 0, [tax10.id])],
+            "categ_id": self.env.ref("product.product_category_office").id,
         }
     )
 
@@ -164,6 +171,7 @@ def setup_pos_combo_items(self):
             "available_in_pos": True,
             "list_price": 40,
             "taxes_id": [(6, 0, [tax20in.id])],
+            "categ_id": self.env.ref("product.product_category_office").id,
         }
     )
 

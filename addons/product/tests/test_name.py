@@ -15,6 +15,7 @@ class TestName(TransactionCase):
         cls.product = cls.env['product.product'].create({
             'name': cls.product_name,
             'default_code': cls.product_code,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
     def test_10_product_name(self):
@@ -38,6 +39,7 @@ class TestName(TransactionCase):
         color_attr_value_b = self.env['product.attribute.value'].create({'name': 'Blue', 'attribute_id': color_attr.id})
         template_dyn = self.env['product.template'].create({
             'name': 'Test Dynamical',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [(0, 0, {
                 'attribute_id': color_attr.id,
                 'value_ids': [(4, color_attr_value_r.id), (4, color_attr_value_b.id)],
@@ -46,6 +48,7 @@ class TestName(TransactionCase):
         product = self.env['product.product'].create({
             'name': 'Dynamo Lamp',
             'default_code': 'Dynamo',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.assertTrue(template_dyn.has_dynamic_attributes())
         # Ensure that template_dyn hasn't any product_product

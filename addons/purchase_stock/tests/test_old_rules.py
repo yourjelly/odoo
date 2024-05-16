@@ -43,6 +43,7 @@ class TestPurchaseOldRules(PurchaseTestCommon):
                 'partner_id': cls.customer.id,
                 'price': 100.0,
             })],
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         # Since the old rules are still a valid setup for multi-step routes, we need to make sure they still work.

@@ -28,6 +28,7 @@ class TestSoLineMilestones(TestSaleCommon):
             'default_code': 'MILE-DELI4',
             'service_type': 'milestones',
             'service_tracking': 'project_only',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.product_delivery_milestones2 = cls.env['product.product'].create({
             'name': "Milestones 2, create project only",
@@ -40,6 +41,7 @@ class TestSoLineMilestones(TestSaleCommon):
             'default_code': 'MILE-DELI4',
             'service_type': 'milestones',
             'service_tracking': 'project_only',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.product_delivery_milestones3 = cls.env['product.product'].create({
             'name': "Milestones 3, create project & task",
@@ -52,6 +54,7 @@ class TestSoLineMilestones(TestSaleCommon):
             'default_code': 'MILE-DELI4',
             'service_type': 'milestones',
             'service_tracking': 'task_in_project',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         cls.sale_order = cls.env['sale.order'].create({

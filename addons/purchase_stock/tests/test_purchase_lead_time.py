@@ -100,6 +100,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         # create a product with manufacture route
         product_1 = self.env['product.product'].create({
             'name': 'AAA',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(4, self.route_buy)],
             'seller_ids': [(0, 0, {'partner_id': self.partner_1.id, 'delay': 5})]
         })
@@ -224,6 +225,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         prod = self.env['product.product'].create({
             'name': 'Carrot',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [
                 (0, 0, {'partner_id': vendor.id, 'delay': 1.0, 'company_id': company.id})
             ]
@@ -249,6 +251,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         product = self.env['product.product'].create({
             'name': 'Chicory',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [
                 (0, 0, {'partner_id': vendor2.id, 'delay': 15.0, 'company_id': company2.id}),
                 (0, 0, {'partner_id': vendor.id, 'delay': 1.0, 'company_id': company.id})

@@ -26,6 +26,7 @@ class TestProjectProfitabilityCommon(Common):
             'invoice_policy': 'order',
             'uom_id': uom_unit_id,
             'uom_po_id': uom_unit_id,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         # Create service products
@@ -42,12 +43,14 @@ class TestProjectProfitabilityCommon(Common):
             'default_code': 'SERV-ORDERED2',
             'service_tracking': 'task_global_project',
             'project_id': cls.project.id,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.down_payment_product = cls.env['product.product'].create({
             'name': "downpayment product, used to simulate down payments",
             'standard_price': 30,
             'type': 'service',
             'service_policy': 'ordered_prepaid',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.sale_order = cls.env['sale.order'].with_context(tracking_disable=True).create({
             'partner_id': cls.partner.id,
@@ -154,6 +157,7 @@ class TestSaleProjectProfitability(TestProjectProfitabilityCommon, TestSaleCommo
             'default_code': 'SERV-ORDERED2',
             'service_tracking': 'task_global_project',
             'project_id': self.project.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         sale_order_foreign = self.env['sale.order'].with_context(tracking_disable=True).create({
             'partner_id': self.partner.id,

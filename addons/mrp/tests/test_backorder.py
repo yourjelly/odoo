@@ -283,12 +283,14 @@ class TestMrpProductionBackorder(TestMrpCommon):
         product_finished = self.env['product.product'].create({
             'name': 'Young Tom',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         product_component = self.env['product.product'].create({
             'name': 'Botox',
             'type': 'product',
             'uom_id': self.env.ref('uom.product_uom_kgm').id,
             'uom_po_id': self.env.ref('uom.product_uom_kgm').id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         mo_form = Form(self.env['mrp.production'])
@@ -637,14 +639,17 @@ class TestMrpWorkorderBackorder(TransactionCase):
         cls.finished1 = cls.env['product.product'].create({
             'name': 'finished1',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.compfinished1 = cls.env['product.product'].create({
             'name': 'compfinished1',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.compfinished2 = cls.env['product.product'].create({
             'name': 'compfinished2',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.workcenter1 = cls.env['mrp.workcenter'].create({
             'name': 'workcenter1',

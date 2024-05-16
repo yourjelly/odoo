@@ -96,11 +96,13 @@ class TestSaleStockInvoices(TestSaleCommon):
             'name': 'Product By Lot',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.product_by_usn = self.env['product.product'].create({
             'name': 'Product By USN',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         self.stock_location = self.warehouse.lot_stock_id

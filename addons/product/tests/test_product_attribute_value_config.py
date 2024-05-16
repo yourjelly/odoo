@@ -23,6 +23,7 @@ class TestProductAttributeValueCommon(TransactionCase):
         cls.computer = cls.env['product.template'].create({
             'name': 'Super Computer',
             'list_price': 2000,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
 
         (
@@ -120,7 +121,8 @@ class TestProductAttributeValueCommon(TransactionCase):
         cls._add_computer_attribute_lines()
 
         cls.computer_case = cls.env['product.template'].create({
-            'name': 'Super Computer Case'
+            'name': 'Super Computer Case',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
 
         cls.computer_case_size_attribute_lines = cls.env['product.template.attribute.line'].create({
@@ -321,7 +323,10 @@ class TestProductAttributeValueConfig(TestProductAttributeValueCommon):
         self.assertFalse(self.computer._is_combination_possible(computer_ssd_256 + computer_ram_16))
 
         # CASE: no combination, no variant, just return the only variant
-        mouse = self.env['product.template'].create({'name': 'Mouse'})
+        mouse = self.env['product.template'].create({
+            'name': 'Mouse',
+            'categ_id': self.env.ref('product.product_category_office').id,
+        })
         self.assertTrue(mouse._is_combination_possible(self.env['product.template.attribute.value']))
 
         # prep work for the last part of the test
@@ -469,7 +474,10 @@ class TestProductAttributeValueConfig(TestProductAttributeValueCommon):
         self.assertIsNone(next(gen, None))
 
         # Testing parent case
-        mouse = self.env['product.template'].create({'name': 'Mouse'})
+        mouse = self.env['product.template'].create({
+            'name': 'Mouse',
+            'categ_id': self.env.ref('product.product_category_office').id,
+        })
         self.assertTrue(mouse._is_combination_possible(self.env['product.template.attribute.value']))
 
         # prep work for the last part of the test
@@ -514,6 +522,7 @@ class TestProductAttributeValueConfig(TestProductAttributeValueCommon):
         # Making sure it's not extremely slow (has to discard invalid combinations early !)
         product_template = self.env['product.template'].create({
             'name': 'many combinations',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         for i in range(10):
@@ -610,6 +619,7 @@ class TestProductAttributeValueConfig(TestProductAttributeValueCommon):
         # Make sure this is not extremely slow:
         product_template = self.env['product.template'].create({
             'name': 'many combinations',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         for i in range(10):
@@ -735,6 +745,7 @@ class TestProductAttributeValueConfig(TestProductAttributeValueCommon):
         product = self.env['product.template'].create({
             'name': 'P1',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_office').id,
             'attribute_line_ids': [(0, 0, {
                 'attribute_id': product_attribut.id,
                 'value_ids': [(6, 0, [a1.id])],

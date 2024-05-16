@@ -19,6 +19,7 @@ class TestAccruedStockSaleOrders(AccountTestInvoicingCommon):
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
             'invoice_policy': 'delivery',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.sale_order = cls.env['sale.order'].with_context(tracking_disable=True).create({
             'partner_id': cls.partner_a.id,

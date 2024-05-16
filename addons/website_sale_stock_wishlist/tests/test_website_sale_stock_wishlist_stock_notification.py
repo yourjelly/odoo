@@ -24,6 +24,7 @@ class TestStockNotificationWishlist(HttpCase):
             'website_published': True,
             'type': 'product',
             'allow_out_of_stock_order': False,
+            'categ_id': cls.env.ref('product.product_category_office').id,
 
         })
         cls.pricelist = cls.env['product.pricelist'].create({

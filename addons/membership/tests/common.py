@@ -20,6 +20,7 @@ class TestMembershipCommon(AccountTestInvoicingCommon):
             'name': 'Basic Limited',
             'type': 'service',
             'list_price': 100.00,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         # Test people

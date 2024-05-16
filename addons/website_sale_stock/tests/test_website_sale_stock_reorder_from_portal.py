@@ -11,13 +11,14 @@ class TestWebsiteSaleStockReorderFromPortal(HttpCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.env['website'].get_current_website().enabled_portal_reorder_button = True
-
+        cls.cat = cls.env['product.category'].create({'name': 'cat'})
         cls.available_product = cls.env['product.product'].create({
             'name': 'available_product',
             'type': 'product',
             'allow_out_of_stock_order': False,
             'sale_ok': True,
             'website_published': True,
+            'categ_id': cls.cat.id,
         })
         cls.unavailable_product = cls.env['product.product'].create({
             'name': 'unavailable_product',
@@ -25,6 +26,7 @@ class TestWebsiteSaleStockReorderFromPortal(HttpCase):
             'allow_out_of_stock_order': False,
             'sale_ok': True,
             'website_published': True,
+            'categ_id': cls.cat.id,
         })
         cls.partially_available_product = cls.env['product.product'].create({
             'name': 'partially_available_product',
@@ -32,6 +34,7 @@ class TestWebsiteSaleStockReorderFromPortal(HttpCase):
             'allow_out_of_stock_order': False,
             'sale_ok': True,
             'website_published': True,
+            'categ_id': cls.cat.id,
         })
         user_admin = cls.env.ref('base.user_admin')
         order = cls.env['sale.order'].create({

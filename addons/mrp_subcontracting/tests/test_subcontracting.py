@@ -680,10 +680,12 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         finished, component = self.env['product.product'].create([{
             'name': 'Finished Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Component',
             'type': 'product',
             'route_ids': [(4, resupply_route.id)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         bom = self.env['mrp.bom'].create({
@@ -747,8 +749,16 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         in_pck_type = self.env.ref('stock.picking_type_in')
         in_pck_type.write({'show_operations': True})
 
-        finished = self.env['product.product'].create({'name': 'Finished Product', 'type': 'product'})
-        component = self.env['product.product'].create([{'name': 'Component', 'type': 'product'}])
+        finished = self.env['product.product'].create({
+            'name': 'Finished Product',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
+        component = self.env['product.product'].create([{
+            'name': 'Component',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        }])
         self.env['mrp.bom'].create({
             'product_tmpl_id': finished.product_tmpl_id.id,
             'product_qty': 1.0,
@@ -1354,11 +1364,13 @@ class TestSubcontractingTracking(TransactionCase):
             'name': 'SuperProduct',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Component',
             'type': 'product',
             'tracking': 'lot',
             'route_ids': [(4, resupply_sub_on_order_route.id)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         bom_form = Form(self.env['mrp.bom'])
@@ -1426,10 +1438,12 @@ class TestSubcontractingTracking(TransactionCase):
             'name': 'Pepper Spray',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Pepper',
             'type': 'product',
             'route_ids': [(4, resupply_sub_on_order_route.id)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         bom_form = Form(self.env['mrp.bom'])
@@ -1522,6 +1536,7 @@ class TestSubcontractingPortal(TransactionCase):
         cls.product_not_in_bom = cls.env['product.product'].create({
             'name': 'Product not in the BoM',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         # 2.2. Finished prodcut has tracking by serial number
@@ -1633,12 +1648,14 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
         self.raw_material = self.env['product.product'].create({
             'name': 'Component',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [Command.link(self.resupply_route.id)],
         })
         self.finished = self.env['product.product'].create({
             'name': 'Finished',
             'type': 'product',
-            'tracking': 'serial'
+            'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.bom = self.env['mrp.bom'].create({
             'product_id': self.finished.id,
@@ -1730,6 +1747,7 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
             'name': 'Cake',
             'uom_id': self.env.ref('uom.product_uom_unit').id,
             'detailed_type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['product.template.attribute.line'].create({
             'product_tmpl_id': product_template.id,

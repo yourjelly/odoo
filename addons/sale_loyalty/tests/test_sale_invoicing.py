@@ -28,6 +28,7 @@ class TestSaleInvoicing(TestSaleCouponCommon):
             'invoice_policy': 'delivery',
             'name': 'Product invoiced on delivery',
             'lst_price': 500,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         order = self.empty_order
@@ -88,6 +89,7 @@ class TestSaleInvoicing(TestSaleCouponCommon):
 
         product_6 = self.env['product.product'].create({
             'name': 'Large Cabinet',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         # orderline1
         self.env['sale.order.line'].create({
@@ -106,6 +108,7 @@ class TestSaleInvoicing(TestSaleCouponCommon):
 
         product_11 = self.env['product.product'].create({
             'name': 'Conference Chair',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # orderline2

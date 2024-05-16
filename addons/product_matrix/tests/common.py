@@ -38,6 +38,7 @@ class TestMatrixCommon(common.HttpCase):
             'type': "consu",
             'uom_id': self.ref("uom.product_uom_unit"),
             'uom_po_id': self.ref("uom.product_uom_unit"),
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [(0, 0, {
                 'attribute_id': attribute.id,
                 'value_ids': [(6, 0, attribute.value_ids.ids)]

@@ -32,12 +32,14 @@ class TestMrpSerialMassProducePerformance(common.TransactionCase):
             raw_materials.append(self.env['product.product'].create({
                 'name': '@raw_material#' + str(i + 1),
                 'type': 'product',
-                'tracking': trackings[i % len(trackings)]
+                'tracking': trackings[i % len(trackings)],
+                'categ_id': self.env.ref('product.product_category_services').id,
             }))
         finished = self.env['product.product'].create({
             'name': '@finished',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         bom = self.env['mrp.bom'].create({
             'product_id': finished.id,

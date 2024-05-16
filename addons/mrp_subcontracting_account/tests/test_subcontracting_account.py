@@ -541,6 +541,7 @@ class TestBomPriceSubcontracting(TestBomPriceCommon):
             'type': 'product',
             'standard_price': 100,
             'company_id': self.env.company.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         supplier = self.env['product.supplierinfo'].create([{
                 'partner_id': partner.id,

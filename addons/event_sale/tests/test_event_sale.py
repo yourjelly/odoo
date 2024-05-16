@@ -18,6 +18,7 @@ class TestEventSale(TestEventSaleCommon):
         product = cls.env['product.product'].create({
             'name': 'Event',
             'detailed_type': 'event',
+            'categ_id': cls.env.ref('event_sale.product_category_events').id,
         })
 
         cls.user_salesperson = mail_new_test_user(cls.env, login='user_salesman', groups='sales_team.group_sale_salesman')
@@ -396,6 +397,7 @@ class TestEventSale(TestEventSaleCommon):
             'name': 'Event Product',
             'list_price': 10.0,
             'taxes_id': False,
+            'categ_id': self.env.ref('event_sale.product_category_events').id,
         })
 
         event = self.env['event.event'].create({
@@ -445,6 +447,7 @@ class TestEventSale(TestEventSaleCommon):
         event_product = self.env['product.template'].create({
             'name': 'Event Product',
             'list_price': 10.0,
+            'categ_id': self.env.ref('event_sale.product_category_events').id,
         })
 
         event_product.taxes_id = tax

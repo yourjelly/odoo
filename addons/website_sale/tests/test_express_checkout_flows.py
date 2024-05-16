@@ -29,6 +29,7 @@ class TestWebsiteSaleExpressCheckoutFlows(HttpCaseWithUserDemo):
                     'name': 'Product A',
                     'list_price': 100,
                     'website_published': True,
+                    'categ_id': cls.env.ref('product.product_category_services').id,
                     'sale_ok': True}).id,
                 'name': 'Product A',
             })]

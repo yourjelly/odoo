@@ -490,14 +490,17 @@ class TestUnbuild(TestMrpCommon):
         finshed_product = ProductObj.create({
             'name': 'Table',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         component1 = ProductObj.create({
             'name': 'Table head',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         component2 = ProductObj.create({
             'name': 'Table stand',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         # Create bom and add components
@@ -616,9 +619,11 @@ class TestUnbuild(TestMrpCommon):
             'name': 'compo',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'finished',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         lot01, lot02 = self.env['stock.lot'].create([{
@@ -735,6 +740,7 @@ class TestUnbuild(TestMrpCommon):
             'name': 'Product tracked by sn',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_1_sn = self.env['stock.lot'].create({
             'name': 'sn1',
@@ -743,6 +749,7 @@ class TestUnbuild(TestMrpCommon):
         component = self.env['product.product'].create({
             'name': 'Product component',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         bom_1 = self.env['mrp.bom'].create({
             'product_id': product_1.id,
@@ -757,6 +764,7 @@ class TestUnbuild(TestMrpCommon):
         product_2 = self.env['product.product'].create({
             'name': 'finished Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['mrp.bom'].create({
             'product_id': product_2.id,
@@ -814,6 +822,7 @@ class TestUnbuild(TestMrpCommon):
             'name': 'Product tracked by sn',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         finished_product_sn = self.env['stock.lot'].create({
             'name': 'sn1',
@@ -822,6 +831,7 @@ class TestUnbuild(TestMrpCommon):
         component = self.env['product.product'].create({
             'name': 'Product component',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         bom_1 = self.env['mrp.bom'].create({
             'product_id': finished_product.id,

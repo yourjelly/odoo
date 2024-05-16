@@ -53,7 +53,10 @@ class TestEventData(TestEventSaleCommon):
         self.assertFalse(event.event_registrations_open)
 
         # at least one valid ticket -> ok is back
-        event_product = self.env['product.product'].create({'name': 'Test Registration Product New',})
+        event_product = self.env['product.product'].create({
+            'name': 'Test Registration Product New',
+            'categ_id': self.env.ref('event_sale.product_category_events').id,
+        })
         new_ticket = self.env['event.event.ticket'].create({
             'name': 'TestTicket 2',
             'event_id': event.id,

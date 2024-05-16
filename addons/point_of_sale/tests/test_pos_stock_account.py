@@ -273,5 +273,8 @@ class TestPoSStock(TestPoSCommon):
             self.env, 'temp_stock_manager', 'stock.group_stock_manager',
         )
         self.env['product.product'].with_user(stock_manager).create({
-            'name': 'temp', 'type': 'product', 'available_in_pos': False,
+            'name': 'temp',
+            'type': 'product',
+            'available_in_pos': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })

@@ -171,6 +171,7 @@ class TestLoyalty(TransactionCase):
             'name': 'Test Product',
             'detailed_type': 'consu',
             'list_price': 20.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         reward = self.env['loyalty.reward'].create({
             'program_id': self.program.id,

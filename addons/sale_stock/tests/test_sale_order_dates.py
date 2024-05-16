@@ -19,18 +19,21 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
             'type': 'product',
             'sale_delay': 5,
             'uom_id': 1,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_B = Product.create({
             'name': 'Product B',
             'type': 'product',
             'sale_delay': 10,
             'uom_id': 1,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_C = Product.create({
             'name': 'Product C',
             'type': 'product',
             'sale_delay': 15,
             'uom_id': 1,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.env['stock.quant']._update_available_quantity(product_A, self.company_data['default_warehouse'].lot_stock_id, 10)
@@ -98,6 +101,7 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
                 'product_id': self.env['product.product'].create({
                     'name': 'A product',
                     'type': 'product',
+                    'categ_id': self.env.ref('product.product_category_services').id,
                 }).id,
                 'product_uom_qty': 1,
                 'price_unit': 750,

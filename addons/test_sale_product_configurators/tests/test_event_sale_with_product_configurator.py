@@ -59,6 +59,7 @@ class TestEventProductConfiguratorUi(AccountTestInvoicingCommon, HttpCase):
             'name': 'Registration Event (TEST variants)',
             'list_price': 30.0,
             'detailed_type': 'event',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         # Generate variants
@@ -107,6 +108,7 @@ class TestEventProductConfiguratorUi(AccountTestInvoicingCommon, HttpCase):
             cls.product_product_memorabilia = cls.env['product.template'].create({
                 'name': 'Memorabilia (TEST)',
                 'list_price': 16.50,
+                'categ_id': cls.env.ref('product.product_category_services').id,
             })
 
             cls.event_product_template.optional_product_ids = [cls.product_product_memorabilia.id,]

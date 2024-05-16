@@ -22,6 +22,7 @@ class TestPurchaseDashboard(AccountTestInvoicingCommon, MailCase):
         product_data = {
             'name': 'SuperProduct',
             'type': 'consu',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         }
         cls.product_100 = cls.env['product.product'].create({**product_data, 'standard_price': 100})
         cls.product_250 = cls.env['product.product'].create({**product_data, 'standard_price': 250})

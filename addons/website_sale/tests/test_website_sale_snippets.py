@@ -32,6 +32,7 @@ class TestSnippets(HttpCase):
             'image_512': b'/product/static/img/product_product_9-image.jpg',
             'display_name': 'Bin',
             'description_sale': 'Pedal-based opening system',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         before_tour_product_ids = website_visitor.product_ids.ids
         website_visitor._add_viewed_product(self.product.id)

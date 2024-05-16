@@ -34,11 +34,13 @@ class TestMrpAnalyticAccount(TransactionCase):
             'name': 'Product',
             'type': 'product',
             'standard_price': 233.0,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.component = cls.env['product.product'].create({
             'name': 'Component',
             'type': 'product',
             'standard_price': 10.0,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.bom = cls.env['mrp.bom'].create({
             'product_id': cls.product.id,
@@ -258,10 +260,12 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
             'name': 'Component',
             'type': 'product',
             'standard_price': 100,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product = self.env['product.product'].create({
             'name': 'Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         bom = self.env['mrp.bom'].create({
                 'product_tmpl_id': product.product_tmpl_id.id,

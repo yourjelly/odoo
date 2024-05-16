@@ -44,6 +44,7 @@ class SelfOrderCommonTest(odoo.tests.HttpCase):
             'taxes_id': False,
             'available_in_pos': True,
             'pos_categ_ids': [(4, pos_categ_misc.id)],
+            'categ_id': cls.env.ref('point_of_sale.product_category_food').id,
         })
         cls.fanta = cls.env['product.product'].create({
             'name': 'Fanta',
@@ -52,6 +53,7 @@ class SelfOrderCommonTest(odoo.tests.HttpCase):
             'taxes_id': False,
             'available_in_pos': True,
             'pos_categ_ids': [(4, pos_categ_misc.id)],
+            'categ_id': cls.env.ref('point_of_sale.product_category_food').id,
         })
 
         #desk organizer
@@ -60,6 +62,7 @@ class SelfOrderCommonTest(odoo.tests.HttpCase):
             'available_in_pos': True,
             'list_price': 5.10,
             'pos_categ_ids': [(4, pos_categ_misc.id)],
+            'categ_id': cls.env.ref('point_of_sale.product_category_food').id,
         })
         desk_size_attribute = cls.env['product.attribute'].create({
             'name': 'Size',

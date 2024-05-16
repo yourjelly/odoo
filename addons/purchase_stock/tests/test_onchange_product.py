@@ -54,6 +54,7 @@ class TestOnchangeProductId(TransactionCase):
 
         product_tmpl_id = self.product_tmpl_model.create(dict(name="Voiture",
                                                               list_price=121,
+                                                              categ_id=self.env.ref('product.product_category_services').id,
                                                               seller_ids=[(6, 0, [supplierinfo.id])],
                                                               supplier_taxes_id=[(6, 0, [tax_include_id.id])]))
         product_id = product_tmpl_id.product_variant_id
@@ -107,6 +108,7 @@ class TestOnchangeProductId(TransactionCase):
             'standard_price': 100,
             'uom_id': ipad_lot.id,
             'uom_po_id': ipad_lot.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         po_line2 = self.po_line_model.create({
             'name': product_ipad.name,

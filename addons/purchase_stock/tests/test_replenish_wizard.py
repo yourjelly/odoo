@@ -29,6 +29,7 @@ class TestReplenishWizard(TestStockCommon):
             'seller_ids': [(4, cls.supplierinfo.id, 0)],
             'route_ids': [(4, cls.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
+        cls.category = cls.env.ref('product.product_category_services')
 
         # Additional Values required by the replenish wizard
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
@@ -73,7 +74,7 @@ class TestReplenishWizard(TestStockCommon):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
             'type': 'product',
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
         vendor1 = self.env['res.partner'].create({'name': 'vendor1', 'email': 'from.test@example.com'})
@@ -124,7 +125,7 @@ class TestReplenishWizard(TestStockCommon):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
             'type': 'product',
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
         vendor1 = self.env['res.partner'].create({'name': 'vendor1', 'email': 'from.test@example.com'})
@@ -182,7 +183,7 @@ class TestReplenishWizard(TestStockCommon):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
             'type': 'product',
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
         vendor1 = self.env['res.partner'].create({'name': 'vendor1', 'email': 'from.test@example.com'})
@@ -232,7 +233,7 @@ class TestReplenishWizard(TestStockCommon):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
             'type': 'product',
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
         vendor1 = self.env['res.partner'].create({'name': 'vendor1', 'email': 'from.test@example.com'})
@@ -315,7 +316,7 @@ class TestReplenishWizard(TestStockCommon):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
             'type': 'product',
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
         vendor1 = self.env['res.partner'].create({'name': 'vendor1', 'email': 'from.test@example.com'})
@@ -351,7 +352,7 @@ class TestReplenishWizard(TestStockCommon):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
             'type': 'product',
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
         vendor = self.env['res.partner'].create({'name': 'vendor1', 'email': 'from.test@example.com'})
@@ -392,7 +393,7 @@ class TestReplenishWizard(TestStockCommon):
         product_to_buy = self.env['product.product'].create({
             'name': "Furniture Service",
             'type': 'product',
-            'categ_id': self.env.ref('product.product_category_services').id,
+            'categ_id': self.category.id,
             'route_ids': [(4, self.env.ref('purchase_stock.route_warehouse0_buy').id, 0)],
         })
         vendor = self.env['res.partner'].create({'name': 'vendor1', 'email': 'from.test@example.com'})
@@ -426,6 +427,7 @@ class TestReplenishWizard(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'Product',
             'standard_price': 60,
+            'categ_id': self.category.id,
             'seller_ids': [(0, 0, {
                 'partner_id': vendor.id,
                 'price': 1.0,
@@ -456,6 +458,7 @@ class TestReplenishWizard(TestStockCommon):
         self.env['stock.warehouse'].search([], limit=1).reception_steps = 'two_steps'
         product = self.env['product.product'].create({
             'name': 'Product',
+            'categ_id': self.category.id,
             'route_ids': [(6, 0, [
                 self.env.ref('purchase_stock.route_warehouse0_buy').id
             ])],

@@ -36,20 +36,24 @@ class StockQuant(TransactionCase):
         cls.product = cls.env['product.product'].create({
             'name': 'Product A',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.product_lot = cls.env['product.product'].create({
             'name': 'Product A',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.product_consu = cls.env['product.product'].create({
             'name': 'Product A',
             'type': 'consu',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.product_serial = cls.env['product.product'].create({
             'name': 'Product A',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.stock_location = cls.env['stock.location'].create({
             'name': 'stock_location',
@@ -237,6 +241,7 @@ class StockQuant(TransactionCase):
         product2 = self.env['product.product'].create({
             'name': 'Product B',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 1.0)
         self.env['stock.quant']._update_available_quantity(self.product, stock_sub_location, 1.0)
@@ -886,6 +891,7 @@ class StockQuant(TransactionCase):
             'name': 'Product',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         sn1 = self.env['stock.lot'].create({
             'name': 'SN1',
@@ -948,12 +954,14 @@ class StockQuant(TransactionCase):
         # testing moving multiple packed quants to a new location with incomplete package
         product_b = self.env['product.product'].create({
             'name': 'product B',
-            'type': 'product'
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['stock.quant']._update_available_quantity(product_b, self.stock_location, 10, package_id=package_01)
         product_c = self.env['product.product'].create({
             'name': 'product C',
-            'type': 'product'
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['stock.quant']._update_available_quantity(product_c, self.stock_location, 10, package_id=package_01)
 
@@ -991,12 +999,14 @@ class StockQuant(TransactionCase):
         product_a_company_B = self.env['product.product'].create({
             'name': 'product A company B',
             'type': 'product',
-            'company_id': company_B.id
+            'company_id': company_B.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_b_company_B = self.env['product.product'].create({
             'name': 'product b company B',
             'type': 'product',
-            'company_id': company_B.id
+            'company_id': company_B.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['stock.quant']._update_available_quantity(product_a_company_B, location_company_B, 10, package_id=package_03)
         self.env['stock.quant']._update_available_quantity(product_b_company_B, location_company_B, 10)
@@ -1024,7 +1034,11 @@ class StockQuant(TransactionCase):
         """ With the changes implemented in _get_inventory_move_values(), we want to make sure that it correctly
         writes the package and destination package for inventory adjustments in _apply_inventory(). """
 
-        dummy_product = self.env['product.product'].create({'name': 'dummy product', 'type': 'product'})
+        dummy_product = self.env['product.product'].create({
+            'name': 'dummy product',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         dummy_package = self.env['stock.quant.package'].create({'name': 'dummy package'})
         dummy_quant = self.env['stock.quant'].create({
             'product_id': dummy_product.id,
@@ -1241,6 +1255,7 @@ class StockQuant(TransactionCase):
             'name': 'Product',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         lot_a = self.env['stock.lot'].create({
             'name': 'A',
@@ -1318,6 +1333,7 @@ class StockQuantRemovalStrategy(TransactionCase):
         self.product = self.env['product.product'].create({
             'name': 'Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.product.categ_id.removal_strategy_id = self.least_package_strategy.id
         self.stock_location = self.env['stock.location'].create({

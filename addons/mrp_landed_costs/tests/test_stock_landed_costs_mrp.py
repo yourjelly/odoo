@@ -71,6 +71,7 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
         cls.landed_cost = cls.env['product.product'].create({
             'name': 'Landed Cost',
             'type': 'service',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.allow_user = cls.env['res.users'].with_context({'no_reset_password': True}).create({
             'name': "Adviser",

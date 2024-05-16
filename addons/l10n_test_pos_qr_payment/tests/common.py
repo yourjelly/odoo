@@ -15,6 +15,7 @@ class TestPosQrCommon(AccountTestInvoicingHttpCommon):
             'available_in_pos': True,
             'list_price': 4.8,
             'taxes_id': False,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
 
         # Create user.

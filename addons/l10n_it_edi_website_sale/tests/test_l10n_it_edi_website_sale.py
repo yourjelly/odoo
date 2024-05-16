@@ -10,6 +10,7 @@ class TestUi(HttpCase):
             'standard_price': 70.0,
             'list_price': 79.0,
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
     def test_checkout_address(self):

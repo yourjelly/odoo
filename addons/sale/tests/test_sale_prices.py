@@ -665,18 +665,22 @@ class TestSalePrices(SaleCommon):
         ) = self.env['product.template'].create([{
             'name': "Voiture",
             'list_price': 121,
+            'categ_id': self.product_category.id,
             'taxes_id': [Command.set([tax_include_src.id])]
         }, {
             'name': "Voiture",
             'list_price': 100,
+            'categ_id': self.product_category.id,
             'taxes_id': [Command.set([tax_exclude_src.id])]
         }, {
             'name': "Voiture",
             'list_price': 100,
+            'categ_id': self.product_category.id,
             'taxes_id': [Command.set([tax_fixed_incl.id, tax_exclude_src.id])]
         }, {
             'name': "Voiture",
             'list_price': 100,
+            'categ_id': self.product_category.id,
             'taxes_id': [Command.set([tax_fixed_excl.id, tax_include_src.id])]
         }])
 

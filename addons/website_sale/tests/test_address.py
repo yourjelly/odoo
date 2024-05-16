@@ -307,6 +307,7 @@ class TestCheckoutAddress(BaseUsersCommon, WebsiteSaleCommon):
             'list_price': 100,
             'website_published': True,
             'sale_ok': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'taxes_id': [tax_10_incl.id]
         })
         so = self.env['sale.order'].create({
@@ -546,7 +547,10 @@ class TestCheckoutAddress(BaseUsersCommon, WebsiteSaleCommon):
         self.assertTrue(all(not p.can_edit_vat() for p in partner_company.child_ids))
         self.assertTrue(all(p._can_edit_name() for p in partner_company.child_ids))
 
-        dumb_product = self.env['product.product'].create({'name': 'test'})
+        dumb_product = self.env['product.product'].create({
+            'name': 'test',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': partner_company.id,
@@ -582,6 +586,7 @@ class TestCheckoutAddress(BaseUsersCommon, WebsiteSaleCommon):
             'list_price': 100,
             'website_published': True,
             'sale_ok': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         }).id
 
         env = api.Environment(self.env.cr, self.portal_user.id, {})

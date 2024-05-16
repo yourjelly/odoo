@@ -816,6 +816,7 @@ class TestSaleToInvoice(TestSaleCommon):
             'expense_policy': 'cost',
             'default_code': 'PROD_COST',
             'service_type': 'manual',
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         prod_gap = self.company_data['product_service_order']
         so = self.env['sale.order'].create({
@@ -929,6 +930,7 @@ class TestSaleToInvoice(TestSaleCommon):
         product_shared = self.env['product.template'].create({
             'name': 'shared product',
             'invoice_policy': 'order',
+            'categ_id': self.env.ref('product.product_category_expenses').id,
             'taxes_id': [(6, False, (self.company_data['default_tax_sale'] + self.company_data_2['default_tax_sale']).ids)],
             'property_account_income_id': self.company_data['default_account_revenue'].id,
         })

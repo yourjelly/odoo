@@ -20,6 +20,7 @@ class TestSnailmailOnInvoice(TransactionCase):
             'name': 'product',
             'sale_ok': True,
             'standard_price': 100.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         invoice = self.env['account.move'].create({

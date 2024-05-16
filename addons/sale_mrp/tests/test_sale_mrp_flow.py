@@ -160,9 +160,11 @@ class TestSaleMrpFlowCommon(ValuationReconciliationTestCommon):
 
     @classmethod
     def _cls_create_product(cls, name, uom_id, routes=()):
+        cls.category = cls.env['product.category'].create({'name': 'Category'})
         p = Form(cls.env['product.product'])
         p.name = name
         p.detailed_type = 'product'
+        p.categ_id = cls.category
         p.uom_id = uom_id
         p.uom_po_id = uom_id
         p.route_ids.clear()
@@ -495,10 +497,12 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         product_wood_panel = self.env['product.product'].create({
             'name': 'Wood Panel',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         product_desk_bolt = self.env['product.product'].create({
             'name': 'Bolt',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.env['mrp.bom'].create({
             'product_tmpl_id': product.product_tmpl_id.id,
@@ -1486,12 +1490,14 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
             'name': 'Geyser',
             'type': 'product',
             'route_ids': [(4, route_mto), (4, route_manufacture)],
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # Create service type product
         product_raw = self.env['product.product'].create({
             'name': 'raw Geyser',
             'type': 'service',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # Create bom for finish product
@@ -1535,11 +1541,13 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
             'name': 'Geyser',
             'type': 'product',
             'route_ids': [(4, route_mto), (4, route_manufacture)],
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         product_raw = self.env['product.product'].create({
             'name': 'raw Geyser',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # Create bom for finish product
@@ -1589,11 +1597,13 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
             'name': 'Geyser',
             'type': 'product',
             'route_ids': [(4, route_mto), (4, route_manufacture)],
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         product_raw = self.env['product.product'].create({
             'name': 'raw Geyser',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # Create bom for finish product
@@ -1652,16 +1662,19 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         main_kit_product = self.env['product.product'].create({
             'name': 'Main Kit',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         nested_kit_product = self.env['product.product'].create({
             'name': 'Nested Kit',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         product = self.env['product.product'].create({
             'name': 'Screw',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.env['mrp.bom'].create({

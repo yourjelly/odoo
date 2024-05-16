@@ -26,6 +26,7 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
             'type': 'product',
             'uom_id': unit,
             'uom_po_id': unit,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(6, 0, [supplier_info1.id])],
             'route_ids': [(6, 0, [route_buy, route_mto])]
         })
@@ -119,6 +120,7 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
             'type': 'product',
             'uom_id': unit,
             'uom_po_id': unit,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(6, 0, [supplier_info1.id])],
             'route_ids': [(6, 0, [route_buy, route_mto])]
         })
@@ -127,6 +129,7 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
             'type': 'product',
             'uom_id': unit,
             'uom_po_id': unit,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(6, 0, [supplier_info1.id])],
             'route_ids': [(6, 0, [route_buy, route_mto])]
         })
@@ -247,6 +250,7 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
         product = self.env['product.product'].create({
             'name': 'Test product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [Command.create({
                 'partner_id': vendor_1.id,
                 'price': 10.0,

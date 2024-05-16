@@ -36,6 +36,7 @@ class TestWebsiteEventSaleCommon(TransactionCase):
             'list_price': 100,
             'name': 'Event Registration No Company Assigned',
             'taxes_id': [(6, 0, cls.zero_tax.ids)],
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         cls.event = cls.env['event.event'].create({

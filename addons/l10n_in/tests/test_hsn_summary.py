@@ -24,6 +24,7 @@ class TestHSNsummary(TestTaxCommon):
             'uom_id': cls.env.ref('uom.product_uom_unit').id,
             'lst_price': 1000.0,
             'property_account_income_id': cls.company_data['default_account_revenue'].id,
+            'categ_id': cls.env.ref('product.product_category_expenses').id,
         })
 
         cls.gst_5 = cls.env['account.chart.template'].ref('sgst_sale_5')

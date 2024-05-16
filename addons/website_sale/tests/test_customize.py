@@ -37,6 +37,7 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
             'name': 'Test Product',
             'is_published': True,
             'list_price': 750,
+            'categ_id': cls.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': product_attribute.id,
@@ -110,6 +111,7 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
             'name': 'Dynamic Product',
             'website_published': True,
             'list_price': 10,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': product_attribute.id,
@@ -154,6 +156,7 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
         product_template = self.env['product.template'].create({
             'name': 'Test Product 2',
             'is_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': product_attribute.id,
@@ -195,6 +198,7 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
         product_template = self.env['product.template'].create({
             'name': 'Test Product 3',
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': product_attribute_no_variant.id,
@@ -260,6 +264,7 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
         product_template = self.env['product.template'].create({
             'name': 'Test Product 2',
             'is_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': attribute.id,
@@ -301,6 +306,7 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
         self.env['product.template'].create({
             'name': 'Test Product 2',
             'is_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': attribute_size.id,
@@ -343,6 +349,7 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
             'name': 'Product Multi',
             'is_published': True,
             'list_price': 750,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': attribute.id,

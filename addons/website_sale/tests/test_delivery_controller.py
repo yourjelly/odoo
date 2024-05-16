@@ -48,7 +48,10 @@ class TestWebsiteSaleDeliveryController(PaymentCommon, SaleCommon):
         # Create a new carrier to only one state in mexico
         self.env['delivery.carrier'].create({
                 'name': "One_state",
-                'product_id': self.env['product.product'].create({'name': "delivery product"}).id,
+                'product_id': self.env['product.product'].create({
+                    'name': "delivery product",
+                    'categ_id': self.env.ref('delivery.product_category_deliveries').id,
+                }).id,
                 'website_published': True,
                 'country_ids': [(6, 0, [MX.id])],
                 'state_ids': [(6, 0, [MX.state_ids.ids[0]])]

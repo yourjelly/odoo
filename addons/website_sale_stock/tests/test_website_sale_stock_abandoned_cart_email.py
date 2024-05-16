@@ -18,6 +18,7 @@ class TestWebsiteSaleStockAbandonedCartEmail(TestWebsiteSaleCartAbandonedCommon)
         storable_product_template = self.env['product.template'].create({
             'name': 'storable_product_template',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'allow_out_of_stock_order': False
         })
         storable_product_product = storable_product_template.product_variant_id

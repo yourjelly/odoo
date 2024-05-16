@@ -22,6 +22,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
     def setUpClass(cls):
         super().setUpClass()
         cls.WebsiteSaleController = WebsiteSale()
+        cls.cat = cls.env['product.category'].create({'name': 'cat'})
 
     def test_add_cart_deleted_product(self):
         # Create a published product then unlink it
@@ -29,6 +30,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
             'name': 'Test Product',
             'sale_ok': True,
             'website_published': True,
+            'categ_id': self.cat.id,
         })
         product_id = product.id
         product.unlink()
@@ -42,6 +44,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
         product = self.env['product.product'].create({
             'name': 'Test Product',
             'sale_ok': True,
+            'categ_id': self.cat.id,
         })
 
         with self.assertRaises(UserError):
@@ -61,6 +64,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
         product = self.env['product.product'].create({
             'name': 'Test Product',
             'sale_ok': True,
+            'categ_id': self.cat.id,
         })
         product.active = False
 
@@ -85,12 +89,14 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
             'detailed_type': 'consu',
             'list_price': 0,
             'website_published': True,
+            'categ_id': self.cat.id,
         })
         product_service = self.env['product.product'].create({
             'name': 'Can be zero price',
             'detailed_type': 'service',
             'list_price': 0,
             'website_published': True,
+            'categ_id': self.cat.id,
         })
 
         with patch.object(ProductTemplate, '_get_product_types_allow_zero_price', lambda pt: ['service']):
@@ -109,6 +115,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
             'website_published': True,
             'lst_price': 1000.0,
             'standard_price': 800.0,
+            'categ_id': self.cat.id,
         })
         website = self.website.with_user(self.public_user)
         with MockRequest(product.with_user(self.public_user).env, website=website):
@@ -129,6 +136,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
             'website_published': True,
             'lst_price': 1000.0,
             'standard_price': 800.0,
+            'categ_id': self.cat.id,
         })
         portal_user = self.user_portal
         website = self.website.with_user(portal_user)
@@ -158,12 +166,14 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
         accessory_product = self.env['product.product'].create({
             'name': 'Access Product',
             'is_published': False,
+            'categ_id': self.cat.id,
         })
 
         product = self.env['product.product'].create({
             'name': 'Test Product',
             'sale_ok': True,
             'website_published': True,
+            'categ_id': self.cat.id,
             'accessory_product_ids': [Command.link(accessory_product.id)]
         })
 
@@ -203,6 +213,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
             'name': 'Test Product',
             'list_price': 110,
             'taxes_id': [Command.set([tax10.id])],
+            'categ_id': self.cat.id,
         })
 
         # Add discount of 50% for pricelist
@@ -281,6 +292,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
             'list_price': 110,
             'taxes_id': [Command.set([tax10.id])],
             'is_published': True,
+            'categ_id': self.cat.id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': product_attribute.id,
@@ -312,6 +324,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
         # one SOLine
         product_no_variants = self.env['product.template'].create({
             'name': 'No variants product (TEST)',
+            'categ_id': self.cat.id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': self.no_variant_attribute.id,

@@ -28,6 +28,7 @@ class TestWebsiteEventBoothSale(HttpCaseWithUserPortal, TestWebsiteEventSaleComm
             'standard_price': 60.0,
             'taxes_id': [(6, 0, [cls.tax.id])],
             'detailed_type': 'event_booth',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.event_booth_category = cls.env['event.booth.category'].create({
             'name': 'Standard',

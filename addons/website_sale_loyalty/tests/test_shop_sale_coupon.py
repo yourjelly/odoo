@@ -55,6 +55,7 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
             'is_published': True,
             'sale_ok': True,
             'public_categ_ids': [(4, public_category.id)],
+            'categ_id': self.env.ref('product.product_category_services').id,
             'taxes_id': False,
         })
 
@@ -153,6 +154,7 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
             'is_published': True,
             'sale_ok': True,
             'public_categ_ids': [(4, public_category.id)],
+            'categ_id': self.env.ref('product.product_category_services').id,
             'taxes_id': False,
         })
         self.env['product.product'].create({
@@ -162,6 +164,7 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
             'is_published': True,
             'sale_ok': True,
             'public_categ_ids': [(4, public_category.id)],
+            'categ_id': self.env.ref('product.product_category_services').id,
             'taxes_id': False,
         })
         # Disable any other program
@@ -276,6 +279,7 @@ class TestWebsiteSaleCoupon(HttpCase):
                 'name': 'Product A',
                 'list_price': 100,
                 'sale_ok': True,
+                'categ_id': self.env.ref('product.product_category_services').id,
             }).id,
             'name': 'Product A',
             'product_uom_qty': 2.0,
@@ -315,7 +319,10 @@ class TestWebsiteSaleCoupon(HttpCase):
         """
         self.env['loyalty.program'].search([]).write({'active': False})
         chair = self.env['product.product'].create({
-            'name': 'Super Chair', 'list_price': 1000, 'website_published': True
+            'name': 'Super Chair',
+            'list_price': 1000,
+            'website_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.discount_code_program_multi_rewards = self.env['loyalty.program'].create({
             'name': 'Discount code program',
@@ -351,7 +358,10 @@ class TestWebsiteSaleCoupon(HttpCase):
         order.website_id = self.env['website'].browse(1)
         self.env['sale.order.line'].create({
             'product_id': self.env['product.product'].create({
-                'name': 'Product A', 'list_price': 100, 'sale_ok': True
+                'name': 'Product A',
+                'list_price': 100,
+                'sale_ok': True,
+                'categ_id': self.env.ref('product.product_category_services').id,
             }).id,
             'name': 'Product A',
             'order_id': order.id,
@@ -386,6 +396,7 @@ class TestWebsiteSaleCoupon(HttpCase):
             'list_price': 100,
             'sale_ok': True,
             'taxes_id': [],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         order = self.empty_order
@@ -474,6 +485,7 @@ class TestWebsiteSaleCoupon(HttpCase):
                 'list_price': 100,
                 'sale_ok': True,
                 'taxes_id': [Command.set(taxes_id)],
+                'categ_id': self.env.ref('product.product_category_services').id,
             } for name, taxes_id in products_data]
         )
 

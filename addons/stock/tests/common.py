@@ -56,13 +56,34 @@ class TestStockCommon(TestProductCommon):
         cls.customer_location = cls.ModelDataObj._xmlid_to_res_id('stock.stock_location_customers')
         cls.categ_unit = cls.ModelDataObj._xmlid_to_res_id('uom.product_uom_categ_unit')
         cls.categ_kgm = cls.ModelDataObj._xmlid_to_res_id('uom.product_uom_categ_kgm')
+        cls.category = cls.env['product.category'].create({'name': 'category'})
 
         # Product Created A, B, C, D
-        cls.productA = cls.ProductObj.create({'name': 'Product A', 'type': 'product'})
-        cls.productB = cls.ProductObj.create({'name': 'Product B', 'type': 'product'})
-        cls.productC = cls.ProductObj.create({'name': 'Product C', 'type': 'product'})
-        cls.productD = cls.ProductObj.create({'name': 'Product D', 'type': 'product'})
-        cls.productE = cls.ProductObj.create({'name': 'Product E', 'type': 'product'})
+        cls.productA = cls.ProductObj.create({
+            'name': 'Product A',
+            'type': 'product',
+            'categ_id': cls.category.id,
+        })
+        cls.productB = cls.ProductObj.create({
+            'name': 'Product B',
+            'type': 'product',
+            'categ_id': cls.category.id,
+        })
+        cls.productC = cls.ProductObj.create({
+            'name': 'Product C',
+            'type': 'product',
+            'categ_id': cls.category.id,
+        })
+        cls.productD = cls.ProductObj.create({
+            'name': 'Product D',
+            'type': 'product',
+            'categ_id': cls.category.id,
+        })
+        cls.productE = cls.ProductObj.create({
+            'name': 'Product E',
+            'type': 'product',
+            'categ_id': cls.category.id,
+        })
 
         # Configure unit of measure.
         cls.uom_kg = cls.env['uom.uom'].search([('category_id', '=', cls.categ_kgm), ('uom_type', '=', 'reference')], limit=1)
@@ -112,12 +133,46 @@ class TestStockCommon(TestProductCommon):
             'rounding': 1.0})
 
         # Product for different unit of measure.
-        cls.DozA = cls.ProductObj.create({'name': 'Dozon-A', 'type': 'product', 'uom_id': cls.uom_dozen.id, 'uom_po_id': cls.uom_dozen.id})
-        cls.SDozA = cls.ProductObj.create({'name': 'SuperDozon-A', 'type': 'product', 'uom_id': cls.uom_sdozen.id, 'uom_po_id': cls.uom_sdozen.id})
-        cls.SDozARound = cls.ProductObj.create({'name': 'SuperDozenRound-A', 'type': 'product', 'uom_id': cls.uom_sdozen_round.id, 'uom_po_id': cls.uom_sdozen_round.id})
-        cls.UnitA = cls.ProductObj.create({'name': 'Unit-A', 'type': 'product'})
-        cls.kgB = cls.ProductObj.create({'name': 'kg-B', 'type': 'product', 'uom_id': cls.uom_kg.id, 'uom_po_id': cls.uom_kg.id})
-        cls.gB = cls.ProductObj.create({'name': 'g-B', 'type': 'product', 'uom_id': cls.uom_gm.id, 'uom_po_id': cls.uom_gm.id})
+        cls.DozA = cls.ProductObj.create({
+            'name': 'Dozon-A',
+            'type': 'product',
+            'uom_id': cls.uom_dozen.id,
+            'uom_po_id': cls.uom_dozen.id,
+            'categ_id': cls.category.id,
+        })
+        cls.SDozA = cls.ProductObj.create({
+            'name': 'SuperDozon-A',
+            'type': 'product',
+            'uom_id': cls.uom_sdozen.id,
+            'uom_po_id': cls.uom_sdozen.id,
+            'categ_id': cls.category.id,
+        })
+        cls.SDozARound = cls.ProductObj.create({
+            'name': 'SuperDozenRound-A',
+            'type': 'product',
+            'uom_id': cls.uom_sdozen_round.id,
+            'uom_po_id': cls.uom_sdozen_round.id,
+            'categ_id': cls.category.id,
+        })
+        cls.UnitA = cls.ProductObj.create({
+            'name': 'Unit-A',
+            'type': 'product',
+            'categ_id': cls.category.id,
+        })
+        cls.kgB = cls.ProductObj.create({
+            'name': 'kg-B',
+            'type': 'product',
+            'uom_id': cls.uom_kg.id,
+            'uom_po_id': cls.uom_kg.id,
+            'categ_id': cls.category.id,
+        })
+        cls.gB = cls.ProductObj.create({
+            'name': 'g-B',
+            'type': 'product',
+            'uom_id': cls.uom_gm.id,
+            'uom_po_id': cls.uom_gm.id,
+            'categ_id': cls.category.id,
+        })
 
         cls.env.ref('base.group_user').write({'implied_ids': [
             (4, cls.env.ref('base.group_multi_company').id),
@@ -169,6 +224,7 @@ class TestStockCommon(TestProductCommon):
             'name': 'Stone',  # product_3
             'uom_id': cls.uom_dozen.id,
             'uom_po_id': cls.uom_dozen.id,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         # Existing data

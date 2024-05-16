@@ -103,8 +103,10 @@ class TestMrpCancelMO(TestMrpCommon):
             manufacturing_order.unlink()
 
     def test_cancel_mo_without_component(self):
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_form = Form(self.env['product.product'])
         product_form.name = "SuperProduct"
+        product_form.categ_id = product_category
         product = product_form.save()
 
         mo_form = Form(self.env['mrp.production'])

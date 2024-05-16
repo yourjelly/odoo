@@ -20,6 +20,7 @@ class TestEventSaleCommon(EventCase, TestSalesCommon):
             'list_price': 10,
             'standard_price': 30.0,
             'detailed_type': 'event',
+            'categ_id': cls.env.ref('event_sale.product_category_events').id,
         })
 
         cls.event_type_tickets = cls.env['event.type'].create({

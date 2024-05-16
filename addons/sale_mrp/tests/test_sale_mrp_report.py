@@ -18,6 +18,7 @@ class TestSaleMrpInvoices(AccountTestInvoicingCommon):
             'name': 'Product By Lot',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.warehouse = cls.env['stock.warehouse'].search([('company_id', '=', cls.env.company.id)], limit=1)
         cls.stock_location = cls.warehouse.lot_stock_id
@@ -30,6 +31,7 @@ class TestSaleMrpInvoices(AccountTestInvoicingCommon):
         cls.tracked_kit = cls.env['product.product'].create({
             'name': 'Simple Kit',
             'type': 'consu',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.env['mrp.bom'].create({
             'product_tmpl_id': cls.tracked_kit.product_tmpl_id.id,

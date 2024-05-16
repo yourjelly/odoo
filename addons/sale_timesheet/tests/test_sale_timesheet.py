@@ -893,6 +893,7 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
                 'service_tracking': 'task_in_project',
                 'project_id': False,  # will create a project,
                 'project_template_id': project_template_1.id,
+                'categ_id': self.env.ref('product.product_category_services').id,
             }, {
                 'name': "Service with template 2",
                 'standard_price': 10,
@@ -905,6 +906,7 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
                 'service_tracking': 'task_in_project',
                 'project_id': False,  # will create a project,
                 'project_template_id': project_template_2.id,
+                'categ_id': self.env.ref('product.product_category_services').id,
             },
         ])
 
@@ -939,11 +941,13 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
             {
                 'name': "Consumable to convert to service 1",
                 'standard_price': 10,
+                'categ_id': self.env.ref('product.product_category_services').id,
             },
         ])
         product_2 = self.env['product.product'].create({
                 'name': "Consumable to convert to service 2",
                 'standard_price': 15,
+                'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         # Initial uom should be unit
@@ -986,6 +990,7 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
             'service_tracking': 'task_in_project',
             'project_id': False,  # will create a project,
             'project_template_id': project_template.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         sale_order = self.env['sale.order'].create({
             'partner_id': self.partner_a.id,

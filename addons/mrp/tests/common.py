@@ -18,16 +18,19 @@ class TestMrpCommon(TestStockCommon):
             'name': 'Young Tom',
             'type': 'product',
             'tracking': tracking_final,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         product_to_use_1 = cls.env['product.product'].create({
             'name': 'Botox',
             'type': 'product',
             'tracking': tracking_base_1,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         product_to_use_2 = cls.env['product.product'].create({
             'name': 'Old Tom',
             'type': 'product',
             'tracking': tracking_base_2,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         bom_1 = cls.env['mrp.bom'].create({
             'product_id': product_to_build.id,
@@ -54,6 +57,7 @@ class TestMrpCommon(TestStockCommon):
     def setUpClass(cls):
         super(TestMrpCommon, cls).setUpClass()
 
+        cls.category = cls.env['product.category'].create({'name': 'category'})
         (
             cls.product_4,
             cls.product_5,
@@ -63,17 +67,22 @@ class TestMrpCommon(TestStockCommon):
             'name': 'Stick',  # product_4
             'uom_id': cls.uom_dozen.id,
             'uom_po_id': cls.uom_dozen.id,
+            'categ_id': cls.category.id,
         }, {
             'name': 'Stone Tools',  # product_5
+            'categ_id': cls.category.id,
         }, {
             'name': 'Door',  # product_6
+            'categ_id': cls.category.id,
         }, {
             'name': 'House',  # product_8
+            'categ_id': cls.category.id,
         }])
 
         # Update demo products
         (cls.product_2 | cls.product_3 | cls.product_4 | cls.product_5 | cls.product_6 | cls.product_7_3 | cls.product_8).write({
             'type': 'product',
+            'categ_id': cls.category.id,
         })
 
         # User Data: mrp user and mrp manager
@@ -234,9 +243,11 @@ class TestMrpCommon(TestStockCommon):
     @classmethod
     def make_prods(cls, n):
         return [
-            cls.env["product.product"].create(
-                {"name": f"p{k + 1}", "type": "product"}
-            )
+            cls.env["product.product"].create({
+                "name": f"p{k + 1}",
+                "type": "product",
+                "categ_id": cls.env.ref('product.product_category_services').id,
+            })
             for k in range(n)
         ]
 

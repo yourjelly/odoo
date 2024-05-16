@@ -43,6 +43,7 @@ class TestMrpMulticompany(common.TransactionCase):
         product_b = self.env['product.product'].create({
             'name': 'p1',
             'company_id': self.company_b.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         with self.assertRaises(UserError):
             self.env['mrp.bom'].create({
@@ -58,10 +59,12 @@ class TestMrpMulticompany(common.TransactionCase):
         product_a = self.env['product.product'].create({
             'name': 'p1',
             'company_id': self.company_a.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         product_b = self.env['product.product'].create({
             'name': 'p2',
             'company_id': self.company_b.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         with self.assertRaises(UserError):
             self.env['mrp.bom'].create({
@@ -78,6 +81,7 @@ class TestMrpMulticompany(common.TransactionCase):
         product_a = self.env['product.product'].create({
             'name': 'p1',
             'company_id': self.company_a.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         mo = self.env['mrp.production'].create({
             'product_id': product_a.id,
@@ -94,10 +98,12 @@ class TestMrpMulticompany(common.TransactionCase):
         product_a = self.env['product.product'].create({
             'name': 'p1',
             'company_id': self.company_a.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         component_a = self.env['product.product'].create({
             'name': 'p2',
             'company_id': self.company_a.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.env['mrp.bom'].create({
             'product_id': product_a.id,
@@ -119,9 +125,11 @@ class TestMrpMulticompany(common.TransactionCase):
         product = self.env['product.product'].create({
             'name': 'p1',
             'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         component = self.env['product.product'].create({
             'name': 'p2',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         lot_b = self.env['stock.lot'].create({
             'product_id': product.id,
@@ -151,10 +159,12 @@ class TestMrpMulticompany(common.TransactionCase):
 
         product = self.env['product.product'].create({
             'name': 'p1',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         component = self.env['product.product'].create({
             'name': 'p2',
             'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         lot_b = self.env['stock.lot'].create({
             'product_id': component.id,
@@ -190,6 +200,7 @@ class TestMrpMulticompany(common.TransactionCase):
         shared_product = self.env['product.product'].create({
             'name': 'Shared Product',
             'company_id': False,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         with self.assertRaises(UserError):
             shared_product.with_user(self.user_b).property_stock_production = self.stock_location_a

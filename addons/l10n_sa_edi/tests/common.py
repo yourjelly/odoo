@@ -95,18 +95,21 @@ class TestSaEdiCommon(AccountEdiTestCommon):
             'uom_id': cls.env.ref('uom.product_uom_unit').id,
             'standard_price': 320.0,
             'default_code': 'P0001',
+            'categ_id': cls.env.ref('product.product_category_expenses').id,
         })
         cls.product_b = cls.env['product.product'].create({
             'name': 'Product B',
             'uom_id': cls.env.ref('uom.product_uom_unit').id,
             'standard_price': 15.8,
             'default_code': 'P0002',
+            'categ_id': cls.env.ref('product.product_category_expenses').id,
         })
 
         cls.product_burger = cls.env['product.product'].create({
             'name': 'Burger',
             'uom_id': cls.env.ref('uom.product_uom_unit').id,
             'standard_price': 265.00,
+            'categ_id': cls.env.ref('product.product_category_expenses').id,
         })
 
         cls.remove_ubl_extensions_xpath = '''<xpath expr="//*[local-name()='UBLExtensions']" position="replace"/>'''

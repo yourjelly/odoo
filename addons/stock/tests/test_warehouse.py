@@ -160,7 +160,11 @@ class TestWarehouse(TestStockCommon):
 
     def test_inventory_adjustment_and_negative_quants_1(self):
         """Make sure negative quants from returns get wiped out with an inventory adjustment"""
-        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'product'})
+        productA = self.env['product.product'].create({
+            'name': 'Product A',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         stock_location = self.env.ref('stock.stock_location_stock')
         customer_location = self.env.ref('stock.stock_location_customers')
 
@@ -204,7 +208,11 @@ class TestWarehouse(TestStockCommon):
 
     def test_inventory_adjustment_and_negative_quants_2(self):
         """Make sure negative quants get wiped out with an inventory adjustment"""
-        productA = self.env['product.product'].create({'name': 'Product A', 'type': 'product'})
+        productA = self.env['product.product'].create({
+            'name': 'Product A',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         stock_location = self.env.ref('stock.stock_location_stock')
         customer_location = self.env.ref('stock.stock_location_customers')
         location_loss = productA.property_stock_inventory
@@ -291,6 +299,7 @@ class TestWarehouse(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'Fakir',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(4, route_id) for route_id in [route_stock_to_dist.id, route_dist_to_shop.id, self.env.ref('stock.route_warehouse0_mto').id]],
         })
 
@@ -368,6 +377,7 @@ class TestWarehouse(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'Fakir',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(4, route_id) for route_id in [route_shop_namur.id, route_shop_wavre.id, self.env.ref('stock.route_warehouse0_mto').id]],
         })
 

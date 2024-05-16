@@ -11,6 +11,7 @@ class TestStockPickingTour(HttpCase):
             'location_id': self.env.ref('stock.stock_location_suppliers').id,
             'location_dest_id': self.env.ref('stock.stock_location_stock').id,
         })
+        self.category = self.env['product.category'].create({'name': 'Category'})
 
         return super().setUp()
 
@@ -24,6 +25,7 @@ class TestStockPickingTour(HttpCase):
             'name': 'Product Lot',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': self.category.id,
         })
         url = self._get_picking_url(self.receipt.id)
 
@@ -44,6 +46,7 @@ class TestStockPickingTour(HttpCase):
             'name': 'Product Serial',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.category.id
         })
         url = self._get_picking_url(self.receipt.id)
 
@@ -65,6 +68,7 @@ class TestStockPickingTour(HttpCase):
             'name': 'Product Lot 1',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': self.category.id
         })
         url = self._get_picking_url(self.receipt.id)
         self.start_tour(url, 'test_generate_serial_2', login='admin', timeout=60)
@@ -93,8 +97,8 @@ class TestStockPickingTour(HttpCase):
         (without clicking on anything else)
         """
         self.env['product.product'].create([
-            {'name': 'Product 1', 'type': 'product'},
-            {'name': 'Product 2', 'type': 'product'},
+            {'name': 'Product 1', 'type': 'product', 'categ_id': self.category.id},
+            {'name': 'Product 2', 'type': 'product', 'categ_id': self.category.id},
         ])
 
         menu = self.env.ref('stock.menu_action_inventory_tree')
@@ -110,11 +114,13 @@ class TestStockPickingTour(HttpCase):
                 'name': 'Product one',
                 'type': 'product',
                 'tracking': 'serial',
+                'categ_id': self.category.id
             },
             {
                 'name': 'Product two',
                 'type': 'product',
                 'tracking': 'serial',
+                'categ_id': self.category.id
             }
         ])
 
@@ -143,6 +149,7 @@ class TestStockPickingTour(HttpCase):
             'name': 'Product one',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.category.id
         })
 
         self.receipt.write({

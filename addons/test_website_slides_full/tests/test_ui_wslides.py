@@ -61,6 +61,7 @@ class TestUi(AccountTestInvoicingCommon, TestUICommon):
             'list_price': 100.0,
             'type': 'service',
             'is_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         furniture_survey = self.env['survey.survey'].create({

@@ -32,9 +32,11 @@ class TestSaleOrder(SaleCommon):
         free_product, dummy_product = self.env['product.product'].create([{
             'name': 'Free product',
             'list_price': 0.0,
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         }, {
             'name': 'Dummy product',
             'list_price': 0.0,
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         }])
         # Test pre-computes of lines with order
         order = self.env['sale.order'].create({
@@ -482,6 +484,7 @@ class TestSaleOrder(SaleCommon):
             'expense_policy': 'sales_price',
             'list_price': 14.0,
             'standard_price': 10.0,
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         sale_order = self.env['sale.order'].with_user(self.sale_user).create({
             'partner_id': self.partner.id,
@@ -621,18 +624,22 @@ class TestSaleOrder(SaleCommon):
         product_all_taxes = self.env['product.product'].create({
             'name': 'Product all taxes',
             'taxes_id': [Command.set((tax_a + tax_b + tax_x + tax_xx).ids)],
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         product_no_xx_tax = self.env['product.product'].create({
             'name': 'Product no tax from XX',
             'taxes_id': [Command.set((tax_a + tax_b + tax_x).ids)],
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         product_no_branch_tax = self.env['product.product'].create({
             'name': 'Product no tax from branch',
             'taxes_id': [Command.set((tax_a + tax_b).ids)],
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         product_no_tax = self.env['product.product'].create({
             'name': 'Product no tax',
             'taxes_id': [],
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         # create a SO from Branch XX
         so_form = Form(self.env['sale.order'].with_company(branch_xx))
@@ -735,9 +742,14 @@ class TestSalesTeam(SaleCommon):
         analytic_plan = self.env['account.analytic.plan'].create({'name': 'Plan Test'})
         analytic_account_super = self.env['account.analytic.account'].create({'name': 'Super Account', 'plan_id': analytic_plan.id})
         analytic_account_great = self.env['account.analytic.account'].create({'name': 'Great Account', 'plan_id': analytic_plan.id})
-        super_product = self.env['product.product'].create({'name': 'Super Product'})
-        great_product = self.env['product.product'].create({'name': 'Great Product'})
-        product_no_account = self.env['product.product'].create({'name': 'Product No Account'})
+        super_product = self.env['product.product'].create({
+            'name': 'Super Product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
+        great_product = self.env['product.product'].create({
+            'name': 'Great Product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         self.env['account.analytic.distribution.model'].create([
             {
                 'analytic_distribution': {analytic_account_super.id: 100},
@@ -815,7 +827,10 @@ class TestSalesTeam(SaleCommon):
             'partner_id': self.partner.id,
             'company_id': company_a.id
         })
-        product = self.env['product.product'].create({'name': 'Product'})
+        product = self.env['product.product'].create({
+            'name': 'Product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
 
         # In sudo to simulate an user that have access to both companies.
         sol = self.env['sale.order.line'].sudo().create({
@@ -860,7 +875,10 @@ class TestSalesTeam(SaleCommon):
         })
 
         sale_order = self.env['sale.order'].create({'partner_id': self.partner.id, 'company_id': root_company.child_ids[0].id})
-        product = self.env['product.product'].create({'name': 'Product'})
+        product = self.env['product.product'].create({
+            'name': 'Product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
 
         # In sudo to simulate an user that have access to both companies.
         sol_b1 = self.env['sale.order.line'].sudo().create({

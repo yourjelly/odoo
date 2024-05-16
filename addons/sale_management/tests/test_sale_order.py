@@ -28,13 +28,16 @@ class TestSaleOrder(SaleManagementCommon):
         cls.merged_option_discount = 100.0 - (100.0 - cls.pl_option_discount) * (100.0 - cls.tpl_option_discount) / 100.0
 
         # create some products
+        cls.category = cls.env['product.category'].create({'name': 'Category'})
         cls.product_1, cls.optional_product = cls.env['product.product'].create([
             {
                 'name': 'Product 1',
                 'lst_price': cls.pub_product_price,
+                'categ_id': cls.category.id,
             }, {
                 'name': 'Optional product',
                 'lst_price': cls.pub_option_price,
+                'categ_id': cls.category.id,
             }
         ])
 

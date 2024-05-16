@@ -19,6 +19,7 @@ class TestProcurementException(common.TransactionCase):
         })
 
         # I create a product with no supplier define for it.
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_form = Form(self.env['product.product'])
         product_form.name = 'product with no seller'
         # <field name="list_price" position="attributes">
@@ -33,7 +34,7 @@ class TestProcurementException(common.TransactionCase):
         #     ...
         #         product.write({'list_price': value})
         product_form.lst_price = 20.00
-        product_form.categ_id = self.env.ref('product.product_category_services')
+        product_form.categ_id = product_category
         product_with_no_seller = product_form.save()
 
         product_with_no_seller.standard_price = 70.0

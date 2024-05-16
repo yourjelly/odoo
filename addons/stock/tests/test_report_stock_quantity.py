@@ -185,6 +185,7 @@ class TestReportStockQuantity(tests.TransactionCase):
         product = self.env['product.product'].create({
             'name': 'SuperProduct',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         today = datetime.now()

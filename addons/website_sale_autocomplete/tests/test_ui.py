@@ -16,6 +16,7 @@ class TestUI(HttpCase):
         cls.product = cls.env['product.product'].create({
             'name': 'A test product',
             'website_published': True,
+            'categ_id': cls.env.ref('product.product_category_office').id,
             'list_price': 1
         })
 

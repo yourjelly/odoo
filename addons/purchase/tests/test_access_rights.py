@@ -46,6 +46,7 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
             'standard_price': 200.0,
             'list_price': 180.0,
             'type': 'service',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
     def test_create_purchase_order(self):

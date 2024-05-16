@@ -234,6 +234,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'uom_id': self.env.ref('uom.product_uom_unit').id,
             'lst_price': 110.0,
             'taxes_id': [(6, 0, tax_price_include.ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
@@ -406,6 +407,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'uom_id': self.env.ref('uom.product_uom_unit').id,
             'lst_price': 110.0,
             'taxes_id': [(6, 0, tax_price_include_1.ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
@@ -920,6 +922,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'lst_price': 100.0,
             'property_account_income_id': self.company_data['default_account_revenue'].id,
             'taxes_id': [(6, 0, tax.ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
@@ -3085,6 +3088,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'lst_price': 1000.0,
             'standard_price': 800.0,
             'company_id': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         partner = self.env['res.partner'].create({
@@ -4192,18 +4196,22 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         product_all_taxes = self.env['product.product'].create({
             'name': 'Product all taxes',
             'taxes_id': [Command.set((tax_a + tax_b + tax_x + tax_xx).ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_no_xx_tax = self.env['product.product'].create({
             'name': 'Product no tax from XX',
             'taxes_id': [Command.set((tax_a + tax_b + tax_x).ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_no_branch_tax = self.env['product.product'].create({
             'name': 'Product no tax from branch',
             'taxes_id': [Command.set((tax_a + tax_b).ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_no_tax = self.env['product.product'].create({
             'name': 'Product no tax',
             'taxes_id': [],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         # create an invoice from Branch XX with the different products:
         # - Product all taxes           => tax from Branch XX should be set

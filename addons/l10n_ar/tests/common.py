@@ -192,6 +192,7 @@ class TestAr(AccountTestInvoicingCommon):
             'standard_price': 800.0,
             'type': "consu",
             'default_code': 'E-COM07',
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
         cls.service_iva_27 = cls.env['product.product'].create({
             # demo 'product_product_telefonia'
@@ -203,6 +204,7 @@ class TestAr(AccountTestInvoicingCommon):
             'type': 'service',
             'default_code': 'TELEFONIA',
             'taxes_id': [(6, 0, cls.tax_27.ids)],
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
         cls.product_iva_cero = cls.env['product.product'].create({
             # demo 'product_product_cero'
@@ -214,6 +216,7 @@ class TestAr(AccountTestInvoicingCommon):
             'type': 'consu',
             'default_code': 'CERO',
             'taxes_id': [(6, 0, cls.tax_0.ids)],
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
         cls.product_iva_105 = cls.env['product.product'].create({
             # demo 'product.product_product_27'
@@ -224,6 +227,7 @@ class TestAr(AccountTestInvoicingCommon):
             'type': 'consu',
             'default_code': '10,5',
             'taxes_id': [(6, 0, cls.tax_10_5.ids)],
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
         cls.service_iva_21 = cls.env['product.product'].create({
             # demo data product.product_product_2
@@ -235,6 +239,7 @@ class TestAr(AccountTestInvoicingCommon):
             'type': 'service',
             'default_code': 'VAT 21',
             'taxes_id': [(6, 0, cls.tax_21.ids)],
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
         cls.product_no_gravado = cls.env['product.product'].create({
             # demo data product_product_no_gravado
@@ -246,6 +251,7 @@ class TestAr(AccountTestInvoicingCommon):
             'type': 'consu',
             'default_code': 'NOGRAVADO',
             'taxes_id': [(6, 0, cls.tax_no_gravado.ids)],
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
         cls.product_iva_105_perc = cls.env['product.product'].create({
             # product.product_product_25
@@ -257,6 +263,7 @@ class TestAr(AccountTestInvoicingCommon):
             'default_code': '10,5',
             # agregamos percecipn aplicada y sufrida tambien
             'taxes_id': [(6, 0, [cls.tax_10_5.id, cls.tax_perc_iibb.id])],
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
         cls.product_iva_exento = cls.env['product.product'].create({
             # demo product_product_exento
@@ -268,6 +275,7 @@ class TestAr(AccountTestInvoicingCommon):
             'type': 'consu',
             'default_code': 'EXENTO',
             'taxes_id': [(6, 0, cls.tax_iva_exento.ids)],
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
         cls.service_wo_tax = cls.env['product.product'].create({
             # demo product_product_quote_despacho
@@ -276,6 +284,7 @@ class TestAr(AccountTestInvoicingCommon):
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
             'default_code': 'AFIP_DESPACHO',
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
         cls.service_iva_no_gravado = cls.env['product.product'].create({
             # demo product_product_arancel
@@ -285,6 +294,7 @@ class TestAr(AccountTestInvoicingCommon):
             'uom_po_id': uom_unit.id,
             'default_code': 'AFIP_ARANCEL',
             "supplier_taxes_id": [(6, 0, (cls.tax_no_gravado_purchase).ids)],
+            'categ_id': cls.env.ref('product.product_category_office'),
         })
 
         # ==== Document Types ====

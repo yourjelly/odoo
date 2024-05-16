@@ -15,9 +15,11 @@ class TestProcRule(TransactionCase):
         super().setUpClass()
 
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
+        cls.category = cls.env['product.category'].create({'name': 'category'})
         cls.product = cls.env['product.product'].create({
             'name': 'Desk Combination',
             'type': 'consu',
+            'categ_id': cls.category.id,
         })
         cls.partner = cls.env['res.partner'].create({'name': 'Partner'})
 
@@ -213,11 +215,13 @@ class TestProcRule(TransactionCase):
         self.productA = self.env['product.product'].create({
             'name': 'Desk Combination',
             'type': 'product',
+            'categ_id': self.category.id,
         })
 
         self.productB = self.env['product.product'].create({
             'name': 'Desk Decoration',
             'type': 'product',
+            'categ_id': self.category.id,
         })
 
         warehouse = self.env['stock.warehouse'].search([], limit=1)
@@ -297,6 +301,7 @@ class TestProcRule(TransactionCase):
         self.productA = self.env['product.product'].create({
             'name': 'Desk Combination',
             'type': 'product',
+            'categ_id': self.category.id,
         })
         self.env['stock.quant'].with_context(inventory_mode=True).create({
             'product_id': self.productA.id,
@@ -344,6 +349,7 @@ class TestProcRule(TransactionCase):
         product = self.env['product.product'].create({
             'name': 'Super Product',
             'type': 'product',
+            'categ_id': self.category.id,
             'route_ids': [route_2.id, route_3.id]
         })
         moves = self.env['stock.move'].create([{
@@ -390,6 +396,7 @@ class TestProcRule(TransactionCase):
         product = self.env['product.product'].create({
             'name': 'Rep Product',
             'type': 'product',
+            'categ_id': self.category.id,
         })
         move = self.env['stock.move'].create({
             'name': 'Move WH2',
@@ -484,7 +491,11 @@ class TestProcRule(TransactionCase):
             'usage': 'internal',
             'name': 'shelf1'
         })
-        product = self.env['product.product'].create({'name': 'Test Product', 'type': 'product'})
+        product = self.env['product.product'].create({
+            'name': 'Test Product',
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
         stock_move = self.env['stock.move'].create({
             'name': 'Test Move',
             'product_id': product.id,
@@ -526,7 +537,11 @@ class TestProcRuleLoad(TransactionCase):
             'name': 'shelf2'
         })
 
-        products = self.env['product.product'].create([{'name': i, 'type': 'product'} for i in range(500)])
+        products = self.env['product.product'].create([{
+            'name': i,
+            'type': 'product',
+            'categ_id': self.category.id,
+        } for i in range(500)])
         self.env['stock.warehouse.orderpoint'].create([{
             'product_id': products[i // 2].id,
             'location_id': (i % 2 == 0) and shelf1.id or shelf2.id,

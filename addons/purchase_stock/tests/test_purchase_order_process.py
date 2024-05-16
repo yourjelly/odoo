@@ -38,6 +38,7 @@ class TestPurchaseOrderProcess(PurchaseTestCommon):
         product = self.env['product.product'].create({
             'name': 'Product with packaging',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         packaging = self.env['product.packaging'].create({

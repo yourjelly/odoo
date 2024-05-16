@@ -18,6 +18,7 @@ class TestStockReportTour(HttpCase):
         self.env['product.template'].create({
             'name': 'Test Storable Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         url = self._get_report_url()
 

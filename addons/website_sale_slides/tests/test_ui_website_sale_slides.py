@@ -16,6 +16,7 @@ class TestUiWebsiteSaleSlides(test_ui_wslides.TestUICommon):
             'type': 'service',
             'invoice_policy': 'order',
             'is_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.channel.write({

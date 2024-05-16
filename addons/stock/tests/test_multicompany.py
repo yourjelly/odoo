@@ -128,6 +128,7 @@ class TestMultiCompany(TransactionCase):
             'type': 'product',
             'company_id': self.company_a.id,
             'name': 'Product limited to company A',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         inventory_quant = self.env['stock.quant'].with_user(self.user_a).with_context(inventory_mode=True).create({
             'location_id': self.stock_location_a.id,
@@ -150,7 +151,8 @@ class TestMultiCompany(TransactionCase):
         product = self.env['product.product'].create({
             'name': 'product limited to company b',
             'company_id': self.company_b.id,
-            'type': 'product'
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         with self.assertRaises(UserError):
@@ -184,6 +186,7 @@ class TestMultiCompany(TransactionCase):
             'tracking': 'serial',
             'name': 'product',
             'company_id': self.company_a.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         picking = self.env['stock.picking'].with_user(self.user_a).create({
             'picking_type_id': self.warehouse_a.in_type_id.id,
@@ -224,6 +227,7 @@ class TestMultiCompany(TransactionCase):
         product = self.env['product.product'].create({
             'type': 'product',
             'name': 'shared product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         orderpoint = Form(self.env['stock.warehouse.orderpoint'].with_user(self.user_a))
         orderpoint.company_id = self.company_b
@@ -245,6 +249,7 @@ class TestMultiCompany(TransactionCase):
         product = self.env['product.product'].create({
             'type': 'product',
             'name': 'shared product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         orderpoint = Form(self.env['stock.warehouse.orderpoint'].with_user(self.user_a))
         orderpoint.company_id = self.company_a
@@ -264,6 +269,7 @@ class TestMultiCompany(TransactionCase):
         product = self.env['product.product'].create({
             'type': 'product',
             'name': 'shared product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         orderpoint = self.env['stock.warehouse.orderpoint'].with_user(self.user_a).create({
             'product_id': product.id,
@@ -283,10 +289,12 @@ class TestMultiCompany(TransactionCase):
     def test_product_1(self):
         """ As an user of Company A, checks we can or cannot create new product
         depending of its `company_id`."""
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         # Creates a new product with no company_id and set a responsible.
         # The product must be created as there is no company on the product.
         product_form = Form(self.env['product.template'].with_user(self.user_a))
         product_form.name = 'Paramite Pie'
+        product_form.categ_id = product_category
         product_form.responsible_id = self.user_b
         product = product_form.save()
 
@@ -299,6 +307,7 @@ class TestMultiCompany(TransactionCase):
         self.user_b.company_ids = [(6, 0, [self.company_b.id])]
         product_form = Form(self.env['product.template'].with_user(self.user_a))
         product_form.name = 'Meech Munchy'
+        product_form.categ_id = product_category
         product_form.company_id = self.company_a
         product_form.responsible_id = self.user_b
 
@@ -312,6 +321,7 @@ class TestMultiCompany(TransactionCase):
         self.user_b.company_ids = [(6, 0, [self.company_a.id, self.company_b.id])]
         product_form = Form(self.env['product.template'].with_user(self.user_a))
         product_form.name = 'Scrab Cake'
+        product_form.categ_id = product_category
         product_form.company_id = self.company_a
         product_form.responsible_id = self.user_b
         product = product_form.save()
@@ -337,7 +347,8 @@ class TestMultiCompany(TransactionCase):
         """
         product = self.env['product.product'].create({
             'name': 'p1',
-            'type': 'product'
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         picking_type_b = self.env['stock.picking.type'].search([
             ('company_id', '=', self.company_b.id),
@@ -360,7 +371,8 @@ class TestMultiCompany(TransactionCase):
         """
         product = self.env['product.product'].create({
             'name': 'p1',
-            'type': 'product'
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         picking_type_b = self.env['stock.picking.type'].search([
             ('company_id', '=', self.company_b.id),
@@ -385,6 +397,7 @@ class TestMultiCompany(TransactionCase):
             'name': 'p1',
             'type': 'product',
             'company_id': self.company_b.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         picking_type_b = self.env['stock.picking.type'].search([
             ('company_id', '=', self.company_b.id),
@@ -416,6 +429,7 @@ class TestMultiCompany(TransactionCase):
             'type': 'product',
             'tracking': 'lot',
             'name': 'product lot',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         picking_type_to_transit = self.env['stock.picking.type'].create({
@@ -526,6 +540,7 @@ class TestMultiCompany(TransactionCase):
             'type': 'product',
             'tracking': 'lot',
             'name': 'product lot',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(4, resupply_route.id), (4, self.env.ref('stock.route_warehouse0_mto').id)],
         })
 

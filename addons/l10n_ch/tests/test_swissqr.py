@@ -45,6 +45,7 @@ class TestSwissQR(AccountTestInvoicingCommon):
         )
         self.product = self.env['product.product'].create({
             'name': 'Customizable Desk',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.invoice1 = self.create_invoice('base.CHF')
         sale_journal = self.env['account.journal'].search([("type", "=", "sale")])

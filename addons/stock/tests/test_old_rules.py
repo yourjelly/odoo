@@ -227,6 +227,7 @@ class TestOldRules(TestStockCommon):
         product_a = self.env['product.product'].create({
             'name': 'ProductA',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.env['stock.quant']._update_available_quantity(product_a, warehouse.wh_output_stock_loc_id, 4.0)
@@ -370,7 +371,11 @@ class TestOldRules(TestStockCommon):
           * Put products in a package then validate the receipt.
           * The automatically generated internal transfer should have package set by default.
         """
-        prod = self.env['product.product'].create({'name': 'bad dragon', 'type': 'consu'})
+        prod = self.env['product.product'].create({
+            'name': 'bad dragon',
+            'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         ship_move = self.env['stock.move'].create({
             'name': 'The ship move',
             'product_id': prod.id,
@@ -407,6 +412,7 @@ class TestOldRules(TestStockCommon):
         product1 = self.env['product.product'].create({
             'name': 'test_procurement_group_merge',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         pick_ship_route = self.warehouse_2_steps.delivery_route_id
         ship_rule = pick_ship_route.rule_ids.filtered(lambda rule: '2S: Output → Customers' in rule.name)
@@ -472,6 +478,7 @@ class TestOldRules(TestStockCommon):
         product_a = self.env['product.product'].create({
             'name': 'ProductA',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['stock.quant']._update_available_quantity(product_a, self.warehouse_2_steps.lot_stock_id, 10.0)
         warehouse = self.warehouse_2_steps
@@ -552,6 +559,7 @@ class TestOldRules(TestStockCommon):
         self.product = self.env['product.product'].create({
             'name': 'Test product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         ship_move = self.env['stock.move'].create({

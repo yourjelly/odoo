@@ -15,7 +15,9 @@ class TestPaymentTransaction(PaymentCommon):
 
         cls.provider = cls._prepare_provider(code='custom')
         cls.product = cls.env['product.product'].create({
-            'name': "test product", 'list_price': cls.amount
+            'name': "test product",
+            'list_price': cls.amount,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
     def test_communication_based_on_transaction_reference(self):

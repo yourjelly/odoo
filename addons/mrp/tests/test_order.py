@@ -947,6 +947,7 @@ class TestMrpOrder(TestMrpCommon):
         add_product = self.env['product.product'].create({
             'name': 'additional',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         mo.action_assign()
 
@@ -973,6 +974,7 @@ class TestMrpOrder(TestMrpCommon):
         serial = self.env['product.product'].create({
             'name': 'S1',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.stock_location = self.env.ref('stock.stock_location_stock')
         mo, bom, p_final, p1, p2 = self.generate_mo()
@@ -1004,7 +1006,8 @@ class TestMrpOrder(TestMrpCommon):
         self.byproduct1 = self.env['product.product'].create({
             'name': 'Byproduct 1',
             'type': 'product',
-            'tracking': 'serial'
+            'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.serial_1 = self.env['stock.lot'].create({
             'product_id': self.byproduct1.id,
@@ -1019,6 +1022,7 @@ class TestMrpOrder(TestMrpCommon):
             'name': 'Byproduct 2',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.lot_1 = self.env['stock.lot'].create({
             'product_id': self.byproduct2.id,
@@ -1033,6 +1037,7 @@ class TestMrpOrder(TestMrpCommon):
             'name': 'Byproduct 3',
             'type': 'product',
             'tracking': 'none',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         with Form(self.bom_1) as bom:
@@ -1265,9 +1270,19 @@ class TestMrpOrder(TestMrpCommon):
     def test_product_produce_duplicate_3(self):
         """ produce a finished product with by-product tracked by serial number 2
         times with the same SN. Check that an error is raised the second time"""
-        finished_product = self.env['product.product'].create({'name': 'finished product'})
-        byproduct = self.env['product.product'].create({'name': 'byproduct', 'tracking': 'serial'})
-        component = self.env['product.product'].create({'name': 'component'})
+        finished_product = self.env['product.product'].create({
+            'name': 'finished product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
+        byproduct = self.env['product.product'].create({
+            'name': 'byproduct',
+            'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
+        component = self.env['product.product'].create({
+            'name': 'component',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         bom = self.env['mrp.bom'].create({
             'product_id': finished_product.id,
             'product_tmpl_id': finished_product.product_tmpl_id.id,
@@ -1371,6 +1386,7 @@ class TestMrpOrder(TestMrpCommon):
                 "name": "Subassembly",
                 "type": "product",
                 "tracking": "serial",
+                "categ_id": self.env.ref('product.product_category_services').id,
             }
         )
 
@@ -1395,6 +1411,7 @@ class TestMrpOrder(TestMrpCommon):
                 "name": "Finished Good",
                 "type": "product",
                 "tracking": "serial",
+                "categ_id": self.env.ref('product.product_category_services').id,
             }
         )
         finished_good_product_bom = self.env["mrp.bom"].create(
@@ -1453,6 +1470,7 @@ class TestMrpOrder(TestMrpCommon):
                 "name": "Product",
                 "type": "product",
                 "tracking": "serial",
+                "categ_id": self.env.ref('product.product_category_services').id,
             }
         )
 
@@ -1536,6 +1554,7 @@ class TestMrpOrder(TestMrpCommon):
         product = self.env['product.product'].create({
             'name': 'Product no BoM',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = product
@@ -1570,6 +1589,7 @@ class TestMrpOrder(TestMrpCommon):
         product = self.env['product.product'].create({
             'name': 'Product no BoM',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = product
@@ -1599,12 +1619,14 @@ class TestMrpOrder(TestMrpCommon):
             'uom_id': unit.id,
             'uom_po_id': unit.id,
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         ply_veneer = self.env['product.product'].create({
             'name': 'Ply Veneer',
             'type': 'product',
             'uom_id': unit.id,
             'uom_po_id': unit.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         bom = self.env['mrp.bom'].create({
             'product_tmpl_id': plastic_laminate.product_tmpl_id.id,
@@ -1654,12 +1676,14 @@ class TestMrpOrder(TestMrpCommon):
         finished_product = self.env['product.product'].create({
             'name': 'Geyser',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # Create service type product
         product_raw = self.env['product.product'].create({
             'name': 'raw Geyser',
             'type': 'service',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # Create bom for finish product
@@ -1831,10 +1855,12 @@ class TestMrpOrder(TestMrpCommon):
         p_final = self.env['product.product'].create({
             'name': 'final',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         component = self.env['product.product'].create({
             'name': 'component',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         bom = self.env['mrp.bom'].create({
             'product_id': p_final.id,
@@ -1878,18 +1904,21 @@ class TestMrpOrder(TestMrpCommon):
         product = self.env['product.product'].create({
             'name': 'SuperProduct',
             'uom_id': uom_units.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         consumable_component = self.env['product.product'].create({
             'name': 'Consumable Component',
             'type': 'consu',
             'uom_id': uom_cL.id,
             'uom_po_id': uom_cL.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         storable_component = self.env['product.product'].create({
             'name': 'Storable Component',
             'type': 'product',
             'uom_id': uom_cL.id,
             'uom_po_id': uom_cL.id,
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         self.env['stock.quant']._update_available_quantity(storable_component, self.env.ref('stock.stock_location_stock'), 100)
 
@@ -2300,6 +2329,7 @@ class TestMrpOrder(TestMrpCommon):
                 [0, 0, {"attribute_id": attribute.id, "value_ids": [[6, 0, attribute_values.ids]]}]
             ],
             "name": "Product with variants",
+            "categ_id": self.env.ref('product.product_category_services').id,
         })
 
         variant_1 = product.product_variant_ids[0]
@@ -2307,6 +2337,7 @@ class TestMrpOrder(TestMrpCommon):
 
         component = self.env['product.template'].create({
             "name": "Component",
+            "categ_id": self.env.ref('product.product_category_services').id,
         })
 
         self.env['mrp.bom'].create({
@@ -2383,9 +2414,11 @@ class TestMrpOrder(TestMrpCommon):
 
         product1 = self.env['product.product'].create({
             'name': 'Oatmeal Cookie',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
         product2 = self.env['product.product'].create({
             'name': 'Chocolate Chip Cookie',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         # ===== product_id onchange checks ===== #
@@ -2447,6 +2480,7 @@ class TestMrpOrder(TestMrpCommon):
         # ===== bom_id onchange checks ===== #
         component = self.env['product.product'].create({
             "name": "Sugar",
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         bom1 = self.env['mrp.bom'].create({
@@ -2683,10 +2717,25 @@ class TestMrpOrder(TestMrpCommon):
         work_center_2 = self.env['mrp.workcenter'].create({"name": "WorkCenter 2", "time_start": 12})
         work_center_3 = self.env['mrp.workcenter'].create({"name": "WorkCenter 3", "time_start": 13})
 
-        product = self.env['product.template'].create({"name": "Finished Product"})
-        component_1 = self.env['product.template'].create({"name": "Component 1", "type": "product"})
-        component_2 = self.env['product.template'].create({"name": "Component 2", "type": "product"})
-        component_3 = self.env['product.template'].create({"name": "Component 3", "type": "product"})
+        product = self.env['product.template'].create({
+            "name": "Finished Product",
+            "categ_id": self.env.ref('product.product_category_services').id,
+        })
+        component_1 = self.env['product.template'].create({
+            "name": "Component 1",
+            "type": "product",
+            "categ_id": self.env.ref('product.product_category_services').id,
+        })
+        component_2 = self.env['product.template'].create({
+            "name": "Component 2",
+            "type": "product",
+            "categ_id": self.env.ref('product.product_category_services').id,
+        })
+        component_3 = self.env['product.template'].create({
+            "name": "Component 3",
+            "type": "product",
+            "categ_id": self.env.ref('product.product_category_services').id,
+        })
 
         self.env['stock.quant'].create({
             "product_id": component_1.product_variant_id.id,
@@ -2846,11 +2895,13 @@ class TestMrpOrder(TestMrpCommon):
         product_to_build = self.env['product.product'].create({
             'name': 'final product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         product_to_use = self.env['product.product'].create({
             'name': 'component',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         bom = self.env['mrp.bom'].create({
@@ -2995,10 +3046,12 @@ class TestMrpOrder(TestMrpCommon):
             'name': n,
             'type': 'product',
             'route_ids': [(6, 0, mto_route.ids + manufacture_route.ids)],
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         } for n in ['grandparent', 'parent', 'child']])
         component = self.env['product.product'].create({
             'name': 'component',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         })
 
         self.env['mrp.bom'].create([{
@@ -3436,7 +3489,10 @@ class TestMrpOrder(TestMrpCommon):
             {'name': 'Third Warehouse', 'code': 'WH03'},
         ])
 
-        finished_product = self.env['product.product'].create({'name': 'finished product'})
+        finished_product = self.env['product.product'].create({
+            'name': 'finished product',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         bom_wh01, bom_wh02 = self.env['mrp.bom'].create([{
             'product_id': finished_product.id,
             'product_tmpl_id': finished_product.product_tmpl_id.id,
@@ -3702,6 +3758,7 @@ class TestMrpOrder(TestMrpCommon):
         product01, product02, product03 = self.env['product.product'].create([{
             'name': 'Product %s' % (i + 1),
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         } for i in range(3)])
 
         product02.route_ids = [(6, 0, (mto_route | manufacture_route).ids)]
@@ -3818,6 +3875,7 @@ class TestMrpOrder(TestMrpCommon):
         finished, component, kit = self.env['product.product'].create([{
             'name': 'Product %s' % (i + 1),
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         } for i in range(3)])
         self.env['mrp.bom'].create({
             'product_id': kit.id,
@@ -3852,6 +3910,7 @@ class TestMrpOrder(TestMrpCommon):
         c1, c2, c3 = self.env['product.product'].create([{
             'name': i,
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_consumable').id,
         } for i in range(3)])
 
         self.env['mrp.bom'].create({
@@ -4186,6 +4245,7 @@ class TestTourMrpOrder(HttpCase):
         product = self.env['product.product'].create({
             'name': 'test1',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         mo = self.env['mrp.production'].create({
             'product_id': product.id,

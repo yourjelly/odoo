@@ -46,6 +46,7 @@ class TestWishlistProcess(HttpCase):
             'standard_price': 500.0,
             'list_price': 750.0,
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': attribute.id,
@@ -72,6 +73,7 @@ class TestWishlistProcess(HttpCase):
         self.env['product.template'].create({
             'name': 'Rock',
             'is_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [
                 Command.create({
                     'attribute_id': attribute.id,

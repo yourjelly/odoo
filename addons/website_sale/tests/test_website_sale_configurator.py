@@ -106,6 +106,7 @@ class TestWebsiteSaleProductConfigurator(TestProductConfiguratorCommon, HttpCase
         product_short = self.env['product.template'].create({
             'name': 'Short (TEST)',
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.env['product.template.attribute.line'].create([
@@ -135,6 +136,7 @@ class TestWebsiteSaleProductConfigurator(TestProductConfiguratorCommon, HttpCase
         optional_product = self.env['product.template'].create({
             'name': 'Optional product (TEST)',
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_short.optional_product_ids = [(4, optional_product.id)]
 

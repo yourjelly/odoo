@@ -7,7 +7,10 @@ class TestPurchaseMethod(TransactionCase):
     def test_product_purchase_method_with_receive_as_default_purchase_method(self):
         self.env['ir.default'].set('product.template', 'purchase_method', 'receive', company_id=True)
 
-        product = self.env['product.product'].create({'name': 'product_test'})
+        product = self.env['product.product'].create({
+            'name': 'product_test',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         self.assertEqual(product.purchase_method, 'receive')
 
         product.write({'detailed_type': 'service'})
@@ -19,7 +22,10 @@ class TestPurchaseMethod(TransactionCase):
     def test_product_purchase_method_with_purchase_as_default_purchase_method(self):
         self.env['ir.default'].set('product.template', 'purchase_method', 'purchase', company_id=True)
 
-        product = self.env['product.product'].create({'name': 'product_test'})
+        product = self.env['product.product'].create({
+            'name': 'product_test',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         self.assertEqual(product.purchase_method, 'purchase')
 
         product.write({'detailed_type': 'service'})

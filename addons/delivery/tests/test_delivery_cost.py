@@ -73,7 +73,8 @@ class TestDeliveryCost(DeliveryCommon, SaleCommon):
             'uom_id': self.product_uom_hour.id,
             'uom_po_id': self.product_uom_hour.id,
             'name': 'Service',
-            'type': 'service'
+            'type': 'service',
+            'categ_id': self.env.ref('delivery.product_category_deliveries').id,
         })
 
         # I add delivery cost in Sales order
@@ -336,6 +337,7 @@ class TestDeliveryCost(DeliveryCommon, SaleCommon):
                         'name': 'wv',
                         'weight': weight,
                         'volume': volume,
+                        'categ_id': self.env.ref('delivery.product_category_deliveries').id,
                     }).id,
                     'product_uom_qty': qty,
                 }),
@@ -397,6 +399,7 @@ class TestDeliveryCost(DeliveryCommon, SaleCommon):
         delivery_product = self.env['product.product'].create({
             'name': 'Delivery Product',
             'taxes_id': [Command.set((tax_a + tax_b).ids)],
+            'categ_id': self.env.ref('delivery.product_category_deliveries').id,
         })
         # create delivery
         delivery = self.env['delivery.carrier'].create({

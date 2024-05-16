@@ -48,8 +48,10 @@ class TestEsEdiTbaiCommon(AccountEdiTestCommon):
             'vat': 'ESF35999705',
         })
 
-        cls.product_t = cls.env["product.product"].create(
-            {"name": "Test product"})
+        cls.product_t = cls.env["product.product"].create({
+          "name": "Test product",
+          'categ_id': cls.env.ref('product.product_category_services').id,
+        })
         cls.partner_t = cls.env["res.partner"].create({"name": "Test partner", "vat": "ESF35999705"})
 
     @classmethod

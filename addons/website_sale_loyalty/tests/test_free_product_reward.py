@@ -19,12 +19,14 @@ class TestFreeProductReward(HttpCase):
             'name': 'Test Sofa',
             'list_price': 2950.0,
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.carpet = self.env['product.product'].create({
             'name': 'Test Carpet',
             'list_price': 500.0,
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # Disable any other program

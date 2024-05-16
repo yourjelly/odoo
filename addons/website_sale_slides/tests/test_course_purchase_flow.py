@@ -23,6 +23,7 @@ class TestCoursePurchaseFlow(common.SlidesCase):
             'type': 'service',
             'invoice_policy': 'order',
             'is_published': True,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
     def test_course_purchase_flow(self):

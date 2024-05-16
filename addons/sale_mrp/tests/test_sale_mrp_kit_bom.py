@@ -12,6 +12,7 @@ class TestSaleMrpKitBom(TransactionCase):
             'name': name,
             'type': product_type,
             'standard_price': price,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
     def test_reset_avco_kit(self):
@@ -20,13 +21,19 @@ class TestSaleMrpKitBom(TransactionCase):
         component_2. Create a SO for one of the variant, confirm, cancel, reset to draft and then change the product of
         the SO -> There should be no traceback
         """
-        component_1 = self.env['product.product'].create({'name': 'compo 1'})
-        component_2 = self.env['product.product'].create({'name': 'compo 2'})
-
         product_category = self.env['product.category'].create({
             'name': 'test avco kit',
             'property_cost_method': 'average'
         })
+        component_1 = self.env['product.product'].create({
+            'name': 'compo 1',
+            'categ_id': product_category.id,
+        })
+        component_2 = self.env['product.product'].create({
+            'name': 'compo 2',
+            'categ_id': product_category.id,
+        })
+
         attributes = self.env['product.attribute'].create({'name': 'Legs'})
         steel_legs = self.env['product.attribute.value'].create({'attribute_id': attributes.id, 'name': 'Steel'})
         aluminium_legs = self.env['product.attribute.value'].create(
@@ -420,6 +427,7 @@ class TestSaleMrpKitBom(TransactionCase):
         kit_1, component_1, product_1, kit_3, kit_4 = self.env['product.product'].create([{
             'name': n,
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         } for n in ['Kit 1', 'Compo 1', 'Product 1', 'Kit 3', 'Kit 4']])
         kit_1.description_sale = "test"
 
@@ -436,6 +444,7 @@ class TestSaleMrpKitBom(TransactionCase):
         prod_attr_values = self.env['product.attribute.value'].create([{'name': color, 'attribute_id': prod_attr.id, 'sequence': 1} for color in colors])
         kit_2 = self.env['product.template'].create({
             'name': 'Kit 2',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'attribute_line_ids': [(0, 0, {
                 'attribute_id': prod_attr.id,
                 'value_ids': [(6, 0, prod_attr_values.ids)]

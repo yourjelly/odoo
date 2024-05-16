@@ -32,6 +32,7 @@ class TestDropship(common.TransactionCase):
         cls.lot_dropship_product = cls.env['product.product'].create({
             'name': "Serial product",
             'tracking': 'lot',
+            'categ_id': cls.env.ref('product.product_category_services').id,
             'seller_ids': [(0, 0, {
                 'partner_id': cls.supplier.id,
             })],
@@ -143,6 +144,7 @@ class TestDropship(common.TransactionCase):
         # Create new product without any routes
         super_product = self.env['product.product'].create({
             'name': "Super product",
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(0, 0, {
                 'partner_id': supplier_dropship.id,
             })],

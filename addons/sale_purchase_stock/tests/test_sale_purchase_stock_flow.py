@@ -20,6 +20,7 @@ class TestSalePurchaseStockFlow(TransactionCase):
         cls.mto_product = cls.env['product.product'].create({
             'name': 'SuperProduct',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_services').id,
             'route_ids': [(6, 0, (cls.mto_route + cls.buy_route).ids)],
             'seller_ids': [(0, 0, {
                 'partner_id': cls.vendor.id,

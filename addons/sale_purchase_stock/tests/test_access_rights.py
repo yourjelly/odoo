@@ -41,6 +41,7 @@ class TestAccessRights(TestCommonSalePurchaseNoChart):
         product = self.env['product.product'].create({
             'name': 'SuperProduct',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(6, 0, seller.ids)],
             'route_ids': [(6, 0, (mto_route + buy_route).ids)]
         })

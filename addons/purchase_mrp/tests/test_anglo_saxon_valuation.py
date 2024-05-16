@@ -111,6 +111,7 @@ class TestAngloSaxonValuationPurchaseMRP(AccountTestInvoicingCommon):
         kit = self.env['product.product'].create({
             'name': 'Super Kit',
             'type': 'consu',
+            'categ_id': self.avco_category.id,
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
         })

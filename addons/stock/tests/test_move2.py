@@ -2469,6 +2469,7 @@ class TestStockUOM(TestStockCommon):
             'uom_id': T_LBS.id,
             'uom_po_id': T_LBS.id,
             'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         picking_in = self.env['stock.picking'].create({
@@ -2826,6 +2827,7 @@ class TestRoutes(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'new_product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(4, route.id)]
         })
         move1 = self.env['stock.move'].create({
@@ -2863,10 +2865,12 @@ class TestRoutes(TestStockCommon):
         product_A = self.env['product.product'].create({
             'name': 'Product A',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_B = self.env['product.product'].create({
             'name': 'Product B',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         # We alter one rule and we set it to 'mts_else_mto'
@@ -2916,10 +2920,12 @@ class TestRoutes(TestStockCommon):
         product_A = self.env['product.product'].create({
             'name': 'Product A',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_B = self.env['product.product'].create({
             'name': 'Product B',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         # We alter one rule and we set it to 'mts_else_mto'
@@ -2983,6 +2989,7 @@ class TestRoutes(TestStockCommon):
         product_A = self.env['product.product'].create({
             'name': 'Product A',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         # We alter one rule and we set it to 'mts_else_mto'
@@ -3065,6 +3072,7 @@ class TestRoutes(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'Product with packaging',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(4, route_on_product.id, 0)]
         })
 

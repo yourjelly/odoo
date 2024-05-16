@@ -46,10 +46,10 @@ class TestAngloSaxonCommon(AccountTestInvoicingCommon):
             'standard_price': 100,
             'available_in_pos': True,
             'type': 'product',
+            'categ_id': cls.category.id,
         })
         cls.company.anglo_saxon_accounting = True
         cls.company.point_of_sale_update_stock_quantities = 'real'
-        cls.product.categ_id = cls.category
         cls.product.property_account_expense_id = account_expense
         cls.product.property_account_income_id = account_income
         sale_journal = cls.env['account.journal'].create({'name': 'POS journal', 'type': 'sale', 'code': 'POS00'})

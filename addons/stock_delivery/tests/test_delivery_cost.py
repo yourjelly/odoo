@@ -9,7 +9,11 @@ class TestDeliveryCost(common.TransactionCase):
         """Ensure that the price is correctly set on the delivery line in the case of a Back Order
         """
         self.partner_18 = self.env['res.partner'].create({'name': 'My Test Customer'})
-        self.product_4 = self.env['product.product'].create({'name': 'A product to deliver', 'weight': 1.0})
+        self.product_4 = self.env['product.product'].create({
+            'name': 'A product to deliver',
+            'weight': 1.0,
+            'categ_id': self.env.ref('delivery.product_category_deliveries').id,
+        })
         self.product_uom_unit = self.env.ref('uom.product_uom_unit')
 
         product_delivery = self.env['product.product'].create({

@@ -16,11 +16,15 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
         cls.AccountJournal = cls.env['account.journal']
 
         cls.partner_18 = cls.env['res.partner'].create({'name': 'My Test Customer'})
-        cls.product_11 = cls.env['product.product'].create({'name': 'A product to deliver'})
+        cls.product_11 = cls.env['product.product'].create({
+            'name': 'A product to deliver',
+            'categ_id': cls.env.ref('delivery.product_category_deliveries').id,
+        })
         cls.product_cable_management_box = cls.env['product.product'].create({
             'name': 'Another product to deliver',
             'weight': 1.0,
             'invoice_policy': 'order',
+            'categ_id': cls.env.ref('delivery.product_category_deliveries').id,
         })
         cls.product_uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.product_delivery_normal = cls.env['product.product'].create({
@@ -140,10 +144,12 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
         super_product = self.env['product.product'].create({
             'name': 'Super Product',
             'invoice_policy': 'delivery',
+            'categ_id': self.env.ref('delivery.product_category_deliveries').id,
         })
         great_product = self.env['product.product'].create({
             'name': 'Great Product',
             'invoice_policy': 'delivery',
+            'categ_id': self.env.ref('delivery.product_category_deliveries').id,
         })
 
         so = self.env['sale.order'].create({

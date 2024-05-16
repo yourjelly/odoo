@@ -251,6 +251,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
             'name': 'Super Product',
             'type': 'service',
             'service_to_purchase': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(0, 0, {
                 'partner_id': self.partner_vendor_service.id,
                 'min_qty': 1,
@@ -361,6 +362,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
             'list_price': 50,
             'type': 'service',
             'service_to_purchase': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [
                 (0, 0, {'partner_id': self.partner_b.id, 'price': 100, 'company_id': company_a.id}),
             ],

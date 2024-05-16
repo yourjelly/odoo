@@ -47,6 +47,7 @@ class TestProductConfiguratorCommon(TransactionCase):
             'name': 'Customizable Desk (TEST)',
             'standard_price': 500.0,
             'list_price': 750.0,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
 
         # Generate variants
@@ -83,6 +84,7 @@ class TestProductConfiguratorCommon(TransactionCase):
             'name': 'Conference Chair (TEST)',
             'image_1920': img_content,
             'list_price': 16.50,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
 
         cls.env['product.template.attribute.line'].create({
@@ -97,6 +99,7 @@ class TestProductConfiguratorCommon(TransactionCase):
         cls.product_product_conf_chair_floor_protect = cls.env['product.template'].create({
             'name': 'Chair floor protection (TEST)',
             'list_price': 12.0,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.product_product_conf_chair.optional_product_ids = [(4, cls.product_product_conf_chair_floor_protect.id)]
 

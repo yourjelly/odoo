@@ -22,8 +22,16 @@ class TestPackingCommon(TransactionCase):
         cls.customer_location = cls.env.ref('stock.stock_location_customers')
         cls.picking_type_in = cls.env.ref('stock.picking_type_in')
 
-        cls.productA = cls.env['product.product'].create({'name': 'Product A', 'type': 'product'})
-        cls.productB = cls.env['product.product'].create({'name': 'Product B', 'type': 'product'})
+        cls.productA = cls.env['product.product'].create({
+            'name': 'Product A',
+            'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_office').id,
+        })
+        cls.productB = cls.env['product.product'].create({
+            'name': 'Product B',
+            'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_office').id,
+        })
         cls.shelf1 = cls.env['stock.location'].create({
             'name': 'shelf1',
             'usage': 'internal',
@@ -426,7 +434,11 @@ class TestPacking(TestPackingCommon):
           * Put products in a package then validate the receipt.
           * The automatically generated internal transfer should have package set by default.
         """
-        prod = self.env['product.product'].create({'name': 'bad dragon', 'type': 'consu'})
+        prod = self.env['product.product'].create({
+            'name': 'bad dragon',
+            'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_office').id,
+        })
         pick_move = self.env['stock.move'].create({
             'name': 'The ship move',
             'product_id': prod.id,
@@ -1575,6 +1587,7 @@ class TestPacking(TestPackingCommon):
         product = self.env['product.product'].create({
             'name': 'Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # Set the removal strategy to 'least_packages'
@@ -1792,6 +1805,7 @@ class TestPackagePropagation(TestPackingCommon):
             'name': 'productA',
             'type': 'product',
             'tracking': 'none',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 2)
         pg = self.env['procurement.group'].create({'name': 'propagation_test'})

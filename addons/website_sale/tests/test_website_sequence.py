@@ -24,15 +24,19 @@ class TestWebsiteSequence(odoo.tests.TransactionCase):
         self.p1, self.p2, self.p3, self.p4 = ProductTemplate.create([{
             'name': 'First Product',
             'website_sequence': 100,
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Second Product',
             'website_sequence': 180,
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Third Product',
             'website_sequence': 225,
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Last Product',
             'website_sequence': 250,
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         self._check_correct_order(self.p1 + self.p2 + self.p3 + self.p4)
@@ -71,6 +75,7 @@ class TestWebsiteSequence(odoo.tests.TransactionCase):
 
         new_product = self.env['product.template'].create({
             'name': 'Last Newly Created Product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.assertEqual(self._search_website_sequence_order()[-1], new_product, "new product should be last")

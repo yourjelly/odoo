@@ -33,6 +33,7 @@ class TestStockValuation(TransactionCase):
             # Ignore tax calculations for these tests.
             'supplier_taxes_id': False,
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_office').id
         })
         Account = cls.env['account.account']
         cls.stock_input_account = Account.create({
@@ -304,7 +305,6 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         cls.supplier_location = cls.env.ref('stock.stock_location_suppliers')
         cls.stock_location = cls.env.ref('stock.stock_location_stock')
         cls.partner_id = cls.env['res.partner'].create({'name': 'Wood Corner Partner'})
-        cls.product1 = cls.env['product.product'].create({'name': 'Large Desk'})
 
         cls.cat = cls.env['product.category'].create({
             'name': 'cat',

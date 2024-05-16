@@ -67,6 +67,7 @@ class TestSaleService(TestCommonSaleTimesheet):
             'default_code': 'SERV-DELI',
             'service_type': 'timesheet',
             'service_tracking': 'task_global_project',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'project_id': project.id
         })
 
@@ -291,6 +292,7 @@ class TestSaleService(TestCommonSaleTimesheet):
             'project_id': False,
             'taxes_id': False,
             'property_account_income_id': self.account_sale.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         # create 5 so lines
@@ -609,6 +611,7 @@ class TestSaleService(TestCommonSaleTimesheet):
         product_vals = {
             'type': 'service',
             'service_type': 'timesheet',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'project_id': project.id,
             'service_tracking': 'task_global_project',
         }
@@ -659,6 +662,7 @@ class TestSaleService(TestCommonSaleTimesheet):
             'service_type': 'timesheet',
             'project_id': self.project_global.id,
             'service_tracking': 'task_global_project',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         sale_order_line_create = SaleOrderLine.create({
             'order_id': self.sale_order.id,
@@ -671,7 +675,10 @@ class TestSaleService(TestCommonSaleTimesheet):
         self.sale_order.action_confirm()
 
         # Add a SOL with a task_id to mimmic the "Add a product" flow on the task
-        product_add = Product.create({'name': 'Product added on task'})
+        product_add = Product.create({
+            'name': 'Product added on task',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         SaleOrderLine.create({
             'order_id': self.sale_order.id,
             'name': product_add.name,

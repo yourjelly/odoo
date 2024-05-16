@@ -20,6 +20,7 @@ class WebsiteSaleVisitorTests(TransactionCase):
         product = self.env['product.product'].create({
             'name': 'Storage Box',
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         with MockRequest(self.env, website=self.website):
@@ -42,6 +43,7 @@ class WebsiteSaleVisitorTests(TransactionCase):
             'name': 'Large Cabinet',
             'website_published': True,
             'list_price': 320.0,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         with MockRequest(self.env, website=self.website, cookies=self.cookies):
@@ -64,6 +66,7 @@ class WebsiteSaleVisitorTests(TransactionCase):
             'name': 'Test Product',
             'website_published': True,
             'sale_ok': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.website = self.website.with_user(public_user).with_context(website_id=self.website.id)
@@ -93,6 +96,7 @@ class WebsiteSaleVisitorTests(TransactionCase):
             'name': 'Test Product',
             'website_published': True,
             'sale_ok': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.website = self.website.with_user(public_user).with_context(website_id=self.website.id)

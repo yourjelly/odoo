@@ -15,6 +15,7 @@ class TestWebsiteSaleCartRecovery(HttpCaseWithUserPortal):
             'name': 'Acoustic Bloc Screens',
             'list_price': 2950.0,
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.start_tour("/", 'shop_cart_recovery', login="portal")

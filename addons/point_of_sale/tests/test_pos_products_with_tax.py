@@ -526,6 +526,7 @@ class TestPoSProductsWithTax(TestPoSCommon):
             'available_in_pos': True,
             'list_price': 0,
             'taxes_id': [(6, 0, [fixed_tax.id])],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.open_new_session()
@@ -618,21 +619,25 @@ class TestPoSProductsWithTax(TestPoSCommon):
             'name': 'Product all taxes',
             'available_in_pos': True,
             'taxes_id': [odoo.Command.set((tax_a + tax_b + tax_x + tax_xx).ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_no_xx_tax = self.env['product.product'].create({
             'name': 'Product no tax from XX',
             'available_in_pos': True,
             'taxes_id': [odoo.Command.set((tax_a + tax_b + tax_x).ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_no_branch_tax = self.env['product.product'].create({
             'name': 'Product no tax from branch',
             'available_in_pos': True,
             'taxes_id': [odoo.Command.set((tax_a + tax_b).ids)],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_no_tax = self.env['product.product'].create({
             'name': 'Product no tax',
             'available_in_pos': True,
             'taxes_id': [],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         # configure a session on Branch XX
         xx_config = self.env['pos.config'].with_company(branch_xx).create({

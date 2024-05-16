@@ -31,11 +31,13 @@ class TestSubcontractingPortalUi(HttpCase):
         cls.comp = cls.env['product.product'].create({
             'name': 'Component',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         cls.finished_product = cls.env['product.product'].create({
             'name': 'Finished',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         bom_form = Form(cls.env['mrp.bom'])
         bom_form.type = 'subcontract'

@@ -17,6 +17,7 @@ class TestWebsiteSaleMail(HttpCase):
             'list_price': 2950.0,
             'sale_ok': True,
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.env['res.partner'].create({
             'name': 'Azure Interior',

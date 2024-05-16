@@ -25,6 +25,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER',
             'taxes_id': False,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.product_order_other_price = cls.env['product.product'].create({
             'name': "Zed+ Antivirus",
@@ -36,6 +37,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER',
             'taxes_id': False,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.product_order_var_name = cls.env['product.product'].create({
             'name': "Zed+ Antivirus Var Name",
@@ -47,6 +49,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER_VAR_NAME',
             'taxes_id': False,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.service_deliver = cls.env['product.product'].create({
             'name': "Cost-plus Contract",
@@ -58,6 +61,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'purchase_method': 'receive',
             'default_code': 'SERV_DEL',
             'taxes_id': False,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.service_order = cls.env['product.product'].create({
             'name': "Prepaid Consulting",
@@ -69,6 +73,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'purchase_method': 'purchase',
             'default_code': 'PRE-PAID',
             'taxes_id': False,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.product_deliver = cls.env['product.product'].create({
             'name': "Switch, 24 ports",
@@ -80,6 +85,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'purchase_method': 'receive',
             'default_code': 'PROD_DEL',
             'taxes_id': False,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
 
     @classmethod
@@ -408,8 +414,14 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         analytic_account_super = self.env['account.analytic.account'].create({'name': 'Super Account', 'plan_id': analytic_plan.id})
         analytic_account_great = self.env['account.analytic.account'].create({'name': 'Great Account', 'plan_id': analytic_plan.id})
 
-        super_product = self.env['product.product'].create({'name': 'Super Product'})
-        great_product = self.env['product.product'].create({'name': 'Great Product'})
+        super_product = self.env['product.product'].create({
+            'name': 'Super Product',
+            'categ_id': self.env.ref('product.product_category_office').id,
+        })
+        great_product = self.env['product.product'].create({
+            'name': 'Great Product',
+            'categ_id': self.env.ref('product.product_category_office').id,
+        })
         self.env['account.analytic.distribution.model'].create([
             {
                 'analytic_distribution': {analytic_account_super.id: 100},

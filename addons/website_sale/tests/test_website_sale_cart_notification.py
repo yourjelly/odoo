@@ -18,12 +18,14 @@ class TestWebsiteSaleCartNotification(HttpCase, ProductAttributesCommon):
             'type': 'consu',
             'website_published': True,
             'list_price': 1000,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.env['product.template'].create({
             'name': 'website_sale_cart_notification_product_2',
             'type': 'consu',
             'website_published': True,
             'list_price': 5000,
+            'categ_id': cls.env.ref('product.product_category_office').id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': cls.size_attribute.id,
                 'value_ids': [Command.set([

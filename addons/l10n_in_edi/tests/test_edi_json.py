@@ -48,6 +48,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
             'taxes_id': [Command.set(sgst_sale_5.ids)],
             'supplier_taxes_id': [Command.set(sgst_purchase_5.ids)],
             "l10n_in_hsn_code": "01111",
+            'categ_id': cls.env.ref('product.product_category_expenses').id,
         })
         cls.product_a_discount = cls.env['product.product'].create({
             'name': 'product_a discount',
@@ -59,6 +60,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
             'taxes_id': [Command.set(sgst_sale_5.ids)],
             'supplier_taxes_id': [Command.set(sgst_purchase_5.ids)],
             "l10n_in_hsn_code": "01111",
+            'categ_id': cls.env.ref('product.product_category_expenses').id,
         })
         gst_with_cess = cls.env.ref("account.%s_sgst_sale_12" % (cls.company_data["company"].id)
             ) + cls.env.ref("account.%s_cess_5_plus_1591_sale" % (cls.company_data["company"].id))
@@ -72,6 +74,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
             "taxes_id": [Command.set(gst_with_cess.ids)],
             "supplier_taxes_id": [Command.set(sgst_purchase_5.ids)],
             "l10n_in_hsn_code": "02222",
+            "categ_id": cls.env.ref('product.product_category_services').id,
         })
         rounding = cls.env["account.cash.rounding"].create({
             "name": "half-up",

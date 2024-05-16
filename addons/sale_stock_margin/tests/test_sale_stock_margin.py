@@ -45,6 +45,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
         product_template = self.env['product.template'].create({
             'name': 'Super product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_template.categ_id.property_cost_method = 'fifo'
         return product_template.product_variant_ids
@@ -176,6 +177,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
         service = self.env['product.product'].create({
             'name': 'Service',
             'type': 'service',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'list_price': 100.0,
             'standard_price': 50.0})
         self.product1.list_price = 80.0

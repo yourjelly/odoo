@@ -86,6 +86,7 @@ class TestWebsiteSaleProductAttributeValueConfig(TestSaleProductAttributeValueCo
             'list_price': 2000,
             'taxes_id': [Command.set(self.company_data['default_tax_sale'].ids)],
             'company_id': self.env.company.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         # Setup pricelist: make sure the pricelist has a 10% discount

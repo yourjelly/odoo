@@ -11,10 +11,12 @@ class TestProduct(AccountTestInvoicingCommon):
         """ Ensure default taxes are set for all companies on products with no company set. """
         product_without_company = self.env['product.template'].with_context(allowed_company_ids=self.env.company.ids).create({
             'name': 'Product Without a Company',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_with_company = self.env['product.template'].with_context(allowed_company_ids=self.env.company.ids).create({
             'name': 'Product With a Company',
             'company_id': self.company_data['company'].id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         companies = self.env['res.company'].sudo().search([])
         # Product should have all the default taxes of the other companies.

@@ -22,6 +22,7 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon):
             'standard_price': 70.0,
             'list_price': 79.0,
             'website_published': True,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.product_attribute_legs = cls.env['product.attribute'].create({
             'name': 'Legs',
@@ -41,6 +42,7 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon):
             'name': 'Conference Chair',
             'list_price': 16.50,
             'website_published': True,
+            'categ_id': cls.env.ref('product.product_category_office').id,
             'accessory_product_ids': [Command.link(cls.storage_box.id)],
             'attribute_line_ids': [
                 Command.create({
@@ -53,6 +55,7 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon):
         cls.chair_floor_protection = cls.env['product.template'].create({
             'name': 'Chair floor protection',
             'list_price': 12.0,
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         # Crappy hack: But otherwise the "Proceed To Checkout" modal button won't be displayed
         if 'optional_product_ids' in cls.env['product.template']:
@@ -109,6 +112,7 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon):
             'list_price': 79.0,
             'website_published': True,
             'invoice_policy': 'delivery',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.product_product_7.taxes_id = [tax.id]
         self.env['res.config.settings'].create({
@@ -134,5 +138,6 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon):
             'name': 'Office Chair Black TEST',
             'list_price': 12.50,
             'is_published': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.start_tour("/shop", 'update_billing_shipping_address', login="admin")

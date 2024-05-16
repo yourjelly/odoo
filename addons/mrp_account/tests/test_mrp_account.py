@@ -48,24 +48,29 @@ class TestMrpAccount(TestMrpCommon):
             'name': 'Table (MTO)',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.product_table_sheet = cls.env['product.product'].create({
             'name': 'Table Top',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.product_table_leg = cls.env['product.product'].create({
             'name': 'Table Leg',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         cls.product_bolt = cls.env['product.product'].create({
             'name': 'Bolt',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_consumable').id,
         })
         cls.product_screw = cls.env['product.product'].create({
             'name': 'Screw',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_consumable').id,
         })
 
         cls.mrp_workcenter = cls.env['mrp.workcenter'].create({

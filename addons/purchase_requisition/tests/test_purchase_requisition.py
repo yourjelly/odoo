@@ -106,9 +106,11 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         a supplier info"""
         product = self.env['product.product'].create({
             'name': 'test6',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product2 = self.env['product.product'].create({
             'name': 'test6',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         vendor = self.env['res.partner'].create({
             'name': 'vendor6',
@@ -375,6 +377,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
 
         product = self.env['product.product'].create({
             'name': 'Product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(0, 0, {
                 'partner_id': vendor_usd.id,
                 'price': 100,
@@ -429,6 +432,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         })
         product = self.env['product.product'].create({
             'name': 'Product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(0, 0, {
                 'partner_id': vendor_a.id,
                 'price': 5,

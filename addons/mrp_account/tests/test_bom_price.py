@@ -14,6 +14,7 @@ class TestBomPriceCommon(common.TransactionCase):
             'name': name,
             'type': 'product',
             'standard_price': price,
+            'categ_id': cls.env.ref('product.product_category_expenses').id,
         })
 
     @classmethod

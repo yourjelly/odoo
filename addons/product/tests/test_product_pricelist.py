@@ -26,6 +26,7 @@ class TestProductPricelist(ProductCommon):
         })
         cls.ipad_retina_display = cls.env['product.product'].create({
             'name': 'Customizable Desk',
+            'categ_id': cls.category_5_id,
         })
         cls.custom_computer_kit = cls.env['product.product'].create({
             'name': 'Corner Desk Right Sit',
@@ -257,7 +258,8 @@ class TestProductPricelist(ProductCommon):
             'uom_id': self.uom_ton.id,
             'uom_po_id': self.uom_ton.id,
             'list_price': 100,
-            'type': 'consu'
+            'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         self.assertEqual(
             ProductPricelist._get_product_price(self.monitor, quantity=1.0),

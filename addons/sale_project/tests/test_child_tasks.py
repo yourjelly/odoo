@@ -22,6 +22,7 @@ class TestNestedTaskUpdate(TransactionCase):
             'name': "Prepaid Consulting",
             'type': 'service',
             'service_tracking': 'project_only',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.order_line = cls.env['sale.order.line'].create({
             'name': "Order line",
@@ -267,6 +268,7 @@ class TestNestedTaskUpdate(TransactionCase):
             'detailed_type': 'service',
             'service_tracking': 'project_only',
             'project_template_id': project_tempalte.id,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         sale_order = self.env['sale.order'].create({
             'partner_id': self.partner.id,

@@ -1316,6 +1316,7 @@ class TestExpenses(TestExpenseCommon):
         product = self.env['product.product'].create({
             'name': 'Product',
             'standard_price': 100.0,
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         sheet_no_update, sheet_update = sheets = self.env['hr.expense.sheet'].create([{
             'company_id': self.env.company.id,
@@ -1408,16 +1409,19 @@ class TestExpenses(TestExpenseCommon):
             'name': 'Category A',
             'default_code': 'CA',
             'standard_price': 0.0,
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         self.expense_cat_B = self.env['product.product'].create({
             'name': 'Category B',
             'default_code': 'CB',
             'standard_price': 0.0,
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         self.expense_cat_C = self.env['product.product'].create({
             'name': 'Category C',
             'default_code': 'CC',
             'standard_price': 0.0,
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         self.expense_1 = self.env['hr.expense'].create({
             'employee_id': self.expense_employee.id,

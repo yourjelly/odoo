@@ -21,6 +21,7 @@ class TestPoSSaleL10NBe(TestPointOfSaleHttpCommon):
             'list_price': 10,
             'taxes_id': False,
             'available_in_pos': True,
+            'categ_id': self.env.ref('point_of_sale.product_category_food').id,
         })
 
         sale_order = self.env['sale.order'].create({

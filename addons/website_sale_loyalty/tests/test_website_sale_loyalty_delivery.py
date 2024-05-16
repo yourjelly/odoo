@@ -22,6 +22,7 @@ class TestWebsiteSaleDelivery(HttpCase):
             'name': 'Acoustic Bloc Screens',
             'list_price': 2950.0,
             'website_published': True,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.gift_card = self.env['product.product'].create({
@@ -31,6 +32,7 @@ class TestWebsiteSaleDelivery(HttpCase):
             'is_published': True,
             'sale_ok': True,
             'taxes_id': False,
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         # Disable any other program
@@ -68,12 +70,14 @@ class TestWebsiteSaleDelivery(HttpCase):
             'name': 'Normal Delivery Charges',
             'invoice_policy': 'order',
             'type': 'service',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.product_delivery_normal2 = self.env['product.product'].create({
             'name': 'Normal Delivery Charges',
             'invoice_policy': 'order',
             'type': 'service',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.normal_delivery = self.env['delivery.carrier'].create({

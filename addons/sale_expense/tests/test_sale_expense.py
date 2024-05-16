@@ -66,6 +66,7 @@ class TestSaleExpense(TestExpenseCommon, TestSaleCommon):
             'uom_id': self.env.ref('uom.product_uom_km').id,
             'uom_po_id': self.env.ref('uom.product_uom_km').id,
             'standard_price': 0.15,
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
         # Submit to Manager
         sheet = self.env['hr.expense.sheet'].create({
@@ -110,6 +111,7 @@ class TestSaleExpense(TestExpenseCommon, TestSaleCommon):
             'invoice_policy': 'order',
             'standard_price': 100,
             'expense_policy': 'cost',
+            'categ_id': self.env.ref('product.product_category_expenses').id,
         })
 
         sale_order = self.env['sale.order'].create({

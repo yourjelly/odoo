@@ -173,6 +173,7 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
         # add an optional product to the office chair and the custo desk for testing purposes
         office_chair = self.env['product.product'].create({
             'name': 'Office Chair Black',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         custo_desk = self.product_product_custo_desk.product_variant_ids[0]

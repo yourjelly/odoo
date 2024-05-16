@@ -33,6 +33,7 @@ class TestWebsiteSaleStockProductWarehouse(TestSaleProductAttributeValueCommon):
             'allow_out_of_stock_order': False,
             'type': 'product',
             'default_code': 'E-COM1',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         cls.product_B = cls.env['product.product'].create({
@@ -40,6 +41,7 @@ class TestWebsiteSaleStockProductWarehouse(TestSaleProductAttributeValueCommon):
             'allow_out_of_stock_order': False,
             'type': 'product',
             'default_code': 'E-COM2',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         # Add 10 Product A in WH1 and 15 Product 1 in WH2

@@ -14,8 +14,14 @@ class TestPricelist(ProductCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.datacard = cls.env['product.product'].create({'name': 'Office Lamp'})
-        cls.usb_adapter = cls.env['product.product'].create({'name': 'Office Chair'})
+        cls.datacard = cls.env['product.product'].create({
+            'name': 'Office Lamp',
+            'categ_id': cls.env.ref('product.product_category_office').id,
+        })
+        cls.usb_adapter = cls.env['product.product'].create({
+            'name': 'Office Chair',
+            'categ_id': cls.env.ref('product.product_category_office').id,
+        })
 
         cls.sale_pricelist_id = cls.env['product.pricelist'].create({
             'name': 'Sale pricelist',
@@ -74,7 +80,8 @@ class TestPricelist(ProductCommon):
             'uom_id': self.uom_ton.id,
             'uom_po_id': self.uom_ton.id,
             'list_price': tonne_price,
-            'type': 'consu'
+            'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
 
         self.env['product.pricelist.item'].create({

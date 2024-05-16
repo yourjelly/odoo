@@ -16,6 +16,7 @@ class TestStockLot(TestStockCommon):
     def setUpClass(cls):
         super().setUpClass()
         # Creates a tracked product with expiration dates.
+        cls.category = cls.env['product.category'].create({'name': 'category'})
         cls.apple_product = cls.ProductObj.create({
             'name': 'Apple',
             'type': 'product',
@@ -25,6 +26,7 @@ class TestStockLot(TestStockCommon):
             'use_time': 5,
             'removal_time': 2,
             'alert_time': 6,
+            'categ_id': cls.category.id,
         })
 
     def test_00_stock_production_lot(self):
@@ -35,6 +37,7 @@ class TestStockLot(TestStockCommon):
             'name': 'Product AAA',
             'type': 'product',
             'tracking':'lot',
+            'categ_id': self.category.id,
             'company_id': self.env.company.id,
         })
 
@@ -132,7 +135,8 @@ class TestStockLot(TestStockCommon):
         self.productBBB = self.ProductObj.create({
             'name': 'Product BBB',
             'type': 'product',
-            'tracking':'lot'
+            'tracking': 'lot',
+            'categ_id': self.category.id,
         })
 
         # create a new lot with with alert date in the past
@@ -185,7 +189,12 @@ class TestStockLot(TestStockCommon):
         """ Test Scheduled Task on lot without an alert_date does not create an activity """
 
         # create product
-        self.productCCC = self.ProductObj.create({'name': 'Product CCC', 'type': 'product', 'tracking':'lot'})
+        self.productCCC = self.ProductObj.create({
+            'name': 'Product CCC',
+            'type': 'product',
+            'tracking': 'lot',
+            'categ_id': self.category.id,
+        })
 
         # create a new lot with with alert date in the past
         self.lot1_productCCC = self.LotObj.create({'name': 'Lot 1 ProductCCC', 'product_id': self.productCCC.id})

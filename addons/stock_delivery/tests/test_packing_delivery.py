@@ -15,6 +15,7 @@ class TestPacking(TestPackingCommon):
         cls.product_aw = cls.env['product.product'].create({
             'name': 'Product AW',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_services').id,
             'weight': 2.4,
             'uom_id': cls.uom_kg.id,
             'uom_po_id': cls.uom_kg.id
@@ -22,6 +23,7 @@ class TestPacking(TestPackingCommon):
         cls.product_bw = cls.env['product.product'].create({
             'name': 'Product BW',
             'type': 'product',
+            'categ_id': cls.env.ref('product.product_category_services').id,
             'weight': 0.3,
             'uom_id': cls.uom_kg.id,
             'uom_po_id': cls.uom_kg.id
@@ -29,6 +31,7 @@ class TestPacking(TestPackingCommon):
         test_carrier_product = cls.env['product.product'].create({
             'name': 'Test carrier product',
             'type': 'service',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.test_carrier = cls.env['delivery.carrier'].create({
             'name': 'Test carrier',
@@ -155,6 +158,7 @@ class TestPacking(TestPackingCommon):
         another_test_carrier_product = self.env['product.product'].create({
             'name': 'Another test carrier product',
             'type': 'service',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         test_carrier = self.env['delivery.carrier'].create({
             'name': 'Another Test carrier',

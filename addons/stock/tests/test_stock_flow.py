@@ -24,6 +24,7 @@ class TestStockFlow(TestStockCommon):
             'partner_id': cls.partner_company2.id,
             'name': 'My Company (Chicago)-demo',
         })
+        cls.category = cls.env['product.category'].create({'name': 'category'})
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')
     def test_00_picking_create_and_transfer_quantity(self):
@@ -902,7 +903,13 @@ class TestStockFlow(TestStockCommon):
         # Create product in kg and receive in ton.
         # -----------------------------------------
 
-        productKG = self.ProductObj.create({'name': 'Product KG', 'uom_id': self.uom_kg.id, 'uom_po_id': self.uom_kg.id, 'type': 'product'})
+        productKG = self.ProductObj.create({
+            'name': 'Product KG',
+            'uom_id': self.uom_kg.id,
+            'uom_po_id': self.uom_kg.id,
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
         picking_in = self.PickingObj.create({
             'picking_type_id': self.picking_type_in,
             'location_id': self.supplier_location,
@@ -1063,8 +1070,20 @@ class TestStockFlow(TestStockCommon):
         # TEST EMPTY INVENTORY WITH PACKS and LOTS
         # ---------------------------------------------------------
 
-        packproduct = self.ProductObj.create({'name': 'Pack Product', 'uom_id': self.uom_unit.id, 'uom_po_id': self.uom_unit.id, 'type': 'product'})
-        lotproduct = self.ProductObj.create({'name': 'Lot Product', 'uom_id': self.uom_unit.id, 'uom_po_id': self.uom_unit.id, 'type': 'product'})
+        packproduct = self.ProductObj.create({
+            'name': 'Pack Product',
+            'uom_id': self.uom_unit.id,
+            'uom_po_id': self.uom_unit.id,
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
+        lotproduct = self.ProductObj.create({
+            'name': 'Lot Product',
+            'uom_id': self.uom_unit.id,
+            'uom_po_id': self.uom_unit.id,
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
         quant_obj = self.env['stock.quant'].with_context(inventory_mode=True)
         pack_obj = self.env['stock.quant.package']
         lot_obj = self.env['stock.lot']
@@ -1803,6 +1822,7 @@ class TestStockFlow(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'The product from the other company that I absolutely want',
             'type': 'product',
+            'categ_id': self.category.id,
             'route_ids': [(4, route_a.id), (4, route_b.id)]
         })
 
@@ -1884,12 +1904,14 @@ class TestStockFlow(TestStockCommon):
         product_from_company_2 = self.env['product.product'].create({
             'name': 'The product from the other company that I absolutely want',
             'type': 'product',
+            'categ_id': self.category.id,
             'route_ids': [(4, route_a.id), (4, route_b.id)]
         })
 
         product_from_company_3 = self.env['product.product'].create({
             'name': 'Ice',
             'type': 'product',
+            'categ_id': self.category.id,
             'route_ids': [(4, route_a.id), (4, route_c.id)]
         })
 
@@ -1927,7 +1949,11 @@ class TestStockFlow(TestStockCommon):
         test ensure the scheduled_date is writable on a picking in state 'draft' or 'confirmed'
         """
         partner = self.env['res.partner'].create({'name': 'Hubert Bonisseur de la Bath'})
-        product = self.env['product.product'].create({'name': 'Un petit coup de polish', 'type': 'product'})
+        product = self.env['product.product'].create({
+            'name': 'Un petit coup de polish',
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
         wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
 
         picking = self.env['stock.picking'].create({
@@ -1963,7 +1989,11 @@ class TestStockFlow(TestStockCommon):
         grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
         self.env.user.write({'groups_id': [(4, grp_multi_loc.id, 0)]})
 
-        product = self.env['product.product'].create({'name': 'Un petit coup de polish', 'type': 'product'})
+        product = self.env['product.product'].create({
+            'name': 'Un petit coup de polish',
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
         wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
 
         self.env['stock.quant']._update_available_quantity(product, wh.wh_qc_stock_loc_id, 10)
@@ -1996,11 +2026,13 @@ class TestStockFlow(TestStockCommon):
             'name': 'Tracked by lot',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': self.category.id,
         })
         product_serial = self.env['product.product'].create({
             'name': 'Tracked by SN',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.category.id,
         })
         # Creates two receipts using some lot names in common.
         picking_type = self.env['stock.picking.type'].browse(self.picking_type_in)
@@ -2236,7 +2268,11 @@ class TestStockFlow(TestStockCommon):
         """
         partner_1 = self.env['res.partner'].create({'name': 'Hubert Bonisseur de la Bath'})
         partner_2 = self.env['res.partner'].create({'name': 'Donald Clairvoyant du Bled'})
-        product = self.env['product.product'].create({'name': 'Un petit coup de polish', 'type': 'product'})
+        product = self.env['product.product'].create({
+            'name': 'Un petit coup de polish',
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
         wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
 
         f = Form(self.env['stock.picking'])
@@ -2587,11 +2623,13 @@ class TestStockFlowPostInstall(TestStockCommon):
         stock_location = self.env['stock.location'].browse(self.stock_location)
 
         partner = self.env['res.partner'].create({'name': 'Super Partner'})
+        category = self.env['product.category'].create({'name': 'category'})
 
         product = self.env['product.product'].create({
             'name': 'Super Product',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': category.id,
         })
         sn = self.env['stock.lot'].create({
             'name': 'super_sn',

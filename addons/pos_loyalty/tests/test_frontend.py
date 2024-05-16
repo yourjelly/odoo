@@ -400,6 +400,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "type": "service",
                 "list_price": 30,
                 "available_in_pos": True,
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
         tax01 = self.env["account.tax"].create({
@@ -418,6 +419,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 15,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, [tax01.id])],
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
 
@@ -428,7 +430,8 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "type": "product",
                 "list_price": 25,
                 "available_in_pos": True,
-                "taxes_id": [(6, 0, [tax02.id])]
+                "taxes_id": [(6, 0, [tax02.id])],
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
 
@@ -623,6 +626,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "type": "product",
                 "list_price": 25,
                 "available_in_pos": True,
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
 
@@ -638,6 +642,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 25,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, [tax01.id])],
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
 
@@ -744,6 +749,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 0,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, [tax.id])],
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
 
@@ -792,6 +798,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "type": "product",
                 "list_price": 100,
                 "available_in_pos": True,
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
 
@@ -811,6 +818,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             "type": "product",
             "list_price": 10,
             "available_in_pos": True,
+            "categ_id": self.env.ref("product.product_category_services").id,
         })
 
         self.loyalty_program = self.env['loyalty.program'].create({
@@ -869,6 +877,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             "list_price": 40,
             "available_in_pos": True,
             "taxes_id": False,
+            "categ_id": self.env.ref("product.product_category_services").id,
         })
         self.product_b = self.env["product.product"].create({
             "name": "Test Product B",
@@ -876,6 +885,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             "list_price": 40,
             "available_in_pos": True,
             "taxes_id": False,
+            "categ_id": self.env.ref("product.product_category_services").id,
         })
         self.loyalty_program = self.env['loyalty.program'].create({
             'name': 'Loyalty Program Test',
@@ -909,6 +919,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'list_price': 40,
             'available_in_pos': True,
             'taxes_id': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.product_b = self.env['product.product'].create({
             'name': 'Test Product B',
@@ -916,6 +927,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'list_price': 80,
             'available_in_pos': True,
             'taxes_id': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.product_c = self.env['product.product'].create({
             'name': 'Test Product C',
@@ -923,6 +935,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'list_price': 100,
             'available_in_pos': True,
             'taxes_id': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['loyalty.program'].create({
             'name': 'Discount 10%',
@@ -998,6 +1011,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             "list_price": 265,
             "available_in_pos": True,
             "taxes_id": False,
+            "categ_id": self.env.ref("product.product_category_services").id,
         })
 
         partner_aaa = self.env['res.partner'].create({'name': 'AAA Partner'})
@@ -1020,6 +1034,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": False,
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
 
@@ -1133,6 +1148,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 0,
                 "available_in_pos": True,
                 "taxes_id": False,
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
 
@@ -1143,6 +1159,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": False,
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
 
@@ -1190,6 +1207,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, self.tax01.ids)],
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
         self.product_b = self.env["product.product"].create(
@@ -1199,6 +1217,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": False,
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
         self.free_product = self.env['loyalty.program'].create({
@@ -1303,6 +1322,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": [(6, 0, self.tax01.ids)],
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
         self.product_b = self.env["product.product"].create(
@@ -1312,6 +1332,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 "list_price": 100,
                 "available_in_pos": True,
                 "taxes_id": False,
+                "categ_id": self.env.ref("product.product_category_services").id,
             }
         )
         self.free_product = self.env['loyalty.program'].create({
@@ -1367,6 +1388,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'available_in_pos': True,
                 'taxes_id': False,
                 'product_tag_ids': [(4, free_product_tag.id)],
+                'categ_id': self.env.ref('product.product_category_services').id,
             },
             {
                 'name': 'Free Product B',
@@ -1375,6 +1397,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'available_in_pos': True,
                 'taxes_id': False,
                 'product_tag_ids': [(4, free_product_tag.id)],
+                'categ_id': self.env.ref('product.product_category_services').id,
             },
             {
                 'name': 'Product Test',
@@ -1382,6 +1405,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'list_price': 1,
                 'available_in_pos': True,
                 'taxes_id': False,
+                'categ_id': self.env.ref('product.product_category_services').id,
             }
         ])
 
@@ -1416,6 +1440,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'list_price': 1,
                 'available_in_pos': True,
                 'taxes_id': False,
+                'categ_id': self.env.ref('product.product_category_services').id,
             })
         self.env['product.product'].create({
                 'name': 'Product Test',
@@ -1423,6 +1448,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'list_price': 50,
                 'available_in_pos': True,
                 'taxes_id': False,
+                'categ_id': self.env.ref('product.product_category_services').id,
             })
 
         loyalty_program = self.env['loyalty.program'].create({
@@ -1473,6 +1499,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'list_price': 20,
             'available_in_pos': True,
             'taxes_id': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['product.product'].create({
             'name': "Product B",
@@ -1480,6 +1507,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'list_price': 30,
             'available_in_pos': True,
             'taxes_id': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.env['loyalty.program'].create({
             'name': "Discount on specific products",

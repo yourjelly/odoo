@@ -202,6 +202,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             'name': 'Super Product',
             'list_price': 100,
             'taxes_id': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.website.pricelist_id.write({
             'discount_policy': 'with_discount',
@@ -250,6 +251,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             'name': 'Super Product',
             'list_price': 0,
             'taxes_id': False,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.website.pricelist_id.write({
             'discount_policy': 'without_discount',
@@ -294,6 +296,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
         product = self.env['product.template'].create({
             'name': 'Event Product',
             'list_price': 10.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'taxes_id': [Command.create({
                 'name': "Tax 10",
                 'amount': 10,
@@ -323,7 +326,10 @@ class TestWebsitePriceList(WebsiteSaleCommon):
         ])
 
         product_template = self.env['product.template'].create({
-            'name': 'Product Template', 'list_price': 10.0, 'standard_price': 5.0
+            'name': 'Product Template',
+            'list_price': 10.0,
+            'standard_price': 5.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.assertEqual(product_template.standard_price, 5)
         price = product_template._get_sales_prices(
@@ -365,6 +371,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
         product_tmpl = self.env['product.template'].create({
             'name': 'Test Product',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'list_price': 61.98,  # 75 tax incl.
             'taxes_id': [
                 Command.create({

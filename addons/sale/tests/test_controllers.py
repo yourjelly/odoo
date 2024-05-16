@@ -81,7 +81,10 @@ class TestSaleSignature(HttpCaseWithUserPortal):
         })
         self.env['sale.order.line'].create({
             'order_id': sales_order.id,
-            'product_id': self.env['product.product'].create({'name': 'A product'}).id,
+            'product_id': self.env['product.product'].create({
+                'name': 'A product',
+                'categ_id': self.env.ref('product.product_category_services').id,
+            }).id,
         })
 
         # must be sent to the user so he can see it

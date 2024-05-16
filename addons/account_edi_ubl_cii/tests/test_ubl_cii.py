@@ -23,12 +23,14 @@ class TestAccountEdiUblCii(AccountTestInvoicingCommon):
             'name': 'Displacement',
             'uom_id': cls.uom_units.id,
             'standard_price': 90.0,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         cls.place_prdct = cls.env['product.product'].create({
             'name': 'Placement',
             'uom_id': cls.uom_units.id,
             'standard_price': 80.0,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
     def import_attachment(self, attachment, journal=None):

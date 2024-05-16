@@ -16,6 +16,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
         # Useful models
+        cls.category = cls.env.ref('product.product_category_services')
         cls.UoM = cls.env['uom.uom']
         cls.categ_unit = cls.env.ref('uom.product_uom_categ_unit')
         cls.categ_kgm = cls.env.ref('uom.product_uom_categ_kgm')
@@ -158,6 +159,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         p = Form(cls.env['product.product'])
         p.name = name
         p.detailed_type = 'product'
+        p.categ_id = cls.category
         p.uom_id = uom_id
         p.uom_po_id = uom_id
         p.route_ids.clear()
@@ -513,11 +515,13 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'type': 'product',
             'route_ids': [(4, buy_route.id)],
             'seller_ids': [(6, 0, [supplier_info1.id])],
+            'categ_id': self.category.id,
         })
         finished = self.env['product.product'].create({
             'name': 'finished',
             'type': 'product',
             'route_ids': [(4, manufacture_route.id)],
+            'categ_id': self.category.id,
         })
         self.env['stock.warehouse.orderpoint'].create({
             'name': 'A RR',
@@ -613,6 +617,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'type': 'product',
             'seller_ids': [(0, 0, {'partner_id': vendor.id})],
             'route_ids': [(4, manu_route.id), (4, buy_route.id)],
+            'categ_id': self.category.id,
         })
 
         rr = self.env['stock.warehouse.orderpoint'].create({
@@ -645,6 +650,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'type': 'product',
             'seller_ids': [(0, 0, {'partner_id': vendor.id})],
             'route_ids': buy_route,
+            'categ_id': self.category.id,
         })
         self.env['mrp.bom'].create({
             'product_tmpl_id': product.product_tmpl_id.id,
@@ -761,6 +767,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
                 'min_qty': 1,
                 'price': 1,
             })],
+            'categ_id': self.category.id,
         })
         self.env['mrp.bom'].create({
             'product_tmpl_id': product.product_tmpl_id.id,
@@ -791,10 +798,12 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
                 'min_qty': 3,
                 'price': 10,
             })],
+            'categ_id': self.category.id,
         })
         finished_product = self.env['product.product'].create({
             'name': 'finished_product',
             'type': 'product',
+            'categ_id': self.category.id,
         })
         self.env['mrp.bom'].create({
             'product_tmpl_id': finished_product.product_tmpl_id.id,
@@ -834,7 +843,11 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         location = self.stock_location
         uom_unit = self.env.ref('uom.product_uom_unit')
         final_product_tmpl = self.env['product.template'].create({'name': 'Final Product', 'type': 'product'})
-        component_product = self.env['product.product'].create({'name': 'Compo 1', 'type': 'product'})
+        component_product = self.env['product.product'].create({
+            'name': 'Compo 1',
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
 
         self.env['stock.quant']._update_available_quantity(component_product, location, 3.0)
 
@@ -887,7 +900,11 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         """
         uom_unit = self.env.ref('uom.product_uom_unit')
         final_product_tmpl = self.env['product.template'].create({'name': 'Final Product', 'type': 'product'})
-        component_product = self.env['product.product'].create({'name': 'Compo 1', 'type': 'product'})
+        component_product = self.env['product.product'].create({
+            'name': 'Compo 1',
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
 
         bom = self.env['mrp.bom'].create({
             'product_tmpl_id': final_product_tmpl.id,

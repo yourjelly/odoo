@@ -167,8 +167,10 @@ class TestProductCommon(ProductVariantsCommon):
             'default_code': 'PROD-1',
             'uom_id': cls.uom_dunit.id,
             'uom_po_id': cls.uom_dunit.id,
+            'categ_id': cls.product_category.id,
         }, {
             'name': 'Wood',  # product_2
+            'categ_id': cls.product_category.id,
         }])
 
         # Kept for reduced diff in other modules (mainly stock & mrp)

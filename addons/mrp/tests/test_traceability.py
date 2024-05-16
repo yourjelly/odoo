@@ -147,26 +147,31 @@ class TestTraceability(TestMrpCommon):
             'name': 'Finished Product',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_1 = self.env['product.product'].create({
             'name': 'Raw 1',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         product_2 = self.env['product.product'].create({
             'name': 'Raw 2',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         byproduct_1 = self.env['product.product'].create({
             'name': 'Byproduct 1',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         byproduct_2 = self.env['product.product'].create({
             'name': 'Byproduct 2',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         bom_1 = self.env['mrp.bom'].create({
             'product_id': product_final.id,
@@ -372,13 +377,16 @@ class TestTraceability(TestMrpCommon):
         productA, productB, productC = self.env['product.product'].create([{
             'name': 'Product A',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Product B',
             'type': 'product',
             'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Product C',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         lot_B01, lot_B02, lot_B03 = self.env['stock.lot'].create([{
@@ -653,6 +661,7 @@ class TestTraceability(TestMrpCommon):
         product_final = self.env['product.product'].create({
             'name': 'Finished Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         with freeze_time('2024-01-15'):
             production = self.env['mrp.production'].create({

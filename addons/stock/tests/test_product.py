@@ -17,6 +17,7 @@ class TestVirtualAvailable(TestStockCommon):
         # Make `product3` a storable product for this test. Indeed, creating quants
         # and playing with owners is not possible for consumables.
         cls.product_3.type = 'product'
+        cls.cat = cls.env['product.category'].create({'name': 'cat'})
         cls.env['stock.picking.type'].browse(cls.env.ref('stock.picking_type_out').id).reservation_method = 'manual'
 
         cls.env['stock.quant'].create({
@@ -115,6 +116,7 @@ class TestVirtualAvailable(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'Product [TEST - Change Company]',
             'type': 'product',
+            'categ_id': self.cat.id,
         })
         # Creates a quant for productA in the first company.
         self.env['stock.quant'].create({
@@ -142,6 +144,7 @@ class TestVirtualAvailable(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'Product [TEST - Change Company]',
             'type': 'consu',
+            'categ_id': self.cat.id,
         })
         picking = self.env['stock.picking'].create({
             'location_id': self.env.ref('stock.stock_location_customers').id,
@@ -174,6 +177,7 @@ class TestVirtualAvailable(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'Product Single Company',
             'type': 'product',
+            'categ_id': self.cat.id,
         })
         # Creates a quant for company 1.
         self.env['stock.quant'].create({
@@ -210,6 +214,7 @@ class TestVirtualAvailable(TestStockCommon):
         product = self.env['product.product'].create({
             'name': 'Brand new product',
             'type': 'product',
+            'categ_id': self.cat.id,
         })
         result = self.env['product.product'].search([
             ('qty_available', '=', 0),
@@ -230,6 +235,7 @@ class TestVirtualAvailable(TestStockCommon):
         self.env.ref('base.group_user').write({'implied_ids': [(4, self.env.ref('product.group_product_variant').id)]})
         template = self.env['product.template'].create({
             'name': 'Super Product',
+            'categ_id': self.cat.id,
         })
         product01 = template.product_variant_id
 
@@ -265,6 +271,7 @@ class TestVirtualAvailable(TestStockCommon):
         product02 = self.env['product.product'].create({
             'default_code': '123',
             'product_tmpl_id': template.id,
+            'categ_id': self.cat.id,
             'product_template_attribute_value_ids': [(6, 0, tmpl_attr_lines.product_template_value_ids[0].ids)]
         })
 
@@ -326,6 +333,7 @@ class TestVirtualAvailable(TestStockCommon):
             'name': 'Brand new product',
             'type': 'product',
             'tracking': 'serial',
+            'categ_id': self.cat.id,
         })
         product_form = Form(product)
         product_form.detailed_type = 'service'
@@ -342,7 +350,11 @@ class TestVirtualAvailable(TestStockCommon):
         self.assertEqual(product.tracking, 'none')
 
     def test_domain_locations_only_considers_selected_companies(self):
-        product = self.env['product.product'].create({'name': 'Product', 'type': 'product'})
+        product = self.env['product.product'].create({
+            'name': 'Product',
+            'type': 'product',
+            'categ_id': self.cat.id,
+        })
         company_a = self.env['res.company'].create({'name': 'Company A'})
         company_b = self.env['res.company'].create({'name': 'Company B'})
         warehouse_a = self.env['stock.warehouse'].create({

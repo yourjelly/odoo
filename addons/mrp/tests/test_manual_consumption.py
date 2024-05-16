@@ -17,11 +17,15 @@ class TestTourManualConsumption(HttpCase):
         product_finish = Product.create({
             'name': 'finish',
             'type': 'product',
-            'tracking': 'none',})
+            'tracking': 'none',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         product_nt = Product.create({
             'name': 'No tracking',
             'type': 'product',
-            'tracking': 'none',})
+            'tracking': 'none',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         bom = self.env['mrp.bom'].create({
             'product_id': product_finish.id,
             'product_tmpl_id': product_finish.product_tmpl_id.id,
@@ -161,15 +165,21 @@ class TestManualConsumption(TestMrpCommon):
         product_finish = Product.create({
             'name': 'finish',
             'type': 'product',
-            'tracking': 'none'})
+            'tracking': 'none',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         product_auto_consumption = Product.create({
             'name': 'Automatic',
             'type': 'product',
-            'tracking': 'none'})
+            'tracking': 'none',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         product_manual_consumption = Product.create({
             'name': 'Manual',
             'type': 'product',
-            'tracking': 'none'})
+            'tracking': 'none',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         bom = self.env['mrp.bom'].create({
             'product_id': product_finish.id,
             'product_tmpl_id': product_finish.product_tmpl_id.id,

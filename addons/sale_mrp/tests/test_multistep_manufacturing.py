@@ -27,10 +27,12 @@ class TestMultistepManufacturing(TestMrpCommon):
         cls.warehouse = warehouse_form.save()
 
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
+        cls.category = cls.env['product.category'].create({'name': 'category'})
 
         # Create manufactured product
         product_form = Form(cls.env['product.product'])
         product_form.name = 'Stick'
+        product_form.categ_id = cls.category
         product_form.uom_id = cls.uom_unit
         product_form.uom_po_id = cls.uom_unit
         product_form.route_ids.clear()
@@ -41,6 +43,7 @@ class TestMultistepManufacturing(TestMrpCommon):
         # Create raw product for manufactured product
         product_form = Form(cls.env['product.product'])
         product_form.name = 'Raw Stick'
+        product_form.categ_id = cls.category
         product_form.uom_id = cls.uom_unit
         product_form.uom_po_id = cls.uom_unit
         cls.product_raw = product_form.save()
@@ -107,9 +110,10 @@ class TestMultistepManufacturing(TestMrpCommon):
             an activity should be generated on parent MO, to notify user that
             demands from child MO has been cancelled.
         """
-
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_form = Form(self.env['product.product'])
         product_form.name = 'Screw'
+        product_form.categ_id = product_category
         self.product_screw = product_form.save()
 
         # Add routes for manufacturing and make to order to the raw material product

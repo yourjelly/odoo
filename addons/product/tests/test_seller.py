@@ -14,11 +14,14 @@ class TestSeller(TransactionCase):
         super().setUpClass()
         cls.product_service = cls.env['product.product'].create({
             'name': 'Virtual Home Staging',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.product_service.default_code = 'DEFCODE'
         cls.product_consu = cls.env['product.product'].create({
             'name': 'Boudin',
             'type': 'consu',
+            'categ_id': cls.env.ref('product.product_category_services').id,
+
         })
         cls.product_consu.default_code = 'DEFCODE'
         cls.asustec = cls.env['res.partner'].create({'name': 'Wood Corner'})
@@ -70,9 +73,11 @@ class TestSeller(TransactionCase):
         self.ipad_mini, self.monitor = self.env['product.product'].create([{
             'name': 'Large Cabinet',
             'standard_price': 800.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Super nice monitor',
             'list_price': 1000.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
 
         self.env['product.supplierinfo'].create([

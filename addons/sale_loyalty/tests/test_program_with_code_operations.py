@@ -193,6 +193,7 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
         self.third_product = self.env['product.product'].create({
             'name': 'Thrid Product',
             'list_price': 5,
+            'categ_id': self.env.ref('product.product_category_services').id,
             'sale_ok': True
         })
         order.write({'order_line': [

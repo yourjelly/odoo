@@ -58,7 +58,8 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
             'user_id': cls.public_user.id,  # specific public user
         })
         product = cls.env['product.product'].create({
-            'name': 'The Product'
+            'name': 'The Product',
+            'categ_id': cls.env.ref('product.product_category_office').id,
         })
         add_order_line = [[0, 0, {
             'name': 'The Product',
@@ -155,7 +156,8 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
         website.send_abandoned_cart_email = True
 
         product = self.env['product.product'].create({
-            'name': 'The Product'
+            'name': 'The Product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         order_line = [[0, 0, {
             'name': 'The Product',
@@ -200,7 +202,8 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
         # Test that no email is sent if the sale order contains product that are free.
         free_product_template = self.env['product.template'].create({
             'list_price': 0.0,
-            'name': 'free_product'
+            'name': 'free_product',
+            'categ_id': self.env.ref('product.product_category_office').id,
         })
         free_product_product = free_product_template.product_variant_id
         order_line = [[0, 0, {

@@ -42,6 +42,7 @@ class TestCarrierPropagation(TransactionCase):
         cls.super_product = cls.ProductProduct.create({
             'name': 'Super Product',
             'invoice_policy': 'delivery',
+            'categ_id': cls.env.ref('delivery.product_category_deliveries').id,
         })
         mto_route = cls.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
@@ -49,6 +50,7 @@ class TestCarrierPropagation(TransactionCase):
         cls.mto_product = cls.ProductProduct.create({
             'name': 'MTO Product',
             'invoice_policy': 'delivery',
+            'categ_id': cls.env.ref('delivery.product_category_deliveries').id,
             'route_ids': [(6, 0, mto_route.ids)],
         })
         cls.rule_pack = cls.warehouse.delivery_route_id.rule_ids.filtered(lambda r: r.picking_type_id == cls.warehouse.pack_type_id)

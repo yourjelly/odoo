@@ -16,7 +16,10 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
         cls.pricelist = cls.env['product.pricelist'].create({
             'name': 'Test Pricelist',
         })
-        cls.product_4 = cls.env['product.product'].create({'name': 'A product to deliver'})
+        cls.product_4 = cls.env['product.product'].create({
+            'name': 'A product to deliver',
+            'categ_id': cls.env.ref('delivery.product_category_deliveries').id,
+        })
         cls.product_uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.product_delivery = cls.env['product.product'].create({
             'name': 'Delivery Charges',

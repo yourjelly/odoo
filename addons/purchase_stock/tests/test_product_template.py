@@ -20,6 +20,7 @@ class TestProductTemplate(TransactionCase):
         'default_code': 'VOB2A',
         'seller_ids': [seller.id],
         'purchase_ok': True,
+        'categ_id': self.env.ref('product.product_category_office').id,
       })
       ns = self.env['product.template'].with_context(partner_id=partner.id).name_search('VOB2', [['purchase_ok', '=', True]])
       self.assertEqual(len(ns), 1, "name_search should have 1 item")

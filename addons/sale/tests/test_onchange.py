@@ -41,9 +41,17 @@ class TestSaleOnchanges(TransactionCase):
         # Reuse non blocking partner for product warning tests
         sale_order.partner_id = partner_with_warning
         product_with_warning = self.env['product.product'].create({
-            'name': 'Test Product', 'sale_line_warn': 'warning', 'sale_line_warn_msg': 'Highly corrosive'})
+            'name': 'Test Product',
+            'sale_line_warn': 'warning',
+            'sale_line_warn_msg': 'Highly corrosive',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
         product_with_block_warning = self.env['product.product'].create({
-            'name': 'Test Product (2)', 'sale_line_warn': 'block', 'sale_line_warn_msg': 'Not produced anymore'})
+            'name': 'Test Product (2)',
+            'sale_line_warn': 'block',
+            'sale_line_warn_msg': 'Not produced anymore',
+            'categ_id': self.env.ref('product.product_category_services').id,
+        })
 
         sale_order_line = self.env['sale.order.line'].create({
             'order_id': sale_order.id,

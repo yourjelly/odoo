@@ -71,6 +71,7 @@ class TestStockReplenish(TestStockCommon):
         product = self.env['product.template'].create({
         'name': 'Brand new product',
         'type': 'product',
+        'categ_id': self.env.ref('product.product_category_services').id,
     })
         self.assertEqual(len(product.route_ids), 0)
         wizard = Form(self.env['product.replenish'].with_context(default_product_tmpl_id=product.id))

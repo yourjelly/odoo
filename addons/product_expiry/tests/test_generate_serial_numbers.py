@@ -19,6 +19,7 @@ class TestStockLot(StockGenerateCommon):
             'tracking': 'lot',
             'type': 'product',
             'use_expiration_date': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         user_lang = self.env['res.lang'].browse([get_lang(self.env).id])
         # Try first with the "day/month/year" date format.
@@ -66,6 +67,7 @@ class TestStockLot(StockGenerateCommon):
             'name': 'Tracked by Lot Numbers',
             'tracking': 'lot',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         user_lang = self.env['res.lang'].browse([get_lang(self.env).id])
         # Try first with the "day/month/year" date format.
@@ -95,6 +97,7 @@ class TestStockLot(StockGenerateCommon):
             'tracking': 'lot',
             'type': 'product',
             'use_expiration_date': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         user_lang = self.env['res.lang'].browse([get_lang(self.env).id])
         # Month first in the system but day in the first place in the given dates.
@@ -141,6 +144,7 @@ class TestStockLot(StockGenerateCommon):
             'tracking': 'lot',
             'type': 'product',
             'use_expiration_date': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         list_lot_and_qty = [
             {'lot_name': "ln01", "date": "01 march 2077", "datetime": datetime.strptime('2077-03-01', "%Y-%m-%d")},
@@ -167,6 +171,7 @@ class TestStockLot(StockGenerateCommon):
             'tracking': 'lot',
             'type': 'product',
             'use_expiration_date': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         list_lot_and_qty = [
             "ln01\t31/12",  # Day is missing but the date is valid.
@@ -223,6 +228,7 @@ class TestStockLot(StockGenerateCommon):
             'tracking': 'lot',
             'type': 'product',
             'use_expiration_date': True,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         user_lang = self.env['res.lang'].browse([get_lang(self.env).id])
         user_lang.date_format = "%d/%m/%y"

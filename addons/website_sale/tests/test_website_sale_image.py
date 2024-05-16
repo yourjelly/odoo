@@ -93,6 +93,7 @@ class TestWebsiteSaleImage(HttpCase):
         # create the template, without creating the variants
         template = self.env['product.template'].create({
             'name': 'A Colorful Image',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'product_template_image_ids': [
                 Command.create({'name': 'image 1', 'image_1920': image_gif}),
                 Command.create({'name': 'image 4', 'image_1920': image_svg}),
@@ -233,6 +234,7 @@ class TestWebsiteSaleImage(HttpCase):
         self.env['product.product'].create({
             'product_tmpl_id': template.id,
             'image_1920': green_image,
+            'categ_id': self.env.ref('product.product_category_services').id,
         }).unlink()
         self.assertEqual(template.image_1920, red_image)
 
@@ -258,6 +260,7 @@ class TestWebsiteSaleImage(HttpCase):
 
         product = self.env['product.product'].create({
             'product_tmpl_id': template.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         product_image = self.env['product.image'].with_context(**additionnal_context).create([{
@@ -306,6 +309,7 @@ class TestWebsiteSaleImage(HttpCase):
         # create the template, without creating the variants
         template = self.env['product.template'].with_context(create_product_product=False).create({
             'name': 'Test subject',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         # when there are no variants, the image must be obtained from the template
@@ -388,11 +392,13 @@ class TestWebsiteSaleRemoveImage(HttpCase):
         cls.template = cls.env['product.template'].with_context(create_product_product=False).create({
             'name': 'Test Remove Image',
             'image_1920': blue_image,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
     def test_website_sale_add_and_remove_main_product_image_no_variant(self):
         self.product = self.env['product.product'].create({
             'product_tmpl_id': self.template.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.start_tour(self.env['website'].get_client_action_url('/'), 'add_and_remove_main_product_image_no_variant', login='admin')
@@ -408,6 +414,7 @@ class TestWebsiteSaleRemoveImage(HttpCase):
         }])
         self.product = self.env['product.product'].create({
             'product_tmpl_id': self.template.id,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.start_tour(self.env['website'].get_client_action_url('/'), 'remove_main_product_image_with_variant', login='admin')
         self.assertFalse(self.template.image_1920)

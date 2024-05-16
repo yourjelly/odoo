@@ -98,6 +98,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
         # Create service products
 
         # -- ordered quantities (ordered, timesheet)
+        cls.category = cls.env['product.category'].create({'name': 'category'})
         cls.product_order_timesheet1 = cls.env['product.product'].create({
             'name': "Service Ordered, create no task",
             'standard_price': 11,
@@ -112,6 +113,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': False,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_order_timesheet2 = cls.env['product.product'].create({
             'name': "Service Ordered, create task in global project",
@@ -127,6 +129,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': cls.project_global.id,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_order_timesheet3 = cls.env['product.product'].create({
             'name': "Service Ordered, create task in new project",
@@ -142,6 +145,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': False,  # will create a project
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_order_timesheet4 = cls.env['product.product'].create({
             'name': "Service Ordered, create project only",
@@ -157,6 +161,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': False,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_order_timesheet5 = cls.env['product.product'].create({
             'name': "Service Ordered, create project only based on template",
@@ -173,6 +178,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_template_id': cls.project_template.id,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
 
         # -- timesheet on tasks (delivered, timesheet)
@@ -190,6 +196,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': False,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_delivery_timesheet2 = cls.env['product.product'].create({
             'name': "Service delivered, create task in global project",
@@ -205,6 +212,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': cls.project_global.id,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_delivery_timesheet3 = cls.env['product.product'].create({
             'name': "Service delivered, create task in new project",
@@ -220,6 +228,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': False,  # will create a project
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_delivery_timesheet4 = cls.env['product.product'].create({
             'name': "Service delivered, create project only",
@@ -235,6 +244,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': False,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_delivery_timesheet5 = cls.env['product.product'].create({
             'name': "Service delivered, create project only based on template",
@@ -251,6 +261,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': False,
             'taxes_id': False,
             'property_account_income_id': cls.account_sale.id,
+            'categ_id': cls.cat.id,
         })
         cls.product_service_delivered_timesheet = cls.env['product.product'].create({
             'name': "Service timesheet",
@@ -261,6 +272,7 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
             'project_id': False,
             'invoice_policy': 'delivery',
             'service_type': 'timesheet',
+            'categ_id': cls.cat.id,
         })
 
     def setUp(self):

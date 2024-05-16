@@ -35,12 +35,14 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
             'uom_po_id': cls.env.ref('uom.product_uom_hour').id,
             'property_account_income_id': cls.company_data['default_account_revenue'].id,
             'property_account_expense_id': cls.company_data['default_account_expense'].id,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.product_no_uom = cls.env['product.product'].create({
             'name': 'Item without UoM',
             'type': 'service',
             'property_account_income_id': cls.company_data['default_account_revenue'].id,
             'property_account_expense_id': cls.company_data['default_account_expense'].id,
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
 
         # Partners

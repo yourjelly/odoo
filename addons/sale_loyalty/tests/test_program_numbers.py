@@ -983,6 +983,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         testprod = self.env['product.product'].create({
             'name': 'testprod',
             'lst_price': 118.0,
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.all_programs |= self.env['loyalty.program'].create({
@@ -1241,6 +1242,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
             'list_price': 100,
             'sale_ok': True,
             'taxes_id': [(6, 0, [])],
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         self.all_programs |= self.env['loyalty.program'].create({
             'name': '1 Product F = 5$ discount',
@@ -1286,24 +1288,28 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         # Apply both coupons -> order total should be 10$
         # Apply a 10% discount -> order total should be 9$
         # Redo the same process but discount first
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_a, product_b, product_c = self.env['product.product'].create([
             {
                 'name': 'Product A',
                 'list_price': 6,
                 'sale_ok': True,
                 'taxes_id': [(6, 0, [])],
+                'categ_id': product_category.id
             },
             {
                 'name': 'Product B',
                 'list_price': 4,
                 'sale_ok': True,
                 'taxes_id': [(6, 0, [])],
+                'categ_id': product_category.id
             },
             {
                 'name': 'Product C',
                 'list_price': 10,
                 'sale_ok': True,
                 'taxes_id': [(6, 0, [])],
+                'categ_id': product_category.id
             },
         ])
         programs = self.env['loyalty.program'].create([
@@ -1382,18 +1388,21 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         # Applying both programs in a different order should result in a different
         #  outcome since discountable amounts are computed per tax
         # Applying program A before B should yield a better final price
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_a, product_b = self.env['product.product'].create([
             {
                 'name': 'Product A',
                 'list_price': 10,
                 'sale_ok': True,
                 'taxes_id': [(6, 0, [self.tax_10pc_excl.id])],
+                'categ_id': product_category.id
             },
             {
                 'name': 'Product B',
                 'list_price': 10,
                 'sale_ok': True,
                 'taxes_id': [(6, 0, [self.tax_20pc_excl.id])],
+                'categ_id': product_category.id
             },
         ])
         program_a, program_b = self.env['loyalty.program'].create([

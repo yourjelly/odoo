@@ -24,9 +24,11 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         self.finished2, self.comp3 = self.env['product.product'].create([{
             'name': 'SuperProduct',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }, {
             'name': 'Component',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         }])
         self.vendor = self.env['res.partner'].create({
             'name': 'Vendor',
@@ -216,10 +218,12 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         product = self.env['product.product'].create({
             'name': 'Product',
             'detailed_type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         component = self.env['product.product'].create({
             'name': 'Component',
             'detailed_type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         subcontractor = self.env['res.partner'].create({
             'name': 'Subcontractor',
@@ -732,10 +736,12 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         finished, component = self.env['product.product'].create([{
             'name': 'Finished Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'seller_ids': [(0, 0, {'partner_id': self.subcontractor_partner1.id})]
         }, {
             'name': 'Component',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': [(4, resupply_route.id)],
         }])
 

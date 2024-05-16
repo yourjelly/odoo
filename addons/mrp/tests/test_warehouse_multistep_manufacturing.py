@@ -24,6 +24,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         cls.warehouse = warehouse_form.save()
 
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
+        cls.product_category = cls.env['product.category'].create({'name': 'Product Category'})
 
         # Create manufactured product
         product_form = Form(cls.env['product.product'])
@@ -31,6 +32,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         product_form.uom_id = cls.uom_unit
         product_form.uom_po_id = cls.uom_unit
         product_form.detailed_type = 'product'
+        product_form.categ_id = cls.product_category
         product_form.route_ids.clear()
         product_form.route_ids.add(cls.warehouse.manufacture_pull_id.route_id)
         product_form.route_ids.add(cls.warehouse.mto_pull_id.route_id)
@@ -40,6 +42,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         product_form = Form(cls.env['product.product'])
         product_form.name = 'Raw Stick'
         product_form.detailed_type = 'product'
+        product_form.categ_id = cls.product_category
         product_form.uom_id = cls.uom_unit
         product_form.uom_po_id = cls.uom_unit
         cls.raw_product = product_form.save()
@@ -288,6 +291,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         new_product = self.env['product.product'].create({
             'name': 'New product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         bom.consumption = 'flexible'
         production_form = Form(self.env['mrp.production'])
@@ -334,14 +338,17 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             'name': 'Super Product',
             'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))],
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         secondary_product = self.env['product.product'].create({
             'name': 'Secondary',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
         component = self.env['product.product'].create({
             'name': 'Component',
             'type': 'consu',
+            'categ_id': self.env.ref('product.product_category_services').id,
         })
 
         self.env['mrp.bom'].create({
@@ -401,11 +408,13 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             p.route_ids.add(self.warehouse.manufacture_pull_id.route_id)
 
         # Create an additional BoM for component
+        product_category = self.env['product.category'].create({'name': 'Product Category'})
         product_form = Form(self.env['product.product'])
         product_form.name = 'Wood'
         product_form.detailed_type = 'product'
         product_form.uom_id = self.uom_unit
         product_form.uom_po_id = self.uom_unit
+        product_form.categ_id = product_category
         self.wood_product = product_form.save()
 
         # Create bom for manufactured product
@@ -556,6 +565,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         finished_product = self.env['product.product'].create({
             'name': 'Product',
             'type': 'product',
+            'categ_id': self.env.ref('product.product_category_services').id,
             'route_ids': manufacturing_route,
         })
         self.env['mrp.bom'].create({
@@ -598,31 +608,37 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         """
         manufacturing_route = self.env['stock.rule'].search([
             ('action', '=', 'manufacture')]).route_id
+        product_category = self.env.ref('product.product_category_services')
         products = self.env['product.product'].create([
             {
             'name': 'FP',
             'type': 'product',
             'route_ids': manufacturing_route,
+            'categ_id': product_category.id,
             },
             {
             'name': 'P1',
             'type': 'product',
             'route_ids': manufacturing_route,
+            'categ_id': product_category.id,
             },
             {
             'name': 'P2',
             'type': 'product',
             'route_ids': manufacturing_route,
+            'categ_id': product_category.id,
             },
             {
             'name': 'P3',
             'type': 'product',
             'route_ids': manufacturing_route,
+            'categ_id': product_category.id,
             },
             {
             'name': 'P4',
             'type': 'product',
             'route_ids': manufacturing_route,
+            'categ_id': product_category.id,
             },
 
         ])
