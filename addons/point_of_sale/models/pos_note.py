@@ -19,4 +19,4 @@ class PosNote(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config_id):
-        return ['name']
+        return ['name', 'color']

@@ -17,7 +17,7 @@ export class Orderline extends Component {
                 comboParent: { type: String, optional: true },
                 oldUnitPrice: { type: String, optional: true },
                 customerNote: { type: String, optional: true },
-                internalNote: { type: String, optional: true },
+                internalNote: { type: Array, optional: true },
                 imageSrc: { type: String, optional: true },
                 packLotLines: { type: Array, optional: true },
                 price_without_discount: { type: String, optional: true },
