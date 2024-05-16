@@ -365,6 +365,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
         fromSerialized = false,
         delayedSetup = false
     ) {
+        vals = { ...vals };
         if (!("id" in vals)) {
             vals["id"] = uuid(model);
         }
