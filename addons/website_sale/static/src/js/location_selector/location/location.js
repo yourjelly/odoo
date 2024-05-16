@@ -35,6 +35,10 @@ export class Location extends Component {
      * @return {Object} The city and the postal code.
      */
     getCityAndPostalCode() {
-        return this.props.postalCode + " " + this.props.city
+        if (this.env.zipBeforeCity) {
+            return this.props.postalCode + " " + this.props.city
+        } else {
+            return this.props.city + " " + this.props.postalCode
+        }
     }
 }

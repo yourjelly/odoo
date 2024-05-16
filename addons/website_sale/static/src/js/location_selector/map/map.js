@@ -146,7 +146,11 @@ export class Map extends Component {
      * @return {Object} The city and the postal code.
      */
     getCityAndPostalCode(selectedLocation) {
-        return selectedLocation.postal_code + " " + selectedLocation.city
+        if (this.env.zipBeforeCity) {
+            return selectedLocation.postal_code + " " + selectedLocation.city
+        } else {
+            return selectedLocation.city + " " + selectedLocation.postal_code
+        }
     }
 
     /**

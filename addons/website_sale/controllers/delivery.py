@@ -32,6 +32,32 @@ class Delivery(WebsiteSale):
         """ Hook to update values used for rendering the website_sale.delivery_form template. """
         return {}
 
+    @route(
+        '/shop/get_delivery_method_countries',
+        type='json',
+        auth='public',
+        website=True,
+    )
+    def get_delivery_method_countries(self):
+        carrier_sudo = request.website.sale_get_order().carrier_id
+        if carrier_sudo.country_ids:
+            countries = carrier_sudo.country_ids
+        else:
+            countries = request.env['res.country'].search_fetch(
+                [], ['id', 'name', 'code', 'image_url']
+            )
+        return [
+            {
+                'value': {
+                    'name': c.name,
+                    'code': c.code,
+                    'image_url': c.image_url,
+                    'fields': c.get_address_fields(),
+                },
+                'label': c.name,
+            } for c in countries
+        ]
+
     @route('/shop/set_delivery_method', type='json', auth='public', website=True)
     def shop_set_delivery_method(self, dm_id=None, **kwargs):
         """ Set the delivery method on the current order and return the order summary values.
@@ -88,18 +114,18 @@ class Delivery(WebsiteSale):
         }
 
     @route('/shop/get_delivery_rate', type='json', auth='public', methods=['POST'], website=True)
-    def shop_get_delivery_rate(self, dm_id):
+    def shop_get_delivery_rate(self, dm_id, partial_shipping_address=None):
         """ Return the delivery rate data for the given delivery method.
 
         :param str dm_id: The delivery method whose rate to get, as a `delivery.carrier` id.
         :return: The delivery rate data.
         :rtype: dict
         """
-        order = request.website.sale_get_order()
-        if not order:
+        order_sudo = request.website.sale_get_order()
+        if not order_sudo:
             raise ValidationError(_("Your cart is empty."))
 
-        if int(dm_id) not in order._get_delivery_methods().ids:
+        if int(dm_id) not in order_sudo._get_delivery_methods().ids:
             raise UserError(_(
                 "It seems that a delivery method is not compatible with your address. Please"
                 " refresh the page and try again."
@@ -107,15 +133,32 @@ class Delivery(WebsiteSale):
 
         Monetary = request.env['ir.qweb.field.monetary']
         delivery_method = request.env['delivery.carrier'].sudo().browse(int(dm_id)).exists()
-        rate = Delivery._get_rate(delivery_method, order)
+        temp_order = False
+        if partial_shipping_address:
+            temp_order = request.env['sale.order'].new(origin=order_sudo)
+            country = request.env['res.country'].search(
+                [('code', '=', partial_shipping_address['country_code'])],
+                limit=1,
+            )
+            partner_address = order_sudo.env['res.partner'].new({
+                'active': False,
+                'country_id': country.id,
+                'zip': partial_shipping_address['zip'],
+            })
+            temp_order.partner_shipping_id = partner_address
+        rate = Delivery._get_rate(
+            delivery_method,
+            temp_order or order_sudo,
+            partial_delivery_address=bool(partial_shipping_address),
+        )
         if rate['success']:
             rate['amount_delivery'] = Monetary.value_to_html(
-                rate['price'], {'display_currency': order.currency_id}
+                rate['price'], {'display_currency': order_sudo.currency_id}
             )
             rate['is_free_delivery'] = not bool(rate['price'])
         else:
             rate['amount_delivery'] = Monetary.value_to_html(
-                0.0, {'display_currency': order.currency_id}
+                0.0, {'display_currency': order_sudo.currency_id}
             )
         return rate
 
@@ -137,7 +180,7 @@ class Delivery(WebsiteSale):
             order.access_point_address = pickup_location
 
     @route('/shop/get_close_locations', type='json', auth='public', website=True)
-    def shop_get_close_locations(self, zip_code=None):
+    def shop_get_close_locations(self, zip_code=None, country_code=None):
         """ Return the pickup locations of the delivery method close to a given zip code.
 
         If `zip_code` is provided, determine the country based on GeoIP or fallback on the order
@@ -145,15 +188,16 @@ class Delivery(WebsiteSale):
         code and the country to use.
 
         :param int zip_code: The zip code to look up to.
+        :param str country_code: The country code to look up to.
         :return: The close pickup locations data.
         :rtype: dict
         """
         order_sudo = request.website.sale_get_order()
         if zip_code:
             country = request.env['res.country'].search(
-                [('code', '=', request.geoip.country_code)],
+                [('code', '=', country_code or request.geoip.country_code)],
                 limit=1,
-            ) if request.geoip.country_code else order_sudo.partner_shipping_id.country_id
+            ) or order_sudo.partner_shipping_id.country_id
             partner_address = order_sudo.env['res.partner'].new({
                 'active': False,
                 'country_id': country.id,
@@ -169,7 +213,15 @@ class Delivery(WebsiteSale):
             close_locations = getattr(order_sudo.carrier_id, function_name)(partner_address)
             if not close_locations:
                 return error
-            return {'close_locations': close_locations}
+            return {
+                'close_locations': close_locations,
+                'selected_country': {
+                    'name': partner_address.country_id.name,
+                    'code': partner_address.country_id.code,
+                    'image_url': partner_address.country_id.image_url,
+                    'fields': partner_address.country_id.get_address_fields(),
+                },
+            }
         except UserError as e:
             return {'error': str(e)}
 
@@ -230,19 +282,19 @@ class Delivery(WebsiteSale):
             'name': dm.name,
             'description': dm.website_description,
             'minorAmount': payment_utils.to_minor_currency_units(
-                Delivery._get_rate(dm, order_sudo, is_express_checkout_flow=True)['price'],
+                Delivery._get_rate(dm, order_sudo, partial_delivery_address=True)['price'],
                 order_sudo.currency_id,
             ),
         } for dm in order_sudo._get_delivery_methods()], key=lambda dm: dm['minorAmount'])
 
     @staticmethod
-    def _get_rate(delivery_method, order, is_express_checkout_flow=False):
+    def _get_rate(delivery_method, order, partial_delivery_address=False):
         """ Compute the delivery rate and apply the taxes if relevant.
 
         :param delivery.carrier delivery_method: The delivery method for which the rate must be
                                                  computed.
         :param sale.order order: The current sales order.
-        :param boolean is_express_checkout_flow: Whether the flow is express checkout.
+        :param boolean partial_delivery_address: Whether the flow is express checkout.
         :return: The delivery rate data.
         :rtype: dict
         """
@@ -252,7 +304,7 @@ class Delivery(WebsiteSale):
         # still want to compute the rate, this context key will ensure that we only check the
         # required fields for a partial delivery address (city, zip, country_code, state_code).
         rate = delivery_method.rate_shipment(order.with_context(
-            express_checkout_partial_delivery_address=is_express_checkout_flow
+            partial_delivery_address=partial_delivery_address
         ))
         if rate.get('success'):
             tax_ids = delivery_method.product_id.taxes_id.filtered(
@@ -269,7 +321,7 @@ class Delivery(WebsiteSale):
                     partner=order.partner_shipping_id,
                 )
                 if (
-                    not is_express_checkout_flow
+                    not partial_delivery_address
                     and request.website.show_line_subtotals_tax_selection == 'tax_excluded'
                 ):
                     rate['price'] = taxes['total_excluded']

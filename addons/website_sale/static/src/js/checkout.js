@@ -135,11 +135,12 @@ publicWidget.registry.websiteSaleCheckout = publicWidget.Widget.extend({
      * @return {void}
      */
     async _selectPickupLocation(ev) {
-        const { zipCode, locationId } = ev.currentTarget.dataset;
+        const { zipCode, countryCode, locationId } = ev.currentTarget.dataset;
         this.call('dialog', 'add', LocationSelectorDialog, {
             zipCode: zipCode,
+            countryCode: countryCode,
             selectedLocationId: locationId,
-            save: async (location) => {
+            save: async (location, countryCode) => {
                 // Assign the selected pickup location to the order.
                 await this._setPickupLocation(location.pickup_location_data);
 
@@ -159,6 +160,7 @@ publicWidget.registry.websiteSaleCheckout = publicWidget.Widget.extend({
                 );
                 editPickupLocationButton.dataset.locationId = location.id;
                 editPickupLocationButton.dataset.zipCode = location.postal_code;
+                editPickupLocationButton.dataset.countryCode = countryCode;
                 pickupLocation.querySelector(
                     '[name="o_pickup_location_details"]'
                 ).classList.remove('d-none');

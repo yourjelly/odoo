@@ -89,6 +89,7 @@
                     title="Change location"
                     t-att-data-location-id="pickup_location.get('id')"
                     t-att-data-zip-code="pickup_location.get('postal_code')"
+                    t-att-data-country-code="pickup_location.get('country_code')"
                 />
             </div>
             <button
