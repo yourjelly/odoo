@@ -147,7 +147,6 @@ update-rc.d -f nginx remove
 update-rc.d -f dnsmasq remove
 
 systemctl enable ramdisks.service
-systemctl enable led-status.service
 systemctl disable dphys-swapfile.service
 systemctl enable ssh
 systemctl set-default graphical.target
@@ -156,6 +155,7 @@ systemctl enable systemd-timesyncd.service
 systemctl unmask hostapd.service
 systemctl disable hostapd.service
 systemctl disable cups-browsed.service
+systemctl enable odoo.service
 
 # disable overscan in /boot/config.txt, we can't use
 # overwrite_after_init because it's on a different device
