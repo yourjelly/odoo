@@ -14,6 +14,7 @@ patch(Navbar.prototype, {
      */
     setup() {
         super.setup();
+        this.sound = useService('sound');
         this.state = useState({
             posOrderCount: 0,
             posOrderData: [],
@@ -29,6 +30,7 @@ patch(Navbar.prototype, {
             id: Math.random(),
             name: brandName,
         });
+        this.sound.play("notification");
         this.notification.add(
             "Order arrived",
             {
