@@ -115,6 +115,7 @@ class StockQuant(models.Model):
     is_outdated = fields.Boolean('Quantity has been moved since last count', compute='_compute_is_outdated', search='_search_is_outdated')
     user_id = fields.Many2one(
         'res.users', 'Assigned To', help="User assigned to do product count.")
+    product_name = fields.Char(string = "Product Name")
 
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):
@@ -250,6 +251,9 @@ class StockQuant(models.Model):
         """ Override to handle the "inventory mode" and create a quant as
         superuser the conditions are met.
         """
+
+        # breakpoint()
+
         quants = self.env['stock.quant']
         is_inventory_mode = self._is_inventory_mode()
         allowed_fields = self._get_inventory_fields_create()
@@ -261,7 +265,32 @@ class StockQuant(models.Model):
                 inventory_quantity = vals.pop('inventory_quantity_auto_apply', False) or vals.pop(
                     'inventory_quantity', False) or 0
                 # Create an empty quant or write on a similar one.
+                # if not product_id in vals_list and product_name:
+                #     self.env['product.product'].create({
+                #         'name': vals_list.product_name,
+                #         'type': 'product',
+                #     })
+
+                # Ensure the product exists or create it
+                # product_id = vals.get('product_id')
+                # product_name = vals.get('product_name')
+                # if not product_id and product_name:
+                    # Search for a product with the given name
+                    # product = self.env['product.product'].search([('name', '=', product_name)], limit=1)
+                    # if not product:
+
+                        # Create the product if it doesn't exist
+                #     product_vals = {
+                #         'name': product_name,
+                #         'type':  'product',
+                #         # Add other necessary product fields here
+                #     }
+                #     product = self.env['product.product'].create(product_vals)
+                #     product_id = product.id
+                #     vals['product_id'] = product_id
+                # elif product_id: 
                 product = self.env['product.product'].browse(vals['product_id'])
+                    
                 location = self.env['stock.location'].browse(vals['location_id'])
                 lot_id = self.env['stock.lot'].browse(vals.get('lot_id'))
                 package_id = self.env['stock.quant.package'].browse(vals.get('package_id'))
@@ -326,8 +355,15 @@ class StockQuant(models.Model):
     def _get_forbidden_fields_write(self):
         """ Returns a list of fields user can't edit when he want to edit a quant in `inventory_mode`."""
         return ['product_id', 'location_id', 'lot_id', 'package_id', 'owner_id']
+    
+    def execute_import(self, fields, columns, options, dryrun=False):
+        res = super().execute_import(fields, columns, options, dryrun=dryrun)
+
+        breakpoint()
+        pass
 
     def write(self, vals):
+        breakpoint()
         """ Override to handle the "inventory mode" and create the inventory move. """
         forbidden_fields = self._get_forbidden_fields_write()
         if self._is_inventory_mode() and any(field for field in forbidden_fields if field in vals.keys()):
@@ -335,7 +371,7 @@ class StockQuant(models.Model):
                 # Do nothing when user tries to modify manually a inventory loss
                 return
             self = self.sudo()
-            raise UserError(_("Quant's editing is restricted, you can't do this operation."))
+            # raise UserError(_("Quant's editing is restricted, you can't do this operation."))
         return super(StockQuant, self).write(vals)
 
     @api.ondelete(at_uninstall=False)
@@ -985,6 +1021,7 @@ class StockQuant(models.Model):
             ).lot_stock_id
 
     def _apply_inventory(self):
+        breakpoint()
         move_vals = []
         for quant in self:
             # Create and validate a move so that the quant matches its `inventory_quantity`.
@@ -1022,6 +1059,7 @@ class StockQuant(models.Model):
 
     @api.model
     def _update_available_quantity(self, product_id, location_id, quantity=False, reserved_quantity=False, lot_id=None, package_id=None, owner_id=None, in_date=None):
+        breakpoint()
         """ Increase or decrease `quantity` or 'reserved quantity' of a set of quants for a given set of
         product_id/location_id/lot_id/package_id/owner_id.
 
@@ -1194,7 +1232,7 @@ class StockQuant(models.Model):
         """
         fields = ['inventory_quantity', 'inventory_quantity_auto_apply', 'inventory_diff_quantity',
                   'inventory_date', 'user_id', 'inventory_quantity_set', 'is_outdated', 'lot_id',
-                  'location_id', 'package_id']
+                  'location_id', 'package_id', 'product_name']
         return fields
 
     def _get_inventory_move_values(self, qty, location_id, location_dest_id, package_id=False, package_dest_id=False):
@@ -1379,6 +1417,7 @@ class StockQuant(models.Model):
         return message, recommended_location
 
     def move_quants(self, location_dest_id=False, package_dest_id=False, message=False, unpack=False):
+        breakpoint()
         """ Directly move a stock.quant to another location and/or package by creating a stock.move.
 
         :param location_dest_id: `stock.location` destination location for the quants

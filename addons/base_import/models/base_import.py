@@ -1282,6 +1282,7 @@ class Import(models.TransientModel):
             })
 
     def execute_import(self, fields, columns, options, dryrun=False):
+        breakpoint()
         """ Actual execution of the import
 
         :param fields: import mapping: maps each column to a field,
@@ -1332,6 +1333,7 @@ class Import(models.TransientModel):
             import_set_empty_fields=options.get('import_set_empty_fields', []),
             import_skip_records=options.get('import_skip_records', []),
             _import_limit=import_limit)
+        breakpoint()
         import_result = model.load(import_fields, merged_data)
         _logger.info('done')
 
