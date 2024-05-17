@@ -53,7 +53,7 @@
         <!-- <xpath expr="//div[hasclass('pads')]//div[hasclass('pads')]" position="before">
             <t t-set="order" t-value="getSelectedOrder()" />
             <t t-debug="pdb"/>
-            <t t-if="order.brand_id">
+            <t t-if="order.delivery_partner">
                 <div class="container">
                     <div class="row">
                         <button class="button validation load-order-button w-100 btn btn-lg btn-primary rounded-0 fw-bolder py-3 col-sm" t-on-click="() => this._acceptOrder(order)">

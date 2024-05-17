@@ -14,6 +14,13 @@ patch(TicketScreen.prototype, {
         this.notification = useService("notification");
     },
 
+    async onFilterSelected(selectedFilter) {
+        super.onFilterSelected(...arguments);
+        if (this.state.filter == "DELIVERY") {
+            await this._fetchDeliveryOrders();
+        }
+    },
+
     getDeliveryStatus(order) {
         const statusCombination = {
             awaiting: "Awaiting",
@@ -24,7 +31,6 @@ patch(TicketScreen.prototype, {
             delivered: "Delivered",
             cancelled: "Cancelled",
         };
-        debugger;
         if (
             !order.delivery_asap &&
             order.delivery_status &&
@@ -41,79 +47,72 @@ patch(TicketScreen.prototype, {
         return order.delivery_status ? statusCombination[order.delivery_status] : "";
     },
 
-    // async onFilterSelected(selectedFilter) {
-    //     super.onFilterSelected(...arguments);
-    //     debugger;
-    //     if (this.state.filter == "DELIVERY") {
-    //         await this._fetchDeliveryOrders();
-    //     }
-    // },
+    _computeDeliveryOrdersDomain() {
+        const { fieldName, searchTerm } = this.state.search;
+        if (!searchTerm) {
+            return [
+                ["delivery_id", "!=", ""],
+                ["amount_total", ">=", 0],
+            ];
+        }
+        const modelField = this._getSearchFields()[fieldName].modelField;
+        if (modelField) {
+            return [
+                [modelField, "ilike", `%${searchTerm}%`],
+                ["delivery_id", "!=", ""],
+                ["amount_total", ">=", 0],
+            ];
+        } else {
+            return [];
+        }
+    },
 
-    // _computeDeliveryOrdersDomain() {
-    //     const { fieldName, searchTerm } = this._state.ui.searchDetails;
-    //     if (!searchTerm) {
-    //         return [
-    //             ["delivery_id", "!=", ""],
-    //             ["amount_total", ">=", 0],
-    //         ];
-    //     }
-    //     const modelField = this._getSearchFields()[fieldName].modelField;
-    //     if (modelField) {
-    //         return [
-    //             [modelField, "ilike", `%${searchTerm}%`],
-    //             ["delivery_id", "!=", ""],
-    //             ["amount_total", ">=", 0],
-    //         ];
-    //     } else {
-    //         return [];
-    //     }
-    // },
-
-    // async _fetchDeliveryOrders() {
-    //     const domain = this._computeDeliveryOrdersDomain();
-    //     await this._fetchPaidOrders(domain);
-    //     this._state.syncedOrders.toShow.sort((a, b) => {
-    //         const delivery_status_value = {
-    //             awaiting: 1,
-    //             scheduled: 2,
-    //             confirmed: 3,
-    //             preparing: 4,
-    //             ready: 5,
-    //             delivered: 6,
-    //             cancelled: 7,
-    //         };
-    //         return (
-    //             delivery_status_value[a.delivery_status] - delivery_status_value[b.delivery_status]
-    //         );
-    //     });
-    //     for (const order of this._state.syncedOrders.toShow) {
-    //         switch (order.delivery_status) {
-    //             case "awaiting":
-    //                 order.bgClass = "bg-warning";
-    //                 break;
-    //             case "scheduled" || "confirmed":
-    //                 order.bgClass = "bg-secondary";
-    //                 break;
-    //             case "preparing":
-    //                 order.bgClass = "bg-success";
-    //                 break;
-    //             case "ready":
-    //                 order.bgClass = "bg-info";
-    //                 break;
-    //             default:
-    //                 order.bgClass = "";
-    //                 break;
-    //         }
-    //     }
-    // },
+    async _fetchDeliveryOrders() {
+        const domain = this._computeDeliveryOrdersDomain();
+        await this._fetchSyncedOrders(domain);
+        debugger;
+        // this._state.syncedOrders.toShow.sort((a, b) => {
+        //     const delivery_status_value = {
+        //         awaiting: 1,
+        //         scheduled: 2,
+        //         confirmed: 3,
+        //         preparing: 4,
+        //         ready: 5,
+        //         delivered: 6,
+        //         cancelled: 7,
+        //     };
+        //     return (
+        //         delivery_status_value[a.delivery_status] - delivery_status_value[b.delivery_status]
+        //     );
+        // });
+        // for (const order of this._state.syncedOrders.toShow) {
+        //     switch (order.delivery_status) {
+        //         case "awaiting":
+        //             order.bgClass = "bg-warning";
+        //             break;
+        //         case "scheduled" || "confirmed":
+        //             order.bgClass = "bg-secondary";
+        //             break;
+        //         case "preparing":
+        //             order.bgClass = "bg-success";
+        //             break;
+        //         case "ready":
+        //             order.bgClass = "bg-info";
+        //             break;
+        //         default:
+        //             order.bgClass = "";
+        //             break;
+        //     }
+        // }
+    },
 
     //@override
     _getSearchFields() {
         return Object.assign({}, super._getSearchFields(...arguments), {
-            BRAND: {
+            DELIVERY_PARTNER: {
                 repr: (order) => order.get_brand_name(),
-                displayName: _t("Brand"),
-                modelField: "brand_id",
+                displayName: _t("Deliver Partner"),
+                modelField: "delivery_partner",
             },
         });
     },
@@ -128,6 +127,7 @@ patch(TicketScreen.prototype, {
     async _acceptDeliveryOrder(order) {
         this.state.acceptDeliveryOrderLoading = true;
         await this.pos.data.call("pos.order", "accept_delivery_order", [order.id]);
+        await this.pos.sendOrderInPreparationUpdateLastChange(order);
         this.state.acceptDeliveryOrderLoading = false;
         order.delivery_status = order.delivery_asap
             ? "preparing"

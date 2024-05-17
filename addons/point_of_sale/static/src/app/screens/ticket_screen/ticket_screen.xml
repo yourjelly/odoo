@@ -77,7 +77,7 @@
                                         <div><t t-esc="order.partner_id?.name"></t></div>
                                     </div>
                                     <div class="col p-2">
-                                        <div><t t-esc="order.brand_id"></t></div>
+                                        <div><t t-esc="order.delivery_partner"></t></div>
                                     </div>
                                     <div t-if="showCardholderName()" class="col p-2">
                                         <div><t t-esc="getCardholderName(order)"></t></div>

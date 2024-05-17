@@ -13,12 +13,12 @@ class PosConfig(models.Model):
             self._notify('DELIVERY_ORDER_COUNT', order_count, private=False)
 
     def get_delivery_order_count(self):
-        # records = self.env['pos.order'].search([('brand_id', '!=', False)])
+        # records = self.env['pos.order'].search([('delivery_partner', '!=', False)])
         # brand_stages = defaultdict(lambda: defaultdict(int))
         # for record in records:
-        #     brand_id = record.brand_id
+        #     delivery_partner = record.delivery_partner
         #     delivery_status = record.delivery_status.lower()  # Convert status to lowercase for consistency
-        #     brand_stages[brand_id][delivery_status] += 1
+        #     brand_stages[delivery_partner][delivery_status] += 1
 
         # # Prepare the final output
         # output = []
@@ -48,13 +48,13 @@ class PosConfig(models.Model):
         return res
 
     def get_urbanpiper_order_count(self):
-        brand_ids = set(self.env['pos.order'].search([('brand_id', '!=', False)]).mapped('brand_id'))
+        brand_ids = set(self.env['pos.order'].search([('delivery_partner', '!=', False)]).mapped('delivery_partner'))
         order_count = defaultdict(lambda: defaultdict(int))
 
         for brand_id in brand_ids:
             orders = self.env['pos.order'].search([
                 ('delivery_id', '!=', False),
-                ('brand_id', '=', brand_id),
+                ('delivery_partner', '=', brand_id),
                 ('config_id', '=', self.id)  # Filter orders for the current config
             ])
 

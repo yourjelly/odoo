@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="view_pos_order_tree_1" model="ir.ui.view">
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree" />
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <!-- <field name="pos_reference" position="after">
+                <field name="delivery_partner"/>
+            </field> -->
+            <xpath expr="//field[@name='pos_reference']" position="after">
+                <field name="delivery_partner"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

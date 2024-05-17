@@ -4,7 +4,7 @@ import pytz
 class PosOrder(models.Model):
     _inherit = 'pos.order'
 
-    brand_id = fields.Char('Brand ID')
+    delivery_partner = fields.Char('Delivery Partner')
     delivery_display = fields.Char('Delivery Display')
     delivery_prepare_for = fields.Datetime('Delivery Prepare For')
     delivery_asap = fields.Boolean('Delivery ASAP', default=True)

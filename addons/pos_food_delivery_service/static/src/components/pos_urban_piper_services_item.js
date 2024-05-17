@@ -11,23 +11,31 @@ export class PosUrbanPiperServicesItem extends Component {
         this.pos = usePos();
     }
 
-    async goToOrders(delieveryProvider) {
+    async showDeliverooOrders(deliveryProvider) {
         const order = await this.pos.getServerOrders();
-        // const stateOverride = {
-        //     search: {
-        //         fieldName: "BRAND",
-        //         searchTerm: delieveryProvider,
-        //     },
-        //     filter: delieveryProviderHasActiveOrders ? "" : "ACTIVE_ORDERS",
-        // };
-        // this.pos.showScreen("TicketScreen", { stateOverride });
-        const searchDetails = { fieldName: "BRAND", searchTerm: delieveryProvider };
+        const searchDetails = { fieldName: "DELIVERY_PARTNER", searchTerm: "Zomato" };
         this.pos.showScreen("TicketScreen", {
-            stateOverride: {
-                filter: "DELIVERY",
-                search: searchDetails,
-                destinationOrder: order,
-            },
+            stateOverride: { filter: "DELIVERY", search: searchDetails, destinationOrder: order },
         });
     }
+
+    // async goToOrders(delieveryProvider) {
+    //     const order = await this.pos.getServerOrders();
+    //     // const stateOverride = {
+    //     //     search: {
+    //     //         fieldName: "BRAND",
+    //     //         searchTerm: delieveryProvider,
+    //     //     },
+    //     //     filter: delieveryProviderHasActiveOrders ? "" : "ACTIVE_ORDERS",
+    //     // };
+    //     // this.pos.showScreen("TicketScreen", { stateOverride });
+    //     const searchDetails = { fieldName: "BRAND", searchTerm: delieveryProvider };
+    //     this.pos.showScreen("TicketScreen", {
+    //         stateOverride: {
+    //             filter: "DELIVERY",
+    //             search: searchDetails,
+    //             destinationOrder: order,
+    //         },
+    //     });
+    // }
 }

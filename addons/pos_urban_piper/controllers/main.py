@@ -29,7 +29,7 @@ class PosDeliverooController(http.Controller):
             'name': 'zomato/0001',
             'amount_return': 0,
             'state': 'draft',
-            'brand_id': 'zomato',
+            'delivery_partner': 'zomato',
             'lines': [
                 (0, 0, {
                     'product_id': 58,
@@ -143,7 +143,7 @@ class PosDeliverooController(http.Controller):
             'name': 'zomato/0001',
             'amount_return': 0,
             'state': 'draft',
-            'brand_id': 'zomato',
+            'delivery_partner': 'zomato',
             'lines': [
                 (0, 0, {
                     'product_id': 58,

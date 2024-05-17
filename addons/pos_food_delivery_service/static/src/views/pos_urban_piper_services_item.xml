@@ -9,7 +9,7 @@
                 <ul class="dropdown-menu sub-menu position-absolute d-flex flex-column align-items-stretch bg-white shadow-lg z-index-1">
                     <ul>
                         <t t-foreach="Object.entries(props.orderStatus)" t-as="order" t-key="order[0]">
-                            <li class="dropdown-item px-3 py-2" t-on-click="() => this.goToOrders(order[0])">
+                            <li class="dropdown-item px-3 py-2" t-on-click="() => this.showDeliverooOrders(order[0])">
                                 <div class="font-bold mb-1 fw-bolder"><a><t t-out="order[0]"/></a></div>
                                 <ul class="d-flex justify-content-between gap-4">
                                     <li><a><span><t t-out="order[1].awaiting"/></span> Order</a></li>

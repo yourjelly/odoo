@@ -21,7 +21,7 @@ patch(Navbar.prototype, {
         });
         this.posOrderNotify = useService("pos_order_notify");
         this.posOrderNotify.notify(this.onNotify.bind(this), this.pos.config.id);
-        this.state.posOrderCount = this.pos.models["pos.order"].filter((o) => !o.finalized && o.brand_id).length;
+        this.state.posOrderCount = this.pos.models["pos.order"].filter((o) => !o.finalized && o.delivery_partner).length;
     },
 
     onNotify(count, brandName) {
