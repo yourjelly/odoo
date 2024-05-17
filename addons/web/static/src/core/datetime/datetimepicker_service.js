@@ -45,6 +45,8 @@ const parsers = {
     datetime: parseDateTime,
 };
 
+let inputBuffer = ''; 
+
 export const datetimePickerService = {
     dependencies: ["popover"],
     start(env, { popover: popoverService }) {
@@ -84,7 +86,7 @@ export const datetimePickerService = {
 
                     lastInitialProps = null; // Next pickerProps are considered final
                     inputsChanged = ensureArray(pickerProps.value).map(() => false);
-
+                    debugger;
                     hookParams.onApply?.(pickerProps.value);
                 };
 
@@ -213,7 +215,27 @@ export const datetimePickerService = {
                 /**
                  * @param {KeyboardEvent} ev
                  */
+                // const openPopoverOnInput = (ev,inputBuffer) => {
+                //     const [parsedValue, error] = safeConvert("parse", inputBuffer);
+                //     if (!error) {
+                //         updateValue(parsedValue);
+                //     }
+                // }
+
                 const onInputKeydown = (ev) => {
+                    // if (/^\d$/.test(ev.key) || ev.key === '/') {
+                    //     inputBuffer += ev.key;
+                    // }
+                    // debugger;
+                    // if(inputBuffer.length == 10){
+                    //     openPopoverOnInput(ev,inputBuffer);
+                    //     // inputBuffer = '';
+                    //     openPicker(ev.target === getInput(1) ? 1 : 0)
+
+                    // }
+                    // if(inputBuffer.length > 10){
+                    //     inputBuffer = inputBuffer.slice(0, -1);
+                    // }
                     switch (ev.key) {
                         case "Enter":
                         case "Escape": {
@@ -228,7 +250,21 @@ export const datetimePickerService = {
                                 return saveAndClose();
                             }
                         }
+                        // case "Backspace": {
+                        //     inputBuffer = inputBuffer.slice(0, -1);
+                        //     if(inputBuffer<10){
+                        //         updateValueFromInputs();
+                        //         openPopoverOnInput(ev,inputBuffer);
+                        //     }
+                        //     // return saveAndClose();
+                        // }
                     }
+                    if(ev.code == "Space"){
+                        // updateValueFromInputs();
+                        openPicker(ev.target === getInput(1) ? 1 : 0)
+
+                    }
+                    
                 };
 
                 /**
@@ -334,6 +370,7 @@ export const datetimePickerService = {
                  * @param {DateTimePickerProps["value"]} value
                  */
                 const updateValue = (value) => {
+                    debugger;
                     const previousValue = pickerProps.value;
                     pickerProps.value = value;
 

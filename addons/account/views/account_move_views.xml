@@ -711,6 +711,7 @@
                                 invisible="move_type != 'entry' or state != 'posted' or payment_state == 'reversed'"/>
                         <button name="action_reverse" string='Credit Note'
                                 type='object' groups="account.group_account_invoice"
+                                data-hotkey="n"
                                 invisible="move_type not in ('out_invoice', 'in_invoice') or state != 'posted'"/>
                         <!-- Cancel -->
                         <button name="button_cancel" string="Cancel Entry" type="object" groups="account.group_account_invoice" data-hotkey="x"
@@ -1326,7 +1327,7 @@
                                     <span>This entry has been generated through the Invoicing app, before installing Accounting. Its balance has been imported separately.</span>
                                 </div>
                             </page>
-                            <page id="other_tab" string="Other Info" name="other_info"
+                            <page id="other_tab" string="Other Info" name="other_info" tabindex="-1"
                                   invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')">
                                 <group id="other_tab_group">
                                     <group string="Invoice"
@@ -1366,7 +1367,7 @@
                                 </group>
                             </page>
                             <page id="other_tab_entry" string="Other Info" name="other_info"
-                                  invisible="move_type != 'entry'">
+                                  invisible="move_type != 'entry'" tabindex="10">
                                 <group id="other_tab_entry_group">
                                     <group name="misc_group">
                                         <field name="auto_post"
