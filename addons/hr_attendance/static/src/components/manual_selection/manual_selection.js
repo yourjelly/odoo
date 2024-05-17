@@ -32,6 +32,23 @@ export class KioskManualSelection extends Component {
         }
     }
 
+    // Changes needed. Can probably be combined with above
+    onDepartementClickMobile(dep_id){
+        let departmentName = "All departments";
+        if (dep_id){
+            this.state.displayedEmployees = this.props.employees.filter(item => item.department.id === dep_id);
+            
+            const selectedDepartment = this.props.departments.find(dep => dep.id === dep_id);
+            if (selectedDepartment) {
+                departmentName = selectedDepartment.name;
+            }
+        } else {
+            this.state.displayedEmployees = this.props.employees;
+        }
+        
+        document.getElementById('departmentButton').innerHTML = `${departmentName}`;
+    }
+
     onSearchInput(ev) {
         const searchInput = ev.target.value;
         if (searchInput.length){

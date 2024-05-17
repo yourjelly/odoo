@@ -2,37 +2,39 @@
 <templates xml:space="preserve">
 
 <t t-name="hr_attendance.companyHeader">
-    <h2 class="mb-2"><small>Welcome to</small></h2>
-    <img t-att-src="companyImageUrl" alt="Company Logo" class="o_hr_attendance_kiosk_company_image align-self-center img img-fluid mb-3" width="200"/>
+    <img t-att-src="companyImageUrl" alt="Company Logo" class="o_hr_attendance_kiosk_company_image align-self-center"/>
+</t>
+
+
+<t t-inherit="barcodes.BarcodeScanner" t-inherit-mode="extension">
+    <xpath expr="//div[hasclass('o_barcode_mobile_container')]" position="replace">
+        <button t-if="isBarcodeScannerSupported" t-on-click="openMobileScanner" class="o_mobile_barcode btn btn-light btn-lg p-5 rounded-3">
+            <i class="fa fa-2x fa-barcode mb-3"/>
+            <span class="d-block">Scan your badge</span>
+        </button>
+    </xpath>
 </t>
 
 <t t-name="hr_attendance.public_kiosk_app">
     <MainComponentsContainer/>
     <CardLayout>
         <t t-if="this.state.active_display === 'main'">
-            <t t-call="hr_attendance.companyHeader">
-                <t t-set="companyImageUrl" t-value="companyImageUrl"/>
-                <t t-set="companyName" t-value="this.props.companyName"/>
-            </t>
-            <t t-if="this.props.kioskMode !== 'manual'">
-                <div class="col-md-5 mt-5 mb-5 mb-md-0 align-self-center">
-                    <KioskBarcodeScanner barcodeSource="this.props.barcodeSource" onBarcodeScanned="(ev) => this.onBarcodeScanned(ev)"/>
-                    <h6 class="mt-2 text-muted">Scan your badge</h6>
-                </div>
-            </t>
-            <t t-if="this.props.kioskMode !== 'barcode'">
-                <div class="mt-5 align-self-center">
-                    <button t-on-click="() => this.switchDisplay('manual')"  class="o_hr_attendance_button_employees btn btn-link">
-                        Identify Manually
+            <div class="o_hr_kiosk_mode_main d-flex flex-column flex-sm-row gap-3 m-auto">
+                <t t-if="this.props.kioskMode !== 'barcode'">
+                    <button t-on-click="() => this.switchDisplay('manual')"  class="btn btn-light btn-lg p-5 rounded-3">
+                        <i class="fa fa-2x fa-user-o mb-3"/>
+                        <span class="d-block">Identify Manually</span>
                     </button>
-                </div>
-            </t>
+                </t>
+                <t t-if="this.props.kioskMode !== 'manual'">
+                <KioskBarcodeScanner barcodeSource="this.props.barcodeSource" onBarcodeScanned="(ev) => this.onBarcodeScanned(ev)"/>
+                </t>
+            </div>
+            <div class="o_hr_kiosk_mode_bottom my-5 mx-auto">
+                Powered by <img height="32" src="/web/static/img/logo.png" />
+            </div>
         </t>
         <t t-if="this.state.active_display === 'manual'">
-            <t t-call="hr_attendance.companyHeader">
-                <t t-set="companyImageUrl" t-value="companyImageUrl"/>
-                <t t-set="companyName" t-value="this.props.companyName"/>
-            </t>
             <KioskManualSelection employees="this.props.employees" displayBackButton="this.manualKioskMode" departments="this.props.departments" onSelectEmployee="(e) => this.kioskConfirm(e)" onClickBack="() => this.kioskReturn()"/>
         </t>
         <t t-if="this.state.active_display === 'greet'">
