@@ -54,14 +54,17 @@ class PosConfig(models.Model):
 
         for brand_id in brand_ids:
             orders = self.env['pos.order'].search([
-                # ('session_id', '=', self.current_session_id.id),
                 ('delivery_id', '!=', False),
-                ('brand_id', '=', brand_id)
+                ('brand_id', '=', brand_id),
+                ('config_id', '=', self.id)  # Filter orders for the current config
             ])
-            order_count[brand_id] = {
-                'awaiting': len(orders.filtered(lambda r: r.delivery_status == 'awaiting')),
-                'scheduled': len(orders.filtered(lambda r: r.delivery_status in ['scheduled', 'confirmed'])),
-                'preparing': len(orders.filtered(lambda r: r.delivery_status == 'preparing'))
-            }
+
+            # Check if there are any orders for the current brand and config
+            if orders:
+                order_count[brand_id] = {
+                    'awaiting': len(orders.filtered(lambda r: r.delivery_status == 'awaiting')),
+                    'scheduled': len(orders.filtered(lambda r: r.delivery_status in ['scheduled', 'confirmed'])),
+                    'preparing': len(orders.filtered(lambda r: r.delivery_status == 'preparing'))
+                }
 
         return order_count

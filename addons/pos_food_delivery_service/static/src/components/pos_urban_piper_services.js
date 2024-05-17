@@ -18,7 +18,7 @@ export class PosUrbanPiperServices extends Component {
         useEffect(
             () => {
                 (async() => {
-                    this.orderStatus = await this.pos.data.call("pos.config", "get_urbanpiper_order_count", [""]);
+                    this.orderStatus = await this.pos.data.call("pos.config", "get_urbanpiper_order_count", [this.pos.config.id]);
                 })();
             },
             () => [this.props.orderCount]
