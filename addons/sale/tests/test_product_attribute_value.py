@@ -26,6 +26,7 @@ class TestProductAttributeValue(HttpCase, SaleCommon):
             {
                 'name': 'P1',
                 'type': 'consu',
+                'categ_id': cls.product_category.id,
                 'attribute_line_ids': [Command.create({
                     'attribute_id': cls.product_attribute.id,
                     'value_ids': [Command.set([cls.a1.id, cls.a3.id])],
@@ -34,6 +35,7 @@ class TestProductAttributeValue(HttpCase, SaleCommon):
             {
                 'name': 'P2',
                 'type': 'consu',
+                'categ_id': cls.product_category.id,
                 'attribute_line_ids': [Command.create({
                     'attribute_id': cls.product_attribute.id,
                     'value_ids': [Command.set([cls.a1.id, cls.a2.id])],

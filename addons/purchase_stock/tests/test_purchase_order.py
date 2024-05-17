@@ -492,6 +492,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
 
         product = self.env['product.product'].create({
             'name': 'Super Product',
+            'categ_id': self.stock_account_product_categ.id,
             'seller_ids': [(0, 0, {
                 'partner_id': self.partner_a.id,
                 'min_qty': 1,
@@ -499,7 +500,6 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
                 'product_code': 'C01',
                 'product_name': 'Name01',
                 'sequence': 1,
-                'categ_id': self.stock_account_product_categ.id,
             }), (0, 0, {
                 'partner_id': self.partner_a.id,
                 'min_qty': 20,

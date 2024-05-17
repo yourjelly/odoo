@@ -842,7 +842,11 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         """
         location = self.stock_location
         uom_unit = self.env.ref('uom.product_uom_unit')
-        final_product_tmpl = self.env['product.template'].create({'name': 'Final Product', 'type': 'product'})
+        final_product_tmpl = self.env['product.template'].create({
+            'name': 'Final Product',
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
         component_product = self.env['product.product'].create({
             'name': 'Compo 1',
             'type': 'product',
@@ -899,7 +903,11 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             With an incoming PO for the first and second line.
         """
         uom_unit = self.env.ref('uom.product_uom_unit')
-        final_product_tmpl = self.env['product.template'].create({'name': 'Final Product', 'type': 'product'})
+        final_product_tmpl = self.env['product.template'].create({
+            'name': 'Final Product',
+            'type': 'product',
+            'categ_id': self.category.id,
+        })
         component_product = self.env['product.product'].create({
             'name': 'Compo 1',
             'type': 'product',

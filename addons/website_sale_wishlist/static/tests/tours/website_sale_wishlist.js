@@ -128,44 +128,54 @@ registry.category("web_tour.tours").add('shop_wishlist', {
             content: "Create a product with dynamic attribute and its values.",
             trigger: 'body',
             run: function () {
-                rpc("/web/dataset/call_kw/product.attribute/create", {
-                    model: 'product.attribute',
+                rpc("/web/dataset/call_kw/product.category/create", {
+                    model: 'product.category',
                     method: 'create',
                     args: [{
-                        'name': "color",
-                        'display_type': 'color',
-                        'create_variant': 'dynamic'
+                        'name': 'Food'
                     }],
                     kwargs: {},
-                }).then(function (attributeId) {
-                    return rpc("/web/dataset/call_kw/product.template/create", {
-                        model: 'product.template',
+                }).then(function (categoryId) {
+                    return rpc("/web/dataset/call_kw/product.attribute/create", {
+                        model: 'product.attribute',
                         method: 'create',
                         args: [{
-                            'name': "Bottle",
-                            'is_published': true,
-                            'attribute_line_ids': [[0, 0, {
-                                'attribute_id': attributeId,
-                                'value_ids': [
-                                    [0, 0, {
-                                        'name': "red",
-                                        'attribute_id': attributeId,
-                                    }],
-                                    [0, 0, {
-                                        'name': "blue",
-                                        'attribute_id': attributeId,
-                                    }],
-                                    [0, 0, {
-                                        'name': "black",
-                                        'attribute_id': attributeId,
-                                    }],
-                                ]
-                            }]],
+                            'name': "color",
+                            'display_type': 'color',
+                            'create_variant': 'dynamic'
                         }],
                         kwargs: {},
+                    }).then(function (attributeId) {
+                        return rpc("/web/dataset/call_kw/product.template/create", {
+                            model: 'product.template',
+                            method: 'create',
+                            args: [{
+                                'name': "Bottle",
+                                'is_published': true,
+                                'categ_id': categoryId,
+                                'attribute_line_ids': [[0, 0, {
+                                    'attribute_id': attributeId,
+                                    'value_ids': [
+                                        [0, 0, {
+                                            'name': "red",
+                                            'attribute_id': attributeId,
+                                        }],
+                                        [0, 0, {
+                                            'name': "blue",
+                                            'attribute_id': attributeId,
+                                        }],
+                                        [0, 0, {
+                                            'name': "black",
+                                            'attribute_id': attributeId,
+                                        }],
+                                    ]
+                                }]],
+                            }],
+                            kwargs: {},
+                        });
+                    }).then(function () {
+                        window.location.href = '/web/session/logout?redirect=/shop?search=Bottle';
                     });
-                }).then(function () {
-                    window.location.href = '/web/session/logout?redirect=/shop?search=Bottle';
                 });
             },
         },

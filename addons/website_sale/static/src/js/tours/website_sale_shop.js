@@ -24,6 +24,10 @@
         position: "left",
         run: "edit Test",
     }, {
+        trigger: ".modal-dialog .o_input_dropdown",
+        content: _t("Enter the product category."),
+        position: "left",
+    }, {
         trigger: ".modal-footer button.btn-primary",
         content: markup(_t("Click on <em>Save</em> to create the product.")),
         position: "right",

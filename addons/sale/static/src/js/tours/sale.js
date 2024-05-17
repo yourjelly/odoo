@@ -68,6 +68,26 @@ registry.category("web_tour.tours").add("sale_tour", {
             run: () => {},
             auto: true,
         }, {
+            trigger: ".o_field_widget[name='categ_id'] input",
+            content: _t("Search a category or create one on the fly."),
+            position: "right",
+            run: function () {
+                const categIdInput = document.querySelector(".o_field_widget[name='categ_id'] input");
+                if (categIdInput) {
+                    categIdInput.click();
+                }
+            },
+        }, {
+            trigger: ".ui-menu-item > a:contains('Furniture')",
+            content: _t("Select the 'Clothes' category."),
+            position: "right",
+            auto: true,
+        }, {
+            trigger: ".modal-footer button.btn-primary",
+            extra_trigger: ".o_field_widget[name='categ_id']",
+            content: _t("Save the product and continue."),
+            position: "bottom",
+        }, {
             trigger: ".o_field_widget[name='price_unit'] input",
             extra_trigger: ".oi-arrow-right",  // Wait for product creation
             content: _t("add the price of your product."),
