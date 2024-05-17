@@ -32,6 +32,7 @@ export class OrderlineNoteButton extends Component {
         if (this.props.label == _t("Internal Note")) {
             buttons = notes.map((note) => ({
                 label: note.name,
+                color: note.color,
                 isSelected: selectedNote.split("\n").includes(note.name), // Check if the note is already selected
             }));
         } else {

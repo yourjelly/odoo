@@ -48,4 +48,13 @@ export class TextInputPopup extends Component {
             button.isSelected = true;
         }
     }
+    getBtnBgClass(button) {
+        if (button.isSelected) {
+            return `btn-primary`;
+        } else if (button.color) {
+            return `o_colorlist_item_color_${button.color}`;
+        } else {
+            return `btn-secondary`;
+        }
+    }
 }

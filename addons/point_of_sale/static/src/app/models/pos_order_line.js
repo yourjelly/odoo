@@ -660,6 +660,21 @@ export class PosOrderline extends Base {
     getNote() {
         return this.note || "";
     }
+    getNotes() {
+        const defaultNotes = new Map(
+            this.models["pos.note"].getAll().map((note) => [note.name.trim(), note.color])
+        );
+
+        const notes = (
+            this.note ? this.note.split("\n").filter((note) => note.trim() !== "") : []
+        ).map((noteLine) => {
+            const trimmedNote = noteLine.trim();
+            const color = defaultNotes.get(trimmedNote) || Math.floor(Math.random() * 11);
+            return { note: trimmedNote, color };
+        });
+
+        return notes;
+    }
     setNote(note) {
         this.note = note;
     }
