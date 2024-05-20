@@ -403,7 +403,7 @@ export class DateTimePicker extends Component {
             val?.second || 0,
         ]);
 
-        this.shouldAdjustFocusDate = !props.range;
+        this.shouldAdjustFocusDate = !this.isRange;
         this.adjustFocus(this.values, props.focusedDateIndex);
         this.handle12HourSystem();
         this.state.timeValues = this.state.timeValues.map((timeValue) => timeValue.map(String));
@@ -428,7 +428,7 @@ export class DateTimePicker extends Component {
         this.highlightedRange = [...this.values];
 
         // Apply hovered date to selected range
-        if (hoveredDate) {
+        if (hoveredDate && (!this.values[0] || !this.values[1])) {
             [this.selectedRange] = this.applyValueAtIndex(hoveredDate, this.props.focusedDateIndex);
             if (this.isRange && this.selectedRange.every(Boolean)) {
                 this.highlightedRange = [
@@ -436,6 +436,12 @@ export class DateTimePicker extends Component {
                     latest(this.selectedRange[1], this.values[1]),
                 ];
             }
+        }
+        else if (hoveredDate && this.isRange) {
+            this.highlightedRange = [
+                earliest(this.values[0], hoveredDate),
+                latest(this.values[1], hoveredDate),
+            ];
         }
     }
 
@@ -450,8 +456,7 @@ export class DateTimePicker extends Component {
     adjustFocus(values, focusedDateIndex) {
         if (
             !this.shouldAdjustFocusDate &&
-            this.state.focusDate &&
-            focusedDateIndex === this.props.focusedDateIndex
+            this.state.focusDate
         ) {
             return;
         }
@@ -480,14 +485,11 @@ export class DateTimePicker extends Component {
      */
     applyValueAtIndex(value, valueIndex) {
         const result = [...this.values];
-        if (this.isRange) {
-            if (result[0] && value.endOf("day") < result[0].startOf("day")) {
-                valueIndex = 0;
-            } else if (result[1] && result[1].endOf("day") < value.startOf("day")) {
-                valueIndex = 1;
-            }
-        } else {
-            valueIndex = 0;
+        if (result[1] && value.endOf("day") > result[1].endOf("day")) {
+            result[1] = null;
+        }
+        if (result.length === 2 && result[0] && !result[1]) {
+            this.props.focusedDateIndex = 1;
         }
         result[valueIndex] = value;
         return [result, valueIndex];
