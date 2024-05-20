@@ -11,7 +11,7 @@ registry.category("web_tour.tours").add("point_of_sale_tour", {
         stepUtils.showAppsMenuItem(),
         {
             trigger: '.o_app[data-menu-xmlid="point_of_sale.menu_point_root"]',
-            content: markup(_t("Ready to launch your <b>point of sale</b>?")),
+            content: markup(_t("Ready to launch your <b>POS Store</b>?")),
             width: 215,
             position: "right",
             edition: "community",
@@ -19,7 +19,7 @@ registry.category("web_tour.tours").add("point_of_sale_tour", {
         },
         {
             trigger: '.o_app[data-menu-xmlid="point_of_sale.menu_point_root"]',
-            content: markup(_t("Ready to launch your <b>point of sale</b>?")),
+            content: markup(_t("Ready to launch your <b>POS Store</b>?")),
             width: 215,
             position: "bottom",
             edition: "enterprise",
