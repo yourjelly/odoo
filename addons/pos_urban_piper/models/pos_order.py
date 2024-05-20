@@ -11,8 +11,7 @@ class PosOrder(models.Model):
     delivery_confirm_at = fields.Datetime('Delivery Confirm At')
     delivery_start_preparing_at = fields.Datetime('Delivery Start Preparing At')
 
-    # def _export_for_ui(self, order):
-    #     res = super()._export_for_ui(order)
+    # def sync_from_ui(self, order):
     #     timezone = pytz.timezone(self._context.get('tz') or self.env.user.tz or 'UTC')
     #     res['delivery_display'] = order.delivery_display if order.delivery_display else False
     #     res['delivery_prepare_for'] = str(order.delivery_prepare_for.astimezone(timezone)) if order.delivery_prepare_for else False

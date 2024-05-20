@@ -154,11 +154,11 @@ class PosDeliverooController(http.Controller):
                     'price_subtotal_incl': 1.98,
                 }),
             ],
-            'payment_ids': [(0,0,{
-                'amount': amount_paid,
-                'payment_date': date_order,
-                'payment_method_id': deliveroo_provider.payment_method_id.id,
-            })],
+            # 'payment_ids': [(0,0,{
+            #     'amount': amount_paid,
+            #     'payment_date': date_order,
+            #     'payment_method_id': deliveroo_provider.payment_method_id.id,
+            # })],
         })
         # request.env['bus.bus']._sendone("broadcast", 'pos_order_notify', { 'count': 1, 'session_id': pos_config_sudo.id, 'brand': 'zomato' })
         # pos_config_sudo._send_delivery_order_count(delivery_order.id)

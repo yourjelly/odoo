@@ -3,7 +3,6 @@ import { patch } from "@web/core/utils/patch";
 
 patch(PosOrder.prototype, {
     get_brand_name() {
-        debugger;
         return this.delivery_partner ? this.delivery_partner : "";
     }
 });

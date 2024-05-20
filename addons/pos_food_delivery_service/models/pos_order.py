@@ -9,11 +9,11 @@ class PosOrder(models.Model):
     delivery_status = fields.Selection([('awaiting', 'Awaiting'), ('scheduled', 'Scheduled'), ('confirmed', 'Confirmed'), ('preparing', 'Preparing'), ('ready', 'Ready'), ('delivered', 'Delivered'), ('cancelled', 'Cancelled')], string='Delivery Status')
     delivery_note = fields.Text(string='Delivery Note')
 
-    # def _export_for_ui(self, order):
-    #     res = super(PosOrder, self)._export_for_ui(order)
+    # def sync_from_ui(self, order):
+    #     res = super(PosOrder, self).sync_from_ui(order)
     #     res['delivery_provider_name'] = order.delivery_provider_id.name if order.delivery_provider_id else False
     #     return res
-    
+
     def accept_delivery_order(self):
         self.ensure_one()
         status_to_send = 'accepted' if self.delivery_status == 'awaiting' else 'confirmed'
@@ -27,7 +27,7 @@ class PosOrder(models.Model):
         #     elif self.delivery_status == 'scheduled':
         #         self.change_order_delivery_status('confirmed')
         # else:
-            self.change_order_delivery_status('preparing')
+        self.change_order_delivery_status('preparing')
 
     def reject_delivery_order(self, reject_reason):
         self.ensure_one()
@@ -58,9 +58,9 @@ class PosOrder(models.Model):
         res['delivery_id'] = ui_order.get('delivery_id', '')
         res['delivery_status'] = ui_order.get('delivery_status', None)
         return res
-    
-    # def _export_for_ui(self, order):
-    #     res = super(PosOrder, self)._export_for_ui(order)
+
+    # def sync_from_ui(self, order):
+    #     res = super(PosOrder, self).sync_from_ui(order)
     #     res['delivery_id'] = order.delivery_id
     #     res['delivery_status'] = order.delivery_status
     #     res['delivery_note'] = order.delivery_note or False

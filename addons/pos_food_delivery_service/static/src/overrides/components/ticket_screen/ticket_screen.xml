@@ -9,14 +9,14 @@
             </div>
         </xpath>
 
-        <xpath expr="//div[hasclass('status-col-value')]" position="replace">
+        <!-- <xpath expr="//div[hasclass('status-col-value')]" position="replace">
             <div class="status-col-value col narrow p-2">
                 <div>
                     <t t-if="state.filter == 'DELIVERY'" t-out="getDeliveryStatus(order)"/>
                     <t t-else="" t-out="getStatus(order)"/>
                 </div>
             </div>
-        </xpath>
+        </xpath> -->
 
         <xpath expr="//div[hasclass('ticket-screen-buttons')]" position="attributes">
             <attribute name="t-if">!_selectedSyncedOrder.delivery_id</attribute>
@@ -24,18 +24,18 @@
 
         <xpath expr="//div[hasclass('ticket-screen-buttons')]" position="after">
             <div t-else="" class="pads border-top">
-                <div t-if="_selectedSyncedOrder.delivery_status != 'awaiting'" class="control-buttons d-flex flex-column border-bottom overflow-hidden bg-300">
+                <div t-if="_selectedSyncedOrder.delivery_status == 'cancelled'" class="control-buttons d-flex flex-column border-bottom overflow-hidden bg-300">
                     <div class="control-buttons d-flex">
                         <InvoiceButton onInvoiceOrder.bind="onInvoiceOrder" order="_selectedSyncedOrder" />
                         <ReprintReceiptButton order="_selectedSyncedOrder" />
                     </div>
                     <SelectPartnerButton partner="getSelectedOrder()?.get_partner()"/>
                 </div>
-                <div t-if="_selectedSyncedOrder.delivery_status == 'awaiting'" class="d-flex justify-content-center bg-primary">
+                <div t-else="" class="d-flex justify-content-center bg-primary">
                     <t t-if="!state.acceptDeliveryOrderLoading">
                         <button class="button validation load-order-button w-50 btn btn-lg btn-primary rounded-0 fw-bolder py-3" t-on-click="() => this._acceptDeliveryOrder(_selectedSyncedOrder)">
-                            <span class="fs-2 d-block">Accept Order</span>
-                            <span t-if="!_selectedSyncedOrder.delivery_asap" class="fs-6">(prepare for <t t-out="_selectedSyncedOrder.delivery_prepare_for" />)</span>
+                            <span t-if="_selectedSyncedOrder.delivery_status == 'awaiting'" class="fs-2 d-block">Accept Order</span>
+                            <span t-else="" class="fs-2 d-block" t-on-click="() => this._setOrder(_selectedSyncedOrder)">Edit Order</span>
                         </button>
                         <button class="button load-order-button w-50 btn btn-lg rounded-0 fw-bolder py-3 bg-secondary" t-on-click="() => this._rejectDeliveryOrder(_selectedSyncedOrder)">
                             <span class="fs-2 d-block">Reject Order</span>
