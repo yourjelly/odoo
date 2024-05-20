@@ -72,7 +72,7 @@ class PosMakePayment(models.TransientModel):
                 order._send_order()
 
                 active_pos_order = self.env["pos.order"].browse(self.env.context.get("active_id"))
-                active_pos_order.lines.sale_order_line_id._compute_name()
+                active_id = self.env.context.get("active_id")
 
             return {'type': 'ir.actions.act_window_close'}
 
