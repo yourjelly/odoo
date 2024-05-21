@@ -50,39 +50,56 @@ export function scrollTo(
     element,
     options = { behavior: "auto", scrollable: null, isAnchor: false }
 ) {
-    const scrollable = closestScrollableY(options.scrollable || element.parentElement);
-    if (scrollable) {
-        const scrollBottom = scrollable.getBoundingClientRect().bottom;
-        const scrollTop = scrollable.getBoundingClientRect().top;
-        const elementBottom = element.getBoundingClientRect().bottom;
-        const elementTop = element.getBoundingClientRect().top;
-        if (elementBottom > scrollBottom && !options.isAnchor) {
-            // The scroll place the element at the bottom border of the scrollable
-            scrollable.scrollTo({
-                top:
-                    scrollable.scrollTop +
-                    elementTop -
-                    scrollBottom +
-                    Math.ceil(element.getBoundingClientRect().height),
-                behavior: options.behavior,
-            });
-        } else if (elementTop < scrollTop || options.isAnchor) {
-            // The scroll place the element at the top of the scrollable
-            scrollable.scrollTo({
-                top: scrollable.scrollTop - scrollTop + elementTop,
-                behavior: options.behavior,
-            });
-            if (options.isAnchor) {
-                // If the scrollable is within a scrollable, another scroll should be done
-                const parentScrollable = closestScrollableY(scrollable.parentElement);
-                if (parentScrollable) {
-                    scrollTo(scrollable, {
-                        behavior: options.behavior,
-                        isAnchor: true,
-                        scrollable: parentScrollable,
-                    });
-                }
+    if (!element) {
+        return Promise.reject(new Error("No element found"));
+    }
+    const scrollable =
+        closestScrollableY(options.scrollable || element.parentElement) ||
+        document.scrollingElement;
+
+    const scrollBottom = scrollable.getBoundingClientRect().bottom;
+    const scrollTop = scrollable.getBoundingClientRect().top;
+    const elementBottom = element.getBoundingClientRect().bottom;
+    const elementTop = element.getBoundingClientRect().top;
+
+    let targetScrollTop;
+
+    if (elementBottom > scrollBottom && !options.isAnchor) {
+        // The scroll place the element at the bottom border of the scrollable
+        targetScrollTop = scrollable.scrollTop +
+            elementTop -
+            scrollBottom +
+            Math.ceil(element.getBoundingClientRect().height);
+    } else if (elementTop < scrollTop || options.isAnchor) {
+        // The scroll place the element at the top of the scrollable
+        targetScrollTop = scrollable.scrollTop - scrollTop + elementTop;
+
+        if (options.isAnchor) {
+            // If the scrollable is within a scrollable, another scroll should be done
+            const parentScrollable = closestScrollableY(scrollable.parentElement);
+            if (parentScrollable) {
+                return scrollTo(scrollable, {
+                    behavior: options.behavior,
+                    isAnchor: true,
+                    scrollable: parentScrollable,
+                });
             }
         }
+    } else {
+        return Promise.resolve();
     }
+
+    return new Promise((resolve, reject) => {
+        const onScrollEnd = () => {
+            scrollable.removeEventListener('scrollend', onScrollEnd);
+            resolve();
+        };
+
+        scrollable.addEventListener('scrollend', onScrollEnd, { once: true });
+
+        scrollable.scrollTo({
+            top: targetScrollTop,
+            behavior: options.behavior,
+        });
+    });
 }

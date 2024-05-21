@@ -227,3 +227,73 @@ export function addLoadingEffect(btnEl) {
         loaderEl.remove();
     };
 }
+
+/**
+ * Renders a button with standard odoo template. This does not use any xml
+ * template to avoid forcing the frontend part to lazy load a xml file for
+ * each widget which might want to create a simple button.
+ *
+ * @param {Object} options
+ * @param {Object} [options.attrs] - Attributes to put on the button element
+ * @param {string} [options.attrs.type='button']
+ * @param {string} [options.attrs.class='btn-secondary']
+ *        Note: automatically completed with "btn btn-X"
+ *        (@see options.size for the value of X)
+ * @param {string} [options.size] - @see options.attrs.class
+ * @param {string} [options.icon]
+ *        The specific fa icon class (for example "fa-home") or an URL for
+ *        an image to use as icon.
+ * @param {string} [options.text] - the button's text
+ * @returns {HTMLElement}
+ */
+export function renderButton(options) {
+    const params = Object.assign({
+        type: 'button',
+    }, options.attrs || {});
+
+    let extraClasses = params.class;
+    if (extraClasses) {
+        // If we got extra classes, check if old oe_highlight/oe_link
+        // classes are given and switch them to the right classes (those
+        // classes have no style associated to them anymore).
+        // TODO ideally this should be dropped at some point.
+        extraClasses = extraClasses.replace(/\boe_highlight\b/g, 'btn-primary')
+            .replace(/\boe_link\b/g, 'btn-link');
+    }
+
+    params.class = 'btn';
+    if (options.size) {
+        params.class += ' btn-' + options.size;
+    }
+    params.class += ' ' + (extraClasses || 'btn-secondary');
+
+    const button = document.createElement('button');
+    for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+            if (key === 'disabled' && params[key] === undefined) {
+                continue;
+            }
+            button.setAttribute(key, params[key]);
+        }
+    }
+
+    if (options.icon) {
+        let iconElement;
+        if (options.icon.substr(0, 3) === 'fa-') {
+            iconElement = document.createElement('i');
+            iconElement.className = 'fa fa-fw o_button_icon ' + options.icon;
+        } else {
+            iconElement = document.createElement('img');
+            iconElement.src = options.icon;
+        }
+        button.appendChild(iconElement);
+    }
+
+    if (options.text) {
+        const textElement = document.createElement('span');
+        textElement.textContent = options.text;
+        button.appendChild(textElement);
+    }
+
+    return button;
+}
