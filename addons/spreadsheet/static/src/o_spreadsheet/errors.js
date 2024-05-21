@@ -16,6 +16,6 @@ export function isLoadingError(valueOrError) {
 
 export class LoadingDataError extends EvaluationError {
     constructor() {
-        super("", LOADING_ERROR);
+        super(LOADING_ERROR, LOADING_ERROR);
     }
 }
