@@ -2,13 +2,13 @@
  * Provides a way to start JS code for public contents.
  */
 
-import dom from '@web/legacy/js/core/dom';
 import Class from "@web/legacy/js/core/class";
 import mixins from "@web/legacy/js/core/mixins";
 import ServicesMixin from "@web/legacy/js/core/service_mixins";
 import { loadBundle, loadCSS, loadJS } from '@web/core/assets';
 import { renderToElement } from "@web/core/utils/render";
 import { makeAsyncHandler, makeButtonHandler } from "@web/legacy/js/core/minimal_dom";
+import { cssFind } from "@web/core/utils/ui";
 
 /**
  * Base class for all visual components. Provides a lot of functions helpful
@@ -560,7 +560,12 @@ var RootWidget = PublicWidget.extend({
      */
     _attachComponent: function (childInfo, $from) {
         var self = this;
-        var $elements = dom.cssFind($from || this.$el, childInfo.selector);
+        // let fromElements = [];
+        // if ($from) {
+        //     fromElements = [...$from];
+        // }
+        // var $elements = cssFind(fromElements || this.$el, childInfo.selector);
+        var $elements = cssFind($from || this.$el, childInfo.selector);
         var defs = Array.from($elements).map((element) => {
             var w = new childInfo.Widget(self);
             self._widgets.push(w);

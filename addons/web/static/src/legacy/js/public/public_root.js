@@ -1,7 +1,7 @@
-import dom from '@web/legacy/js/core/dom';
 import { cookie } from "@web/core/browser/cookie";
 import publicWidget from '@web/legacy/js/public/public_widget';
 import { registry } from '@web/core/registry';
+import { cssFind } from "@web/core/utils/ui";
 
 import lazyloader from "@web/legacy/js/public/lazyloader";
 
@@ -156,11 +156,16 @@ export const PublicRoot = publicWidget.RootWidget.extend({
 
         var defs = Object.values(this._getPublicWidgetsRegistry(options)).map((PublicWidget) => {
             var selector = PublicWidget.prototype.selector || '';
-            var $target = dom.cssFind($from, selector, true);
+            // let fromElements = [];
+            // if ($from) {
+            //     fromElements = [...$from];
+            // }
+            // var $target = cssFind(fromElements, selector, true);
+            var $target = cssFind($from, selector, true);
             var defs = Array.from($target).map((el) => {
                 var widget = new PublicWidget(self, options);
                 self.publicWidgets.push(widget);
-                return widget.attachTo($(el));
+                return widget.attachTo(el);
             });
             return Promise.all(defs);
         });

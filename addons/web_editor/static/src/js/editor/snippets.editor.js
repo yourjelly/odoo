@@ -3,7 +3,6 @@
 import { clamp } from "@web/core/utils/numbers";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useService, useBus } from "@web/core/utils/hooks";
-import dom from "@web/legacy/js/core/dom";
 import Widget from "@web/legacy/js/core/widget";
 import { useDragAndDrop } from "@web_editor/js/editor/drag_and_drop";
 import options from "@web_editor/js/editor/snippets.options";
@@ -28,7 +27,7 @@ import {
     useState,
 } from "@odoo/owl";
 import { LinkTools } from '@web_editor/js/wysiwyg/widgets/link_tools';
-import { touching, closest, addLoadingEffect as addButtonLoadingEffect } from "@web/core/utils/ui";
+import { touching, closest, addLoadingEffect as addButtonLoadingEffect, cssFind, scrollTo } from "@web/core/utils/ui";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
 import { RPCError } from "@web/core/network/rpc";
@@ -1145,7 +1144,7 @@ var SnippetEditor = Widget.extend({
         self.$target.detach();
         self.$el.addClass('d-none');
 
-        var $selectorSiblings;
+        var $selectorSiblings = $();
         for (var i = 0; i < self.selectorSiblings.length; i++) {
             let $siblings = self.selectorSiblings[i].all();
             if (this.excludeAncestors) {
@@ -3047,7 +3046,12 @@ class SnippetsMenu extends Component {
                 return $from.closest(selector, parentNode).filter(filterFunc);
             };
             functions.all = function ($from) {
-                return ($from ? dom.cssFind($from, selector) : self.$body.find(selector)).filter(filterFunc);
+                // let fromElements = [];
+                // if ($from) {
+                //     fromElements = [...$from];
+                // }
+                // return (fromElements ? cssFind(fromElements, selector) : self.$body.find(selector)).filter(filterFunc);
+                return ($from ? cssFind($from, selector) : self.$body.find(selector)).filter(filterFunc);
             };
         } else {
             functions.is = function ($from) {
@@ -3069,10 +3073,20 @@ class SnippetsMenu extends Component {
                 }).filter(filterFunc);
             };
             functions.all = isChildren ? function ($from) {
-                return dom.cssFind($from || self.getEditableArea(), selector).filter(filterFunc);
+                // let fromElements = [];
+                // if ($from) {
+                //     fromElements = [...$from];
+                // }
+                // return cssFind(fromElements || [...self.getEditableArea()], selector).filter(filterFunc);
+                return cssFind($from || self.getEditableArea(), selector).filter(filterFunc);
             } : function ($from) {
                 $from = $from || self.getEditableArea();
-                return $from.filter(selector).add(dom.cssFind($from, selector)).filter(filterFunc);
+                // let fromElements = [];
+                // if ($from) {
+                //     fromElements = [...$from];
+                // }
+                // return $from.filter(selector).add(cssFind(fromElements, selector)).filter(filterFunc);
+                return $from.filter(selector).add(cssFind($from, selector)).filter(filterFunc);
             };
         }
         return functions;
@@ -3707,7 +3721,8 @@ class SnippetsMenu extends Component {
         if (modalEl && !$(modalEl).hasScrollableContent()) {
             return;
         }
-        return dom.scrollTo($el[0], {extraOffset: 50, $scrollable: $scrollable});
+        let scrollable = $scrollable?.get(0);
+        return scrollTo($el[0], {extraOffset: 50, scrollable: scrollable});
     }
     /**
      * @private
