@@ -338,6 +338,7 @@ export class ListUIPlugin extends OdooUIPlugin {
         dataSource.addFieldToFetch(fieldName);
         const error = dataSource.assertIsValid({ throwOnError: false });
         if (error) {
+            console.log(error);
             return error;
         }
         const value = dataSource.getListCellValue(position, fieldName);
