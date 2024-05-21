@@ -3,7 +3,6 @@
 import * as hoot from "@odoo/hoot-dom";
 import { markup } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-import { utils } from "@web/core/ui/ui_service";
 
 /**
  * @typedef {string | (actions: RunningTourActionHelper) => void | Promise<void>} RunCommand
@@ -37,61 +36,6 @@ export function callWithUnloadCheck(func, ...args) {
         window.removeEventListener("beforeunload", beforeunload);
         return willUnload;
     }
-}
-
-/**
- * @param {HTMLElement} [element]
- * @param {RunCommand} [runCommand]
- * @returns {string}
- */
-export function getConsumeEventType(element, runCommand) {
-    if (!element) {
-        return "click";
-    }
-    const { classList, tagName, type } = element;
-    const tag = tagName.toLowerCase();
-
-    // Many2one
-    if (classList.contains("o_field_many2one")) {
-        return "autocompleteselect";
-    }
-
-    // Inputs and textareas
-    if (
-        tag === "textarea" ||
-        (tag === "input" &&
-            (!type ||
-                ["email", "number", "password", "search", "tel", "text", "url", "date", "range"].includes(
-                    type
-                )))
-    ) {
-        if (
-            utils.isSmall() &&
-            element.closest(".o_field_widget")?.matches(".o_field_many2one, .o_field_many2many")
-        ) {
-            return "click";
-        }
-        return "input";
-    }
-
-    // Drag & drop run command
-    if (typeof runCommand === "string" && /^drag_and_drop/.test(runCommand)) {
-        // this is a heuristic: the element has to be dragged and dropped but it
-        // doesn't have class 'ui-draggable-handle', so we check if it has an
-        // ui-sortable parent, and if so, we conclude that its event type is 'sort'
-        if (element.closest(".ui-sortable")) {
-            return "sort";
-        }
-        if (
-            (/^drag_and_drop_native/.test(runCommand) && classList.contains("o_draggable")) ||
-            element.closest(".o_draggable")
-        ) {
-            return "pointerdown";
-        }
-    }
-
-    // Default: click
-    return "click";
 }
 
 /**
@@ -149,12 +93,9 @@ export const triggerPointerEvent = (el, type, canBubbleAndBeCanceled, additional
 };
 
 export class RunningTourActionHelper {
-
     /**
      * @typedef {string|Node} Selector
      */
-
-
     constructor(anchor) {
         this.anchor = anchor;
         this.delay = 20;
@@ -300,7 +241,6 @@ export class RunningTourActionHelper {
         hoot.keyUp("_");
         hoot.manuallyDispatchProgrammaticEvent(element, "change");
     }
-
 
     /**
      * Fills the **{@link Selector}** with the given `value`.
@@ -449,6 +389,14 @@ export class RunningTourActionHelper {
      * Helper to facilitate drag and drop debugging
      */
     _showCursor() {
+        function getCursor(event) {
+            const x = event.clientX;
+            const y = event.clientY;
+            const infoElement = hoot.queryFirst(".o_tooltip_mouse_coordinates");
+            infoElement.textContent = `[ X: ${x} | Y: ${y} ]`;
+            infoElement.style.top = y + 3 + "px";
+            infoElement.style.left = x + 3 + "px";
+        }
         if (!document.querySelector("div.o_tooltip_mouse_coordinates")) {
             const infoElement = document.createElement("div");
             infoElement.classList.add(".o_tooltip_mouse_coordinates");
@@ -458,19 +406,12 @@ export class RunningTourActionHelper {
             document.body.appendChild(infoElement);
             document.addEventListener("mousemove", (event) => {
                 getCursor(event);
-            })
+            });
             hoot.queryAll(":iframe").forEach((iframe) => {
                 iframe.addEventListener("mousemove", (event) => {
                     getCursor(event);
-                })
-            })
-            function getCursor(event) {
-                let x = event.clientX;
-                let y = event.clientY;
-                infoElement.textContent = `[ X: ${x} | Y: ${y} ]`;
-                infoElement.style.top = (y+3) + "px";
-                infoElement.style.left = (x+3) + "px";
-            }
+                });
+            });
         }
     }
 }
@@ -700,11 +641,10 @@ export const stepUtils = {
     },
 
     waitIframeIsReady() {
-        return  {
+        return {
             content: "Wait until the iframe is ready",
             trigger: `:has([is-ready="true"]):iframe html`,
             isCheck: true,
         };
-    }
-
+    },
 };

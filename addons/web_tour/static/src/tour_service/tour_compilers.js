@@ -1,18 +1,16 @@
 /** @odoo-module **/
 
+import * as hoot from "@odoo/hoot-dom";
 import { browser } from "@web/core/browser/browser";
 import { debounce } from "@web/core/utils/timing";
 import { _legacyIsVisible, isVisible } from "@web/core/utils/ui";
 import { omit, pick } from "@web/core/utils/objects";
 import { tourState } from "./tour_state";
-import * as hoot from "@odoo/hoot-dom";
 import { setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
-import {
-    callWithUnloadCheck,
-    getConsumeEventType,
-    getScrollParent,
-    RunningTourActionHelper,
-} from "./tour_utils";
+import { callWithUnloadCheck, getScrollParent, RunningTourActionHelper } from "./tour_utils";
+import { utils } from "@web/core/ui/ui_service";
+
+const REGEX_ACTIONS_ARGUMENTS = /^(?<action>\w*) *\(? *(?<arguments>.*?)\)?$/;
 
 /**
  * @typedef {import("@web/core/macro").MacroDescriptor} MacroDescriptor
@@ -47,7 +45,7 @@ function findTrigger(selector, shadowDOM, inModal) {
         }
     }
     if (!nodes) {
-        nodes = hoot.queryAll(selector, { root: target });        
+        nodes = hoot.queryAll(selector, { root: target });
     }
     return nodes;
 }
@@ -125,19 +123,20 @@ function describeFailedStepDetailed(tour, step) {
     const start = stepIndex - offset >= 0 ? stepIndex - offset : 0;
     const end =
         stepIndex + offset + 1 <= tour.steps.length ? stepIndex + offset + 1 : tour.steps.length;
-    let result = [describeFailedStepSimple(tour, step)];
+    const result = [describeFailedStepSimple(tour, step)];
     for (let i = start; i < end; i++) {
-        const stepString = JSON.stringify(
-            omit(tour.steps[i], "state"),
-            (_key, value) => {
-                if (typeof value === "function") {
-                    return "[function]";
-                } else {
-                    return value;
-                }
-            },
-            2
-        ) + ",";
+        const stepString =
+            JSON.stringify(
+                omit(tour.steps[i], "state"),
+                (_key, value) => {
+                    if (typeof value === "function") {
+                        return "[function]";
+                    } else {
+                        return value;
+                    }
+                },
+                2
+            ) + ",";
         const text = [stepString];
         if (i === stepIndex) {
             const line = "-".repeat(10);
@@ -148,29 +147,6 @@ function describeFailedStepDetailed(tour, step) {
         result.push(...text);
     }
     return result.join("\n");
-}
-
-/**
- * Returns the element that will be used in listening to the `consumeEvent`.
- * @param {HTMLElement} el
- * @param {string} consumeEvent
- */
-function getAnchorEl(el, consumeEvent) {
-    if (consumeEvent === "drag") {
-        // jQuery-ui draggable triggers 'drag' events on the .ui-draggable element,
-        // but the tip is attached to the .ui-draggable-handle element which may
-        // be one of its children (or the element itself)
-        return el.closest(".ui-draggable, .o_draggable");
-    }
-    if (consumeEvent === "input" && !["textarea", "input"].includes(el.tagName.toLowerCase())) {
-        return el.closest("[contenteditable='true']");
-    }
-    if (consumeEvent === "sort") {
-        // when an element is dragged inside a sortable container (with classname
-        // 'ui-sortable'), jQuery triggers the 'sort' event on the container
-        return el.closest(".ui-sortable, .o_sortable");
-    }
-    return el;
 }
 
 /**
@@ -210,6 +186,64 @@ function getStepState(step) {
         step.isCheck;
     const check = checkRun && step.state.canContinue;
     return check ? "succeeded" : "errored";
+}
+
+/**
+ * @param {HTMLElement} [element]
+ * @param {RunCommand} [runCommand]
+ * @returns {string}
+ */
+function getConsumeEventType(element, runCommand) {
+    if (!element) {
+        return "click";
+    }
+    const { classList, tagName, type } = element;
+    const tag = tagName.toLowerCase();
+
+    // Many2one
+    if (classList.contains("o_field_many2one")) {
+        return "autocompleteselect";
+    }
+
+    // Inputs and textareas
+    if (
+        tag === "textarea" ||
+        (tag === "input" &&
+            (!type ||
+                [
+                    "email",
+                    "number",
+                    "password",
+                    "search",
+                    "tel",
+                    "text",
+                    "url",
+                    "date",
+                    "range",
+                ].includes(type)))
+    ) {
+        if (
+            utils.isSmall() &&
+            element.closest(".o_field_widget")?.matches(".o_field_many2one, .o_field_many2many")
+        ) {
+            return "click";
+        }
+        return "input";
+    }
+
+    // Drag & drop run command
+    if (typeof runCommand === "string" && /^drag_and_drop/.test(runCommand)) {
+        // this is a heuristic: the element has to be dragged and dropped but it
+        // doesn't have class 'ui-draggable-handle', so we check if it has an
+        // ui-sortable parent, and if so, we conclude that its event type is 'sort'
+        if (element.closest(".ui-sortable")) {
+            return "sort";
+        }
+        return "dragend";
+    }
+
+    // Default: click
+    return "click";
 }
 
 /**
@@ -304,8 +338,10 @@ export function compileStepManual(stepIndex, step, options) {
 
                 if (stepEl && canContinue(stepEl, step)) {
                     const consumeEvent = step.consumeEvent || getConsumeEventType(stepEl, step.run);
-                    const anchorEl = getAnchorEl(stepEl, consumeEvent);
                     const debouncedToggleOpen = debounce(pointer.showContent, 50, true);
+                    const anchorEl = stepEl;
+                    const { groups } = String(step.run).trim().match(REGEX_ACTIONS_ARGUMENTS);
+                    const target = groups.arguments;
 
                     const updatePointer = () => {
                         pointer.setState({
@@ -321,7 +357,7 @@ export function compileStepManual(stepIndex, step, options) {
                         onMouseEnter: () => pointer.showContent(true),
                         onMouseLeave: () => pointer.showContent(false),
                         onScroll: updatePointer,
-                        onConsume: () => {
+                        onConsume: (event) => {
                             proceedWith = stepEl;
                             pointer.hide();
                         },
@@ -438,8 +474,10 @@ export function compileStepAuto(stepIndex, step, options) {
                     result = willUnload && "will unload";
                 } else if (typeof step.run === "string") {
                     for (const todo of step.run.split("&&")) {
-                        const m = String(todo).trim().match(/^(?<action>\w*) *\(? *(?<arguments>.*?)\)?$/);
-                        await tryToDoAction(() => actionHelper[m.groups?.action](m.groups?.arguments));
+                        const m = String(todo).trim().match(REGEX_ACTIONS_ARGUMENTS);
+                        await tryToDoAction(() =>
+                            actionHelper[m.groups?.action](m.groups?.arguments)
+                        );
                     }
                 } else if (!step.isCheck) {
                     if (stepIndex === tour.steps.length - 1) {
