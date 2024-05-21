@@ -28,13 +28,14 @@ import {
     useEffect,
     useRef,
     useState,
+    useSubEnv,
 } from "@odoo/owl";
 import { LinkTools } from '@web_editor/js/wysiwyg/widgets/link_tools';
 import { touching, closest, addLoadingEffect as addButtonLoadingEffect } from "@web/core/utils/ui";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
 import { RPCError } from "@web/core/network/rpc";
-import { ColumnLayoutMixin } from "@web_editor/js/common/column_layout_mixin";
+import { ColumnLayoutUtils } from "@web_editor/js/common/column_layout_mixin";
 import { Tooltip as OdooTooltip } from "@web/core/tooltip/tooltip";
 import { AddSnippetDialog } from "@web_editor/js/editor/add_snippet_dialog";
 import { SnippetOption, SnippetOptionComponent } from "./snippets.options";
@@ -836,6 +837,7 @@ var SnippetEditor = Widget.extend({
                     options: this.options,
                     callbacks: {
                         requestUserValue: this._requestUserValue.bind(this),
+                        cover: this.cover.bind(this),
                     }
                 });
                 optionName = (option.Class || SnippetOption).name
@@ -1572,7 +1574,9 @@ var SnippetEditor = Widget.extend({
             // another snippet, fill the gap left in the starting snippet.
             if (this.dragState.mobileOrder !== undefined
                 && this.$target[0].parentNode !== this.dragState.startingParent) {
-                ColumnLayoutMixin._fillRemovedItemGap(this.dragState.startingParent, this.dragState.mobileOrder);
+                // TODO: @owl-options this is a bit ugly, maybe this method
+                // should be moved into an util.
+                ColumnLayoutUtils._fillRemovedItemGap(this.dragState.startingParent, this.dragState.mobileOrder);
             }
 
             this.$target.trigger('content_changed');
@@ -1939,7 +1943,6 @@ class SnippetsMenu extends Component {
         this.options = Object.assign({}, this.props.options);
         this.options.snippetEditionRequest = this.snippetEditionRequest.bind(this);
         this.options.optionUpdate = this._snippetOptionUpdate.bind(this);
-        this.options.env = this.env;
         this.$body = $((this.options.document || document).body);
         this.customEvents = SnippetsMenu.custom_events;
         this.tabs = SnippetsMenu.tabs;
@@ -2068,6 +2071,9 @@ class SnippetsMenu extends Component {
         });
 
         useSubEnv({
+            activateSnippet: this._activateSnippet.bind(this),
+            cloneSnippet: this._cloneSnippet.bind(this),
+            cleanUI: this._cleanUI.bind(this),
             userValueWidgetOpening: this._onUserValueWidgetOpening.bind(this),
             userValueWidgetClosing: this._onUserValueWidgetClosing.bind(this),
         });
@@ -4192,6 +4198,27 @@ class SnippetsMenu extends Component {
         }
     }
     /**
+     * Clones an existing snippet
+     *
+     * @param {jQuery} $snippet - the snippet to copy
+     */
+    async _cloneSnippet($snippet) {
+        const editor = await this._createSnippetEditor($snippet);
+        await editor.clone();
+    }
+    /**
+     * Asks options to clean their UI elements present in the DOM
+     *
+     * @param {HTMLElement} targetEl
+     * @returns {Promise}
+     */
+    async _cleanUI(targetEl) {
+        const targetEditors = this.snippetEditors.filter(editor => {
+            return targetEl.contains(editor.$target[0]);
+        });
+        await Promise.all(targetEditors.map(editor => editor.cleanUI()));
+	}
+	/**
      * @private
      */
     _allowInTranslationMode($snippet) {
@@ -4302,8 +4329,7 @@ class SnippetsMenu extends Component {
      */
     async _onCloneSnippet(ev) {
         ev.stopPropagation();
-        const editor = await this._createSnippetEditor(ev.data.$snippet);
-        await editor.clone();
+        await this._cloneSnippet(ev.data.$snippet);
         if (ev.data.onSuccess) {
             ev.data.onSuccess();
         }
@@ -4315,12 +4341,7 @@ class SnippetsMenu extends Component {
      * @param {OdooEvent} ev
      */
     _onCleanUIRequest(ev) {
-        const targetEditors = this.snippetEditors.filter(editor => {
-            return ev.data.targetEl.contains(editor.$target[0]);
-        });
-        Promise.all(targetEditors.map(editor => editor.cleanUI())).then(() => {
-            ev.data.onSuccess();
-        });
+        this._cleanUI(ev.data.targetEl).then(ev.data.onSuccess);
     }
     /**
      * Called when a child editor asks to deactivate the current snippet
