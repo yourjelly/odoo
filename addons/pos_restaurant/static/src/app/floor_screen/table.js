@@ -105,12 +105,6 @@ export class Table extends Component {
     get orderCount() {
         // These informations in uiState came from the server websocket
         const table = this.props.table;
-        if (table.uiState.changeCount > 0) {
-            return table.uiState.changeCount;
-        }
-        if (table.uiState.skipCount > 0) {
-            return table.uiState.skipCount;
-        }
 
         // If the table is not synced, we need to count the unsynced orders
         const orderCount = new Set();
@@ -119,6 +113,17 @@ export class Table extends Component {
         );
 
         table.uiState.orderCount = tableOrders.length;
+
+        // Shifted below for in case where after deleting an order which not
+        // passed to the preparation display showing change count on the table
+        // after returning from the ticket screen
+        if (table.uiState.orderCount !== 0 && table.uiState.changeCount > 0) {
+            return table.uiState.changeCount;
+        }
+        if (table.uiState.orderCount !== 0 && table.uiState.skipCount > 0) {
+            return table.uiState.skipCount;
+        }
+
         for (const order of tableOrders) {
             const changes = getOrderChanges(order, false, this.pos.orderPreparationCategories);
             table.uiState.changeCount += changes.nbrOfChanges;

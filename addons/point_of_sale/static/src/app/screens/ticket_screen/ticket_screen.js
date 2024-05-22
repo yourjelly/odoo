@@ -154,6 +154,13 @@ export class TicketScreen extends Component {
             }
             const deleted = this.pos.removeOrder(order, true);
 
+            // For deleting orders from the server just after deleting from the local cascade
+            const idToDelete = [...this.pos.pendingOrder.delete];
+            if (idToDelete && order.state === "draft") {
+                this.pos.pendingOrder.delete.clear();
+                await this.pos.data.ormDelete("pos.order", idToDelete);
+            }
+
             if (!deleted) {
                 order.uiState.displayed = true;
             }
