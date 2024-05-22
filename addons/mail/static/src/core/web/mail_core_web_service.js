@@ -42,7 +42,7 @@ export class MailCoreWeb {
             }
         });
         this.busService.subscribe("mail.message/mark_as_read", (payload, { id: notifId }) => {
-            const { message_ids: messageIds, needaction_inbox_counter } = payload;
+            const { message_ids: messageIds, inbox_counter } = payload;
             const inbox = this.store.discuss.inbox;
             for (const messageId of messageIds) {
                 // We need to ignore all not yet known messages because we don't want them
@@ -70,7 +70,7 @@ export class MailCoreWeb {
                 history.messages.add(message);
             }
             if (notifId > inbox.counter_bus_id) {
-                inbox.counter = needaction_inbox_counter;
+                inbox.counter = inbox_counter;
                 inbox.counter_bus_id = notifId;
             }
             if (inbox.counter > inbox.messages.length) {

@@ -177,7 +177,7 @@ patch(MockServer.prototype, {
         return mainMatchingPartners.concat(extraMatchingPartners);
     },
     /**
-     * Simulates `_get_needaction_count` on `res.partner`.
+     * Simulates `_get_inbox_count` on `res.partner`.
      *
      * @private
      * @param {integer} id

@@ -329,7 +329,7 @@ export class ResPartner extends webModels.ResPartner {
      * @param {number} id
      * @returns {number}
      */
-    _get_needaction_count(id) {
+    _get_inbox_count(id) {
         /** @type {import("mock_models").MailNotification} */
         const MailNotification = this.env["mail.notification"];
 

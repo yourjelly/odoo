@@ -149,8 +149,8 @@ class Message(models.Model):
     notified_partner_ids = fields.Many2many(
         'res.partner', 'mail_notification', string='Partners with Need Action',
         context={'active_test': False}, depends=['notification_ids'], copy=False)
-    needaction = fields.Boolean(
-        'Need Action', compute='_compute_needaction', search='_search_needaction')
+    is_in_inbox = fields.Boolean(
+        "Determines if the message is in the user inbox", compute='_compute_is_in_inbox', search='_search_is_in_inbox')
     has_error = fields.Boolean(
         'Has error', compute='_compute_has_error', search='_search_has_error')
     # notifications
@@ -216,17 +216,17 @@ class Message(models.Model):
             else:
                 message.is_current_user_or_guest_author = False
 
-    def _compute_needaction(self):
+    def _compute_is_in_inbox(self):
         """ Need action on a mail.message = notified on my channel """
         my_messages = self.env['mail.notification'].sudo().search([
             ('mail_message_id', 'in', self.ids),
             ('res_partner_id', '=', self.env.user.partner_id.id),
             ('is_read', '=', False)]).mapped('mail_message_id')
         for message in self:
-            message.needaction = message in my_messages
+            message.is_in_inbox = message in my_messages
 
     @api.model
-    def _search_needaction(self, operator, operand):
+    def _search_is_in_inbox(self, operator, operand):
         is_read = False if operator == '=' and operand else True
         notification_ids = self.env['mail.notification']._search([('res_partner_id', '=', self.env.user.partner_id.id), ('is_read', '=', is_read)])
         return [('notification_ids', 'in', notification_ids)]
@@ -792,7 +792,7 @@ class Message(models.Model):
 
         self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.message/mark_as_read', {
             'message_ids': notifications.mail_message_id.ids,
-            'needaction_inbox_counter': self.env.user.partner_id._get_needaction_count(),
+            'inbox_counter': self.env.user.partner_id._get_inbox_count(),
         })
 
     def set_message_done(self):
@@ -813,7 +813,7 @@ class Message(models.Model):
         # notifies changes in messages through the bus.
         self.env['bus.bus']._sendone(partner_id, 'mail.message/mark_as_read', {
             'message_ids': notifications.mail_message_id.ids,
-            'needaction_inbox_counter': self.env.user.partner_id._get_needaction_count(),
+            'inbox_counter': self.env.user.partner_id._get_inbox_count(),
         })
 
     @api.model
@@ -1026,8 +1026,8 @@ class Message(models.Model):
                 displayed_tracking_ids = allowed_tracking_ids
                 if record and hasattr(record, '_track_filter_for_display'):
                     displayed_tracking_ids = record._track_filter_for_display(displayed_tracking_ids)
-                needaction_partner_ids = message_sudo.notification_ids.filtered(lambda n: not n.is_read).res_partner_id
-                vals["needaction"] = self.env.user.partner_id in needaction_partner_ids and not self.env.user._is_public()
+                inbox_partner_ids = message_sudo.notification_ids.filtered(lambda n: not n.is_read).res_partner_id
+                vals["needaction"] = self.env.user.partner_id in inbox_partner_ids and not self.env.user._is_public()
                 vals["starredPersonas"] = [{"id": partner_id, "type": "partner"} for partner_id in message_sudo.starred_partner_ids.ids]
                 vals["trackingValues"] = displayed_tracking_ids._tracking_value_format()
         return vals_list

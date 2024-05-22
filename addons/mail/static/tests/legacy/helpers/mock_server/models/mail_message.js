@@ -135,9 +135,7 @@ patch(MockServer.prototype, {
         }
         this.pyEnv["bus.bus"]._sendone(this.pyEnv.currentPartner, "mail.message/mark_as_read", {
             message_ids: messageIds,
-            needaction_inbox_counter: this._mockResPartner_GetNeedactionCount(
-                this.pyEnv.currentPartnerId
-            ),
+            inbox_counter: this._mockResPartner_GetNeedactionCount(this.pyEnv.currentPartnerId),
         });
         return messageIds;
     },
@@ -434,9 +432,7 @@ patch(MockServer.prototype, {
             });
             this.pyEnv["bus.bus"]._sendone(this.pyEnv.currentPartner, "mail.message/mark_as_read", {
                 message_ids: [message.id],
-                needaction_inbox_counter: this._mockResPartner_GetNeedactionCount(
-                    this.pyEnv.currentPartnerId
-                ),
+                inbox_counter: this._mockResPartner_GetNeedactionCount(this.pyEnv.currentPartnerId),
             });
         }
     },

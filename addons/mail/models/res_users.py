@@ -304,7 +304,7 @@ class Users(models.Model):
             "Store": {
                 "discuss": {
                     "inbox": {
-                        "counter": self.partner_id._get_needaction_count(),
+                        "counter": self.partner_id._get_inbox_count(),
                         "counter_bus_id": bus_last_id,
                         "id": "inbox",
                         "model": "mail.box",

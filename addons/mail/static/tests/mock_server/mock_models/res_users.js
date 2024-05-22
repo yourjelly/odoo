@@ -129,7 +129,7 @@ export class ResUsers extends webModels.ResUsers {
             Store: {
                 discuss: {
                     inbox: {
-                        counter: ResPartner._get_needaction_count(user.partner_id),
+                        counter: ResPartner._get_inbox_count(user.partner_id),
                         counter_bus_id: bus_last_id,
                         id: "inbox",
                         model: "mail.box",

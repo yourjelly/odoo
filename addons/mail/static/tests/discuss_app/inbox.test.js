@@ -613,7 +613,7 @@ test("emptying inbox doesn't display rainbow man in another thread", async () =>
     const [partner] = pyEnv["res.partner"].read(serverState.partnerId);
     pyEnv["bus.bus"]._sendone(partner, "mail.message/mark_as_read", {
         message_ids: [messageId],
-        needaction_inbox_counter: 0,
+        inbox_counter: 0,
     });
     await contains("button", { text: "Inbox", contains: [".badge", { count: 0 }] });
     // weak test, no guarantee that we waited long enough for the potential rainbow man to show

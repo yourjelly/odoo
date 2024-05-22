@@ -61,7 +61,7 @@ export class MailMessage extends models.ServerModel {
         const [partner] = ResPartner.read(this.env.user.partner_id);
         BusBus._sendone(partner, "mail.message/mark_as_read", {
             message_ids: messageIds,
-            needaction_inbox_counter: ResPartner._get_needaction_count(this.env.user.partner_id),
+            inbox_counter: ResPartner._get_inbox_count(this.env.user.partner_id),
         });
         return messageIds;
     }
@@ -262,9 +262,7 @@ export class MailMessage extends models.ServerModel {
             const [partner] = ResPartner.read(this.env.user.partner_id);
             BusBus._sendone(partner, "mail.message/mark_as_read", {
                 message_ids: [message.id],
-                needaction_inbox_counter: ResPartner._get_needaction_count(
-                    this.env.user.partner_id
-                ),
+                inbox_counter: ResPartner._get_inbox_count(this.env.user.partner_id),
             });
         }
     }
