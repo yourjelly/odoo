@@ -1645,8 +1645,17 @@ class MrpProduction(models.Model):
         finish_moves = self.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
         raw_moves = self.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
         (finish_moves | raw_moves)._action_cancel()
-        picking_ids = self.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
-        picking_ids.action_cancel()
+
+        if len(self.picking_ids) >= 1:
+            if self.picking_ids[0].state not in ('cancel', 'done'):
+                self.picking_ids[0].action_cancel()
+
+            for current_picking, next_picking in zip(self.picking_ids, self.picking_ids[1:]):
+                if all(move.propagate_cancel for move in current_picking.move_ids):
+                    if next_picking.state not in ('cancel', 'done'):
+                        next_picking.action_cancel()
+                else:
+                    break
 
         for production, documents in documents_by_production.items():
             filtered_documents = {}
