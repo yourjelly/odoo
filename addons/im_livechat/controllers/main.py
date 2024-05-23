@@ -42,7 +42,7 @@ class LivechatController(http.Controller):
         if ext not in ('css', 'js'):
             raise request.not_found()
         stream = request.env['ir.binary']._get_stream_from(getattr(asset, ext)())
-        return stream.get_response()
+        return stream.get_response(content_security_policy=None)
 
     @http.route('/im_livechat/font-awesome', type='http', auth='none', cors="*")
     def fontawesome(self, **kwargs):
