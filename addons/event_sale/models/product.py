@@ -6,19 +6,20 @@ from odoo import api, fields, models
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    detailed_type = fields.Selection(selection_add=[
-        ('event', 'Event Ticket'),
-    ], ondelete={'event': 'set service'})
+    service_tracking = fields.Selection([
+        ('none', 'None'),
+        ('event', 'Event')
+    ], string='Service Tracking', default='none')
 
     @api.onchange('detailed_type')
-    def _onchange_type_event(self):
-        if self.detailed_type == 'event':
-            self.invoice_policy = 'order'
+    def _onchange_detailed_type(self):
+        if self.detailed_type != 'service':
+            self.service_tracking = 'none'
 
-    def _detailed_type_mapping(self):
-        type_mapping = super()._detailed_type_mapping()
-        type_mapping['event'] = 'service'
-        return type_mapping
+    @api.onchange('detailed_type', 'service_tracking')
+    def _onchange_type_event(self):
+        if self.detailed_type == 'service' and self.service_tracking == 'event':
+            self.invoice_policy = 'order'
 
 
 class Product(models.Model):

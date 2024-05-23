@@ -15,7 +15,7 @@ class SaleOrder(models.Model):
         in website_sale controller shop/address that updates customer, but not
         only. """
         result = super(SaleOrder, self).write(vals)
-        if any(line.product_type == 'event' for line in self.order_line) and vals.get('partner_id'):
+        if any(line.service_tracking == 'event' for line in self.order_line) and vals.get('partner_id'):
             registrations_toupdate = self.env['event.registration'].sudo().search([('sale_order_id', 'in', self.ids)])
             registrations_toupdate.write({'partner_id': vals['partner_id']})
         return result
@@ -66,4 +66,4 @@ class SaleOrder(models.Model):
         :rtype: list
         """
         domain = super()._get_product_catalog_domain()
-        return expression.AND([domain, [('detailed_type', '!=', 'event')]])
+        return expression.AND([domain, [('service_tracking', '!=', 'event')]])
