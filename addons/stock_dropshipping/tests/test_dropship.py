@@ -102,7 +102,7 @@ class TestDropship(common.TransactionCase):
                 line.product_id = self.dropship_product
                 line.product_uom_qty = 200
                 line.price_unit = 1.00
-                line.route_id = self.dropshipping_route
+                line.route_ids = self.dropshipping_route
         sale_order_drp_shpng = so_form.save()
 
         # Confirm sales order
@@ -272,7 +272,7 @@ class TestDropship(common.TransactionCase):
             with so_form.order_line.new() as line:
                 line.product_id = self.dropship_product
                 line.product_uom_qty = 1
-                line.route_id = self.dropshipping_route
+                line.route_ids = self.dropshipping_route
         sale_order_drp_shpng = so_form.save()
         sale_order_drp_shpng.action_confirm()
 
@@ -287,7 +287,7 @@ class TestDropship(common.TransactionCase):
             with so_form.order_line.new() as line:
                 line.product_id = self.dropship_product
                 line.product_uom_qty = 2
-                line.route_id = self.dropshipping_route
+                line.route_ids = self.dropshipping_route
         sale_order_drp_shpng = so_form.save()
         sale_order_drp_shpng.action_confirm()
 
