@@ -91,7 +91,7 @@ class ResPartner(models.Model):
     def autocomplete(self, query, timeout=15):
         suggestions, _ = self.env['iap.autocomplete.api']._request_partner_autocomplete('search', {
             'query': query,
-        }, timeout=timeout)
+        }, api_version=2, timeout=timeout)
         if suggestions:
             results = []
             for suggestion in suggestions:

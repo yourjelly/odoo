@@ -13,9 +13,7 @@ var _t = core._t;
  * This mixin only works with classes having EventDispatcherMixin in 'web.mixins'
  */
 var PartnerAutocompleteMixin = {
-    _dropPreviousOdoo: new concurrency.DropPrevious(),
-    _dropPreviousClearbit: new concurrency.DropPrevious(),
-    _timeout : 1000, // Timeout for Clearbit autocomplete in ms
+    _dropPrevious: new concurrency.DropPrevious(),
 
     //--------------------------------------------------------------------------
     // Public
@@ -29,47 +27,33 @@ var PartnerAutocompleteMixin = {
      * @private
      */
     _autocomplete: function (value) {
-        var self = this;
         value = value.trim();
-        var isVAT = this._isVAT(value);
-        var odooSuggestions = [];
-        var clearbitSuggestions = [];
-        return new Promise(function (resolve, reject) {
-            var odooPromise = self._getOdooSuggestions(value, isVAT).then(function (suggestions){
-                odooSuggestions = suggestions;
-            });
+        var method = this._isVAT(value) ? 'read_by_vat' : 'autocomplete';
 
-            // Only get Clearbit suggestions if not a VAT number
-            var clearbitPromise = isVAT ? false : self._getClearbitSuggestions(value).then(function (suggestions){
-                clearbitSuggestions = suggestions;
-            });
+        var def = this._rpc({
+            model: 'res.partner',
+            method: method,
+            args: [value],
+        }, {
+            shadow: true,
+        }).then(function (suggestions) {
+            suggestions.map(function (suggestion) {
+                suggestion.logo = suggestion.logo || '';
+                suggestion.label = suggestion.name;
+                if (suggestion.vat) suggestion.description = suggestion.vat;
+                else if (suggestion.website) suggestion.description = suggestion.website;
 
-            var concatResults = function () {
-                // Add Clearbit result with Odoo result (with unique domain)
-                if (clearbitSuggestions && clearbitSuggestions.length) {
-                    var websites = odooSuggestions.map(function (suggestion) {
-                        return suggestion.website;
-                    });
-                    clearbitSuggestions.forEach(function (suggestion) {
-                        if (websites.indexOf(suggestion.domain) < 0) {
-                            websites.push(suggestion.domain);
-                            odooSuggestions.push(suggestion);
-                        }
-                    });
+                if (suggestion.country_id && suggestion.country_id.display_name) {
+                    if (suggestion.description) suggestion.description += _.str.sprintf(' (%s)', suggestion.country_id.display_name);
+                    else suggestion.description += suggestion.country_id.display_name;
                 }
 
-                odooSuggestions = _.filter(odooSuggestions, function (suggestion) {
-                    return !suggestion.ignored;
-                });
-                _.each(odooSuggestions, function(suggestion){
-                delete suggestion.ignored;
-                });
-                return resolve(odooSuggestions);
-            };
-
-            self._whenAll([odooPromise, clearbitPromise]).then(concatResults, concatResults);
+                return suggestion;
+            });
+            return suggestions;
         });
 
+        return this._dropPrevious.add(def);
     },
 
     /**
@@ -221,69 +205,6 @@ var PartnerAutocompleteMixin = {
         });
     },
 
-    /**
-     * Use Clearbit Autocomplete API to return suggestions
-     *
-     * @param {string} value
-     * @returns {Promise}
-     * @private
-     */
-    _getClearbitSuggestions: function (value) {
-        var url = 'https://autocomplete.clearbit.com/v1/companies/suggest?query=' + value;
-        var def = $.ajax({
-            url: url,
-            dataType: 'json',
-            timeout: this._timeout,
-            success: function (suggestions) {
-                suggestions.map(function (suggestion) {
-                    suggestion.label = suggestion.name;
-                    suggestion.website = suggestion.domain;
-                    suggestion.description = suggestion.website;
-                    return suggestion;
-                });
-                return suggestions;
-            },
-        });
-
-        return this._dropPreviousClearbit.add(def);
-    },
-
-    /**
-     * Use Odoo Autocomplete API to return suggestions
-     *
-     * @param {string} value
-     * @param {boolean} isVAT
-     * @returns {Promise}
-     * @private
-     */
-    _getOdooSuggestions: function (value, isVAT) {
-        var method = isVAT ? 'read_by_vat' : 'autocomplete';
-
-        var def = this._rpc({
-            model: 'res.partner',
-            method: method,
-            args: [value],
-        }, {
-            shadow: true,
-        }).then(function (suggestions) {
-            suggestions.map(function (suggestion) {
-                suggestion.logo = suggestion.logo || '';
-                suggestion.label = suggestion.legal_name || suggestion.name;
-                if (suggestion.vat) suggestion.description = suggestion.vat;
-                else if (suggestion.website) suggestion.description = suggestion.website;
-
-                if (suggestion.country_id && suggestion.country_id.display_name) {
-                    if (suggestion.description) suggestion.description += _.str.sprintf(' (%s)', suggestion.country_id.display_name);
-                    else suggestion.description += suggestion.country_id.display_name;
-                }
-
-                return suggestion;
-            });
-            return suggestions;
-        });
-
-        return this._dropPreviousOdoo.add(def);
-    },
     /**
      * Check if searched value is possibly a VAT : 2 first chars = alpha + min 5 numbers
      *

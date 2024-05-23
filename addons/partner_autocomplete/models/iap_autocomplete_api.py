@@ -32,13 +32,13 @@ class IapAutocompleteEnrichAPI(models.AbstractModel):
         return iap_tools.iap_jsonrpc(base_url + local_endpoint + '/' + action, params=params, timeout=timeout)
 
     @api.model
-    def _request_partner_autocomplete(self, action, params, timeout=15):
+    def _request_partner_autocomplete(self, action, params, api_version=1, timeout=15):
         """ Contact endpoint to get autocomplete data.
 
         :return tuple: results, error code
         """
         try:
-            results = self._contact_iap('/iap/partner_autocomplete', action, params, timeout=timeout)
+            results = self._contact_iap(f'/api/directory/{api_version}/complete', action, params, timeout=timeout)
         except exceptions.ValidationError:
             return False, 'Insufficient Credit'
         except (ConnectionError, HTTPError, exceptions.AccessError, exceptions.UserError) as exception:
