@@ -440,6 +440,5 @@ class ChannelMember(models.Model):
                 "model": "discuss.channel",
             },
         }
-        if sync:
-            channel_member["localNewMessageSeparator"] = self.new_message_separator
+        channel_member["syncNewMessageSeparator"] = sync
         self.env["bus.bus"]._sendone(target, "mail.record/insert", {"ChannelMember": channel_member})

@@ -176,9 +176,7 @@ export class DiscussChannelMember extends models.ServerModel {
                 model: "discuss.channel",
             },
         };
-        if (sync) {
-            memberData["localNewMessageSeparator"] = message_id;
-        }
+        memberData["syncNewMessageSeparator"] = sync;
         this.env["bus.bus"]._sendone(target, "mail.record/insert", { ChannelMember: memberData });
     }
 }

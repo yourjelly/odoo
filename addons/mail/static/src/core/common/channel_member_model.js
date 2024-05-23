@@ -24,7 +24,13 @@ export class ChannelMember extends Record {
     last_interest_dt = Record.attr(undefined, { type: "datetime" });
     persona = Record.one("Persona", { inverse: "channelMembers" });
     rtcSession = Record.one("RtcSession");
-    syncNewMessageSeparator = true;
+    syncNewMessageSeparator = Record.attr(true, {
+        onUpdate() {
+            if (this.syncNewMessageSeparator) {
+                this.localNewMessageSeparator = this.new_message_separator;
+            }
+        },
+    });
     thread = Record.one("Thread", { inverse: "channelMembers" });
     threadAsSelf = Record.one("Thread", {
         compute() {
@@ -36,7 +42,14 @@ export class ChannelMember extends Record {
     fetched_message_id = Record.one("Message");
     seen_message_id = Record.one("Message");
     localNewMessageSeparator = null;
-    new_message_separator = null;
+    new_message_separator = Record.attr(null, {
+        onUpdate() {
+            console.warn(this.new_message_separator, this.syncNewMessageSeparator);
+            if (this.syncNewMessageSeparator) {
+                this.localNewMessageSeparator = this.new_message_separator;
+            }
+        },
+    });
     threadAsTyping = Record.one("Thread", {
         onAdd() {
             browser.clearTimeout(this.typingTimeoutId);
@@ -70,9 +83,6 @@ export class ChannelMember extends Record {
     onChangeIsThreadDisplayed(isDisplayed) {
         if (!isDisplayed) {
             return;
-        }
-        if (this.syncNewMessageSeparator) {
-            this.localNewMessageSeparator = this.new_message_separator;
         }
         this.syncNewMessageSeparator = true;
     }

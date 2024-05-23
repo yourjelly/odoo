@@ -421,7 +421,7 @@ async function discuss_channel_mark_as_read(request) {
     const DiscussChannel = this.env["discuss.channel"];
 
     const { channel_id, last_message_id } = await parseRequestParams(request);
-    return DiscussChannel._mark_as_read([channel_id], last_message_id);
+    return DiscussChannel._mark_as_read([channel_id], last_message_id, false);
 }
 
 registerRoute("/discuss/channel/mark_as_unread", discuss_channel_mark_as_unread);

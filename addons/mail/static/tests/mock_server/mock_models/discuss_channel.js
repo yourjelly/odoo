@@ -949,12 +949,14 @@ export class DiscussChannel extends models.ServerModel {
     /**
      * @param {number[]} ids
      * @param {number} last_message_id
+     * @param {boolean} [sync=false]
      */
-    _mark_as_read(ids, last_message_id) {
-        const kwargs = parseModelParams(arguments, "ids", "last_message_id");
+    _mark_as_read(ids, last_message_id, sync) {
+        const kwargs = parseModelParams(arguments, "ids", "last_message_id", "sync");
         ids = kwargs.ids;
         delete kwargs.ids;
         last_message_id = kwargs.last_message_id;
+        sync = kwargs.sync;
 
         /** @type {import("mock_models").MailMessage} */
         const MailMessage = this.env["mail.message"];
@@ -979,7 +981,8 @@ export class DiscussChannel extends models.ServerModel {
         }
         this.env["discuss.channel.member"]._set_new_message_separator(
             [member.id],
-            last_message_id + 1
+            last_message_id + 1,
+            sync
         );
     }
 

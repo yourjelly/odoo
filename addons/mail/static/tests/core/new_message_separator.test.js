@@ -79,6 +79,7 @@ test("separator is not shown if message is not yet loaded", async () => {
     await contains(".o-mail-Message", { count: 30 });
     await scroll(".o-mail-Thread", 0);
     await contains(".o-mail-Message", { text: "message 0" });
+    await contains(".o-mail-Thread-newMessage ~ .o-mail-Message", { text: "message 0", count: 0 });
     await tick(); // give enough time for the useVisible hook to register load more as hidden
     await scroll(".o-mail-Thread", 0);
     await contains(".o-mail-Thread-newMessage ~ .o-mail-Message", { text: "message 0" });

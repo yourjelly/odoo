@@ -1022,7 +1022,7 @@ class Channel(models.Model):
         else:
             self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.record/insert', {"Thread": self._channel_info()[0]})
 
-    def _mark_as_read(self, last_message_id=None):
+    def _mark_as_read(self, last_message_id=None, sync=False):
         """
         Mark channel as read by updating seen message id of the current persona
         as well as its new message separator.
@@ -1044,7 +1044,7 @@ class Channel(models.Model):
         current_member = self.env["discuss.channel.member"].search(
             [("channel_id", "=", self.id), ("is_self", "=", True)]
         )
-        current_member._set_new_message_separator(last_message.id + 1)
+        current_member._set_new_message_separator(last_message.id + 1, sync=sync)
         return last_message.id
 
     def _set_last_seen_message(self, last_message, notify=True):

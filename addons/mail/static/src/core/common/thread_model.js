@@ -1080,8 +1080,9 @@ export class Thread extends Record {
             );
             this.messages.push(tmpMsg);
             if (this.selfMember) {
+                this.selfMember.syncNewMessageSeparator = true;
                 this.selfMember.seen_message_id = tmpMsg;
-                this.selfMember.localNewMessageSeparator = tmpMsg + 1;
+                this.selfMember.new_message_separator = tmpMsg.id + 1;
             }
         }
         const data = await this.store.doMessagePost(params, tmpMsg);
@@ -1095,7 +1096,7 @@ export class Thread extends Record {
         this.addOrReplaceMessage(message, tmpMsg);
         if (this.selfMember?.seen_message_id?.id < message.id) {
             this.selfMember.seen_message_id = message;
-            this.selfMember.localNewMessageSeparator = message.id + 1;
+            this.selfMember.new_message_separator = message.id + 1;
         }
         // Only delete the temporary message now that seen_message_id is updated
         // to avoid flickering.
