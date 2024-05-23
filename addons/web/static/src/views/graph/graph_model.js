@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { sortBy } from "@web/core/utils/arrays";
 import { KeepLast, Race } from "@web/core/utils/concurrency";
 import { rankInterval } from "@web/search/utils/dates";
@@ -13,6 +14,11 @@ export const SEP = " / ";
 /**
  * @typedef {import("@web/search/search_model").SearchParams} SearchParams
  */
+
+function getId(range, unit, type) {
+    const start = type === "date" ? deserializeDate(range.from) : deserializeDateTime(range.from);
+    return unit === "day" ? [[start.day, start.month], start.year] : [start[unit], start.year];
+}
 
 class DateClasses {
     // We view the param "array" as a matrix of values and undefined.
@@ -386,7 +392,7 @@ export class GraphModel extends Model {
      * @returns {Object[]}
      */
     async _loadDataPoints(metaData) {
-        const { measure, domains, fields, groupBy, resModel } = metaData;
+        const { comparisonField, measure, domains, fields, groupBy, resModel } = metaData;
 
         const measures = ["__count"];
         if (measure !== "__count") {
@@ -419,7 +425,7 @@ export class GraphModel extends Model {
                     .then((data) => {
                         const dataPoints = [];
                         for (const group of data.groups) {
-                            const { __domain, __count } = group;
+                            const { __domain, __count, __range } = group;
                             const labels = [];
 
                             for (const gb of groupBy) {
@@ -462,12 +468,23 @@ export class GraphModel extends Model {
                             if (!Number.isInteger(value)) {
                                 metaData.allIntegers = false;
                             }
+                            let idForVal;
+                            if (
+                                comparisonField &&
+                                groupBy.length &&
+                                groupBy[0].fieldName === comparisonField
+                            ) {
+                                const { fieldName, interval } = groupBy[0];
+                                const { type } = fields[fieldName];
+                                idForVal = getId(__range[fieldName], interval, type);
+                            }
                             dataPoints.push({
                                 count: __count,
                                 domain: __domain,
                                 value,
                                 labels,
                                 originIndex,
+                                idForVal,
                             });
                         }
                         return dataPoints;
