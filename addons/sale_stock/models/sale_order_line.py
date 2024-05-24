@@ -52,13 +52,21 @@ class SaleOrderLine(models.Model):
          2. The quotation hasn't commitment_date, we compute the estimated delivery
             date based on lead time"""
         treated = self.browse()
+        forecast_expected_date_per_move = self._get_forecast_expected_date_per_move()
         # If the state is already in sale the picking is created and a simple forecasted quantity isn't enough
         # Then used the forecasted data of the related stock.move
         for line in self.filtered(lambda l: l.state == 'sale'):
             if not line.display_qty_widget:
                 continue
             moves = line.move_ids.filtered(lambda m: m.product_id == line.product_id)
-            line.forecast_expected_date = max(moves.filtered("forecast_expected_date").mapped("forecast_expected_date"), default=False)
+            line.forecast_expected_date = max(
+                (
+                    forecast_expected_date_per_move[move.id]
+                    for move in moves
+                    if forecast_expected_date_per_move[move.id]
+                ),
+                default=False,
+            )
             line.qty_available_today = 0
             line.free_qty_today = 0
             for move in moves:
@@ -263,6 +271,19 @@ class SaleOrderLine(models.Model):
 
     def _get_procurement_group(self):
         return self.order_id.procurement_group_id
+    
+    def _get_forecast_expected_date_per_move(self):
+        all_move_ids = {
+            move.id
+            for line in self
+            for move in line.move_ids
+            if line.state == 'sale' and move.product_id == line.product_id
+        }
+        all_moves = self.env['stock.move'].browse(all_move_ids)
+        return {
+            move['id']: move['forecast_expected_date']
+            for move in all_moves.read(['forecast_expected_date'])
+        }
 
     def _prepare_procurement_group_vals(self):
         return {
