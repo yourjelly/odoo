@@ -136,6 +136,9 @@ export class CommandPalette extends Component {
             allowRepeat: true,
         });
         useExternalListener(window, "mousedown", this.onWindowMouseDown);
+        useExternalListener(window, "mousemove", () => {
+            this.mouseSelectionActive = true;
+        });
 
         /**
          * @type {{ commands: CommandItem[],
@@ -310,8 +313,6 @@ export class CommandPalette extends Component {
     onCommandMouseEnter(index) {
         if (this.mouseSelectionActive) {
             this.selectCommand(index);
-        } else {
-            this.mouseSelectionActive = true;
         }
     }
 
