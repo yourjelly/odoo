@@ -137,3 +137,29 @@ class TestAccruedSaleOrders(AccountTestInvoicingCommon):
             {'account_id': self.account_expense.id, 'debit': 12000.0, 'credit': 0.0, 'analytic_distribution': {str(self.analytic_account_a.id): 66.67, str(self.analytic_account_b.id): 33.33, str(self.analytic_account_c.id): 100.0}},
 
         ])
+
+    def test_product_name_in_accured_revenue_entry(self):
+        self.sale_order.order_line.qty_delivered = 5
+
+        so_context = {
+            'active_model': 'sale.order',
+            'active_ids': [self.sale_order.id],
+            'active_id': self.sale_order.id,
+            'default_journal_id': self.company_data['default_journal_sale'].id,
+        }
+        payment_params = {
+            'advance_payment_method': 'percentage',
+            'amount': 50.0,
+        }
+        downpayment = self.env['sale.advance.payment.inv'].with_context(so_context).create(payment_params)
+        invoice = downpayment._create_invoices({
+            'sale_orders': so_context,
+        })
+        invoice.action_post()
+        wizard = self.env['account.accrued.orders.wizard'].with_context({
+            'active_model': 'sale.order',
+            'active_ids': self.sale_order.ids,
+        }).create({
+            'account_id': self.account_expense.id,
+        })
+        wizard.create_entries()
