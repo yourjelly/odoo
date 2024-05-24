@@ -439,13 +439,6 @@
                                 <field name="update_stock_quantities" colspan="4" widget="radio"/>
                             </setting>
                         </block>
-                        <block title="Food Delivery Connector" id="pos_food_delivery_section">
-                            <setting string="Urban Piper" help="Manage your online orders with urban piper" id="urban_piper">
-                                <field name="module_pos_urban_piper" widget="upgrade_boolean"/>
-                                <div id="urban_piper_credentials" class="content-group" invisible="not module_pos_urban_piper">
-                                </div>
-                            </setting>
-                        </block>
                     </div>
                 </app>
             </xpath>
