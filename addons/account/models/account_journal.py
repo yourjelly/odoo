@@ -79,11 +79,13 @@ class AccountJournal(models.Model):
             ('purchase', 'Purchase'),
             ('cash', 'Cash'),
             ('bank', 'Bank'),
+            ('credit', 'Credit Card'),
             ('general', 'Miscellaneous'),
         ], required=True,
         help="Select 'Sale' for customer invoices journals.\n"\
         "Select 'Purchase' for vendor bills journals.\n"\
         "Select 'Cash' or 'Bank' for journals that are used in customer or vendor payments.\n"\
+        "Select 'Credit Card' for journals that are used for credit card statements.\n"\
         "Select 'General' for miscellaneous operations journals.")
     account_control_ids = fields.Many2many('account.account', 'journal_account_control_rel', 'journal_id', 'account_id', string='Allowed accounts',
         check_company=True,
@@ -116,11 +118,6 @@ class AccountJournal(models.Model):
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
 
     refund_sequence = fields.Boolean(string='Dedicated Credit Note Sequence', help="Check this box if you don't want to share the same sequence for invoices and credit notes made from this journal", default=False)
-    payment_sequence = fields.Boolean(
-        string='Dedicated Payment Sequence',
-        compute='_compute_payment_sequence', readonly=False, store=True, precompute=True,
-        help="Check this box if you don't want to share the same sequence on payments and bank transactions posted on this journal",
-    )
     sequence_override_regex = fields.Text(help="Technical field used to enforce complex sequence composition that the system would normally misunderstand.\n"\
                                           "This is a regex that can include all the following capture groups: prefix1, year, prefix2, month, prefix3, seq, suffix.\n"\
                                           "The prefix* groups are the separators between the year, month and the actual increasing sequence number (seq).\n"\
@@ -293,6 +290,7 @@ class AccountJournal(models.Model):
             'cash': 'asset_cash',
             'sale': 'income%',
             'purchase': 'expense%',
+            'credit': 'liability_credit_card',
         }
 
         for journal in self:
@@ -302,7 +300,7 @@ class AccountJournal(models.Model):
     def _compute_inbound_payment_method_line_ids(self):
         for journal in self:
             pay_method_line_ids_commands = [Command.clear()]
-            if journal.type in ('bank', 'cash'):
+            if journal.type in ('bank', 'cash', 'credit'):
                 default_methods = journal._default_inbound_payment_methods()
                 pay_method_line_ids_commands += [Command.create({
                     'name': pay_method.name,
@@ -314,7 +312,7 @@ class AccountJournal(models.Model):
     def _compute_outbound_payment_method_line_ids(self):
         for journal in self:
             pay_method_line_ids_commands = [Command.clear()]
-            if journal.type in ('bank', 'cash'):
+            if journal.type in ('bank', 'cash', 'credit'):
                 default_methods = journal._default_outbound_payment_methods()
                 pay_method_line_ids_commands += [Command.create({
                     'name': pay_method.name,
@@ -458,11 +456,6 @@ class AccountJournal(models.Model):
     @api.onchange('type')
     def _onchange_type(self):
         self.refund_sequence = self.type in ('sale', 'purchase')
-
-    @api.depends('type')
-    def _compute_payment_sequence(self):
-        for journal in self:
-            journal.payment_sequence = journal.type in ('bank', 'cash')
 
     def unlink(self):
         bank_accounts = self.env['res.partner.bank'].browse()

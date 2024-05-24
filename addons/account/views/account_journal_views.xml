@@ -68,6 +68,8 @@
                                                invisible="type != 'sale'" groups="account.group_account_readonly"/>
                                         <label for="default_account_id" string="Default Expense Account"
                                                invisible="type != 'purchase'" groups="account.group_account_readonly"/>
+                                        <label for="default_account_id" string="Journal Account"
+                                               invisible="type != 'credit'" groups="account.group_account_readonly"/>
                                         <label for="default_account_id" string="Default Account"
                                                help="If set, this account is used to automatically balance entries."
                                                invisible="type != 'general'" groups="account.group_account_readonly"/>
@@ -84,7 +86,6 @@
                                         <field name="profit_account_id" invisible="type not in ('cash', 'bank')"/>
                                         <field name="loss_account_id" invisible="type not in ('cash', 'bank')"/>
                                         <field name="refund_sequence" invisible="type not in ['sale', 'purchase']"/>
-                                        <field name="payment_sequence" invisible="type not in ('bank', 'cash')"/>
                                         <field name="code" placeholder="e.g. INV"/>
                                         <field name="currency_id" options="{'no_create': True}" groups="base.group_multi_currency"/>
                                     </group>
@@ -96,7 +97,7 @@
                                     </group>
                                 </group>
                             </page>
-                            <page id="inbound_payment_settings" string="Incoming Payments" name="page_incoming_payments" invisible="type not in ['cash', 'bank']">
+                            <page id="inbound_payment_settings" string="Incoming Payments" name="page_incoming_payments" invisible="type not in ['cash', 'bank', 'credit']">
                                 <field name="available_payment_method_ids" invisible="1"/>
                                 <field name="inbound_payment_method_line_ids" nolabel="1" context="{'default_payment_type': 'inbound'}">
                                     <tree string="Payment Methods" editable="bottom">
@@ -112,10 +113,12 @@
                                                optional="hide"
                                                options="{'no_quick_create': True}"
                                                groups="account.group_account_readonly"/>
+                                        <field name="dedicated_sequence"/>
+                                        <field name="automatic_marking"/>
                                     </tree>
                                 </field>
                             </page>
-                            <page id="outbound_payment_settings" string="Outgoing Payments" name="page_outgoing_payments" invisible="type not in ['cash', 'bank']">
+                            <page id="outbound_payment_settings" string="Outgoing Payments" name="page_outgoing_payments" invisible="type not in ['cash', 'bank', 'credit']">
                                     <field name="outbound_payment_method_line_ids" nolabel="1" context="{'default_payment_type': 'outbound'}">
                                         <tree string="Payment Methods" editable="bottom" nolabel="1">
                                             <field name="available_payment_method_ids" column_invisible="True"/>
@@ -130,6 +133,8 @@
                                                    optional="hide"
                                                    options="{'no_quick_create': True}"
                                                    groups="account.group_account_readonly"/>
+                                        <field name="dedicated_sequence"/>
+                                        <field name="automatic_marking"/>
                                         </tree>
                                     </field>
                                     <field name="selected_payment_method_codes" invisible="1"/>

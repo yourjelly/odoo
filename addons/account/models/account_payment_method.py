@@ -96,6 +96,11 @@ class AccountPaymentMethodLine(models.Model):
     # == Business fields ==
     name = fields.Char(compute='_compute_name', readonly=False, store=True)
     sequence = fields.Integer(default=10)
+    dedicated_sequence = fields.Boolean(
+        string='Dedicated Sequence',
+        default=True, readonly=False, store=True,
+        help="Check this box if you don't want to share the same sequence with the other payment methods",
+    )
     payment_method_id = fields.Many2one(
         string='Payment Method',
         comodel_name='account.payment.method',
@@ -115,6 +120,11 @@ class AccountPaymentMethodLine(models.Model):
         comodel_name='account.journal',
         ondelete="cascade",
         check_company=True,
+    )
+    automatic_marking = fields.Boolean(
+        string="Mark as Paid", default=False,
+        help="Allows any invoice reconciled with a payment from that Payment Method to be marked 'Paid', "
+             "instead of 'In Payment'. This will be used to skip the bank reconciliation.",
     )
 
     # == Display purpose fields ==
