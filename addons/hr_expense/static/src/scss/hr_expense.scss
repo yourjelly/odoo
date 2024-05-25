@@ -23,11 +23,9 @@
     }
 
     .o_view_pink_overlay {
-        border: 2px;
-        border-style: dashed;
-        border-radius: 10px;
-        border-color: pink;
-        background-color: #f2edf0;
+        border: $border-width * 2 dashed $border-color;
+        border-radius: $border-radius-lg;
+        background-color: $o-view-background-color;
         width: 600px;
         height: 300px;
 
@@ -37,7 +35,8 @@
     }
 
     .o_view_pink_overlay:hover {
-        background-color: #e8e0e5;
+        border-color: $primary;
+        background-color: mix($primary, $o-view-background-color, 10%);
         cursor: pointer;
     }
 }
