@@ -359,8 +359,8 @@ class Sanitize {
             const editable = closestElement(this.root, '[contenteditable=true]');
             if (
                 node.nodeType === Node.TEXT_NODE &&
-                node.textContent.includes('\uFEFF') &&
-                !closestElement(node, 'a') &&
+                node.textContent.includes("\uFEFF") &&
+                (!closestElement(node, "a") || node.data) &&
                 !(editable && getTraversedNodes(editable).includes(node))
             ) {
                 const startsWithLegitZws = node.textContent.startsWith('\uFEFF') && node.previousSibling && node.previousSibling.nodeName === 'A';
