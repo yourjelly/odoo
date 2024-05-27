@@ -120,7 +120,7 @@ paymentForm.include({
         Xendit.card.createToken(
             {
                 ...this._xenditGetPaymentDetails(paymentOptionId),
-                is_multiple_use: true, // Allows reusing tokens in case the users wants to tokenize.
+                is_multiple_use: this.paymentContext.tokenizationRequested, // Allows reusing tokens in case the users wants to tokenize.
                 should_authenticate: false,
             },
             (err, token) => this._xenditHandleResponse(err, token, processingValues),

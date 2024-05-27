@@ -37,9 +37,7 @@ class PaymentProvider(models.Model):
     def _compute_feature_support_fields(self):
         """ Override of `payment` to enable additional features. """
         super()._compute_feature_support_fields()
-        self.filtered(lambda p: p.code == 'xendit').update({
-            'support_tokenization': True,
-        })
+        self.filtered(lambda p: p.code == 'xendit').support_tokenization = True
 
     # === BUSINESS METHODS - PAYMENT FLOW ===#
 
@@ -73,7 +71,7 @@ class PaymentProvider(models.Model):
         self.ensure_one()
 
         auth = (self.xendit_secret_key, '')
-        url = url_join('https://api.xendit.co/', endpoint)
+        url = "https://api.xendit.co/" + endpoint
         try:
             response = requests.post(url, json=payload, auth=auth, timeout=10)
             response.raise_for_status()
