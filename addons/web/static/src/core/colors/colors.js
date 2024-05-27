@@ -88,6 +88,11 @@ const COLORS_XL = [
     "#936A12", // Yellow #4
 ];
 
+/**
+ * @param {string} colorScheme
+ * @param {string} paletteName
+ * @returns {array}
+ */
 export function getColors(colorScheme, paletteName) {
     switch (paletteName) {
         case "odoo":
@@ -144,4 +149,68 @@ export function hexToRGBA(hex, opacity) {
         .map((n) => parseInt(n, 16))
         .join(",");
     return `rgba(${rgb},${opacity})`;
+}
+
+/**
+ * Used to return custom colors depending on the color scheme
+ * @param {string} colorScheme
+ * @param {string} brightModeColor
+ * @param {string} darkModeColor
+ * @returns {string|Number|Boolean}
+ */
+
+export function getCustomColor(colorScheme, brightModeColor, darkModeColor) {
+    if(darkModeColor === undefined) {
+        return brightModeColor;
+    } else {
+        return colorScheme === "dark" ? darkModeColor : brightModeColor;
+    }
+}
+
+/**
+ * Used to lighten a color
+ * @param {string} color
+ * @param {number} factor
+ * @returns {string}
+ */
+export function lightenColor(color, factor) {
+    factor = Math.max(0, Math.min(1, factor));
+
+    let r = parseInt(color.substring(1, 3), 16);
+    let g = parseInt(color.substring(3, 5), 16);
+    let b = parseInt(color.substring(5, 7), 16);
+
+    r = Math.round(r + (255 - r) * factor);
+    g = Math.round(g + (255 - g) * factor);
+    b = Math.round(b + (255 - b) * factor);
+
+    r = r.toString(16).padStart(2, '0');
+    g = g.toString(16).padStart(2, '0');
+    b = b.toString(16).padStart(2, '0');
+
+    return `#${r}${g}${b}`;
+}
+
+/**
+ * Used to darken a color
+ * @param {string} color
+ * @param {number} factor
+ * @returns {string}
+ */
+export function darkenColor(color, factor) {
+    factor = Math.max(0, Math.min(1, factor));
+
+    let r = parseInt(color.substring(1, 3), 16);
+    let g = parseInt(color.substring(3, 5), 16);
+    let b = parseInt(color.substring(5, 7), 16);
+
+    r = Math.round(r * (1 - factor));
+    g = Math.round(g * (1 - factor));
+    b = Math.round(b * (1 - factor));
+
+    r = r.toString(16).padStart(2, '0');
+    g = g.toString(16).padStart(2, '0');
+    b = b.toString(16).padStart(2, '0');
+
+    return `#${r}${g}${b}`;
 }
