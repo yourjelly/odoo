@@ -239,48 +239,58 @@ class AccountMove(models.Model):
     def _l10n_it_edi_get_line_values(self, reverse_charge_refund=False, is_downpayment=False, convert_to_euros=True):
         """ Returns a list of dictionaries passed to the template for the invoice lines (DettaglioLinee)
         """
-        invoice_lines = []
         lines = self.invoice_line_ids.filtered(lambda l: l.display_type not in ('line_note', 'line_section'))
-        for num, line in enumerate(lines):
-            sign = -1 if line.move_id.is_inbound() else 1
-            price_subtotal = (line.balance * sign) if convert_to_euros else line.price_subtotal
-            # The price_subtotal should be inverted when the line is a reverse charge refund.
+        base_lines = [
+            {
+                **invl._convert_to_tax_base_line_dict(),
+                'line': invl,
+            }
+            for invl in lines
+        ]
+        for line in base_lines:
             if reverse_charge_refund:
-                price_subtotal = -price_subtotal
-
-            # Unit price
-            price_unit = 0
-            if line.quantity and line.discount != 100.0:
-                price_unit = price_subtotal / ((1 - (line.discount or 0.0) / 100.0) * abs(line.quantity))
+                line['price_subtotal'] = -line['price_subtotal']
+            if line['discount'] != 100.0 and line['quantity']:
+                gross_price = line['price_subtotal'] / (1 - line['discount'] / 100.0)
+                line['discount_percentage_amount'] = (gross_price - line['price_subtotal']) * (-1 if reverse_charge_refund else 1)
+                line['gross_price_subtotal'] = line['currency'].round(gross_price * (-1 if reverse_charge_refund else 1))
+                line['price_unit'] = line['currency'].round(gross_price / abs(line['quantity']))
             else:
-                price_unit = line.price_unit
+                line['gross_price_subtotal'] = line['currency'].round(line['price_unit'] * line['quantity'])
+                line['discount_percentage_amount'] = line['gross_price_subtotal']
+        dict_lines = self.env['account.tax']._dispatch_negative_lines_for_global_discount(base_lines)
+        if dict_lines['orphan_negative_lines']:
+            raise UserError(_("You have negative lines that we can't dispatch on others. They need to have the same tax."))
+        invoice_lines = dict_lines['result_lines']
+        for num, line in enumerate(invoice_lines):
 
-            description = line.name
+            description = line['line'].name
 
             # Down payment lines:
             # If there was a down paid amount that has been deducted from this move,
             # we need to put a reference to the down payment invoice in the DatiFattureCollegate tag
             downpayment_moves = self.env['account.move']
-            if not is_downpayment and line.price_subtotal < 0:
-                downpayment_moves = line._get_downpayment_lines().mapped("move_id")
+            if not is_downpayment and line['currency'].compare_amounts(line['price_subtotal'], 0) < 0:
+                downpayment_moves = line['line']._get_downpayment_lines().mapped("move_id")
                 if downpayment_moves:
                     downpayment_moves_description = ', '.join(m.name for m in downpayment_moves)
                     sep = ', ' if description else ''
                     description = f"{description}{sep}{downpayment_moves_description}"
 
-            invoice_lines.append({
-                'line': line,
+            line.update({
+                'line': line['line'],
                 'line_number': num + 1,
                 'description': description or 'NO NAME',
-                'unit_price': price_unit,
-                'subtotal_price': price_subtotal,
-                'vat_tax': line.tax_ids.flatten_taxes_hierarchy().filtered(lambda t: t._l10n_it_filter_kind('vat') and t.amount >= 0),
+                'vat_tax': line['line'].tax_ids.flatten_taxes_hierarchy().filtered(lambda t: t._l10n_it_filter_kind('vat') and t.amount >= 0),
                 'downpayment_moves': downpayment_moves,
                 'discount_type': (
-                    'SC' if line.discount > 0
-                    else 'MG' if line.discount < 0
+                    'SC' if line['currency'].compare_amounts(line['discount_percentage_amount'], 0) > 0
+                    else 'MG' if line['currency'].compare_amounts(line['discount_percentage_amount'], 0) < 0
                     else False
-                )
+                ),
+                'subtotal_price': (line['gross_price_subtotal'] - line['discount_amount']) * (-1 if reverse_charge_refund else 1),
+                'unit_price': line['price_unit'],
+                'discount_amount': line['discount_amount'] - line['discount_percentage_amount'],
             })
         return invoice_lines
 

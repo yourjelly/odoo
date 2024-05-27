@@ -2174,6 +2174,88 @@ class AccountTax(models.Model):
             line_taxes = line_taxes.filtered(lambda tax: tax.company_id == company_id)
         return self._fix_tax_included_price(price, prod_taxes, line_taxes)
 
+    @api.model
+    def _dispatch_negative_lines_for_global_discount(self, base_lines):
+        results = {
+            'result_lines': [],
+            'orphan_negative_lines': [],
+        }
+        for line in base_lines:
+            line['discount_amount'] = line['discount_percentage_amount']
+
+            if line['currency'].compare_amounts(line['gross_price_subtotal'], 0) < 0.0:
+                results['orphan_negative_lines'].append(line)
+            else:
+                results['result_lines'].append(line)
+
+        for neg_base_line in list(results['orphan_negative_lines']):
+            candidates = [
+                candidate
+                for candidate in results['result_lines']
+                if (
+                        neg_base_line['currency'] == candidate['currency']
+                        and neg_base_line['partner'] == candidate['partner']
+                        and neg_base_line['taxes'] == candidate['taxes']
+                )
+            ]
+
+            sorted_candidates = self._get_sorted_candidate(candidates, neg_base_line)
+
+            # Dispatch.
+            for candidate in sorted_candidates:
+                net_price_subtotal = neg_base_line['gross_price_subtotal'] - neg_base_line['discount_amount']
+                other_net_price_subtotal = candidate['gross_price_subtotal'] - neg_base_line['discount_amount']
+                discount_to_distribute = min(other_net_price_subtotal, -net_price_subtotal)
+
+                candidate['discount_amount'] += discount_to_distribute
+                neg_base_line['discount_amount'] -= discount_to_distribute
+
+                remaining_to_distribute = neg_base_line['gross_price_subtotal'] - neg_base_line['discount_amount']
+                is_zero = neg_base_line['currency'].is_zero(remaining_to_distribute)
+
+                self._dispatch_tax_amounts(neg_base_line, candidate, discount_to_distribute, is_zero)
+
+                # Check if there is something left on the other line.
+                remaining_amount = candidate['discount_amount'] - candidate['gross_price_subtotal']
+                if candidate['currency'].is_zero(remaining_amount):
+                    results['result_lines'].remove(candidate)
+
+                if neg_base_line['product'] and neg_base_line['product'] == candidate['product'] and neg_base_line['quantity'] < 0 and neg_base_line['quantity'] != -candidate['quantity']:
+                    quantity_to_distribute = min(-neg_base_line['product'], candidate['product'])
+                    candidate['quantity'] -= quantity_to_distribute
+                    neg_base_line['quantity'] += quantity_to_distribute
+
+                if is_zero:
+                    results['orphan_negative_lines'].remove(neg_base_line)
+                    break
+
+        return results
+
+    @api.model
+    def _dispatch_tax_amounts(self, neg_base_line, candidate, discount_to_distribute, is_zero):
+        """ In some localizations, we need to dispatch the amounts of tax too"""
+        # To Override
+        pass
+
+    @api.model
+    def _get_sorted_candidate(self, candidates, neg_base_line):
+        # Ordering by priority:
+        # - same product
+        # - same amount
+        # - biggest amount
+        return sorted(candidates, key=lambda candidate: (
+            (
+                    not candidate['product']
+                    or not neg_base_line['product']
+                    or candidate['product'] != neg_base_line['product']
+            ),
+            candidate['currency'].compare_amounts(
+                candidate['price_subtotal'],
+                -neg_base_line['price_subtotal']
+            ) != 0,
+            -candidate['price_subtotal'],
+        ))
+
 
 class AccountTaxRepartitionLine(models.Model):
     _name = "account.tax.repartition.line"
