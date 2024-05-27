@@ -1,11 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import copy
-import hashlib
-import io
 import logging
-import re
-from collections import OrderedDict, defaultdict
 
 import babel.messages.pofile
 import werkzeug
@@ -13,8 +8,6 @@ import werkzeug.exceptions
 import werkzeug.utils
 import werkzeug.wrappers
 import werkzeug.wsgi
-from lxml import etree
-from werkzeug.urls import iri_to_uri
 
 from odoo.tools.translate import JAVASCRIPT_TRANSLATION_COMMENT, WEB_TRANSLATION_COMMENT
 from odoo.tools.misc import file_open
@@ -78,8 +71,7 @@ def ensure_db(redirect='/web/database/selector', db=None):
         url_redirect = werkzeug.urls.url_parse(r.base_url)
         if r.query_string:
             # in P3, request.query_string is bytes, the rest is text, can't mix them
-            query_string = iri_to_uri(r.query_string)
-            url_redirect = url_redirect.replace(query=query_string)
+            url_redirect = url_redirect.replace(query=r.query_string.decode())
         request.session.db = db
         werkzeug.exceptions.abort(request.redirect(url_redirect.to_url(), 302))
 
