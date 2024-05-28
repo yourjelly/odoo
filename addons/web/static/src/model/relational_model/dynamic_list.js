@@ -250,8 +250,18 @@ export class DynamicList extends DataPoint {
             );
             this.model.notification.add(msg, { title: _t("Warning") });
         }
-        await this._removeRecords(records.map((r) => r.id));
+        this._updateOffset(records.map((r) => r.id));
+        await this._load(this.offset, this.limit, this.orderBy, this.domain);
         return unlinked;
+    }
+
+    _updateOffset(removedIds) {
+        const _records = this.records.filter((r) => !removedIds.includes(r.id));
+        if (this.offset && !_records.length) {
+            // we weren't on the first page, and we removed all records of the current page
+            const offset = Math.max(this.offset - this.limit, 0);
+            this.model._updateConfig(this.config, { offset }, { reload: false });
+        }
     }
 
     async _leaveSampleMode() {

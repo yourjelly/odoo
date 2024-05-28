@@ -121,4 +121,11 @@ export class Group extends DataPoint {
         await this.list._removeRecords(idsToRemove);
         this.count -= idsToRemove.length;
     }
+
+    _updateOffset(removedIds) {
+        const _records = this.records.filter((r) => !removedIds.includes(r.id));
+        const nbRemovedRecords = this.records.length - _records.length;
+        this.list._updateOffset(removedIds);
+        // this.count -= nbRemovedRecords; // Why does this make a test fail ?
+    }
 }

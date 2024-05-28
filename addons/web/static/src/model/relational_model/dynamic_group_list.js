@@ -105,6 +105,18 @@ export class DynamicGroupList extends DynamicList {
         // step 1: move record to correct position
         const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
         const oldIndex = sourceGroup.list.records.findIndex((r) => r.id === dataRecordId);
+
+        let shouldLoad = false;
+        const sourceGroupRecordsAfterRemove = sourceGroup.list.records.filter((r) => r.id !== record.id);
+        if (sourceGroup.list.offset && !sourceGroupRecordsAfterRemove.length) {
+            // we weren't on the first page, and we removed all records of the current page
+            shouldLoad = true;
+        } else if (sourceGroup.list.count > sourceGroup.list.offset + sourceGroup.list.limit) {
+            // we removed some records, and there are other pages after the current one
+            shouldLoad = true;
+        }
+        sourceGroup._updateOffset([record.id]);
+
         sourceGroup._removeRecords([record.id]);
         targetGroup._addRecord(record, refIndex + 1);
         // step 2: update record value
@@ -127,6 +139,17 @@ export class DynamicGroupList extends DynamicList {
             revert();
             throw e;
         }
+
+
+        if (shouldLoad) {
+            await sourceGroup.list._load(
+                sourceGroup.list.offset,
+                sourceGroup.list.limit,
+                sourceGroup.list.orderBy,
+                sourceGroup.list.domain
+            );
+        }
+
         if (!targetGroup.isFolded) {
             await targetGroup.list._resequence(
                 targetGroup.list.records,
@@ -295,6 +318,12 @@ export class DynamicGroupList extends DynamicList {
             proms.push(group._removeRecords(recordIds));
         }
         return Promise.all(proms);
+    }
+
+    _updateOffset(remainingIds) {
+        for (const group of this.groups) {
+            group._updateOffset(remainingIds);
+        }
     }
 
     _unlinkGroups(groups) {
