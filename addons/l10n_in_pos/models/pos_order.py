@@ -7,7 +7,7 @@ from odoo import api, fields, models
 class PosOrder(models.Model):
     _inherit = 'pos.order'
 
-    l10n_in_state_id = fields.Many2one('res.country.state', string="Place of supply")
+    l10n_in_state_id = fields.Many2one('res.country.state', string="Place of supply", related="account_move.l10n_in_state_id")
 
     def _prepare_invoice_vals(self):
         vals = super()._prepare_invoice_vals()

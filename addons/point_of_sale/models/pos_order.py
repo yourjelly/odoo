@@ -844,7 +844,6 @@ class PosOrder(models.Model):
 
     def _generate_pos_order_invoice(self):
         moves = self.env['account.move']
-        # breakpoint()
         for order in self:
             # Force company for all SUPERUSER_ID action
             if order.account_move:

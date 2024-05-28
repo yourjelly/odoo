@@ -1,42 +1,28 @@
-/** @odoo-module */
 import { DatePickerPopup } from "@point_of_sale/app/utils/date_picker_popup/date_picker_popup";
-import { Many2OneField } from "@web/views/fields/many2one/many2one_field";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
-import { useService } from "@web/core/utils/hooks";
-import { onWillStart } from "@odoo/owl";
-import { Dropdown } from "@web/core/dropdown/dropdown";
-import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 
 export class ShipLater extends DatePickerPopup {
     static template = "l10n_in_pos.ShipLater";
     static components = {
         ...DatePickerPopup.components,
-        Dropdown,
         AutoComplete,
-        DropdownItem,
-        Many2OneField,
     };
     static props = {
         ...DatePickerPopup.props,
         order: {type: Object, optional: true},
-        data: {type: Object, optional: true},
     }
 
     setup() {
         super.setup();
         this.pos = usePos();
-        this.orm = useService("orm");
-        onWillStart(async () => {
-            this.stateData = this.pos.models['res.country.state'].getAll().filter((state)=>state.country_id.code == 'IN');
-        });
-        debugger;
+        this.stateData = this.getPlaceOfSupply;
+        this.selectedStateId = this.pos.company.state_id;
     }
 
     loadOptionsSource(request) {
         const inputValue = request?.toLowerCase();
-        debugger;
-        const records = this.props.data.map(({ id, name }) => [id, name]);
+        const records = this.stateData.map(({ id, name }) => [id, name]);
         const filteredRecords = inputValue
             ? records.filter(([_, name]) => name.toLowerCase().startsWith(inputValue))
             : records;
@@ -51,13 +37,16 @@ export class ShipLater extends DatePickerPopup {
         };
     }
 
-    // get stateId() {
-    //     return {
-    //         name: "l10n_in_state_id",
-    //         options: this.props.order,
-    //         record: this.stateData,
-    //     };
-    // }
+    get getPlaceOfSupply(){
+        let states = this.pos.models['res.country.state'].getAll()
+        let l10n_in_state = [];
+        for(const state of states ){
+            if(state.country_id.code == 'IN'){
+                l10n_in_state.push({id: state.id, name:state.name});
+            }
+        }
+        return l10n_in_state;
+    }
 
     get sources() {
         return [this.optionsSource];
@@ -69,19 +58,16 @@ export class ShipLater extends DatePickerPopup {
         };
     }
 
+    get defaultValue(){
+        return this.pos.company.state_id.name;
+    }
+
     onSelect(option, params = {}) {
-        const record = {
-            id: option.value,
-            display_name: option.displayName,
-        };
         this.selectedStateId = this.pos.models['res.country.state'].get(option.value);
         params.input.value = option.displayName;
-        params.input.focus();
-        debugger;
     }
 
     confirm() {
-        debugger;
         this.props.getPayload(
             this.state.shippingDate < this._today() ? this._today() : this.state.shippingDate,
             this.selectedStateId

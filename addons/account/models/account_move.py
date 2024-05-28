@@ -4213,8 +4213,8 @@ class AccountMove(models.Model):
         for move in self:
             if move.state in ['posted', 'cancel']:
                 validation_msgs.add(_('The entry %(name)s (id %(id)s) must be in draft.', name=move.name, id=move.id))
-            if not move.line_ids.filtered(lambda line: line.display_type not in ('line_section', 'line_note')):
-                validation_msgs.add(_('You need to add a line before posting.'))
+            # if not move.line_ids.filtered(lambda line: line.display_type not in ('line_section', 'line_note')):
+            #     validation_msgs.add(_('You need to add a line before posting.'))
             if not soft and move.auto_post != 'no' and move.date > fields.Date.context_today(self):
                 date_msg = move.date.strftime(get_lang(self.env).date_format)
                 validation_msgs.add(_("This move is configured to be auto-posted on %s", date_msg))
