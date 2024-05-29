@@ -11,7 +11,7 @@ class TestClientAction extends Component {
 
 export function useTestClientAction() {
     const tag = "__test__client__action__";
-    registry.category("actions").add(tag, TestClientAction);
+    registry.category("actions").add(tag, TestClientAction, { force: true }); // Weird, the registry should instead get cleaned up between module sets
     return {
         tag,
         target: "main",
