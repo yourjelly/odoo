@@ -237,7 +237,7 @@ class Websocket:
         self._close_received = False
         self._timeout_manager = TimeoutManager()
         # Used for rate limiting.
-        self._incoming_frame_timestamps = deque(maxlen=self.RL_BURST)
+        self._incoming_frame_timestamps = deque(maxlen=self.RL_BURST + 1)
         # Used to notify the websocket that bus notifications are
         # available.
         self.__notif_sock_w, self.__notif_sock_r = socket.socketpair()
@@ -588,7 +588,7 @@ class Websocket:
         `RateLimitExceededException`.
         """
         now = time.time()
-        if len(self._incoming_frame_timestamps) >= self.RL_BURST:
+        if len(self._incoming_frame_timestamps) > self.RL_BURST:
             elapsed_time = now - self._incoming_frame_timestamps[0]
             if elapsed_time < self.RL_DELAY * self.RL_BURST:
                 raise RateLimitExceededException()
