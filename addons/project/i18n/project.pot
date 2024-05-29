@@ -2056,6 +2056,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/project/models/project_project.py:0
 msgid ""
+"Grant employees access to your project or tasks by adding them as followers."
+" Customers automatically get access to their tasks in their portal."
+msgstr ""
+
+#. module: project
+#. odoo-python
+#: code:addons/project/models/project_project.py:0
+msgid ""
 "Grant portal users access to your project by adding them as followers (the "
 "tasks of the project are not included). To grant access to tasks to a portal"
 " user, add them as followers for these tasks."
