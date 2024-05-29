@@ -8,7 +8,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from odoo.addons.payment import utils as payment_utils
-from odoo.addons.payment_paypal.const import PAYMENT_STATUS_MAPPING
+from odoo.addons.payment_paypal.const import PAYMENT_STATUS_MAPPING, CAPTURE, AUTHORIZE
 from odoo.addons.payment_paypal.controllers.main import PaypalController
 
 _logger = logging.getLogger(__name__)
@@ -21,8 +21,8 @@ class PaymentTransaction(models.Model):
     # this field has no use in Odoo except for debugging
     paypal_type = fields.Char(string="PayPal Transaction Type")
 
-    def _get_specific_rendering_values(self, processing_values):
-        """ Override of payment to return Paypal-specific rendering values.
+    def _get_specific_processing_values(self, processing_values):
+        """ Override of payment to return Paypal-specific processing values.
 
         Note: self.ensure_one() from `_get_processing_values`
 
@@ -30,38 +30,42 @@ class PaymentTransaction(models.Model):
         :return: The dict of provider-specific processing values
         :rtype: dict
         """
-        res = super()._get_specific_rendering_values(processing_values)
+        res = super()._get_specific_processing_values(processing_values)
         if self.provider_code != 'paypal':
             return res
-
-        base_url = self.provider_id.get_base_url()
-        cancel_url = urls.url_join(base_url, PaypalController._cancel_url)
-        cancel_url_params = {
-            'tx_ref': self.reference,
-            'return_access_tkn': payment_utils.generate_access_token(self.reference),
-        }
         partner_first_name, partner_last_name = payment_utils.split_partner_name(self.partner_name)
-        return {
-            'address1': self.partner_address,
-            'amount': self.amount,
-            'business': self.provider_id.paypal_email_account,
-            'cancel_url': f'{cancel_url}?{urls.url_encode(cancel_url_params)}',
-            'city': self.partner_city,
-            'country': self.partner_country_id.code,
-            'currency_code': self.currency_id.name,
-            'email': self.partner_email,
-            'first_name': partner_first_name,
-            'item_name': f"{self.company_id.name}: {self.reference}",
-            'item_number': self.reference,
-            'last_name': partner_last_name,
-            'lc': self.partner_lang,
-            'no_shipping': '1',  # Do not prompt for a delivery address.
-            'notify_url': urls.url_join(base_url, PaypalController._webhook_url),
-            'return_url': urls.url_join(base_url, PaypalController._return_url),
-            'state': self.partner_state_id.name,
-            'zip_code': self.partner_zip,
-            'api_url': self.provider_id._paypal_get_api_url(),
+        payload = {
+            'intent': AUTHORIZE if self.provider_id.capture_manually else CAPTURE,
+            'purchase_units': [
+                {
+                    'reference_id': self.reference,
+                    'amount': {
+                        'currency_code': self.currency_id.name,
+                        'value': self.amount,
+                    },
+                    'payee':  {
+                        'email_address': self.provider_id._get_normalized_paypal_email_account(),
+                        'display_data': {
+                            'business_email':  self.provider_id.company_id.email,
+                            'brand_name': self.provider_id.company_id.name,
+                        }
+                    },
+                },
+            ],
+            "payment_source": {
+                "paypal": {
+                    "experience_context": {
+                        "shipping_preference": "NO_SHIPPING",
+                    },
+                },
+            },
         }
+
+        response_content = self.provider_id._paypal_make_request(
+            endpoint='/v2/checkout/orders',
+            payload=payload,
+        )
+        return {'order_id': response_content['id']}
 
     def _get_tx_from_notification_data(self, provider_code, notification_data):
         """ Override of payment to find the transaction based on Paypal data.
@@ -76,7 +80,7 @@ class PaymentTransaction(models.Model):
         if provider_code != 'paypal' or len(tx) == 1:
             return tx
 
-        reference = notification_data.get('item_number')
+        reference = notification_data.get('reference_id')
         tx = self.search([('reference', '=', reference), ('provider_code', '=', 'paypal')])
         if not tx:
             raise ValidationError(
@@ -101,16 +105,19 @@ class PaymentTransaction(models.Model):
             self._set_canceled(state_message=_("The customer left the payment page."))
             return
 
-        amount = notification_data.get('amt') or notification_data.get('mc_gross')
-        currency_code = notification_data.get('cc') or notification_data.get('mc_currency')
+        amount = notification_data.get('amount').get('value')
+        currency_code = notification_data.get('amount').get('currency_code')
+        # Update the provider reference.
+        txn_id = notification_data.get('id')
+        # Update the payment state.
+        payment_status = notification_data.get('status')
+        txn_type = notification_data.get('txn_type')
+
         assert amount and currency_code, 'PayPal: missing amount or currency'
         assert self.currency_id.compare_amounts(float(amount), self.amount) == 0, \
             'PayPal: mismatching amounts'
         assert currency_code == self.currency_id.name, 'PayPal: mismatching currency codes'
 
-        # Update the provider reference.
-        txn_id = notification_data.get('txn_id')
-        txn_type = notification_data.get('txn_type')
         if not all((txn_id, txn_type)):
             raise ValidationError(
                 "PayPal: " + _(
@@ -125,9 +132,8 @@ class PaymentTransaction(models.Model):
         self.payment_method_id = self.env['payment.method'].search(
             [('code', '=', 'paypal')], limit=1
         ) or self.payment_method_id
-
-        # Update the payment state.
-        payment_status = notification_data.get('payment_status')
+        assert self.payment_method_id.code in notification_data.get(
+            'payment_source'), 'PayPal: mismatching payment methods'
 
         if payment_status in PAYMENT_STATUS_MAPPING['pending']:
             self._set_pending(state_message=notification_data.get('pending_reason'))

@@ -18,3 +18,37 @@
     }
 
 }
+
+button[name="o_payment_submit_button"] {
+    min-width: 150px;
+    padding: 0;
+    margin-bottom: 6px;
+}
+
+@media only screen and (min-width: 75px) {
+    button[name="o_payment_submit_button"] {
+        height: 25px;
+    }
+}
+
+@media only screen and (min-width: 150px) {
+    button[name="o_payment_submit_button"] {
+        height: 25px;
+    }
+}
+
+@media only screen and (min-width: 200px) {
+    button[name="o_payment_submit_button"] {
+        height: 35px;
+    }
+}
+
+@media only screen and (min-width: 300px) {
+    button[name="o_payment_submit_button"] {
+        height: 45px;
+    }
+}
+
+.modal-body button[name="o_payment_submit_button"] {
+    height: 25px;
+}

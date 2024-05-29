@@ -37,10 +37,35 @@ DEFAULT_PAYMENT_METHOD_CODES = {
     'paypal',
 }
 
-# Mapping of transaction states to PayPal payment statuses
-# See https://developer.paypal.com/docs/api-basics/notifications/ipn/IPNandPDTVariables/
+# Mapping of new rest api statusses for capture and authorize
+# https://developer.paypal.com/docs/api/orders/v2/#definition-capture_status
+# https://developer.paypal.com/docs/api/orders/v2/#definition-authorization_status
+# https://developer.paypal.com/api/rest/webhooks/event-names/#orders
 PAYMENT_STATUS_MAPPING = {
-    'pending': ('Pending',),
-    'done': ('Processed', 'Completed', 'Cleared'),  # cleared status is required fo echeck
-    'cancel': ('Voided', 'Expired'),
+    'pending': (
+        'PENDING',
+        'CREATED',
+        'APPROVED',  # A buyer approved a checkout order
+    ),
+    'done': (
+        'COMPLETED',
+        'CAPTURED',
+    ),
+    'cancel': (
+        'DECLINED',
+        'DENIED',
+        'VOIDED',
+    ),
+    'error': ('FAILED',),
 }
+
+AUTHORIZE = 'AUTHORIZE'
+CAPTURE = 'CAPTURE'
+
+# Events which are handled by the webhook
+# https://developer.paypal.com/api/rest/webhooks/event-names
+HANDLED_WEBHOOK_EVENTS = [
+    'CHECKOUT.ORDER.COMPLETED',
+    'CHECKOUT.ORDER.APPROVED',
+    'CHECKOUT.PAYMENT-APPROVAL.REVERSED',
+]
