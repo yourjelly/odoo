@@ -586,6 +586,10 @@ class Websocket:
         how many requests can be made in excess of the given rate at the
         begining. When requests are received too fast, raises the
         `RateLimitExceededException`.
+
+                            t=0                t=0 + RL_DELAY, time ellapsed= RL_DELAY
+        |====================|==================|
+        0                   10                  11
         """
         now = time.time()
         if len(self._incoming_frame_timestamps) > self.RL_BURST:
