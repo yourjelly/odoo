@@ -4020,6 +4020,7 @@
     }
 
     const macRegex = /Mac/i;
+    const MODIFIER_KEYS = ["Shift", "Control", "Alt", "Meta"];
     /**
      * Return true if the event was triggered from
      * a child element.
@@ -4037,6 +4038,31 @@
     }
     function getOpenedMenus() {
         return Array.from(document.querySelectorAll(".o-spreadsheet .o-menu"));
+    }
+    const letterRegex = /^[a-zA-Z]$/;
+    /**
+     * Transform a keyboard event into a shortcut string that represent this event. The letters keys will be uppercased.
+     *
+     * @argument ev - The keyboard event to transform
+     * @argument mode - Use either ev.key of ev.code to get the string shortcut
+     *
+     * @example
+     * event : { ctrlKey: true, key: "a" } => "Ctrl+A"
+     * event : { shift: true, alt: true, key: "Home" } => "Alt+Shift+Home"
+     */
+    function keyboardEventToShortcutString(ev, mode = "key") {
+        let keyDownString = "";
+        if (!MODIFIER_KEYS.includes(ev.key)) {
+            if (isCtrlKey(ev))
+                keyDownString += "Ctrl+";
+            if (ev.altKey)
+                keyDownString += "Alt+";
+            if (ev.shiftKey)
+                keyDownString += "Shift+";
+        }
+        const key = mode === "key" ? ev.key : ev.code;
+        keyDownString += letterRegex.test(key) ? key.toUpperCase() : key;
+        return keyDownString;
     }
     function isMacOS() {
         return Boolean(macRegex.test(navigator.userAgent));
@@ -20579,7 +20605,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         onPaste(ev) {
             if (this.env.model.getters.getEditionMode() !== "inactive") {
+                // let the browser clipboard work
                 ev.stopPropagation();
+            }
+            else {
+                // the user meant to paste in the sheet, not open the composer with the pasted content
+                // While we're not editing, we still have the focus and should therefore prevent
+                // the native "paste" to occur.
+                ev.preventDefault();
             }
         }
         /*
@@ -20588,10 +20621,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         onInput(ev) {
             var _a, _b;
             if (!this.shouldProcessInputEvents) {
-                return;
-            }
-            if (ev.inputType === "insertFromPaste" &&
-                this.env.model.getters.getEditionMode() === "inactive") {
                 return;
             }
             ev.stopPropagation();
@@ -20910,10 +20939,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         get containerStyle() {
             if (this.env.model.getters.getEditionMode() === "inactive" || !this.rect) {
-                return `
-        position: absolute;
-        z-index: -1000;
-      `;
+                return `z-index: -1000;`;
             }
             const isFormula = this.env.model.getters.getCurrentContent().startsWith("=");
             const cell = this.env.model.getters.getActiveCell();
@@ -21199,7 +21225,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         onKeyDown(ev) {
             const figure = this.props.figure;
-            switch (ev.key) {
+            const keyDownShortcut = keyboardEventToShortcutString(ev);
+            switch (keyDownShortcut) {
                 case "Delete":
                     this.env.model.dispatch("DELETE_FIGURE", {
                         sheetId: this.env.model.getters.getActiveSheetId(),
@@ -21226,6 +21253,22 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         x: figure.x + delta[0],
                         y: figure.y + delta[1],
                     });
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    break;
+                case "Ctrl+A":
+                    // Maybe in the future we will implement a way to select all figures
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    break;
+                case "Ctrl+Y":
+                case "Ctrl+Z":
+                    if (keyDownShortcut === "Ctrl+Y") {
+                        this.env.model.dispatch("REQUEST_REDO");
+                    }
+                    else if (keyDownShortcut === "Ctrl+Z") {
+                        this.env.model.dispatch("REQUEST_UNDO");
+                    }
                     ev.preventDefault();
                     ev.stopPropagation();
                     break;
@@ -23251,15 +23294,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
     class LinkCell extends AbstractCell {
         constructor(id, content, properties = {}) {
-            var _a;
             const link = parseMarkdownLink(content);
-            properties = {
-                ...properties,
-                style: {
-                    ...properties.style,
-                    textColor: ((_a = properties.style) === null || _a === void 0 ? void 0 : _a.textColor) || LINK_COLOR,
-                },
-            };
             link.label = _t(link.label);
             super(id, lazy({ value: link.label, type: CellValueType.text }), properties);
             this.link = link;
@@ -27825,6 +27860,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     BordersPlugin.getters = ["getCellBorder"];
 
     const nbspRegexp = new RegExp(String.fromCharCode(160), "g");
+    const LINK_STYLE = { textColor: LINK_COLOR };
     /**
      * Core Plugin
      *
@@ -28059,7 +28095,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return this.buildFormulaContent(sheetId, cell);
         }
         getCellStyle(cell) {
-            return (cell && cell.style) || {};
+            if (!cell) {
+                return {};
+            }
+            const linkStyle = cell.isLink() ? LINK_STYLE : {};
+            return { ...linkStyle, ...cell.style };
         }
         /**
          * Converts a zone to a XC coordinate system
@@ -41766,6 +41806,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         else {
             // Shouldn't we always output the value then ?
             const value = cell.value;
+            // If the cell contains a non-exported formula and that is evaluates to
+            // nothing* ,we don't export it.
+            // * non-falsy value are relevant and so are 0 and FALSE, which only leaves
+            // the empty string.
+            if (value === "")
+                return undefined;
             const type = getCellType(value);
             attrs.push(["t", type]);
             node = escapeXml /*xml*/ `<v>${value}</v>`;
@@ -42488,7 +42534,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     let cellNode = escapeXml ``;
                     // Either formula or static value inside the cell
                     if (cell.isFormula) {
-                        ({ attrs: additionalAttrs, node: cellNode } = addFormula(cell));
+                        const res = addFormula(cell);
+                        if (!res) {
+                            continue;
+                        }
+                        ({ attrs: additionalAttrs, node: cellNode } = res);
                     }
                     else if (cell.content && isMarkdownLink(cell.content)) {
                         const { label } = parseMarkdownLink(cell.content);
@@ -43327,8 +43377,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.42';
-    __info__.date = '2024-05-24T11:34:45.051Z';
-    __info__.hash = 'fd11d19';
+    __info__.date = '2024-05-29T11:31:33.029Z';
+    __info__.hash = '64a7cf5';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
