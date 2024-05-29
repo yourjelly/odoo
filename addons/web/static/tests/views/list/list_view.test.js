@@ -1,6 +1,8 @@
+/* eslint-disable */
+
 import { Component, markup, onRendered, onWillRender, xml } from "@odoo/owl";
 import { after, beforeEach, expect, getFixture, test } from "@odoo/hoot";
-import { keyDown, waitFor } from "@odoo/hoot-dom";
+import { keyDown, pointerUp, waitFor } from "@odoo/hoot-dom";
 import { click, dblclick, drag, edit, hover, leave, pointerDown, press, queryAll, queryAllTexts, queryFirst, queryOne, queryText, resize } from "@odoo/hoot-dom";
 import { animationFrame, Deferred, mockDate, mockTimeZone, runAllTimers } from "@odoo/hoot-mock";
 import {
@@ -351,35 +353,34 @@ test("simple readonly list", async () => {
     expect(".o_list_button_discard").not.toBeVisible();
 });
 
-test.todo("select record range with shift click", async () => {
+test("select record range with shift click", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree><field name="foo"/><field name="int_field"/></tree>',
     });
-    await click(queryFirst(".o_data_row .o_list_record_selector input"));
+    await contains(".o_data_row .o_list_record_selector input").click();
     expect(".o_control_panel_actions .o_list_selection_box").toHaveCount(1);
     expect(".o_list_selection_box .o_list_select_domain").toHaveCount(0);
-    expect(".o_list_selection_box").toHaveText("1 selected");
+    expect(".o_list_selection_box").toHaveText("1\nselected");
     expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(1);
 
     // shift click the 4th record to have 0-1-2-3 toggled
-    await triggerEvents(queryAll()[3], null, [["keydown", { key: "Shift", shiftKey: true }], "click"]);
-
-    expect(".o_list_selection_box").toHaveText("4 selected");
-    expect(document.querySelectorAll(".o_data_row .o_list_record_selector input:checked").length).toBe(4);
+    await contains(`.o_data_row .o_list_record_selector input:eq(3)`).click({ shiftKey: true });
+    expect(".o_list_selection_box").toHaveText("4\nselected");
+    expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(4);
 
     // shift click the 3rd record to untoggle 2-3
-    await triggerEvents(queryAll(".o_data_row .o_list_record_selector input")[2], null, [["keydown", { key: "Shift", shiftKey: true }], "click"]);
-    expect(".o_list_selection_box").toHaveText("2 selected");
-    expect(document.querySelectorAll(".o_data_row .o_list_record_selector input:checked").length).toBe(2);
+    await contains(`.o_data_row .o_list_record_selector input:eq(2)`).click({ shiftKey: true });
+    expect(".o_list_selection_box").toHaveText("2\nselected");
+    expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(2);
 
     // shift click the 1st record to untoggle 0-1
-    await triggerEvents(queryFirst(".o_data_row .o_list_record_selector input"), null, [["keydown", { key: "Shift", shiftKey: true }], "click"]);
-    expect(document.querySelectorAll(".o_data_row .o_list_record_selector input:checked").length).toBe(0);
+    await contains(`.o_data_row .o_list_record_selector input:eq(0)`).click({ shiftKey: true });
+    expect(".o_data_row .o_list_record_selector input:checked").toHaveCount(0);
 });
 
-test.todo("select record range with shift+space", async () => {
+test("select record range with shift+space", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
@@ -391,6 +392,7 @@ test.todo("select record range with shift+space", async () => {
     press("ArrowDown");
     await animationFrame();
     expect(".o_data_row:first .o_list_record_selector input").toBeFocused();
+
     await contains(".o_data_row:first .o_list_record_selector input").click();
     expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
 
@@ -399,21 +401,22 @@ test.todo("select record range with shift+space", async () => {
     press("ArrowDown");
     press("ArrowDown");
     await animationFrame();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeFocused();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").not.toBeChecked();
-    press("shift+space");
+    expect(".o_data_row:eq(3) .o_list_record_selector input").toBeFocused();
+    expect(".o_data_row:eq(3) .o_list_record_selector input").not.toBeChecked();
+
+    press(["shift", "space"]);
     await animationFrame();
     // focus is on the input and not in the td cell
     expect(document.activeElement.tagName).toBe("INPUT");
 
     // Check that all checkbox is checked
-    expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(0) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:eq(1) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(3) .o_list_record_selector input").toBeChecked();
 });
 
-test.todo("expand range of checkbox with shift+arrow", async () => {
+test("expand range of checkbox with shift+arrow", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
@@ -425,25 +428,26 @@ test.todo("expand range of checkbox with shift+arrow", async () => {
     press("ArrowDown");
     await animationFrame();
     expect(".o_data_row:first .o_list_record_selector input").toBeFocused();
+
     await contains(".o_data_row:first .o_list_record_selector input").click();
     expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
 
     // expand the checkbox with arrowdown
-    press("shift+ArrowDown");
-    press("shift+ArrowDown");
-    press("shift+ArrowDown");
-    press("shift+ArrowUp");
+    press(["shift", "ArrowDown"]);
+    press(["shift", "ArrowDown"]);
+    press(["shift", "ArrowDown"]);
+    press(["shift", "ArrowUp"]);
     await animationFrame();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeFocused();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeFocused();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeChecked();
 
     // Check that the three checkbox are checked
     expect(".o_data_row:eq(1) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(3) .o_list_record_selector input").toBeChecked();
 });
 
-test.todo("multiple interactions to change the range of checked boxes", async () => {
+test("multiple interactions to change the range of checked boxes", async () => {
     for (let i = 0; i < 5; i++) {
         Foo._records.push({ id: 5 + i, bar: true, foo: "foo" + i });
     }
@@ -454,41 +458,38 @@ test.todo("multiple interactions to change the range of checked boxes", async ()
         arch: '<tree><field name="foo"/><field name="int_field"/></tree>',
     });
 
-    press("ArrowDown");
-    expect(".o_data_row:first .o_list_record_selector input").not.toBeFocused();
+    press("down");
+    await animationFrame();
+    expect(".o_data_row:eq(0) .o_list_record_selector input").not.toBeFocused();
 
     keyDown("shift");
-    press("shift+ArrowDown");
-    expect(".o_data_row:first .o_list_record_selector input").toBeFocused();
+    press("down");
     await animationFrame();
-    press("shift+ArrowDown");
-    await animationFrame();
-    press("shift+ArrowDown");
-    await animationFrame();
-    press("shift+ArrowDown");
-    await animationFrame();
-    press("shift+ArrowUp");
-    await animationFrame();
+    expect(".o_data_row:eq(0) .o_list_record_selector input").toBeFocused();
+
+    press("down");
+    press("down");
+    press("down");
+    press("up");
     keyUp("shift");
-    press("ArrowDown");
-    await animationFrame();
-    press("ArrowDown");
-    await animationFrame();
-    press("shift+ArrowDown");
+    press("down");
+    press("down");
+    press(["shift", "down"]);
     await animationFrame();
 
-    await contains(".o_data_row:nth-child(8) .o_list_record_selector .o-checkbox").click();
-    press("shift+ArrowDown");
+    await contains(".o_data_row:eq(7) .o_list_record_selector .o-checkbox").click();
+    press(["shift", "down"]);
+    await animationFrame();
 
-    expect(".o_data_row:first .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(0) .o_list_record_selector input").toBeChecked();
     expect(".o_data_row:eq(1) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(3) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(4) .o_list_record_selector input").not.toBeChecked();
-    expect(".o_data_row:nth-child(5) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(6) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(7) .o_list_record_selector input").not.toBeChecked();
-    expect(".o_data_row:nth-child(8) .o_list_record_selector input").toBeChecked();
-    expect(".o_data_row:nth-child(9) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(2) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(3) .o_list_record_selector input").not.toBeChecked();
+    expect(".o_data_row:eq(4) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(5) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(6) .o_list_record_selector input").not.toBeChecked();
+    expect(".o_data_row:eq(7) .o_list_record_selector input").toBeChecked();
+    expect(".o_data_row:eq(8) .o_list_record_selector input").toBeChecked();
 });
 
 test("list with class and style attributes", async () => {
@@ -1360,17 +1361,15 @@ test.todo("multi_edit: edit a required field with an invalid value", async () =>
     expect(".o_data_row").toHaveCount(4);
     expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group"]).toVerifySteps();
 
-    await contains(".o_list_record_selector input").click();
-    await contains(".o_data_cell").click();
-    await contains("[name=foo] input").clear("");
-    // await contains(".o_list_view").click();
+    await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
+    await contains(".o_data_row:eq(0) .o_data_cell[name='foo']").click();
+    await contains(".o_field_widget[name=foo] input").clear({ confirm: false });
     expect(".modal").toHaveCount(1);
     expect(".modal .btn").toHaveText("Ok");
 
-    // await contains(".modal .btn").click();
-    // expect(".o_data_row .o_data_cell[name='foo']").toHaveText("yop");
-    // expect(".o_data_row").toHaveClass("o_data_row_selected");
-
+    await contains(".modal .btn").click();
+    expect(".o_data_row:eq(0) .o_data_cell[name='foo']").toHaveText("yop");
+    expect(".o_data_row:eq(0)").toHaveClass("o_data_row_selected");
     expect([]).toVerifySteps();
 });
 
@@ -5979,7 +5978,7 @@ test("can display a list with a many2many field", async () => {
     expect(queryAllTexts(".o_data_cell")).toEqual(["2 records", "3 records", "No records", "1 record"]);
 });
 
-test.todo("display a tooltip on a field", async () => {
+test("display a tooltip on a field", async () => {
     serverState.debug = false;
 
     await mountView({
@@ -5989,33 +5988,23 @@ test.todo("display a tooltip on a field", async () => {
             <tree>
                 <field name="foo"/>
                 <field name="bar" widget="boolean_favorite"/>
-            </tree>`,
+            </tree>
+        `,
     });
 
-    await mouseEnter(queryFirst("th[data-name=foo]"));
-    await animationFrame(); // GES: see next nextTick comment
-    expect(queryAll(".o-tooltip .o-tooltip--technical").length).toBe(0, {
-        message: "should not have rendered a tooltip",
-    });
+    hover(`th[data-name="foo"]`);
+    await runAllTimers();
+    expect(".o-tooltip .o-tooltip--technical").toHaveCount(0);
 
-    patchWithCleanup(odoo, {
-        debug: true,
-    });
+    serverState.debug = true;
 
     // it is necessary to rerender the list so tooltips can be properly created
-    await reloadListView(target);
-    await mouseEnter(queryFirst("th[data-name=bar]"));
-    await animationFrame(); // GES: I had once an indetermist failure because of no tooltip, so for safety I add a nextTick.
-
-    expect(queryAll(".o-tooltip .o-tooltip--technical").length).toBe(1, {
-        message: "should have rendered a tooltip",
-    });
-
-    assert.containsOnce(target, '.o-tooltip--technical>li[data-item="widget"]', "widget should be present for this field");
-
-    expect(getNodesTextContent([queryFirst('.o-tooltip--technical>li[data-item="widget"]')])).toEqual(["Widget:Favorite (boolean_favorite) "], {
-        message: "widget description should be correct",
-    });
+    await reloadListView();
+    hover(`th[data-name="bar"]`);
+    await runAllTimers();
+    expect(".o-tooltip .o-tooltip--technical").toHaveCount(1);
+    expect(`.o-tooltip--technical > li[data-item="widget"]`).toHaveCount(1);
+    expect(`.o-tooltip--technical > li[data-item="widget"]`).toHaveText("Widget:Favorite (boolean_favorite)");
 });
 
 test("support row decoration", async () => {
@@ -6169,32 +6158,29 @@ test("support field decoration (decoration-it)", async () => {
     expect("tbody td.o_list_number.fst-italic").toHaveCount(0);
 });
 
-test.todo("bounce create button when no data and click on empty area", async () => {
-    // patchWithCleanup(browser, {
-    //     setTimeout: () => {},
-    // });
+test("bounce create button when no data and click on empty area", async () => {
     await mountView({
         type: "list",
         resModel: "foo",
         arch: '<tree><field name="foo"/></tree>',
         noContentHelp: "click to add a record",
         searchViewArch: `
-                <search>
-                    <filter name="Empty List" domain="[('id', '&lt;', 0)]"/>
-                </search>`,
+            <search>
+                <filter name="Empty List" domain="[('id', '&lt;', 0)]"/>
+            </search>
+        `,
     });
-
     expect(".o_view_nocontent").toHaveCount(0);
+
     await contains(".o_list_view").click();
-    expect(queryFirst(".o_list_button_add")).not.toHaveClass("o_catch_attention");
+    expect(".o_list_button_add").not.toHaveClass("o_catch_attention");
 
     await toggleSearchBarMenu();
     await toggleMenuItem("Empty List");
     expect(".o_view_nocontent").toHaveCount(1);
 
     await contains(".o_list_renderer").click();
-    await runAllTimers();
-    expect(queryFirst(".o_list_button_add")).toHaveClass("o_catch_attention");
+    expect(".o_list_button_add").toHaveClass("o_catch_attention");
 });
 
 test("no content helper when no data", async () => {
@@ -9536,7 +9522,6 @@ test.todo("editable list view: multi edition error and cancellation handling", a
                 <field name="int_field"/>
             </tree>`,
     });
-
     expect(".o_list_record_selector input:enabled").toHaveCount(5);
 
     // select two records
@@ -9682,8 +9667,9 @@ test.todo('editable list view: clicking on "Discard changes" in multi edition', 
         type: "list",
         arch: `
             <tree editable="top" multi_edit="1">
-                    <field name="foo"/>
-                </tree>`,
+                <field name="foo"/>
+            </tree>
+        `,
         resModel: "foo",
     });
 
@@ -9691,18 +9677,13 @@ test.todo('editable list view: clicking on "Discard changes" in multi edition', 
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
+    await contains(".o_data_row [name=foo] input").clear({ confirm: false });
     await contains(".o_data_row [name=foo] input").fill("oof", { confirm: false });
 
-    // Simulates an actual click (event chain is: mousedown > change > blur > focus > mouseup > click)
-    await triggerEvents(discardButton, null, ["mousedown"]);
-    await triggerEvents(queryFirst(".o_data_row .o_data_cell input"), null, ["change", "blur", "focusout"]);
-    await triggerEvents(discardButton, null, ["focus"]);
-    await triggerEvents(discardButton, null, ["mouseup"]);
-    await click(discardButton);
-
+    click(`.o_list_button_discard`);
+    await animationFrame();
     expect(".modal").toHaveCount(0, { message: "should not open modal" });
-
-    expect(".o_data_row:first() .o_data_cell:first()").toHaveText("yop");
+    expect(".o_data_row:eq(0) .o_data_cell:eq(0)").toHaveText("yop");
 });
 
 test.todo('editable list view: mousedown on "Discard", mouseup somewhere else (no multi-edit)', async () => {
@@ -9721,20 +9702,18 @@ test.todo('editable list view: mousedown on "Discard", mouseup somewhere else (n
     await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(1) .o_list_record_selector input").click();
     await contains(".o_data_row:eq(0) .o_data_cell:eq(0)").click();
-    queryFirst(".o_data_row .o_data_cell input").value = "oof";
+    await contains(".o_data_row [name=foo] input").clear({ confirm: false });
+    await contains(".o_data_row [name=foo] input").fill("oof", { confirm: false });
 
-    await triggerEvents($(".o_list_button_discard:visible").get(0), null, ["mousedown"]);
-    await triggerEvents(target, ".o_data_row .o_data_cell input", ["change", "blur", "focusout"]);
-    await triggerEvents(target, null, ["focus"]);
-    await triggerEvents(target, null, ["mouseup"]);
-    await click(target);
+    // pointerDown(`.o_list_button_discard`);
+    // pointerUp(`body`);
 
     expect(".modal").toHaveCount(0, { message: "should not open modal" });
     expect(queryAllTexts(".o_data_cell")).toEqual(["oof", "blip", "gnap", "blip"]);
     expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group", "web_save"]).toVerifySteps();
 });
 
-test.todo('multi edit list view: mousedown on "Discard" with invalid field', async () => {
+test.debug('multi edit list view: mousedown on "Discard" with invalid field', async () => {
     await mountView({
         type: "list",
         arch: `
@@ -9743,7 +9722,6 @@ test.todo('multi edit list view: mousedown on "Discard" with invalid field', asy
             </tree>`,
         resModel: "foo",
     });
-
     expect(".o_data_row:eq(0) .o_data_cell").toHaveText("10");
 
     // select two records

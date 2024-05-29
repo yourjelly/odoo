@@ -12,9 +12,7 @@ export class DynamicList extends DataPoint {
      */
     setup(config) {
         super.setup(...arguments);
-        this.handleField = Object.keys(this.activeFields).find(
-            (fieldName) => this.activeFields[fieldName].isHandle
-        );
+        this.handleField = Object.keys(this.activeFields).find((fieldName) => this.activeFields[fieldName].isHandle);
         if (!this.handleField && DEFAULT_HANDLE_FIELD in this.fields) {
             this.handleField = DEFAULT_HANDLE_FIELD;
         }
@@ -137,11 +135,7 @@ export class DynamicList extends DataPoint {
             }
 
             if (canProceed && this.editedRecord) {
-                this.model._updateConfig(
-                    this.editedRecord.config,
-                    { mode: "readonly" },
-                    { reload: false }
-                );
+                this.model._updateConfig(this.editedRecord.config, { mode: "readonly" }, { reload: false });
             } else {
                 return canProceed;
             }
@@ -237,15 +231,8 @@ export class DynamicList extends DataPoint {
         if (!unlinked) {
             return false;
         }
-        if (
-            this.isDomainSelected &&
-            resIds.length === this.model.activeIdsLimit &&
-            resIds.length < this.count
-        ) {
-            const msg = _t(
-                "Only the first %(count)s records have been deleted (out of %(total)s selected)",
-                { count: resIds.length, total: this.count }
-            );
+        if (this.isDomainSelected && resIds.length === this.model.activeIdsLimit && resIds.length < this.count) {
+            const msg = _t("Only the first %(count)s records have been deleted (out of %(total)s selected)", { count: resIds.length, total: this.count });
             this.model.notification.add(msg, { title: _t("Warning") });
         }
         await this._removeRecords(records.map((r) => r.id));
@@ -279,7 +266,6 @@ export class DynamicList extends DataPoint {
             return false;
         }
         if (validSelection.length === 0) {
-            debugger
             this.model.dialog.add(AlertDialog, {
                 body: _t("No valid record to save"),
                 confirm: () => this.leaveEditMode({ discard: true }),
@@ -329,19 +315,12 @@ export class DynamicList extends DataPoint {
         // Determine which records/groups need to be modified
         const firstIndex = Math.min(fromIndex, toIndex);
         const lastIndex = Math.max(fromIndex, toIndex) + 1;
-        let reorderAll = originalList.some(
-            (dp) => this._getDPFieldValue(dp, handleField) === undefined
-        );
+        let reorderAll = originalList.some((dp) => this._getDPFieldValue(dp, handleField) === undefined);
         if (!reorderAll) {
             let lastSequence = (asc ? -1 : 1) * Infinity;
             for (let index = 0; index < originalList.length; index++) {
                 const sequence = getSequence(originalList[index]);
-                if (
-                    ((index < firstIndex || index >= lastIndex) &&
-                        ((asc && lastSequence >= sequence) ||
-                            (!asc && lastSequence <= sequence))) ||
-                    (index >= firstIndex && index < lastIndex && lastSequence === sequence)
-                ) {
+                if (((index < firstIndex || index >= lastIndex) && ((asc && lastSequence >= sequence) || (!asc && lastSequence <= sequence))) || (index >= firstIndex && index < lastIndex && lastSequence === sequence)) {
                     reorderAll = true;
                 }
                 lastSequence = sequence;
@@ -403,18 +382,11 @@ export class DynamicList extends DataPoint {
         const context = this.context;
         const resIds = await this.getResIds(isSelected);
         const action = await this.model.orm.call(this.resModel, method, [resIds], { context });
-        if (
-            this.isDomainSelected &&
-            resIds.length === this.model.activeIdsLimit &&
-            resIds.length < this.count
-        ) {
-            const msg = _t(
-                "Of the %(selectedRecord)s selected records, only the first %(firstRecords)s have been archived/unarchived.",
-                {
-                    selectedRecords: resIds.length,
-                    firstRecords: this.count,
-                }
-            );
+        if (this.isDomainSelected && resIds.length === this.model.activeIdsLimit && resIds.length < this.count) {
+            const msg = _t("Of the %(selectedRecord)s selected records, only the first %(firstRecords)s have been archived/unarchived.", {
+                selectedRecords: resIds.length,
+                firstRecords: this.count,
+            });
             this.model.notification.add(msg, { title: _t("Warning") });
         }
         const reload = () => this.model.load();
