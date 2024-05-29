@@ -11,6 +11,9 @@
                     <i class="fa fa-2x fa-angle-left pb-1" role="img" aria-label="Go Back" title="Go Back" />
                 </button>
                 <div class="status-buttons d-flex flex-grow-1  justify-content-end h-100">
+                    <a t-if="!installPrompt.isAppShortcut" target="_blank" href="/app_shortcut?app_id=point_of_sale&amp;path=pos" class="d-flex align-items-center text-success">
+                        <i class="fa fa-download pe-1"/> Install
+                    </a>
                     <button class="btn btn-outline my-2" t-if="isBarcodeScannerSupported() and pos.mainScreen.component.name == 'ProductScreen'" t-on-click="onClickScan">
                         <i class="fa fa-barcode" /><span t-if="this.pos.scanning" class="ms-1">Stop</span>
                     </button>

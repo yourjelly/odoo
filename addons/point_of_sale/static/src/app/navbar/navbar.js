@@ -38,6 +38,7 @@ export class Navbar extends Component {
         this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.hardwareProxy = useService("hardware_proxy");
+        this.installPrompt = useService("installPrompt");
         this.isBarcodeScannerSupported = isBarcodeScannerSupported;
     }
     onClickScan() {
