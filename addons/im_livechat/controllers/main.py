@@ -38,6 +38,7 @@ class LivechatController(http.Controller):
         if origin_url.netloc != headers.get('host') or origin_url.scheme != request.httprequest.scheme:
             bundle = 'im_livechat.assets_embed_cors'
         asset = request.env["ir.qweb"]._get_asset_bundle(bundle)
+        print(ext, "=========================== ext")
         if ext not in ('css', 'js'):
             raise request.not_found()
         stream = request.env['ir.binary']._get_stream_from(getattr(asset, ext)())
