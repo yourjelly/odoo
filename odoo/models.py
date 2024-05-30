@@ -4111,7 +4111,7 @@ class BaseModel(metaclass=MetaModel):
 
         # SQL Alternative if computing in-memory is too slow for large dataset
         # invalid = self - self._filter_access_rules(operation)
-        invalid = self - self._filter_access_rules_python(operation)
+        invalid = self - self._filter_access_rules(operation)
         if not invalid:
             return
 
