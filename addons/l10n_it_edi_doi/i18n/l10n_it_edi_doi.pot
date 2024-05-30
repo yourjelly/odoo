@@ -377,11 +377,6 @@ msgid "Journal Entry"
 msgstr ""
 
 #. module: l10n_it_edi_doi
-#: model:ir.model,name:l10n_it_edi_doi.model_account_move_line
-msgid "Journal Item"
-msgstr ""
-
-#. module: l10n_it_edi_doi
 #: model:ir.model.fields,field_description:l10n_it_edi_doi.field_l10n_it_edi_doi_declaration_of_intent__write_uid
 msgid "Last Updated by"
 msgstr ""

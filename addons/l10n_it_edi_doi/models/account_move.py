@@ -83,10 +83,24 @@ class AccountMove(models.Model):
         (the tax amount of the lines is always 0).
         The move_type determines the sign: 1 (-1) for inbound (outbound) types.
         """
-        for move in self:
-            declaration = move.l10n_it_edi_doi_declaration_of_intent_id
-            amount = move.invoice_line_ids._l10n_it_edi_doi_get_declaration_amount(declaration)
-            move.l10n_it_edi_doi_amount = amount
+        inbound_move_types = self.env['account.move'].get_inbound_types(include_receipts=True)
+        for company_id, moves in self.grouped('company_id').items():
+            tax = company_id.l10n_it_edi_doi_declaration_of_intent_tax
+            if not tax:
+                moves.l10n_it_edi_doi_amount = 0
+                continue
+            for move in moves:
+                declaration = move.l10n_it_edi_doi_declaration_of_intent_id
+                if not declaration:
+                    move.l10n_it_edi_doi_amount = 0
+                    continue
+                declaration_lines = move.invoice_line_ids.filtered(
+                    # The declaration tax cannot be used with other taxes on a single line
+                    # (checked in `_post`)
+                    lambda line: line.tax_ids.ids == tax.ids
+                )
+                sign = 1 if move.move_type in inbound_move_types else -1
+                move.l10n_it_edi_doi_amount = sign * sum(declaration_lines.mapped('price_total'))
 
     @api.depends('l10n_it_edi_doi_declaration_of_intent_id', 'l10n_it_edi_doi_amount')
     def _compute_l10n_it_edi_doi_warning(self):
@@ -104,25 +118,7 @@ class AccountMove(models.Model):
             declaration_not_yet_invoiced = declaration.not_yet_invoiced
             if move.state != 'posted':  # exactly the 'posted' invoices are included in declaration.invoiced
                 # Here we replicate what would happen when posting the invoice.
-                # Note: lines manually added to a move linked to an sales order are not added to the sales order
                 declaration_invoiced += move.l10n_it_edi_doi_amount
-                linked_orders = move.line_ids.sale_line_ids.order_id.filtered(
-                    lambda o: o.l10n_it_edi_doi_declaration_of_intent_id == declaration
-                )
-                for order in linked_orders:
-                    lines_from_order = move.line_ids.filtered(
-                        lambda line: line.sale_line_ids.order_id == order
-                    )
-                    # `amount_invoiced` is negative in case of a credit note ('out_refund')
-                    amount_invoiced = lines_from_order._l10n_it_edi_doi_get_declaration_amount(declaration)
-                    not_yet_invoiced_before = order._l10n_it_edi_doi_get_amount_not_yet_invoiced(
-                        declaration,
-                    )
-                    not_yet_invoiced = order._l10n_it_edi_doi_get_amount_not_yet_invoiced(
-                        declaration,
-                        additional_invoiced={order.id: amount_invoiced},
-                    )
-                    declaration_not_yet_invoiced -= not_yet_invoiced_before - not_yet_invoiced
 
             validity_warnings = move._l10n_it_edi_doi_get_declaration_of_intent_validity_warnings()
 
