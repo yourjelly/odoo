@@ -119,6 +119,11 @@ class AccountMove(models.Model):
             if move.state != 'posted':  # exactly the 'posted' invoices are included in declaration.invoiced
                 # Here we replicate what would happen when posting the invoice.
                 declaration_invoiced += move.l10n_it_edi_doi_amount
+                if move.state == 'draft':
+                    # The amount on draft invoices is currently included in `declaration.not_yet_invoiced`.
+                    # Posting will add the current amount to `declaration.invoiced`.
+                    old_move_state = self.browse(move.ids)
+                    declaration_not_yet_invoiced -= old_move_state.l10n_it_edi_doi_amount
 
             validity_warnings = move._l10n_it_edi_doi_get_declaration_of_intent_validity_warnings()
 

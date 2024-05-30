@@ -710,10 +710,12 @@ msgstr "Totale imposte incluse"
 #: model:ir.model.fields,help:l10n_it_edi_doi.field_l10n_it_edi_doi_declaration_of_intent__not_yet_invoiced
 msgid ""
 "Total amount of planned sales of services / goods under this Declaration of "
-"Intent (i.e. current quotation and sales orders) that can still be invoiced"
+"Intent  that can still be invoiced (i.e. current quotation, sales orders and"
+" draft invoices)"
 msgstr ""
-"Importo totale delle vendite pianificate di servizi/beni ai sensi della presente Dichiarazione di "
-"Intento (preventivi e ordini di vendita)"
+"Importo totale delle vendite previste di servizi / beni ai sensi della presente Dichiarazione di "
+"Intento che possono ancora essere fatturate (cioè preventivo corrente, ordini di vendita e"
+" ‘bozze di fattura)’"
 
 #. module: l10n_it_edi_doi
 #: model:ir.model.fields,help:l10n_it_edi_doi.field_account_bank_statement_line__l10n_it_edi_doi_amount

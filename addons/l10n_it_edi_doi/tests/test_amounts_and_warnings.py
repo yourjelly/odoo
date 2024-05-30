@@ -144,11 +144,11 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
                 }),
             ],
         })
-        # The amounts have not changed since the invoice has not been posted yet.
+        # The draft amount gets added to "not_yet_invoiced"
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
-            'not_yet_invoiced': 0.0,
-            'remaining': 1000.0,
+            'not_yet_invoiced': 1000.0,
+            'remaining': 0.0,
         }])
         # There is no warning since posting the invoice would not exceed the threshold.
         # (only lines with the special tax are counted)
@@ -256,14 +256,13 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
                 }),
             ],
         })
-        # The amounts have not changed since the invoice has not been posted yet.
+        # The draft amount gets added to "not_yet_invoiced"
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
-            'not_yet_invoiced': 2000.0,
-            'remaining': -1000.0,
+            'not_yet_invoiced': 3000.0,  # 2000 "base" + 1000 "draft"
+            'remaining': -2000.0,
         }])
 
-        # The warning has the updated values though
         self.assertEqual(
             invoice.l10n_it_edi_doi_warning,
             "Pay attention, the threshold of your Declaration of Intent test 2019-threshold 1000 of 1,000.00\xa0€ is exceeded by 2,000.00\xa0€, this document included.\n"
@@ -362,28 +361,31 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
                    'amount': 50,
                    'deposit_account_id': self.company_data_2['default_account_revenue'].id,
                }).create_invoices()
+        # The amount of both draft invoices is moved to not_yet_invoiced.
+        self.assertRecordValues(declaration, [{
+            'invoiced': 0.0,
+            'not_yet_invoiced': 3000.0,  # 2000 "base" + 2 * 500 from the invoices
+            'remaining': -2000.0,
+        }])
 
         invoice = order.invoice_ids[0]
-
-        # The amount of both draft invoices is subtracted from the not yet invoiced amount of the SO.
-        # Only the amount of `invoice` is added in the warning.
         self.assertEqual(
             invoice.l10n_it_edi_doi_warning,
-            "Pay attention, the threshold of your Declaration of Intent test 2019-threshold 1000 of 1,000.00\xa0€ is exceeded by 1,500.00\xa0€, this document included.\n"
-            "Invoiced: 500.00\xa0€; Not Yet Invoiced: 2,000.00\xa0€"
+            "Pay attention, the threshold of your Declaration of Intent test 2019-threshold 1000 of 1,000.00\xa0€ is exceeded by 2,000.00\xa0€, this document included.\n"
+            "Invoiced: 500.00\xa0€; Not Yet Invoiced: 2,500.00\xa0€"
         )
 
         invoice.invoice_line_ids[0].price_unit = 2000  # 1000 more than the sales order declaration amount
         self.assertEqual(
             invoice.l10n_it_edi_doi_warning,
-            "Pay attention, the threshold of your Declaration of Intent test 2019-threshold 1000 of 1,000.00\xa0€ is exceeded by 3,000.00\xa0€, this document included.\n"
-            "Invoiced: 2,000.00\xa0€; Not Yet Invoiced: 2,000.00\xa0€"
+            "Pay attention, the threshold of your Declaration of Intent test 2019-threshold 1000 of 1,000.00\xa0€ is exceeded by 3,500.00\xa0€, this document included.\n"
+            "Invoiced: 2,000.00\xa0€; Not Yet Invoiced: 2,500.00\xa0€"
         )
         invoice.action_post()
         self.assertRecordValues(declaration, [{
             'invoiced': 2000.0,  # 2000 from invoice
-            'not_yet_invoiced': 2000.0,  # 2000 "base"
-            'remaining': -3000.0,
+            'not_yet_invoiced': 2500.0,  # 2000 "base" + 500 from draft downpayment
+            'remaining': -3500.0,
         }])
 
         invoice2 = order.invoice_ids[1]
@@ -431,7 +433,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
           * We create a single invoice for the SOs from the previous step.
             There is one line per SO.
           * We change the amount on the one of the lines of the invoice.
-        I.e. we check that the modified line only impacts the 1 SO
+        I.e. we check that there is no "not yet invoiced" amount on the SO left despite of the price_unit change.
         """
 
         declaration = self.declaration_1000
@@ -460,11 +462,11 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         }])
 
         invoice = orders._create_invoices()
-        # Due to the draft invoice all the SOs are considered invoiced already
+        # The draft amount gets added to "not_yet_invoiced"
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
-            'not_yet_invoiced': 0.0,
-            'remaining': 1000.0,
+            'not_yet_invoiced': 6000.0,
+            'remaining': -5000.0,
         }])
         self.assertEqual(
             invoice.l10n_it_edi_doi_warning,
@@ -481,8 +483,8 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         )
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
-            'not_yet_invoiced': 0.0,
-            'remaining': 1000.0,
+            'not_yet_invoiced': 5000.0,
+            'remaining': -4000.0,
         }])
 
         invoice.action_post()

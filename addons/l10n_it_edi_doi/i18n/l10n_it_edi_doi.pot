@@ -694,7 +694,8 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_it_edi_doi.field_l10n_it_edi_doi_declaration_of_intent__not_yet_invoiced
 msgid ""
 "Total amount of planned sales of services / goods under this Declaration of "
-"Intent (i.e. current quotation and sales orders) that can still be invoiced"
+"Intent  that can still be invoiced (i.e. current quotation, sales orders and"
+" draft invoices)"
 msgstr ""
 
 #. module: l10n_it_edi_doi
