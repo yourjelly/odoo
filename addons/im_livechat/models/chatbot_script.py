@@ -8,7 +8,7 @@ from odoo.tools import email_normalize, get_lang, html2plaintext, is_html_empty,
 
 class ChatbotScript(models.Model):
     _description = 'Chatbot Script'
-    _inherit = ['image.mixin', 'utm.source.mixin']
+    _inherit = ['image.mixin']
     _rec_name = 'title'
     _order = 'title, id'
 
