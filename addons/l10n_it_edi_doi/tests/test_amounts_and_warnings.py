@@ -20,6 +20,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
 
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 0.0,
             'remaining': 1000.0,
         }])
@@ -60,6 +61,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
 
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 0.0,
             'remaining': 1000.0,
         }])
@@ -118,6 +120,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
 
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 0.0,
             'remaining': 1000.0,
         }])
@@ -144,11 +147,11 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
                 }),
             ],
         })
-        # The draft amount gets added to "not_yet_invoiced"
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
-            'not_yet_invoiced': 1000.0,
-            'remaining': 0.0,
+            'draft_amount': 1000.0,
+            'not_yet_invoiced': 0.0,
+            'remaining': 1000.0,
         }])
         # There is no warning since posting the invoice would not exceed the threshold.
         # (only lines with the special tax are counted)
@@ -166,6 +169,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         invoice.action_post()
         self.assertRecordValues(declaration, [{
             'invoiced': 2000.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 0.0,
             'remaining': -1000.0,
         }])
@@ -214,6 +218,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         # We only count sales orders not quotations
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 0.0,
             'remaining': 1000.0,
         }])
@@ -230,6 +235,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         order.action_confirm()
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 2000.0,
             'remaining': -1000.0,
         }])
@@ -256,11 +262,11 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
                 }),
             ],
         })
-        # The draft amount gets added to "not_yet_invoiced"
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
-            'not_yet_invoiced': 3000.0,  # 2000 "base" + 1000 "draft"
-            'remaining': -2000.0,
+            'draft_amount': 1000.0,
+            'not_yet_invoiced': 2000.0,  # 2000 "base"
+            'remaining': -1000.0,
         }])
 
         self.assertEqual(
@@ -272,6 +278,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         invoice.action_post()
         self.assertRecordValues(declaration, [{
             'invoiced': 1000.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 2000.0,
             'remaining': -2000.0,
         }])
@@ -318,6 +325,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         independent_order.action_confirm()
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 2000.0,  # 2000 "base" from independent_order
             'remaining': -1000.0,
         }])
@@ -346,6 +354,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         order.action_confirm()
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 3000.0,  # 2000 "base" + 1000 from `order`
             'remaining': -2000.0,
         }])
@@ -361,31 +370,33 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
                    'amount': 50,
                    'deposit_account_id': self.company_data_2['default_account_revenue'].id,
                }).create_invoices()
-        # The amount of both draft invoices is moved to not_yet_invoiced.
+        # The amount of both draft invoices is moved to draft_amount.
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
-            'not_yet_invoiced': 3000.0,  # 2000 "base" + 2 * 500 from the invoices
-            'remaining': -2000.0,
+            'draft_amount': 1000.0,  # 2 * 500 from the invoices
+            'not_yet_invoiced': 2000.0,  # 2000 "base"
+            'remaining': -1000.0,
         }])
 
         invoice = order.invoice_ids[0]
         self.assertEqual(
             invoice.l10n_it_edi_doi_warning,
-            "Pay attention, the threshold of your Declaration of Intent test 2019-threshold 1000 of 1,000.00\xa0€ is exceeded by 2,000.00\xa0€, this document included.\n"
-            "Invoiced: 500.00\xa0€; Not Yet Invoiced: 2,500.00\xa0€"
+            "Pay attention, the threshold of your Declaration of Intent test 2019-threshold 1000 of 1,000.00\xa0€ is exceeded by 1,500.00\xa0€, this document included.\n"
+            "Invoiced: 500.00\xa0€; Not Yet Invoiced: 2,000.00\xa0€"
         )
 
         invoice.invoice_line_ids[0].price_unit = 2000  # 1000 more than the sales order declaration amount
         self.assertEqual(
             invoice.l10n_it_edi_doi_warning,
-            "Pay attention, the threshold of your Declaration of Intent test 2019-threshold 1000 of 1,000.00\xa0€ is exceeded by 3,500.00\xa0€, this document included.\n"
-            "Invoiced: 2,000.00\xa0€; Not Yet Invoiced: 2,500.00\xa0€"
+            "Pay attention, the threshold of your Declaration of Intent test 2019-threshold 1000 of 1,000.00\xa0€ is exceeded by 3,000.00\xa0€, this document included.\n"
+            "Invoiced: 2,000.00\xa0€; Not Yet Invoiced: 2,000.00\xa0€"
         )
         invoice.action_post()
         self.assertRecordValues(declaration, [{
             'invoiced': 2000.0,  # 2000 from invoice
-            'not_yet_invoiced': 2500.0,  # 2000 "base" + 500 from draft downpayment
-            'remaining': -3500.0,
+            'draft_amount': 500.0,  # 500 from invoice2
+            'not_yet_invoiced': 2000.0,  # 2000 "base"
+            'remaining': -3000.0,
         }])
 
         invoice2 = order.invoice_ids[1]
@@ -397,6 +408,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         )
         self.assertRecordValues(declaration, [{
             'invoiced': 2500.0,  # 2000 + 500 from the 2 downpayment invoices
+            'draft_amount': 0.0,
             'not_yet_invoiced': 2000.0,  # 2000 "base"
             'remaining': -3500.0,
         }])
@@ -421,6 +433,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         credit_note.action_post()
         self.assertRecordValues(declaration, [{
             'invoiced': 500,  # 1 downpayment of 50% on 1000 sale order
+            'draft_amount': 0,
             'not_yet_invoiced': 2500,  # 2000 ("base") + 500 (left on sale order)
             'remaining': -2000,
         }])
@@ -457,6 +470,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         orders.action_confirm()
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 6000.0,
             'remaining': -5000.0,
         }])
@@ -465,8 +479,9 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         # The draft amount gets added to "not_yet_invoiced"
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
-            'not_yet_invoiced': 6000.0,
-            'remaining': -5000.0,
+            'draft_amount': 6000.0,
+            'not_yet_invoiced': 0.0,
+            'remaining': 1000.0,
         }])
         self.assertEqual(
             invoice.l10n_it_edi_doi_warning,
@@ -483,13 +498,15 @@ class TestItEdiDoiRemaining(TestItEdiDoi, ProductCommon):
         )
         self.assertRecordValues(declaration, [{
             'invoiced': 0.0,
-            'not_yet_invoiced': 5000.0,
-            'remaining': -4000.0,
+            'draft_amount': 5000.0,
+            'not_yet_invoiced': 0.0,
+            'remaining': 1000.0,
         }])
 
         invoice.action_post()
         self.assertRecordValues(declaration, [{
             'invoiced': 5000.0,
+            'draft_amount': 0.0,
             'not_yet_invoiced': 0.0,
             'remaining': -4000.0,
         }])

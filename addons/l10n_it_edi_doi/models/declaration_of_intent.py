@@ -81,9 +81,16 @@ class L10nItDeclarationOfIntent(models.Model):
 
     invoiced = fields.Monetary(
         string='Invoiced',
-        compute='_compute_invoiced',
+        compute='_compute_invoices_amounts',
         store=True, readonly=True,
         help="Total amount of sales of services / goods under this Declaration of Intent",
+    )
+
+    draft_amount = fields.Monetary(
+        string='Draft Amount',
+        compute='_compute_invoices_amounts',
+        store=True, readonly=True,
+        help="Total amount of planned sales of services / goods under this Declaration of Intent  that can still be invoiced (i.e. current quotation, sales orders and draft invoices)",
     )
 
     not_yet_invoiced = fields.Monetary(
@@ -143,25 +150,25 @@ class L10nItDeclarationOfIntent(models.Model):
             record.display_name = f"{record.protocol_number_part1}-{record.protocol_number_part2}"
 
     @api.depends('invoice_ids', 'invoice_ids.state', 'invoice_ids.l10n_it_edi_doi_amount')
-    def _compute_invoiced(self):
+    def _compute_invoices_amounts(self):
         for declaration in self:
-            relevant_invoices = self.invoice_ids.filtered(
-                lambda invoice: invoice.state == 'posted'
-            )
-            declaration.invoiced = sum(relevant_invoices.mapped('l10n_it_edi_doi_amount'))
+            invoiced = 0
+            draft_amount = 0
+            for invoice in self.invoice_ids:
+                if invoice.state == 'posted':
+                    invoiced += invoice.l10n_it_edi_doi_amount
+                if invoice.state == 'draft':
+                    draft_amount += invoice.l10n_it_edi_doi_amount
+            declaration.invoiced = invoiced
+            declaration.draft_amount = draft_amount
 
-    @api.depends('sale_order_ids', 'invoice_ids', 'invoice_ids.state', 'invoice_ids.l10n_it_edi_doi_amount', 'sale_order_ids.state', 'sale_order_ids.l10n_it_edi_doi_not_yet_invoiced')
+    @api.depends('sale_order_ids', 'sale_order_ids.state', 'sale_order_ids.l10n_it_edi_doi_not_yet_invoiced')
     def _compute_not_yet_invoiced(self):
         for declaration in self:
             relevant_orders = declaration.sale_order_ids.filtered(
                 lambda order: order.state == 'sale'
             )
-            sale_order_amount = sum(relevant_orders.mapped('l10n_it_edi_doi_not_yet_invoiced'))
-            relevant_invoices = declaration.invoice_ids.filtered(
-                lambda invoice: invoice.state == 'draft'
-            )
-            draft_invoice_amount = sum(relevant_invoices.mapped('l10n_it_edi_doi_amount'))
-            declaration.not_yet_invoiced = sale_order_amount + draft_invoice_amount
+            declaration.not_yet_invoiced = sum(relevant_orders.mapped('l10n_it_edi_doi_not_yet_invoiced'))
 
     @api.depends('threshold', 'not_yet_invoiced', 'invoiced')
     def _compute_remaining(self):
