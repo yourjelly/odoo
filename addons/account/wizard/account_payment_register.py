@@ -599,21 +599,33 @@ class AccountPaymentRegister(models.TransientModel):
                 late_pay_charges_mode = self._get_late_payment_charges_mode(move)
                 if late_pay_charges_mode:
                     lpc_penalty, label = self._get_lpc_penalty_and_label(move, late_pay_charges_mode, amount)
-                    if move.move_type in ['out_invoice', 'in_invoice']:
-                        obj = self.env['account.debit.note'].create({
-                            "move_ids": move,
-                            "reason": "Late Pay Charges",
-                            "journal_id": move.journal_id.id
-                        })
-                        note = obj.create_debit()
-                        self.env['account.move'].search([('id', '=', self.env['account.move'].search([('id', '=', note['res_id'])]).id)]).write({
-                            "invoice_line_ids": [Command.create({
+                    default_values = self._prepare_default_values(move)
+                    new_move = move.copy(default=default_values)
+                    move_msg = _("This debit note was created from: %s", move._get_html_link())
+                    new_move.message_post(body=move_msg)
+                    new_move.line_ids = [Command.create({
                                 "product_id": self.lpc_product_id.id,
                                 "quantity": 1,
                                 "name": label,
                                 "price_unit": lpc_penalty
                             })]
-                        })
+
+    def _prepare_default_values(self, move):
+        if move.move_type in ('in_refund', 'out_refund'):
+            type = 'in_invoice' if move.move_type == 'in_refund' else 'out_invoice'
+        else:
+            type = move.move_type
+        default_values = {
+                'ref': '%s, %s' % (move.name, 'Late Pay Charges'),
+                'date': self.payment_date,
+                'invoice_date': move.is_invoice(include_receipts=True) and (move.date) or False,
+                'journal_id': move.journal_id.id,
+                'invoice_payment_term_id': None,
+                'lpc_debit_origin_id': move.id,
+                'move_type': type,
+            }
+        default_values['line_ids'] = [(5, 0, 0)]
+        return default_values
 
     def _get_total_amount_using_same_currency(self, batch_result, early_payment_discount=True):
         self.ensure_one()

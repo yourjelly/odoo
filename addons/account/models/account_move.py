@@ -618,6 +618,12 @@ class AccountMove(models.Model):
 
     taxes_legal_notes = fields.Html(string='Taxes Legal Notes', compute='_compute_taxes_legal_notes')
 
+    # === Late payment charge (lpc) fields === #
+    lpc_debit_origin_id = fields.Many2one('account.move', 'Original Invoice Debited', readonly=True, copy=False, index='btree_not_null')
+    lpc_debit_note_ids = fields.One2many('account.move', 'lpc_debit_origin_id', 'Late Pay Debit Notes',
+                                     help="The debit notes created for this invoice")
+    lpc_debit_note_count = fields.Integer('Number of Debit Notes', compute='_compute_lpc_debit_count')
+
     _sql_constraints = [(
         'unique_name', "", "Another entry with the same name already exists.",
     )]
@@ -1814,6 +1820,14 @@ class AccountMove(models.Model):
                 for tax in OrderedSet(move.line_ids.tax_ids)
                 if not is_html_empty(tax.invoice_legal_notes)
             )
+
+    @api.depends('lpc_debit_note_ids')
+    def _compute_lpc_debit_count(self):
+        debit_data = self.env['account.move']._read_group([('lpc_debit_origin_id', 'in', self.ids)],
+                                                        ['lpc_debit_origin_id'], ['__count'])
+        data_map = {debit_origin.id: count for debit_origin, count in debit_data}
+        for inv in self:
+            inv.lpc_debit_note_count = data_map.get(inv.id, 0.0)
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS
@@ -4471,6 +4485,16 @@ class AccountMove(models.Model):
         if other_moves:
             other_moves._post(soft=False)
         return False
+
+    def action_view_debit_notes(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Debit Notes'),
+            'res_model': 'account.move',
+            'view_mode': 'tree,form',
+            'domain': [('lpc_debit_origin_id', '=', self.id)],
+        }
 
     def js_assign_outstanding_line(self, line_id):
         ''' Called by the 'payment' widget to reconcile a suggested journal item to the present

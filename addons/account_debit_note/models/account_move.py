@@ -17,7 +17,7 @@ class AccountMove(models.Model):
                                                         ['debit_origin_id'], ['__count'])
         data_map = {debit_origin.id: count for debit_origin, count in debit_data}
         for inv in self:
-            inv.debit_note_count = data_map.get(inv.id, 0.0)
+            inv.debit_note_count = data_map.get(inv.id, 0.0) + self.lpc_debit_note_count
 
     def action_view_debit_notes(self):
         self.ensure_one()
@@ -26,7 +26,7 @@ class AccountMove(models.Model):
             'name': _('Debit Notes'),
             'res_model': 'account.move',
             'view_mode': 'tree,form',
-            'domain': [('debit_origin_id', '=', self.id)],
+            'domain': ['|', ('debit_origin_id', '=', self.id), ('lpc_debit_origin_id', '=', self.id)],
         }
 
     def action_debit_note(self):
