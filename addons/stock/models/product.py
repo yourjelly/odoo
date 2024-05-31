@@ -307,14 +307,26 @@ class Product(models.Model):
         # this optimizes [('location_id', 'child_of', locations.ids)]
         # by avoiding the ORM to search for children locations and injecting a
         # lot of location ids into the main query
-        for location in locations:
-            loc_domain = loc_domain and ['|'] + loc_domain or loc_domain
-            loc_domain.append(('location_id.parent_path', '=like', location.parent_path + '%'))
-            dest_loc_domain = expression.OR([dest_loc_domain, [
-                '|',
-                    '&', ('location_final_id', '!=', False), ('location_final_id.parent_path', '=like', location.parent_path + '%'),
-                    '&', ('location_final_id', '=', False), ('location_dest_id.parent_path', '=like', location.parent_path + '%'),
-            ]])
+        paths_domain = expression.OR([[('parent_path', '=like', loc.parent_path + '%')] for loc in locations])
+
+        loc_domain = [('location_id', 'any', paths_domain)]
+        # for location in locations:
+        #     dest_loc_domain = expression.OR([dest_loc_domain, [
+        #         '|',
+        #             '&', ('location_final_id', '!=', False), ('location_final_id.parent_path', '=like', location.parent_path + '%'),
+        #             '&', ('location_final_id', '=', False), ('location_dest_id.parent_path', '=like', location.parent_path + '%'),
+        #     ]])
+        # note that dest_loc_domain was of the form
+        # ((X and x11) or (~X and x12)) or ((X and x21) or (~X and x22)) or .... ((X and xN1) or (~X and xN2))
+        # equivalent to
+        # (X and x11) or (~X and x12) or (X and x21) or (~X and x22) or .... (X and xN1) or (~X and xN2)      associtivity -> remove parentesis
+        # (X and x11) or (X and x21) ... or (X and xN1) or (~X and x12) or (~X and x22) ... or (~X and xN2)   commutatitivy -> reorder
+        # (X and (x11 or x21 or ... xN1)) or (~X and (x12 or x22 ... or xN2))   -> distributive laws between AND and OR
+        dest_loc_domain = [
+            '|',
+            '&', ('location_final_id', '!=', False), ('location_final_id', 'any', paths_domain),
+            '&', ('location_final_id', '=', False), ('location_dest_id', 'any', paths_domain),
+        ]
 
         return (
             loc_domain,
