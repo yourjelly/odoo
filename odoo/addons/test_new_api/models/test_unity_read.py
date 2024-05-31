@@ -73,3 +73,18 @@ class PersonAccount(models.Model):
 
     person_id = fields.Many2one('test_new_api.person', required=True, ondelete='cascade')
     login = fields.Char()
+
+
+class Parent(models.Model):
+    _name = 'test_new_api.parent'
+    _description = 'parent'
+
+    name = fields.Char()
+    tag_ids = fields.Many2many('test_new_api.tag')
+
+class Tag(models.Model):
+    _name = 'test_new_api.tag'
+    _description = 'tag'
+
+    name = fields.Char()
+    hidden = fields.Boolean()

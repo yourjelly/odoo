@@ -133,6 +133,8 @@ class Base(models.AbstractModel):
                     continue
 
                 co_records = self[field_name]
+                # filter out inaccessible corecords in case of "cache pollution"
+                co_records = co_records._filter_access_rules_python('read')
 
                 if 'order' in field_spec and field_spec['order']:
                     co_records = co_records.search([('id', 'in', co_records.ids)], order=field_spec['order'])
@@ -142,7 +144,7 @@ class Base(models.AbstractModel):
                     }
                     for values in values_list:
                         # filter out inaccessible corecords in case of "cache pollution"
-                        values[field_name] = [id_ for id_ in values[field_name] if id_ in order_key]
+                        values[field_name] = [id_ for id_ in values[field_name] if id_ in order_key] # maybe this is not needed anymore?
                         values[field_name] = sorted(values[field_name], key=order_key.__getitem__)
 
                 if 'context' in field_spec:

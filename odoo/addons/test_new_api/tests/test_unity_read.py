@@ -388,6 +388,27 @@ class TestUnityRead(TransactionCase):
                         ],
                 }])
 
+    def test_read_many2many_filter_records_based_on_record_rules(self):
+        internal_user = new_test_user(self.env, 'internal user', 'base.group_user')  # internal user can not see hidden tags
+
+        parent = self.env['test_new_api.parent'].create({'name': 'parent'})
+        visible, invisible = self.env['test_new_api.tag'].create([
+            {'name': 'visible tag', 'hidden': False},
+            {'name': 'invisible tag', 'hidden': True},
+        ])
+        parent.tag_ids = visible | invisible
+
+        read = parent.with_user(internal_user).web_read({'tag_ids': {'fields': {'display_name': {}}}})
+        self.assertEqual(read, [
+            {
+                'id': parent.id,
+                'tag_ids':
+                    [
+                        {'id': visible.id, 'display_name': 'visible tag'},
+                        {'id': invisible.id},
+                    ]
+            }])
+
     def test_specify_fields_many2many(self):
         read = self.course.web_read({'display_name': {},
                                      'lesson_ids': {
