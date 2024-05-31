@@ -62,11 +62,13 @@ export async function waitForOdooSources(model) {
 export async function waitForDataLoaded(model) {
     await waitForOdooSources(model);
     const odooDataProvider = model.config.custom.odooDataProvider;
+    console.log("waitForDataLoaded", odooDataProvider);
     if (!odooDataProvider) {
         return;
     }
     await new Promise((resolve, reject) => {
         function check() {
+            console.log("check", isLoaded(model));
             model.dispatch("EVALUATE_CELLS");
             if (isLoaded(model)) {
                 odooDataProvider.removeEventListener("data-source-updated", check);
@@ -191,6 +193,7 @@ function containsOdooFunction(content) {
 function isLoaded(model) {
     for (const sheetId of model.getters.getSheetIds()) {
         for (const cell of Object.values(model.getters.getEvaluatedCells(sheetId))) {
+            console.log(cell, cell.type === "error" && isLoadingError(cell));
             if (cell.type === "error" && isLoadingError(cell)) {
                 return false;
             }

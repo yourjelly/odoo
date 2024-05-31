@@ -155,6 +155,8 @@ class SurveyCase(common.TransactionCase):
             base_alvals[qtype[1][1]] = answer_value_row
 
         base_alvals.update(kwargs)
+        print(base_alvals)
+
         return self.env['survey.user_input.line'].create(base_alvals)
 
     # ------------------------------------------------------------

@@ -120,6 +120,7 @@ export class ServerData {
      */
     _getBatchItem(resModel, method, args) {
         const request = new Request(resModel, method, [args]);
+        console.log(request.key);
         if (!(request.key in this.cache)) {
             const error = new LoadingDataError();
             this.cache[request.key] = error;
