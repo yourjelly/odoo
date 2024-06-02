@@ -66,6 +66,7 @@ export class PosStore extends Reactive {
             pos_data,
             action,
             alert,
+            sound
         }
     ) {
         this.env = env;
@@ -78,6 +79,7 @@ export class PosStore extends Reactive {
         this.data = pos_data;
         this.action = action;
         this.alert = alert;
+        this.sound = sound;
         this.notification = notification;
         this.unwatched = markRaw({});
         this.pushOrderMutex = new Mutex();

@@ -3,7 +3,8 @@
     <t t-name="pos_restaurant.ActionpadWidget" t-inherit="point_of_sale.ActionpadWidget" t-inherit-mode="extension">
         <!-- Replace the payment button by the order button -->
         <xpath expr="//button[hasclass('validation')]" position="after">
-            <button
+            <!-- TODO : ALTERNATIVE OF ID FOR XPATH -->
+            <button id="order-button"
                 t-if="this.swapButton"
                 t-attf-class="submit-order h-100 {{getMainButtonClasses()}} position-relative border-top"
                 t-att-class="swapButtonClasses"
