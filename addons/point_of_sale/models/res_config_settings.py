@@ -50,6 +50,7 @@ class ResConfigSettings(models.TransientModel):
     pos_customer_display_bg_img_name = fields.Char(related='pos_config_id.customer_display_bg_img_name', readonly=False)
 
     # pos.config fields
+    pos_module_pos_urban_piper = fields.Boolean(related='pos_config_id.module_pos_urban_piper', string="Urban Piper", help="Manage your online orders with Urban Piper.", readonly=False)
     pos_module_pos_discount = fields.Boolean(related='pos_config_id.module_pos_discount', readonly=False)
     pos_module_pos_hr = fields.Boolean(related='pos_config_id.module_pos_hr', readonly=False)
     pos_module_pos_restaurant = fields.Boolean(related='pos_config_id.module_pos_restaurant', readonly=False)
