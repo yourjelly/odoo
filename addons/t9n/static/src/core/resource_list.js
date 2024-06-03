@@ -3,7 +3,7 @@ import { Component, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 export class ResourceList extends Component {
-    static props = {};
+    static props = { resources: Array };
     static template = "t9n.ResourceList";
 
     setup() {
@@ -17,8 +17,8 @@ export class ResourceList extends Component {
                 order: "asc",
             },
         });
-        this.store = useState(useService("t9n.store"));
-        this.store.fetchResources();
+        this.store = useState(useService("mail.store"));
+        this.fetchResources();
     }
 
     get resources() {
@@ -45,6 +45,15 @@ export class ResourceList extends Component {
         return resources;
     }
 
+    async fetchResources() {
+        const resourceData = await this.env.services.orm.call(
+            "t9n.resource",
+            "get_resources",
+            this.props.resources.map(({ id }) => id)
+        );
+        this.store["t9n.resource"].insert(resourceData);
+    }
+
     onClickColumnName(column) {
         if (this.state.sorting.column === column) {
             this.state.sorting.order = this.state.sorting.order === "asc" ? "desc" : "asc";
@@ -54,12 +63,8 @@ export class ResourceList extends Component {
         }
     }
 
-    onClickResource(id) {
-        this.store.setResourceId(id);
-        this.action.doAction({
-            type: "ir.actions.client",
-            tag: "t9n.open_resource_page",
-            target: "current",
-        });
+    onClickResource(resource) {
+        this.store.t9n.activeView = "TranslationEditor";
+        this.store.t9n.activeResource = resource;
     }
 }

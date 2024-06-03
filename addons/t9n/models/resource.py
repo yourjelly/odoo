@@ -94,14 +94,24 @@ class Resource(models.Model):
         return super().write(vals)
 
     @api.model
-    def get_resources(self, project_id):
-        resources_records = self.search([("project_id.id", "=", project_id)])
+    def get_resources(self, ids):
+        return self.browse(ids)._format()
+
+    def _format(self):
         return [
             {
-                "id": record.id,
-                "file_name": record.file_name,
-            }
-            for record in resources_records
+                "id": resource.id,
+                "file_name": resource.file_name,
+                "message_ids": [
+                    {
+                        "id": msg.id,
+                        "body": msg.body,
+                    } for msg in resource.message_ids
+                ],
+                "project_id": {
+                    "id": resource.project_id.id,
+                },
+            } for resource in self
         ]
 
     @api.model

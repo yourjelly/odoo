@@ -7,7 +7,7 @@
     </record>
 
     <record model="ir.actions.client" id="t9n.open_target_langs">
-        <field name="name">Open Target Languages</field>
+        <field name="name">Open Language Selection</field>
         <field name="tag">t9n.open_target_langs</field>
     </record>
 

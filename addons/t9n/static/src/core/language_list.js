@@ -3,7 +3,7 @@ import { Component, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 export class LanguageList extends Component {
-    static props = {};
+    static props = { languages: Array };
     static template = "t9n.LanguageList";
 
     setup() {
@@ -17,22 +17,17 @@ export class LanguageList extends Component {
                 order: "asc",
             },
         });
-        this.store = useState(useService("t9n.store"));
-        this.store.fetchLanguages();
+        this.store = useState(useService("mail.store"));
     }
 
     get languages() {
         const searchTerms = this.state.filters.searchText.trim().toUpperCase();
         const languages = searchTerms
-            ? this.store.languages.filter((l) => l.name.toUpperCase().includes(searchTerms))
-            : [...this.store.languages];
-
-        languages.sort((l1, l2) => {
-            let l1Col = l1[this.state.sorting.column];
-            let l2Col = l2[this.state.sorting.column];
-
-            l1Col = l1Col.toLowerCase();
-            l2Col = l2Col.toLowerCase();
+            ? this.props.languages.filter((l) => l.name.toUpperCase().includes(searchTerms))
+            : [...this.props.languages];
+        return languages.sort((l1, l2) => {
+            const l1Col = l1[this.state.sorting.column];
+            const l2Col = l2[this.state.sorting.column];
 
             if (l1Col < l2Col) {
                 return this.state.sorting.order === "asc" ? -1 : 1;
@@ -42,7 +37,6 @@ export class LanguageList extends Component {
             }
             return 0;
         });
-        return languages;
     }
 
     onClickColumnName(column) {
@@ -54,12 +48,8 @@ export class LanguageList extends Component {
         }
     }
 
-    onClickLanguage(id) {
-        this.store.setTargetLangId(id);
-        this.action.doAction({
-            type: "ir.actions.client",
-            tag: "t9n.open_resource_list",
-            target: "current",
-        });
+    onClickLanguage(language) {
+        this.store.t9n.activeView = "ResourceList";
+        this.store.t9n.activeLanguage = language;
     }
 }

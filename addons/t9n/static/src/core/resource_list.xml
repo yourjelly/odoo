@@ -15,11 +15,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="this.resources" t-as="resource" t-key="resource.id">
+                    <t t-foreach="props.resources" t-as="resource" t-key="resource.id">
                         <tr>
                             <td>
-                                <button class="btn btn-link " t-on-click="() => this.onClickResource(resource.id)">
-                                    <t t-esc="resource.fileName"/>
+                                <button class="btn btn-link " t-on-click="() => this.onClickResource(resource)">
+                                    <t t-esc="resource.file_name"/>
                                 </button>
                             </td>
                         </tr>

@@ -1,7 +1,9 @@
 import { Component, useState, useRef } from "@odoo/owl";
+
+import { CopyPopover } from "@t9n/core/copy_button_popover";
+
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { CopyPopover } from "@t9n/core/copy_button_popover";
 
 export class MessageForm extends Component {
     static props = {};
@@ -11,7 +13,7 @@ export class MessageForm extends Component {
         this.state = useState({
             suggestedTranslationText: "",
         });
-        this.store = useState(useService("t9n.store"));
+        this.store = useState(useService("mail.store"));
         this.orm = useService("orm");
         this.popoverButtonRef = useRef("popover-button");
         this.copyPopover = usePopover(CopyPopover, {
@@ -23,11 +25,11 @@ export class MessageForm extends Component {
     }
 
     get message() {
-        return this.store.active_message;
+        return this.store.t9n.activeMessage;
     }
 
     get translations() {
-        return this.store.active_message.translations;
+        return this.message.translationsInCurrentLanguage;
     }
 
     onClickClear() {
@@ -47,14 +49,15 @@ export class MessageForm extends Component {
     }
 
     async onClickSuggest() {
-        await this.orm.create("t9n.translation", [
+        const data = await this.orm.call("t9n.translation", "create_and_format", [], 
             {
                 body: this.state.suggestedTranslationText.trim(),
-                source_id: this.store.active_message.id,
-                lang_id: this.store.target_lang_id,
+                source_id: this.store.t9n.activeMessage.id,
+                lang_id: this.store.t9n.activeLanguage.id,
             },
-        ]);
-        this.store.fetchActiveMessage();
-        this.onClickClear();
+        );
+        console.log(data);
+        this.store["t9n.translation"].insert(data);
+        this.state.suggestedTranslationText = "";
     }
 }

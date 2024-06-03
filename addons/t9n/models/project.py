@@ -40,17 +40,18 @@ class Project(models.Model):
             {
                 "id": record.id,
                 "name": record.name,
-                "src_lang": {
+                "src_lang_id": {
                     "id": record.src_lang_id.id,
                     "name": record.src_lang_id.name if record.src_lang_id.name else "",
                 },
-                "resources": [
+                "resource_ids": [
                     {
                         "id": resource.id,
+                        "file_name": resource.file_name,
                     }
                     for resource in record.resource_ids
                 ],
-                "target_langs": [
+                "target_lang_ids": [
                     {
                         "id": lang.id,
                         "name": lang.name,

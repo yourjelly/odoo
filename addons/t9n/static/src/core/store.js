@@ -1,7 +1,5 @@
 import { reactive } from "@odoo/owl";
 
-import { Project } from "@t9n/core/project_model";
-import { Resource } from "@t9n/core/resource_model";
 import { registry } from "@web/core/registry";
 
 export class Store {
@@ -19,18 +17,6 @@ export class Store {
         return reactive(this);
     }
 
-    async fetchProjects() {
-        const projects = await this.orm.call("t9n.project", "get_projects");
-        this.projects.splice(
-            0,
-            this.projects.length,
-            ...projects.map(
-                (p) =>
-                    new Project(p.id, p.name, p.src_lang.name, p.target_langs, p.resources.length)
-            )
-        );
-    }
-
     async fetchLanguages() {
         this.languages.splice(
             0,
@@ -39,12 +25,12 @@ export class Store {
         );
     }
     async fetchResources() {
-        const resources = await this.orm.call("t9n.resource", "get_resources", [this.project_id]);
-        this.resources.splice(
-            0,
-            this.resources.length,
-            ...resources.map((r) => new Resource(r.id, r.file_name, r.project_id, r.messages))
-        );
+        // const resources = await this.orm.call("t9n.resource", "get_resources", [this.project_id]);
+        // this.resources.splice(
+        //     0,
+        //     this.resources.length,
+        //     ...resources.map((r) => new Resource(r.id, r.file_name, r.project_id, r.messages))
+        // );
     }
 
     async fetchResource() {
