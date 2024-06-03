@@ -121,10 +121,11 @@ paymentForm.include({
             {
                 ...this._xenditGetPaymentDetails(paymentOptionId),
                 is_multiple_use: this.paymentContext.tokenizationRequested, // Allows reusing tokens in case the users wants to tokenize.
-                should_authenticate: false,
+                amount: processingValues.amount,
             },
             (err, token) => this._xenditHandleResponse(err, token, processingValues),
         )
+        return;
     },
 
     /**
@@ -160,6 +161,11 @@ paymentForm.include({
         } else if (token.status === 'FAILED') {
             this._displayErrorDialog(_t("Payment processing failed"), token.failure_reason);
             this._enableButton();
+        } else if (token.status == 'IN_REVIEW') {
+            // unblock and open the authentication window
+            // this.call('ui', 'unblock');
+            document.querySelector('#three-ds-container').style.display = 'block';
+            window.open(token.payer_authentication_url, 'authorization-form');
         }
     },
 

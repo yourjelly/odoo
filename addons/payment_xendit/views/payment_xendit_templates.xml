@@ -57,6 +57,22 @@
                         />
                     </div>
                 </div>
+                <div id="three-ds-container" style="width: 550px;
+                    display: none;
+                    height: 450px;
+                    line-height: 200px;
+                    position: sticky;
+                    top: 25%;
+                    left: 40%;
+                    margin-top: -100px;
+                    margin-left: -150px;
+                    background-color: #ffffff;
+                    border-radius: 5px;
+                    text-align: center;
+                    z-index: 1056 !important;">
+                    <iframe height="600" width="450" id="authorization-form" name="authorization-form">
+                    </iframe>
+                </div>
             </t>
         </div>
     </template>
