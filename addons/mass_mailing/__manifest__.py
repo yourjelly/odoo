@@ -17,6 +17,7 @@
         'social_media',
         'web_tour',
         'digest',
+        'base_import',
     ],
     'data': [
         'security/res_groups_data.xml',

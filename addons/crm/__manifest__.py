@@ -10,6 +10,7 @@
     'summary': 'Track leads and close opportunities',
     'website': 'https://www.odoo.com/app/crm',
     'depends': [
+        'iap',
         'base_setup',
         'sales_team',
         'mail',
