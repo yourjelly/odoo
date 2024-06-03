@@ -81,8 +81,7 @@ import { MockServerError } from "./mock_server_utils";
 /**
  * @param {string} name
  */
-const camelToPascal = (name) =>
-    name[0].toUpperCase() + name.slice(1).replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+const camelToPascal = (name) => name[0].toUpperCase() + name.slice(1).replace(/_([a-z])/g, (_, char) => char.toUpperCase());
 
 /**
  * This function spawns a 3-level process to create field definitions: it's a function
@@ -105,13 +104,13 @@ const camelToPascal = (name) =>
  *  requiredKeys?: RK[];
  * }} params
  */
-const makeFieldGenerator = (type, { groupOperator, requiredKeys = [] } = {}) => {
+const makeFieldGenerator = (type, { groupOperator, requiredKeys = [], sortable = true } = {}) => {
     const constructorFnName = camelToPascal(type);
     const defaultDef = {
         readonly: false,
         required: false,
         searchable: true,
-        sortable: true,
+        sortable,
         store: true,
         groupable: true,
     };
@@ -141,9 +140,7 @@ const makeFieldGenerator = (type, { groupOperator, requiredKeys = [] } = {}) => 
             const fullDef = fieldGetter();
             for (const key of requiredKeys) {
                 if (!(key in fullDef)) {
-                    throw new MockServerError(
-                        `missing key "${key}" in ${type || "generic"} field definition`
-                    );
+                    throw new MockServerError(`missing key "${key}" in ${type || "generic"} field definition`);
                 }
             }
 
@@ -174,7 +171,7 @@ export function isComputed(field) {
 
 export const Binary = makeFieldGenerator("binary");
 
-export const Boolean = makeFieldGenerator("boolean");
+export const Boolean = makeFieldGenerator("boolean", { sortable: false });
 
 export const Char = makeFieldGenerator("char");
 
