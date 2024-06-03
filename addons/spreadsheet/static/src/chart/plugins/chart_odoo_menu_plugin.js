@@ -1,7 +1,10 @@
 /** @odoo-module */
 
-import { coreTypes } from "@odoo/o-spreadsheet";
+import { coreTypes, helpers } from "@odoo/o-spreadsheet";
 import { OdooCorePlugin } from "@spreadsheet/plugins";
+import { omit } from "@web/core/utils/objects";
+
+const { deepEquals } = helpers;
 
 /** Plugin that link charts with Odoo menus. It can contain either the Id of the odoo menu, or its xml id. */
 export class ChartOdooMenuPlugin extends OdooCorePlugin {
@@ -23,6 +26,31 @@ export class ChartOdooMenuPlugin extends OdooCorePlugin {
             case "DELETE_FIGURE":
                 this.history.update("odooMenuReference", cmd.id, undefined);
                 break;
+            case "DUPLICATE_SHEET":
+                this.updateOnDuplicateSheet(cmd.sheetId, cmd.sheetIdTo);
+                break;
+        }
+    }
+
+    updateOnDuplicateSheet(sheetIdFrom, sheetIdTo) {
+        for (const newChartId of this.getters.getChartIds(sheetIdTo)) {
+            const newChartDefinition = this.getters.getChartDefinition(newChartId);
+            const newFigure = this.getters.getFigure(sheetIdTo, newChartId);
+            const oldChartId = this.getters.getChartIds(sheetIdFrom).find((oldChartId) => {
+                const oldChartDefinition = this.getters.getChartDefinition(oldChartId);
+                const oldFigure = this.getters.getFigure(sheetIdFrom, oldChartId);
+                return (
+                    deepEquals(oldChartDefinition, newChartDefinition) &&
+                    deepEquals(omit(newFigure, "id"), omit(oldFigure, "id")) // compare size and position
+                );
+            });
+            if (oldChartId && this.odooMenuReference[oldChartId]) {
+                this.history.update(
+                    "odooMenuReference",
+                    newChartId,
+                    this.odooMenuReference[oldChartId]
+                );
+            }
         }
     }
 
