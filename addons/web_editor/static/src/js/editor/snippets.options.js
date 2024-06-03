@@ -1140,18 +1140,11 @@ class WeButton extends UserValueComponent {
 registry.category("snippet_widgets").add("WeButton", WeButton);
 
 const ButtonUserValueWidget = Widget.extend({className: ''});
-const CheckboxUserValueWidget = ButtonUserValueWidget.extend({
-    className: (ButtonUserValueWidget.prototype.className || '') + ' o_we_checkbox_wrapper',
+const CheckboxUserValueWidget = ButtonUserValueWidget.extend({});
 
-    /**
-     * @override
-     */
-    start: function () {
-        const checkboxEl = document.createElement('we-checkbox');
-        this.containerEl.appendChild(checkboxEl);
-
-        return this._super(...arguments);
-    },
+class WeCheckbox extends WeButton {
+    static template = "web_editor.WeCheckbox";
+    static components = { WeTitle };
 
     //--------------------------------------------------------------------------
     // Public
@@ -1161,8 +1154,9 @@ const CheckboxUserValueWidget = ButtonUserValueWidget.extend({
      * @override
      */
     enable() {
+        // TODO: @owl-options adapt
         this.$('we-checkbox').click();
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -1176,9 +1170,10 @@ const CheckboxUserValueWidget = ButtonUserValueWidget.extend({
             // Only consider clicks on the label and the checkbox control itself
             return;
         }
-        return this._super(...arguments);
-    },
-});
+        return super._onButtonClick(...arguments);
+    }
+}
+registry.category("snippet_widgets").add("WeCheckbox", WeCheckbox);
 
 const BaseSelectionUserValueWidget = UserValueWidget.extend({});
 class BaseSelectionUserValue extends UserValue {
