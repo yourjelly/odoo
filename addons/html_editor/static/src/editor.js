@@ -9,6 +9,17 @@ import { initElementForEdition } from "./utils/sanitize";
  **/
 
 /**
+ * @typedef { Object } CollaborationConfig
+ * @property { string } collaboration.peerId
+ * @property { Object } collaboration.busService
+ * @property { Object } collaboration.collaborationChannel
+ * @property { String } collaboration.collaborationChannel.collaborationModelName
+ * @property { String } collaboration.collaborationChannel.collaborationFieldName
+ * @property { Number } collaboration.collaborationChannel.collaborationResId
+ * @property { 'start' | 'focus' } [collaboration.collaborativeTrigger]
+/**
+
+/**
  * @typedef { Object } EditorConfig
  * @property { string } [content]
  * @property { boolean } [allowInlineAtRoot]
@@ -21,13 +32,7 @@ import { initElementForEdition } from "./utils/sanitize";
  * @property { string } [direction="ltr"]
  * @property { Function } [onChange]
  * @property { boolean } [dropImageAsAttachment]
- * @property { string } [peerId]
- * @property { Object } [busService]
- * @property { Object } [collaborationChannel]
- * @property { String } [collaborationChannel.collaborationModelName]
- * @property { String } [collaborationChannel.collaborationFieldName]
- * @property { Number } [collaborationChannel.collaborationResId]
- * @property { 'start' | 'focus' } [collaborativeTrigger]
+ * @property { CollaborationConfig } [collaboration]
  */
 
 function sortPlugins(plugins) {
