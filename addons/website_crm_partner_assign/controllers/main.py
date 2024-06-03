@@ -8,7 +8,6 @@ from werkzeug.exceptions import NotFound
 from odoo import fields
 from odoo import http
 from odoo.http import request
-from odoo.addons.http_routing.models.ir_http import slug, unslug
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo.addons.website_google_map.controllers.main import GoogleMap
@@ -209,11 +208,12 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
         if not qs or qs.lower() in '/partners':
             yield {'loc': '/partners'}
 
+        IrHttp = env['ir.http']
         Grade = env['res.partner.grade']
         dom = [('website_published', '=', True)]
         dom += sitemap_qs2dom(qs=qs, route='/partners/grade/', field=Grade._rec_name)
         for grade in env['res.partner.grade'].search(dom):
-            loc = '/partners/grade/%s' % slug(grade)
+            loc = '/partners/grade/%s' % IrHttp._slug(grade)
             if not qs or qs.lower() in loc:
                 yield {'loc': loc}
 
@@ -222,7 +222,7 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
         dom += sitemap_qs2dom(qs=qs, route='/partners/country/')
         countries = env['res.partner'].sudo()._read_group(partners_dom, groupby=['country_id'])
         for [country] in countries:
-            loc = '/partners/country/%s' % slug(country)
+            loc = '/partners/country/%s' % IrHttp._slug(country)
             if not qs or qs.lower() in loc:
                 yield {'loc': loc}
 
@@ -305,12 +305,13 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
             base_partner_domain += [('country_id', '=', country.id)]
 
         # format pager
+        IrHttp = request.env['ir.http']
         if grade and not country:
-            url = '/partners/grade/' + slug(grade)
+            url = '/partners/grade/' + IrHttp._slug(grade)
         elif country and not grade:
-            url = '/partners/country/' + slug(country)
+            url = '/partners/country/' + IrHttp._slug(country)
         elif country and grade:
-            url = '/partners/grade/' + slug(grade) + '/country/' + slug(country)
+            url = '/partners/grade/' + IrHttp._slug(grade) + '/country/' + IrHttp._slug(country)
         else:
             url = '/partners'
         url_args = {}
@@ -354,7 +355,7 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
     @http.route()
     def partners_detail(self, partner_id, **post):
         current_slug = partner_id
-        _, partner_id = unslug(partner_id)
+        _, partner_id = request.env['ir.http']._unslug(partner_id)
         current_grade, current_country = None, None
         grade_id = post.get('grade_id')
         country_id = post.get('country_id')
@@ -366,8 +367,8 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
             partner = request.env['res.partner'].sudo().browse(partner_id)
             is_website_restricted_editor = request.env.user.has_group('website.group_website_restricted_editor')
             if partner.exists() and (partner.website_published or is_website_restricted_editor):
-                if slug(partner) != current_slug:
-                    return request.redirect('/partners/%s' % slug(partner))
+                if request.env['ir.http']._slug(partner) != current_slug:
+                    return request.redirect('/partners/%s' % request.env['ir.http']._slug(partner))
                 values = {
                     'main_object': partner,
                     'partner': partner,

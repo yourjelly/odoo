@@ -1,5 +1,4 @@
 from lxml import html
-from odoo.addons.http_routing.models.ir_http import slug
 
 from odoo.tools import mute_logger
 from odoo.exceptions import AccessError
@@ -120,9 +119,9 @@ class TestWebsiteControllerPage(HttpCase):
         rec_nodes = tree.xpath("//a[@class='test_record_listing']")
         self.assertEqual(len(rec_nodes), 2)
         for n, record in zip(rec_nodes, self.exposed_records):
-            self.assertEqual(n.get("href"), f"/model/{self.single_controller_page.name_slugified}/{slug(record)}")
+            self.assertEqual(n.get("href"), f"/model/{self.single_controller_page.name_slugified}/{self.env['ir.http']._slug(record)}")
 
-        response = self.url_open(f"/model/{self.single_controller_page.name_slugified}/{slug(self.exposed_records[0])}")
+        response = self.url_open(f"/model/{self.single_controller_page.name_slugified}/{self.env['ir.http']._slug(self.exposed_records[0])}")
         tree = html.fromstring(response.content.decode())
         self.assertEqual(len(tree.xpath("//div[@class='test_record']")), 1)
 
@@ -130,7 +129,7 @@ class TestWebsiteControllerPage(HttpCase):
         self.assertEqual(response.status_code, 404)
 
         non_reachable_record = self.env[self.model.model].create({"name": "non_reachable"})
-        response = self.url_open(f"/model/{self.single_controller_page.name_slugified}/{slug(non_reachable_record)}")
+        response = self.url_open(f"/model/{self.single_controller_page.name_slugified}/{self.env['ir.http']._slug(non_reachable_record)}")
         self.assertEqual(response.status_code, 404)
 
         response = self.url_open("/model/some-other-slug")
@@ -147,14 +146,14 @@ class TestWebsiteControllerPage(HttpCase):
         tree = html.fromstring(response.content.decode())
         rec_nodes = tree.xpath("//a[@class='test_record_listing']")
         self.assertEqual(len(rec_nodes), 1)
-        self.assertEqual(rec_nodes[0].get("href"), f"/model/{self.single_controller_page.name_slugified}/{slug(self.exposed_records[1])}")
+        self.assertEqual(rec_nodes[0].get("href"), f"/model/{self.single_controller_page.name_slugified}/{self.env['ir.http']._slug(self.exposed_records[1])}")
 
         self.patch(ModelPageController, "pager_step", 1)
         response = self.url_open(f"/model/{self.listing_controller_page.name_slugified}/page/2")
         tree = html.fromstring(response.content.decode())
         rec_nodes = tree.xpath("//a[@class='test_record_listing']")
         self.assertEqual(len(rec_nodes), 1)
-        self.assertEqual(rec_nodes[0].get("href"), f"/model/{self.single_controller_page.name_slugified}/{slug(self.exposed_records[1])}")
+        self.assertEqual(rec_nodes[0].get("href"), f"/model/{self.single_controller_page.name_slugified}/{self.env['ir.http']._slug(self.exposed_records[1])}")
 
     def test_default_layout(self):
         self.assertEqual(self.listing_controller_page.default_layout, 'grid')

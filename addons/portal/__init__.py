@@ -3,11 +3,12 @@
 
 # Updating mako environement in order to be able to use slug
 try:
+    import threading
     from odoo.tools.rendering_tools import template_env_globals
-    from odoo.addons.http_routing.models.ir_http import slug
+    from odoo.modules.registry import Registry
 
     template_env_globals.update({
-        'slug': slug
+        'slug': lambda value: Registry(threading.current_thread().dbname)['ir.http']._slug(value)  # noqa: PLW0108
     })
 except ImportError:
     pass

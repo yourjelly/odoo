@@ -20,7 +20,6 @@ from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.safe_eval import safe_eval
 from odoo.osv.expression import FALSE_DOMAIN
 from odoo.addons.http_routing.models import ir_http
-from odoo.addons.http_routing.models.ir_http import _guess_mimetype
 from odoo.addons.portal.controllers.portal import _build_url_w_params
 
 logger = logging.getLogger(__name__)
@@ -67,6 +66,17 @@ class Http(models.AbstractModel):
         return super().routing_map(key=key)
 
     @classmethod
+    def _slug(cls, value: models.BaseModel | str) -> str:
+        try:
+            if value.id and value.seo_name:
+                name = value.seo_name
+                slugname = name and cls._slugify(name).strip().strip('-')
+                return f"{slugname}-{value.id}" if slugname else str(value.id)
+        except AttributeError:
+            pass
+        return super()._slug(value)
+
+    @classmethod
     def _slug_matching(cls, adapter, endpoint, **kw):
         for arg in kw:
             if isinstance(kw[arg], models.BaseModel):
@@ -74,8 +84,11 @@ class Http(models.AbstractModel):
         qs = request.httprequest.query_string.decode('utf-8')
         return adapter.build(endpoint, kw) + (qs and '?%s' % qs or '')
 
+    def _rewrite_len(self) -> int:
+        return self.__rewrite_len(request.website_routing)
+
     @tools.ormcache('website_id', cache='routing')
-    def _rewrite_len(self, website_id):
+    def __rewrite_len(self, website_id: int) -> int:
         rewrites = self._get_rewrites(website_id)
         return len(rewrites)
 
@@ -90,7 +103,7 @@ class Http(models.AbstractModel):
         website_id = request.website_routing
         logger.debug("_generate_routing_rules for website: %s", website_id)
         rewrites = self._get_rewrites(website_id)
-        self._rewrite_len.__cache__.add_value(self, website_id, cache_value=len(rewrites))
+        self.__rewrite_len.__cache__.add_value(self, website_id, cache_value=len(rewrites))
 
         for url, endpoint in super()._generate_routing_rules(modules, converters):
             if url in rewrites:
@@ -301,7 +314,7 @@ class Http(models.AbstractModel):
             _, ext = os.path.splitext(req_page)
             response = request.render(page.view_id.id, {
                 'main_object': page,
-            }, mimetype=_guess_mimetype(ext))
+            }, mimetype=request.env['ir.http']._extension_to_mimetype(ext) or 'text/html')
             return response
         return False
 
