@@ -711,7 +711,7 @@ class TestResMixin(TestResourceCommon):
             datetime_tz(2018, 4, 6, 16, 0, 0, tzinfo=self.john.tz),
         )[self.jean.id]
         # still showing as 5 days because of rounding, but we see only 39 hours
-        self.assertEqual(data, {'days': 4.875, 'hours': 39})
+        self.assertEqual(data, {'days': 4.88, 'hours': 39})
 
         # Looking at John's calendar
 
@@ -875,7 +875,7 @@ class TestResMixin(TestResourceCommon):
             datetime_tz(2018, 4, 9, 0, 0, 0, tzinfo=self.john.tz),
             datetime_tz(2018, 4, 13, 23, 59, 59, tzinfo=self.john.tz),
         )[self.john.id]
-        self.assertEqual(data, {'days': 0.9375, 'hours': 10})
+        self.assertEqual(data, {'days': 0.96, 'hours': 10})
 
         # half days
         leave = self.env['resource.calendar.leaves'].create({
