@@ -180,6 +180,7 @@ class CloseCode(IntEnum):
     BAD_GATEWAY = 1014
     SESSION_EXPIRED = 4001
     KEEP_ALIVE_TIMEOUT = 4002
+    KILL_NOW = 4003
 
 
 class ConnectionState(IntEnum):
@@ -328,7 +329,7 @@ class Websocket:
         orderly shutdown. Note that we don't need to wait for the
         acknowledgment if the connection was failed beforewards.
         """
-        if code is not CloseCode.ABNORMAL_CLOSURE:
+        if code not in (CloseCode.KILL_NOW, CloseCode.ABNORMAL_CLOSURE):
             self._enqueue_close_frame(code, reason)
         else:
             self._terminate()
@@ -803,10 +804,6 @@ class WebsocketConnectionHandler:
     }
 
     @classmethod
-    def websocket_allowed(cls, request):
-        return not request.registry.in_test_mode()
-
-    @classmethod
     def open_connection(cls, request):
         """
         Open a websocket connection if the handshake is successfull.
@@ -816,8 +813,6 @@ class WebsocketConnectionHandler:
         versions the client supports and those we support.
         :raise: BadRequest if the handshake data is incorrect.
         """
-        if not cls.websocket_allowed(request):
-            raise ServiceUnavailable("Websocket is disabled in test mode")
         cls._handle_public_configuration(request)
         try:
             response = cls._get_handshake_response(request.httprequest.headers)
@@ -927,11 +922,11 @@ class WebsocketConnectionHandler:
                     _logger.exception("Exception occurred during websocket request handling")
 
 
-def _kick_all():
+def _kick_all(code=CloseCode.GOING_AWAY):
     """ Disconnect all the websocket instances. """
     for websocket in _websocket_instances:
         if websocket.state is ConnectionState.OPEN:
-            websocket.disconnect(CloseCode.GOING_AWAY)
+            websocket.disconnect(code)
 
 
 CommonServer.on_stop(_kick_all)

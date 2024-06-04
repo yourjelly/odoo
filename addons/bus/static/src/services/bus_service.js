@@ -23,6 +23,7 @@ export const busService = {
 
     start(env, { multi_tab: multiTab, "bus.parameters": params }) {
         const bus = new EventBus();
+        delete browser.SharedWorker;
         const notificationBus = new EventBus();
         const subscribeFnToWrapper = new Map();
         let worker;
