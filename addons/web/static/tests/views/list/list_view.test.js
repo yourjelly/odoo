@@ -2,9 +2,9 @@
 
 import { Component, markup, onRendered, xml } from "@odoo/owl";
 import { expect, getFixture, test } from "@odoo/hoot";
-import { clear, click, drag, edit, hover, keyDown, pointerDown, pointerUp, press, queryAll, queryAllTexts, queryFirst, queryOne, waitFor } from "@odoo/hoot-dom";
+import { clear, click, drag, edit, hover, keyDown, pointerDown, pointerUp, press, queryAll, queryAllProperties, queryAllTexts, queryFirst, queryOne, waitFor } from "@odoo/hoot-dom";
 import { animationFrame, Deferred, mockDate, mockTimeZone, runAllTimers } from "@odoo/hoot-mock";
-import { clickSave, contains, defineActions, defineModels, defineParams, editFavoriteName, editPager, fields, getFacetTexts, getPagerLimit, getPagerValue, getService, makeServerError, mockService, models, mountView, mountViewInDialog, mountWithCleanup, onRpc, pagerNext, patchDate, patchWithCleanup, removeFacet, saveFavorite, selectGroup, serverState, stepAllNetworkCalls, toggleMenuItem, toggleSaveFavorite, toggleSearchBarMenu, validateSearch, webModels } from "@web/../tests/web_test_helpers";
+import { clickFieldDropdownItem, clickSave, contains, defineActions, defineModels, defineParams, editFavoriteName, editPager, fields, getFacetTexts, getPagerLimit, getPagerValue, getService, makeServerError, mockService, models, mountView, mountViewInDialog, mountWithCleanup, onRpc, pagerNext, pagerPrevious, patchDate, patchWithCleanup, removeFacet, saveFavorite, selectFieldDropdownItem, selectGroup, serverState, stepAllNetworkCalls, toggleMenuItem, toggleSaveFavorite, toggleSearchBarMenu, validateSearch, webModels } from "@web/../tests/web_test_helpers";
 import { getPickerApplyButton, getPickerCell } from "@web/../tests/core/datetime/datetime_test_helpers";
 
 import { currencies } from "@web/core/currency";
@@ -16,6 +16,7 @@ import { ListController } from "@web/views/list/list_controller";
 import { floatField } from "@web/views/fields/float/float_field";
 import { session } from "@web/session";
 import { Domain } from "@web/core/domain";
+import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
@@ -649,7 +650,7 @@ test(`list view: action button in controlPanel basic rendering`, async () => {
                     <button name="x" type="object" class="plaf" string="plaf"/>
                     <button name="y" type="object" class="plouf" string="plouf" invisible="not context.get('bim')"/>
                 </header>
-                <field name="foo" />
+                <field name="foo"/>
             </tree>`,
     });
     expect(`.o_control_panel_actions button[name=x]`).toHaveCount(0);
@@ -681,7 +682,7 @@ test(`list view: action button in controlPanel with display='always'`, async () 
                     <button name="display" type="object" class="display_invisible" string="invisible context" display="always" invisible="context.get('a')"/>
                     <button name="default-selection" type="object" class="default-selection" string="default-selection"/>
                 </header>
-                <field name="foo" />
+                <field name="foo"/>
             </tree>`,
         context: {
             a: true,
@@ -731,7 +732,7 @@ test(`list view: give a context dependent on the current context to a header but
                 <header>
                     <button name="toDo" type="object" string="toDo" display="always" context="{'b': context.get('a')}"/>
                 </header>
-                <field name="foo" />
+                <field name="foo"/>
             </tree>`,
         context: {
             a: "yop",
@@ -761,7 +762,7 @@ test(`list view: action button executes action on click: buttons are disabled an
                     <header>
                             <button name="x" type="object" class="plaf" string="plaf"/>
                     </header>
-                    <field name="foo" />
+                    <field name="foo"/>
                 </tree>`,
     });
     await contains(`.o_data_row .o_list_record_selector input[type="checkbox"]`).click();
@@ -791,7 +792,7 @@ test(`list view: buttons handler is called once on double click`, async () => {
         resModel: "foo",
         arch: `
                 <tree>
-                    <field name="foo" />
+                    <field name="foo"/>
                     <button name="x" type="object" class="do_something" string="Do Something"/>
                 </tree>`,
     });
@@ -814,7 +815,7 @@ test(`list view: click on an action button saves the record before executing the
         resModel: "foo",
         arch: `
                 <tree editable="bottom">
-                    <field name="foo" />
+                    <field name="foo"/>
                     <button name="toDo" type="object" class="do_something" string="Do Something"/>
                 </tree>`,
     });
@@ -870,7 +871,7 @@ test(`list view: action button executes action on click: correct parameters`, as
                     <header>
                             <button name="x" type="object" class="plaf" string="plaf" context="{'plouf': 'plif'}"/>
                     </header>
-                    <field name="foo" />
+                    <field name="foo"/>
                 </tree>`,
         context: {
             paf: "pif",
@@ -927,7 +928,7 @@ test(`list view: action button executes action on click with domain selected: co
                     <header>
                             <button name="x" type="object" class="plaf" string="plaf"/>
                     </header>
-                    <field name="foo" />
+                    <field name="foo"/>
                 </tree>`,
     });
     await contains(`.o_data_row .o_list_record_selector input[type="checkbox"]`).click();
@@ -993,7 +994,7 @@ test(`simple editable rendering`, async () => {
     expect(`.o_list_button_discard`).toHaveCount(1);
     expect(`.o_list_record_selector input:enabled`).toHaveCount(0);
 
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     expect(`.o_list_button_add`).toHaveCount(1);
     expect(`.o_list_button_save`).toHaveCount(0);
     expect(`.o_list_button_discard`).toHaveCount(0);
@@ -1140,7 +1141,7 @@ test(`save a record with an invisible required field`, async () => {
     expect(`.o_data_row`).toHaveCount(4);
     expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group"]).toVerifySteps();
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     await contains(`[name='int_field'] input`).edit("1", { confirm: false });
     await contains(`.o_list_view`).click();
     expect(`.o_data_row`).toHaveCount(5);
@@ -1185,7 +1186,7 @@ test(`multi_edit: clicking on a readonly field switches the focus to the next ed
         arch: `
             <tree multi_edit="1">
                 <field name="int_field" readonly="1"/>
-                <field name="foo" />
+                <field name="foo"/>
             </tree>`,
     });
 
@@ -1219,7 +1220,7 @@ test(`save a record with an required field computed by another`, async () => {
     expect(`.o_data_row`).toHaveCount(4);
     expect(`.o_selected_row`).toHaveCount(0);
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     await contains(`[name='int_field'] input`).edit("1");
     await contains(`.o_list_view`).click();
     expect(`.o_data_row`).toHaveCount(5);
@@ -1321,7 +1322,7 @@ test(`do not perform extra RPC to read invisible many2one fields`, async () => {
             </tree>`,
     });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group", "onchange"]).toVerifySteps({ message: "no nameget should be done" });
 });
 
@@ -1359,7 +1360,7 @@ test(`editable list datepicker destroy widget (new line)`, async () => {
 
     expect(`.o_data_row`).toHaveCount(4, { message: "There should be 4 rows" });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_selected_row`).toHaveCount(1);
 
     await contains(`.o_field_date input`).click();
@@ -1392,7 +1393,7 @@ test(`discard a new record in editable="top" list with less than 4 records`, asy
     expect(`.o_data_row`).toHaveCount(3);
     expect(`tbody tr`).toHaveCount(4);
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_data_row`).toHaveCount(4);
     expect(`tbody tr:first`).toHaveClass("o_selected_row");
 
@@ -1990,7 +1991,7 @@ test(`opening records when clicking on record`, async () => {
         arch: `<tree js_class="custom_list"><field name="foo"/></tree>`,
     });
 
-    await contains(`tr:nth-child(2) td:not(.o_list_record_selector)`).click();
+    await contains(`tr:eq(1) td:not(.o_list_record_selector)`).click();
     await selectGroup("foo");
 
     expect(`tr.o_group_header`).toHaveCount(3, { message: "list should be grouped" });
@@ -2323,7 +2324,7 @@ test(`editable list: add a line and discard`, async () => {
 
     expect(`.o_pager_value`).toHaveText("1-1", { message: "pager should be correct" });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
 
     expect(`tbody tr`).toHaveCount(4, { message: "list should still contain 4 rows" });
     expect(`.o_data_row`).toHaveCount(2, {
@@ -2433,7 +2434,7 @@ test(`editable list view: check that controlpanel buttons are updating when grou
     await mountWithCleanup(WebClient);
 
     await getService("action").doAction(11);
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
 
     expect(`.o_list_button_add`).toHaveCount(0);
     expect(`.o_list_button_save`).toHaveCount(2, {
@@ -2443,7 +2444,7 @@ test(`editable list view: check that controlpanel buttons are updating when grou
     await toggleSearchBarMenu();
     await toggleMenuItem("candle");
 
-    expect(`.o_list_button_add:visible`).toHaveCount(1, {
+    expect(`.o_list_button_add`).toHaveCount(1, {
         message: "Create available as list is grouped",
     });
     expect(`.o_list_button_save`).toHaveCount(0, {
@@ -2480,13 +2481,13 @@ test(`editable list view: check that add button is present when groupby applied`
     await mountWithCleanup(WebClient);
     await getService("action").doAction(11);
 
-    expect(`.o_list_button_add:visible`).toHaveCount(1);
+    expect(`.o_list_button_add`).toHaveCount(1);
     await contains(`.o_searchview_dropdown_toggler`).click();
     await contains(`.o_menu_item:contains(candle)`).click();
-    expect(`.o_list_button_add:visible`).toHaveCount(1);
+    expect(`.o_list_button_add`).toHaveCount(1);
 
     expect(`.o_list_view`).toHaveCount(1);
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_form_view`).toHaveCount(1);
 });
 
@@ -2614,7 +2615,7 @@ test(`head selector is toggled by the other selectors`, async () => {
         message: "Head selector should be unchecked",
     });
 
-    await contains(`.o_group_header:nth-child(2)`).click();
+    await contains(`.o_group_header:eq(1)`).click();
     await contains(`thead .o_list_record_selector input`).click();
     expect(`tbody .o_list_record_selector input:checked`).toHaveCount(3, {
         message: "All visible checkboxes should be checked",
@@ -2625,7 +2626,7 @@ test(`head selector is toggled by the other selectors`, async () => {
         message: "Head selector should be unchecked",
     });
 
-    await contains(`tbody:nth-child(2) .o_list_record_selector input`).click();
+    await contains(`tbody:eq(1) .o_list_record_selector input`).click();
     expect(`thead .o_list_record_selector input`).toBeChecked({
         message: "Head selector should be checked",
     });
@@ -2946,7 +2947,7 @@ test(`aggregates are computed correctly in grouped lists`, async () => {
         type: "list",
         resModel: "foo",
         groupBy: ["m2o"],
-        arch: `<tree editable="bottom"><field name="foo" /><field name="int_field" sum="Sum"/></tree>`,
+        arch: `<tree editable="bottom"><field name="foo"/><field name="int_field" sum="Sum"/></tree>`,
     });
     expect(`.o_group_header:eq(0) td:last-child`).toHaveText("23", {
         message: "first group total should be 23",
@@ -3526,7 +3527,7 @@ test(`column width should not change when switching mode`, async () => {
     var editionWidth = window.getComputedStyle(queryOne("table")).width;
 
     // leave edition
-    await click($(".o_list_button_save:visible").get(0));
+    await click($(".o_list_button_save").get(0));
 
     var readonlyWidths = [...queryAll("thead th")].map((el) => el.offsetWidth);
     var readonlyWidth = window.getComputedStyle(queryOne("table")).width;
@@ -3772,8 +3773,8 @@ test(`empty editable list with the handle widget and no content help`, async () 
         resModel: "foo",
         arch: `
             <tree editable="bottom">
-                <field name="int_field" widget="handle" />
-                <field name="foo" />
+                <field name="int_field" widget="handle"/>
+                <field name="foo"/>
             </tree>`,
         noContentHelp: '<p class="hello">click to add a foo</p>',
     });
@@ -3781,7 +3782,7 @@ test(`empty editable list with the handle widget and no content help`, async () 
     expect(`.o_view_nocontent`).toHaveCount(1, { message: "should have no content help" });
 
     // click on create button
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     const handleWidgetWidth = "33px";
     const handleWidgetHeader = queryOne("thead > tr > th.o_handle_cell");
 
@@ -4078,7 +4079,7 @@ test(`editable list view, click on m2o dropdown does not close editable row`, as
         arch: `<tree editable="top"><field name="m2o"/></tree>`,
     });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_selected_row .o_field_many2one input`).toHaveValue("");
     await contains(`.o_selected_row .o_field_many2one input`).click();
     expect(`.o_field_many2one .o-autocomplete--dropdown-menu`).toHaveCount(1);
@@ -4159,7 +4160,7 @@ test(`column widths are kept when adding first record`, async () => {
 
     var width = queryAll('th[data-name="datetime"]')[0].offsetWidth;
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
 
     expect(`.o_data_row`).toHaveCount(1);
     expect(queryAll('th[data-name="datetime"]')[0].offsetWidth).toBe(width);
@@ -4178,7 +4179,7 @@ test(`column widths are kept when editing a record`, async () => {
 
     var width = queryAll('th[data-name="datetime"]')[0].offsetWidth;
 
-    await contains(`.o_data_row:first > .o_data_cell:nth-child(2)`).click();
+    await contains(`.o_data_row:first > .o_data_cell:eq(1)`).click();
     expect(`.o_selected_row`).toHaveCount(1);
 
     var longVal = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed blandit, " + "justo nec tincidunt feugiat, mi justo suscipit libero, sit amet tempus ipsum purus " + "bibendum est.";
@@ -4202,12 +4203,12 @@ test(`column widths are kept when switching records in edition`, async () => {
 
     const width = queryAll('th[data-name="m2o"]')[0].offsetWidth;
 
-    await contains(`.o_data_row:first > .o_data_cell:nth-child(2)`).click();
+    await contains(`.o_data_row:first > .o_data_cell:eq(1)`).click();
 
     expect(`.o_data_row:first`).toHaveClass("o_selected_row");
     expect(queryAll('th[data-name="m2o"]')[0].offsetWidth).toBe(width);
 
-    await contains(`.o_data_row:eq(1) > .o_data_cell:nth-child(2)`).click();
+    await contains(`.o_data_row:eq(1) > .o_data_cell:eq(1)`).click();
 
     expect(`.o_data_row:eq(1)`).toHaveClass("o_selected_row");
     expect(queryAll('th[data-name="m2o"]')[0].offsetWidth).toBe(width);
@@ -4398,7 +4399,7 @@ test(`row height and width should not change when switching mode`, async () => {
     const editionWidth = queryFirst(".o_data_row").offsetWidth;
 
     // leave edition
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     const readonlyHeight = queryFirst(".o_data_row").offsetHeight;
     const readonlyWidth = queryFirst(".o_data_row").offsetWidth;
 
@@ -4995,10 +4996,10 @@ test(`grouped, update the count of the group (and ancestors) when a record is de
         actionMenus: {},
     });
     expect(`.o_group_header:first-child`).toHaveText("blip (6)");
-    expect(`.o_group_header:nth-child(2)`).toHaveText("No (2)");
+    expect(`.o_group_header:eq(1)`).toHaveText("No (2)");
 
-    expect(`.o_group_header:nth-child(3)`).toHaveText("Yes (4)");
-    await contains(`.o_group_header:nth-child(3)`).click();
+    expect(`.o_group_header:eq(2)`).toHaveText("Yes (4)");
+    await contains(`.o_group_header:eq(2)`).click();
     expect(`.o_data_row`).toHaveCount(4);
 
     await contains(`.o_data_row input`).click();
@@ -5006,7 +5007,7 @@ test(`grouped, update the count of the group (and ancestors) when a record is de
     await toggleMenuItem("Delete");
     await contains(`.modal .btn-primary`).click();
     expect(`.o_group_header:first-child`).toHaveText("blip (5)");
-    expect(`.o_group_header:nth-child(3)`).toHaveText("Yes (3)");
+    expect(`.o_group_header:eq(2)`).toHaveText("Yes (3)");
 });
 
 test(`pager (ungrouped and grouped mode), default limit`, async () => {
@@ -5451,9 +5452,9 @@ test(`grouped, show only limited records when the list view is initially expande
 test(`list keeps offset on switchView`, async () => {
     expect.assertions(3);
     Foo._views = {
-        "search,false": `<search />`,
-        "list,99": `<list limit="1"><field name="display_name" /></list>`,
-        "form,100": `<form><field name="display_name" /></form>`,
+        "search,false": `<search/>`,
+        "list,99": `<list limit="1"><field name="display_name"/></list>`,
+        "form,100": `<form><field name="display_name"/></form>`,
     };
 
     const offsets = [0, 1, 1];
@@ -5477,8 +5478,8 @@ test(`list keeps offset on switchView`, async () => {
 
 test(`Navigate between the list and kanban view using the command palette`, async () => {
     Foo._views = {
-        "search,false": `<search />`,
-        "list,false": `<list><field name="display_name" /></list>`,
+        "search,false": `<search/>`,
+        "list,false": `<list><field name="display_name"/></list>`,
         "kanban,false": `
             <kanban class="o_kanban_test">
                 <templates><t t-name="kanban-box">
@@ -5529,8 +5530,8 @@ test(`grouped list keeps offset on switchView`, async () => {
             <search>
                 <filter string="IntField" name="groupby" domain="[]" context="{'group_by': 'int_field'}"/>
             </search>`,
-        "list,99": `<list groups_limit="1"><field name="display_name" /></list>`,
-        "form,100": `<form><field name="display_name" /></form>`,
+        "list,99": `<list groups_limit="1"><field name="display_name"/></list>`,
+        "form,100": `<form><field name="display_name"/></form>`,
     };
 
     const offsets = [0, 1, 1];
@@ -5842,7 +5843,7 @@ test(`support row decoration (with unset numeric values)`, async () => {
             </tree>`,
     });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`tr.o_data_row.text-danger`).toHaveCount(0, {
         message: "the data row should not have .text-danger decoration (int_field is unset)",
     });
@@ -6186,13 +6187,13 @@ test(`empty list with sample data: keyboard navigation`, async () => {
     expect(`.o_searchview_input`).toBeFocused();
 
     // From 'Create' button
-    pointerDown(".o_list_button_add:visible");
+    pointerDown(".o_list_button_add");
     await animationFrame();
-    expect(`.o_list_button_add:visible`).toBeFocused();
+    expect(`.o_list_button_add`).toBeFocused();
 
     press("arrowdown");
     await animationFrame();
-    expect(`.o_list_button_add:visible`).toBeFocused();
+    expect(`.o_list_button_add`).toBeFocused();
 
     press("tab");
     await animationFrame();
@@ -6328,7 +6329,7 @@ test(`empty editable list with sample data: start create record and cancel`, asy
     expect(`.o_nocontent_help`).toHaveCount(1);
 
     // Start creating a record
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_list_view .o_content`).not.toHaveClass("o_view_sample_data");
     expect(`.o_data_row`).toHaveCount(1);
 
@@ -6363,12 +6364,12 @@ test(`empty editable list with sample data: create and delete record`, async () 
     expect(`.o_nocontent_help`).toHaveCount(1);
 
     // Start creating a record
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_list_view .o_content`).not.toHaveClass("o_view_sample_data");
     expect(`.o_data_row`).toHaveCount(1);
 
     // Save temporary record
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     expect(`.o_list_view .o_content`).not.toHaveClass("o_view_sample_data");
     expect(`.o_list_table`).toHaveCount(1);
     expect(`.o_data_row`).toHaveCount(1);
@@ -6408,12 +6409,12 @@ test(`empty editable list with sample data: create and duplicate record`, async 
     expect(`.o_nocontent_help`).toHaveCount(1);
 
     // Start creating a record
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_list_view .o_content`).not.toHaveClass("o_view_sample_data");
     expect(`.o_data_row`).toHaveCount(1);
 
     // Save temporary record
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     expect(`.o_list_view .o_content`).not.toHaveClass("o_view_sample_data");
     expect(`.o_list_table`).toHaveCount(1);
     expect(`.o_data_row`).toHaveCount(1);
@@ -6503,7 +6504,7 @@ test(`groupby node with a button in inner groupbys`, async () => {
     await contains(`.o_group_header:first-child`).click();
     expect(`.o_list_view .o_group_header`).toHaveCount(3);
     expect(`.o_group_header button`).toHaveCount(0);
-    await contains(`.o_group_header:nth-child(2)`).click();
+    await contains(`.o_group_header:eq(1)`).click();
     expect(`.o_group_header button`).toHaveCount(1);
 });
 
@@ -6534,7 +6535,7 @@ test(`groupby node with a button with modifiers`, async () => {
     expect(`.o_group_header button`).toHaveCount(0);
     expect(`.o_data_row`).toHaveCount(0);
 
-    await contains(`.o_group_header:nth-child(2)`).click();
+    await contains(`.o_group_header:eq(1)`).click();
     expect(["web_search_read"]).toVerifySteps();
     expect(`.o_group_header button`).toHaveCount(0);
     expect(`.o_data_row`).toHaveCount(1);
@@ -6722,7 +6723,7 @@ test(`list view, editable, without data`, async () => {
     });
     expect(`table`).toHaveCount(1, { message: "should have rendered a table" });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_view_nocontent`).toHaveCount(0, {
         message: "should not have a no content helper displayed",
     });
@@ -6739,7 +6740,7 @@ test(`list view, editable, without data`, async () => {
         message: "buttons should not be disabled while the record is not yet created",
     });
 
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     expect(`tbody tr .o_list_record_selector input`).toHaveProperty("disabled", false, {
         message: "record selector checkbox should not be disabled once the record is created",
     });
@@ -6770,7 +6771,7 @@ test(`list view, editable, with a button`, async () => {
             </tree>`,
     });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
 
     expect(`table button i.o_button_icon.fa-phone`).toHaveCount(1, {
         message: "should have rendered a button",
@@ -6847,17 +6848,17 @@ test(`editable list view, click on the list to save`, async () => {
             </tree>`,
     });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     await contains(`.o_field_widget[name=foo] input`).edit("new value");
     await contains(`.o_list_renderer`).click();
     expect(["web_save"]).toVerifySteps();
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     await contains(`.o_field_widget[name=foo] input`).edit("new value");
     await contains(`tfoot`).click();
     expect(["web_save"]).toVerifySteps();
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     await contains(`.o_field_widget[name=foo] input`).edit("new value");
     await click(queryAll("tbody tr")[2].querySelector(".o_data_cell"));
     expect(["web_save"]).toVerifySteps();
@@ -6877,7 +6878,7 @@ test(`editable list view, should refocus date field`, async () => {
                 <field name="date"/>
             </tree>`,
     });
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_field_widget[name=foo] input`).toBeFocused();
 
     await contains(`.o_field_widget[name=date] input`).click();
@@ -7035,10 +7036,10 @@ test(`monetary fields are properly rendered`, async () => {
     expect(`tbody tr:first td`).toHaveCount(3, {
         message: "currency_id column should not be in the table",
     });
-    expect(`tbody .o_data_row:first-child .o_data_cell:nth-child(3)`).toHaveText("1,200.00 €", {
+    expect(`tbody .o_data_row:first-child .o_data_cell:eq(2)`).toHaveText("1,200.00 €", {
         message: "currency_id column should not be in the table",
     });
-    expect(`tbody .o_data_row:eq(1) .o_data_cell:nth-child(3)`).toHaveText("$ 500.00", {
+    expect(`tbody .o_data_row:eq(1) .o_data_cell:eq(2)`).toHaveText("$ 500.00", {
         message: "currency_id column should not be in the table",
     });
 });
@@ -7252,7 +7253,7 @@ test(`edition: create new line, then discard`, async () => {
     });
     expect(`.o_list_button_discard`).toHaveCount(0);
     expect(`.o_list_record_selector input:enabled`).toHaveCount(5);
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_list_button_add`).toHaveCount(0);
     expect(`.o_list_button_discard`).toHaveCount(2, {
         message: "Should have 2 discard button (small and xl screens)",
@@ -7295,7 +7296,7 @@ test(`invisible attrs on fields are re-evaluated on field change`, async () => {
 
     // Reswitch the field to visible and save the row
     await contains(`.o_field_widget[name=bar] input`).click();
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["yop", "", "", "blip"]);
 });
 
@@ -7361,7 +7362,7 @@ test(`required attrs on fields are re-evaluated on field change`, async () => {
     // Reswitch the field to required and save the row and make first line editable again
     await contains(`.o_field_widget[name=bar] input`).click();
     expect(`.o_selected_row .o_field_widget[name=foo]`).not.toHaveClass("o_required_modifier");
-    await click($(".o_list_button_save:visible").get(0));
+    await click($(".o_list_button_save").get(0));
     await contains(`.o_field_cell`).click();
     expect(`.o_selected_row .o_field_widget[name=foo]`).not.toHaveClass("o_required_modifier");
 });
@@ -7405,7 +7406,7 @@ test(`modifiers of other x2many rows a re-evaluated when a subrecord is updated`
     expect(queryAllTexts(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")).toEqual(["Value 1", ""]);
 
     // Make a change in the list to trigger the onchange
-    await contains(`.o_field_widget[name=o2m] .o_data_row .o_data_cell:nth-child(2)`).click();
+    await contains(`.o_field_widget[name=o2m] .o_data_row .o_data_cell:eq(1)`).click();
     await contains(`.o_field_widget[name=o2m] .o_data_row [name=stage] select`).select(`"open"`);
     expect(queryAllTexts(".o_field_widget[name=o2m] .o_data_row .o_data_cell:first-child")).toEqual(["", "Value 2"]);
     expect(`.o_data_row:eq(1)`).toHaveText("Value 2 Draft", {
@@ -7466,21 +7467,21 @@ test(`pressing enter on last line of editable list view`, async () => {
     expect(`tr.o_data_row`).toHaveCount(4);
 
     // click on 3rd line
-    await contains(`tr.o_data_row:nth-child(3) .o_field_cell[name=foo]`).click();
-    expect(`tr.o_data_row:nth-child(3)`).toHaveClass("o_selected_row");
+    await contains(`tr.o_data_row:eq(2) .o_field_cell[name=foo]`).click();
+    expect(`tr.o_data_row:eq(2)`).toHaveClass("o_selected_row");
     expect(`.o_selected_row [name=foo] input`).toBeFocused();
 
     // press enter in input
     press("Enter");
     await animationFrame();
-    expect(`tr.o_data_row:nth-child(4)`).toHaveClass("o_selected_row");
+    expect(`tr.o_data_row:eq(3)`).toHaveClass("o_selected_row");
     expect(`.o_selected_row [name=foo] input`).toBeFocused();
 
     // press enter on last row
     press("Enter");
     await animationFrame();
     expect(`tr.o_data_row`).toHaveCount(5);
-    expect(`tr.o_data_row:nth-child(5)`).toHaveClass("o_selected_row");
+    expect(`tr.o_data_row:eq(4)`).toHaveClass("o_selected_row");
 
     expect(["onchange"]).toVerifySteps();
 });
@@ -7762,7 +7763,7 @@ test(`edit list line after line deletion`, async () => {
     expect(`.o_data_row:eq(2)`).toHaveClass("o_selected_row");
 
     await contains(`.o_list_button_discard`).click();
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_data_row:eq(0)`).toHaveClass("o_selected_row");
 
     await contains(`.o_list_button_discard`).click();
@@ -8153,11 +8154,11 @@ test(`skip buttons when navigating list view with TAB (end)`, async () => {
         resId: 1,
     });
 
-    await contains(`.o_data_row:nth-child(3) [name=foo]`).click();
-    expect(`.o_data_row:nth-child(3) [name=foo] input`).toBeFocused();
+    await contains(`.o_data_row:eq(2) [name=foo]`).click();
+    expect(`.o_data_row:eq(2) [name=foo] input`).toBeFocused();
     press("Tab");
     await animationFrame();
-    expect(`.o_data_row:nth-child(4) [name=foo] input`).toBeFocused();
+    expect(`.o_data_row:eq(3) [name=foo] input`).toBeFocused();
 });
 
 test(`skip buttons when navigating list view with TAB (middle)`, async () => {
@@ -8174,11 +8175,11 @@ test(`skip buttons when navigating list view with TAB (middle)`, async () => {
         resId: 1,
     });
 
-    await contains(`.o_data_row:nth-child(3) [name=foo]`).click();
-    expect(`.o_data_row:nth-child(3) [name=foo] input`).toBeFocused();
+    await contains(`.o_data_row:eq(2) [name=foo]`).click();
+    expect(`.o_data_row:eq(2) [name=foo] input`).toBeFocused();
     press("Tab");
     await animationFrame();
-    expect(`.o_data_row:nth-child(3) [name=int_field] input`).toBeFocused();
+    expect(`.o_data_row:eq(2) [name=int_field] input`).toBeFocused();
 });
 
 test(`navigation: not moving down with keydown`, async () => {
@@ -8338,7 +8339,7 @@ test(`pressing ESC discard the current line changes`, async () => {
         arch: `<tree editable="top"><field name="foo"/></tree>`,
     });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`tr.o_data_row`).toHaveCount(5, { message: "should currently adding a 5th data row" });
 
     press("escape");
@@ -8357,7 +8358,7 @@ test(`pressing ESC discard the current line changes (with required)`, async () =
         arch: `<tree editable="top"><field name="foo" required="1"/></tree>`,
     });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`tr.o_data_row`).toHaveCount(5, { message: "should currently adding a 5th data row" });
 
     press("escape");
@@ -8423,7 +8424,7 @@ test(`list with handle widget`, async () => {
     });
 
     // Drag and drop the fourth line in second position
-    await contains(`tbody tr:nth-child(4) .o_handle_cell`).dragAndDrop(queryFirst("tbody tr:nth-child(2)"));
+    await contains(`tbody tr:eq(3) .o_handle_cell`).dragAndDrop(queryFirst("tbody tr:eq(1)"));
     expect(`.o_data_row:eq(0) [name='amount']`).toHaveText("0", {
         message: "new second record should have amount 0",
     });
@@ -8515,22 +8516,22 @@ test(`result of consecutive resequences is correctly sorted`, async () => {
         message: "default should be sorted by id",
     });
 
-    await contains(`.o_list_view tbody tr:nth-child(4) .o_handle_cell`).dragAndDrop(".o_list_view tbody tr:nth-child(3)");
+    await contains(`.o_list_view tbody tr:eq(3) .o_handle_cell`).dragAndDrop(".o_list_view tbody tr:eq(2)");
     expect(queryAllTexts("tbody tr td[name=id]")).toEqual(["1", "2", "4", "3"], {
         message: "the int_field (sequence) should have been correctly updated",
     });
 
-    await contains(`.o_list_view tbody tr:nth-child(3) .o_handle_cell`).dragAndDrop(".o_list_view tbody tr:nth-child(2)");
+    await contains(`.o_list_view tbody tr:eq(2) .o_handle_cell`).dragAndDrop(".o_list_view tbody tr:eq(1)");
     expect(queryAllTexts("tbody tr td[name=id]")).toEqual(["1", "4", "2", "3"], {
         message: "the int_field (sequence) should have been correctly updated",
     });
 
-    await contains(`.o_list_view tbody tr:nth-child(2) .o_handle_cell`).dragAndDrop(".o_list_view tbody tr:nth-child(3)");
+    await contains(`.o_list_view tbody tr:eq(1) .o_handle_cell`).dragAndDrop(".o_list_view tbody tr:eq(2)");
     expect(queryAllTexts("tbody tr td[name=id]")).toEqual(["1", "2", "4", "3"], {
         message: "the int_field (sequence) should have been correctly updated",
     });
 
-    await contains(`.o_list_view tbody tr:nth-child(3) .o_handle_cell`).dragAndDrop(".o_list_view tbody tr:nth-child(2)");
+    await contains(`.o_list_view tbody tr:eq(2) .o_handle_cell`).dragAndDrop(".o_list_view tbody tr:eq(1)");
     expect(queryAllTexts("tbody tr td[name=id]")).toEqual(["1", "4", "2", "3"], {
         message: "the int_field (sequence) should have been correctly updated",
     });
@@ -8582,7 +8583,7 @@ test(`editable list with handle widget`, async () => {
     });
 
     // Drag and drop the fourth line in second position
-    await contains(`tbody tr:nth-child(4) .o_handle_cell`).dragAndDrop(queryFirst("tbody tr:nth-child(2)"));
+    await contains(`tbody tr:eq(3) .o_handle_cell`).dragAndDrop(queryFirst("tbody tr:eq(1)"));
     expect(`tbody tr:eq(0) td:last`).toHaveText("1,200", {
         message: "new first record should have amount 1,200",
     });
@@ -8596,7 +8597,7 @@ test(`editable list with handle widget`, async () => {
         message: "new fourth record should have amount 300",
     });
 
-    await contains(`tbody tr:nth-child(2) div[name='amount']`).click();
+    await contains(`tbody tr:eq(1) div[name='amount']`).click();
     expect(`tbody tr:eq(1) td:last input`).toHaveValue("0", {
         message: "the edited record should be the good one",
     });
@@ -8624,7 +8625,7 @@ test(`editable target, handle widget locks and unlocks on sort`, async () => {
     });
 
     // Drag and drop the fourth line in second position
-    await contains(`tbody tr:nth-child(4) .o_row_handle`).dragAndDrop(queryFirst("tbody tr:nth-child(2)"));
+    await contains(`tbody tr:eq(3) .o_row_handle`).dragAndDrop(queryFirst("tbody tr:eq(1)"));
     // Handle should be unlocked at this point
     expect(queryAllTexts("tbody div[name=amount]")).toEqual(["1,200.00", "0.00", "500.00", "300.00"], {
         message: "drag and drop should have succeeded, as the handle is unlocked",
@@ -8637,7 +8638,7 @@ test(`editable target, handle widget locks and unlocks on sort`, async () => {
     });
 
     // Drag and drop the fourth line in second position (not)
-    await contains(`tbody tr:nth-child(4) .o_row_handle`).dragAndDrop(queryFirst("tbody tr:nth-child(2)"));
+    await contains(`tbody tr:eq(3) .o_row_handle`).dragAndDrop(queryFirst("tbody tr:eq(1)"));
     expect(queryAllTexts("tbody div[name=amount]")).toEqual(["0.00", "300.00", "500.00", "1,200.00"], {
         message: "drag and drop should have failed as the handle is locked",
     });
@@ -8649,7 +8650,7 @@ test(`editable target, handle widget locks and unlocks on sort`, async () => {
     });
 
     // Drag and drop the fourth line in second position
-    await contains(`tbody tr:nth-child(4) .o_row_handle`).dragAndDrop(queryFirst("tbody tr:nth-child(2)"));
+    await contains(`tbody tr:eq(3) .o_row_handle`).dragAndDrop(queryFirst("tbody tr:eq(1)"));
     expect(queryAllTexts("tbody div[name=amount]")).toEqual(["1,200.00", "300.00", "0.00", "500.00"], {
         message: "drag and drop should have worked as the handle is unlocked",
     });
@@ -8684,37 +8685,37 @@ test(`editable list with handle widget with slow network`, async () => {
         resModel: "foo",
         arch: `
             <tree editable="top">
-                <field name="int_field" widget="handle" />
-                <field name="amount" widget="float" digits="[5,0]" />
+                <field name="int_field" widget="handle"/>
+                <field name="amount" widget="float" digits="[5,0]"/>
             </tree>`,
     });
     expect(queryAllTexts(".o_data_cell[name=amount]")).toEqual(["1,200", "500", "300", "0"]);
 
     // drag and drop the fourth line in second position
-    await contains(`tbody tr:nth-child(4) .o_handle_cell`).dragAndDrop(queryFirst("tbody tr:nth-child(2)"));
+    await contains(`tbody tr:eq(3) .o_handle_cell`).dragAndDrop(queryFirst("tbody tr:eq(1)"));
     // edit moved row before the end of resequence
-    await contains(`tbody tr:nth-child(4) .o_field_widget[name='amount']`).click();
+    await contains(`tbody tr:eq(3) .o_field_widget[name='amount']`).click();
     await animationFrame();
-    expect(`tbody tr:nth-child(4) td:nth-child(3) input`).toHaveCount(0, {
+    expect(`tbody tr:eq(3) td:eq(2) input`).toHaveCount(0, {
         message: "shouldn't edit the line before resequence",
     });
 
     def.resolve();
     await animationFrame();
-    expect(`tbody tr:nth-child(4) td:nth-child(3) input`).toHaveCount(1, {
+    expect(`tbody tr:eq(3) td:eq(2) input`).toHaveCount(1, {
         message: "should edit the line after resequence",
     });
-    expect(`tbody tr:nth-child(4) td:nth-child(3) input`).toHaveValue("300", {
+    expect(`tbody tr:eq(3) td:eq(2) input`).toHaveValue("300", {
         message: "fourth record should have amount 300",
     });
 
     await contains(`.o_data_row [name='amount'] input`).edit("301", { confirm: false });
-    await contains(`tbody tr:nth-child(1) .o_field_widget[name='amount']`).click();
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`tbody tr:eq(0) .o_field_widget[name='amount']`).click();
+    await contains(`.o_list_button_save`).click();
     expect(queryAllTexts(".o_data_cell[name=amount]")).toEqual(["1,200", "0", "500", "301"]);
 
-    await contains(`tbody tr:nth-child(4) .o_field_widget[name='amount']`).click();
-    expect(`tbody tr:nth-child(4) td:nth-child(3) input`).toHaveValue("301", {
+    await contains(`tbody tr:eq(3) .o_field_widget[name='amount']`).click();
+    expect(`tbody tr:eq(3) td:eq(2) input`).toHaveValue("301", {
         message: "fourth record should have amount 301",
     });
 });
@@ -8736,8 +8737,8 @@ test(`multiple clicks on Add do not create invalid rows`, async () => {
     expect(`.o_data_row`).toHaveCount(4, { message: "should contain 4 records" });
 
     // click on Add and delay the onchange (check that the button is correctly disabled)
-    await contains(`.o_list_button_add:visible`).click();
-    expect(`.o_list_button_add:visible`).toHaveProperty("disabled", true);
+    await contains(`.o_list_button_add`).click();
+    expect(`.o_list_button_add`).toHaveProperty("disabled", true);
 
     def.resolve();
     await animationFrame();
@@ -8898,7 +8899,7 @@ test(`multi edit field with daterange widget`, async () => {
         resModel: "daterange",
         arch: `
             <tree multi_edit="1">
-                <field name="date_start" widget="daterange" options="{'end_date_field': 'date_end'}" />
+                <field name="date_start" widget="daterange" options="{'end_date_field': 'date_end'}"/>
             </tree>`,
     });
     await contains(`.o_list_record_selector input`).click();
@@ -8954,7 +8955,7 @@ test(`multi edit field with daterange widget (edition without using the picker)`
         resModel: "daterange",
         arch: `
             <tree multi_edit="1">
-                <field name="date_start" widget="daterange" options="{'end_date_field': 'date_end'}" />
+                <field name="date_start" widget="daterange" options="{'end_date_field': 'date_end'}"/>
             </tree>`,
     });
 
@@ -8982,7 +8983,7 @@ test(`list daterange with start date and empty end date`, async () => {
         resModel: "foo",
         arch: /* xml */ `
             <tree>
-                <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}" />
+                <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}"/>
             </tree>`,
     });
 
@@ -8999,7 +9000,7 @@ test(`list daterange with empty start date and end date`, async () => {
         resModel: "foo",
         arch: /* xml */ `
             <tree>
-                <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}" />
+                <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}"/>
             </tree>`,
     });
 
@@ -9030,7 +9031,7 @@ test(`editable list view: contexts are correctly sent`, async () => {
 
     await contains(`.o_data_cell`).click();
     await contains(`.o_field_widget[name=foo] input`).edit("abc", { confirm: false });
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
 });
 
 test(`editable list view: contexts with multiple edit`, async () => {
@@ -9077,7 +9078,7 @@ test(`editable list view: single edition with selected records`, async () => {
     // Edit the second
     await contains(`.o_data_row:eq(1) .o_data_cell`).click();
     await contains(`.o_data_cell input`).edit("oui", { confirm: false });
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
 
     expect(queryAllTexts(".o_data_cell")).toEqual(["yop", "oui", "gnap", "blip"]);
 });
@@ -9094,7 +9095,7 @@ test(`editable list view: non dirty record with required fields`, async () => {
     });
     expect(`.o_data_row`).toHaveCount(4);
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_data_row`).toHaveCount(5);
     expect(`.o_selected_row`).toHaveCount(1);
 
@@ -9103,12 +9104,12 @@ test(`editable list view: non dirty record with required fields`, async () => {
     expect(`.o_data_row`).toHaveCount(4);
     expect(`.o_selected_row`).toHaveCount(0);
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_data_row`).toHaveCount(5);
     expect(`.o_selected_row`).toHaveCount(1);
 
     // do not change anything and then click save button should not allow to discard record
-    await click($(".o_list_button_save:visible").get(0));
+    await click($(".o_list_button_save").get(0));
     expect(`.o_data_row`).toHaveCount(5);
     expect(`.o_selected_row`).toHaveCount(1);
 
@@ -9122,7 +9123,7 @@ test(`editable list view: non dirty record with required fields`, async () => {
     expect(`.o_data_row`).toHaveCount(4);
     expect(`.o_selected_row`).toHaveCount(0);
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_data_row`).toHaveCount(5);
     expect(`.o_selected_row`).toHaveCount(1);
 
@@ -9133,7 +9134,7 @@ test(`editable list view: non dirty record with required fields`, async () => {
 
     // discard row and create new record and keep required field empty and click anywhere
     await contains(`.o_list_button_discard:not(.dropdown-item)`).click();
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_selected_row`).toHaveCount(1, { message: "row should be selected" });
     await contains(`.o_selected_row [name=int_field] input`).edit("123", { confirm: false });
     await contains(`.o_list_view`).click();
@@ -9178,13 +9179,13 @@ test(`editable list view: multi edition`, async () => {
     expect(`.o_selected_row`).toHaveCount(0);
 
     // create a record and edit its value
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(["onchange"]).toVerifySteps();
 
     await contains(`.o_selected_row [name=int_field] input`).edit("123", { confirm: false });
     expect(`.modal`).toHaveCount(0);
 
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     expect(["web_save"]).toVerifySteps();
 
     // edit a field
@@ -9259,7 +9260,7 @@ test(`create in multi editable list`, async () => {
     });
 
     // click on CREATE (should trigger a switch_view)
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(["createRecord"]).toVerifySteps();
 });
 
@@ -9402,7 +9403,7 @@ test(`multi edition: many2many_tags in many2many field`, async () => {
         message: "should have open the confirmation modal",
     });
     expect(`.modal .o_field_many2many_tags .badge`).toHaveCount(3);
-    expect(`.modal .o_field_many2many_tags .badge:nth-child(3)`).toHaveText("Value 3", { message: "should have display_name in badge" });
+    expect(`.modal .o_field_many2many_tags .badge:eq(2)`).toHaveText("Value 3", { message: "should have display_name in badge" });
 });
 
 test(`multi edition: many2many field in grouped list`, async () => {
@@ -9789,8 +9790,8 @@ test(`editable readonly list view: navigation`, async () => {
     press("Enter");
     await animationFrame();
     expect(`.o_selected_row`).toHaveCount(1);
-    expect(`.o_data_row:nth-child(4)`).toHaveClass("o_selected_row");
-    expect(`.o_data_row:nth-child(4) [name=foo] input`).toBeFocused();
+    expect(`.o_data_row:eq(3)`).toHaveClass("o_selected_row");
+    expect(`.o_data_row:eq(3) [name=foo] input`).toBeFocused();
 
     press("Tab"); // go to 4th row int_field
     press("Tab"); // go to 2nd row foo field
@@ -9803,8 +9804,8 @@ test(`editable readonly list view: navigation`, async () => {
     press("Tab"); // go to 4th row foo field
     await animationFrame();
     expect(`.o_selected_row`).toHaveCount(1);
-    expect(`.o_data_row:nth-child(4)`).toHaveClass("o_selected_row");
-    expect(`.o_data_row:nth-child(4) [name=foo] input`).toBeFocused();
+    expect(`.o_data_row:eq(3)`).toHaveClass("o_selected_row");
+    expect(`.o_data_row:eq(3) [name=foo] input`).toBeFocused();
 
     press("Shift+Tab"); // go to 2nd row int_field
     await animationFrame();
@@ -9816,16 +9817,16 @@ test(`editable readonly list view: navigation`, async () => {
     press("Shift+Tab"); // go to 4th row int_field field
     await animationFrame();
     expect(`.o_selected_row`).toHaveCount(1);
-    expect(`.o_data_row:nth-child(4)`).toHaveClass("o_selected_row");
-    expect(`.o_data_row:nth-child(4) [name=int_field] input`).toBeFocused();
+    expect(`.o_data_row:eq(3)`).toHaveClass("o_selected_row");
+    expect(`.o_data_row:eq(3) [name=int_field] input`).toBeFocused();
 
     // Clicking on an unselected row while a row is being edited will leave the edition
-    await contains(`.o_data_row:nth-child(3) [name=foo]`).click();
+    await contains(`.o_data_row:eq(2) [name=foo]`).click();
     expect(`.o_selected_row`).toHaveCount(0);
 
     // Clicking on an unselected record while no row is being edited will open the record
     expect([]).toVerifySteps();
-    await contains(`.o_data_row:nth-child(3) [name=foo]`).click();
+    await contains(`.o_data_row:eq(2) [name=foo]`).click();
     expect([`resId: 3`]).toVerifySteps();
 });
 
@@ -10074,7 +10075,7 @@ test(`editable list with fields with readonly modifier`, async () => {
             </tree>`,
     });
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_selected_row`).toHaveCount(1);
     expect(`.o_selected_row .o_field_boolean input`).toHaveProperty("checked", false);
     expect(`.o_selected_row .o_field_char`).not.toHaveClass("o_readonly_modifier");
@@ -10207,10 +10208,10 @@ test(`grouped list view, indentation for empty group`, async () => {
 
     // open the first group
     await contains(`.o_group_header`).click();
-    expect(`tr:nth-child(1) th.o_group_name .fa`).toHaveCount(1, {
+    expect(`tr:eq(0) th.o_group_name .fa`).toHaveCount(1, {
         message: "There should be an element creating the indentation for the subgroup.",
     });
-    expect(`tr:nth-child(1) th.o_group_name span`).toHaveStyle(
+    expect(`tr:eq(0) th.o_group_name span`).toHaveStyle(
         { "--o-list-group-level": "" },
         {
             message: "The element creating the indentation should have a group level to use for margin css calculation.",
@@ -10379,7 +10380,7 @@ test(`grouped list view move to next page when all records from the current page
     });
 
     expect(queryFirst("tr.o_group_header:first-child th").textContent.trim()).toBe("Value 1 (6)");
-    expect(queryFirst("tr.o_group_header:nth-child(2) th").textContent.trim()).toBe("Value 2 (1)");
+    expect(queryFirst("tr.o_group_header:eq(1) th").textContent.trim()).toBe("Value 2 (1)");
     const firstGroup = queryFirst("tr.o_group_header:first-child");
     await contains(firstGroup).click();
     expect(getPagerValue(firstGroup)).toEqual([1, 2]);
@@ -10393,7 +10394,7 @@ test(`grouped list view move to next page when all records from the current page
 
     const groupLabel = "Value 1 (4)";
     const pagerText = "1-2 / 4";
-    expect(`.o_group_header:nth-child(1) .o_group_name`).toHaveText(`${groupLabel}\n${pagerText}`);
+    expect(`.o_group_header:eq(0) .o_group_name`).toHaveText(`${groupLabel}\n${pagerText}`);
     expect(queryAllTexts(".o_data_row")).toEqual(["yop3", "yop4"]);
 });
 
@@ -10504,10 +10505,10 @@ test(`list with handle field, override default_get, bottom when inline`, async (
     // click add a new line
     // save the record
     // check line is at the correct place
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     await contains(`[name=foo] input`).edit("ninja", { confirm: false });
-    await contains(`.o_list_button_save:visible`).click();
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_save`).click();
+    await contains(`.o_list_button_add`).click();
     expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blip", "blip", "yop", "gnap", "ninja", ""]);
 });
 
@@ -10524,7 +10525,7 @@ test(`create record on list with modifiers depending on id`, async () => {
     });
 
     // add a new record
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
 
     // modifiers should be evaluted to false
     expect(`.o_selected_row`).toHaveCount(1);
@@ -10533,7 +10534,7 @@ test(`create record on list with modifiers depending on id`, async () => {
 
     // set a value and save
     await contains(`.o_selected_row [name=foo] input`).edit("some value");
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     // int_field should not be displayed
     expect(queryAll(".o_data_row .o_data_cell")[1].innerText).toBe("");
 
@@ -10929,7 +10930,7 @@ test(`char field edition in editable grouped list`, async () => {
     await contains(`.o_group_header`).click();
     await contains(`.o_data_cell`).click();
     await contains(`.o_selected_row .o_data_cell [name=foo] input`).edit("pla");
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     expect(Foo._records[3].foo).toBe("pla", {
         message: "the edition should have been properly saved",
     });
@@ -10955,7 +10956,7 @@ test(`control panel buttons in editable grouped list views`, async () => {
     await toggleSearchBarMenu();
     await toggleMenuItem("bar");
 
-    expect(`.o_list_button_add:visible`).toHaveCount(1);
+    expect(`.o_list_button_add`).toHaveCount(1);
 
     // reload without groupby
     await toggleMenuItem("bar");
@@ -10978,13 +10979,13 @@ test(`control panel buttons in multi editable grouped list views`, async () => {
     });
 
     expect(`.o_data_row`).toHaveCount(0, { message: "all groups should be closed" });
-    expect(`.o_list_button_add:visible`).toHaveCount(1, {
+    expect(`.o_list_button_add`).toHaveCount(1, {
         message: "should have a visible Create button",
     });
 
     await contains(`.o_group_header`).click();
     expect(`.o_data_row`).toHaveCount(2, { message: "first group should be opened" });
-    expect(`.o_list_button_add:visible`).toHaveCount(1, {
+    expect(`.o_list_button_add`).toHaveCount(1, {
         message: "should have a visible Create button",
     });
 
@@ -10992,13 +10993,13 @@ test(`control panel buttons in multi editable grouped list views`, async () => {
     expect(`.o_data_row:eq(0) .o_list_record_selector input:enabled`).toHaveCount(1, {
         message: "should have selected first record",
     });
-    expect(`.o_list_button_add:visible`).toHaveCount(1, {
+    expect(`.o_list_button_add`).toHaveCount(1, {
         message: "should have a visible Create button",
     });
 
     await contains(`.o_group_header:last`).click();
     expect(`.o_data_row`).toHaveCount(3, { message: "two groups should be opened" });
-    expect(`.o_list_button_add:visible`).toHaveCount(1, {
+    expect(`.o_list_button_add`).toHaveCount(1, {
         message: "should have a visible Create button",
     });
 });
@@ -11011,22 +11012,22 @@ test(`edit a line and discard it in grouped editable`, async () => {
         groupBy: ["bar"],
     });
 
-    await contains(`.o_group_header:nth-child(2)`).click();
-    await contains(`.o_data_row:nth-child(5) .o_data_cell:nth-child(2)`).click();
+    await contains(`.o_group_header:eq(1)`).click();
+    await contains(`.o_data_row:eq(4) .o_data_cell:eq(1)`).click();
     expect(`.o_selected_row`).toHaveCount(1);
-    expect(`.o_data_row:nth-child(5)`).toHaveClass("o_selected_row");
+    expect(`.o_data_row:eq(4)`).toHaveClass("o_selected_row");
 
     await contains(`.o_list_button_discard:visible`).click();
-    await contains(`.o_data_row:nth-child(3) .o_data_cell:nth-child(2)`).click();
+    await contains(`.o_data_row:eq(2) .o_data_cell:eq(1)`).click();
     expect(`.o_selected_row`).toHaveCount(1);
-    expect(`.o_data_row:nth-child(3)`).toHaveClass("o_selected_row");
+    expect(`.o_data_row:eq(2)`).toHaveClass("o_selected_row");
 
     await contains(`.o_list_button_discard:visible`).click();
     expect(`.o_selected_row`).toHaveCount(0);
 
-    await contains(`.o_data_row:nth-child(5) .o_data_cell:nth-child(2)`).click();
+    await contains(`.o_data_row:eq(4) .o_data_cell:eq(1)`).click();
     expect(`.o_selected_row`).toHaveCount(1);
-    expect(`.o_data_row:nth-child(5)`).toHaveClass("o_selected_row");
+    expect(`.o_data_row:eq(4)`).toHaveClass("o_selected_row");
 });
 
 test(`add and discard a record in a multi-level grouped list view`, async () => {
@@ -11525,42 +11526,42 @@ test(`cell-level keyboard navigation in non-editable list`, async () => {
 
     press("ArrowDown");
     await animationFrame();
-    expect(`tbody tr:nth-child(2) .o_field_cell[name=foo]`).toBeFocused();
-    expect(`tbody tr:nth-child(2) .o_field_cell[name=foo]`).toHaveText("blip");
+    expect(`tbody tr:eq(1) .o_field_cell[name=foo]`).toBeFocused();
+    expect(`tbody tr:eq(1) .o_field_cell[name=foo]`).toHaveText("blip");
 
     press("ArrowDown");
     await animationFrame();
-    expect(`tbody tr:nth-child(3) .o_field_cell[name=foo]`).toBeFocused();
-    expect(`tbody tr:nth-child(3) .o_field_cell[name=foo]`).toHaveText("gnap");
+    expect(`tbody tr:eq(2) .o_field_cell[name=foo]`).toBeFocused();
+    expect(`tbody tr:eq(2) .o_field_cell[name=foo]`).toHaveText("gnap");
 
     press("ArrowDown");
     await animationFrame();
-    expect(`tbody tr:nth-child(4) .o_field_cell[name=foo]`).toBeFocused();
-    expect(`tbody tr:nth-child(4) .o_field_cell[name=foo]`).toHaveText("blip");
+    expect(`tbody tr:eq(3) .o_field_cell[name=foo]`).toBeFocused();
+    expect(`tbody tr:eq(3) .o_field_cell[name=foo]`).toHaveText("blip");
 
     press("ArrowDown");
     await animationFrame();
-    expect(`tbody tr:nth-child(4) .o_field_cell[name=foo]`).toBeFocused();
-    expect(`tbody tr:nth-child(4) .o_field_cell[name=foo]`).toHaveText("blip");
+    expect(`tbody tr:eq(3) .o_field_cell[name=foo]`).toBeFocused();
+    expect(`tbody tr:eq(3) .o_field_cell[name=foo]`).toHaveText("blip");
 
     press("ArrowRight");
     await animationFrame();
-    expect(`tbody tr:nth-child(4) .o_field_cell[name=foo]`).toBeFocused();
-    expect(`tbody tr:nth-child(4) .o_field_cell[name=foo]`).toHaveText("blip");
+    expect(`tbody tr:eq(3) .o_field_cell[name=foo]`).toBeFocused();
+    expect(`tbody tr:eq(3) .o_field_cell[name=foo]`).toHaveText("blip");
 
     press("ArrowLeft");
     await animationFrame();
-    expect(`tbody tr:nth-child(4) .o_list_record_selector input`).toBeFocused();
+    expect(`tbody tr:eq(3) .o_list_record_selector input`).toBeFocused();
 
     press("ArrowLeft");
     await animationFrame();
-    expect(`tbody tr:nth-child(4) .o_list_record_selector input`).toBeFocused();
+    expect(`tbody tr:eq(3) .o_list_record_selector input`).toBeFocused();
 
     press("ArrowUp");
     press("ArrowRight");
     await animationFrame();
-    expect(`tbody tr:nth-child(3) .o_field_cell[name=foo]`).toBeFocused();
-    expect(`tbody tr:nth-child(3) .o_field_cell[name=foo]`).toHaveText("gnap");
+    expect(`tbody tr:eq(2) .o_field_cell[name=foo]`).toBeFocused();
+    expect(`tbody tr:eq(2) .o_field_cell[name=foo]`).toHaveText("gnap");
 
     press("Enter");
     await animationFrame();
@@ -11846,7 +11847,7 @@ test(`keyboard navigation with date range`, async () => {
         arch: `
             <tree editable="bottom">
                 <field name="foo"/>
-                <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}" />
+                <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}"/>
                 <field name="int_field"/>
             </tree>`,
     });
@@ -12106,7 +12107,7 @@ test.skip(`cell-level keyboard navigation in editable grouped list`, async () =>
     //     press("ArrowUp");
     // }
 
-    // expect(`thead th:nth-child(2)`).toBeFocused();
+    // expect(`thead th:eq(1)`).toBeFocused();
 
     // press("ArrowLeft");
     // expect(`thead th.o_list_record_selector input`).toBeFocused();
@@ -12117,37 +12118,37 @@ test.skip(`cell-level keyboard navigation in editable grouped list`, async () =>
     // expect(`.o_data_row:first [name=foo] input`).toBeFocused();
 
     // press("ArrowUp");
-    // expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    // expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
     // expect(`.o_data_row`).toHaveCount(5);
 
     // press("Enter");
     // await animationFrame();
     // expect(`.o_data_row`).toHaveCount(2);
-    // expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    // expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // press("ArrowRight");
     // await animationFrame();
     // expect(`.o_data_row`).toHaveCount(5);
-    // expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    // expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // press("ArrowRight");
     // await animationFrame();
     // expect(`.o_data_row`).toHaveCount(5);
-    // expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    // expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // press("ArrowLeft");
     // await animationFrame();
     // expect(`.o_data_row`).toHaveCount(2);
-    // expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    // expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // press("ArrowLeft");
     // await animationFrame();
 
     // expect(`.o_data_row`).toHaveCount(2);
-    // expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    // expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // press("ArrowDown");
-    // expect(`.o_group_header:nth-child(2) .o_group_name`).toBeFocused();
+    // expect(`.o_group_header:eq(1) .o_group_name`).toBeFocused();
 
     // press("ArrowDown");
     // expect(`.o_data_row:first [name=foo]`).toBeFocused();
@@ -12193,8 +12194,8 @@ test(`execute group header button with keyboard navigation`, async () => {
     expect(`.o_list_button_add`).toHaveCount(2, {
         message: "Should have 2 add button (small and xl screens)",
     });
-    $(".o_list_button_add:visible").get(0).focus();
-    expect(document.activeElement).toBe($(".o_list_button_add:visible").get(0));
+    $(".o_list_button_add").get(0).focus();
+    expect(document.activeElement).toBe($(".o_list_button_add").get(0));
 
     press("ArrowDown");
     await animationFrame();
@@ -12203,13 +12204,13 @@ test(`execute group header button with keyboard navigation`, async () => {
 
     press("ArrowDown");
     await animationFrame();
-    expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // unfold first group
     press("Enter");
     await animationFrame();
     expect(`.o_data_row`).toHaveCount(3);
-    expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // move to first record of opened group
     press("ArrowDown");
@@ -12219,19 +12220,19 @@ test(`execute group header button with keyboard navigation`, async () => {
     // move back to the group header
     press("ArrowUp");
     await animationFrame();
-    expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // fold the group
     press("Enter");
     await animationFrame();
     expect(`.o_data_row`).toHaveCount(0);
-    expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // unfold the group
     press("Enter");
     await animationFrame();
     expect(`.o_data_row`).toHaveCount(3);
-    expect(`.o_group_header:nth-child(1) .o_group_name`).toBeFocused();
+    expect(`.o_group_header:eq(0) .o_group_name`).toBeFocused();
 
     // tab to the group header button
     press("Tab");
@@ -12274,7 +12275,7 @@ test(`add a new row in grouped editable="top" list`, async () => {
     expect(`.o_data_row:first`).toHaveClass("o_selected_row");
 
     await contains(`.o_selected_row [name=foo] input`).edit("pla");
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     expect(`.o_data_row`).toHaveCount(5);
 });
 
@@ -12297,7 +12298,7 @@ test(`add a new row in grouped editable="bottom" list`, async () => {
     expect(`.o_data_row:first`).toHaveClass("o_selected_row");
 
     await contains(`.o_selected_row [name=foo] input`).edit("pla");
-    await contains(`.o_list_button_save:visible`).click();
+    await contains(`.o_list_button_save`).click();
     expect(`.o_data_row`).toHaveCount(5);
 });
 
@@ -12967,8 +12968,8 @@ test(`list: column: resize, reorder, resize again`, async () => {
 
     // 1. Resize column foo to middle of column int_field.
     const originalWidths = [...queryAll(".o_list_table th")].map((th) => th.offsetWidth);
-    const th2 = queryFirst("th:nth-child(2)");
-    const th3 = queryFirst("th:nth-child(3)");
+    const th2 = queryFirst("th:eq(1)");
+    const th3 = queryFirst("th:eq(2)");
     const resizeHandle = th2.querySelector(".o_resize");
 
     await dragAndDrop(resizeHandle, th3);
@@ -13005,8 +13006,8 @@ test(`list: resize column and toggle one checkbox`, async () => {
     });
 
     // 1. Resize column foo to middle of column int_field.
-    const th2 = queryFirst("th:nth-child(2)");
-    const th3 = queryFirst("th:nth-child(3)");
+    const th2 = queryFirst("th:eq(1)");
+    const th3 = queryFirst("th:eq(2)");
     const resizeHandle = th2.querySelector(".o_resize");
 
     await dragAndDrop(resizeHandle, th3);
@@ -13036,8 +13037,8 @@ test(`list: resize column and toggle check all`, async () => {
     });
 
     // 1. Resize column foo to middle of column int_field.
-    const th2 = queryFirst("th:nth-child(2)");
-    const th3 = queryFirst("th:nth-child(3)");
+    const th2 = queryFirst("th:eq(1)");
+    const th3 = queryFirst("th:eq(2)");
     const resizeHandle = th2.querySelector(".o_resize");
 
     await dragAndDrop(resizeHandle, th3);
@@ -13067,7 +13068,7 @@ test(`editable list: resize column headers`, async () => {
     });
 
     const originalWidths = [...queryAll(".o_list_table th")].map((th) => Math.floor(th.offsetWidth));
-    const th = queryFirst("th:nth-child(2)");
+    const th = queryFirst("th:eq(1)");
     const resizeHandle = th.querySelector(".o_resize");
     const expectedWidth = Math.floor(originalWidths[1] / 2 + resizeHandle.offsetWidth / 2);
     await dragAndDrop(resizeHandle, th);
@@ -13095,8 +13096,8 @@ test(`editable list: resize column headers (2)`, async () => {
     });
 
     // Target handle
-    const th = queryFirst("th:nth-child(2)");
-    const thNext = queryFirst("th:nth-child(3)");
+    const th = queryFirst("th:eq(1)");
+    const thNext = queryFirst("th:eq(2)");
     const resizeHandle = th.querySelector(".o_resize");
     const nextResizeHandle = thNext.querySelector(".o_resize");
     const thOriginalWidth = th.getBoundingClientRect().width;
@@ -13244,7 +13245,7 @@ test(`continue creating new lines in editable=top on keyboard nav`, async () => 
     const initialRowCount = $(".o_data_cell[name=int_field]").length;
 
     // click on int_field cell of first row
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
 
     await contains(`.o_data_cell[name=int_field] input`).edit("1");
     press("Tab");
@@ -13340,7 +13341,7 @@ test(`Auto save: add a record and leave action`, async () => {
     expect(queryAllTexts(".o_data_cell")).toEqual(["yop", "blip", "gnap", "blip"]);
     expect(`.o_data_row`).toHaveCount(4);
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     await contains(`.o_data_cell [name=foo] input`).edit("test");
 
     // change action and come back
@@ -13381,7 +13382,7 @@ test(`Auto save: create a new record without modifying it and leave action`, asy
     expect(queryAllTexts(".o_data_cell")).toEqual(["yop", "blip", "gnap", "blip"]);
     expect(`.o_data_row`).toHaveCount(4);
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     expect(`.o_data_row`).toHaveCount(5);
 
     // change action and come back
@@ -13487,12 +13488,12 @@ test(`Auto save: add a record and change page`, async () => {
     });
     expect(queryAllTexts(".o_data_cell")).toEqual(["yop", "blip", "gnap"]);
 
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
     await contains(`.o_data_cell [name=foo] input`).edit("test");
     await pagerNext();
     expect(queryAllTexts(".o_data_cell")).toEqual(["blip", "test"]);
 
-    await pagerPrevious(target);
+    await pagerPrevious();
     expect(queryAllTexts(".o_data_cell")).toEqual(["yop", "blip", "gnap"]);
 });
 
@@ -13512,7 +13513,7 @@ test(`Auto save: modify a record and change page`, async () => {
     await pagerNext();
     expect(queryAllTexts(".o_data_cell")).toEqual(["blip"]);
 
-    await pagerPrevious(target);
+    await pagerPrevious();
     expect(queryAllTexts(".o_data_cell")).toEqual(["test", "blip", "gnap"]);
 });
 
@@ -13957,14 +13958,14 @@ test(`editable list header click should unselect record`, async () => {
     await mountView({
         resModel: "foo",
         type: "list",
-        arch: `<list editable="top"><field name="display_name" /></list>`,
+        arch: `<list editable="top"><field name="display_name"/></list>`,
         serverData,
     });
 
     await contains(`.o_data_cell`).click();
     expect(`.o_selected_row`).toHaveCount(1);
     await contains(`.o_data_cell input`).edit("someInput");
-    await contains(`thead th:nth-child(2)`).click();
+    await contains(`thead th:eq(1)`).click();
     await triggerEvent(queryFirst("thead th"), null, "keydown", { key: "ArrowDown" });
 
     expect(`.o_selected_row`).toHaveCount(0);
@@ -13974,7 +13975,7 @@ test(`editable list group header click should unselect record`, async () => {
     await mountView({
         resModel: "foo",
         type: "list",
-        arch: `<list editable="top"><field name="display_name" /></list>`,
+        arch: `<list editable="top"><field name="display_name"/></list>`,
         groupBy: ["bar"],
     });
 
@@ -14069,7 +14070,7 @@ test(`editable list correctly saves dirty fields `, async () => {
         resModel: "foo",
         type: "list",
         arch: `<list editable="bottom">
-                <field name="display_name" />
+                <field name="display_name"/>
             </list>`,
         mockRPC(route, args) {
             if (args.method === "web_save") {
@@ -14115,7 +14116,7 @@ test(`edit a field with a slow onchange in a new row`, async () => {
 
     const value = "14";
     // add a new line
-    await contains(`.o_list_button_add:visible`).click();
+    await contains(`.o_list_button_add`).click();
 
     expect(["onchange"]).toVerifySteps();
 
@@ -14142,115 +14143,113 @@ test(`edit a field with a slow onchange in a new row`, async () => {
 });
 
 test(`create a record with the correct context`, async () => {
-    serverData.models.foo.fields.text.required = true;
+    Foo._fields.text = fields.Text({ required: true });
     Foo._records = [];
+
+    onRpc("web_save", ({ kwargs }) => {
+        expect.step("web_save");
+        const { context } = kwargs;
+        expect(context.default_text).toBe("yop");
+        expect(context.test).toBe(true);
+    });
 
     await mountView({
         resModel: "foo",
         type: "list",
-        arch: ` <list editable="bottom">
-                    <field name="display_name"/>
-                    <field name="text"/>
-                </list>`,
-        mockRPC(route, args) {
-            if (args.method === "web_save") {
-                expect.step("web_save");
-                const { context } = args.kwargs;
-                expect(context.default_text).toBe("yop");
-                expect(context.test).toBe(true);
-            }
-        },
+        arch: `
+            <list editable="bottom">
+                <field name="foo"/>
+                <field name="text"/>
+            </list>
+        `,
         context: {
             default_text: "yop",
             test: true,
         },
     });
-    await contains(`.o_list_button_add:visible`).click();
-    await contains(`[name='display_name'] input`).edit("blop");
+    await contains(`.o_list_button_add`).click();
+    await contains(`[name='foo'] input`).edit("blop", { confirm: false });
     expect(`.o_selected_row`).toHaveCount(1);
 
     await contains(`.o_list_view`).click();
     expect(`.o_selected_row`).toHaveCount(0);
-
-    expect([...queryAll(".o_data_row .o_data_cell")].map((el) => el.textContent)["blop".toEqual("yop")]);
-
+    expect(queryAllTexts`.o_data_row:eq(-1) .o_data_cell`).toEqual(["blop", "yop"]);
     expect(["web_save"]).toVerifySteps();
 });
 
 test(`create a record with the correct context in a group`, async () => {
-    serverData.models.foo.fields.text.required = true;
+    Foo._fields.text = fields.Text({ required: true });
+
+    onRpc("web_save", ({ kwargs }) => {
+        expect.step("web_save");
+        const { context } = kwargs;
+        expect(context.default_bar).toBe(true);
+        expect(context.default_text).toBe("yop");
+        expect(context.test).toBe(true);
+    });
 
     await mountView({
         resModel: "foo",
         type: "list",
-        arch: ` <list editable="bottom">
-                    <field name="display_name"/>
-                    <field name="text"/>
-                </list>`,
+        arch: `
+            <list editable="bottom">
+                <field name="foo"/>
+                <field name="text"/>
+            </list>
+        `,
         groupBy: ["bar"],
-        mockRPC(route, args) {
-            if (args.method === "web_save") {
-                expect.step("web_save");
-                const { context } = args.kwargs;
-                expect(context.default_bar).toBe(true);
-                expect(context.default_text).toBe("yop");
-                expect(context.test).toBe(true);
-            }
-        },
         context: {
             default_text: "yop",
             test: true,
         },
     });
-    await click(queryAll(".o_group_name")[1]);
-
+    await contains(`.o_group_name:eq(1)`).click();
     await contains(`.o_group_field_row_add a`).click();
-    await contains(`[name='display_name'] input`).edit("blop");
+    await contains(`[name='foo'] input`).edit("blop", { confirm: false });
     expect(`.o_selected_row`).toHaveCount(1);
 
     await contains(`.o_list_view`).click();
     expect(`.o_selected_row`).toHaveCount(0);
-
-    expect([...queryAll(".o_data_row .o_data_cell")].map((el) => el.textContent)["blop".toEqual("yop")]);
-
+    expect(queryAllTexts`.o_data_row:eq(-1) .o_data_cell`).toEqual(["blop", "yop"]);
     expect(["web_save"]).toVerifySteps();
 });
 
 test(`classNames given to a field are set on the right field directly`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
-                <field class="d-flex align-items-center" name="int_field" widget="progressbar" options="{'editable': true}" />
-                <field class="d-none" name="bar" />
-            </tree>`,
+                <field class="d-flex align-items-center" name="int_field" widget="progressbar" options="{'editable': true}"/>
+                <field class="d-none" name="bar"/>
+            </tree>
+        `,
     });
-    expect(`.o_field_cell`).not.toHaveClass("d-flex align-items-center", {
+    expect(`.o_field_cell:eq(2)`).not.toHaveClass("d-flex align-items-center", {
         message: "classnames are not set on the first cell",
     });
     expect(`.o_field_progressbar`).toHaveClass("d-flex align-items-center", {
         message: "classnames are set on the corresponding field div directly",
     });
-    expect(`.o_field_cell`).toHaveClass("d-none", {
+    expect(`.o_field_cell:eq(3)`).toHaveClass("d-none", {
         message: "classnames are set on the second cell",
     });
 });
 
 test(`use a filter_domain in a list view`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `<tree><field name="foo"/><field name="m2o"/></tree>`,
         searchViewArch: `
             <search>
                 <field name="m2o" filter_domain="[('m2o', 'child_of', raw_value)]"/>
-            </search>`,
+            </search>
+        `,
         context: {
             search_default_m2o: 1,
         },
     });
-
     expect(`.o_data_row`).toHaveCount(3);
 });
 
@@ -14260,55 +14259,50 @@ test(`Formatted group operator`, async () => {
     Foo._records[2].qux = 0.01;
     Foo._records[3].qux = 0.48;
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `<tree><field name="qux" widget="percentage"/></tree>`,
         groupBy: ["bar"],
     });
-    const [td1, td2] = queryAll("td.o_list_number");
-    expect(td1.textContent).toBe("48%");
-    expect(td2.textContent).toBe("61%");
+    expect(`td.o_list_number:eq(0)`).toHaveText("48%");
+    expect(`td.o_list_number:eq(1)`).toHaveText("61%");
 });
 
 test(`Formatted group operator with digit precision on the field definition`, async () => {
-    serverData.models.foo.fields.qux.digits = [16, 3];
+    Foo._fields.qux = fields.Float({ digits: [16, 3] });
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `<tree><field name="qux"/></tree>`,
         groupBy: ["bar"],
     });
-    const [td1, td2] = queryAll("td.o_list_number");
-    expect(td1.textContent).toBe("9.000");
-    expect(td2.textContent).toBe("10.400");
+    expect(`td.o_list_number:eq(0)`).toHaveText("9.000");
+    expect(`td.o_list_number:eq(1)`).toHaveText("10.400");
 });
 
 test(`list view does not crash when clicked button cell`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
-        arch: `
-            <tree>
-                <button name="a" type="object" icon="fa-car"/>
-            </tree>`,
+        type: "list",
+        arch: `<tree><button name="a" type="object" icon="fa-car"/></tree>`,
     });
-
     expect(`.o_data_row:first-child td.o_list_button`).toHaveCount(1);
     await contains(`.o_data_row:first-child td.o_list_button`).click();
 });
 
 test(`group by going to next page then back to first`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `<tree groups_limit="1"><field name="foo"/><field name="bar"/></tree>`,
         groupBy: ["bar"],
     });
-
     expect([...getPagerValue(), getPagerLimit()]).toEqual([1, 2]);
+
     await pagerNext();
     expect([...getPagerValue(), getPagerLimit()]).toEqual([2, 2]);
-    await pagerPrevious(target);
+
+    await pagerPrevious();
     expect([...getPagerValue(), getPagerLimit()]).toEqual([1, 2]);
 });
 
@@ -14316,22 +14310,16 @@ test(`sort on a non sortable field with allow_order option`, async () => {
     Foo._records = [{ bar: true }, { bar: false }, { bar: true }];
 
     await mountView({
-        type: "list",
         resModel: "foo",
-        arch: `
-            <list>
-                <field name="bar" options="{ 'allow_order': true }"/>
-            </list>
-        `,
+        type: "list",
+        arch: `<list><field name="bar" options="{ 'allow_order': true }"/></list>`,
     });
-
-    expect([...queryAll("[name=bar] input")].map((el) => el.checked)).toEqual([true, false, true]);
+    expect(queryAllProperties(`[name=bar] input`, "checked")).toEqual([true, false, true]);
     expect(`th[data-name=bar]`).toHaveClass("o_column_sortable");
     expect(`th[data-name=bar]`).not.toHaveClass("table-active");
 
     await contains(`th[data-name=bar]`).click();
-
-    expect([...queryAll("[name=bar] input")].map((el) => el.checked)).toEqual([false, true, true]);
+    expect(queryAllProperties(`[name=bar] input`, "checked")).toEqual([false, true, true]);
     expect(`th[data-name=bar]`).toHaveClass("o_column_sortable");
     expect(`th[data-name=bar]`).toHaveClass("table-active");
     expect(`th[data-name=bar] i`).toHaveClass("fa-angle-up");
@@ -14339,22 +14327,16 @@ test(`sort on a non sortable field with allow_order option`, async () => {
 
 test(`sort rows in a grouped list view`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
-        arch: `
-            <list>
-                <field name="int_field"/>
-            </list>`,
+        type: "list",
+        arch: `<list><field name="int_field"/></list>`,
         groupBy: ["bar"],
     });
-
     await contains(`.o_group_header:eq(1)`).click();
-
     expect(queryAllTexts(".o_data_cell")).toEqual(["10", "9", "17"]);
     expect(`th[data-name=int_field]`).toHaveClass("o_column_sortable");
 
     await contains(`th[data-name=int_field]`).click();
-
     expect(queryAllTexts(".o_data_cell")).toEqual(["9", "10", "17"]);
     expect(`th[data-name=int_field]`).toHaveClass("o_column_sortable");
     expect(`th[data-name=int_field] i`).toHaveClass("fa-angle-up");
@@ -14362,19 +14344,19 @@ test(`sort rows in a grouped list view`, async () => {
 
 test(`have some records, then go to next page in pager then group by some field: at least one group should be visible`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
-                <list limit="2">
-                    <field name="foo"/>
-                    <field name="bar"/>
-                </list>
-            `,
+            <list limit="2">
+                <field name="foo"/>
+                <field name="bar"/>
+            </list>
+        `,
         searchViewArch: `
-                <search>
-                    <filter name="group_by_bar" string="Bar" context="{ 'group_by': 'bar' }"/>
-                </search>
-            `,
+            <search>
+                <filter name="group_by_bar" string="Bar" context="{ 'group_by': 'bar' }"/>
+            </search>
+        `,
     });
     expect(`tbody .o_data_row`).toHaveCount(2);
     expect(queryAllTexts("tbody .o_data_row")).toEqual(["yop", "blip"]);
@@ -14384,7 +14366,7 @@ test(`have some records, then go to next page in pager then group by some field:
     expect(`tbody .o_group_header`).toHaveCount(2);
     expect(queryAllTexts("tbody .o_group_header")).toEqual(["No (1)", "Yes (3)"]);
 
-    await removeFacet("GroupBy IntField");
+    await removeFacet("Bar");
     expect(`tbody .o_data_row`).toHaveCount(2);
     expect(queryAllTexts("tbody .o_data_row")).toEqual(["yop", "blip"]);
 
@@ -14400,32 +14382,31 @@ test(`have some records, then go to next page in pager then group by some field:
 
 test(`optional field selection do not unselect current row`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
-        arch: `<tree editable="top">
-                    <field name="text" optional="hide"/>
-                    <field name="foo" optional="show"/>
-                    <field name="bar" optional="hide"/>
-                </tree>`,
+        type: "list",
+        arch: `
+            <tree editable="top">
+                <field name="text" optional="hide"/>
+                <field name="foo" optional="show"/>
+                <field name="bar" optional="hide"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_list_button_add`).click();
     expect(`.o_selected_row`).toHaveCount(1);
     expect(`div[name=foo] input:focus`).toHaveCount(1);
 
     await contains(`table .o_optional_columns_dropdown .dropdown-toggle`).click();
-
     expect(`.o_selected_row`).toHaveCount(1);
-    expect(`div[name=foo] input:focus`).toHaveCount(1);
+    // input loses focus when we open dropdown but gets it back when an item is toggled.
+    expect(`div[name=foo] input:focus`).toHaveCount(0);
 
-    await contains(`.o-dropdown--menu span.dropdown-item:nth-child(3) label`).click();
-
+    await contains(`.o-dropdown--menu span.dropdown-item:eq(2) label`).click();
     expect(`.o_selected_row`).toHaveCount(1);
     expect(`div[name=foo] input:focus`).toHaveCount(1);
     expect(`.o_selected_row div[name=bar]`).toHaveCount(1);
 
-    await contains(`.o-dropdown--menu span.dropdown-item:nth-child(1) label`).click();
-
+    await contains(`.o-dropdown--menu span.dropdown-item:eq(0) label`).click();
     expect(`.o_selected_row`).toHaveCount(1);
     // This below would be better if it still focused foo, but it is an acceptable tradeoff.
     expect(`div[name=text] textarea:focus`).toHaveCount(1);
@@ -14437,13 +14418,11 @@ test(`view widgets are rendered in list view`, async () => {
         static template = xml`<div class="test_widget" t-esc="props.record.data.bar"/>`;
         static props = ["*"];
     }
-    const testWidget = {
-        component: TestWidget,
-    };
-    registry.category("view_widgets").add("test_widget", testWidget);
+    registry.category("view_widgets").add("test_widget", { component: TestWidget });
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <list>
                 <field name="bar" column_invisible="1"/>
@@ -14454,58 +14433,44 @@ test(`view widgets are rendered in list view`, async () => {
     expect(`td .test_widget`).toHaveCount(4, {
         message: "there should be one widget (inside td) per record",
     });
-    assert.deepEqual(
-        [...queryAll(".test_widget")].map((w) => w.textContent),
-        ["true", "true", "true", "false"],
-        "the widget has access to the record's data"
-    );
+    expect(queryAllTexts`.test_widget`).toEqual(["true", "true", "true", "false"]);
 });
 
 test(`edit a record then select another record with a throw error when saving`, async () => {
-    await mountView({
-        type: "list",
-        resModel: "foo",
-        arch: `
-                <tree editable="bottom">
-                    <field name="foo"/>
-                </tree>`,
-        mockRPC(route, args) {
-            if (args.method === "web_save") {
-                throw makeServerError({ message: "Can't write" });
-            }
-        },
+    expect.errors(1);
+
+    onRpc("web_save", () => {
+        throw makeServerError({ message: "Can't write" });
     });
 
-    await click(queryAll(".o_data_cell")[1]);
-    await contains(`[name=foo] input`).edit("plop");
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<tree editable="bottom"><field name="foo"/></tree>`,
+    });
+    await contains(`.o_data_cell:eq(1)`).click();
+    await contains(`[name=foo] input`).edit("plop", { confirm: false });
     expect(`[name=foo] input`).toHaveCount(1);
 
-    await click(queryFirst(".o_data_cell"));
+    await contains(`.o_data_cell:eq(0)`).click();
     await animationFrame();
     expect(`.o_error_dialog`).toHaveCount(1);
 
     await contains(`.o_error_dialog .btn-primary.o-default-button`).click();
     expect(`.o_selected_row`).toHaveCount(1);
-    expect(`.o_data_row:first`).toHaveClass("o_selected_row");
-
-    await click(queryFirst(".o_data_cell"));
-    await animationFrame();
-    expect(`.o_error_dialog`).toHaveCount(1);
-
-    await contains(`.o_error_dialog .btn-primary.o-default-button`).click();
-    expect(`.o_selected_row`).toHaveCount(1);
-    expect(`.o_data_row:first`).toHaveClass("o_selected_row");
+    expect(`.o_data_row:eq(1)`).toHaveClass("o_selected_row");
 });
 
 test(`no highlight of a (sortable) column without label`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree default_order="foo">
                 <field name="foo" nolabel="1"/>
                 <field name="bar"/>
-            </tree>`,
+            </tree>
+        `,
     });
     expect(`thead th[data-name=foo]`).toHaveCount(1);
     expect(`thead th[data-name=foo]`).not.toHaveClass("table-active");
@@ -14513,157 +14478,134 @@ test(`no highlight of a (sortable) column without label`, async () => {
 
 test(`highlight of a (sortable) column with label`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree default_order="foo">
                 <field name="foo"/>
-            </tree>`,
+            </tree>
+        `,
     });
     expect(`thead th[data-name=foo]`).toHaveCount(1);
     expect(`thead th[data-name=foo]`).toHaveClass("table-active");
 });
 
 test(`Search more in a many2one`, async () => {
-    serverData.views = {
-        "bar,false,list": `
-            <list>
-                <field name="display_name"/>
-            </list>
-        `,
-        "bar,false,search": `<search/>`,
+    Bar._views = {
+        list: `<list><field name="display_name"/></list>`,
+        search: `<search/>`,
     };
-
-    patchWithCleanup(browser, {
-        setTimeout: () => {},
-    });
 
     patchWithCleanup(Many2XAutocomplete.defaultProps, {
         searchLimit: 1,
     });
 
-    await mountView({
-        type: "list",
-        resModel: "foo",
-        arch: `
-            <tree editable="bottom">
-                <field name="m2o"/>
-            </tree>`,
-        mockRPC(_, args) {
-            if (args.method === "web_read") {
-                expect.step(`web_read ${args.args[0]}`);
-            } else if (args.method === "web_save") {
-                expect.step(`web_save ${args.args[0]}`);
-            }
-        },
-    });
+    onRpc("web_read", ({ args }) => expect.step(`web_read ${args[0]}`));
+    onRpc("web_save", ({ args }) => expect.step(`web_save ${args[0]}`));
 
-    assert.deepEqual(
-        [...queryAll(".o_data_row td[name=m2o]")].map((el) => el.innerText),
-        ["Value 1", "Value 2", "Value 1", "Value 1"]
-    );
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<tree editable="bottom"><field name="m2o"/></tree>`,
+    });
+    expect(queryAllTexts`.o_data_row td[name=m2o]`).toEqual(["Value 1", "Value 2", "Value 1", "Value 1"]);
 
     await contains(`.o_data_row:first td.o_list_many2one`).click();
-    await contains(`.o_field_many2one_selection .o-autocomplete--input`).click();
-    await clickOpenedDropdownItem(target, "m2o", "Search More...");
-
+    await selectFieldDropdownItem("m2o", "Search More...");
     expect([]).toVerifySteps();
 
-    await contains(`.modal .o_data_row:nth-child(3) td[name=display_name]`).click();
-
+    await contains(`.modal .o_data_row:eq(2) td[name=display_name]`).click();
     expect(["web_read 3"]).toVerifySteps();
 
-    await contains(`.o_list_button_save:visible`).click();
-    assert.deepEqual(
-        [...queryAll(".o_data_row td[name=m2o]")].map((el) => el.innerText),
-        ["Value 3", "Value 2", "Value 1", "Value 1"]
-    );
+    await contains(`.o_list_button_save`).click();
+    expect(queryAllTexts`.o_data_row td[name=m2o]`).toEqual(["Value 3", "Value 2", "Value 1", "Value 1"]);
     expect(["web_save 1"]).toVerifySteps();
 });
 
 test(`view's context is passed down as evalContext`, async () => {
+    onRpc("name_search", ({ kwargs }) => {
+        expect.step(`name_search`);
+        expect(kwargs.args).toEqual([["someField", "=", "some_value"]]);
+    });
+
     await mountView({
-        type: "list",
         resModel: "foo",
-        context: {
-            default_global_key: "some_value",
-        },
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o" domain="[['someField', '=', context.get('default_global_key', 'nope')]]"/>
-            </tree>`,
-        mockRPC(_, args) {
-            if (args.method === "name_search") {
-                expect.step(`name_search`);
-                expect(args.kwargs.args).toEqual([["someField", "=", "some_value"]]);
-            }
+            </tree>
+        `,
+        context: {
+            default_global_key: "some_value",
         },
     });
-
     await contains(`.o_data_row:first td.o_list_many2one`).click();
     await contains(`.o_field_many2one_selection .o-autocomplete--input`).click();
     expect(["name_search"]).toVerifySteps();
 });
 
 test(`list view with default_group_by`, async () => {
-    serverData.models.foo.fields.m2m.groupable = true;
+    // serverData.models.foo.fields.m2m.groupable = true;
 
     let readGroupCount = 0;
+    onRpc("web_read_group", ({ kwargs }) => {
+        readGroupCount++;
+        expect.step(`web_read_group${readGroupCount}`);
+        switch (readGroupCount) {
+            case 1:
+                return expect(kwargs.groupby).toEqual(["bar"]);
+            case 2:
+                return expect(kwargs.groupby).toEqual(["m2m"]);
+            case 3:
+                return expect(kwargs.groupby).toEqual(["bar"]);
+        }
+    });
+
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree default_group_by="bar">
                 <field name="bar"/>
-            </tree>`,
-        async mockRPC(route, { kwargs }) {
-            if (route === "/web/dataset/call_kw/partner/web_read_group") {
-                readGroupCount++;
-                switch (readGroupCount) {
-                    case 1:
-                        return expect(kwargs.groupby).toEqual(["bar"]);
-                    case 2:
-                        return expect(kwargs.groupby).toEqual(["m2m"]);
-                    case 3:
-                        return expect(kwargs.groupby).toEqual(["bar"]);
-                }
-            }
-        },
+            </tree>
+        `,
     });
-
     expect(`.o_list_renderer table`).toHaveClass("o_list_table_grouped");
     expect(`.o_group_header`).toHaveCount(2);
+    expect(["web_read_group1"]).toVerifySteps();
 
     await selectGroup("m2m");
     expect(`.o_group_header`).toHaveCount(4);
+    expect(["web_read_group2"]).toVerifySteps();
 
-    await toggleMenuItem("M2M field");
+    await toggleMenuItem("M2m");
     expect(`.o_group_header`).toHaveCount(2);
+    expect(["web_read_group3"]).toVerifySteps();
 });
 
 test(`ungrouped list, apply filter, decrease limit`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `<tree limit="4"><field name="foo"/></tree>`,
         searchViewArch: `
             <search>
                 <filter name="my_filter" string="My Filter" domain="[('id', '>', 1)]"/>
-            </search>`,
+            </search>
+        `,
     });
-
     expect(`.o_data_row`).toHaveCount(4);
 
     // apply the filter to trigger a reload of datapoints
     await toggleSearchBarMenu();
     await toggleMenuItem("My Filter");
-
     expect(`.o_data_row`).toHaveCount(3);
 
     // edit the pager with a smaller limit
     await contains(`.o_pager_value`).click();
     await contains(`.o_pager_value`).edit("1-2");
-
     expect(`.o_data_row`).toHaveCount(2);
 });
 
@@ -14680,38 +14622,37 @@ test(`Properties: char`, async () => {
         }
     }
 
+    onRpc("web_save", ({ args }) => {
+        expect.step("web_save");
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: "TEST" }] }]);
+    });
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: "TEST" }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_char']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_char']").textContent).toBe("Property char");
+    expect(`.o_list_renderer th[data-name='properties.property_char']`).toHaveText("Property char");
     expect(`.o_field_cell.o_char_cell`).toHaveCount(3);
-    expect(queryFirst(".o_field_cell.o_char_cell").textContent).toBe("CHAR");
+    expect(`.o_field_cell.o_char_cell`).toHaveText("CHAR");
 
     await contains(`.o_field_cell.o_char_cell`).click();
-    await contains(`.o_field_cell.o_char_cell input`).edit("TEST");
-    expect(queryFirst(".o_field_cell.o_char_cell input").value).toBe("TEST");
-
+    await contains(`.o_field_cell.o_char_cell input`).edit("TEST", { confirm: false });
+    expect(`.o_field_cell.o_char_cell input`).toHaveValue("TEST");
     await contains(`[name='m2o']`).click();
-    expect(queryFirst(".o_field_cell.o_char_cell input").value).toBe("TEST");
+    expect(`.o_field_cell.o_char_cell input`).toHaveValue("TEST");
 
-    await contains(`.o_list_button_save:visible`).click();
-    expect(queryFirst(".o_field_cell.o_char_cell").textContent).toBe("TEST");
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_char_cell:eq(0)`).toHaveText("TEST");
+    expect(["web_save"]).toVerifySteps();
 });
 
 test(`Properties: boolean`, async () => {
@@ -14727,33 +14668,32 @@ test(`Properties: boolean`, async () => {
         }
     }
 
+    onRpc("web_save", ({ args }) => {
+        expect.step("web_save");
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: false }] }]);
+    });
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: false }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_boolean']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_boolean']").textContent).toBe("Property boolean");
+    expect(`.o_list_renderer th[data-name='properties.property_boolean']`).toHaveText("Property boolean");
     expect(`.o_field_cell.o_boolean_cell`).toHaveCount(3);
 
     await contains(`.o_field_cell.o_boolean_cell`).click();
     await contains(`.o_field_cell.o_boolean_cell input`).click();
-    await contains(`.o_list_button_save:visible`).click();
-
-    expect(queryFirst(".o_field_cell.o_boolean_cell input").checked).toBe(false);
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_boolean_cell input`).not.toBeChecked();
+    expect(["web_save"]).toVerifySteps();
 });
 
 test(`Properties: integer`, async () => {
@@ -14769,36 +14709,35 @@ test(`Properties: integer`, async () => {
         }
     }
 
+    onRpc("web_save", ({ args }) => {
+        expect.step("web_save");
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: 321 }] }]);
+    });
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: 321 }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_integer']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_integer']").textContent).toBe("Property integer");
+    expect(`.o_list_renderer th[data-name='properties.property_integer']`).toHaveText("Property integer");
     expect(`.o_field_cell.o_integer_cell`).toHaveCount(3);
 
     await contains(`.o_field_cell.o_integer_cell`).click();
-    await editInput(target, ".o_field_cell.o_integer_cell input", 321);
-    await contains(`.o_list_button_save:visible`).click();
-
-    expect(queryFirst(".o_field_cell.o_integer_cell").textContent).toBe("321");
-    expect(queryFirst(".o_list_footer .o_list_number").textContent).toBe("567", {
+    await contains(`.o_field_cell.o_integer_cell input`).edit(321, { confirm: false });
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_integer_cell:eq(0)`).toHaveText("321");
+    expect(`.o_list_footer .o_list_number`).toHaveText("567", {
         message: "First property is 321, second is zero because it has a different parent and the 2 others are 123 so the total should be 321 + 123 * 2 = 567",
     });
+    expect(["web_save"]).toVerifySteps();
 });
 
 test(`Properties: float`, async () => {
@@ -14814,36 +14753,35 @@ test(`Properties: float`, async () => {
         }
     }
 
+    onRpc("web_save", ({ args }) => {
+        expect.step("web_save");
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: 3.21 }] }]);
+    });
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: 3.21 }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_float']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_float']").textContent).toBe("Property float");
+    expect(`.o_list_renderer th[data-name='properties.property_float']`).toHaveText("Property float");
     expect(`.o_field_cell.o_float_cell`).toHaveCount(3);
 
     await contains(`.o_field_cell.o_float_cell`).click();
-    await editInput(target, ".o_field_cell.o_float_cell input", 3.21);
-    await contains(`.o_list_button_save:visible`).click();
-
-    expect(queryFirst(".o_field_cell.o_float_cell").textContent).toBe("3.21");
-    expect(queryFirst(".o_list_footer .o_list_number").textContent).toBe("126.66", {
+    await contains(`.o_field_cell.o_float_cell input`).edit(3.21, { confirm: false });
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_float_cell:eq(0)`).toHaveText("3.21");
+    expect(`.o_list_footer .o_list_number`).toHaveText("126.66", {
         message: "First property is 3.21, second is zero because it has a different parent the other is 123.45 and the last one zero because it is false so the total should be 3.21 + 123.45 = 126.66",
     });
+    expect(["web_save"]).toVerifySteps();
 });
 
 test(`Properties: date`, async () => {
@@ -14859,34 +14797,33 @@ test(`Properties: date`, async () => {
         }
     }
 
+    onRpc("web_save", ({ args }) => {
+        expect.step("web_save");
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: "2022-12-19" }] }]);
+    });
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: "2022-12-19" }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_date']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_date']").textContent).toBe("Property date");
+    expect(`.o_list_renderer th[data-name='properties.property_date']`).toHaveText("Property date");
     expect(`.o_field_cell.o_date_cell`).toHaveCount(3);
 
     await contains(`.o_field_cell.o_date_cell`).click();
     await contains(`.o_field_date input`).click();
     await click(getPickerCell("19"));
-    await contains(`.o_list_button_save:visible`).click();
-
-    expect(queryFirst(".o_field_cell.o_date_cell").textContent).toBe("12/19/2022");
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_date_cell:eq(0)`).toHaveText("12/19/2022");
+    expect(["web_save"]).toVerifySteps();
 });
 
 test(`Properties: datetime`, async () => {
@@ -14903,34 +14840,33 @@ test(`Properties: datetime`, async () => {
         }
     }
 
+    onRpc("web_save", ({ args }) => {
+        expect.step("web_save");
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: "2022-12-19 12:12:00" }] }]);
+    });
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: "2022-12-19 12:12:00" }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_datetime']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_datetime']").textContent).toBe("Property datetime");
+    expect(`.o_list_renderer th[data-name='properties.property_datetime']`).toHaveText("Property datetime");
     expect(`.o_field_cell.o_datetime_cell`).toHaveCount(3);
 
     await contains(`.o_field_cell.o_datetime_cell`).click();
     await contains(`.o_field_datetime input`).click();
     await click(getPickerCell("19"));
-    await contains(`.o_list_button_save:visible`).click();
-
-    expect(queryFirst(".o_field_cell.o_datetime_cell").textContent).toBe("12/19/2022 12:12:00");
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_datetime_cell:eq(0)`).toHaveText("12/19/2022 12:12:00");
+    expect(["web_save"]).toVerifySteps();
 });
 
 test(`Properties: selection`, async () => {
@@ -14951,33 +14887,32 @@ test(`Properties: selection`, async () => {
         }
     }
 
+    onRpc("web_save", ({ args }) => {
+        expect.step("web_save");
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: "a" }] }]);
+    });
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: "a" }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_selection']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_selection']").textContent).toBe("Property selection");
-    expect(`.o_field_cell.o_selection_cell`).toHaveCount(3);
+    expect(`.o_list_renderer th[data-name='properties.property_selection']`).toHaveText("Property selection");
+    expect(`.o_field_cell.o_selection_cell`).toHaveCount(3);    
 
     await contains(`.o_field_cell.o_selection_cell`).click();
-    await editSelect(target, ".o_field_cell.o_selection_cell select", `"a"`);
-    await contains(`.o_list_button_save:visible`).click();
-
-    expect(queryFirst(".o_field_cell.o_selection_cell").textContent).toBe("A");
+    await contains(`.o_field_cell.o_selection_cell select`).select(`"a"`);
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_selection_cell:eq(0)`).toHaveText("A");
+    expect(["web_save"]).toVerifySteps();
 });
 
 test(`Properties: tags`, async () => {
@@ -14999,42 +14934,40 @@ test(`Properties: tags`, async () => {
     }
 
     let expectedValue = null;
+    onRpc("web_save", ({ args }) => {
+        expect.step("web_save");
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: expectedValue }] }]);
+    });
 
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: expectedValue }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_tags']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_tags']").textContent).toBe("Property tags");
+    expect(`.o_list_renderer th[data-name='properties.property_tags']`).toHaveText("Property tags");
     expect(`.o_field_cell.o_property_tags_cell`).toHaveCount(3);
 
     await contains(`.o_field_cell.o_property_tags_cell`).click();
-    await click(queryFirst(".o_field_cell.o_property_tags_cell .o_delete"));
+    await contains(`.o_field_cell.o_property_tags_cell .o_delete`).click();
     expectedValue = ["c"];
-    await contains(`.o_list_button_save:visible`).click();
-
-    expect(queryFirst(".o_field_cell.o_property_tags_cell").textContent).toBe("C");
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_property_tags_cell:eq(0)`).toHaveText("C");
+    expect(["web_save"]).toVerifySteps();
 
     await contains(`.o_field_cell.o_property_tags_cell`).click();
-    await selectDropdownItem(target, "properties.property_tags", "B");
+    await selectFieldDropdownItem(`properties.property_tags`, "B");
     expectedValue = ["c", "b"];
-    await contains(`.o_list_button_save:visible`).click();
-
-    expect(queryFirst(".o_field_cell.o_property_tags_cell").textContent).toBe("BC");
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_property_tags_cell:eq(0)`).toHaveText("B\nC");
+    expect(["web_save"]).toVerifySteps();
 });
 
 test(`Properties: many2one`, async () => {
@@ -15052,33 +14985,32 @@ test(`Properties: many2one`, async () => {
         }
     }
 
+    onRpc("web_save", ({ args }) => {
+        expect.step("web_save");
+        expect(args).toEqual([[1], { properties: [{ ...definition, value: [2, "EUR"] }] }]);
+    });
+
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: [2, "EUR"] }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_many2one']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_many2one']").textContent).toBe("Property many2one");
+    expect(`.o_list_renderer th[data-name='properties.property_many2one']`).toHaveText("Property many2one");
     expect(`.o_field_cell.o_many2one_cell`).toHaveCount(3);
 
     await contains(`.o_field_cell.o_many2one_cell`).click();
-    await selectDropdownItem(target, "properties.property_many2one", "EUR");
-    await contains(`.o_list_button_save:visible`).click();
-
-    expect(queryFirst(".o_field_cell.o_many2one_cell").textContent).toBe("EUR");
+    await selectFieldDropdownItem(`properties.property_many2one`, "EUR");
+    await contains(`.o_list_button_save`).click();
+    expect(`.o_field_cell.o_many2one_cell:eq(0)`).toHaveText("EUR");
+    expect(["web_save"]).toVerifySteps();
 });
 
 test(`Properties: many2many`, async () => {
@@ -15097,25 +15029,19 @@ test(`Properties: many2many`, async () => {
     }
 
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            if (method === "write") {
-                expect(args).toEqual([[1], { properties: [{ ...definition, value: [] }] }]);
-            }
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
     await contains(`.o-dropdown--menu input[type='checkbox']`).click();
-
     expect(`.o_list_renderer th[data-name='properties.property_many2many']`).toHaveCount(1);
-    expect(queryFirst(".o_list_renderer th[data-name='properties.property_many2many']").textContent).toBe("Property many2many");
+    expect(`.o_list_renderer th[data-name='properties.property_many2many']`).toHaveText("Property many2many");
     expect(`.o_field_cell.o_many2many_tags_cell`).toHaveCount(3);
 });
 
@@ -15141,24 +15067,22 @@ test(`multiple sources of properties definitions`, async () => {
     }
 
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
-    await click(queryFirst(".o-dropdown--menu input[type='checkbox']"));
-    await click(queryAll(".o-dropdown--menu input[type='checkbox']")[1]);
-
+    await contains(`.o-dropdown--menu input[type=checkbox]:eq(0)`).click();
+    await contains(`.o-dropdown--menu input[type=checkbox]:eq(1)`).click();
     expect(`.o_list_renderer th[data-name='properties.property_char']`).toHaveCount(1);
     expect(`.o_field_cell.o_char_cell`).toHaveCount(3);
-
     expect(`.o_list_renderer th[data-name='properties.property_boolean']`).toHaveCount(1);
-    assert.containsOnce(target, ".o_field_cell.o_boolean_cell", 1);
+    expect(`.o_field_cell.o_boolean_cell`).toHaveCount(1);
 });
 
 test(`toggle properties`, async () => {
@@ -15183,30 +15107,29 @@ test(`toggle properties`, async () => {
     }
 
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
     await contains(`.o_optional_columns_dropdown_toggle`).click();
-
-    await click(queryFirst(".o-dropdown--menu input[type='checkbox']"));
+    await contains(`.o-dropdown--menu input[type='checkbox']:eq(0)`).click();
     expect(`.o_list_renderer th[data-name='properties.property_char']`).toHaveCount(1);
     expect(`.o_list_renderer th[data-name='properties.property_boolean']`).toHaveCount(0);
 
-    await click(queryAll(".o-dropdown--menu input[type='checkbox']")[1]);
+    await contains(`.o-dropdown--menu input[type='checkbox']:eq(1)`).click();
     expect(`.o_list_renderer th[data-name='properties.property_char']`).toHaveCount(1);
     expect(`.o_list_renderer th[data-name='properties.property_boolean']`).toHaveCount(1);
 
-    await click(queryFirst(".o-dropdown--menu input[type='checkbox']"));
+    await contains(`.o-dropdown--menu input[type='checkbox']:eq(0)`).click();
     expect(`.o_list_renderer th[data-name='properties.property_char']`).toHaveCount(0);
     expect(`.o_list_renderer th[data-name='properties.property_boolean']`).toHaveCount(1);
 
-    await click(queryAll(".o-dropdown--menu input[type='checkbox']")[1]);
+    await contains(`.o-dropdown--menu input[type='checkbox']:eq(1)`).click();
     expect(`.o_list_renderer th[data-name='properties.property_char']`).toHaveCount(0);
     expect(`.o_list_renderer th[data-name='properties.property_boolean']`).toHaveCount(0);
 });
@@ -15225,15 +15148,15 @@ test(`properties: optional show/hide (no config in local storage)`, async () => 
     }
 
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
                 <field name="properties"/>
-            </tree>`,
+            </tree>
+        `,
     });
-
     expect(`.o_list_table thead th`).toHaveCount(3);
     expect(`.o_list_table thead th.o_list_record_selector`).toHaveCount(1);
     expect(`.o_list_table thead th[data-name=m2o]`).toHaveCount(1);
@@ -15253,22 +15176,22 @@ test(`properties: optional show/hide (config from local storage)`, async () => {
         }
     }
 
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         getItem(key) {
             return "properties.property_char";
         },
     });
 
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
                 <field name="properties"/>
-            </tree>`,
+            </tree>
+        `,
     });
-
     expect(`.o_list_table thead th`).toHaveCount(4);
     expect(`.o_list_table thead th.o_list_record_selector`).toHaveCount(1);
     expect(`.o_list_table thead th[data-name=m2o]`).toHaveCount(1);
@@ -15289,20 +15212,21 @@ test(`properties: optional show/hide (at reload, config from local storage)`, as
         }
     }
 
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         getItem(key) {
             return "properties.property_char";
         },
     });
 
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
                 <field name="properties"/>
-            </tree>`,
+            </tree>
+        `,
         groupBy: ["m2o"],
     });
 
@@ -15315,7 +15239,6 @@ test(`properties: optional show/hide (at reload, config from local storage)`, as
     expect(`.o_list_table thead th[data-name=m2o]`).toHaveCount(1);
 
     await contains(`.o_group_header`).click(); // open group Value 1
-
     expect(`.o_data_row`).toHaveCount(3);
     expect(`.o_list_table thead th`).toHaveCount(4);
     expect(`.o_list_table thead th.o_list_record_selector`).toHaveCount(1);
@@ -15337,17 +15260,16 @@ test(`reload properties definitions when domain change`, async () => {
         }
     }
 
+    stepAllNetworkCalls();
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route) {
-            expect.step(route);
-        },
+                <field name="properties"/>
+            </tree>
+        `,
         irFilters: [
             {
                 context: "{}",
@@ -15359,13 +15281,11 @@ test(`reload properties definitions when domain change`, async () => {
             },
         ],
     });
-
-    expect(["/web/dataset/call_kw/foo/get_views", "/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group"]).toVerifySteps();
 
     await toggleSearchBarMenu();
     await toggleMenuItem("only one");
-
-    expect(["/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["web_search_read"]).toVerifySteps();
 });
 
 test(`do not reload properties definitions when page change`, async () => {
@@ -15381,24 +15301,21 @@ test(`do not reload properties definitions when page change`, async () => {
         }
     }
 
+    stepAllNetworkCalls();
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom" limit="2">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route) {
-            expect.step(route);
-        },
+                <field name="properties"/>
+            </tree>
+        `,
     });
-
-    expect(["/web/dataset/call_kw/foo/get_views", "/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group"]).toVerifySteps();
 
     await pagerNext();
-
-    expect(["/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["web_search_read"]).toVerifySteps();
 });
 
 test(`load properties definitions only once when grouped`, async () => {
@@ -15414,24 +15331,22 @@ test(`load properties definitions only once when grouped`, async () => {
         }
     }
 
+    stepAllNetworkCalls();
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
-                <field name="properties" />
-            </tree>`,
-        mockRPC(route) {
-            expect.step(route);
-        },
+                <field name="properties"/>
+            </tree>
+        `,
         groupBy: ["m2o"],
     });
-
-    expect(["/web/dataset/call_kw/foo/get_views", "/web/dataset/call_kw/foo/web_read_group"]).toVerifySteps();
+    expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_read_group", "has_group"]).toVerifySteps();
 
     await contains(`.o_group_header`).click();
-    expect(["/web/dataset/call_kw/foo/web_search_read"]).toVerifySteps();
+    expect(["web_search_read"]).toVerifySteps();
 });
 
 test(`Invisible Properties`, async () => {
@@ -15447,56 +15362,52 @@ test(`Invisible Properties`, async () => {
         }
     }
 
+    stepAllNetworkCalls();    
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree editable="bottom">
                 <field name="m2o"/>
                 <field name="properties" column_invisible="1"/>
-            </tree>`,
-        mockRPC(route, { method, args }) {
-            expect.step(method);
-        },
+            </tree>
+        `,
     });
-
     expect(`.o_optional_columns_dropdown_toggle`).toHaveCount(0);
     expect(["/web/webclient/translations", "/web/webclient/load_menus", "get_views", "web_search_read", "has_group"]).toVerifySteps();
 });
 
 test(`header buttons in list view`, async () => {
+    onRpc("/web/dataset/call_button", async (request) => {
+        const { params } = await request.json();
+        expect.step(params.method);
+        return true;
+    });
     await mountView({
-        type: "list",
         resModel: "foo",
+        type: "list",
         arch: `
             <tree>
                 <header>
-                    <button name="a" type="object" string="Confirm" confirm="Are you sure?" />
+                    <button name="a" type="object" string="Confirm" confirm="Are you sure?"/>
                 </header>
                 <field name="foo"/>
-                <field name="bar" />
-            </tree>`,
-
-        mockRPC: async (route, args) => {
-            if (route.startsWith("/web/dataset/call_button")) {
-                expect.step(args.method);
-                return true;
-            }
-        },
+                <field name="bar"/>
+            </tree>
+        `,
     });
     await contains(`.o_data_row .o_list_record_selector input`).click();
-    await click(queryFirst('.o_control_panel_actions button[name="a"]'));
+    await contains(`.o_control_panel_actions button[name="a"]`).click();
     expect(`.modal`).toHaveCount(1);
-    const modalText = queryFirst(".modal-body").textContent;
-    expect(modalText).toBe("Are you sure?");
+    expect(`.modal-body`).toHaveText("Are you sure?");
+
     await contains(`.modal footer button.btn-primary`).click();
     expect(["a"]).toVerifySteps();
 });
 
 test(`restore orderBy from state when using default order`, async () => {
-    serverData.models.foo.fields.amount.sortable = true;
-    serverData.actions = {
-        1: {
+    defineActions([
+        {
             id: 1,
             name: "Foo",
             res_model: "foo",
@@ -15506,33 +15417,30 @@ test(`restore orderBy from state when using default order`, async () => {
                 [false, "form"],
             ],
         },
-    };
-    serverData.views = {
-        "list,false": `
+    ]);
+
+    Foo._views = {
+        list: `
             <tree default_order="foo">
                 <field name="foo"/>
                 <field name="amount"/>
-            </tree>`,
-        "form,false": `
+            </tree>
+        `,
+        form: `
             <form>
                 <field name="amount"/>
                 <field name="foo"/>
-            </form>`,
-        "search,false": "<search/>",
+            </form>
+        `,
+        search: `<search/>`,
     };
-    const webclient = await createWebClient({
-        async mockRPC(route, { kwargs, method }) {
-            if (method === "web_search_read") {
-                expect.step("order:" + kwargs.order);
-            }
-        },
-    });
-    await doAction(webclient, 1);
 
+    onRpc("web_search_read", ({ kwargs }) => expect.step(`order:${kwargs.order}`));
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
     await contains(`th[data-name=amount]`).click(); // order by amount
     await contains(`.o_data_row .o_data_cell`).click(); // switch to the form view
     await contains(`.breadcrumb-item`).click(); // go back to the list view
-
     expect([
         "order:foo ASC", // initial list view
         "order:amount ASC, foo ASC", // order by amount
@@ -15541,69 +15449,62 @@ test(`restore orderBy from state when using default order`, async () => {
 });
 
 test(`x2many onchange, check result`, async () => {
-    const def = new Deferred();
+    const deferred = new Deferred();
     Foo._onChanges = {
-        m2m: function () {},
+        m2m() {},
     };
 
+    onRpc("onchange", async () => {
+        expect.step("onchange");
+        await deferred;
+        return { value: { m2o: [3, "Value 3"] } };
+    });
     await mountView({
-        type: "list",
         resModel: "foo",
-        arch: `<tree editable="bottom">
+        type: "list",
+        arch: `
+            <tree editable="bottom">
                 <field name="m2m" widget="many2many_tags"/>
                 <field name="m2o"/>
-            </tree>`,
-        async mockRPC(route, args) {
-            if (args.method === "onchange") {
-                expect.step("onchange");
-                await def;
-                return { value: { m2o: [3, "Value 3"] } };
-            }
-        },
+            </tree>
+        `,
     });
-
-    expect(queryFirst(".o_data_cell.o_many2many_tags_cell").textContent).toBe("Value 1Value 2");
-    expect(queryFirst(".o_data_cell.o_list_many2one").textContent).toBe("Value 1");
-    await contains(`.o_data_cell.o_many2many_tags_cell`).click();
-    await selectDropdownItem(target, "m2m", "Value 3");
-
+    expect(`.o_data_cell.o_many2many_tags_cell:eq(0)`).toHaveText("Value 1\nValue 2");
+    expect(`.o_data_cell.o_list_many2one:eq(0)`).toHaveText("Value 1");
+    
+    await contains(`.o_data_cell.o_many2many_tags_cell:eq(0)`).click();
+    await selectFieldDropdownItem("m2m", "Value 3");
     expect(["onchange"]).toVerifySteps();
-    await contains(`.o_list_button_save:not(.btn-link)`).click();
-    def.resolve();
-    await animationFrame();
 
-    expect(queryFirst(".o_data_cell.o_many2many_tags_cell").textContent).toBe("Value 1Value 2Value 3");
-    expect(queryFirst(".o_data_cell.o_list_many2one").textContent).toBe("Value 3", {
+    await contains(`.o_list_button_save`).click();
+    deferred.resolve();
+    await animationFrame();
+    expect(`.o_data_cell.o_many2many_tags_cell:eq(0)`).toHaveText("Value 1\nValue 2\nValue 3");
+    expect(`.o_data_cell.o_list_many2one:eq(0)`).toHaveText("Value 3", {
         message: "onchange result should be applied",
     });
 });
 
 test(`list view: prevent record selection when editable list in edit mode`, async () => {
     await mountView({
-        type: "list",
         resModel: "foo",
-        arch: `
-            <tree editable="top">
-                <field name="foo" />
-            </tree>`,
+        type: "list",
+        arch: `<tree editable="top"><field name="foo"/></tree>`,
     });
 
     //  When we try to select new record in edit mode
-    await contains(`.o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_list_button_add`).click();
+    await contains(`.o_control_panel_main_buttons .o_list_button_add`).click();
     await contains(`.o_data_row .o_list_record_selector`).click();
-    expect(queryFirst('.o_data_row .o_list_record_selector input[type="checkbox"]').checked).toBe(false);
+    expect(`.o_data_row .o_list_record_selector input[type="checkbox"]`).not.toBeChecked();
 
     //  When we try to select all records in edit mode
     await contains(`th.o_list_record_selector.o_list_controller`).click();
-    expect(queryFirst('.o_list_controller input[type="checkbox"]').checked).toBe(false);
+    expect(`.o_list_controller input[type="checkbox"]`).not.toBeChecked();
 });
 
 test(`context keys not passed down the stack and not to fields`, async () => {
-    patchWithCleanup(AutoComplete, {
-        timeout: 0,
-    });
-    serverData.actions = {
-        1: {
+    defineActions([
+        {
             id: 1,
             name: "Foo",
             res_model: "foo",
@@ -15614,48 +15515,51 @@ test(`context keys not passed down the stack and not to fields`, async () => {
                 search_default_bar: true,
             },
         },
-    };
-    serverData.views = {
-        "foo,foo_view_ref,list": `
+    ]);
+
+    Foo._views = {
+        "list,foo_view_ref": `
             <tree default_order="foo" editable="top">
                 <field name="m2m" widget="many2many_tags"/>
-            </tree>`,
-        "search,false": "<search/>",
-        "bar,false,list": `<tree><field name="name" /></tree>`,
-        "bar,false,search": "<search/>",
+            </tree>
+        `,
+        "search": `<search/>`,
+    };
+    Bar._views = {
+        "list": `<tree><field name="name"/></tree>`,
+        "search": `<search/>`,
     };
 
-    const barRecs = [];
+    Bar._records = [];
     for (let i = 1; i < 50; i++) {
-        barRecs.push({
-            id: i,
-            display_name: `Value ${i}`,
-        });
+        Bar._records.push({ id: i, name: `Value ${i}` });
     }
-    Bar._records = barRecs;
 
-    const mockRPC = (route, args) => {
-        if (args.method) {
-            expect.step(`${args.model}: ${args.method}: ${JSON.stringify(args.kwargs.context)}`);
+    onRpc(({ model, method, kwargs }) => {
+        if (["foo", "bar"].includes(model) && method) {
+            expect.step(`${model}: ${method}: ${JSON.stringify(kwargs.context)}`);
         }
-    };
-    const wc = await createWebClient({ serverData, mockRPC });
-    await doAction(wc, 1);
-    expect([`foo: get_views: {"lang":"en","tz":"taht","uid":7,"tree_view_ref":"foo_view_ref"}`, `foo: web_search_read: {"lang":"en","tz":"taht","uid":7,"bin_size":true,"tree_view_ref":"foo_view_ref"}`]).toVerifySteps();
+    });
 
-    await click(queryAll(".o_data_row .o_data_cell")[1]);
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+    expect([
+        `foo: get_views: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"tree_view_ref":"foo_view_ref"}`,
+        `foo: web_search_read: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"bin_size":true,"tree_view_ref":"foo_view_ref","current_company_id":1}`,
+    ]).toVerifySteps();
 
-    const input = queryFirst(".o_selected_row .o_field_many2many_tags input");
-    await triggerEvent(input, null, "focus");
-    await click(input);
-    await animationFrame();
-    expect([`bar: name_search: {"lang":"en","tz":"taht","uid":7}`]).toVerifySteps();
+    await contains(`.o_data_row .o_data_cell:eq(1)`).click();
+    await contains(`.o_selected_row .o_field_many2many_tags input`).click();
+    await runAllTimers();
+    expect([`bar: name_search: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1]}`]).toVerifySteps();
 
-    const items = Array.from(queryAll(".o_selected_row .o_field_many2many_tags .dropdown-item"));
-    await click(items.find((el) => el.textContent.trim() === "Search More..."));
-    expect([`bar: get_views: {"lang":"en","tz":"taht","uid":7}`, `bar: web_search_read: {"lang":"en","tz":"taht","uid":7,"bin_size":true}`]).toVerifySteps();
+    await contains(`.o_selected_row .o_field_many2many_tags .dropdown-item:contains(Search More...)`).click();
+    expect([
+        `bar: get_views: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1]}`,
+        `bar: web_search_read: {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"bin_size":true,"current_company_id":1}`,
+    ]).toVerifySteps();
     expect(`.modal`).toHaveCount(1);
-    expect(queryFirst(".modal .modal-header .modal-title").textContent).toBe("Search: M2M field");
+    expect(`.modal .modal-header .modal-title`).toHaveText("Search: M2m");
 });
 
 test("search nested many2one field with early option selection", async () => {
