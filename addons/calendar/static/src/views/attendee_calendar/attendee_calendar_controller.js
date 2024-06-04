@@ -88,7 +88,11 @@ export class AttendeeCalendarController extends CalendarController {
             if (record.rawRecord.recurrency) {
                 this.openRecurringDeletionWizard(record);
             } else {
-                super.deleteRecord(...arguments);
+                const action = this.orm.call("calendar.event", "unlink_event", [
+                    record.id,
+                    record.attendeeId,
+                ]);
+                this.actionService.doAction(action);
             }
         } else {
             // Decline event
@@ -106,7 +110,11 @@ export class AttendeeCalendarController extends CalendarController {
                 views: [[false, "form"]],
                 view_mode: "form",
                 name: "Delete Recurring Event",
-                context: { default_record: record.id },
+                context: {
+                    default_record: record.id,
+                    default_attendee_id: record.attendeeId,
+                    form_view_ref: 'calendar.calendar_popover_delete_view',
+                },
                 target: "new",
             },
             {
