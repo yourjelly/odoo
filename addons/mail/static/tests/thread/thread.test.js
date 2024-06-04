@@ -21,6 +21,7 @@ import { Deferred, mockDate, tick } from "@odoo/hoot-mock";
 import { Command, onRpc, serverState, withUser } from "@web/../tests/web_test_helpers";
 
 import { rpcWithEnv } from "@mail/utils/common/misc";
+import { queryFirst, queryOne } from "@odoo/hoot-dom";
 /** @type {ReturnType<import("@mail/utils/common/misc").rpcWithEnv>} */
 let rpc;
 
@@ -198,12 +199,12 @@ test("scroll position is kept when navigating from one channel to another [CAN F
     await start();
     await openDiscuss(channelId_1);
     await contains(".o-mail-Message", { count: 20 });
-    const scrollValue1 = $(".o-mail-Thread")[0].scrollHeight / 2;
+    const scrollValue1 = queryFirst(".o-mail-Thread").scrollHeight / 2;
     await contains(".o-mail-Thread", { scroll: "bottom" });
     await scroll(".o-mail-Thread", scrollValue1);
     await click(".o-mail-DiscussSidebarChannel", { text: "channel-2" });
     await contains(".o-mail-Message", { count: 30 });
-    const scrollValue2 = $(".o-mail-Thread")[0].scrollHeight / 3;
+    const scrollValue2 = queryFirst(".o-mail-Thread").scrollHeight / 3;
     await contains(".o-mail-Thread", { scroll: "bottom" });
     await scroll(".o-mail-Thread", scrollValue2);
     await click(".o-mail-DiscussSidebarChannel", { text: "channel-1" });
@@ -231,7 +232,7 @@ test("thread is still scrolling after scrolling up then to bottom", async () => 
     await openDiscuss(channelId);
     await contains(".o-mail-Message", { count: 20 });
     await contains(".o-mail-Thread", { scroll: "bottom" });
-    await scroll(".o-mail-Thread", $(".o-mail-Thread")[0].scrollHeight / 2);
+    await scroll(".o-mail-Thread", queryFirst(".o-mail-Thread").scrollHeight / 2);
     await scroll(".o-mail-Thread", "bottom");
     await insertText(".o-mail-Composer-input", "123");
     await click(".o-mail-Composer-send:enabled");
@@ -557,7 +558,7 @@ test("mention a channel when replacing the space after the mention by another ch
     await click(".o-mail-Composer-suggestion");
     await contains(".o-mail-Composer-input", { value: "#General good " });
     const text = $(".o-mail-Composer-input").val();
-    $(".o-mail-Composer-input").val(text.slice(0, -1));
+    queryOne(".o-mail-Composer-input").value = text.slice(0, -1);
     await insertText(".o-mail-Composer-input", ", test");
     await click(".o-mail-Composer-send:enabled");
     await contains(".o-mail-Message-body .o_channel_redirect", { text: "#General good" });
@@ -677,7 +678,7 @@ test("first unseen message should be directly preceded by the new message separa
     await click(".o-mail-Composer-send:enabled");
     await contains(".o-mail-Message", { count: 2 });
     // composer is focused by default, we remove that focus
-    $(".o-mail-Composer-input")[0].blur();
+    queryFirst(".o-mail-Composer-input").blur();
     // simulate receiving a message
     withUser(userId, () =>
         rpc("/mail/message/post", {

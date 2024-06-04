@@ -21,6 +21,7 @@ import {
 import { browser } from "@web/core/browser/browser";
 import { withUser } from "@web/../tests/_framework/mock_server/mock_server";
 import { Command, mountWithCleanup, serverState } from "@web/../tests/web_test_helpers";
+import { waitFor } from "@odoo/hoot-dom";
 
 /** @type {ReturnType<import("@mail/utils/common/misc").rpcWithEnv>} */
 let rpc;
@@ -106,7 +107,8 @@ test("focus on unread livechat marks it as read", async () => {
             context: { lang: "en", tz: "taht", uid: serverState.userId, allowed_company_ids: [1] },
         })}`,
     ]);
-    $(".o-mail-Composer-input").blur();
+    const el = await waitFor(".o-mail-Composer-input", { visible: true });
+    el.blur();
     const [channelId] = pyEnv["discuss.channel"].search([
         ["channel_type", "=", "livechat"],
         [

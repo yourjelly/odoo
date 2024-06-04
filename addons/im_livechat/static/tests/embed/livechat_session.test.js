@@ -16,6 +16,7 @@ import {
 } from "@mail/../tests/mail_test_helpers";
 import { rpcWithEnv } from "@mail/utils/common/misc";
 import { describe, expect, test } from "@odoo/hoot";
+import { waitFor } from "@odoo/hoot-dom";
 import { advanceTime } from "@odoo/hoot-mock";
 import { withUser } from "@web/../tests/_framework/mock_server/mock_server";
 import { mountWithCleanup, serverState } from "@web/../tests/web_test_helpers";
@@ -89,7 +90,8 @@ test("Seen message is saved on the server", async () => {
     await waitUntilSubscribe();
     const initialSeenMessageId =
         env.services["im_livechat.livechat"].thread.selfMember.seen_message_id?.id;
-    $(".o-mail-Composer-input").blur();
+    const el = await waitFor(".o-mail-Composer-input", { visible: true });
+    el.blur();
     await withUser(userId, () =>
         rpc("/mail/message/post", {
             post_data: {

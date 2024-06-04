@@ -11,6 +11,7 @@ import {
     startServer,
     triggerHotkey,
 } from "../mail_test_helpers";
+import { queryFirst } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -82,9 +83,8 @@ test("Basic keyboard navigation", async () => {
     await contains(`.o-EmojiPicker-content .o-Emoji[data-index='${EMOJI_PER_ROW}'].o-active`);
     triggerHotkey("ArrowUp");
     await contains(".o-EmojiPicker-content .o-Emoji[data-index='0'].o-active");
-    const codepoints = $(".o-EmojiPicker-content .o-Emoji[data-index='0'].o-active").data(
-        "codepoints"
-    );
+    const codepoints = queryFirst(".o-EmojiPicker-content .o-Emoji[data-index='0'].o-active")
+        .dataset.codepoints;
     triggerHotkey("Enter");
     await contains(".o-EmojiPicker", { count: 0 });
     await contains(".o-mail-Composer-input", { value: codepoints });

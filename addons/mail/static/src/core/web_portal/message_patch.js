@@ -17,9 +17,11 @@ patch(Message.prototype, {
      * @param {HTMLElement} element
      */
     prepareMessageBody(element) {
-        const $el = $(element);
-        $el.find(".o-mail-read-more-less").remove();
-        this.insertReadMoreLess($el);
+        const read_more_less = element.querySelector(".o-mail-read-more-less");
+        if (read_more_less) {
+            read_more_less.remove();
+        }
+        this.insertReadMoreLess(element);
     },
 
     /**
@@ -31,60 +33,70 @@ patch(Message.prototype, {
      *
      * FIXME This method should be rewritten (task-2308951)
      *
-     * @param {jQuery} $element
+     * @param {HTMLElement} element
      */
-    insertReadMoreLess($element) {
+    insertReadMoreLess(element) {
+        function getPreviousSiblings(elem) {
+            const siblings = [];
+            let sibling = elem.previousElementSibling;
+            while (sibling) {
+                siblings.push(sibling);
+                sibling = sibling.previousElementSibling;
+            }
+            return siblings;
+        }
         const groups = [];
         let readMoreNodes;
 
         // nodeType 1: element_node
         // nodeType 3: text_node
-        const $children = $element
-            .contents()
-            .filter(
-                (index, content) =>
-                    content.nodeType === 1 || (content.nodeType === 3 && content.nodeValue.trim())
-            );
+        const children = [...element.childNodes].filter(
+            (content) =>
+                content.nodeType === 1 || (content.nodeType === 3 && content.nodeValue.trim())
+        );
 
-        for (const child of $children) {
-            let $child = $(child);
-
+        for (const child of children) {
             // Hide Text nodes if "stopSpelling"
-            if (child.nodeType === 3 && $child.prevAll('[id*="stopSpelling"]').length > 0) {
+            const previousSiblingElements = getPreviousSiblings(child).filter((node) => {
+                const idValue = node.getAttribute("id");
+                return idValue && idValue.includes("stopSpelling");
+            });
+            if (child.nodeType === 3 && previousSiblingElements.length > 0) {
                 // Convert Text nodes to Element nodes
-                $child = $("<span>", {
-                    text: child.textContent,
-                    "data-o-mail-quote": "1",
-                });
-                child.parentNode.replaceChild($child[0], child);
+                const newChild = document.createElement("span");
+                newChild.textContent = child.textContent;
+                newChild.setAttribute("data-o-mail-quote", "1");
+                child.parentNode.replaceChild(newChild, child);
             }
 
             // Create array for each 'read more' with nodes to toggle
             if (
-                $child.attr("data-o-mail-quote") ||
-                ($child.get(0).nodeName === "BR" &&
-                    $child.prev('[data-o-mail-quote="1"]').length > 0)
+                (child.nodeType === 1 && child.getAttribute("data-o-mail-quote")) ||
+                (child.nodeName === "BR" &&
+                    child.previousElementSibling &&
+                    child.previousElementSibling.nodeType === 1 &&
+                    child.previousElementSibling.getAttribute("data-o-mail-quote"))
             ) {
                 if (!readMoreNodes) {
                     readMoreNodes = [];
                     groups.push(readMoreNodes);
                 }
-                $child.hide();
-                readMoreNodes.push($child);
+                child.style.display = "none";
+                readMoreNodes.push(child);
             } else {
                 readMoreNodes = undefined;
-                this.insertReadMoreLess($child);
+                this.insertReadMoreLess(child);
             }
         }
 
         for (const group of groups) {
             const index = this.state.lastReadMoreIndex++;
             // Insert link just before the first node
-            const $readMoreLess = $("<a>", {
-                class: "o-mail-read-more-less d-block",
-                href: "#",
-                text: "Read More",
-            }).insertBefore(group[0]);
+            const readMoreLess = document.createElement("a");
+            readMoreLess.classList.add(["o-mail-read-more-less", "d-block"]);
+            readMoreLess.setAttribute("href", "#");
+            readMoreLess.textContent = "Read More";
+            group[0].parentNode.insertBefore(readMoreLess, group[0]);
 
             // Toggle All next nodes
             if (!this.state.isReadMoreByIndex.has(index)) {
@@ -92,14 +104,13 @@ patch(Message.prototype, {
             }
             const updateFromState = () => {
                 const isReadMore = this.state.isReadMoreByIndex.get(index);
-                for (const $child of group) {
-                    $child.hide();
-                    $child.toggle(!isReadMore);
+                for (const child of group) {
+                    child.style.display = isReadMore ? "block" : "none";
                 }
-                $readMoreLess.text(isReadMore ? "Read More" : "Read Less");
+                readMoreLess.textContent = isReadMore ? "Read More" : "Read Less";
             };
-            $readMoreLess.click((e) => {
-                e.preventDefault();
+            readMoreLess.addEventListener("click", (ev) => {
+                ev.preventDefault();
                 this.state.isReadMoreByIndex.set(index, !this.state.isReadMoreByIndex.get(index));
                 updateFromState();
             });

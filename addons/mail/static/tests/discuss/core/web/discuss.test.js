@@ -257,7 +257,7 @@ test("sidebar: add channel", async () => {
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory-channel .o-mail-DiscussSidebarCategory-add");
     expect(
-        $(".o-mail-DiscussSidebarCategory-channel .o-mail-DiscussSidebarCategory-add")[0]
+        ".o-mail-DiscussSidebarCategory-channel .o-mail-DiscussSidebarCategory-add"
     ).toHaveAttribute("title", "Add or join a channel");
     await click(".o-mail-DiscussSidebarCategory-channel .o-mail-DiscussSidebarCategory-add");
     await contains(".o-discuss-ChannelSelector");

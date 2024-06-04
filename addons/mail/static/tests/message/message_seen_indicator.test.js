@@ -45,7 +45,7 @@ test("rendering when just one has received the message", async () => {
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-MessageSeenIndicator");
-    expect($(".o-mail-MessageSeenIndicator")).not.toHaveClass("o-all-seen");
+    expect(".o-mail-MessageSeenIndicator").not.toHaveClass("o-all-seen");
     await contains(".o-mail-MessageSeenIndicator i");
 });
 
@@ -76,7 +76,7 @@ test("rendering when everyone have received the message", async () => {
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-MessageSeenIndicator");
-    expect($(".o-mail-MessageSeenIndicator")).not.toHaveClass("o-all-seen");
+    expect(".o-mail-MessageSeenIndicator").not.toHaveClass("o-all-seen");
     await contains(".o-mail-MessageSeenIndicator i");
 });
 
@@ -114,7 +114,7 @@ test("rendering when just one has seen the message", async () => {
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-MessageSeenIndicator");
-    expect($(".o-mail-MessageSeenIndicator")).not.toHaveClass("o-all-seen");
+    expect(".o-mail-MessageSeenIndicator").not.toHaveClass("o-all-seen");
     await contains(".o-mail-MessageSeenIndicator i", { count: 2 });
 });
 
@@ -148,7 +148,7 @@ test("rendering when just one has seen & received the message", async () => {
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-MessageSeenIndicator");
-    expect($(".o-mail-MessageSeenIndicator")).not.toHaveClass("o-all-seen");
+    expect(".o-mail-MessageSeenIndicator").not.toHaveClass("o-all-seen");
     await contains(".o-mail-MessageSeenIndicator i", { count: 2 });
 });
 
@@ -179,7 +179,7 @@ test("rendering when just everyone has seen the message", async () => {
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-MessageSeenIndicator");
-    expect($(".o-mail-MessageSeenIndicator")).toHaveClass("o-all-seen");
+    expect(".o-mail-MessageSeenIndicator").toHaveClass("o-all-seen");
     await contains(".o-mail-MessageSeenIndicator i", { count: 2 });
 });
 

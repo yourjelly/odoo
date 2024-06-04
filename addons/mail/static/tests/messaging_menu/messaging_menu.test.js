@@ -664,7 +664,7 @@ test("basic rendering", async () => {
     });
     await start();
     await contains(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
-    expect($('.o_menu_systray .dropdown-toggle:has(i[aria-label="Messages"])')[0]).not.toHaveClass(
+    expect('.o_menu_systray .dropdown-toggle:has(i[aria-label="Messages"]):eq(0)').not.toHaveClass(
         "show"
     );
     await contains(".o_menu_systray i[aria-label='Messages']");
