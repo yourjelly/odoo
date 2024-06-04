@@ -6614,7 +6614,20 @@ registry.ImageTools = ImageHandlerOption.extend({
         this.$target.off('.ImageOptimization');
         return this._super(...arguments);
     },
-
+    /**
+     * @override
+     */
+    selectAttribute(previewMode, widgetValue, params) {
+        this._super(...arguments);
+        if (params.attributeName === "alt") {
+            const val = params.activeValue.trim();
+            if (val !== "") {
+                this.$target[0].removeAttribute("aria-hidden");
+            } else {
+                this.$target[0].setAttribute("aria-hidden", "true");
+            }
+        }
+    },
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
