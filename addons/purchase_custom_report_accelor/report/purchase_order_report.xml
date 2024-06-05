@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="purchase_order_report_custom">
+        <t t-call="purchase_custom_report_accelor.inherit_external_layout">
+            <t t-set="o" t-value="o.with_context(lang=lang)"/>
+            <div class="page" style="page-break-inside: avoid; font-size:15px">
+                <table class="col-12">
+                    <tr style="height:70px">
+                        <td style="width:50%">first td</td>
+                        <td style="width:50%">1st td</td>
+                    </tr>
+                    <tr style="height:100px">
+                        <td style="width:50%">first td</td>
+                        <td style="width:50%">1st td</td>
+                    </tr>
+                    <tr style="height:50px">
+                        <td colspan="2">Name and address of the vendor:</td>
+                    </tr>
+                    <tr style="height:130px">
+                        <td style="width:50%">first td</td>
+                        <td style="width:50%">1st td</td>
+                    </tr>
+                </table>
+                <table class="border border-dark text-center" style="width:100%">
+                    <thead class="p1">
+                        <tr class="text-center">
+                            <th> Sr No.</th>
+                            <th style="width:35%;">Description</th>
+                            <th>Part No.</th>
+                            <th>Quantity</th>
+                            <th>UOM</th>
+                            <th>Rate / Unit</th>
+                            <th>Amount in INR</th>
+                        </tr>
+                    </thead>
+                    <t t-foreach="o.order_line" t-as="line">
+                        <tr class="border-bottom border-dark">
+                            <td><t t-out="line_index + 1"/></td>
+                            <td>
+                                <span t-field="line.product_id"/>
+                            </td>
+                            <td>
+                                <span t-field="line.product_id.categ_id.name"/>
+                            </td>
+                            <td>
+                                <strong t-field="line.product_uom.ratio"/>
+                            </td>
+                            <td>
+                                <span t-field="line.product_qty"/>
+                            </td>
+                            <td>
+                                <span t-field="line.price_unit"/>
+                            </td>
+                            <td>
+                                <span t-field="line.price_subtotal"/>
+                            </td>
+                        </tr>
+                        <tr style="height:30px">
+                            <td colspan="5">Basic Total</td>
+                            <td></td>
+                            <td>test</td>
+                        </tr>
+                        <tr style="height:30px">
+                            <td colspan="5">IGST</td>
+                            <td>%</td>
+                            <td>test</td>
+                        </tr>
+                        <tr style="height:30px">
+                            <td colspan="5">Packing</td>
+                            <td>%</td>
+                            <td>test</td>
+                        </tr>
+                        <tr style="height:30px">
+                            <td colspan="5">Freight</td>
+                            <td>%</td>
+                            <td>test</td>
+                        </tr>
+                        <tr style="height:50px">
+                            <td colspan="6" rowspan="2">Total PO value in INR</td>
+                            <td>testttt</td>
+                        </tr>
+                    </t>
+                </table>
+            </div>
+        </t>
+    </template>
+    
+    <template id="purchase_order_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="o.partner_id.lang"/>
+                <t t-set="invoice_name" t-value="'Purchase Order'"/>
+                <t t-set="display_footer" t-value="True"/>
+                <t t-set="footer_message" t-value="'This is a computer generated Purchase Order.'"/>
+                <t t-call="purchase_custom_report_accelor.purchase_order_report_custom" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>

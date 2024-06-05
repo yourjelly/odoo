@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--paper format-->
+    <record id="paperformat_custom_invoice_report" model="report.paperformat">
+        <field name="name">Custom Report</field>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">20</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_spacing">18</field>
+        <field name="dpi">90</field>
+    </record>
+    <!--Purchase Order Reports-->
+    <record id="purchase_order_report_main" model="ir.actions.report">
+        <field name="name">Purchase Order Accelor</field>
+        <field name="model">purchase.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">purchase_custom_report_accelor.purchase_order_report</field>
+        <field name="report_file">purchase_custom_report_accelor.purchase_order_report</field>
+        <field name="attachment_use">True</field>
+        <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="purchase_custom_report_accelor.paperformat_custom_invoice_report"/>
+    </record>
+</odoo>
