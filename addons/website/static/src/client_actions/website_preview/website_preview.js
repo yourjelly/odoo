@@ -272,19 +272,25 @@ export class WebsitePreview extends Component {
 
     addWelcomeMessage() {
         if (this.websiteService.isRestrictedEditor) {
-            const $wrap = $(this.iframe.el.contentDocument.querySelector('#wrapwrap.homepage')).find('#wrap');
-            if ($wrap.length && $wrap.html().trim() === '') {
-                this.$welcomeMessage = $(renderToElement('website.homepage_editor_welcome_message'));
-                this.$welcomeMessage.addClass('o_homepage_editor_welcome_message');
-                this.$welcomeMessage.css('min-height', $wrap.parent('main').height() - ($wrap.outerHeight(true) - $wrap.height()));
-                $wrap.empty().append(this.$welcomeMessage);
+            const homepage = this.iframe.el.contentDocument.querySelector("#wrapwrap.homepage");
+            const wrap = homepage && homepage.querySelector("#wrap");
+            if (wrap?.innerHTML.trim() === "") {
+                this.welcomeMessage = renderToElement("website.homepage_editor_welcome_message");
+                this.welcomeMessage.classList.add("o_homepage_editor_welcome_message");
+                const wrapStyle = getComputedStyle(wrap);
+                const minHeight =
+                    wrap.closest("main").offsetHeight -
+                    (wrapStyle.marginTop + wrapStyle.marginBottom);
+                this.welcomeMessage.style.minHeight = minHeight + "px";
+                wrap.innerHTML = "";
+                wrap.append(this.welcomeMessage);
             }
         }
     }
 
     removeWelcomeMessage() {
-        if (this.$welcomeMessage) {
-            this.$welcomeMessage.detach();
+        if (this.welcomeMessage) {
+            this.welcomeMessage.parentNode.removeChild(this.welcomeMessage);
         }
     }
 

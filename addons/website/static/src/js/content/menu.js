@@ -95,7 +95,39 @@ const BaseAnimatedHeader = animations.Animation.extend({
      * @private
      */
     _adaptFixedHeaderPosition() {
-        $(this.el).compensateScrollbar(this.fixedHeader, false, 'right');
+        function getScrollbarWidth() {
+            const outer = document.createElement("div");
+            outer.style.visibility = "hidden";
+            outer.style.overflow = "scroll"; // Force scrollbar to appear
+            document.body.appendChild(outer);
+
+            const inner = document.createElement("div");
+            outer.appendChild(inner);
+
+            const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
+
+            document.body.removeChild(outer);
+
+            return scrollbarWidth;
+        }
+        function compensateScrollbar(element, fixedHeader, direction = "right") {
+            const scrollbarWidth = getScrollbarWidth();
+
+            if (fixedHeader) {
+                if (direction === "right") {
+                    element.style.paddingRight = `${scrollbarWidth}px`;
+                } else if (direction === "left") {
+                    element.style.paddingLeft = `${scrollbarWidth}px`;
+                }
+            } else {
+                if (direction === "right") {
+                    element.style.paddingRight = "";
+                } else if (direction === "left") {
+                    element.style.paddingLeft = "";
+                }
+            }
+        }
+        compensateScrollbar(this.el, this.fixedHeader, "right");
     },
     /**
      * @private
