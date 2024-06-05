@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <template id="report_product_without_price">
+        <t t-call="web.basic_layout">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <div class="text-center">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td>
+                                    <div class="o_label_full pt-2 mx-auto" style="width:85mm; height: 76.2mm; border: 1px solid black;">
+                                        <div class="o_label_name text-center">
+                                            <strong><span style="font-size: 22px;" t-field="o.display_name">Product Name</span></strong>
+                                        </div>
+                                        <div class="text-center mt-5">
+                                            <span t-if="o.barcode" t-field="o.barcode" style="padding: 0"
+                                                  t-options="{'widget': 'barcode', 'humanreadable': 1, 'symbology': 'auto', 'img_style': 'width: 82mm; height: 25.4mm;'}">1234567890</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>    
+
+    <template id="report_product_without_price_2">
+        <t t-call="web.basic_layout">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <div class="text-center">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td>
+                                    <div class="o_label_full" style="width: 75mm; height: 24mm;">
+                                        <div class="o_label_name text-center">
+                                            <strong><span style="font-size: 14px;" t-field="o.name">Product Name</span></strong>
+                                        </div>
+                                        <div class="text-center">
+                                            <span t-if="o.barcode" t-field="o.barcode" style="padding: 0"
+                                                  t-options="{'widget': 'barcode', 'humanreadable': 1, 'symbology': 'auto', 'img_style': 'width: 70mm; height: 12mm;'}">1234567890</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+    
+    
+
+<template id="report_product">
+    <t t-set="title">Products</t>
+    <t t-call="stock_custom_roots_logisticare.report_product_without_price"/>
+</template>
+<template id="report_product_second">
+    <t t-set="title">Products</t>
+    <t t-call="stock_custom_roots_logisticare.report_product_without_price_2"/>
+</template>
+</data>
+</odoo>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_lot_label_1">
+            <t t-call="web.basic_layout">
+                <t t-foreach="docs" t-as="o">
+                    <div class="text-center">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td>
+                                    <div class="o_label_name text-center mt-1">
+                                        <strong><span style="font-size: 12px;" t-field="o.product_id.display_name">Product Name</span></strong>
+                                    </div>
+                                    <div class="text-center">
+                                        <span t-if="o.product_id.barcode" t-field="o.product_id.barcode" style="padding: 0; display: block;" 
+                                              t-options="{'widget': 'barcode', 'symbology': 'auto', 'img_style': 'width: 100%; height: 10mm;'}"/>
+                                    </div>
+                                    <div class="text-center">
+                                        <span style="font-size: 12px;" t-field="o.name">Lot Name</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </template>        
+    </data>
+</odoo>
