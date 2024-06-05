@@ -248,8 +248,8 @@
                 const ratio = options.ratio || window.devicePixelRatio || 1;
                 const width = options.width || this.canvas.width / ratio;
                 const height = options.height || this.canvas.height / ratio;
-                const xOffset = options.xOffset || 0;
-                const yOffset = options.yOffset || 0;
+                const xOffset = options.xOffset || (this.canvas.width - width) / 2;
+                const yOffset = options.yOffset || (this.canvas.height - height) / 2;
                 this._reset(this._getPointGroupOptions());
                 image.onload = () => {
                     this._ctx.drawImage(image, xOffset, yOffset, width, height);
