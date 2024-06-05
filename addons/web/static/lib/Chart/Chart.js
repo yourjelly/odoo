@@ -1,5 +1,5 @@
 /*!
- * Chart.js v4.4.1
+ * Chart.js v4.4.3
  * https://www.chartjs.org
  * (c) 2024 Chart.js Contributors
  * Released under the MIT License
@@ -1874,7 +1874,7 @@
     function getContainerSize(canvas, width, height) {
         let maxWidth, maxHeight;
         if (width === undefined || height === undefined) {
-            const container = _getParentNode(canvas);
+            const container = canvas && _getParentNode(canvas);
             if (!container) {
                 width = canvas.clientWidth;
                 height = canvas.clientHeight;
@@ -2077,6 +2077,9 @@
     /**
      * Clears the entire canvas.
      */ function clearCanvas(canvas, ctx) {
+        if (!ctx && !canvas) {
+            return;
+        }
         ctx = ctx || canvas.getContext('2d');
         ctx.save();
         // canvas.width and canvas.height do not consider the canvas transform,
@@ -2518,7 +2521,7 @@
     const readKey = (prefix, name)=>prefix ? prefix + _capitalize(name) : name;
     const needsSubResolver = (prop, value)=>isObject(value) && prop !== 'adapters' && (Object.getPrototypeOf(value) === null || value.constructor === Object);
     function _cached(target, prop, resolve) {
-        if (Object.prototype.hasOwnProperty.call(target, prop)) {
+        if (Object.prototype.hasOwnProperty.call(target, prop) || prop === 'constructor') {
             return target[prop];
         }
         const value = resolve();
@@ -4228,10 +4231,14 @@
         passive: true
     } : false;
     function addListener(node, type, listener) {
-        node.addEventListener(type, listener, eventListenerOptions);
+        if (node) {
+            node.addEventListener(type, listener, eventListenerOptions);
+        }
     }
     function removeListener(chart, type, listener) {
-        chart.canvas.removeEventListener(type, listener, eventListenerOptions);
+        if (chart && chart.canvas) {
+            chart.canvas.removeEventListener(type, listener, eventListenerOptions);
+        }
     }
     function fromNativeEvent(event, chart) {
         const type = EVENT_TYPES[event.type] || event.type;
@@ -4424,7 +4431,7 @@
             return getMaximumSize(canvas, width, height, aspectRatio);
         }
         isAttached(canvas) {
-            const container = _getParentNode(canvas);
+            const container = canvas && _getParentNode(canvas);
             return !!(container && container.isConnected);
         }
     }
@@ -4752,15 +4759,18 @@
         }
         return value;
     }
-    function convertObjectDataToArray(data) {
+    function convertObjectDataToArray(data, meta) {
+        const { iScale , vScale  } = meta;
+        const iAxisKey = iScale.axis === 'x' ? 'x' : 'y';
+        const vAxisKey = vScale.axis === 'x' ? 'x' : 'y';
         const keys = Object.keys(data);
         const adata = new Array(keys.length);
         let i, ilen, key;
         for(i = 0, ilen = keys.length; i < ilen; ++i){
             key = keys[i];
             adata[i] = {
-                x: key,
-                y: data[key]
+                [iAxisKey]: key,
+                [vAxisKey]: data[key]
             };
         }
         return adata;
@@ -4952,7 +4962,8 @@
             const data = dataset.data || (dataset.data = []);
             const _data = this._data;
             if (isObject(data)) {
-                this._data = convertObjectDataToArray(data);
+                const meta = this._cachedMeta;
+                this._data = convertObjectDataToArray(data, meta);
             } else if (_data !== data) {
                 if (_data) {
                     unlistenArrayEvents(_data, this);
@@ -7503,7 +7514,7 @@
         return false;
     }
 
-    var version = "4.4.1";
+    var version = "4.4.3";
 
     const KNOWN_POSITIONS = [
         'top',
@@ -8943,7 +8954,7 @@
             const ilen = rects.length;
             let i = 0;
             for(; i < ilen; ++i){
-                if (this.getParsed(i)[vScale.axis] !== null) {
+                if (this.getParsed(i)[vScale.axis] !== null && !rects[i].hidden) {
                     rects[i].draw(this._ctx);
                 }
             }
@@ -11709,7 +11720,7 @@
             }
             if (grid.display) {
                 this.ticks.forEach((tick, index)=>{
-                    if (index !== 0) {
+                    if (index !== 0 || index === 0 && this.min < 0) {
                         offset = this.getDistanceFromCenterForValue(tick.value);
                         const context = this.getContext(index);
                         const optsAtIndex = grid.setContext(context);
@@ -11756,7 +11767,7 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             this.ticks.forEach((tick, index)=>{
-                if (index === 0 && !opts.reverse) {
+                if (index === 0 && this.min >= 0 && !opts.reverse) {
                     return;
                 }
                 const optsAtIndex = tickOpts.setContext(this.getContext(index));
@@ -13920,20 +13931,23 @@
                 return false;
             }
             let i, len;
-            let x = 0;
+            let xSet = new Set();
             let y = 0;
             let count = 0;
             for(i = 0, len = items.length; i < len; ++i){
                 const el = items[i].element;
                 if (el && el.hasValue()) {
                     const pos = el.tooltipPosition();
-                    x += pos.x;
+                    xSet.add(pos.x);
                     y += pos.y;
                     ++count;
                 }
             }
+            const xAverage = [
+                ...xSet
+            ].reduce((a, b)=>a + b) / xSet.size;
             return {
-                x: x / count,
+                x: xAverage,
                 y: y / count
             };
         },
