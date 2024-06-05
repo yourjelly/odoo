@@ -114,7 +114,7 @@ function describeWhyStepFailed(step) {
     } else if (!stepState.isVisible) {
         return "Element has been found but isn't displayed. (Use 'step.allowInvisible: true,' if you want to skip this check)";
     } else if (!stepState.isEnabled) {
-        return "Element has been found but is disabled. (If this step does not run action so that you only want to check that element is visible, you can use 'step.isCheck: true,')";
+        return "Element has been found but is disabled.";
     } else if (stepState.isBlocked) {
         return "Element has been found but DOM is blocked by UI.";
     } else if (!stepState.hasRun) {
@@ -413,10 +413,9 @@ export function compileStepAuto(stepIndex, step, options) {
                     step.run = () => {};
                     step.allowDisabled = true;
                 }
-                // "isCheck: true" = no action to run and accept disabled elements.
-                if (step.isCheck) {
-                    step.run = () => {};
-                    step.allowDisabled = true;
+
+                if (!("isCheck" in step)) {
+                    throwError(tour, step, ["isCheck is not longer used bro !."]);
                 }
 
                 if (!stepEl) {
@@ -433,10 +432,6 @@ export function compileStepAuto(stepIndex, step, options) {
                     pointer.pointTo(stepEl, step);
                     await new Promise((r) => browser.setTimeout(r, showPointerDuration));
                     pointer.hide();
-                }
-
-                if (!("run" in step)) {
-                    throwError(tour, step, ["The step must have a run key `run() {}`."]);
                 }
 
                 // TODO: Delegate the following routine to the `ACTION_HELPERS` in the macro module.

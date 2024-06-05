@@ -60,7 +60,6 @@ registry.category('web_tour.tours').add('mailing_campaign', {
         {
             content: 'Check that newly created record is on the list',
             trigger: '[name="mailing_mail_ids"] td[name="subject"]:contains("TestFromTour")',
-            run: () => null,
         },
         ...stepUtils.saveForm(),
     ]

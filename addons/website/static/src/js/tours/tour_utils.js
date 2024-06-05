@@ -194,7 +194,6 @@ function clickOnEditAndWaitEditMode(position = "bottom") {
         content: "Check that we are in edit mode",
         trigger: ".o_website_preview.editor_enable.editor_has_snippets",
         auto: true, // Checking step only for automated tests
-        isCheck: true,
     }];
 }
 
@@ -219,7 +218,6 @@ function clickOnEditAndWaitEditModeInTranslatedPage(position = "bottom") {
         content: "Check that we are in edit mode",
         trigger: ".o_website_preview.editor_enable.editor_has_snippets",
         auto: true, // Checking step only for automated tests
-        isCheck: true,
     }];
 }
 
@@ -259,7 +257,6 @@ function clickOnSave(position = "bottom", timeout) {
         trigger: ':iframe body:not(.editor_enable)',
         noPrepend: true,
         auto: true, // Just making sure save is finished in automatic tests
-        run: () => null,
         timeout: timeout,
     }];
 }
@@ -397,7 +394,6 @@ function registerWebsitePreviewTour(name, options, steps) {
                     trigger: ".o_website_preview.editor_enable.editor_has_snippets",
                     timeout: 30000,
                     auto: true,
-                    run: () => {}, // It's a check
                 });
             } else {
                 tourSteps[0].timeout = 20000;
@@ -498,7 +494,6 @@ function switchWebsite(websiteId, websiteName) {
         // some time
         timeout: 20000,
         trigger: `:iframe html[data-website-id="${websiteId}"]`,
-        isCheck: true,
     }];
 }
 
@@ -521,7 +516,6 @@ function toggleMobilePreview(toggleOn) {
     }, {
         content: `Check that the mobile preview is ${onOrOff}`,
         trigger: `:iframe #wrapwrap${toggleOn ? mobileOnSelector : mobileOffSelector}`,
-        isCheck: true,
     }];
 }
 

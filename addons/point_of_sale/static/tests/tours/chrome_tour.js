@@ -14,7 +14,6 @@ registry.category("web_tour.tours").add("ChromeTour", {
             Chrome.clickMenuButton(),
             {
                 ...Chrome.clickMenuDropdownOption("Cash In/Out"),
-                isCheck: true,
             },
             Chrome.clickMenuButton(),
 

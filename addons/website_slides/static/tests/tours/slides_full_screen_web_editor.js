@@ -28,10 +28,8 @@ import { stepUtils } from "@web_tour/tour_service/tour_utils";
     run: "click",
 }, {
     trigger: ':iframe .o_wslides_fs_main',
-    run: function () {} // check we land on the fullscreen view
 },
 ...wTourUtils.clickOnEditAndWaitEditMode()
 , {
     trigger: ':iframe .o_wslides_lesson_main',
-    run: function () {} // check we are redirected on the detailed view
 }]);

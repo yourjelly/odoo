@@ -21,7 +21,6 @@ wTourUtils.registerWebsitePreviewTour('website_click_tour', {
     {
         content: "wait for the page to be loaded",
         trigger: '.o_website_preview[data-view-xmlid="website.contactus"]',
-        run: () => null, // it's a check
     },
     ...wTourUtils.clickOnEditAndWaitEditMode(),
     {

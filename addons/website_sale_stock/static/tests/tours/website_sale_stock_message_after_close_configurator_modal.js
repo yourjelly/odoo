@@ -13,7 +13,6 @@ registry.category("web_tour.tours").add('website_sale_stock_message_after_close_
     }, {
         content: "Check that the stock quantity is displayed and correct",
         trigger: '#threshold_message:contains("30")',
-        run: function () { },
     }, {
         content: "Add to cart",
         trigger: '#add_to_cart',
@@ -26,7 +25,6 @@ registry.category("web_tour.tours").add('website_sale_stock_message_after_close_
     }, {
         content: "Check that the stock quantity is displayed and correct after adding to cart",
         trigger: '#threshold_message:contains("29")',
-        run: function () { },
     }
     ]
 });
@@ -42,7 +40,6 @@ registry.category("web_tour.tours").add('website_sale_stock_message_after_close_
     }, {
         content: "Check that the stock quantity is displayed and correct",
         trigger: '#threshold_message:contains("30")',
-        run: function () { },
     }, {
         content: "Add to cart",
         trigger: '#add_to_cart',
@@ -50,7 +47,6 @@ registry.category("web_tour.tours").add('website_sale_stock_message_after_close_
     }, {
         content: "Check that the stock quantity is displayed and correct after adding to cart",
         trigger: '#threshold_message:contains("29")',
-        run: function () { },
     }
     ]
 });

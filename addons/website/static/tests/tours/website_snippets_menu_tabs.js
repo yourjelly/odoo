@@ -18,7 +18,6 @@ wTourUtils.registerWebsitePreviewTour("website_snippets_menu_tabs", {
     {
         content: "Verify that the customize panel is not empty.",
         trigger: '.o_we_customize_panel > we-customizeblock-options',
-        run: () => null, // it's a check
     },
     {
         content: "Click on the style tab.",
@@ -29,6 +28,5 @@ wTourUtils.registerWebsitePreviewTour("website_snippets_menu_tabs", {
     {
         content: "Verify that the customize panel is not empty.",
         trigger: '.o_we_customize_panel > we-customizeblock-options',
-        run: () => null, // it's a check
     },
 ]);

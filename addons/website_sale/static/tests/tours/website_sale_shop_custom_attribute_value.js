@@ -28,5 +28,4 @@
     {
         trigger: 'span:contains(Custom: Wood)',
         extra_trigger: '#cart_products',
-        run: function (){}, // check
     }]});

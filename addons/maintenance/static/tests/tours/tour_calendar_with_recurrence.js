@@ -47,7 +47,6 @@ registry.category("web_tour.tours").add("test_dblclick_event_from_calendar", {
         },
         {
             trigger: 'a[data-event-id="1"]',
-            isCheck: true,
         }
     ],
 });

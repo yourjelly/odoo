@@ -40,7 +40,6 @@ function addCheck(steps, checkX, checkNoX, xType, noSwitch = false) {
         trigger: selectorCheckX || selectorCheckNoX,
         content: `The correct ${name} is marked as selected`,
         position: 'bottom',
-        run: () => null,
     };
     if (!selectorCheckX && selectorCheckNoX) {
         step.extra_trigger = selectorCheckNoX;
@@ -90,7 +89,6 @@ function updateAndCheckCustomGradient({updateStep, checkGradient}) {
     const steps = [updateStep, {
         trigger: `:iframe #wrapwrap section.${snippets[0].id}.o_cc1`,
         content: 'Color combination 1 still selected',
-        run: () => null,
     }];
     addCheck(steps, checkGradient, checkGradient !== gradients[0] && gradients[0], 'gradient', true);
     return steps;
@@ -120,7 +118,6 @@ wTourUtils.clickOnSnippet(snippets[0]),
 {
     content: "Check that the image is set",
     trigger: `:iframe section.${snippets[0].id} img[data-original-id]`,
-    isCheck: true,
 },
 ...wTourUtils.clickOnEditAndWaitEditMode(),
 wTourUtils.clickOnSnippet(snippets[0]),
@@ -394,7 +391,6 @@ switchTo('gradient'),
 wTourUtils.changeOption('ColoredLevelBackground', '[data-name="bg_image_toggle_opt"]', 'image toggle', 'top', true),
 {
     trigger: `:iframe .${snippets[0].id}.o_cc.o_cc1[style*="background-image: ${gradients[1]}"]`,
-    run: () => null,
 },
 
 // Now removing all colors via the 'None' button (note: colorpicker still opened)
@@ -406,6 +402,5 @@ wTourUtils.changeOption('ColoredLevelBackground', '[data-name="bg_image_toggle_o
 {
     trigger: `:iframe .${snippets[0].id}:not(.o_cc):not(.o_cc1):not([style*="background-image"])`,
     content: "All color classes and properties should have been removed",
-    run: () => null,
 }
 ]);

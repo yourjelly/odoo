@@ -35,7 +35,6 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
     {
         content: "Check that #wrap is empty",
         trigger: ':iframe #wrap:empty',
-        isCheck:true,
     },
 
     // Cover: test that parallax, bg-filter and shape are not treated as content
@@ -52,17 +51,14 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
     {
         content: "Check that the parallax element is present",
         trigger: ':iframe #wrap .s_cover .s_parallax_bg',
-        run: () => null,
     },
     {
         content: "Check that the filter element is present",
         trigger: ':iframe #wrap .s_cover .o_we_bg_filter',
-        run: () => null,
     },
     {
         content: "Check that the shape element is present",
         trigger: ':iframe #wrap .s_cover .o_we_shape',
-        run: () => null,
     },
     // Add a column
     wTourUtils.changeOption('layout_column', 'we-toggler'),
@@ -76,6 +72,5 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
     {
         content: "Check that #wrap is empty",
         trigger: ':iframe #wrap:empty',
-        run: () => null,
     },
 ]);

@@ -86,7 +86,6 @@
         {
             content: "Wait for field to load",
             trigger: `:iframe .s_website_form_field[data-type="${name}"],:iframe .s_website_form_input[name="${name}"]`, //custom or existing field
-            run: function () {},
         },
         ...selectButtonByText(display.visibility),
     ];
@@ -122,7 +121,6 @@
         ret.push({
             content: "Check the resulting field",
             trigger: testText,
-            run: function () {},
         });
         return ret;
     };
@@ -151,7 +149,6 @@
         }, {
             content: "Verify that the form editor appeared",
             trigger: '.o_we_customize_panel .snippet-option-WebsiteFormEditor',
-            run: () => null,
         },
         wTourUtils.goBackToBlocks(),
         {
@@ -162,7 +159,6 @@
         }, {
             content: "Verify that the form editor appeared",
             trigger: '.o_we_customize_panel .snippet-option-WebsiteFormEditor',
-            run: () => null,
         }, {
             content: "Rename and leave the field label",
             trigger: 'we-input[data-set-label-text] input',
@@ -199,7 +195,6 @@
         {
             content: "Check that 'Conditional Visibility Check 2' is not in the list of the visibility selector of Conditional Visibility Check 1",
             trigger: "we-select[data-name='hidden_condition_opt']:not(:has(we-button[data-set-visibility-dependency='Conditional Visibility Check 2']))",
-            run: () => null,
         },
         ...addCustomField("char", "text", "Conditional Visibility Check 3", false),
         ...addCustomField("char", "text", "Conditional Visibility Check 4", false),
@@ -214,7 +209,6 @@
         {
             content: "Check that the conditional visibility of the renamed field is removed",
             trigger: "we-customizeblock-option.snippet-option-WebsiteFieldEditor we-select:contains('Visibility'):has(we-toggler:contains('Always Visible'))",
-            run: () => null,
         },
         ...addCustomField("char", "text", "Conditional Visibility Check 5", false),
         ...addCustomField("char", "text", "Conditional Visibility Check 6", false),
@@ -228,13 +222,11 @@
         {
             content: "Check that 'Conditional Visibility Check 5' is not in the list of the renamed field",
             trigger: "we-customizeblock-option.snippet-option-WebsiteFieldEditor we-select[data-name='hidden_condition_opt']:not(:has(we-button:contains('Conditional Visibility Check 5')))",
-            run: () => null,
         },
         ...addExistingField('email_cc', 'text', 'Test conditional visibility', false, {visibility: CONDITIONALVISIBILITY, condition: 'odoo'}),
         {
             content: "Ensure that the description has correctly been added on the field",
             trigger: ":iframe .s_website_form_field:contains('Test conditional visibility') .s_website_form_field_description",
-            isCheck: true,
         },
         // Check that visibility condition is deleted on dependency type change.
         ...addCustomField("char", "text", "dependent", false, {visibility: CONDITIONALVISIBILITY}),
@@ -252,7 +244,6 @@
         {
             content: "Check that the field no longer has conditional visibility",
             trigger: "we-select we-button[data-set-visibility='visible'].active",
-            isCheck: true,
         },
 
         ...addExistingField('date', 'text', 'Test Date', true),
@@ -300,7 +291,6 @@
                         ":has(.checkbox:has(label:contains('Galaxy S')):has(input[type='checkbox'][required]))" +
                         ":has(.checkbox:has(label:contains('Xperia')):has(input[type='checkbox'][required]))" +
                         ":has(.checkbox:has(label:contains('Wiko Stairway')):has(input[type='checkbox'][required]))",
-            run: function () {},
         },
         ...selectButtonByData('data-multi-checkbox-display="vertical"'),
         {
@@ -311,7 +301,6 @@
                         ":has(.checkbox:has(label:contains('Galaxy S')):has(input[type='checkbox'][required]))" +
                         ":has(.checkbox:has(label:contains('Xperia')):has(input[type='checkbox'][required]))" +
                         ":has(.checkbox:has(label:contains('Wiko Stairway')):has(input[type='checkbox'][required]))",
-            run: function () {},
         },
 
         ...addCustomField('selection', 'radio', 'Service', true),
@@ -362,7 +351,6 @@
                         ":has(.radio:has(label:contains('Invoicing Service')):has(input[type='radio']:not([required])))" +
                         ":has(.radio:has(label:contains('Development Service')):has(input[type='radio']:not([required])))" +
                         ":has(.radio:has(label:contains('Management Service')):has(input[type='radio']:not([required])))",
-            run: function () {},
         },
 
         ...addCustomField('many2one', 'select', 'State', true),
@@ -446,7 +434,6 @@
                         ":has(option:contains('Canada'))" +
                         ":has(option:contains('44 - UK'))" +
                         ":not(:has(option:contains('Germany')))",
-            run: function () {},
         },
 
         ...addExistingField('attachment_ids', 'file', 'Invoice Scan'),
@@ -471,7 +458,6 @@
         }, {
             content: "Check that no URL field is suggested",
             trigger: '.oe-toolbar:not(.oe-floating):has(#url_row:hidden)',
-            run: () => null,
         }, {
             content: "Change button's style",
             trigger: '.dropdown:has([name="link_style_color"]) > button',
@@ -486,7 +472,6 @@
         }, {
             content: "Check the resulting button",
             trigger: ':iframe .s_website_form_send.btn.btn-sm.btn-secondary.rounded-circle',
-            run: () => null,
         },
         // Add a default value to a auto-fillable field.
         {
@@ -528,11 +513,9 @@
         {
             content: "Check that field B prefill text is set",
             trigger: `:iframe ${triggerFieldByLabel("field B")}:has(input[value="prefilled"])`,
-            isCheck: true,
         }, {
             content: "Check that field A is visible",
             trigger: `:iframe .s_website_form:has(${triggerFieldByLabel("field A")}:visible)`,
-            isCheck: true,
         },
         // A) Check that if we edit again and save again the default value is
         // not deleted.
@@ -573,7 +556,6 @@
                 `:has(${triggerFieldByLabel("field A")}:not(:visible))` +
                 `:has(${triggerFieldByLabel("field B")}` +
                 `:has(input[value="prefilled"]):not(:visible))`,
-            isCheck: true,
         }, {
             content: "Type something in field C",
             trigger: `:iframe ${triggerFieldByLabel("field C")} input`,
@@ -582,7 +564,6 @@
             content: "Check that fields A and B are visible",
             trigger: `:iframe .s_website_form:has(${triggerFieldByLabel("field B")}:visible)` +
                 `:has(${triggerFieldByLabel("field A")}:visible)`,
-            isCheck: true,
         },
 
         // Have field A's visibility tied to field B containing something,
@@ -592,7 +573,6 @@
         {
             content: "Verify that the form editor appeared",
             trigger: ".o_we_customize_panel .snippet-option-WebsiteFormEditor",
-            run: () => null,
         },
         ...selectButtonByData('data-select-data-attribute="contains"'),
         {
@@ -611,7 +591,6 @@
             content: "Check that field B is visible, but field A is not",
             trigger: `:iframe .s_website_form:has(${triggerFieldByLabel("field B")}:visible)` +
                 `:has(${triggerFieldByLabel("field A")}:not(:visible))`,
-            isCheck: true,
         }, {
             content: "Insert 'peek-a-boo' in field B",
             trigger: `:iframe ${triggerFieldByLabel("field B")} input`,
@@ -619,7 +598,6 @@
         }, {
             content: "Check that field A is visible",
             trigger: `:iframe .s_website_form:has(${triggerFieldByLabel("field A")}:visible)`,
-            isCheck: true,
         },
         ...wTourUtils.clickOnEditAndWaitEditMode(),
         // This step is to ensure select fields are properly cleaned before
@@ -695,7 +673,6 @@
         {
             content: "Check that field D is visible",
             trigger: `:iframe .s_website_form:has(${triggerFieldByLabel("field D")}:visible)`,
-            isCheck: true,
         },
         ...wTourUtils.clickOnEditAndWaitEditMode(),
         // The next four calls to "addCustomField" are there to ensure such
@@ -711,7 +688,6 @@
         {
             content: "Ensure that the description has correctly been added on the field",
             trigger: ":iframe .s_website_form_field:contains('Check description option') .s_website_form_field_description",
-            isCheck: true,
         },
 
         ...wTourUtils.clickOnSave(),
@@ -719,7 +695,6 @@
             content: 'Verify that the recipient email has been saved',
             // We have to this that way because the input type = hidden.
             trigger: ':iframe form:has(input[name="email_to"][value="test@test.test"])',
-            isCheck: true,
         }
     ]);
 
@@ -760,7 +735,6 @@
         }, {
             content: "Check that the recipient email is correct",
             trigger: 'we-input[data-field-name="email_to"] input:value("website_form_contactus_edition_no_email@mail.com")',
-            isCheck: true,
         },
     ]));
 
@@ -866,7 +840,6 @@
         }, {
             content: 'Check the form could not be sent',
             trigger: ':iframe #s_website_form_result.text-danger',
-            run: () => null,
         }, {
             content: 'Check the first checkbox',
             trigger: ':iframe input[type="checkbox"][name="Checkbox 1"]',
@@ -874,7 +847,6 @@
         }, {
             content: 'Check the second checkbox is now hidden',
             trigger: ':iframe .s_website_form:has(input[type="checkbox"][name="Checkbox 2"]:not(:visible))',
-            run: () => null,
         }, {
             content: 'Try sending the form',
             trigger: ':iframe .s_website_form_send',
@@ -882,7 +854,6 @@
         }, {
             content: "Check the form was sent (success page without form)",
             trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) .fa-check-circle',
-            run: () => null,
         }, {
             content: "Go back to the form",
             trigger: ':iframe a.navbar-brand.logo',
@@ -900,7 +871,6 @@
         }, {
             content: "Check the form was again sent (success page without form)",
             trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) .fa-check-circle',
-            run: () => null,
         }
     ]);
 
@@ -966,7 +936,6 @@
         {
             content: "Check that the new text value was correctly set",
             trigger: ":iframe section.s_website_form h3:contains(/^ABC$/)",
-            run: () => null, // it's a check
         },
         {   content: "Remove the dropped column",
             trigger: ":iframe .oe_overlay.oe_active .oe_snippet_remove",
@@ -1013,7 +982,6 @@
         }, {
             content: "Check the form was again sent (success page without form)",
             trigger: ":iframe body:not(:has([data-snippet='s_website_form'])) .fa-check-circle",
-            isCheck: true,
         },
     ]);
 

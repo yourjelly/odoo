@@ -17,7 +17,6 @@ wTourUtils.registerWebsitePreviewTour('website_page_options', {
     {
         content: "Check that the header is transparent",
         trigger: ':iframe #wrapwrap.o_header_overlay',
-        run: () => null, // it's a check
     },
     ...wTourUtils.clickOnEditAndWaitEditMode(),
     wTourUtils.clickOnSnippet({id: 'o_header_standard', name: 'Header'}),
@@ -27,7 +26,6 @@ wTourUtils.registerWebsitePreviewTour('website_page_options', {
     {
         content: "Check that the header is in black-50",
         trigger: ':iframe header#top.bg-black-50',
-        run: () => null, // it's a check
     },
     ...wTourUtils.clickOnEditAndWaitEditMode(),
     wTourUtils.clickOnSnippet({id: 'o_header_standard', name: 'Header'}),
@@ -37,7 +35,6 @@ wTourUtils.registerWebsitePreviewTour('website_page_options', {
     {
         content: "Check that the header is hidden",
         trigger: ':iframe #wrapwrap:has(header#top.d-none.o_snippet_invisible)',
-        run: () => null, // it's a check
     },
     ...wTourUtils.clickOnEditAndWaitEditMode(),
     {
@@ -52,6 +49,5 @@ wTourUtils.registerWebsitePreviewTour('website_page_options', {
         content: "Check that the footer is hidden and the header is visible",
         trigger: ':iframe #wrapwrap:has(.o_footer.d-none.o_snippet_invisible)',
         extra_trigger: ':iframe #wrapwrap header#top:not(.d-none)',
-        run: () => null, // it's a check
     },
 ]);

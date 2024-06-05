@@ -81,7 +81,6 @@ wTourUtils.registerWebsitePreviewTour('course_publisher', {
     content: 'eLearning: course create with current member',
     extra_trigger: ':iframe body:not(.editor_enable)',  // wait for editor to close
     trigger: ':iframe .o_wslides_js_course_join:contains("You\'re enrolled")',
-    run: function () {} // check membership
 }
 ].concat(
     slidesTourTools.addExistingCourseTag(true),

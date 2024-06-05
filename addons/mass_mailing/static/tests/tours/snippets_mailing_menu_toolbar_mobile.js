@@ -65,7 +65,6 @@ registry.category("web_tour.tours").add('snippets_mailing_menu_toolbar_mobile', 
     {
         content: "Make sure the toolbar is there",
         trigger: ':iframe #toolbar.oe-floating',
-        run: () => null, // it's a check
         mobile: true,
     },
     ...stepUtils.discardForm().map(command => ({...command, mobile: true})),

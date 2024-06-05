@@ -43,7 +43,6 @@ import { callWithUnloadCheck } from "./tour_utils";
  * @property {boolean} [allowInvisible] Allow trigger nodes (any of them) to be invisible
  * @property {boolean} [allowDisabled] Allow the trigger node to be disabled.
  * @property {boolean} [isCheck] ```isCheck: true === run() {}``` (mainly to avoid clicking on the trigger by default)
- * WARNING: Note that isCheck: true, allows that trigger node can be disabled. run() {} does not allow this behavior.
  * @property {boolean} [auto]
  * @property {boolean} [in_modal] When true, check that trigger node is present in the last visible .modal.
  * @property {number} [width]

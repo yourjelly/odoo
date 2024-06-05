@@ -54,25 +54,20 @@ registry.category("web_tour.tours").add('course_member_youtube', {
     run: "click",
 }, {
     trigger: '.o_wslides_js_course_join:contains("You\'re enrolled")',
-    run: function () {} // check membership
 }, {
     trigger: 'a:contains("Comparing Hardness of Wood Species")',
     run: "click",
 },  {
     trigger: '.o_wslides_progress_percentage:contains("50")',
-    run: function () {} // check progression
 }, {
     trigger: '.o_wslides_fs_slide_name:contains("Wood Bending With Steam Box")',
     run: "click",
 }, {
     trigger: '.player',
-    run: function () {} // check player loading
 }, {
     trigger: '.o_wslides_fs_sidebar_section_slides li:contains("Wood Bending With Steam Box") .o_wslides_slide_completed',
-    run: function () {} // check that video slide is marked as 'done'
 }, {
     trigger: '.o_wslides_channel_completion_completed:contains(Completed)',
-    run: function () {} // check progression
 }, {
     trigger: 'a:contains("Back to course")',
     run: "click",

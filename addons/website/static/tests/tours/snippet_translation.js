@@ -24,12 +24,10 @@ wTourUtils.registerWebsitePreviewTour('snippet_translation', {
     {
         content: "Check that contact us contain Parseltongue",
         trigger: ':iframe .s_cover .btn-primary:contains("Contact us in Parseltongue")',
-        run: () => null, // it's a check
     },
     {
         content: "Check that the save button contains 'in fu_GB'",
         trigger: '.btn[data-action="save"]:contains("Save in fu_GB")',
-        run: () => null, // it's a check
     },
 ]);
 wTourUtils.registerWebsitePreviewTour('snippet_translation_changing_lang', {
@@ -67,6 +65,5 @@ wTourUtils.registerWebsitePreviewTour('snippet_translation_changing_lang', {
     {
         content: "Check that contact us contain Parseltongue",
         trigger: ':iframe .s_cover .btn-primary:contains("Contact us in Parseltongue")',
-        run: () => null, // it's a check
     },
 ]);

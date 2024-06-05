@@ -16,7 +16,6 @@ registry.category("web_tour.tours").add("a_shop_custom_attribute_value", {
     run: 'click',
 }, {
     trigger: 'span.oe_currency_value:contains(750)',
-    run: function (){}, // check
 }, {
     id: 'add_cart_step',
     trigger: 'a:contains(Add to cart)',
@@ -47,7 +46,6 @@ registry.category("web_tour.tours").add("a_shop_custom_attribute_value", {
     run: "click",
 }, {
     trigger: '.oe_price span:contains(22.90)',
-    run: function (){}, // check
 }, {
     trigger: '.oe_advanced_configurator_modal .js_product:has(strong:contains(Conference Chair)) .js_add',
     extra_trigger: '.oe_advanced_configurator_modal .js_product:has(strong:contains(Conference Chair))',
@@ -58,7 +56,6 @@ registry.category("web_tour.tours").add("a_shop_custom_attribute_value", {
     run: 'click'
 }, {
     trigger: 'span:contains(1,557.00)',
-    run: function (){}, // check
 }, {
     trigger: 'button:has(span:contains(Proceed to Checkout))',
     run: 'click',

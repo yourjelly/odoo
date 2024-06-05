@@ -16,7 +16,6 @@ function openRoot() {
     }, {
         content: "wait for client reload",
         trigger: 'body:not(.wait)',
-        run() {}
     }];
 }
 function openUserProfileAtSecurityTab() {
@@ -70,7 +69,6 @@ function closeProfileDialog({content, totp_state}) {
         },
     }, {
         trigger: 'body.dialog-closed',
-        run() {},
     }];
 }
 
@@ -93,7 +91,6 @@ registry.category("web_tour.tours").add('totp_tour_setup', {
 }, {
     content: "Check the wizard has opened",
     trigger: 'li:contains("When requested to do so")',
-    run() {}
 }, {
     content: "Get secret from collapsed div",
     trigger: 'a:contains("Cannot scan it?")',
@@ -115,7 +112,6 @@ registry.category("web_tour.tours").add('totp_tour_setup', {
 }, {
     content: 'wait for rpc',
     trigger: 'body.got-token',
-    run() {}
 },
 ...openRoot(),
 ...openUserProfileAtSecurityTab(),
@@ -165,7 +161,6 @@ registry.category("web_tour.tours").add('totp_login_enabled', {
 }, {
     content: "check we're logged in",
     trigger: ".o_user_menu .dropdown-toggle",
-    run() {}
 }]});
 
 registry.category("web_tour.tours").add('totp_login_device', {
@@ -230,7 +225,6 @@ registry.category("web_tour.tours").add('totp_login_device', {
 },  {
     content: "check we're logged in without 2FA",
     trigger: ".o_user_menu .dropdown-toggle",
-    run() {}
 },
 // now go and disable two-factor authentication would be annoying to do in a separate tour
 // because we'd need to login & totp again as HttpCase.authenticate can't
@@ -298,7 +292,6 @@ registry.category("web_tour.tours").add('totp_admin_disables', {
 }, {
     content: 'Wait for page',
     trigger: '.o_menu_brand:contains("Settings")',
-    run() {}
 }, {
     content: "Open Users menu",
     trigger: '[data-menu-xmlid="base.menu_users"]',

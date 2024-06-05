@@ -46,11 +46,9 @@ wTourUtils.registerWebsitePreviewTour('snippet_countdown', {
     {
         content: "Check that the countdown is not displayed",
         trigger: ':iframe .s_countdown:has(.s_countdown_canvas_wrapper:not(:visible))',
-        run: () => null, // Just a visibility check
     },
     {
         content: "Check that the message is still displayed",
         trigger: ':iframe .s_countdown .s_picture',
-        run: () => null, // Just a visibility check
     },
 ]);

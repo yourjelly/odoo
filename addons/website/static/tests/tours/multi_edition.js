@@ -10,7 +10,6 @@ wTourUtils.registerWebsitePreviewTour('website_multi_edition', {
     {
         content: 'Check the current page has not the elements that will be added',
         trigger: ':iframe body:not(:has(.s_text_image)):not(:has(.s_hr))',
-        run: () => null,
     },
     // Edit the main element of the page
     wTourUtils.dragNDrop({
@@ -29,11 +28,9 @@ wTourUtils.registerWebsitePreviewTour('website_multi_edition', {
     {
         content: 'Check that the main element of the page was properly saved',
         trigger: ':iframe main .s_text_image',
-        run: () => null,
     },
     {
         content: 'Check that the footer was properly saved',
         trigger: ':iframe footer .s_hr',
-        run: () => null,
     },
 ]);

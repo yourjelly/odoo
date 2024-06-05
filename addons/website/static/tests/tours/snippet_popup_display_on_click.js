@@ -65,7 +65,6 @@ wTourUtils.registerWebsitePreviewTour("snippet_popup_display_on_click", {
     {
         content: "wait for the page to be loaded",
         trigger: ".o_website_preview[data-view-xmlid='website.contactus']",
-        run: () => null, // it"s a check
     },
     ...wTourUtils.clickOnEditAndWaitEditMode(),
     wTourUtils.dragNDrop({id: "s_text_image", name: "Image - Text"}),
@@ -92,6 +91,5 @@ wTourUtils.registerWebsitePreviewTour("snippet_popup_display_on_click", {
         in_modal: false,
         extra_trigger: ".o_website_preview[data-view-xmlid='website.homepage']",
         trigger: ":iframe .s_popup .modal[id='Win-%2420'].show",
-        isCheck: true,
     },
 ]);

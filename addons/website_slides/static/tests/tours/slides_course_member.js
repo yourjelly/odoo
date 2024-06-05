@@ -25,7 +25,6 @@ registry.category("web_tour.tours").add('course_member', {
     run: "click",
 }, {
     trigger: '.o_wslides_js_course_join:contains("You\'re enrolled")',
-    run: function () {} // check membership
 }, {
     trigger: 'a:contains("Gardening: The Know-How")',
     run: "click",
@@ -47,7 +46,6 @@ registry.category("web_tour.tours").add('course_member', {
     run: "click",
 }, {
     trigger: '.o_wslides_js_share_email:contains("Sharing is caring")',
-    run: function () {}  // check email has been sent
 }, {
     trigger: '.modal-footer button:contains("Close")',
     run: "click",
@@ -92,7 +90,6 @@ registry.category("web_tour.tours").add('course_member', {
     }
 }, {
     trigger: '.o_wslides_progress_percentage:contains("40")',
-    run: function () {} // check progression
 }, {
     trigger: '.o_wslides_fs_sidebar_header.navigation-success-2',
     extra_trigger: '.o_wslides_progress_percentage:contains("40")',
@@ -116,20 +113,16 @@ registry.category("web_tour.tours").add('course_member', {
     }
 }, {
     trigger: '.o_wslides_progress_percentage:contains("60")',
-    run: function () {} // check progression
 }, {
     trigger: '.o_wslides_fs_sidebar_header.navigation-success-3',
     extra_trigger: '.o_wslides_progress_percentage:contains("60")',
-    run: function () {} // check that previous step succeeded
 }, {
     trigger: '.o_wslides_fs_slide_name:contains("How to Grow and Harvest The Best Strawberries | Basics")',
     run: 'click',
 }, {
     trigger: '.o_wslides_fs_sidebar_section_slides li:contains("How to Grow and Harvest The Best Strawberries | Basics") .o_wslides_slide_completed',
-    run: function () {} // check that video slide is marked as 'done'
 }, {
     trigger: '.o_wslides_progress_percentage:contains("80")',
-    run: function () {} // check progression
 },
 // eLearning: last slide is a quiz, complete it
 {
@@ -155,7 +148,6 @@ registry.category("web_tour.tours").add('course_member', {
 // eLearning: ending course redirect to /slides, course is completed now
 {
     trigger: 'div:contains("Basics of Gardening") span:contains("Completed")',
-    run: function () {} // check that the course is marked as completed
 },
 // eLearning: go back on course and rate it (new rate or update it, both should work)
 {
@@ -182,6 +174,5 @@ registry.category("web_tour.tours").add('course_member', {
     run: "click",
 }, {
     trigger: '.o_portal_chatter_message:contains("This is a great course. Top !")',
-    run: function () {}, // check review is correctly added
 }
 ]});
