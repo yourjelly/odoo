@@ -110,6 +110,7 @@ const IS_KEYBOARD_EVENT_UNDERLINE = ev => ev.key === 'u' && (ev.ctrlKey || ev.me
 const IS_KEYBOARD_EVENT_STRIKETHROUGH = ev => ev.key === '5' && (ev.ctrlKey || ev.metaKey);
 const IS_KEYBOARD_EVENT_LEFT_ARROW = ev => ev.key === 'ArrowLeft' && !(ev.ctrlKey || ev.metaKey);
 const IS_KEYBOARD_EVENT_RIGHT_ARROW = ev => ev.key === 'ArrowRight' && !(ev.ctrlKey || ev.metaKey);
+let customenabled=true;
 
 const CLIPBOARD_BLACKLISTS = {
     unwrap: ['.Apple-interchange-newline', 'DIV'], // These elements' children will be unwrapped.
@@ -4012,6 +4013,90 @@ export class OdooEditor extends EventTarget {
                 this._setLinkZws();
             }
         }
+        if (ev.key=='Escape'){
+            
+            // customenabled=false;
+            // let tabEvent = new KeyboardEvent('keydown', {
+            //     key: 'Tab',
+            //     keyCode: 9,
+            //     code: 'Tab',
+            //     which: 9,
+            //     bubbles: true,
+            //     cancelable: true
+            // });
+            // // Dispatch the event to simulate a Tab key press
+            // console.log(ev.currentTarget);
+            // ev.currentTarget.dispatchEvent(tabEvent);
+            // customenabled=true;
+            //***************************************************** */
+    //         customenabled = false;
+    
+    // // Manually change the value of the input field to mimic user input
+    // const targetInput = ev.currentTarget;
+    // console.log('Target input:', targetInput); // Log the target input element
+    // const inputValue = targetInput.value;
+    // const newValue = inputValue + '\t'; // Tab character to mimic tab key press
+
+    // targetInput.value = newValue; // Manually change the value
+
+    // console.log('Before input event dispatch:', targetInput.value); // Log current value before dispatching event
+
+    // // Create and dispatch an input event
+    // const event = new InputEvent('input', {
+    //     bubbles: true,
+    //     cancelable: false,
+    //     data: "\t" // Tab character
+    // }); 
+
+    // targetInput.dispatchEvent(event);
+
+    // console.log('After input event dispatch:', targetInput.value); // Log current value after dispatching event
+
+    // ev.preventDefault();
+    // ev.stopPropagation();
+            //********************************************* */
+            // debugger;
+            // let a = this.editable.nextElementSibling;
+            // while(a.tabIndex === -1) {
+            //     a = a.nextElementSibling;
+            // }
+            // debugger;
+            // const a = document.querySelector('.o-mail-Chatter-sendMessage')
+            // a.focus();
+            // const a = getAdjacentNextSiblings(this.editable).filter(n => n.tabIndex !== -1);
+            // a[0].focus();
+            // console.log("escape the sytem");
+            // ev.preventDefault();
+
+            // Find all focusable elements
+            const focusableSelectors = [
+                'a[href]',
+                'button',
+                'textarea',
+                'input[type="text"]',
+                'input[type="radio"]',
+                'input[type="checkbox"]',
+                'select',
+                '[contenteditable="true"]',
+                '[tabindex]:not([tabindex="-1"])'
+            ];
+            const focusableElements = Array.from(document.querySelectorAll(focusableSelectors.join(',')))
+                .filter(el => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'));
+            console.log(focusableElements.length);
+            // // Find the current active element
+            const currentElement = document.activeElement;
+            // console.log(focusableElements);
+
+            // Find the index of the current active element among the focusable elements
+            const currentIndex = focusableElements.indexOf(currentElement);
+            // console.log(currentIndex);
+            // console.log(focusableElements.length);
+            // Calculate the index of the next element
+            const nextIndex = currentIndex === focusableElements.length - 1 ? 0 : currentIndex + 1;
+
+            // Focus on the next element
+            focusableElements[nextIndex].focus();
+        }
         if (ev.key === 'Backspace') {
             // backspace
             const selection = this.document.getSelection();
@@ -4045,7 +4130,7 @@ export class OdooEditor extends EventTarget {
                     }
                 }
             }
-        } else if (ev.key === 'Tab') {
+        } else if (ev.key === 'Tab' && customenabled) {
             // Tab
             const tabHtml = '<span class="oe-tabs" contenteditable="false">\u0009</span>\u200B';
             const sel = this.document.getSelection();

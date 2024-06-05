@@ -146,6 +146,7 @@ class ProgressBarState {
     }
 
     async selectBar(groupId, bar) {
+        debugger;
         const group = this.model.root.groups.find((group) => group.id === groupId);
         const progressBar = this.getGroupInfo(group);
         const nextActiveBar = {};

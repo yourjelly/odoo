@@ -63,6 +63,7 @@ export class ProjectTaskStateSelection extends StateSelectionField {
                                     this.options.map(subarr => ({
                                         name: subarr[1],
                                         action: () => {
+                                            console.log(subarr);
                                             this.updateRecord(subarr[0]);
                                         },
                                     })),
@@ -134,6 +135,7 @@ export class ProjectTaskStateSelection extends StateSelectionField {
     }
 
     async toggleState() {
+        console.log("togglestate");
         const toggleVal = this.currentValue == "1_done" ? "01_in_progress" : "1_done";
         await this.updateRecord(toggleVal);
     }
@@ -153,7 +155,9 @@ export class ProjectTaskStateSelection extends StateSelectionField {
     }
 
     async updateRecord(value) {
+        console.log("shis");
         const result = await super.updateRecord(value);
+        console.log(result);
         this.state.isStateButtonHighlighted = false;
         if (result) {
             return result;
@@ -164,6 +168,7 @@ export class ProjectTaskStateSelection extends StateSelectionField {
      * @param {MouseEvent} ev
      */
     onMouseEnterStateButton(ev) {
+        console.log("clicked");
         if (!this.env.isSmall) {
             this.state.isStateButtonHighlighted = true;
         }

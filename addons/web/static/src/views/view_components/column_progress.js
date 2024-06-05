@@ -17,6 +17,7 @@ export class ColumnProgress extends Component {
     };
 
     async onBarClick(bar) {
+        console.log(bar);
         await this.props.onBarClicked(bar);
     }
 }

@@ -3,7 +3,7 @@
 
     <t t-name="web.ListRenderer">
         <t t-set="_canSelectRecord" t-value="canSelectRecord"/>
-        <div
+        <main
             class="o_list_renderer o_renderer table-responsive"
             tabindex="-1"
             t-ref="root"
@@ -94,7 +94,7 @@
                     </tr>
                 </tfoot>
             </table>
-        </div>
+        </main>
     </t>
 
     <t t-name="web.ListRenderer.Rows">

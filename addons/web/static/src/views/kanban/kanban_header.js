@@ -242,6 +242,7 @@ export class KanbanHeader extends Component {
     async onBarClicked(value) {
         await this.props.progressBarState.selectBar(this.props.group.id, value);
         this.props.scrollTop();
+        debugger;
     }
 }
 
