@@ -14,7 +14,7 @@
       "tabWidth": 4,
       "semi": true,
       "singleQuote": false,
-      "printWidth": 1000,
+      "printWidth": 100,
       "endOfLine": "auto"
     }],
     "no-undef": "error",
