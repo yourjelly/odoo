@@ -11046,14 +11046,16 @@ test(`add and discard a record in a multi-level grouped list view`, async () => 
     expect(`.o_data_row`).toHaveCount(1);
 });
 
-test.todo(`pressing ESC in editable grouped list should discard the current line changes`, async () => {
+test(`pressing ESC in editable grouped list should discard the current line changes`, async () => {
+    // This test is wrong, there's a bug in list view when pressing "Escape".
+    // The row becomes readonly but the value is not reset.
+
     await mountView({
         type: "list",
         resModel: "foo",
         arch: `<tree editable="top"><field name="foo"/><field name="bar"/></tree>`,
         groupBy: ["bar"],
     });
-
     await contains(`.o_group_header:eq(1)`).click();
     expect(`tr.o_data_row`).toHaveCount(3);
 
@@ -11062,11 +11064,11 @@ test.todo(`pressing ESC in editable grouped list should discard the current line
     // update foo field of edited row
     await contains(`.o_data_cell [name=foo] input`).edit("new_value", { confirm: false });
     expect(`.o_data_cell [name=foo] input`).toBeFocused();
+
     // discard by pressing ESC
     press("Escape");
     await animationFrame();
     expect(`.modal`).toHaveCount(0);
-
     expect(`tbody tr td:contains(yop)`).toHaveCount(1);
     expect(`tr.o_data_row`).toHaveCount(3);
     expect(`tr.o_data_row.o_selected_row`).toHaveCount(0);
