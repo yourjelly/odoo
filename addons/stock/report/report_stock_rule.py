@@ -55,6 +55,8 @@ class ReportStockRule(models.AbstractModel):
                 for rule in rules_to_display:
                     rule_loc = [r for r in rules_and_loc if r['rule'] == rule][0]
                     res = []
+                    if not rule_loc['source']:
+                        continue
                     for x in range(len(locations_names)):
                         res.append([])
                     idx = locations_names.index(rule_loc['destination'].display_name)
