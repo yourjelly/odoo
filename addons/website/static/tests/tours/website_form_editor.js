@@ -164,7 +164,7 @@
         }, {
             content: "Rename and leave the field label",
             trigger: 'we-input[data-set-label-text] input',
-            run: "edit Renamed && click body",
+            run: "edit Renamed",
         },
         wTourUtils.goBackToBlocks(),
         {
@@ -207,7 +207,7 @@
             content: "Change the label of 'Conditional Visibility Check 4' and change it to 'Conditional Visibility Check 3'",
             trigger: 'we-input[data-set-label-text] input',
             // TODO: remove && click body
-            run: "edit Conditional Visibility Check 3 && click body",
+            run: "edit Conditional Visibility Check 3",
         },
         {
             content: "Check that the conditional visibility of the renamed field is removed",
@@ -221,7 +221,7 @@
             content: "Change the label of 'Conditional Visibility Check 6' and change it to 'Conditional Visibility Check 5'",
             trigger: 'we-input[data-set-label-text] input',
             // TODO: remove && click body
-            run: "edit Conditional Visibility Check 5 && click body",
+            run: "edit Conditional Visibility Check 5",
         },
         {
             content: "Check that 'Conditional Visibility Check 5' is not in the list of the renamed field",
@@ -725,7 +725,7 @@
             content: 'Change the Recipient Email',
             trigger: '[data-field-name="email_to"] input',
             // TODO: remove && click body
-            run: "edit test@test.test && click body", 
+            run: "edit test@test.test", 
         },
     ]));
     wTourUtils.registerWebsitePreviewTour('website_form_contactus_edition_no_email', {
@@ -736,7 +736,7 @@
         {
             content: "Change a random option",
             trigger: '[data-set-mark] input',
-            run: "edit ** && click body",
+            run: "edit **",
         }, {
             content: "Check that the recipient email is correct",
             trigger: 'we-input[data-field-name="email_to"] input:value("website_form_contactus_edition_no_email@mail.com")',
@@ -888,7 +888,7 @@
             content: "Change a random option",
             trigger: '[data-set-mark] input',
             // TODO: remove && click body
-            run: "edit ** && click body",
+            run: "edit **",
         },
     ]));
 

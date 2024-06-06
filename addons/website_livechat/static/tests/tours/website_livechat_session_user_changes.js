@@ -10,11 +10,7 @@ registry.category("web_tour.tours").add("website_livechat_login_after_chat_start
         },
         {
             trigger: ".o-livechat-root:shadow .o-mail-Composer-input",
-            run: "edit Hello!",
-        },
-        {
-            trigger: ".o-livechat-root:shadow .o-mail-Composer-input",
-            run: "press Enter",
+            run: "edit Hello! && press Enter",
         },
         {
             trigger: ".o-livechat-root:shadow .o-mail-Message-content:contains('Hello!')",
@@ -60,11 +56,7 @@ registry.category("web_tour.tours").add("website_livechat_logout_after_chat_star
         },
         {
             trigger: ".o-livechat-root:shadow .o-mail-Composer-input",
-            run: "edit Hello!",
-        },
-        {
-            trigger: ".o-livechat-root:shadow .o-mail-Composer-input",
-            run: "press Enter",
+            run: "edit Hello! && press Enter",
         },
         {
             trigger: ".o-livechat-root:shadow .o-mail-Message-content:contains('Hello!')",

@@ -650,7 +650,7 @@ export const stepUtils = {
                 trigger: ".o_searchview_input",
                 extra_trigger: `.modal:not(.o_inactive_modal) .modal-title:contains('${modalTitle}')`,
                 position: "bottom",
-                run: `edit ${valueSearched}`,
+                run: `fill ${valueSearched}`,
             },
             this.simulateEnterKeyboardInSearchModal(),
             {

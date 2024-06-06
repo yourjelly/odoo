@@ -53,7 +53,8 @@ registry.category("web_tour.tours").add("sale_tour", {
             position: "right",
             run: function (actions) {
                 const input = this.anchor.querySelector("input");
-                actions.edit("DESK0001", input || this.anchor);
+                actions.clear();
+                actions.fill("DESK0001", input || this.anchor);
                 const descriptionElement = document.querySelector(
                     ".o_form_editable textarea[name='name']"
                 );

@@ -9,7 +9,7 @@ registry.category("web_tour.tours").add('test_detailed_op_no_save_1', { test: tr
     },
     {
         trigger: ".o_field_widget[name=product_id] input",
-        run: "edit Lot",
+        run: "fill Lot",
     },
     {
         trigger: ".ui-menu-item > a:contains('Product Lot')",
@@ -76,7 +76,7 @@ registry.category("web_tour.tours").add('test_generate_serial_1', { test: true, 
     },
     {
         trigger: ".o_field_widget[name=product_id] input",
-        run: "edit Serial",
+        run: "fill Serial",
     },
     {
         trigger: ".ui-menu-item > a:contains('Product Serial')",
@@ -108,7 +108,7 @@ registry.category("web_tour.tours").add('test_generate_serial_1', { test: true, 
     },
     {
         trigger: "div[name=next_serial_count] input",
-        run: "edit 5 && click body",
+        run: "edit 5",
     },
     {
         trigger: ".btn-primary:contains('Generate')",
@@ -168,7 +168,7 @@ registry.category("web_tour.tours").add('test_generate_serial_2', { test: true, 
     },
     {
         trigger: ".o_field_widget[name=product_id] input",
-        run: "edit Lot",
+        run: "fill Lot",
     },
     {
         trigger: ".ui-menu-item > a:contains('Product Lot 1')",
@@ -205,11 +205,11 @@ registry.category("web_tour.tours").add('test_generate_serial_2', { test: true, 
     },
     {
         trigger: "div[name=next_serial_count] input",
-        run: "edit 7.5 && click body",
+        run: "edit 7.5",
     },
     {
         trigger: "div[name=total_received] input",
-        run: "edit 50 && click body",
+        run: "edit 50",
     },
     {
         trigger: ".btn-primary:contains('Generate')",
@@ -239,11 +239,11 @@ registry.category("web_tour.tours").add('test_generate_serial_2', { test: true, 
     },
     {
         trigger: "div[name=next_serial_count] input",
-        run: "edit 13 && click body",
+        run: "edit 13",
     },
     {
         trigger: "div[name=total_received] input",
-        run: "edit 50 && click body",
+        run: "edit 50",
     },
     {
         trigger: "div[name=keep_lines] input",
@@ -307,7 +307,7 @@ registry.category('web_tour.tours').add('test_inventory_adjustment_apply_all', {
     },
     {
         trigger: 'div[name=product_id] input',
-        run: "edit Product 1",
+        run: "fill Product 1",
     },
     {
         trigger: '.ui-menu-item > a:contains("Product 1")',
@@ -328,7 +328,7 @@ registry.category('web_tour.tours').add('test_inventory_adjustment_apply_all', {
     },
     {
         trigger: 'div[name=product_id] input',
-        run: "edit Product 2",
+        run: "fill Product 2",
     },
     {
         trigger: '.ui-menu-item > a:contains("Product 2")',
@@ -367,7 +367,7 @@ registry.category("web_tour.tours").add('test_add_new_line', {
         },
         {
             trigger: ".o_field_widget[name=product_id] input",
-            run: 'edit two',
+            run: "fill two",
         },
         {
             trigger: ".ui-menu-item > a:contains('Product two')",

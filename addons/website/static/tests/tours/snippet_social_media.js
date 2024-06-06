@@ -124,7 +124,7 @@ wTourUtils.registerWebsitePreviewTour('snippet_social_media', {
     {
         content: 'Change custom social to unsupported link',
         trigger: 'we-list table input:eq(6)',
-        run: "edit https://www.paypal.com/abc && click body",
+        run: "edit https://www.paypal.com/abc",
     },
     {
         content: "Ensure paypal icon is found",
@@ -162,7 +162,7 @@ wTourUtils.registerWebsitePreviewTour('snippet_social_media', {
     {
         content: 'Change url of the DB instagram link',
         trigger: 'we-list table input:eq(3)',
-        run: "edit https://instagram.com/odoo.official/ && click body",
+        run: "edit https://instagram.com/odoo.official/",
     },
     ...preventRaceConditionStep,
     ...wTourUtils.clickOnSave(),

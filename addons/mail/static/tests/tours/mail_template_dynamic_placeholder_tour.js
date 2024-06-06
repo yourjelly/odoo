@@ -60,7 +60,7 @@ registry.category("web_tour.tours").add("mail_template_dynamic_placeholder_tour"
         {
             content: 'Retry insert # inside "Subject" input',
             trigger: 'div[name="subject"] input[type="text"]',
-            run: "edit (yes_model_id ) && press #",
+            run: "fill (yes_model_id ) && press #",
         },
         {
             content: "Check if the dynamic placeholder popover is opened",

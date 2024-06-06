@@ -17,7 +17,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: 'div[name="partner_id"] input',
     content: 'Add the customer for this quotation (e.g. Brandon Freeman)',
-    run: "edit Brandon Freeman",
+    run: "fill Brandon Freeman",
 }, {
     trigger: 'div[name="partner_id"] ul > li:first-child > a:contains(Freeman)',
     content: 'Select the first item on the autocomplete dropdown',
@@ -30,7 +30,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: '.o_field_html[name="product_id"], .o_field_widget[name="product_template_id"] input',
     content: markup('Select a prepaid service product <i>(e.g. Service Product (Prepaid Hours))</i>'),
-    run: "edit Service Product (Prepaid Hours)",
+    run: "fill Service Product (Prepaid Hours)",
 }, {
     trigger: 'ul.ui-autocomplete a:contains(Service Product (Prepaid Hours))',
     content: 'Select the prepaid service product in the autocomplete dropdown',
@@ -38,7 +38,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: 'div[name="product_uom_qty"] input',
     content: "Add 10 hours as ordered quantity for this product.",
-    run: "edit 10 && click body",
+    run: "edit 10",
 }, {
     trigger: '.o_field_widget[name=price_subtotal]:contains(2,500.00)',
 }, {
@@ -92,7 +92,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: 'div[name="partner_id"] input',
     content: markup('Select the customer of your Sales Order <i>(e.g. Brandon Freeman)</i>. Since we have a Sales Order for this customer with a prepaid service product which the remaining hours to deliver is greater than 0, the Sales Order Item in the task should be contain the Sales Order Item containing this prepaid service product.'),
-    run: "edit Brandon Freeman",
+    run: "fill Brandon Freeman",
 }, {
     trigger: 'div[name="partner_id"] ul > li:first-child > a:contains(Freeman)',
     content: 'Select the customer in the autocomplete dropdown.',
@@ -180,7 +180,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: 'div[name="partner_id"] input',
     content: markup('Add the customer for this project to select an SO and SOL for this customer <i>(e.g. Brandon Freeman)</i>.'),
-    run: "edit Brandon Freeman",
+    run: "fill Brandon Freeman",
 }, {
     trigger: 'div[name="partner_id"] ul > li:first-child > a:contains(Freeman)',
     content: 'Select the customer in the autocomplete dropdown',
@@ -239,7 +239,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: 'div[name="partner_id"] input',
     content: markup('Add the customer for this project to select an SO and SOL for this customer <i>(e.g. Brandon Freeman)</i>.'),
-    run: "edit Brandon Freeman",
+    run: "fill Brandon Freeman",
 }, {
     trigger: 'div[name="partner_id"] ul > li:first-child > a:contains(Freeman)',
     content: 'Select the customer in the autocomplete dropdown',

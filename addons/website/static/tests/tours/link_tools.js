@@ -69,7 +69,7 @@ wTourUtils.registerWebsitePreviewTour('link_tools', {
     {
         content: "Link tools, should be open, change the url",
         trigger: '#o_link_dialog_url_input',
-        run: "edit odoo.be && click body",
+        run: "edit odoo.be",
     },
 
     ...wTourUtils.clickOnSave(),
@@ -278,7 +278,7 @@ wTourUtils.registerWebsitePreviewTour('link_tools', {
         trigger: "#o_link_dialog_url_input",
         // TODO: remove && click
         extra_trigger: "div#oe_snippets:not(div.o_we_ui_loading)",
-        run: "edit callmemaybe.com && click body",
+        run: "edit callmemaybe.com",
     },
     {
         content: "Check that link was updated and link content is synced with URL",

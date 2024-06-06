@@ -38,7 +38,7 @@ registry.category("web_tour.tours").add('personal_stage_tour', {
 }, {
     content: "Create a new personal stage",
     trigger: 'input.form-control',
-    run: "edit Never",
+    run: "fill Never",
 }, {
     content: "Confirm create",
     trigger: '.o_kanban_add',

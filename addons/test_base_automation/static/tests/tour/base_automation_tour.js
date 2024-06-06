@@ -90,7 +90,7 @@ registry.category("web_tour.tours").add("test_base_automation", {
             content: "Input field name",
             trigger:
                 '.o_model_field_selector_popover .o_model_field_selector_popover_search  input',
-            run: "edit Job Position",
+            run: "fill Job Position",
             in_modal: false,
         },
         {
@@ -195,7 +195,7 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             content: "Input field name",
             trigger:
                 '.o_model_field_selector_popover .o_model_field_selector_popover_search  input',
-            run: "edit Name",
+            run: "fill Name",
             in_modal: false,
         },
         {
@@ -230,7 +230,7 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             content: "Input field name",
             trigger:
                 '.o_model_field_selector_popover .o_model_field_selector_popover_search  input',
-            run: "edit Priority",
+            run: "fill Priority",
             in_modal: false,
         },
         {

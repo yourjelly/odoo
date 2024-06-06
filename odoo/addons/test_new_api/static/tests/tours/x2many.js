@@ -230,7 +230,7 @@
     }, {
         content: "open the many2one to select another user",
         trigger: '.o_field_widget[name="author"] input',
-        run: "edit Marc",
+        run: "fill Marc",
     }, {
         content: "select another user",
         trigger: '.o_field_widget[name="author"] .o-autocomplete--dropdown-menu li:contains(Marc Demo)',
@@ -294,7 +294,7 @@
     }, {
         content: "select another user",
         trigger: '.o_field_widget[name=author] input',
-        run: "edit Marc",
+        run: "fill Marc",
     }, {
         content: "select demo user",
         trigger: '.o_field_widget[name="author"] .o-autocomplete--dropdown-menu li:contains(Marc Demo)',
@@ -343,7 +343,7 @@
         content: "edit content",
         trigger: '.o_field_widget[name=name] input',
         extra_trigger: ".o_form_editable",
-        run: "edit test_trigger2 && click body",
+        run: "edit test_trigger2",
     }, {
         content: "click outside to trigger onchange",
         trigger: '.o_form_sheet',
@@ -356,7 +356,7 @@
     }, {
         content: "change text value",
         trigger: '.o_field_widget[name="body"] textarea',
-        run: "edit ccc && click .o_selected_row",
+        run: "fill ccc && click .o_selected_row",
     }, {
         content: "click on other field (trigger the line onchange)",
         trigger: '.o_field_widget[name=messages] .o_field_many2one[name="author"] input',
@@ -367,7 +367,7 @@
     }, {
         content: "open the many2one to select an other user",
         trigger: '.o_field_widget[name=messages] .o_field_many2one[name="author"] input',
-        run: "edit Marc",
+        run: "fill Marc",
     }, {
         content: "select an other user",
         trigger: '.o_field_widget[name="author"] .o-autocomplete--dropdown-menu li:contains(Marc Demo)',
@@ -456,7 +456,7 @@
     }, {
         content: "set discussion title to generate dummy message",
         trigger: '.o_field_widget[name=name] input',
-        run:     "edit {generate_dummy_message} && click body",
+        run:     "edit {generate_dummy_message}",
     }, {
         content: "check new dummy message happened",
         trigger: '.o_field_widget[name=messages] .o_data_row .o_list_number:contains(/^13$/)',
@@ -468,14 +468,14 @@
     }, {
         content: "empty discussion title",
         trigger: '.o_field_widget[name=name] input',
-        run:     "edit removed_title && click body",
+        run:     "edit removed_title",
     }, {
         content: "onchange happened",
         trigger: '.o_field_widget[name=messages] .o_data_row td:contains([removed_title])',
     }, {
         content: "set discussion title to generate dummy message",
         trigger: '.o_field_widget[name=name] input',
-        run:     "edit {generate_dummy_message} && click body",
+        run:     "edit {generate_dummy_message}",
     }, {
         content: "check update and new dummy message happened",
         trigger: '.o_field_widget[name=messages] .o_data_row .o_list_number:contains(/^22$/)',
