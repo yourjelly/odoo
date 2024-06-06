@@ -220,7 +220,7 @@ describe("Link creation by powerbox/toolbar", () => {
         await animationFrame();
         await waitFor(".o-we-linkpopover");
         expect(".o-we-linkpopover").toHaveCount(1);
-        expect(cleanLinkArtifacts(getContent(el))).toBe("<p>ab<a>[]</a></p>");
+        expect(cleanLinkArtifacts(getContent(el))).toBe("<p>ab<a></a></p>");
 
         const pNode = queryOne("p");
         setSelection({
@@ -232,6 +232,7 @@ describe("Link creation by powerbox/toolbar", () => {
         await animationFrame();
         expect(cleanLinkArtifacts(getContent(el))).toBe("<p>[]ab</p>");
     });
+
     test("when create a new link by powerbox and only input the URL, the link should be created with corrected URL", async () => {
         const { editor, el } = await setupEditor("<p>ab[]</p>");
         insertText(editor, "/link");

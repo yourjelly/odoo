@@ -5,7 +5,7 @@
             <div t-if="state.editing" class="m-1 container-fluid d-flex vertical-center" t-ref="editing-wrapper">
                 <div class="col m-1" data-prevent-closing-overlay="true">
                     <div class="input-group">
-                        <input class="o_we_label_link m-1" t-model="state.label" placeholder="Type your link label"/>
+                        <input t-ref="autofocus" class="o_we_label_link m-1" t-model="state.label" placeholder="Type your link label"/>
                         <input class="o_we_href_input_link m-1" t-model="state.url" placeholder="Type your URL" t-on-keydown="(event) => event.key === 'Enter' ? this.onClickApply() : ()=>{}"/>
                     </div>
                     <div class="input-group" t-on-change="onChangeClasses">

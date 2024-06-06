@@ -226,13 +226,14 @@ export class LinkPlugin extends Plugin {
                 this.linkElement = linkEl;
             }
 
+            const cursors = this.shared.preserveSelection();
             const props = {
                 linkEl,
                 onApply: (url, label, classes) => {
                     this.linkElement.href = url;
                     if (cleanZWChars(this.linkElement.innerText) === label) {
                         this.overlay.close();
-                        this.shared.setSelection(this.shared.getEditableSelection());
+                        cursors.restore();
                     } else {
                         const restore = prepareUpdate(...leftPos(this.linkElement));
                         this.linkElement.innerText = label;
@@ -260,6 +261,7 @@ export class LinkPlugin extends Plugin {
                     this.overlay.close();
                 },
             };
+
             // pass the link element to overlay to prevent position change
             this.overlay.open({ target: this.linkElement, props });
         }
