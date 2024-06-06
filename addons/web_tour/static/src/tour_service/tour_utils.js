@@ -288,7 +288,8 @@ export class RunningTourActionHelper {
     edit(text, selector) {
         const element = this._get_action_element(selector);
         hoot.click(element);
-        hoot.edit(text);
+        hoot.clear();
+        hoot.fill(text, { confirm: "blur" });
     }
 
     /**
