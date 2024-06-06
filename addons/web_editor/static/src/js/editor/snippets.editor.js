@@ -2074,6 +2074,7 @@ class SnippetsMenu extends Component {
             activateSnippet: this._activateSnippet.bind(this),
             cloneSnippet: this._cloneSnippet.bind(this),
             cleanUI: this._cleanUI.bind(this),
+            requestSave: (data) => this._onSaveRequest.call(this, { data }),
             userValueWidgetOpening: this._onUserValueWidgetOpening.bind(this),
             userValueWidgetClosing: this._onUserValueWidgetClosing.bind(this),
         });
