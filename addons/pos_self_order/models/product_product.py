@@ -41,7 +41,7 @@ class ProductProduct(models.Model):
     @api.model
     def _load_pos_data_fields(self, config_id):
         params = super()._load_pos_data_fields(config_id)
-        params += ['self_order_available']
+        params += ['self_order_available', 'description_self_order']
         return params
 
     def _get_name(self) -> str:
