@@ -282,7 +282,7 @@
                                             <img t-att-src="qr_code_url"/>
                                             <img src="/account/static/src/img/Odoo_logo_O.svg"
                                                  id="qrcode_odoo_logo"
-                                                 class="top-50 start-50 position-absolute bg-white border border-white border-3 rounded-circle"
+                                                 class="top-50 start-50 position-absolute bg-dark border border-dark border-3 rounded-circle"
                                             />
                                         </p>
                                     </div>
@@ -291,7 +291,7 @@
                                     </div>
                                 </div>
                                 <div t-if="o.display_pay_from_pdf and o.amount_residual > 0" name="pay_from_pdf_button">
-                                    <a t-attf-href="{{o._get_payment_link()}}" class="btn btn-primary fw-bold">Click To Pay</a>
+                                    <a t-attf-href="{{o._get_payment_link()}}" class="btn btn-outline-primary">Click To Pay</a>
                                 </div>
                                 <!--terms and conditions-->
                                 <div class="text-muted mb-3" t-attf-style="#{'text-align:justify;text-justify:inter-word;' if o.company_id.terms_type != 'html' else ''}" t-if="not is_html_empty(o.narration)" name="comment">
