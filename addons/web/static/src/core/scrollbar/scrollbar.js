@@ -24,31 +24,34 @@ function closestScrollable(element) {
  * @param {boolean} [isScrollElement=true]
  * @param {string} [cssProperty='padding-right']
  */
-function compensateScrollbar(add = true, isScrollElement = true, cssProperty = "padding-right") {
-    for (const el of this) {
-        // Compensate scrollbar
-        const scrollableEl = isScrollElement ? el : closestScrollable(el.parentNode);
-        const isRTL = scrollableEl.matches(".o_rtl");
-        if (isRTL) {
-            cssProperty = cssProperty.replace("right", "left");
-        }
-        el.style.removeProperty(cssProperty);
-        if (!add) {
-            return;
-        }
-        const style = getComputedStyle(el);
-        // Round up to the nearest integer to be as close as possible to
-        // the correct value in case of browser zoom.
-        const borderLeftWidth = Math.ceil(parseFloat(style.borderLeftWidth.replace("px", "")));
-        const borderRightWidth = Math.ceil(parseFloat(style.borderRightWidth.replace("px", "")));
-        const bordersWidth = borderLeftWidth + borderRightWidth;
-        const newValue =
-            parseInt(style[cssProperty]) +
-            scrollableEl.offsetWidth -
-            scrollableEl.clientWidth -
-            bordersWidth;
-        el.style.setProperty(cssProperty, `${newValue}px`, "important");
+function compensateScrollbar(
+    element,
+    add = true,
+    isScrollElement = true,
+    cssProperty = "padding-right"
+) {
+    // Compensate scrollbar
+    const scrollableEl = isScrollElement ? element : closestScrollable(element.parentNode);
+    const isRTL = scrollableEl.matches(".o_rtl");
+    if (isRTL) {
+        cssProperty = cssProperty.replace("right", "left");
     }
+    element.style.removeProperty(cssProperty);
+    if (!add) {
+        return;
+    }
+    const style = getComputedStyle(element);
+    // Round up to the nearest integer to be as close as possible to
+    // the correct value in case of browser zoom.
+    const borderLeftWidth = Math.ceil(parseFloat(style.borderLeftWidth.replace("px", "")));
+    const borderRightWidth = Math.ceil(parseFloat(style.borderRightWidth.replace("px", "")));
+    const bordersWidth = borderLeftWidth + borderRightWidth;
+    const newValue =
+        parseInt(style[cssProperty]) +
+        scrollableEl.offsetWidth -
+        scrollableEl.clientWidth -
+        bordersWidth;
+    element.style.setProperty(cssProperty, `${newValue}px`, "important");
 }
 /**
  * @returns {Node}

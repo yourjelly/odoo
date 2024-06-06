@@ -4,7 +4,13 @@ import Dialog from "@web/legacy/js/core/dialog";
 import testUtils from "@web/../tests/legacy_tests/helpers/test_utils";
 import Widget from "@web/legacy/js/core/widget";
 
-var ESCAPE_KEY = $.Event("keyup", { which: 27 });
+const ESCAPE_EVENT = new KeyboardEvent("keyup", {
+    key: "Escape",
+    code: "Escape",
+    keyCode: 27,
+    which: 27,
+    bubbles: true,
+});
 
 async function createEmptyParent(debug) {
     return new Widget();
@@ -28,14 +34,14 @@ QUnit.module('core', {}, function () {
                     click: testPromise.resolve,
                 },
             ],
-            $content: $('<main/>'),
+            $content: document.createElement('main'),
             onForceClose: testPromise.reject,
         }).open();
 
         assert.verifySteps([]);
 
         await testUtils.nextTick();
-        await testUtils.dom.click($('.modal[role="dialog"] .btn-primary'));
+        await testUtils.dom.click(document.querySelector('.modal[role="dialog"] .btn-primary'));
 
         testPromise.then(() => {
             assert.verifySteps(['ok custom callback']);
@@ -58,14 +64,14 @@ QUnit.module('core', {}, function () {
                     click: testPromise.reject,
                 },
             ],
-            $content: $('<main/>'),
+            $content: document.createElement('main'),
             onForceClose: testPromise.resolve,
         }).open();
 
         assert.verifySteps([]);
 
         await testUtils.nextTick();
-        await testUtils.dom.triggerEvents($('.modal[role="dialog"]'), [ESCAPE_KEY]);
+        await testUtils.dom.triggerEvents(document.querySelector('.modal[role="dialog"]'), [ESCAPE_EVENT]);
 
         testPromise.then(() => {
             assert.verifySteps(['ok custom callback']);
@@ -88,7 +94,7 @@ QUnit.module('core', {}, function () {
         assert.verifySteps([]);
 
         await testUtils.nextTick();
-        await testUtils.dom.triggerEvents($('.modal[role="dialog"]'), [ESCAPE_KEY]);
+        await testUtils.dom.triggerEvents(document.querySelector('.modal[role="dialog"]'), [ESCAPE_EVENT]);
 
         testPromise.then(() => {
             assert.verifySteps(['ok confirm callback']);
@@ -113,14 +119,15 @@ QUnit.module('core', {}, function () {
 
         assert.verifySteps([]);
 
-        await testUtils.dom.click($('.modal[role="dialog"] .btn-primary'));
-        await testUtils.dom.click($('.modal[role="dialog"] .btn-primary'));
+        await testUtils.dom.click(document.querySelector('.modal[role="dialog"] .btn-primary'));
+        await testUtils.dom.click(document.querySelector('.modal[role="dialog"] .btn-primary'));
         await testUtils.nextTick();
         assert.verifySteps(['confirm']);
-        assert.ok($('.modal[role="dialog"]').hasClass('show'), "Should still be opened");
+        const el = document.querySelector('.modal[role="dialog"]');
+        assert.ok(el.classList.contains("show"), "Should still be opened");
         testPromise.resolve();
         await testUtils.nextTick();
-        assert.notOk($('.modal[role="dialog"]').hasClass('show'), "Should now be closed");
+        assert.notOk(el.classList.contains("show"), "Should now be closed");
 
         parent.destroy();
     });
@@ -142,8 +149,8 @@ QUnit.module('core', {}, function () {
 
         assert.verifySteps([]);
 
-        testUtils.dom.click($('.modal[role="dialog"] footer button:not(.btn-primary)'));
-        testUtils.dom.click($('.modal[role="dialog"] footer .btn-primary'));
+        testUtils.dom.click(document.querySelector('.modal[role="dialog"] footer button:not(.btn-primary)'));
+        testUtils.dom.click(document.querySelector('.modal[role="dialog"] footer .btn-primary'));
         assert.verifySteps(['cancel']);
 
         parent.destroy();
@@ -164,11 +171,12 @@ QUnit.module('core', {}, function () {
         Dialog.confirm(parent, "", options);
         await testUtils.nextTick();
 
-        assert.ok($('.modal[role="dialog"]').hasClass('show'));
-        testUtils.dom.click($('.modal[role="dialog"] footer button:not(.btn-primary)'));
-        testUtils.dom.click($('.modal[role="dialog"] footer .btn-primary'));
+        const el = document.querySelector('.modal[role="dialog"]');
+        assert.ok(el.classList.contains("show"));
+        testUtils.dom.click(document.querySelector('.modal[role="dialog"] footer button:not(.btn-primary)'));
+        testUtils.dom.click(document.querySelector('.modal[role="dialog"] footer .btn-primary'));
         await testUtils.nextTick();
-        assert.notOk($('.modal[role="dialog"]').hasClass('show'));
+        assert.notOk(el.classList.contains("show"));
 
         parent.destroy();
     });
@@ -191,11 +199,15 @@ QUnit.module('core', {}, function () {
         await testUtils.nextTick();
 
         assert.verifySteps([]);
-        testUtils.dom.click($('.modal[role="dialog"] footer button:not(.btn-primary)'));
+        testUtils.dom.click(
+            document.querySelector('.modal[role="dialog"] footer button:not(.btn-primary)')
+        );
         await testUtils.nextTick();
-        testUtils.dom.click($('.modal[role="dialog"] footer .btn-primary'));
+        testUtils.dom.click(document.querySelector('.modal[role="dialog"] footer .btn-primary'));
         await testUtils.nextTick();
-        testUtils.dom.click($('.modal[role="dialog"] footer button:not(.btn-primary)'));
+        testUtils.dom.click(
+            document.querySelector('.modal[role="dialog"] footer button:not(.btn-primary)')
+        );
         assert.verifySteps(['cancel', 'confirm', 'cancel']);
 
         parent.destroy();
@@ -219,9 +231,9 @@ QUnit.module('core', {}, function () {
         dialogInstance = Dialog.confirm(parent, "", options);
         await testUtils.nextTick();
 
-        testUtils.dom.click($('.modal[role="dialog"] footer button:not(.btn-primary)'));
+        testUtils.dom.click(document.querySelector('.modal[role="dialog"] footer button:not(.btn-primary)'));
         await testUtils.nextTick();
-        testUtils.dom.click($('.modal[role="dialog"] footer .btn-primary'));
+        testUtils.dom.click(document.querySelector('.modal[role="dialog"] footer .btn-primary'));
 
         parent.destroy();
     });
@@ -244,7 +256,7 @@ QUnit.module('core', {}, function () {
         await testUtils.nextTick();
 
         assert.verifySteps([]);
-        testUtils.dom.click($('.modal[role="dialog"] footer .btn-primary'));
+        testUtils.dom.click(document.querySelector('.modal[role="dialog"] footer .btn-primary'));
         assert.verifySteps(['confirm']);
 
         parent.destroy();
@@ -263,7 +275,7 @@ QUnit.module('core', {}, function () {
         assert.verifySteps([]);
 
         await testUtils.nextTick();
-        await testUtils.dom.triggerEvents($('.modal[role="dialog"]'), [ESCAPE_KEY]);
+        await testUtils.dom.triggerEvents(document.querySelector('.modal[role="dialog"]'), [ESCAPE_EVENT]);
 
         testPromise.then(() => {
             assert.verifySteps(['ok alert callback']);
@@ -293,14 +305,14 @@ QUnit.module('core', {}, function () {
                     close: true,
                 },
             ],
-            $content: $('<main/>'),
+            $content: document.createElement("main"),
         }).open();
 
         await dialog.opened();
 
         assert.verifySteps(['on_attach_callback']);
 
-        await testUtils.dom.click($('.modal[role="dialog"] .btn-primary'));
+        await testUtils.dom.click(document.querySelector('.modal[role="dialog"] .btn-primary'));
         assert.verifySteps(['on_detach_callback']);
 
         parent.destroy();
