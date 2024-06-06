@@ -266,6 +266,14 @@ class AccountEdiFormat(models.Model):
             )
 
             invoices.message_post(body=body)
+            if invoices.l10n_in_distance == 0:
+                alert = str(response.get("data", {}).get('alert'))
+                pattern = r", Distance between these two pincodes is \d+, "
+                match = re.fullmatch(pattern, alert)
+                if match:
+                    distance = int(re.search(r'\d+', alert).group())
+                    if distance > 0 :
+                        invoices.l10n_in_distance = distance
         return res
 
     def _l10n_in_edi_irn_ewaybill_generate_json(self, invoice):
@@ -364,6 +372,14 @@ class AccountEdiFormat(models.Model):
                 str(response.get("data", {}).get('EwbValidTill'))
             )
             invoices.message_post(body=body)
+            if invoices.l10n_in_distance == 0:
+                alert = str(response.get("data", {}).get('alert'))
+                pattern = r", Distance between these two pincodes is \d+, "
+                match = re.fullmatch(pattern, alert)
+                if match:
+                    distance = int(re.search(r'\d+', alert).group())
+                    if distance > 0 :
+                        invoices.l10n_in_distance = distance
         return res
 
     def _l10n_in_edi_ewaybill_get_error_message(self, code):

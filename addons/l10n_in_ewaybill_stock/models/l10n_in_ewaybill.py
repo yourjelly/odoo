@@ -404,7 +404,7 @@ class Ewaybill(models.Model):
             return False
         self._handle_internal_warning_if_present(response)  # In case of error 604
         response_data = response.get("data")
-        self._write_successfully_response({
+        response_values = {
             'name': response_data.get("ewayBillNo"),
             'state': 'generated',
             'ewaybill_date': self._indian_timezone_to_odoo_utc(
@@ -413,7 +413,18 @@ class Ewaybill(models.Model):
             'ewaybill_expiry_date': self._indian_timezone_to_odoo_utc(
                 response_data.get('validUpto')
             ),
-        })
+        }
+        if self.distance == 0:
+            alert = str(response_data.get('alert'))
+            pattern = r", Distance between these two pincodes is \d+, "
+            match = re.fullmatch(pattern, alert)
+            if match:
+                dist = int(re.search(r'\d+', alert).group())
+                if dist > 0 :
+                    response_values.update({
+                        'distance': dist,
+                    })
+        self._write_successfully_response(response_values)
         self._cr.commit()
 
     @api.model
