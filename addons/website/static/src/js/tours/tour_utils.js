@@ -143,7 +143,7 @@ function changePaddingSize(direction) {
 /**
  * Checks if an element is visible on the screen, i.e., not masked by another
  * element.
- * 
+ *
  * @param {String} elementSelector The selector of the element to be checked.
  * @returns {Object} The steps required to check if the element is visible.
  */
@@ -493,6 +493,28 @@ function toggleMobilePreview(toggleOn) {
     }];
 }
 
+/**
+ * Waits for an HTMLImageElement to load. Skips waiting if already loaded.
+ *
+ * @param {string} selector The {@link HTMLImageElement} to wait for
+ * @return {Array}
+ */
+function waitForImageToLoad(selector) {
+    return [
+        {
+            content: "Wait for image to load",
+            trigger: selector,
+            async run() {
+                const img = this.$anchor[0];
+                await new Promise((resolve) => {
+                    if (img.complete) resolve();
+                    else img.addEventListener("load", resolve);
+                });
+            }
+        },
+    ];
+}
+
 export default {
     addMedia,
     assertCssVariable,
@@ -525,4 +547,5 @@ export default {
     selectSnippetColumn,
     switchWebsite,
     toggleMobilePreview,
+    waitForImageToLoad,
 };
