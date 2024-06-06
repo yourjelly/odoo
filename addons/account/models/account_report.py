@@ -189,9 +189,15 @@ class AccountReport(models.Model):
 
     @api.constrains('section_report_ids')
     def _validate_section_report_ids(self):
-        for record in self:
-            if any(section.section_report_ids for section in record.section_report_ids):
-                raise ValidationError(_("The sections defined on a report cannot have sections themselves."))
+        report_max_depth = 3
+        for report in self:
+            sections = report
+            for i in range(0, report_max_depth):
+                sections = sections.section_report_ids
+                if sections and i == report_max_depth - 1:
+                    raise ValidationError(_(f"You can only have {report_max_depth - 1} levels of sections defined on a report."))
+                elif not sections:
+                    return
 
     @api.onchange('availability_condition')
     def _onchange_availability_condition(self):
