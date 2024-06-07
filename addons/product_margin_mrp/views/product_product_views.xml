@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_margin_tree_inherit_l10n_in" model="ir.ui.view">
+        <field name="name">product.margin.tree.inherit.l10n_in</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product_margin.view_product_margin_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='sale_avg_price']" position="replace">
+                <field name="sale_avg_price" string="Prd-Out Avg. Unit Price"/>
+            </xpath>
+
+            <xpath expr="//field[@name='sale_num_invoiced']" position="replace">
+                <field name="sale_num_invoiced" string="# Prd-Out Quantity"/>
+            </xpath>
+
+            <xpath expr="//field[@name='total_cost']" position="replace">
+                <field name="total_cost" string="Prd-In Total Cost"/>
+            </xpath>
+
+            <xpath expr="//field[@name='purchase_num_invoiced']" position="replace">
+                <field name="purchase_num_invoiced" string="# Prd-In Quantity"/>
+            </xpath>
+
+            <xpath expr="//field[@name='sales_gap']" position="replace">
+            </xpath>
+
+            <xpath expr="//field[@name='expected_margin']" position="replace">
+            </xpath>
+
+            <xpath expr="//field[@name='expected_margin_rate']" position="replace">
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
