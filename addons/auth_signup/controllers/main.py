@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import functools
 import logging
 import werkzeug
 from werkzeug.urls import url_encode
@@ -9,12 +10,41 @@ from odoo.addons.auth_signup.models.res_users import SignupError
 from odoo.addons.web.controllers.home import ensure_db, Home, SIGN_UP_REQUEST_PARAMS, LOGIN_SUCCESSFUL_PARAMS
 from odoo.addons.base_setup.controllers.main import BaseSetup
 from odoo.exceptions import UserError
-from odoo.http import request
+from odoo.http import request, Response
 from markupsafe import Markup
 
 _logger = logging.getLogger(__name__)
 
 LOGIN_SUCCESSFUL_PARAMS.add('account_created')
+
+#----------------------------------------------------------
+# helpers
+#----------------------------------------------------------
+def fragment_to_query_string(func):
+    @functools.wraps(func)
+    def wrapper(self, *a, **kw):
+        kw.pop('debug', False)
+        if not kw:
+            return Response("""<html><head><script>
+                var l = window.location;
+                var q = l.hash.substring(1);
+                var r = l.pathname + l.search;
+                if(q.length !== 0) {
+                    var s = l.search ? (l.search === '?' ? '' : '&') : '?';
+                    r = l.pathname + l.search + s + q;
+                }
+                if (r == l.pathname) {
+                    r = '/';
+                }
+                window.location = r;
+            </script></head><body></body></html>""")
+        return func(self, *a, **kw)
+    return wrapper
+
+
+#----------------------------------------------------------
+# Controller
+#----------------------------------------------------------
 
 
 class AuthSignupHome(Home):
