@@ -6,8 +6,10 @@ import { sortBy } from "@web/core/utils/arrays";
 import { loadBundle } from "@web/core/assets";
 import { renderToString } from "@web/core/utils/render";
 import { useService } from "@web/core/utils/hooks";
+import { browser } from "@web/core/browser/browser";
+import { useDebounced } from "@web/core/utils/timing";
 
-import { Component, onWillUnmount, useEffect, useRef, onWillStart } from "@odoo/owl";
+import { Component, onWillUnmount, useEffect, useRef, onWillStart, useState, onMounted } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { cookie } from "@web/core/browser/cookie";
@@ -16,7 +18,6 @@ import { ReportViewMeasures } from "@web/views/view_components/report_view_measu
 const NO_DATA = _t("No data");
 
 const colorScheme = cookie.get("color_scheme");
-const GRAPH_LEGEND_COLOR = getCustomColor(colorScheme, "#111827", "#ffffff");
 const GRAPH_GRID_COLOR = getCustomColor(colorScheme, "rgba(0,0,0,.1)", "rgba(255,255,255,.15");
 const GRAPH_LABEL_COLOR = getCustomColor(colorScheme, "#111827", "#E4E4E4");
 
@@ -73,6 +74,67 @@ const gridOnTop = {
                         ctx.stroke();
                     }
                 });
+            });
+        }
+    }
+};
+
+/**
+ * Custom Chart.js plugin:
+ * Create custom legends and push them
+ * in o_graph_legend_container
+ */
+const customHtmlLegend = {
+    id: 'customHtmlLegend',
+    afterUpdate(chart, args, options) {
+        if(chart.config.options.plugins.customHtmlLegend) {
+            const list = document.querySelector(options.containerName);
+
+            // Remove old legend items
+            while (list.firstChild) {
+                list.firstChild.remove();
+            }
+
+            // Reuse the built-in legendItems generator
+            const items = chart.options.plugins.legend.labels.generateLabels(chart);
+            options.labels = items;
+
+            items.forEach(item => {
+                const btnWrap = document.createElement('div');
+                btnWrap.className = "col m-0 p-0";
+
+                // Button
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = item.hidden ? 'opacity-50 text-decoration-line-through ' : ' ';
+                btn.className += "btn btn-light d-flex gap-2 align-items-center w-100 h-100 cursor-pointer text-start lh-sm text-break";
+
+                btn.onclick = () => {
+                    const {type} = chart.config;
+                    if (type === 'pie') {
+                        chart.toggleDataVisibility(item.index);
+                    } else {
+                        chart.setDatasetVisibility(item.datasetIndex, !chart.isDatasetVisible(item.datasetIndex));
+                    }
+                    chart.update();
+                };
+
+                // Color box
+                const boxColor = document.createElement('span');
+                boxColor.style.background = item.fillStyle;
+                boxColor.style.border= item.lineWidth + "px solid" + item.strokeStyle;
+                boxColor.className = "o_graph_legend_item_box flex-shrink-0 rounded-pill";
+
+                // Label
+                const label = document.createElement('small');
+                const text = document.createTextNode(item.text);
+                label.appendChild(text);
+
+                // Push elements in the DOM
+                btn.appendChild(boxColor);
+                btn.appendChild(label);
+                btnWrap.appendChild(btn);
+                list.appendChild(btnWrap);
             });
         }
     }
@@ -160,18 +222,38 @@ export class GraphRenderer extends Component {
         this.tooltip = null;
         this.legendTooltip = null;
 
+        this.state = useState({
+            isSmall: this.env.isSmall
+        });
+        this.debouncedOnResize = useDebounced(this.updateSize, 300);
+
         onWillStart(async () => {
             await loadBundle("web.chartjs_lib");
         });
 
         useEffect(() => this.renderChart());
-        onWillUnmount(this.onWillUnmount);
+        onWillUnmount(() => {
+            this.onWillUnmount;
+            browser.removeEventListener("resize", this.debouncedOnResize);
+        });
+        onMounted(() => {
+            browser.addEventListener("resize", this.debouncedOnResize);
+            this.updateSize();
+        });
     }
 
     onWillUnmount() {
         if (this.chart) {
             this.chart.destroy();
         }
+    }
+
+    /**
+     *
+     * @return {void}
+     */
+    updateSize() {
+        this.state.isSmall = this.env.isSmall;
     }
 
     /**
@@ -424,8 +506,7 @@ export class GraphRenderer extends Component {
     getLegendOptions() {
         const { mode } = this.model.metaData;
         const legendOptions = {
-            onHover: this.onLegendHover.bind(this),
-            onLeave: this.onLegendLeave.bind(this),
+            display: false,
         };
         if (mode === "line") {
             legendOptions.onClick = this.onLegendClick.bind(this);
@@ -435,13 +516,12 @@ export class GraphRenderer extends Component {
                 generateLabels: (chart) => {
                     return chart.data.labels.map((label, index) => {
                         const hidden = !chart.getDataVisibility(index);
-                        const fullText = label;
-                        const text = shortenLabel(fullText);
+                        const text = label;
                         const fillStyle =
                             label === NO_DATA
                                 ? DEFAULT_BG
                                 : getColor(index, colorScheme, chart.data.labels.length);
-                        return { text, fullText, fillStyle, hidden, index, fontColor: GRAPH_LEGEND_COLOR, lineWidth: 0 };
+                        return { text, fillStyle, hidden, index };
                     });
                 },
             };
@@ -454,8 +534,7 @@ export class GraphRenderer extends Component {
                     const { data } = chart;
                     const labels = data.datasets.map((dataset, index) => {
                         return {
-                            text: shortenLabel(dataset.label),
-                            fullText: dataset.label,
+                            text: dataset.label,
                             fillStyle: dataset[referenceColor],
                             hidden: !chart.isDatasetVisible(index),
                             lineCap: dataset.borderCapStyle,
@@ -466,7 +545,6 @@ export class GraphRenderer extends Component {
                             strokeStyle: dataset[referenceColor],
                             pointStyle: dataset.pointStyle,
                             datasetIndex: index,
-                            fontColor: GRAPH_LEGEND_COLOR,
                         };
                     });
                     return labels;
@@ -726,47 +804,6 @@ export class GraphRenderer extends Component {
     }
 
     /**
-     * If the text of a legend item has been shortened and the user mouse
-     * hovers that item (actually the event type is mousemove), a tooltip
-     * with the item full text is displayed.
-     * @param {Event} ev
-     * @param {Object} legendItem
-     */
-    onLegendHover(ev, legendItem) {
-        ev = ev.native;
-        this.canvasRef.el.style.cursor = "pointer";
-        /**
-         * The string legendItem.text is an initial segment of legendItem.fullText.
-         * If the two coincide, no need to generate a tooltip. If a tooltip
-         * for the legend already exists, it is already good and does not
-         * need to be recreated.
-         */
-        const { fullText, text } = legendItem;
-        if (this.legendTooltip || text === fullText) {
-            return;
-        }
-        const viewContentTop = this.canvasRef.el.getBoundingClientRect().top;
-        const legendTooltip = Object.assign(document.createElement("div"), {
-            className: "o_tooltip_legend popover p-3 pe-none position-absolute",
-            innerText: fullText,
-        });
-        legendTooltip.style.top = `${ev.clientY - viewContentTop}px`;
-        legendTooltip.style.maxWidth = getMaxWidth(this.chart.chartArea);
-        this.containerRef.el.appendChild(legendTooltip);
-        this.fixTooltipLeftPosition(legendTooltip, ev.clientX);
-        this.legendTooltip = legendTooltip;
-    }
-
-    /**
-     * If there's a legend tooltip and the user mouse out of the
-     * corresponding legend item, the tooltip is removed.
-     */
-    onLegendLeave() {
-        this.canvasRef.el.style.cursor = "";
-        this.removeLegendTooltip();
-    }
-
-    /**
      * Prepares options for the chart according to the current mode
      * (= chart type). This function returns the parameter options used to
      * instantiate the chart.
@@ -779,7 +816,11 @@ export class GraphRenderer extends Component {
             plugins: {
                 legend: this.getLegendOptions(),
                 tooltip: this.getTooltipOptions(),
-                gridOnTop: mode != "line" ? false : true,
+                customHtmlLegend: {
+                    containerName: '.o_graph_legend_container',
+                    model: this.model,
+                },
+                gridOnTop: mode != "line" ? false : true
             },
             elements: this.getElementOptions(),
             onResize: () => {this.resizeChart(options)},
@@ -850,6 +891,7 @@ export class GraphRenderer extends Component {
      * the current config.
      */
     renderChart() {
+        Chart.register(customHtmlLegend);
         Chart.register(gridOnTop);
 
         if (this.chart) {

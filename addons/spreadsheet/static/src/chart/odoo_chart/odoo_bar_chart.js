@@ -78,6 +78,7 @@ function getBarConfiguration(chart, labels, locale) {
         padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
     };
     config.options.plugins.gridOnTop = false;
+    config.options.plugins.customHtmlLegend = false;
     config.options.scales = {
         x: {
             ticks: {
