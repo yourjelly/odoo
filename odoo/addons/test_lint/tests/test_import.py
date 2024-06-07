@@ -4,7 +4,6 @@ import logging
 import os
 import re
 import ast
-from collections import defaultdict
 
 from odoo.tests.common import TransactionCase
 from odoo import tools
@@ -18,26 +17,27 @@ _logger = logging.getLogger(__name__)
 class TestPyImportManifest(TransactionCase):
 
     def test_import(self):
-        paths = []
+        paths = {}
         for module_name in get_modules():
-            module_path = get_module_path(module_name)
-            if not module_path.startswith(os.path.join(tools.config['root_path'], 'addons')):
-                paths.append((module_path, module_name))
+            paths[module_name] = get_module_path(module_name)
 
         reg = re.compile(r"\s*from odoo.addons([.])([^\s.]+).*( import .*)?")
 
         # get depends in manifest
 
-        module_manifest_depends = defaultdict(set)
-        for path, module_name in paths:
+        module_manifest_depends = {}
+        for module_name in list(paths):
+            path = paths[module_name]
             for MANIFEST_NAME in module.MANIFEST_NAMES:
                 manifest_path = os.path.join(path, MANIFEST_NAME)
                 if os.path.exists(manifest_path):
                     with open(manifest_path, encoding="utf-8") as f:
-                        module_manifest_depends[module_name].update(ast.literal_eval(f.read()).get('depends', []))
+                        manifest_data = ast.literal_eval(f.read())
+                        module_manifest_depends[module_name] = manifest_data.get('depends', [])
+                        if manifest_data.get('installable') is False:
+                            paths.pop(module_name)
 
         module_depends = {}
-
         def get_depends(module_name):
             if module_name not in module_depends:
                 depends = set()
@@ -52,7 +52,7 @@ class TestPyImportManifest(TransactionCase):
         # get depends from import
 
         errors = []
-        for path, module_name in paths:
+        for module_name, path in paths.items():
             imported_addons = set()
             for (dirpath, _dirnames, filenames) in os.walk(path):
                 for filename in filenames:
