@@ -60,6 +60,7 @@ class WebsiteEventMeetController(EventCommunityController):
             # event information
             "event": event,
             'main_object': event,
+            'seo_object': request.website.get_template('website_event_meet.event_meet'),
             # rooms
             "meeting_rooms": meeting_rooms,
             "current_lang": request.env["res.lang"].browse(int(lang)) if lang else False,

@@ -106,6 +106,7 @@ class ExhibitorController(WebsiteEventController):
             # event information
             'event': event,
             'main_object': event,
+            'seo_object': request.website.get_template('website_event_exhibitor.event_exhibitors'),
             'sponsor_categories': sponsor_categories,
             'hide_sponsors': True,
             # search information

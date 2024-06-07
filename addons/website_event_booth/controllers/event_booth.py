@@ -109,6 +109,7 @@ class WebsiteEventBoothController(WebsiteEventController):
             'event_booths': event_sudo.event_booth_ids,
             'hide_sponsors': True,
             'main_object': event_sudo,
+            'seo_object': request.website.get_template('website_event_booth.event_booth_registration_details'),
             'selected_booth_category_id': (chosen_booth_category or default_booth_category).id,
             'selected_booth_ids': booth_ids if booth_category_id == chosen_booth_category.id and booth_ids else False,
         }

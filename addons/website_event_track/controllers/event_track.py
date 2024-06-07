@@ -162,6 +162,7 @@ class EventTrackController(http.Controller):
             # event information
             'event': event,
             'main_object': event,
+            'seo_object': request.website.get_template('website_event_track.tracks_session'),
             # tracks display information
             'tracks': tracks_sudo,
             'tracks_by_day': tracks_by_day,
@@ -191,6 +192,7 @@ class EventTrackController(http.Controller):
         vals = {
             'event': event,
             'main_object': event,
+            'seo_object': request.website.get_template('website_event_track.agenda_online'),
             'tag': tag,
             'is_event_user': request.env.user.has_group('event.group_event_user'),
         }
@@ -426,7 +428,11 @@ class EventTrackController(http.Controller):
 
     @http.route(['''/event/<model("event.event"):event>/track_proposal'''], type='http', auth="public", website=True, sitemap=False)
     def event_track_proposal(self, event, **post):
-        return request.render("website_event_track.event_track_proposal", {'event': event, 'main_object': event})
+        return request.render("website_event_track.event_track_proposal", {
+            'event': event,
+            'main_object': event,
+            'seo_object': request.website.get_template('website_event_track.event_track_proposal')
+        })
 
     @http.route(['''/event/<model("event.event"):event>/track_proposal/post'''], type='http', auth="public", methods=['POST'], website=True)
     def event_track_proposal_post(self, event, **post):
