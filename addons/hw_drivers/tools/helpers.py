@@ -298,13 +298,14 @@ def get_ssid():
     return subprocess.check_output(['sed', 's/.*"\\(.*\\)"/\\1/'], stdin=process_grep.stdout).decode('utf-8').rstrip()
 
 
-@cache
 def get_odoo_server_url():
     if platform.system() == 'Linux':
         ap = subprocess.call(['systemctl', 'is-active', '--quiet', 'hostapd']) # if service is active return 0 else inactive
         if not ap:
             return False
-    return read_file_first_line('odoo-remote-server.conf')
+
+    return read_file_first_line('/home/pi/odoo-remote-server.conf', absolute=True)
+
 
 def get_token():
     return read_file_first_line('token')
@@ -479,11 +480,13 @@ def path_file(filename):
     elif platform_os == 'Windows':
         return Path().absolute().parent.joinpath('server/' + filename)
 
-def read_file_first_line(filename):
-    path = path_file(filename)
+
+def read_file_first_line(filename, absolute=False):
+    path = Path(filename) if absolute else file_path(filename)
     if path.exists():
         with path.open('r') as f:
             return f.readline().strip('\n')
+
 
 def unlink_file(filename):
     with writable():
