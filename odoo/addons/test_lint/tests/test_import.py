@@ -56,7 +56,11 @@ class TestPyImportManifest(TransactionCase):
             imported_addons = set()
             for (dirpath, _dirnames, filenames) in os.walk(path):
                 for filename in filenames:
-                    if filename.startswith('test_') or not filename.endswith('.py') or '/tests' in dirpath or '/populate' in dirpath:
+                    if not filename.endswith('.py'):
+                        continue
+                    if filename.startswith('test_') or '/tests' in dirpath or '/migrations' in dirpath or '/populate' in dirpath:
+                        continue
+                    if not os.path.isfile(os.path.join(dirpath, '__init__.py')):
                         continue
                     with open(os.path.join(dirpath, filename), encoding="utf-8") as f:
                         for line in f:
