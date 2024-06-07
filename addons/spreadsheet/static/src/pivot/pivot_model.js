@@ -365,14 +365,15 @@ export class OdooPivotModel extends PivotModel {
      * Check if the given field is used as col group by
      */
     _isCol(nameWithGranularity) {
-        return this.metaData.fullColGroupBys.includes(nameWithGranularity);
+        // return this.metaData.fullColGroupBys.includes(nameWithGranularity);
+        return !!this.definition.columns.find(dimension => dimension.nameWithGranularity === nameWithGranularity);
     }
 
     /**
      * Check if the given field is used as row group by
      */
     _isRow(nameWithGranularity) {
-        return this.metaData.fullRowGroupBys.includes(nameWithGranularity);
+        return !!this.definition.rows.find(dimension => dimension.nameWithGranularity === nameWithGranularity);
     }
 
     /**

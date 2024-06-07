@@ -282,13 +282,17 @@ export class OdooPivotRuntimeDefinition extends PivotRuntimeDefinition {
         this._model = definition.model;
         /** @type {SortedColumn} */
         this._sortedColumn = definition.sortedColumn;
-        /**
-         * month_number is currently not supported in Odoo, remove it
-         */
         for (const dimension of this.columns.concat(this.rows)) {
+            /**
+             * month_number is currently not supported in Odoo, remove it
+             */
             if (dimension.granularity === "month_number") {
                 dimension.granularity = undefined;
                 dimension.nameWithGranularity = dimension.name;
+            }
+            if ((dimension.type === "date" || dimension.type === "datetime") && !dimension.granularity) {
+                dimension.granularity = "month";
+                dimension.nameWithGranularity = `${dimension.name}:month`;
             }
         }
     }

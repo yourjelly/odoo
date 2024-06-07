@@ -86,10 +86,14 @@ export function parseGroupField(allFields, groupFieldString) {
     if (field === undefined) {
         throw new EvaluationError(sprintf(_t("Field %s does not exist"), fieldName));
     }
-    const dimensionWithGranularity = granularity ? `${fieldName}:${granularity}` : fieldName;
     if (isDateField(field)) {
         granularity = granularity || "month";
     }
+    console.log(groupFieldString)
+    if (groupFieldString === "date") {
+        debugger
+    }
+    const dimensionWithGranularity = granularity ? `${fieldName}:${granularity}` : fieldName;
     return {
         isPositional,
         field,
