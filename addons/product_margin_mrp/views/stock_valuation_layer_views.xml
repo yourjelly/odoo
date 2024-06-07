@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_valuation_layer_tree_inherit_l10n_in" model="ir.ui.view">
+        <field name="name">stock.valuation.layer.tree.inherit.l10n_in</field>
+        <field name="model">stock.valuation.layer</field>
+        <field name="inherit_id" ref="stock_account.stock_valuation_layer_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='value']" position="after">
+                <field name="so_unit_price" string="SO Unit Price" />
+                <field name="turnover" string="Turnover" />
+                <field name="total_margin" string="Total Margin" />
+            </xpath>
+        </field>
+    </record>
+</odoo>
