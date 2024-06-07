@@ -9,7 +9,6 @@ import os
 import subprocess
 import threading
 import time
-
 import urllib3
 
 from odoo import http
@@ -43,6 +42,8 @@ class DisplayDriver(Driver):
         self.owner = False
         self.rendered_html = ''
         if self.device_identifier != 'distant_display':
+            # helpers.get_version returns a string formatted as: <L|W><version> (L: Linux, W: Windows)
+            self.browser = 'chromium-browser' if float(helpers.get_version()[1:]) >= 24.06 else 'firefox'
             self._x_screen = device.get('x_screen', '0')
             self.load_url()
 
@@ -73,12 +74,18 @@ class DisplayDriver(Driver):
     def update_url(self, url=None):
         os.environ['DISPLAY'] = ":0." + self._x_screen
         os.environ['XAUTHORITY'] = '/run/lightdm/pi/xauthority'
-        firefox_env = os.environ.copy()
-        firefox_env['HOME'] = '/tmp/' + self._x_screen
+        browser_env = os.environ.copy()
+        browser_env['HOME'] = '/tmp/' + self._x_screen
         self.url = url or 'http://localhost:8069/point_of_sale/display/' + self.device_identifier
-        new_window = subprocess.call(['xdotool', 'search', '--onlyvisible', '--screen', self._x_screen, '--class', 'Firefox'])
-        subprocess.Popen(['firefox', self.url], env=firefox_env)
-        if new_window:
+
+        subprocess.Popen(
+            [self.browser, self.url, '--start-fullscreen'],
+            env=browser_env,
+            stderr=subprocess.DEVNULL,
+        )
+
+        # To remove when everyone is on version >= 24.06: chromium has '--start-fullscreen' option
+        if self.browser == 'firefox':
             self.call_xdotools('F11')
 
     def load_url(self):
@@ -102,7 +109,18 @@ class DisplayDriver(Driver):
         os.environ['DISPLAY'] = ":0." + self._x_screen
         os.environ['XAUTHORITY'] = "/run/lightdm/pi/xauthority"
         try:
-            subprocess.call(['xdotool', 'search', '--sync', '--onlyvisible', '--screen', self._x_screen, '--class', 'Firefox', 'key', keystroke])
+            subprocess.call([
+                'xdotool',
+                'search',
+                '--sync',
+                '--onlyvisible',
+                '--screen',
+                self._x_screen,
+                '--class',
+                self.browser,
+                'key',
+                keystroke,
+            ])
             return "xdotool succeeded in stroking " + keystroke
         except:
             return "xdotool threw an error, maybe it is not installed on the IoTBox"
@@ -152,8 +170,8 @@ class DisplayDriver(Driver):
         }
         event_manager.device_changed(self)
 
-class DisplayController(http.Controller):
 
+class DisplayController(http.Controller):
     @http.route('/hw_proxy/display_refresh', type='json', auth='none', cors='*')
     def display_refresh(self):
         display = DisplayDriver.get_default_display()
@@ -222,8 +240,8 @@ class DisplayController(http.Controller):
                             'icon': 'sitemap' if 'eth' in iface_id else 'wifi',
                         })
 
-        if not display_identifier:
-            display_identifier = DisplayDriver.get_default_display().device_identifier
+        if not display_identifier and (default_display := DisplayDriver.get_default_display()) != 0:
+            display_identifier = default_display.device_identifier
 
         return pos_display_template.render({
             'title': "Odoo -- Point of Sale",
@@ -232,6 +250,7 @@ class DisplayController(http.Controller):
             'display_ifaces': display_ifaces,
             'display_identifier': display_identifier,
             'pairing_code': connection_manager.pairing_code,
+            'hostname': helpers.get_hostname(),
         })
 
     @http.route('/point_of_sale/iot_devices', type='json', auth='none', methods=['POST'])
