@@ -353,7 +353,7 @@ class ProductTemplate(models.Model):
     def _compute_volume_uom_name(self):
         self.volume_uom_name = self._get_volume_uom_name_from_ir_config_parameter()
 
-    @api.depends('product_variant_ids.product_tmpl_id')
+    @api.depends('attribute_line_ids.product_tmpl_id')
     def _compute_product_variant_count(self):
         for template in self:
             template.product_variant_count = len(template.product_variant_ids)
