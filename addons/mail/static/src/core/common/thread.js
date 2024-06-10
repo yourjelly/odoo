@@ -400,8 +400,8 @@ export class Thread extends Component {
     }
 
     get newMessageBannerText() {
-        if (this.props.thread.selfMember?.localMessageUnreadCounter > 1) {
-            return _t("%s new messages", this.props.thread.selfMember.localMessageUnreadCounter);
+        if (this.props.thread.selfMember?.totalUnreadCounter > 1) {
+            return _t("%s new messages", this.props.thread.selfMember.totalUnreadCounter);
         }
         return _t("1 new message");
     }

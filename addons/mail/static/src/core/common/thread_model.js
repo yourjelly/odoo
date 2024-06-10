@@ -182,7 +182,7 @@ export class Thread extends Record {
             return this.counter;
         }
         if (this.isChatChannel) {
-            return this.message_unread_counter || this.message_needaction_counter;
+            return this.selfMember?.totalUnreadCounter || this.message_needaction_counter;
         }
         return this.message_needaction_counter;
     }
@@ -199,7 +199,7 @@ export class Thread extends Record {
             return this.store.ChatWindow.get({ thread: this })?.isOpen;
         },
         onUpdate() {
-            if (this.selfMember && !this.isDisplayed) {
+            if (this.selfMember?.syncUnread === false && this.isDisplayed) {
                 this.selfMember.syncUnread = true;
             }
         },

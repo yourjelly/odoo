@@ -54,6 +54,19 @@ export class ChannelMember extends Record {
     });
     localMessageUnreadCounter = 0;
     localNewMessageSeparator = null;
+    /**
+     * Unread counter that sums up local unread messages and server unread
+     * messages.
+     */
+    totalUnreadCounter = Record.attr(0, {
+        compute() {
+            let counter = this.localMessageUnreadCounter;
+            if (this.syncUnread === false) {
+                counter += this.thread.message_unread_counter;
+            }
+            return counter;
+        },
+    });
     new_message_separator = null;
     threadAsTyping = Record.one("Thread", {
         onAdd() {
