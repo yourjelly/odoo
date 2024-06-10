@@ -491,8 +491,13 @@ Please change the quantity done or the rounding precision of your unit of measur
                 else:
                     move_update.date_deadline = new_deadline
 
-    @api.depends('move_line_ids.lot_id', 'move_line_ids.quantity')
+    @api.depends('move_line_ids.lot_id', 'move_line_ids.quantity', 'move_line_ids.quant_id')
     def _compute_lot_ids(self):
+        if any(not id_ for id_ in self._ids):
+            for move in self:
+                move.lot_ids = move.move_line_ids.lot_id + move.move_line_ids.quant_id.lot_id
+            return
+
         domain = [('move_id', 'in', self.ids), ('lot_id', '!=', False), ('quantity', '!=', 0.0)]
         lots_by_move_id = self.env['stock.move.line']._read_group(
             domain,
