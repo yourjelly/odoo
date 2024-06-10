@@ -36,7 +36,6 @@ class IrConfigParameter(models.Model):
 
     key = fields.Char(required=True)
     value = fields.Text()
-    default = fields.Text()
     type = fields.Selection([
         ('text', 'Text'),
         ('bool', 'Boolean'),
@@ -48,14 +47,9 @@ class IrConfigParameter(models.Model):
         ('key_uniq', 'unique (key)', 'Key must be unique.')
     ]
 
-    @api.constrains('default', 'value', 'type')
+    @api.constrains('value', 'type')
     def _check_type(self):
         for param in self:
-            if param.default is not False:
-                try:
-                    self._convert_value(param.default, param.type)
-                except (ValueError, TypeError):
-                    raise ValidationError(_('default value "%(default)s" and its type "%(type)s" are not consistent for key "%(key)s"', default=param.default, type=param.type, key=param.key))
             if param.value is not False:
                 try:
                     self._convert_value(param.value, param.type)
@@ -87,7 +81,7 @@ class IrConfigParameter(models.Model):
         # we bypass the ORM because get_param() is used in some field's depends,
         # and must therefore work even when the ORM is not ready to work
         self.flush_model()
-        self.env.cr.execute(SQL('SELECT COALESCE("value", "default"), "type" FROM ir_config_parameter WHERE key = %s', key))
+        self.env.cr.execute(SQL('SELECT "value", "type" FROM ir_config_parameter WHERE key = %s', key))
         result = self.env.cr.fetchone()
         if not result:
             raise Exception('parameter not found for key (%s)' % key)

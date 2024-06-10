@@ -209,12 +209,10 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                 config_parameters.append((field.config_parameter, None if default is False else default, type_))
         if config_parameters:
             self.env.cr.execute(SQL("""
-            INSERT INTO ir_config_parameter ("key", "default", "type")
+            INSERT INTO ir_config_parameter ("key", "value", "type")
             VALUES %s
             ON CONFLICT ("key")
-            DO UPDATE
-            SET "default" = EXCLUDED."default",
-                "type" = EXCLUDED."type"
+            DO NOTHING
             """, SQL(", ").join(config_parameters)))
 
     def _valid_field_parameter(self, field, name):
