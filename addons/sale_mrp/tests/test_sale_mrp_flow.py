@@ -2295,7 +2295,6 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         categ_form = Form(self.env['product.category'])
         categ_form.name = 'Super Fifo'
         categ_form.property_cost_method = 'fifo'
-        categ_form.property_valuation = 'real_time'
         categ = categ_form.save()
         (kit + self.component_a).categ_id = categ
 

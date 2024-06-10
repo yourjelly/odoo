@@ -36,6 +36,32 @@ class StockValuationLayer(models.Model):
     reference = fields.Char(related='stock_move_id.reference')
     price_diff_value = fields.Float('Invoice value correction with invoice currency')
     warehouse_id = fields.Many2one('stock.warehouse', string="Receipt WH", compute='_compute_warehouse_id', search='_search_warehouse_id')
+    # property_stock_valuation_account_id = fields.Many2one('account.account', related='categ_id.property_stock_valuation_account_id', company_dependent=True)
+    # property_stock_valuation_account_id_store = fields.Char('Property Valuation Account',compute='_compute_valuation', store=True)
+    property_stock_valuation_account_id_store = fields.Many2one('account.account', compute='_compute_valuation', store=True)
+
+    @api.depends('categ_id.property_stock_valuation_account_id')
+    def _compute_valuation(self):
+        for record in self:
+            # print("============================",record.company_id)
+            record.property_stock_valuation_account_id_store = record.with_company(record.company_id).categ_id.property_stock_valuation_account_id
+    # property_stock_valuation_account_id = fields.Many2one('account.account', compute='_compute_stock_valuation', company_dependent=True, check_company=True,store=True)
+    # valuation_account = fields.Char(compute='_compute_stock_valuation', store=True)
+
+    # # @api.depends('company_id.automatic_accounting','categ_id.property_stock_valuation_account_id')
+    # @api.depends('company_id','company_id.automatic_accounting')
+    # def _compute_stock_valuation(self):
+    #     # breakpoint()
+    #     # print("======================0",self.with_company(self.company_id))
+    #     # self = self.with_company(self.company_id)
+    #     for record in self:
+    #         print("============================",record.company_id)
+    #         # print("dsiplay_name_property_stock_valuation=====================", record.categ_id.property_stock_valuation_account_id.display_name)
+    #         # breakpoint()
+    #         # record.property_stock_valuation_account_id = record.categ_id.property_stock_valuation_account_id
+    #         # record.valuation_account = record.categ_id.property_stock_valuation_account_id.display_name
+    #         # print('record.valuation_account=================',record.valuation_account)
+    #         # print('record.property_stock_valuation_account_id=================',record.property_stock_valuation_account_id)
 
     def init(self):
         tools.create_index(

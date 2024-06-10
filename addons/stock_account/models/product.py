@@ -864,6 +864,17 @@ class ProductCategory(models.Model):
             }
         }
 
+    @api.model_create_multi
+    def create(self, vals):
+        for category in vals:
+            # if self.env.user.has_group('stock_account.group_stock_accounting_automatic'):
+            # if self.env['ir.config_parameter'].sudo().get_param('stock_account.group_stock_accounting_automatic'):
+            if self.env.company.automatic_accounting:
+                category['property_valuation'] = 'real_time'
+            else:
+                category['property_valuation'] = 'manual_periodic'
+        return super().create(vals)
+
     def write(self, vals):
         impacted_categories = {}
         move_vals_list = []

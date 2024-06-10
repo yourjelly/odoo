@@ -18,8 +18,11 @@ class ValuationReconciliationTestCommon(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.env.user.groups_id += cls.env.ref('stock_account.group_stock_accounting_automatic')
-
+        # cls.env.user.company_id.automatic_accounting = True
+        config_settings = cls.env['res.config.settings'].create({
+            'automatic_accounting': True,
+        }).execute()
+        # cls.env.user.groups_id += cls.env.ref('stock_account.group_stock_accounting_automatic')
         cls.stock_account_product_categ = cls.env['product.category'].create({
             'name': 'Test category',
             'property_valuation': 'real_time',
