@@ -24,7 +24,10 @@ class AccountJournal(models.Model):
     @api.depends('country_code', 'type', 'l10n_latam_use_documents')
     def _compute_l10n_ar_is_pos(self):
         for journal in self:
-            journal.l10n_ar_is_pos = journal.country_code == 'AR' and journal.type == 'sale' and journal.l10n_latam_use_documents
+            # as there is a constrain on l10n_ar_is_pos, avoid writing value if it is the same
+            l10n_ar_is_pos = journal.country_code == 'AR' and journal.type == 'sale' and journal.l10n_latam_use_documents
+            if l10n_ar_is_pos != journal.l10n_ar_is_pos:
+                journal.l10n_ar_is_pos = l10n_ar_is_pos
 
     @api.depends('l10n_ar_is_pos')
     def _compute_l10n_ar_afip_pos_system(self):

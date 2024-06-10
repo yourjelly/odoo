@@ -27,11 +27,13 @@ class AccountChartTemplate(models.AbstractModel):
         """
         coa_responsibility = self._get_ar_responsibility_match(template_code)
         if coa_responsibility:
-            company.write({
+            # avoid unnecessary field constrain trigger
+            data_to_write = {key:value for key, value in {
                 'l10n_ar_afip_responsibility_type_id': coa_responsibility.id,
                 'country_id': self.env['res.country'].search([('code', '=', 'AR')]).id,
                 'tax_calculation_rounding_method': 'round_globally',
-            })
+            }.items() if (company[key]['id'] if key[-3:] == '_id' else company[key]) != value}
+            company.write(data_to_write)
             # set CUIT identification type (which is the argentinean vat) in the created company partner instead of
             # the default VAT type.
             company.partner_id.l10n_latam_identification_type_id = self.env.ref('l10n_ar.it_cuit')
