@@ -148,6 +148,14 @@ const toWeekItem = (weekDayItems) => ({
     days: weekDayItems,
 });
 
+function getWeeksInMonth(monthRange) {
+    let weeknumber1 = getStartOfWeek(monthRange[0]).weekNumber;
+    let weeknumber2 = getStartOfWeek(monthRange[1]).weekNumber;
+
+    weeknumber1 = weeknumber1 > 50 ? 0 : weeknumber1;
+    return weeknumber2 - weeknumber1 + 1;
+  }
+
 // Time constants
 const HOURS = numberRange(0, 24).map((hour) => [hour, String(hour)]);
 const MINUTES = numberRange(0, 60).map((minute) => [minute, String(minute || 0).padStart(2, "0")]);
@@ -184,10 +192,10 @@ const PRECISION_LEVELS = new Map()
                 const monthRange = [date.startOf("month"), date.endOf("month")];
                 /** @type {WeekItem[]} */
                 const weeks = [];
-
+                const abc = additionalMonth ? 6 : getWeeksInMonth(monthRange)
                 // Generate 6 weeks for current month
                 let startOfNextWeek = getStartOfWeek(monthRange[0]);
-                for (let w = 0; w < 6; w++) {
+                for (let w = 0; w < abc; w++) {
                     const weekDayItems = [];
                     // Generate all days of the week
                     for (let d = 0; d < 7; d++) {
