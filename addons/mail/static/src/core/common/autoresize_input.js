@@ -3,6 +3,7 @@
 import { Component, useRef, useState, onWillUpdateProps, onMounted } from "@odoo/owl";
 
 import { useAutoresize } from "@web/core/utils/autoresize";
+import { onExternalClick } from "@mail/utils/common/hooks";
 
 export class AutoresizeInput extends Component {
     static template = "mail.AutoresizeInput";
@@ -39,6 +40,7 @@ export class AutoresizeInput extends Component {
                 this.inputRef.el.setSelectionRange(-1, -1);
             }
         });
+        onExternalClick("input", () => this.onValidate());
     }
 
     /**
@@ -48,11 +50,18 @@ export class AutoresizeInput extends Component {
         switch (ev.key) {
             case "Enter":
                 this.inputRef.el.blur();
+                this.onValidate();
                 break;
             case "Escape":
                 this.state.value = this.props.value;
                 this.inputRef.el.blur();
                 break;
+        }
+    }
+
+    onValidate() {
+        if (!this.state.value) {
+            this.state.value = this.props.value;
         }
     }
 }
