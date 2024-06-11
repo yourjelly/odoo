@@ -46,6 +46,7 @@ export class PosStore extends Reactive {
         "printer",
         "action",
         "alert",
+        "sound",
     ];
     constructor() {
         super();
