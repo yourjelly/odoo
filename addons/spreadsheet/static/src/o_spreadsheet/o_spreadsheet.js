@@ -21413,7 +21413,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return containers;
         }
         getContainerStyle(container) {
-            const { width: viewWidth, height: viewHeight } = this.env.model.getters.getMainViewportRect();
+            const { width: viewWidth, height: viewHeight } = this.env.model.getters.getSheetViewDimension();
             const { x: viewportX, y: viewportY } = this.env.model.getters.getMainViewportCoordinates();
             const left = ["bottomRight", "topRight"].includes(container) ? viewportX : 0;
             const width = viewWidth - left;
@@ -43328,6 +43328,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         rgbaToHex,
         colorToRGBA,
         positionToZone,
+        deepEquals,
     };
     const components = {
         ChartPanel,
@@ -43383,8 +43384,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.44';
-    __info__.date = '2024-06-10T09:42:06.873Z';
-    __info__.hash = '25d16f6';
+    __info__.date = '2024-06-11T09:26:38.505Z';
+    __info__.hash = 'fc6a433';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
