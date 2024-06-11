@@ -108,7 +108,7 @@ QUnit.module("Components", ({ beforeEach }) => {
                         [-2, -3, -4, -5, -6, -7, -8],
                     ],
                     daysOfWeek: ["#", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                    weekNumbers: [1, 2, 3, 4, 5, 6],
+                    weekNumbers: [1, 2, 3, 4, 5],
                 },
             ],
         });
@@ -276,7 +276,7 @@ QUnit.module("Components", ({ beforeEach }) => {
                         [-2, -3, -4, -5, -6, -7, -8],
                     ],
                     daysOfWeek: ["#", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                    weekNumbers: [1, 2, 3, 4, 5, 6],
+                    weekNumbers: [1, 2, 3, 4, 5],
                 },
             ],
             time: [[12, 30]],

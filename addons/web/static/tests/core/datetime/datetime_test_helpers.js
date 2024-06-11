@@ -162,7 +162,7 @@ export function getPickerCell(expr) {
     const cells = select(".o_datetime_picker .o_date_item_cell").filter((cell) =>
         regex.test(getTexts(cell)[0])
     );
-    return cells.length === 1 ? cells[0] : cells;
+    return [cells.length === 1 ? cells[0] : cells];
 }
 
 /**
@@ -212,5 +212,5 @@ export function zoomOut() {
     return click(getFixture(), ".o_zoom_out");
 }
 
-const PICKER_ROWS = 6;
+const PICKER_ROWS = 5;
 const PICKER_COLS = 7;
