@@ -46,10 +46,7 @@ export class PosStore extends Reactive {
         "printer",
         "action",
         "alert",
-<<<<<<< HEAD
         "sound",
-=======
->>>>>>> 9f535228e286 ([IMP] pos_restaurant: imp order merge/split)
     ];
     constructor() {
         super();
