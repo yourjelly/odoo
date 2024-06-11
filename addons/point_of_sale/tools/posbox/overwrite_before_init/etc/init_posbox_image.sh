@@ -78,6 +78,7 @@ PKGS_TO_INSTALL="
     swig \
     unclutter \
     vim \
+    wayfire \
     x11-utils \
     xdotool \
     xserver-xorg-input-evdev \
