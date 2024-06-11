@@ -41,7 +41,6 @@ class ResConfigSettings(models.TransientModel):
     module_pos_mercado_pago = fields.Boolean(string="Mercado Pago Payment Terminal", help="The transactions are processed by Mercado Pago. Set your Mercado Pago credentials on the related payment method.")
     module_pos_preparation_display = fields.Boolean(string="Preparation Display", help="Show orders on the preparation display screen.")
     module_pos_pricer = fields.Boolean(string="Pricer electronic price tags", help="Display the price of your products through electronic price tags")
-    module_pos_urban_piper = fields.Boolean(related='pos_config_id.module_pos_urban_piper', help="Manage your online orders with Urban Piper.", readonly=False)
     update_stock_quantities = fields.Selection(related="company_id.point_of_sale_update_stock_quantities", readonly=False)
     account_default_pos_receivable_account_id = fields.Many2one(string='Default Account Receivable (PoS)', related='company_id.account_default_pos_receivable_account_id', readonly=False, check_company=True)
     barcode_nomenclature_id = fields.Many2one('barcode.nomenclature', related='company_id.nomenclature_id', readonly=False)
@@ -51,6 +50,7 @@ class ResConfigSettings(models.TransientModel):
     pos_customer_display_bg_img_name = fields.Char(related='pos_config_id.customer_display_bg_img_name', readonly=False)
 
     # pos.config fields
+    pos_module_pos_urban_piper = fields.Boolean(related='pos_config_id.module_pos_urban_piper', string="Urban Piper", help="Manage your online orders with Urban Piper.", readonly=False)
     pos_module_pos_discount = fields.Boolean(related='pos_config_id.module_pos_discount', readonly=False)
     pos_module_pos_hr = fields.Boolean(related='pos_config_id.module_pos_hr', readonly=False)
     pos_module_pos_restaurant = fields.Boolean(related='pos_config_id.module_pos_restaurant', readonly=False)

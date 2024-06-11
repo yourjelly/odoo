@@ -446,12 +446,9 @@
                                 <field name="update_stock_quantities" colspan="4" widget="radio"/>
                             </setting>
                         </block>
-                        <!-- URBAN PIPER BLOCK -->
                         <block title="Food Delivery Connector" id="pos_urban_piper_section">
-                            <!-- <setting id="module_auth_oauth"> -->
                             <setting id="urban_piper_setting" string="Urban Piper" documentation="https://www.urbanpiper.com/" company_dependent="1" help="Manage your online orders with Urban Piper.">
-                            <!-- TODO: Remove from this and put into point_of_sale -->
-                                <field name="module_pos_urban_piper"/>
+                                <field name="pos_module_pos_urban_piper"/>
                                 <div class="content-group"></div>
                             </setting>
                         </block>
