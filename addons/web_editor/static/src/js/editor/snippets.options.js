@@ -6215,7 +6215,7 @@ legacyRegistry.GridColumns = SnippetOptionWidget.extend({
     },
 });
 
-legacyRegistry.vAlignment = SnippetOptionWidget.extend({
+export class vAlignment extends SnippetOption {
     /**
      * @override
      */
@@ -6228,8 +6228,8 @@ legacyRegistry.vAlignment = SnippetOptionWidget.extend({
             return 'align-items-stretch';
         }
         return value;
-    },
-});
+    }
+}
 
 /**
  * Allows snippets to be moved before the preceding element or after the following.

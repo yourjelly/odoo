@@ -62,6 +62,74 @@
         <t t-set="indent" t-value="true"/>
     </t>
 </t>
+<t t-name="website.vertical_alignment_option">
+    <WeButtonGroup class="'o_we_sublevel_1'" title.translate="Vert. Alignment"
+                tooltip.translate="Vertical Alignment" dependencies="'normal_mode'">
+        <WeButton tooltip.translate="Align Top"
+            selectClass="'align-items-start'"
+            img="'/website/static/src/img/snippets_options/align_top.svg'"
+        />
+        <WeButton tooltip.translate="Align Middle"
+            selectClass="'align-items-center'"
+            img="'/website/static/src/img/snippets_options/align_middle.svg'"
+        />
+        <WeButton tooltip.translate="Align Bottom"
+            selectClass="'align-items-end'"
+            img="'/website/static/src/img/snippets_options/align_bottom.svg'"
+        />
+        <WeButton tooltip.translate="Stretch to Equal Height"
+            selectClass="'align-items-stretch'"
+            img="'/website/static/src/img/snippets_options/align_stretch.svg'"
+        />
+    </WeButtonGroup>
+</t>
+<!-- Scroll to next section button (only for full height) -->
+<t t-name="website.scroll_button_option">
+    <!-- Min height of section -->
+    <WeButtonGroup title.translate="Height" showScrollButton="''">
+        <WeButton name="'minheight_auto_opt'" selectClass="''" tooltip.translate="Fit content">Auto</WeButton>
+        <WeButton selectClass="'o_half_screen_height'" tooltip.translate="Half screen">50%</WeButton>
+        <WeButton selectClass="'o_full_screen_height'" tooltip.translate="Full screen" name="'full_height_opt'" showScrollButton="'true'">100%</WeButton>
+    </WeButtonGroup>
+    <WeInput title.translate="Height" class="'o_we_sublevel_1'" name="'fixed_height_opt'"
+        dependencies="'minheight_auto_opt'" selectStyle="''" unit="'px'"
+        cssProperty="'height'" forceStyle="''"/>
+        <!--    ↑ ↑ ↑
+            For this setting, we need to always force the style (= if the block
+            is naturally 800px tall and the user enters 800px for this setting,
+            we set 800px as inline style anyway). Indeed, this snippet's style
+            is based on the height that is forced but once the related public
+            widgets are started, the inner carousel items receive a min-height
+            which makes it so the snippet "natural" height is equal to the
+            initially forced height... so if the style is not forced, it would
+            ultimately be removed by mistake thinking it is not necessary.
+            Note: this is forced as not important as we still need the height to
+            be reset to 'auto' in mobile (generic css rules).
+        -->
+    <WeCheckbox title.translate="Scroll Down Button" name="'scroll_button_opt'"
+        dependencies="'full_height_opt'" toggleButton="'true'" noPreview="'true'"/>
+    <WeRow class="'o_we_sublevel_1'" title.translate="Colors">
+        <WeColorpicker dependencies="'scroll_button_opt'"
+            applyTo="'.o_scroll_button'"
+            selectStyle="'true'" cssProperty="'background-color'"
+            colorPrefix="'bg-'"
+        />
+        <WeColorpicker dependencies="'scroll_button_opt'"
+            applyTo="'.o_scroll_button'"
+            selectStyle="'true'" cssProperty="'color'"
+            colorPrefix="'text-'"
+        />
+    </WeRow>
+    <WeSelect class="'o_we_sublevel_1'" title.translate="Spacing"
+            applyTo="'.o_scroll_button'" dependencies="'scroll_button_opt'">
+        <WeButton selectClass="''">None</WeButton>
+        <WeButton selectClass="'mb-1'">Extra-Small</WeButton>
+        <WeButton selectClass="'mb-2'">Small</WeButton>
+        <WeButton selectClass="'mb-3'">Medium</WeButton>
+        <WeButton selectClass="'mb-4'">Large</WeButton>
+        <WeButton selectClass="'mb-5'">Extra-Large</WeButton>
+    </WeSelect>
+</t>
 <t t-name="website.snippet_options_shadow_widgets">
     <!-- Shadow -->
     <!-- TODO: @owl-options what is the variable="shadow_variable" on the button group ? -->
