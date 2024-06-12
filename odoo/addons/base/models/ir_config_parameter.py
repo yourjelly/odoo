@@ -84,7 +84,7 @@ class IrConfigParameter(models.Model):
         self.env.cr.execute(SQL('SELECT "value", "type" FROM ir_config_parameter WHERE key = %s', key))
         result = self.env.cr.fetchone()
         if not result:
-            raise Exception('parameter not found for key (%s)' % key)
+            return False
         value, type_ = result
         return self._convert_value(value, type_)
 
