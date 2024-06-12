@@ -4,7 +4,7 @@ import hashlib
 
 from odoo import fields, models
 
-from odoo.addons.payment_payulatam.const import DEFAULT_PAYMENT_METHOD_CODES
+from ..const import DEFAULT_PAYMENT_METHOD_CODES
 
 
 class PaymentProvider(models.Model):
