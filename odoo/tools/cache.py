@@ -2,10 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 # decorator makes wrappers that have the same API as their wrapped function
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
+from collections.abc import Mapping
 from decorator import decorator
 from inspect import signature, Parameter
 import logging
+import sys
 import time
 import warnings
 
@@ -32,6 +34,7 @@ class ormcache_counter(object):
 # statistic counters dictionary, maps (dbname, modelname, method) to counter
 STAT = defaultdict(ormcache_counter)
 
+ormcache_usage = defaultdict(lambda: [0, 0, 0, False, False])  # {(cache_name, key): [size, hit, gen_time, uid_arg, self_arg]}
 
 class ormcache(object):
     """ LRU cache decorator for model methods.
@@ -57,6 +60,8 @@ class ormcache(object):
         self.args = args
         self.skiparg = kwargs.get('skiparg')
         self.cache_name = kwargs.get('cache', 'default')
+        self.uid_arg = bool(self.args and any('uid' in arg for arg in args))
+        self.self_arg = bool(self.args and any('self.id' in arg for arg in args))
 
     def __call__(self, method):
         self.method = method
@@ -99,6 +104,10 @@ class ormcache(object):
     def lookup(self, method, *args, **kwargs):
         d, key0, counter = self.lru(args[0])
         key = key0 + self.key(*args, **kwargs)
+        usage = ormcache_usage[(self.cache_name, key)]
+        usage[3] = self.uid_arg
+        usage[4] = self.self_arg
+        usage[1] += 1
         try:
             r = d[key]
             counter.hit += 1
@@ -109,6 +118,8 @@ class ormcache(object):
             start = time.time()
             value = d[key] = self.method(*args, **kwargs)
             counter.gen_time += time.time() - start
+            usage[0] = max(usage[0], get_memory_footprint(value) + get_memory_footprint(key[2:]))
+            usage[2] = max(usage[2], counter.gen_time)
             return value
         except TypeError:
             _logger.warning("cache lookup error on %r", key, exc_info=True)
@@ -183,3 +194,31 @@ def get_cache_key_counter(bound_method, *args, **kwargs):
 
 # For backward compatibility
 cache = ormcache
+
+
+def get_memory_footprint(*args):
+    seen_ids = set()
+    total_size = 0
+    objects = deque(args)
+
+    while objects:
+        cur_obj = objects.popleft()
+        if id(cur_obj) in seen_ids or callable(cur_obj):
+            continue
+
+        seen_ids.add(id(cur_obj))
+        total_size += sys.getsizeof(cur_obj)
+        if hasattr(cur_obj, '__dict__'):
+            objects.append(cur_obj.__dict__.values())
+            objects.append(cur_obj.__dict__.keys())
+        if isinstance(cur_obj, Mapping):
+            objects.extend(cur_obj.values())
+        if hasattr(cur_obj, '__iter__') and not isinstance(cur_obj, (str, bytes, bytearray)):
+            try:
+                objects.extend(cur_obj)
+            except TypeError:
+                pass
+        if hasattr(cur_obj, '__slot__'):
+            objects.extend(getattr(cur_obj, s) for s in cur_obj.__slots__ if hasattr(cur_obj, s))
+
+    return total_size

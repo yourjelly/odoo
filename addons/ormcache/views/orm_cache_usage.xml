@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="orm_cache_usage_tree" model="ir.ui.view">
+        <field name="name">orm.cache.usage.tree</field>
+        <field name="model">orm.cache.usage</field>
+        <field name="arch" type="xml">
+            <tree string="ORM Cache Usage" js_class="orm_cache_usage_tree">
+                <field name="cache_name"/>
+                <field name="model_name"/>
+                <field name="method_name"/>
+                <field name="args"/>
+                <field name="largest_size"/>
+                <field name="largest_gen_time"/>
+                <field name="total_hit"/>
+                <field name="in_cache"/>
+                <field name="uid_arg"/>
+                <field name="product_template_arg"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="orm_cache_usage_search" model="ir.ui.view">
+        <field name="name">rm.cache.usage.search</field>
+        <field name="model">orm.cache.usage</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter name="group_by_cache" string="Group by cache" context="{'group_by': 'cache_name'}"/>
+                <filter name="group_by_model" string="Group by model" context="{'group_by': 'model_name'}"/>
+                <filter name="group_by_method" string="Group by method" context="{'group_by': 'method_name'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="orm_cache_usage_graph" model="ir.ui.view">
+        <field name="name">orm.cache.usage.graph</field>
+        <field name="model">orm.cache.usage</field>
+        <field name="arch" type="xml">
+            <graph string="ORM Cache Usage" type="bar">
+                <field name="largest_size" type="row"/>
+                <field name="id" type="measure" string="Number of Records" operator="count"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_orm_cache_usage" model="ir.actions.act_window">
+        <field name="name">ORM Cache Usage</field>
+        <field name="res_model">orm.cache.usage</field>
+        <field name="view_mode">tree,graph</field>
+        <field name="context">{'search_default_group_by_cache': 1, 'search_default_group_by_model': 1, 'search_default_group_by_method': 1}</field>
+        <field name="view_id" ref="orm_cache_usage_tree"/>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_orm_cache_usage_root" name="ORM Cache Usage" action="action_orm_cache_usage" sequence="10"/>
+</odoo>

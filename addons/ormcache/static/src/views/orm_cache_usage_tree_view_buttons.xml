@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+    <t t-name="ormcache.OrmCacheUsageTreeView.Buttons" t-inherit="web.ListView.Buttons" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_buttons')]" position="inside">
+            <button type="button" class="btn btn-primary" t-on-click="onClickUpdate">Update</button>
+            <button type="button" class="btn btn-primary" t-on-click="onClickCleanup">Cleanup</button>
+            <button type="button" class="btn btn-primary" t-on-click="onClickRegistry">Registry</button>
+            <button type="button" class="btn btn-primary" t-on-click="onClickORMCache">ORMCache</button>
+        </xpath>
+    </t>
+</templates>
