@@ -28,9 +28,6 @@ patch(Store.prototype, {
                 id: session.livechatData.options.current_partner_id,
             };
         }
-        if (livechatService.savedState?.threadData) {
-            messagingData.Thread.push(livechatService.savedState.threadData);
-        }
         this.insert(messagingData);
         this.isReady.resolve();
     },

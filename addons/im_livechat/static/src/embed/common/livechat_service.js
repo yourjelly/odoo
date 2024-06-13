@@ -79,17 +79,7 @@ export class LivechatService {
         this.available = data.available_for_me;
         this.rule = this.store.LivechatRule.insert(data.rule);
         this.store.insert(data.storeData);
-        if (this.options?.force_thread) {
-            this._saveLivechatState(this.options.force_thread, { persisted: true });
-        }
-        if (this.savedState) {
-            this.state = this.savedState.persisted
-                ? SESSION_STATE.PERSISTED
-                : SESSION_STATE.CREATED;
-        }
-        if (this.state === SESSION_STATE.PERSISTED) {
-            await this.busService.addChannel(`mail.guest_${this.guestToken}`);
-        }
+        await this._restoreSavedState();
         this.initialized = true;
         this.env.services["im_livechat.initialized"].ready.resolve();
     }
@@ -161,34 +151,45 @@ export class LivechatService {
     }
 
     /**
-     * Save the current live chat state. Only save the strict minimum if the
-     * thread is persisted.
+     * Save the current live chat state.
      *
      * @param {object} threadData
      * @param {object} param1
      * @param {boolean} [param1.persisted=false]
      */
     _saveLivechatState(threadData, { persisted = false } = {}) {
-        const { guest_token } = threadData;
+        const { guest_token, id, operator } = threadData;
         if (guest_token) {
             expirableStorage.setItem(GUEST_TOKEN_STORAGE_KEY, threadData.guest_token);
             delete threadData.guest_token;
         }
+        const ONE_DAY = 60 * 60 * 24;
+        const ONE_WEEK = ONE_DAY * 7;
         expirableStorage.setItem(
             SAVED_STATE_STORAGE_KEY,
-            JSON.stringify({
-                threadData: persisted ? { id: threadData.id, model: threadData.model } : threadData,
-                persisted,
-                livechatUserId: this.savedState?.livechatUserId ?? session.user_id,
-            }),
-            60 * 60 * 24 // kept for 1 day.
+            JSON.stringify({ id, persisted, user_id: this.savedState?.user_id ?? session.user_id }),
+            ONE_DAY
         );
-        if (threadData.operator) {
-            expirableStorage.setItem(
-                OPERATOR_STORAGE_KEY,
-                threadData.operator.id,
-                7 * 24 * 60 * 60 // kept for 7 days.
-            );
+        if (operator) {
+            expirableStorage.setItem(OPERATOR_STORAGE_KEY, operator.id, ONE_WEEK);
+        }
+    }
+
+    /**
+     * Restore the live chat from the saved state. Clean it if it is outdated.
+     */
+    async _restoreSavedState() {
+        // state is outdated if it is linked to another user(log in/out after chat start).
+        const isOutdated = (this.savedState?.user_id || false) !== (session.user_id || false);
+        if (isOutdated || !this.savedState?.persisted) {
+            this.leave({ notifyServer: false });
+        }
+        if (this.options?.force_thread) {
+            this._saveLivechatState(this.options.force_thread, { persisted: true });
+        }
+        if (this.savedState?.persisted) {
+            this.state = SESSION_STATE.PERSISTED;
+            await this.busService.addChannel(`mail.guest_${this.guestToken}`);
         }
     }
 
@@ -203,9 +204,7 @@ export class LivechatService {
             {
                 channel_id: this.options.channel_id,
                 anonymous_name: this.options.default_username ?? _t("Visitor"),
-                chatbot_script_id: this.savedState
-                    ? this.savedState.threadData.chatbot?.script.id
-                    : this.rule.chatbotScript?.id,
+                chatbot_script_id: this.rule.chatbotScript?.id,
                 previous_operator_id: expirableStorage.getItem(OPERATOR_STORAGE_KEY),
                 temporary_id: this.thread?.id,
                 persisted: persist,
@@ -243,10 +242,11 @@ export class LivechatService {
      * @returns {import("models").Thread|undefined}
      */
     get thread() {
-        if (!this.savedState) {
+        const { id } = JSON.parse(expirableStorage.getItem(SAVED_STATE_STORAGE_KEY) ?? false);
+        if (!id) {
             return null;
         }
-        return this.store.Thread.get(this.savedState.threadData);
+        return this.store.Thread.get({ id, model: "discuss.channel" });
     }
 }
 
@@ -254,16 +254,9 @@ export const livechatService = {
     dependencies: ["bus_service", "im_livechat.initialized", "mail.store", "notification"],
     start(env, services) {
         const livechat = reactive(new LivechatService(env, services));
-        (async () => {
-            // Live chat state should be deleted if it is linked to another user
-            // (log in/out after chat start).
-            if ((livechat.savedState?.livechatUserId || false) !== (session.user_id || false)) {
-                await livechat.leave({ notifyServer: false });
-            }
-            if (livechat.available) {
-                livechat.initialize();
-            }
-        })();
+        if (livechat.available) {
+            livechat.initialize();
+        }
         return livechat;
     },
 };
