@@ -19,7 +19,7 @@ registry.category("web_tour.tours").add("product_attribute_multi_type", {
     }, {
         content: "search the partner",
         trigger: 'div[name="partner_id"] input',
-        run: "edit Azure",
+        run: "fill Azure",
     }, {
         content: "select the partner",
         trigger: 'ul.ui-autocomplete > li > a:contains(Azure)',
@@ -30,7 +30,7 @@ registry.category("web_tour.tours").add("product_attribute_multi_type", {
         run: "click",
     }, {
         trigger: 'div[name="product_template_id"] input',
-        run: 'edit Big Burger'
+        run: 'fill Big Burger'
     }, {
         content: "Choose item",
         trigger: '.ui-menu-item-wrapper:contains("Big Burger")',

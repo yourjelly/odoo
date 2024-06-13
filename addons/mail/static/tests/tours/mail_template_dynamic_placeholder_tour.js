@@ -69,7 +69,7 @@ registry.category("web_tour.tours").add("mail_template_dynamic_placeholder_tour"
         {
             content: "filter the dph result",
             trigger: "div.o_model_field_selector_popover_search input[type='text']",
-            run: "edit name",
+            run: "fill name",
         },
         {
             content: "Click on the first entry of the dynamic placeholder",
@@ -80,7 +80,7 @@ registry.category("web_tour.tours").add("mail_template_dynamic_placeholder_tour"
             content: "Enter a default value",
             trigger:
                 'div.o_model_field_selector_popover .o_model_field_selector_default_value_input input[type="text"]',
-            run: "edit defValue",
+            run: "fill defValue",
         },
         {
             content: "Click on the the dynamic placeholder default value",
@@ -131,7 +131,7 @@ registry.category("web_tour.tours").add("mail_template_dynamic_placeholder_tour"
         {
             content: "filter the dph result",
             trigger: "div.o_model_field_selector_popover_search input[type='text']",
-            run: "edit name",
+            run: "fill name",
         },
         {
             content: "Click on the first entry of the dynamic placeholder",
@@ -142,7 +142,7 @@ registry.category("web_tour.tours").add("mail_template_dynamic_placeholder_tour"
             content: "Enter a default value",
             trigger:
                 'div.o_model_field_selector_popover .o_model_field_selector_default_value_input input[type="text"]',
-            run: "edit defValue",
+            run: "fill defValue",
         },
         {
             content: "Click on the the dynamic placeholder default value",

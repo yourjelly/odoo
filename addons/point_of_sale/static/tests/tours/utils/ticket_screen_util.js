@@ -78,7 +78,7 @@ export function search(field, searchWord) {
     return [
         {
             trigger: ".pos-search-bar input",
-            run: `fill ${searchWord}`,
+            run: `clear && fill ${searchWord}`,
         },
         {
             trigger: `.pos-search-bar .search ul li:contains("${field}")`,

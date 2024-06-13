@@ -107,7 +107,7 @@
         content: "insert content",
         trigger: '.o_field_widget[name=name] input',
         extra_trigger: '.o_field_widget[name="message_concat"] textarea:value([test] Mitchell Admin:a\n[test] Mitchell Admin:b)',
-        run: "edit test_trigger && press Enter",
+        run: "fill test_trigger && press Enter",
     }, {
         content: "check onchange",
         trigger: '.o_field_widget[name="message_concat"] textarea:value([test_trigger] Mitchell Admin:a\n[test_trigger] Mitchell Admin:b)',
@@ -230,7 +230,7 @@
     }, {
         content: "open the many2one to select another user",
         trigger: '.o_field_widget[name="author"] input',
-        run: "fill Marc",
+        run: "clear && fill Marc",
     }, {
         content: "select another user",
         trigger: '.o_field_widget[name="author"] .o-autocomplete--dropdown-menu li:contains(Marc Demo)',
@@ -356,7 +356,7 @@
     }, {
         content: "change text value",
         trigger: '.o_field_widget[name="body"] textarea',
-        run: "fill ccc && click .o_selected_row",
+        run: "clear && fill ccc && click .o_selected_row",
     }, {
         content: "click on other field (trigger the line onchange)",
         trigger: '.o_field_widget[name=messages] .o_field_many2one[name="author"] input',
@@ -367,7 +367,7 @@
     }, {
         content: "open the many2one to select an other user",
         trigger: '.o_field_widget[name=messages] .o_field_many2one[name="author"] input',
-        run: "fill Marc",
+        run: "clear && fill Marc",
     }, {
         content: "select an other user",
         trigger: '.o_field_widget[name="author"] .o-autocomplete--dropdown-menu li:contains(Marc Demo)',
@@ -378,7 +378,7 @@
     }, {
         content: "change text value",
         trigger: '.o_field_widget[name="body"] textarea',
-        run: "edit ccccc",
+        run: "clear && fill ccccc && click .o_selected_row",
     }, { // check onchange
         content: "click outside to trigger one2many onchange",
         trigger: '.o_field_widget[name=name] input',
@@ -389,7 +389,7 @@
     }, {
         content: "click outside to trigger one2many onchange",
         trigger: '.o_field_widget[name=categories] input',
-        run: "edit Test",
+        run: "clear && fill Test",
     }, {
         content: "add a tag",
         trigger: '.o_field_widget[name="categories"] .o-autocomplete--dropdown-menu li a:first',
@@ -419,7 +419,7 @@
     }, {
         content: "change text value",
         trigger: '.o_field_widget[name="body"] textarea',
-        run: "edit eee",
+        run: "clear && fill eee",
     }, ...stepUtils.saveForm({ // save
         content: "save discussion",
         extra_trigger: '.o_field_widget[name="body"] textarea:value(eee)',

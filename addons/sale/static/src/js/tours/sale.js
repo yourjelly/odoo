@@ -78,7 +78,7 @@ registry.category("web_tour.tours").add("sale_tour", {
             extra_trigger: ".oi-arrow-right",  // Wait for product creation
             content: _t("add the price of your product."),
             position: "right",
-            run: "edit 10.0 && click .o_selected_row",
+            run: "fill 10.0 && click .o_selected_row",
         }, {
             trigger: ".o_field_monetary[name='price_subtotal']:contains(10.00)",
             auto: true,
