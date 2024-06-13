@@ -74,11 +74,26 @@ export const ExpenseDocumentUpload = (T) => class ExpenseDocumentUpload extends 
         this.http = useService('http');
         this.fileInput = useRef('fileInput');
         this.root = useRef("root");
+        this.isExpenseSheet = this.model.config.resModel === "hr.expense.sheet";
 
         useBus(this.env.bus, "change_file_input", async (ev) => {
             this.fileInput.el.files = ev.detail.files;
             await this.onChangeFileInput();
         });
+    }
+
+    displayCreateReport() {
+        const usesSampleData = this.model.useSampleModel;
+        const records = this.model.root.records;
+        return !usesSampleData && !this.isExpenseSheet && records.length && records.some(record => record.data.state === "draft");
+    }
+
+    async action_show_expenses_to_submit () {
+        const records = this.model.root.selection;
+        const res = await this.orm.call(this.model.config.resModel, 'get_expenses_to_submit', [records.map((record) => record.resId)]);
+        if (res) {
+            await this.actionService.doAction(res, {});
+        }
     }
 
     uploadDocument() {

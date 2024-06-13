@@ -12,6 +12,10 @@ import { KanbanRenderer } from '@web/views/kanban/kanban_renderer';
 
 export class ExpenseKanbanController extends ExpenseDocumentUpload(KanbanController) {
     static template = "hr_expense.KanbanView";
+
+    setup() {
+        super.setup();
+    }
 }
 
 export class ExpenseKanbanRenderer extends ExpenseDocumentDropZone(

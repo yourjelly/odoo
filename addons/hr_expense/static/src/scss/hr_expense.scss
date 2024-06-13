@@ -48,6 +48,13 @@
     }
 }
 
+.o_cp_buttons, .o_list_buttons {
+    // buttons show side-by-side instead on under each other in dropdown on mobile
+    @include media-breakpoint-down(md) {
+        display: block !important;
+    }
+}
+
 .o_graph_view, .o_pivot_view {
     .o_view_nocontent {
         h2:first-of-type {

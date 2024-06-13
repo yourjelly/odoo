@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="expense.ExpenseViews.buttons_create">
+        <!-- In mobile, these buttons are always shown (not in dropdown) -->
+        <button t-if="!env.isSmall" type="button" class="o_button_upload_expense btn btn-primary" t-on-click.prevent="uploadDocument">
+            Upload
+        </button>
+        <button t-if="env.isSmall" type="button" class="o_button_upload_expense btn btn-primary" t-on-click.prevent="uploadDocument">
+            Scan
+        </button>
+        <!-- In mobile, 'New' button is shown directly if 'Create Report' is not shown, else, 'New' is in dropdown -->
+        <t t-if="env.config.viewType === 'kanban' and !displayCreateReport()" t-call="expense.ExpenseViews.kanban.buttons"/>
+        <t t-if="env.config.viewType === 'list' and !displayCreateReport()" t-call="expense.ExpenseViews.list.buttons"/>
+    </t>
+
+    <t t-name="expense.ExpenseViews.buttons">
+        <!-- In mobile, 'New' shows in the dropdown if displayCreateReport(), alongside 'Create Report' -->
+        <t t-if="env.config.viewType === 'kanban'" t-call="expense.ExpenseViews.kanban.buttons"/>
+        <t t-if="env.config.viewType === 'list'" t-call="expense.ExpenseViews.list.buttons"/>
+        <button class="btn btn-secondary" t-on-click="() => this.action_show_expenses_to_submit()">
+            Create Report
+        </button>
+    </t>
+
+    <t t-name="expense.ExpenseViews.kanban.buttons">
+        <t t-if="canCreate and props.showButtons">
+            <button type="button" class="btn btn-primary o-kanban-button-new" t-att-class="!displayCreateReport()?'ms-1':''" accesskey="c" t-on-click="() => this.createRecord()" data-bounce-button="">
+                New
+            </button>
+        </t>
+    </t>
+
+    <t t-name="expense.ExpenseViews.list.buttons">
+        <t t-if="!model.root.editedRecord and activeActions.create and props.showButtons">
+            <button type="button" class="btn btn-primary o_list_button_add" t-att-class="!displayCreateReport()?'ms-1':''" data-hotkey="c" t-on-click="onClickCreate" data-bounce-button="">
+                New
+            </button>
+        </t>
+    </t>
+</templates>
