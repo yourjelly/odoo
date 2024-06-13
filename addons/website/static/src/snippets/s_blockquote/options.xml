@@ -26,7 +26,4 @@
         <WeButton selectClass="'flex-row-reverse align-items-start justify-content-start text-end'">Right</WeButton>
     </WeSelect>
 </t>
-<!-- TODO
-<t t-call="website.snippet_options_border_widgets"/>
--->
 </templates>

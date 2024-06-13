@@ -20,6 +20,11 @@ websiteRegisterBackgroundOptions("Blockquote (background)", {
         withShapes: true,
         withGradients: true,
 });
+registerWebsiteOption("Blockquote (border)", {
+    Class: Box,
+    template: "website.snippet_options_border_widgets",
+    selector: ".s_blockquote",
+});
 registerWebsiteOption("Blockquote (shadow)", {
     Class: Box,
     template: "website.snippet_options_shadow_widgets",

@@ -41,6 +41,7 @@ import { Component, markup, onWillUnmount, useEffect, useRef, useState } from "@
 
 import {
     BackgroundToggler,
+    Box,
     LayoutColumn,
     Many2oneUserValue,
     registerBackgroundOptions,
@@ -4404,6 +4405,19 @@ registerWebsiteOption("WebsiteLayoutColumns", {
     exclude: ".s_masonry_block, .s_features_grid, .s_media_list, .s_table_of_content, .s_process_steps, .s_image_gallery"
 }, { sequence: 15 });
     tags: ["website"],
+
+
+registerWebsiteOption("card_color_border_shadow", {
+    Class: Box,
+    template: "website.card_color_border_shadow",
+    selector: ".s_three_columns .row > div, .s_comparisons .row > div",
+    target: ".card",
+});
+
+registerWebsiteOption("card_color", {
+    template: "website.card_color",
+    selector: ".accordion .card",
+});
 
 registerWebsiteOption("vertical_alignment", {
     class: vAlignment,
