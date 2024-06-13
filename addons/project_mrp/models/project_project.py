@@ -62,6 +62,12 @@ class Project(models.Model):
             [('category', '!=', 'manufacturing_order')],
         ])
 
+    def _get_domain_aal_with_no_move_line(self):
+        return expression.AND([
+            super()._get_domain_aal_with_no_move_line(),
+            [('category', '!=', 'manufacturing_order')],
+        ])
+
     def _get_profitability_items(self, with_action=True):
         profitability_items = super()._get_profitability_items(with_action)
         mrp_category = 'manufacturing_order'

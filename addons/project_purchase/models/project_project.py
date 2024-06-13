@@ -106,6 +106,12 @@ class Project(models.Model):
             ['|', ('move_line_id', '=', False), ('move_line_id.purchase_line_id', '=', False)],
         ])
 
+    def _get_domain_aal_with_no_move_line(self):
+        return expression.AND([
+            super()._get_domain_aal_with_no_move_line(),
+            ['|', ('move_line_id', '=', False), ('move_line_id.purchase_line_id', '=', False)],
+        ])
+
     def _add_purchase_items(self, profitability_items, with_action=True):
         return False
 

@@ -107,6 +107,12 @@ class Project(models.Model):
             ['|', ('move_line_id', '=', False), ('move_line_id.expense_id', '=', False)],
         ])
 
+    def _get_domain_aal_with_no_move_line(self):
+        return expression.AND([
+            super()._get_domain_aal_with_no_move_line(),
+            ['|', ('move_line_id', '=', False), ('move_line_id.expense_id', '=', False)],
+        ])
+
     def _get_profitability_items(self, with_action=True):
         profitability_data = super()._get_profitability_items(with_action)
         expenses_data = self._get_expenses_profitability_items(with_action)
