@@ -72,6 +72,27 @@ function viewFields({ action, env }) {
     };
 }
 
+function ViewModel({ action, env }) {
+    if (!action.id) {
+        return null;
+    }
+    const model_name = action.res_model
+    const description = _t("View Model: ") + model_name;
+    return {
+        type: "item",
+        description,
+        callback: async () => {
+            const modelId = (
+                await env.services.orm.search("ir.model", [["model", "=", action.res_model]], {
+                    limit: 1,
+                })
+            )[0];
+            editModelDebug(env, description, "ir.model", modelId);
+        },
+        sequence: 130,
+    };
+}
+
 function manageFilters({ action, env }) {
     if (!action.res_model) {
         return null;
@@ -96,7 +117,7 @@ function manageFilters({ action, env }) {
                 },
             });
         },
-        sequence: 130,
+        sequence: 140,
     };
 }
 
@@ -168,6 +189,7 @@ debugRegistry
     .category("action")
     .add("actionSeparator", actionSeparator)
     .add("editAction", editAction)
+    .add("ViewModel", ViewModel)
     .add("viewFields", viewFields)
     .add("manageFilters", manageFilters)
     .add("accessSeparator", accessSeparator)
