@@ -4419,6 +4419,11 @@ registerWebsiteOption("card_color", {
     selector: ".accordion .card",
 });
 
+registerWebsiteOption("horizontal_alignment", {
+    template: "website.horizontal_alignment_option",
+    selector: ".s_share, .s_text_highlight, .s_social_media",
+});
+
 registerWebsiteOption("vertical_alignment", {
     class: vAlignment,
     template: "website.vertical_alignment_option",

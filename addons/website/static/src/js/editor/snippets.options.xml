@@ -218,6 +218,13 @@
         cssProperty="'background-color'"
         colorPrefix="'bg-'"/>
 </t>
+<t t-name="website.horizontal_alignment_option">
+    <WeButtonGroup title.translate="Alignment">
+        <WeButton class="'fa fa-fw fa-align-left'" tooltip.translate="Left" selectClass="'text-start'"/>
+        <WeButton class="'fa fa-fw fa-align-center'" tooltip.translate="Center" selectClass="'text-center'"/>
+        <WeButton class="'fa fa-fw fa-align-right'" tooltip.translate="Right" selectClass="'text-end'"/>
+    </WeButtonGroup>
+</t>
 <t t-name="website.s_google_map_option">
     <WeGpsPicker title.translate="Address"
         selectDataAttribute="''" attributeName="'mapGps'"
