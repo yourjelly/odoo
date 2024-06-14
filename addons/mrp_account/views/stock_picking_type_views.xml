@@ -1,0 +1,12 @@
+<odoo>
+    <record id="mrp_account_stock_picking_type_inherited" model="ir.ui.view">
+        <field name="name">stock.picking.type.form.mrp.account</field>
+        <field name="model">stock.picking.type</field>
+        <field name="inherit_id" ref="stock.view_picking_type_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='default_location_dest_id']" position="after">
+                <field name="production_wip_location" groups="mrp_account.group_mrp_wip" required="1" invisible="code != 'mrp_operation'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

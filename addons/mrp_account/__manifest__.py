@@ -22,11 +22,13 @@ If the automated inventory valuation is active, the necessary accounting entries
     "data": [
         'security/ir.model.access.csv',
         "security/mrp_security.xml",
+        "data/mrp_account_data.xml",
         "views/product_views.xml",
         "views/mrp_bom_views.xml",
         "views/mrp_production_views.xml",
         "views/analytic_account_views.xml",
         "views/mrp_workcenter_views.xml",
+        "views/stock_picking_type_views.xml",
         "views/res_config_settings_views.xml",
         "report/report_mrp_templates.xml"
     ],

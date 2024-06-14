@@ -1,0 +1,5 @@
+<odoo>
+    <data noupdate="1">
+        <function model="res.company" name="_create_missing_wip_location" />
+    </data>
+</odoo>

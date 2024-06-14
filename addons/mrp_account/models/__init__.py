@@ -11,3 +11,5 @@ from . import stock_move
 from . import stock_rule
 from . import account_move
 from . import res_config_settings
+from . import stock_picking_type
+from . import res_company
