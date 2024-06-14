@@ -135,18 +135,6 @@ registry.category("web_tour.tours").add('project_tour', {
     mobile: true,
     run: "click",
 }, {
-    trigger: 'a[name="sub_tasks_page"]',
-    content: _t('Open sub-tasks notebook section'),
-    run: 'click',
-}, {
-    trigger: '.o_field_subtasks_one2many .o_list_renderer a[role="button"]',
-    content: _t('Add a sub-task'),
-    run: 'click',
-}, {
-    trigger: '.o_field_subtasks_one2many div[name="name"] input',
-    content: markup(_t('Give the sub-task a <b>name</b>')),
-    run: "edit New Sub-task",
-}, {
     trigger: ".o_form_button_save",
     extra_trigger: '.o_form_project_tasks .o_form_dirty',
     content: markup(_t("You have unsaved changes - no worries! Odoo will automatically save it as you navigate.<br/> You can discard these changes from here or manually save your task.<br/>Let's save it manually.")),
@@ -158,33 +146,6 @@ registry.category("web_tour.tours").add('project_tour', {
     content: markup(_t("Let's go back to the <b>kanban view</b> to have an overview of your next tasks.")),
     position: "right",
     run: 'click',
-}, {
-    trigger: ".o_kanban_record .oe_kanban_content .o_widget_subtask_counter .subtask_list_button",
-    content: _t("You can open sub-tasks from the kanban card!"),
-    run: "click",
-}, {
-    trigger: ".o_kanban_record .o_widget_subtask_kanban_list .subtask_create",
-    extra_trigger: ".o_widget_subtask_kanban_list .subtask_list",
-    content: _t("Create a new sub-task"),
-    run: "click",
-}, {
-    trigger: ".o_kanban_record .o_widget_subtask_kanban_list .subtask_create_input input",
-    extra_trigger: ".subtask_create_input",
-    content: markup(_t("Give the sub-task a <b>name</b>")),
-    run: "edit Newer Sub-task && click body",
-}, {
-    trigger: ".o_kanban_record .o_widget_subtask_kanban_list .subtask_list_row:first-child .o_field_project_task_state_selection button",
-    content: _t("You can change the sub-task state here!"),
-    run: "click",
-}, {
-    trigger: ".dropdown-menu span.text-danger",
-    extra_trigger: ".dropdown-menu",
-    content: markup(_t("Mark the task as <b>Cancelled</b>")),
-    run: "click",
-}, {
-    trigger: ".o_kanban_record .oe_kanban_content .o_widget_subtask_counter .subtask_list_button:contains('1/2')",
-    content: _t("Close the sub-tasks list"),
-    run: "click",
 }, {
     trigger: '.o_kanban_renderer',
     // last step to confirm we've come back before considering the tour successful
