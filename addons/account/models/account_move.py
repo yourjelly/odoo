@@ -1875,12 +1875,10 @@ class AccountMove(models.Model):
 
     @api.onchange('partner_id')
     def _inverse_partner_id(self):
-        for invoice in self:
-            if invoice.is_invoice(True):
-                for line in invoice.line_ids + invoice.invoice_line_ids:
-                    if line.partner_id != invoice.commercial_partner_id:
-                        line.partner_id = invoice.commercial_partner_id
-                        line._inverse_partner_id()
+        (self.line_ids | self.invoice_line_ids)._conditional_add_to_compute('partner_id', lambda l: (
+            l.move_id.is_invoice(True)
+            and l.partner_id != l.move_id.commercial_partner_id
+        ))
 
     @api.onchange('company_id')
     def _inverse_company_id(self):
@@ -5341,6 +5339,7 @@ class AccountMove(models.Model):
         )
         to_reset.invalidate_recordset([fname])
         self.env.add_to_compute(field, to_reset)
+        to_reset.modified([fname])
 
     # -------------------------------------------------------------------------
     # HOOKS

@@ -928,7 +928,7 @@ class AccountMoveLine(models.Model):
             else:
                 line.tax_key = frozendict({'id': line.id})
 
-    @api.depends('tax_ids', 'currency_id', 'partner_id', 'analytic_distribution', 'balance', 'partner_id', 'move_id.partner_id', 'price_unit', 'quantity')
+    @api.depends('tax_ids', 'currency_id', 'analytic_distribution', 'partner_id', 'balance', 'price_unit', 'quantity')
     def _compute_all_tax(self):
         for line in self:
             if line.display_type == 'tax':
@@ -950,7 +950,7 @@ class AccountMoveLine(models.Model):
                 currency=line.currency_id,
                 quantity=quantity,
                 product=line.product_id,
-                partner=line.move_id.partner_id or line.partner_id,
+                partner=line.partner_id,
                 is_refund=line.is_refund,
                 handle_price_include=handle_price_include,
                 include_caba_tags=line.move_id.always_tax_exigible,
@@ -966,7 +966,7 @@ class AccountMoveLine(models.Model):
                     'analytic_distribution': (tax['analytic'] or not tax['use_in_tax_closing']) and line.analytic_distribution,
                     'tax_ids': [(6, 0, tax['tax_ids'])],
                     'tax_tag_ids': [(6, 0, tax['tag_ids'])],
-                    'partner_id': line.move_id.partner_id.id or line.partner_id.id,
+                    'partner_id': line.partner_id.id,
                     'move_id': line.move_id.id,
                     'display_type': line.display_type,
                 }): {
@@ -1520,7 +1520,6 @@ class AccountMoveLine(models.Model):
                     'amount_currency': line.currency_id.round(line.amount_currency),
                     'balance': line.company_id.currency_id.round(line.balance),
                     'currency_rate': line.currency_rate,
-                    'price_subtotal': line.currency_id.round(line.price_subtotal),
                     'move_type': line.move_id.move_type,
                 } for line in container['records'].with_context(
                     skip_invoice_line_sync=True,
@@ -1530,9 +1529,14 @@ class AccountMoveLine(models.Model):
         def changed(fname):
             return line not in before or before[line][fname] != after[line][fname]
 
+        def protecting(field, record):
+            modified.add(line.id)
+            return self.env.protecting(self.env['account.move']._get_protected_vals([field], record))
+
         before = existing()
         yield
         after = existing()
+        modified = set()
         for line in after:
             if (
                 line.display_type == 'product'
@@ -1542,7 +1546,8 @@ class AccountMoveLine(models.Model):
                 if line.amount_currency != amount_currency or line not in before:
                     line.amount_currency = amount_currency
                 if line.currency_id == line.company_id.currency_id:
-                    line.balance = amount_currency
+                    with protecting('balance', line):
+                        line.balance = amount_currency
 
         after = existing()
         for line in after:
@@ -1551,12 +1556,13 @@ class AccountMoveLine(models.Model):
                 and (not changed('balance') or (line not in before and not line.balance))
             ):
                 balance = line.company_id.currency_id.round(line.amount_currency / line.currency_rate)
-                line.balance = balance
+                with protecting('balance', line):
+                    line.balance = balance
         # Since this method is called during the sync, inside of `create`/`write`, these fields
         # already have been computed and marked as so. But this method should re-trigger it since
         # it changes the dependencies.
-        self.env.add_to_compute(self._fields['debit'], container['records'])
-        self.env.add_to_compute(self._fields['credit'], container['records'])
+        self.env.add_to_compute(self._fields['debit'], container['records'].browse(list(modified)))
+        self.env.add_to_compute(self._fields['credit'], container['records'].browse(list(modified)))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1652,7 +1658,6 @@ class AccountMoveLine(models.Model):
                         continue # We don't want to track related field.
                     if hasattr(field, 'tracking') and field.tracking:
                         tracking_fields.append(value)
-                ref_fields = self.env['account.move.line'].fields_get(tracking_fields)
 
                 # Get initial values for each line
                 move_initial_values = {}
@@ -1668,7 +1673,8 @@ class AccountMoveLine(models.Model):
             if any(field in vals for field in ['account_id', 'currency_id']):
                 self._check_constrains_account_id_journal_id()
 
-            if not self.env.context.get('tracking_disable', False):
+            if not self.env.context.get('tracking_disable', False) and tracking_fields:
+                ref_fields = self.env['account.move.line'].fields_get(tracking_fields)
                 # Log changes to move lines on each move
                 for move_id, modified_lines in move_initial_values.items():
                     for line in self.filtered(lambda l: l.move_id.id == move_id):
@@ -3368,6 +3374,7 @@ class AccountMoveLine(models.Model):
         )
         to_reset.invalidate_recordset([fname])
         self.env.add_to_compute(field, to_reset)
+        to_reset.modified([fname])
 
     # -------------------------------------------------------------------------
     # HOOKS

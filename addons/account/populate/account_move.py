@@ -215,6 +215,7 @@ class AccountMove(models.Model):
         if not company_ids:
             return []
         return [
+            ('name', populate.constant('/')),  # don't compute for draft entries
             ('move_type', populate.randomize(
                 ['entry', 'in_invoice', 'out_invoice', 'in_refund', 'out_refund', 'in_receipt', 'out_receipt'],
                 [0.2, 0.3, 0.3, 0.07, 0.07, 0.03, 0.03],
