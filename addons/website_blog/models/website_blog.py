@@ -307,9 +307,11 @@ class BlogPost(models.Model):
         res['default_opengraph']['article:modified_time'] = self.write_date
         res['default_opengraph']['article:tag'] = self.tag_ids.mapped('name')
         # background-image might contain single quotes eg `url('/my/url')`
-        res['default_opengraph']['og:image'] = res['default_twitter']['twitter:image'] = json_scriptsafe.loads(self.cover_properties).get('background-image', 'none')[4:-1].strip("'")
+        cover_image = json_scriptsafe.loads(self.cover_properties).get('background-image', 'none')[4:-1].strip("'")
+        res['default_opengraph']['og:image'] = res['default_twitter']['twitter:image'] = cover_image
         res['default_opengraph']['og:title'] = res['default_twitter']['twitter:title'] = self.name
         res['default_meta_description'] = self.subtitle
+        res['default_meta_image'] = cover_image
         return res
 
     @api.model

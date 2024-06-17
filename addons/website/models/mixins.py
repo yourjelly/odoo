@@ -94,10 +94,13 @@ class SeoMetadata(models.AbstractModel):
             twitter_meta['twitter:description'] = self.website_meta_description
         opengraph_meta['og:image'] = url_join(root_url, url_for(self.website_meta_og_img or opengraph_meta['og:image']))
         twitter_meta['twitter:image'] = url_join(root_url, url_for(self.website_meta_og_img or twitter_meta['twitter:image']))
+        meta_image = default_meta.get('default_meta_image')
+        meta_image = meta_image and url_join(root_url, url_for(meta_image))
         return {
             'opengraph_meta': opengraph_meta,
             'twitter_meta': twitter_meta,
-            'meta_description': default_meta.get('default_meta_description')
+            'meta_description': default_meta.get('default_meta_description'),
+            'meta_image': meta_image,
         }
 
 
