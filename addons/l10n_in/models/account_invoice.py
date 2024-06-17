@@ -30,6 +30,7 @@ class AccountMove(models.Model):
     l10n_in_reseller_partner_id = fields.Many2one('res.partner', 'Reseller', domain=[('vat', '!=', False)], help="Only Registered Reseller")
     l10n_in_journal_type = fields.Selection(string="Journal Type", related='journal_id.type')
     l10n_in_hsn_code_warning = fields.Json(compute="_compute_hsn_code_warning")
+    l10n_in_display_null_pan_tcs_warning = fields.Boolean(string="Display null PAN warning", compute="_compute_l10n_in_display_null_pan_tcs_warning")
 
     @api.depends('partner_id', 'partner_id.l10n_in_gst_treatment', 'state')
     def _compute_l10n_in_gst_treatment(self):
@@ -66,6 +67,19 @@ class AccountMove(models.Model):
                 move.l10n_in_state_id = move.company_id.state_id
             else:
                 move.l10n_in_state_id = False
+
+    @api.depends('move_type', 'invoice_line_ids', 'state', 'partner_id.l10n_in_pan')
+    def _compute_l10n_in_display_null_pan_tcs_warning(self):
+        for move in self:
+            move.l10n_in_display_null_pan_tcs_warning = (
+                move.country_code == 'IN'
+                and not move.partner_id.l10n_in_pan
+                and move.state == 'draft'
+                and any(
+                    tag == move.env.ref("l10n_in.tax_tag_base_tcs")
+                    for tag in move.invoice_line_ids.tax_ids.invoice_repartition_line_ids._origin.mapped("tag_ids")
+                )
+            )
 
     @api.onchange('name')
     def _onchange_name_warning(self):

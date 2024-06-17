@@ -19,6 +19,9 @@
                      invisible="not warning_message">
                     <field name="warning_message"/>
                 </div>
+                <div class="alert alert-warning text-center" role="alert" invisible="not l10n_in_null_pan_tds_warning">
+                    Since the partner doesn’t have a PAN number, please apply TDS at the higher rate.
+                </div>
                 <sheet>
                     <field name="related_move_id" invisible="1"/>
                     <field name="related_payment_id" invisible="1"/>

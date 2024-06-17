@@ -11,6 +11,10 @@
                         <field name="l10n_in_hsn_code_warning" widget="actionable_errors"/>
                     </div>
                 </div>
+                <field name="l10n_in_display_null_pan_tcs_warning" invisible="1"/>
+                <div class="alert alert-warning" role="alert" invisible="not l10n_in_display_null_pan_tcs_warning">
+                    Since the partner doesn’t have a PAN number, please apply TCS at the higher rate.
+                </div>
             </xpath>
             <xpath expr="//field[@name='ref']" position="after">
                 <field name="country_code" invisible="1"/>
