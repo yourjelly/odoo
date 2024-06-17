@@ -169,6 +169,7 @@ export class Editor {
             plugin.setup();
         }
         this.dispatch("NORMALIZE", { node: this.editable });
+        this.dispatch("START_EDITION");
     }
 
     createResources() {

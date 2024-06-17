@@ -114,10 +114,13 @@ export class HistoryPlugin extends Plugin {
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
         this._cleanups.push(() => this.observer.disconnect());
         this.enableObserver();
-        this.reset();
+        this.clean();
     }
     handleCommand(command, payload) {
         switch (command) {
+            case "START_EDITION":
+                this.reset();
+                break;
             case "HISTORY_UNDO":
                 this.undo();
                 break;
@@ -134,6 +137,7 @@ export class HistoryPlugin extends Plugin {
     }
 
     clean() {
+        this.handleObserverRecords();
         /** @type { HistoryStep[] } */
         this.steps = [];
         /** @type { HistoryStep } */
@@ -247,8 +251,12 @@ export class HistoryPlugin extends Plugin {
         // @todo @phoenix remove this?
         // @todo @phoenix this includes previous mutations that were already
         // stored in the current step. Ideally, it should only include the new ones.
+        const root = this.getMutationsRoot(this.currentStep.mutations);
+        if (!root) {
+            return;
+        }
         this.dispatch("CONTENT_UPDATED", {
-            root: this.getMutationsRoot(this.currentStep.mutations),
+            root,
         });
     }
 

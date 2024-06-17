@@ -10,6 +10,28 @@ import { Editor } from "@html_editor/editor";
 import { parseHTML } from "@html_editor/utils/html";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 
+describe("reset", () => {
+    test("should not add mutations in the current step from the normalization when calling reset", async () => {
+        const TestPlugin = class extends Plugin {
+            static name = "test";
+            handleCommand(commandName) {
+                switch (commandName) {
+                    case "NORMALIZE":
+                        this.editable.firstChild.setAttribute("data-test-normalize", "1");
+                        break;
+                }
+            }
+        };
+        const { editor, el } = await setupEditor("<p>a</p>", {
+            config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
+        });
+        const historyPlugin = editor.plugins.find((p) => p.constructor.name === "history");
+        expect(el.firstChild.getAttribute("data-test-normalize")).toBe("1");
+        expect(historyPlugin.steps.length).toBe(1);
+        expect(historyPlugin.currentStep.mutations.length).toBe(0);
+    });
+});
+
 describe("undo", () => {
     test("should undo a backspace", async () => {
         await testEditor({

@@ -185,7 +185,7 @@ test("should reset from snapshot", async () => {
                 "fake_concurrent_id_1",
             ]);
             expect(peerInfos.c2.historyPlugin.steps[0].mutations.map((x) => x.id)).toEqual([
-                "fake_id_1",
+                "fake_id_4",
             ]);
         },
         contentAfter: "<p>ab[c1}{c1]</p>",
