@@ -9,6 +9,12 @@
                 <button name="%(l10n_in_withholding_entry_form_action)d" string="TDS Entry" type="action" class="btn btn-secondary float-end"
                         invisible="country_code != 'IN' or move_type not in ('out_invoice', 'in_invoice', 'out_refund', 'in_refund') or state != 'posted'"/>
             </xpath>
+            <xpath expr="//sheet" position="before">
+                <field name="l10n_in_display_null_pan_tcs_warning" invisible="1"/>
+                <div class="alert alert-warning" role="alert" invisible="not l10n_in_display_null_pan_tcs_warning">
+                    Since the partner doesn’t have a PAN number, please apply TCS at the higher rate.
+                </div>
+            </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <field name="l10n_in_withhold_move_ids" invisible="1"/>
                 <button name="action_l10n_in_withholding_entries"

@@ -78,6 +78,7 @@ class L10nInWithholdWizard(models.TransientModel):
         store=True,
     )
     warning_message = fields.Char(compute='_compute_warning_message')
+    l10n_in_null_pan_tds_warning = fields.Boolean(string="Display null PAN warning", compute='_compute_l10n_in_display_null_pan_tds_warning')
 
     #  ===== Computes =====
     @api.depends('related_move_id', 'related_payment_id')
@@ -121,6 +122,15 @@ class L10nInWithholdWizard(models.TransientModel):
             elif wizard.related_payment_id and float_compare(wizard.related_payment_id.amount, sum(line.base for line in wizard.withhold_line_ids), precision_digits=precision) < 0:
                 warning_message = _("Warning: The base amount of TDS lines is greater than the untaxed amount of the %s", wizard.type_name)
             wizard.warning_message = warning_message
+
+    @api.depends('l10n_in_tds_tax_type', 'related_move_id')
+    def _compute_l10n_in_display_null_pan_tds_warning(self):
+        for wizard in self:
+            wizard.l10n_in_null_pan_tds_warning = (
+                wizard.related_move_id.country_code == 'IN'
+                and wizard.l10n_in_tds_tax_type == 'purchase'
+                and not wizard.related_move_id.commercial_partner_id.l10n_in_pan
+            )
 
     def _get_withhold_type(self):
         if self.related_move_id:

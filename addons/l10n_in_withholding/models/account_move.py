@@ -33,6 +33,7 @@ class AccountMove(models.Model):
         help="Total withholding amount for the move",
     )
     l10n_in_tcs_tds_warning = fields.Char('TDC/TCS Warning', compute="_compute_l10n_in_tcs_tds_warning")
+    l10n_in_display_null_pan_tcs_warning = fields.Boolean(string="Display null PAN warning", compute="_compute_l10n_in_display_null_pan_tcs_warning")
 
     # === Compute Methods ===
     @api.depends('line_ids', 'l10n_in_is_withholding')
@@ -48,6 +49,19 @@ class AccountMove(models.Model):
         for move in self:
             move.l10n_in_total_withholding_amount = sum(move.l10n_in_withhold_move_ids.filtered(
                 lambda m: m.state == 'posted').l10n_in_withholding_line_ids.mapped('l10n_in_withhold_tax_amount'))
+
+    @api.depends('move_type', 'invoice_line_ids', 'state', 'commercial_partner_id.l10n_in_pan')
+    def _compute_l10n_in_display_null_pan_tcs_warning(self):
+        for move in self:
+            move.l10n_in_display_null_pan_tcs_warning = (
+                move.country_code == 'IN'
+                and not move.commercial_partner_id.l10n_in_pan
+                and move.state == 'draft'
+                and any(
+                    tag == move.env.ref("l10n_in.tax_tag_base_tcs")
+                    for tag in move.invoice_line_ids.tax_ids.invoice_repartition_line_ids._origin.mapped("tag_ids")
+                )
+            )
 
     def action_l10n_in_withholding_entries(self):
         self.ensure_one()
