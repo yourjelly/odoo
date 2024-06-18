@@ -138,7 +138,7 @@ class PortalAccount(CustomerPortal):
             'sortby': sortby,
             'searchbar_filters': OrderedDict(sorted(searchbar_filters.items())),
             'filterby': filterby,
-            'overdue_invoice_count': self._get_overdue_invoice_count(),
+            'overdue_invoice_count': 10 # self._get_overdue_invoice_count(),
         })
         return values
 

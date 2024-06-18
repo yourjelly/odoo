@@ -144,6 +144,19 @@ class AccountPaymentRegister(models.TransientModel):
     # -------------------------------------------------------------------------
 
     @api.model
+    def _get_batch_communication(self, batch_result):
+        ''' Helper to compute the communication based on the batch.
+        :param batch_result:    A batch returned by '_get_batches'.
+        :return:                A string representing a communication to be set on payment.
+        '''
+        if len(batch_result) == 1:
+            line = batch_result['lines'][0]
+            label = line.name or line.move_id.ref or line.move_id.name
+        else:
+            label = self.company_id.get_next_batch_payment_communication()
+        return label
+
+    @api.model
     def _get_batch_available_journals(self, batch_result):
         """ Helper to compute the available journals based on the batch.
 
@@ -396,7 +409,8 @@ class AccountPaymentRegister(models.TransientModel):
         # it's a compute editable field and then, should be computed in a separated method.
         for wizard in self:
             if wizard.can_edit_wizard:
-                wizard.communication = wizard.company_id.get_next_batch_payment_communication(self.payment_date, self.line_ids.mapped('move_id'))
+                batches = wizard._get_batches()
+                wizard.communication = wizard._get_batch_communication(batches[0])
             else:
                 wizard.communication = False
 
@@ -720,7 +734,6 @@ class AccountPaymentRegister(models.TransientModel):
             'destination_account_id': self.line_ids[0].account_id.id,
             'write_off_line_vals': [],
         }
-        self.company_id.increment_batch_payment_sequence(self.payment_date, self.line_ids.mapped('move_id'))
 
         if self.payment_difference_handling == 'reconcile':
             if self.early_payment_discount_mode:
@@ -784,7 +797,7 @@ class AccountPaymentRegister(models.TransientModel):
             'amount': batch_values['source_amount_currency'],
             'payment_type': batch_values['payment_type'],
             'partner_type': batch_values['partner_type'],
-            'ref': self.company_id.get_next_batch_payment_communication(self.payment_date, batch_result['lines'].mapped('move_id')),
+            'ref': self.company_id._get_batch_communication(batch_result),
             'journal_id': self.journal_id.id,
             'company_id': self.company_id.id,
             'currency_id': batch_values['source_currency_id'],
@@ -793,7 +806,6 @@ class AccountPaymentRegister(models.TransientModel):
             'destination_account_id': batch_result['lines'][0].account_id.id,
             'write_off_line_vals': [],
         }
-        self.company_id.increment_batch_payment_sequence(self.payment_date, batch_result['lines'].mapped('move_id'))
 
         # In case it is false, we don't add it to the create vals so that
         # _compute_partner_bank_id is executed at payment creation
