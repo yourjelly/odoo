@@ -113,13 +113,13 @@ export class HistoryPlugin extends Plugin {
         this.addDomListener(this.editable, "beforeinput", this.stageSelection);
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
         this._cleanups.push(() => this.observer.disconnect());
-        this.enableObserver();
-        this.clean();
+        // this.clean();
     }
     handleCommand(command, payload) {
         switch (command) {
             case "START_EDITION":
                 this.reset();
+                this.enableObserver();
                 break;
             case "HISTORY_UNDO":
                 this.undo();
