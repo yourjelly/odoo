@@ -172,13 +172,6 @@ async function email_livechat_transcript(request) {
     return true;
 }
 
-registerRoute("/im_livechat/emoji_bundle", get_emoji_bundle);
-/** @type {RouteCallback} */
-async function get_emoji_bundle(request) {
-    await loadBundle("web.assets_emoji");
-    return new MockResponse();
-}
-
 patch(mailDataHelpers, {
     async processRequest(request) {
         const res = await super.processRequest(...arguments);
