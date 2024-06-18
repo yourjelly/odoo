@@ -25,4 +25,16 @@
             </field>
         </field>
     </record>
+
+    <record id="view_account_move_filter_inherit" model="ir.ui.view">
+        <field name="name">account.move.filter</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_move_filter"/>
+        <field name="arch" type="xml">
+            <filter name="misc_filter" position="after">
+                <separator />
+                <filter string="Debit Note" name="debit_note_filter" domain="[('debit_origin_id', '!=', False)]"/>
+            </filter>
+        </field>
+    </record>
 </odoo>
