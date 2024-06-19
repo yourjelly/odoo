@@ -16,7 +16,7 @@ test("should insert a banner with focus inside followed by a paragraph", async (
         `<p>Test</p><div class="o_editor_banner o_not_editable lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" role="status" contenteditable="false">
                 <i class="o_editor_banner_icon mb-3 fst-normal" aria-label="Banner Info">💡</i>
                 <div class="w-100 ms-3" contenteditable="true">
-                    <p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>
+                    <p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>
                 </div>
             </div><p><br></p>`
     );
@@ -75,7 +75,7 @@ test("remove all content should preserves the first paragraph tag inside the ban
     expect(getContent(el)).toBe(
         `<p>Test</p><div class="o_editor_banner o_not_editable lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" role="status" contenteditable="false">
                 <i class="o_editor_banner_icon mb-3 fst-normal" aria-label="Banner Info">💡</i>
-                <div class="w-100 ms-3" contenteditable="true"><p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p></div>
+                <div class="w-100 ms-3" contenteditable="true"><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p></div>
             </div><p><br></p>`
     );
 });
@@ -109,6 +109,6 @@ test("first element of an editable that is contenteditable='false' must not be s
                 <div class="w-100 ms-3" contenteditable="true">
                     <p><br></p>
                 </div>
-            </div><p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
+            </div><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
     );
 });
