@@ -214,14 +214,14 @@ class ResCompany(models.Model):
                 'name': _("Batch Payment Number Sequence"),
                 'implementation': 'no_gap',
                 'padding': 5,
-                'number_increment': 0,
+                'number_increment': 1,
                 'use_date_range': True,
                 'company_id': self.id,
-                'prefix': 'BATCH/%(year)s',
+                'prefix': 'BATCH/%(year)s/',
                 'use_date_range': True,
             })
-        return self.batch_payment_sequence_id.next_by_id()
-    
+        return self.sudo().batch_payment_sequence_id.next_by_id()
+
     def _get_company_root_delegated_field_names(self):
         return super()._get_company_root_delegated_field_names() + [
             'fiscalyear_last_day',

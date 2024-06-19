@@ -23,7 +23,7 @@ class TestFlows(AccountPaymentCommon, PaymentHttpCommon):
         route_values['invoice_id'] = self.invoice.id
         tx_context = self._get_portal_pay_context(**route_values)
 
-        # /invoice/transaction/
+        # /invoice/transaction/<id>
         tx_route_values = {
             'provider_id': self.provider.id,
             'payment_method_id': self.payment_method_id,
@@ -33,7 +33,6 @@ class TestFlows(AccountPaymentCommon, PaymentHttpCommon):
             'tokenization_requested': False,
             'landing_route': tx_context['landing_route'],
             'access_token': tx_context['access_token'],
-            'invoice_ids': [self.invoice.id],
         }
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = self._get_processing_values(
@@ -92,10 +91,9 @@ class TestFlows(AccountPaymentCommon, PaymentHttpCommon):
 
     @mute_logger('odoo.http')
     def test_transaction_route_rejects_unexpected_kwarg(self):
-        url = self._build_url('/invoice/transaction/')
+        url = self._build_url(f'/invoice/transaction/{self.invoice.id}/')
         route_kwargs = {
             'access_token': self.invoice._portal_ensure_token(),
-            'invoice_ids': [self.invoice.id],
             'partner_id': self.partner.id,  # This should be rejected.
         }
         with self.assertRaises(JsonRpcException, msg='odoo.exceptions.ValidationError'):
@@ -125,7 +123,6 @@ class TestFlows(AccountPaymentCommon, PaymentHttpCommon):
             'tokenization_requested': False,
             'landing_route': tx_context['landing_route'],
             'access_token': tx_context['access_token'],
-            'invoice_ids': [invoice.id],
         }
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = self._get_processing_values(

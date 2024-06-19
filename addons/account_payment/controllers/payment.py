@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, fields
+from odoo import _
 from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.fields import Command
 from odoo.http import request, route
@@ -11,13 +11,12 @@ from odoo.addons.payment.controllers import portal as payment_portal
 
 class PaymentPortal(payment_portal.PaymentPortal):
 
-    @route('/invoice/transaction', type='json', auth='public')
-    def invoice_transaction(self, invoice_ids, access_token, payment_reference=None, **kwargs):
+    @route('/invoice/transaction/<int:invoice_id>', type='json', auth='public')
+    def invoice_transaction(self, invoice_id, access_token, **kwargs):
         """ Create a draft transaction and return its processing values.
 
-        :param int invoice_ids: The invoices to pay, as an `account.move` ids
+        :param int invoice_id: The invoice to pay, as an `account.move` id
         :param str access_token: The access token used to authenticate the request
-        :param str payment_reference: The reference to the current payment
         :param dict kwargs: Locally unused data passed to `_create_transaction`
         :return: The mandatory values for the processing of the transaction
         :rtype: dict
@@ -25,29 +24,52 @@ class PaymentPortal(payment_portal.PaymentPortal):
         """
         # Check the invoice id and the access token
         try:
-            for invoice_id in invoice_ids:
-                invoice_sudo = self._document_check_access('account.move', invoice_id, access_token)
-        except MissingError:
-            raise ValidationError(_("The invoice is missing."))
+            invoice_sudo = self._document_check_access('account.move', invoice_id, access_token)
+        except MissingError as error:
+            raise error
         except AccessError:
             raise ValidationError(_("The access token is invalid."))
 
         logged_in = not request.env.user._is_public()
-        # It is assumed that all invoices have the same partner
         partner_sudo = request.env.user.partner_id if logged_in else invoice_sudo.partner_id
         self._validate_transaction_kwargs(kwargs)
-
-        # Inject the create values taken from the invoices into the kwargs.
-        # It is assumed that all invoices have the same currency
         kwargs.update({
             'currency_id': invoice_sudo.currency_id.id,
             'partner_id': partner_sudo.id,
-        })
+        })  # Inject the create values taken from the invoice into the kwargs.
         tx_sudo = self._create_transaction(
-            custom_create_values={'invoice_ids': [Command.set(invoice_ids)], 'reference': payment_reference}, **kwargs,
+            custom_create_values={'invoice_ids': [Command.set([invoice_id])]}, **kwargs,
         )
-        # This increments the batch payment sequence
-        invoice_sudo.company_id.increment_batch_payment_sequence(fields.Date.today(), invoice_ids)
+
+        return tx_sudo._get_processing_values()
+
+    @route('/invoice/transaction/overdue', type='json', auth='public')
+    def overdue_invoices_transaction(self, access_token, **kwargs):
+        """ Create a draft transaction and return its processing values.
+
+        :param int invoice_id: The invoice to pay, as an `account.move` id
+        :param str access_token: The access token used to authenticate the request
+        :param dict kwargs: Locally unused data passed to `_create_transaction`
+        :return: The mandatory values for the processing of the transaction
+        :rtype: dict
+        :raise: ValidationError if the invoice id or the access token is invalid
+        """
+        #TODO receive invoice_ids as parameter? that means the check for single currency must be done ahead as well... not sure
+        logged_in = not request.env.user._is_public()
+        if not logged_in:
+            raise ValidationError(_("Please log in to pay your overdue invoices"))
+        partner = request.env.user.partner_id
+        invoices_per_currency = request.env['account.move']._read_group(domain=self._get_overdue_invoices_domain(), groupby=['currency_id'], aggregates=['id:recordset'])
+        if not len(invoices_per_currency) == 1:
+            raise ValidationError(_("Impossible to pay all the overdue invoices if they don't share the same currency."))
+        self._validate_transaction_kwargs(kwargs)
+        kwargs.update({
+            'currency_id': invoices_per_currency[0][0].id,
+            'partner_id': partner.id,
+        }) 
+        tx_sudo = self._create_transaction(
+            custom_create_values={'invoice_ids': [Command.set(invoices_per_currency[0][1].ids)]}, **kwargs,
+        )
 
         return tx_sudo._get_processing_values()
 
@@ -124,8 +146,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
             # Reroute the next steps of the payment flow to the portal view of the invoice.
             form_values.update({
-                'transaction_route': '/invoice/transaction/',
-                'invoice_ids': [invoice_id],
+                'transaction_route': f'/invoice/transaction/{invoice_id}',
                 'landing_route': f'{invoice_sudo.access_url}'
                                  f'?access_token={invoice_sudo._portal_ensure_token()}',
                 'access_token': invoice_sudo.access_token,

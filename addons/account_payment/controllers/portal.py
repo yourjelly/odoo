@@ -31,6 +31,10 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
             access_token=access_token,
             **kwargs)
         values |= common_view_values
+        values['invoice_id'] = invoice.id
+        values['transaction_route'] = f'/invoice/transaction/{invoice.id}/'
+        #TODO: what if people remove the access token from the url? 
+        #I don't get why it's mandatory to pass it to /invoice/transaction/ if the user is logged in
         return values
 
     @http.route(['/my/invoices/overdue'], type='http', auth='public', methods=['GET'], website=True, sitemap=False)
@@ -62,7 +66,7 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
         total_amount = sum(overdue_invoices.mapped('amount_total'))
         residual_amount = sum(overdue_invoices.mapped('amount_residual'))
         payment_date = fields.Date.today()
-        batch_name = company.get_next_batch_payment_communication(payment_date, overdue_invoices)
+        batch_name = company.get_next_batch_payment_communication()
         values['payment'] = {
             'date': payment_date,
             'reference': batch_name,
@@ -84,6 +88,7 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
             access_token=access_token,
             **kwargs)
         values |= common_view_values
+        values['transaction_route'] = f'/invoice/transaction/overdue'
         return values
 
     def _get_common_page_view_values(self, invoices_data, access_token, **kwargs):
@@ -135,8 +140,6 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
             'payment_methods_sudo': payment_methods_sudo,
             'tokens_sudo': tokens_sudo,
             'availability_report': availability_report,
-            'transaction_route': '/invoice/transaction/',
-            'invoice_ids': invoices_data['invoice_ids'],
             'landing_route': invoices_data['landing_route'],
             'access_token': access_token,
         }

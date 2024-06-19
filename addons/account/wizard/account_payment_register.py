@@ -403,7 +403,7 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.can_edit_wizard = False
                 wizard.can_group_payments = any(len(batch_result['lines']) != 1 for batch_result in batches)
 
-    @api.depends('can_edit_wizard', 'payment_date')
+    @api.depends('can_edit_wizard')
     def _compute_communication(self):
         # The communication can't be computed in '_compute_from_lines' because
         # it's a compute editable field and then, should be computed in a separated method.

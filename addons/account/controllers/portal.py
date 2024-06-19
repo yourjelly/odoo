@@ -56,7 +56,9 @@ class PortalAccount(CustomerPortal):
             ('move_type', 'in', ('out_invoice', 'out_receipt')),
             ('payment_state', 'not in', ('in_payment', 'paid')),
             ('invoice_date_due', '<', fields.Date.today()),
-            ('partner_id', '=', partner_id or request.env.user.partner_id.id),
+            #TODO not sure we need that at all 
+            #('partner_id', '=', partner_id or request.env.user.partner_id.id),
+            ('partner_id', '=', request.env.user.partner_id.id),
         ]
 
     def _get_account_searchbar_sortings(self):
