@@ -722,18 +722,10 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         };
         Object.entries(bundles).forEach(([bundleName, bundleURLs]) => {
             const selector = `link[href*="${bundleName}"]`;
-            const contentWindow = this.websiteService.contentWindow;
-            if (contentWindow) {
-                contentWindow.addEventListener('load', function() {
-                    const doc = contentWindow.document;
-                    if (doc) {
-                        const linksIframe = doc.querySelectorAll(selector);
-                        if (linksIframe.length) {
-                            $allLinksIframe = $allLinksIframe.concat(Array.from(linksIframe));
-                            createLinksProms(bundleURLs, linksIframe[linksIframe.length - 1]);
-                        }
-                    }
-                });
+            const $linksIframe = this.websiteService.contentWindow.$(selector);
+            if ($linksIframe.length) {
+                $allLinksIframe = $allLinksIframe.add($linksIframe);
+                createLinksProms(bundleURLs, $linksIframe.last());
             }
         });
         await Promise.all(proms).then(() => {
