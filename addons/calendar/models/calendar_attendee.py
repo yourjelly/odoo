@@ -34,9 +34,9 @@ class Attendee(models.Model):
     event_id = fields.Many2one('calendar.event', 'Meeting linked', required=True, ondelete='cascade')
     recurrence_id = fields.Many2one('calendar.recurrence', related='event_id.recurrence_id')
     # attendee
-    partner_id = fields.Many2one('res.partner', 'Attendee', required=True, readonly=True, ondelete='cascade')
-    email = fields.Char('Email', related='partner_id.email')
-    phone = fields.Char('Phone', related='partner_id.phone')
+    partner_id = fields.Many2one('res.partner', 'Attendee', readonly=True, ondelete='cascade')
+    email = fields.Char('Email')
+    phone = fields.Char('Phone')
     common_name = fields.Char('Common name', compute='_compute_common_name', store=True)
     access_token = fields.Char('Invitation Token', default=_default_access_token)
     mail_tz = fields.Selection(_tz_get, compute='_compute_mail_tz', help='Timezone used for displaying time in the mail template')
@@ -52,7 +52,10 @@ class Attendee(models.Model):
 
     def _compute_mail_tz(self):
         for attendee in self:
-            attendee.mail_tz = attendee.partner_id.tz
+            if attendee.partner_id:
+                attendee.mail_tz = attendee.partner_id.tz
+            else:
+                attendee.mail_tz = 'UTC'
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -78,6 +81,8 @@ class Attendee(models.Model):
         raise UserError(_('You cannot duplicate a calendar attendee.'))
 
     def _subscribe_partner(self):
+        if not self.partner_id:
+            return
         mapped_followers = defaultdict(lambda: self.env['calendar.event'])
         for event in self.event_id:
             partners = (event.attendee_ids & self).partner_id - event.message_partner_ids
@@ -88,6 +93,8 @@ class Attendee(models.Model):
             events.message_subscribe(partner_ids=partners.ids)
 
     def _unsubscribe_partner(self):
+        if not self.partner_id:
+            return
         for event in self.event_id:
             partners = (event.attendee_ids & self).partner_id & event.message_partner_ids
             event.message_unsubscribe(partner_ids=partners.ids)
@@ -182,7 +189,7 @@ class Attendee(models.Model):
         """ Marks event invitation as Accepted. """
         for attendee in self:
             attendee.event_id.message_post(
-                author_id=attendee.partner_id.id,
+                author_id=attendee.partner_id.id if attendee.partner_id else None,
                 body=_("%s has accepted the invitation", attendee.common_name),
                 subtype_xmlid="calendar.subtype_invitation",
             )
@@ -192,7 +199,7 @@ class Attendee(models.Model):
         """ Marks event invitation as Declined. """
         for attendee in self:
             attendee.event_id.message_post(
-                author_id=attendee.partner_id.id,
+                author_id=attendee.partner_id.id if attendee.partner_id else None,
                 body=_("%s has declined the invitation", attendee.common_name),
                 subtype_xmlid="calendar.subtype_invitation",
             )

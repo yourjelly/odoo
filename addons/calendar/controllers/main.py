@@ -26,7 +26,7 @@ class CalendarController(http.Controller):
         if attendee:
             attendees = request.env['calendar.attendee'].sudo().search([
                 ('event_id', 'in', attendee.event_id.recurrence_id.calendar_event_ids.ids),
-                ('partner_id', '=', attendee.partner_id.id),
+                ('email', '=', attendee.email),
                 ('state', '!=', 'accepted'),
             ])
             attendees.do_accept()
@@ -48,7 +48,7 @@ class CalendarController(http.Controller):
         if attendee:
             attendees = request.env['calendar.attendee'].sudo().search([
                 ('event_id', 'in', attendee.event_id.recurrence_id.calendar_event_ids.ids),
-                ('partner_id', '=', attendee.partner_id.id),
+                ('email', '=', attendee.email),
                 ('state', '!=', 'declined'),
             ])
             attendees.do_decline()
@@ -61,8 +61,8 @@ class CalendarController(http.Controller):
             ('event_id', '=', int(id))])
         if not attendee:
             return request.not_found()
-        timezone = attendee.partner_id.tz
-        lang = attendee.partner_id.lang or get_lang(request.env).code
+        timezone = attendee.mail_tz
+        lang = (attendee.partner_id.lang if attendee.partner_id else None) or get_lang(request.env).code
         event = request.env['calendar.event'].with_context(tz=timezone, lang=lang).sudo().browse(int(id))
         company = event.user_id and event.user_id.company_id or event.create_uid.company_id
 
