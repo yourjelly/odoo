@@ -3,7 +3,8 @@
     <t t-inherit="mail.Discuss" t-inherit-mode="extension">
         <xpath expr="//*[@t-ref='mobileTopbar']" position="after">
             <t t-if="ui.isSmall" t-call="mail.Discuss.loading"/>
-            <DiscussSidebar t-else=""/>
+            <DiscussSidebar t-elif="checkChannel"/>
+            
         </xpath>
         <xpath expr="//*[@t-ref='root']" position="inside">
             <MessagingMenu t-if="ui.isSmall"/>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+     <t t-name="test_template" t-inherit="mail.Discuss" t-inherit-mode="extension">
+     
+         <!-- <xpath expr="//div[hasclass('testc')]" position="replace">
+            <DiscussSidebar t-elif="check"/>
+        </xpath> -->
+        
+     </t>
+</templates>
+

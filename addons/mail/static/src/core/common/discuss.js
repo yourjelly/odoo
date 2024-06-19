@@ -1,3 +1,4 @@
+import { LivechatChannel } from "@im_livechat/core/web/livechat_channel_model";
 import { AutoresizeInput } from "@mail/core/common/autoresize_input";
 import { Composer } from "@mail/core/common/composer";
 import { ImStatus } from "@mail/core/common/im_status";
@@ -25,6 +26,8 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
+import { ChatWindow } from "./chat_window_model";
+import { ChatWindowContainer } from "./chat_window_container";
 
 export class Discuss extends Component {
     static components = {
@@ -87,7 +90,12 @@ export class Discuss extends Component {
             () => [this.store.discuss.inbox.counter]
         );
         onMounted(() => (this.store.discuss.isActive = true));
-        onWillUnmount(() => (this.store.discuss.isActive = false));
+        onWillUnmount(() => {
+            this.store.discuss.isActive = false;
+            if (this.thread?.channel_type === "livechat") {
+                this.store.discuss.thread = undefined;
+            }
+        });
     }
 
     get thread() {
@@ -117,6 +125,14 @@ export class Discuss extends Component {
         const newName = name.trim();
         if (this.store.self.name !== newName) {
             await this.store.self.updateGuestName(newName);
+        }
+    }
+
+    get checkChannel() {
+        if (this.thread?.channel_type !== "livechat") {
+            return true;
+        } else {
+            return false;
         }
     }
 }
