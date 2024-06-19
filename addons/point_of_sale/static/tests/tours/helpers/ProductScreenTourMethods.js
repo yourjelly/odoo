@@ -106,6 +106,22 @@ export function clickPayButton(shouldCheck = true) {
     }
     return steps;
 }
+export function checkOrderButton(dataOnButton) {
+    const steps = [
+        {
+            content: "click pay button",
+            trigger: `.product-screen .submit-order:contains("${dataOnButton}")`,
+            run: () => {
+                const nbLines = document.querySelectorAll(".product-screen .submit-order .break-line .text-truncate");
+                if (nbLines.length > 1 || nbLines[0].innerHTML != `"${dataOnButton}"`){
+                    console.error("wrong number of move lines generated. " + nbLines + " instead of 7");
+                }
+            },
+            mobile: false,
+        },
+    ];
+    return steps;
+}
 export function clickPartnerButton() {
     return [
         clickReview(),

@@ -30,7 +30,8 @@ class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
                                                  'account_type': 'asset_receivable',
                                                  'reconcile': True})
 
-        drinks_category = cls.env['pos.category'].create({'name': 'Drinks'})
+        drinks_category = cls.env['pos.category'].create({'name': 'Drinks', 'sequence': 2})
+        food_category = cls.env['pos.category'].create({'name': 'Food', 'sequence': 1})
 
         printer = cls.env['pos.printer'].create({
             'name': 'Preparation Printer',
@@ -185,6 +186,16 @@ class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
             'taxes_id': [(6, 0, [])],
         })
 
+        # multiple categories product
+        cls.env['product.product'].create({
+            'available_in_pos': True,
+            'list_price': 2.20,
+            'name': 'Multi Category Product',
+            'weight': 0.01,
+            'pos_categ_ids': [(4, drinks_category.id), (4, food_category.id)],
+            'categ_id': cls.env.ref('point_of_sale.product_category_pos').id,
+            'taxes_id': [(6, 0, [])],
+        })
         #desk organizer (variant product)
         cls.desk_organizer = cls.env['product.product'].create({
             'name': 'Desk Organizer',
@@ -323,3 +334,7 @@ class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
         self.pos_config.company_id.point_of_sale_use_ticket_qr_code = True
         self.pos_config.with_user(self.pos_admin).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'BillScreenTour', login="pos_admin")
+
+    def test_12_multi_categ_product_ordering(self):
+        self.pos_config.with_user(self.pos_admin).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'MultiCategProductOrder', login="pos_admin")
