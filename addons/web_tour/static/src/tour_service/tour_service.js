@@ -72,11 +72,9 @@ function checkTourStepKeyValues(tourStep) {
         isActive: { type: Array, element: String, optional: true },
         content: { type: [String, Object], optional: true }, //allow object for _t && markup
         position: { type: String, optional: true },
-        edition: { type: String, optional: true },
         run: { type: [String, Function], optional: true },
         allowInvisible: { type: Boolean, optional: true },
         allowDisabled: { type: Boolean, optional: true },
-        auto: { type: Boolean, optional: true },
         in_modal: { type: Boolean, optional: true },
         width: { type: Number, optional: true },
         timeout: { type: Number, optional: true },
@@ -84,9 +82,10 @@ function checkTourStepKeyValues(tourStep) {
         consumeEvent: { type: String, optional: true },
         mobile: { type: Boolean, optional: true },
         title: { type: String, optional: true },
-        shadow_dom: { type: Boolean, optional: true },
         debugHelp: { type: String, optional: true },
         noPrepend: { type: Boolean, optional: true },
+        pause: { type: Boolean, optional: true }, //ONLY IN DEBUG MODE
+        break: { type: Boolean, optional: true }, //ONLY IN DEBUG MODE
     };
 
     try {

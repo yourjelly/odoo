@@ -36,9 +36,9 @@
         position: "bottom",
         run: "click",
     }, {
+        isActive: ["auto"],
         extra_trigger: 'div.modal.modal_shown',
         trigger: ".modal-header button.btn-close",
-        auto: true,
         run: "click",
     },
     {
@@ -59,9 +59,9 @@
         position: "bottom",
         run: "click",
     }, {
+        isActive: ["auto"],
         extra_trigger: 'div.modal.modal_shown',
         trigger: ".modal-header button.btn-close",
-        auto: true,
         run: "click",
     }, {
         trigger: ".o_wforum_validate_toggler[data-karma]:first",
@@ -69,7 +69,7 @@
         position: "right",
         run: "click",
     }, {
+        isActive: ["auto"],
         content: "Check edit button is there",
         trigger: "a:contains('Edit your answer')",
-        auto: true,
     }]);

@@ -126,7 +126,6 @@ QUnit.module("Tour service", (hooks) => {
             },
             {
                 trigger: "button.bar",
-                run() {},
             },
         ];
         registry.category("web_tour.tours").add("tour1", {

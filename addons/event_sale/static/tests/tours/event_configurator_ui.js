@@ -8,13 +8,8 @@ registry.category("web_tour.tours").add('event_configurator_tour', {
     test: true,
     steps: () => [stepUtils.showAppsMenuItem(), {
     trigger: '.o_app[data-menu-xmlid="sale.sale_menu_root"]',
-    edition: 'community',
     run: "click",
-}, {
-    trigger: '.o_app[data-menu-xmlid="sale.sale_menu_root"]',
-    edition: 'enterprise',
-    run: "click",
-},
+}, 
 {
     trigger: ".o_sale_order",
 },
