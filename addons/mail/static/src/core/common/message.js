@@ -197,11 +197,16 @@ export class Message extends Component {
             ),
             "o-squashed": this.props.squashed,
             "mt-1": !this.props.squashed && this.props.thread && !this.env.messageCard,
-            "px-2": this.props.isInChatWindow,
-            "opacity-50": this.props.messageToReplyTo?.isNotSelected(
+            "px-2": this.props.isInChatWindow || this.env.inChatter,
+            // "opacity-trigger-hover bg-200 bg-opacity-0 bg-75-hover px-3 mx-n3" :  (this.env.message && !this.env.messageHighlight) && !this.props.messageToReplyTo?.isSelected(
+            //     this.props.thread,
+            //     this.props.message
+            // ),
+            "opacity-trigger-hover bg-200 bg-opacity-0 bg-50-hover px-3 mx-n3" :  !this.props.messageToReplyTo?.isSelected(
                 this.props.thread,
                 this.props.message
             ),
+            "mx-n3 px-3": !this.env.inChatter && !this.env.inChatWindow,
         };
     }
 
