@@ -1,10 +1,15 @@
-import { COLLABORATION_PLUGINS, MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import {
+    COLLABORATION_PLUGINS,
+    MAIN_PLUGINS,
+    DYNAMIC_PLACEHOLDER_PLUGINS,
+} from "@html_editor/plugin_sets";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { Component, useRef, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useRecordObserver } from "@web/model/relational_model/utils";
+import { useDynamicPlaceholder } from "@web/views/fields/dynamic_placeholder_hook";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { HtmlViewer } from "./html_viewer";
 
@@ -29,6 +34,8 @@ export class HtmlField extends Component {
     static props = {
         ...standardFieldProps,
         isCollaborative: { type: Boolean, optional: true },
+        dynamicPlaceholder: { type: Boolean, optional: true, default: false },
+        dynamicPlaceholderModelReferenceField: { type: String, optional: true },
         cssReadonlyAssetId: { type: String, optional: true },
         sandboxedPreview: { type: Boolean, optional: true },
         codeview: { type: Boolean, optional: true },
@@ -68,6 +75,10 @@ export class HtmlField extends Component {
                 );
             }
         });
+
+        this.dynamicPlaceholder = this.props.dynamicPlaceholder
+            ? useDynamicPlaceholder(this)
+            : false;
     }
 
     get value() {
@@ -76,6 +87,10 @@ export class HtmlField extends Component {
 
     get displayReadonly() {
         return this.props.readonly || (this.sandboxedPreview && !this.state.showCodeView);
+    }
+
+    get el() {
+        return this?.editor?.editable;
     }
 
     get wysiwygKey() {
@@ -137,6 +152,7 @@ export class HtmlField extends Component {
             Plugins: [
                 ...MAIN_PLUGINS,
                 ...(this.props.isCollaborative ? COLLABORATION_PLUGINS : []),
+                ...(this.props.dynamicPlaceholder ? DYNAMIC_PLACEHOLDER_PLUGINS : []),
             ],
             classList: this.classList,
             onChange: this.onChange.bind(this),
@@ -151,6 +167,8 @@ export class HtmlField extends Component {
                 peerId: this.generateId(),
             },
             dropImageAsAttachment: true, // @todo @phoenix always true ?
+            dynamicPlaceholder: this.dynamicPlaceholder,
+            dynamicPlaceholderModelReferenceField: this.props.dynamicPlaceholderModelReferenceField,
             resources: {
                 toolbarGroup: [
                     {
@@ -216,6 +234,9 @@ export const htmlField = {
         return {
             editorConfig,
             isCollaborative: options.collaborative,
+            dynamicPlaceholder: options.dynamic_placeholder,
+            dynamicPlaceholderModelReferenceField:
+                options.dynamic_placeholder_model_reference_field,
             sandboxedPreview: Boolean(options.sandboxedPreview),
             cssReadonlyAssetId: options.cssReadonly,
             codeview: Boolean(odoo.debug && options.codeview),

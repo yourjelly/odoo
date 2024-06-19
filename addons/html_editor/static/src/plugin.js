@@ -92,7 +92,7 @@ export class Plugin {
         /** @type { SharedMethods } **/
         this.shared = shared;
         this.dispatch = dispatch;
-        this._cleanups = [];
+        this._cleanups = {};
         this.resources = null; // set before start
     }
 
@@ -112,11 +112,19 @@ export class Plugin {
     addDomListener(target, eventName, fn, capture) {
         const handler = fn.bind(this);
         target.addEventListener(eventName, handler, capture);
-        this._cleanups.push(() => target.removeEventListener(eventName, handler, capture));
+        const hash = eventName + (Math.random() + 1).toString(36).substring(7);
+        this._cleanups[hash] = () => target.removeEventListener(eventName, handler, capture);
+        return hash;
+    }
+    removeDomListener(hash) {
+        if (this._cleanups[hash]) {
+            this._cleanups[hash]();
+            delete this._cleanups[hash];
+        }
     }
 
     destroy() {
-        for (const cleanup of this._cleanups) {
+        for (const cleanup of Object.values(this._cleanups)) {
             cleanup();
         }
     }

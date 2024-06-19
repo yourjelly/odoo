@@ -113,7 +113,7 @@ export class HistoryPlugin extends Plugin {
         this.addDomListener(this.editable, "keydown", this.stageSelection);
         this.addDomListener(this.editable, "beforeinput", this.stageSelection);
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
-        this._cleanups.push(() => this.observer.disconnect());
+        this._cleanups["observer_disconnect"] = () => this.observer.disconnect();
         this.enableObserver();
         this.clean();
     }
