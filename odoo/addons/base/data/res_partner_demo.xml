@@ -52,6 +52,7 @@
             <field name="website">http://www.wood-corner.com</field>
             <field name="image_1920" type="base64" file="base/static/img/res_partner_1-image.png"/>
             <field name="vat">US12345672</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_2" model="res.partner">
             <field name="name">Deco Addict</field>
@@ -67,6 +68,7 @@
             <field name="website">http://www.deco-addict.com</field>
             <field name="image_1920" type="base64" file="base/static/img/res_partner_2-image.png"/>
             <field name="vat">US12345673</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_3" model="res.partner">
             <field name="name">Gemini Furniture</field>
@@ -82,6 +84,7 @@
             <field name="website">http://www.gemini-furniture.com/</field>
             <field name="image_1920" type="base64" file="base/static/img/res_partner_3-image.png"/>
             <field name="vat">US12345674</field>
+            <field name="tz">UTC</field>
         </record>
 
         <record id="res_partner_4" model="res.partner">
@@ -98,6 +101,7 @@
             <field name="website">http://www.ready-mat.com/</field>
             <field name="image_1920" type="base64" file="base/static/img/res_partner_4-image.png"/>
             <field name="vat">US12345675</field>
+            <field name="tz">UTC</field>
         </record>
 
         <record id="res_partner_5" model="res.partner">
@@ -112,6 +116,8 @@
             <field name="street">Orval 1</field>
             <field name="website">www.openwood.example.com</field>
             <field name="zip">6823</field>
+            <field name="tz">UTC</field>
+            <field name="tz">UTC</field>
         </record>
 
         <record id="res_partner_10" model="res.partner">
@@ -126,6 +132,7 @@
             <field name="phone">(334)-502-1024</field>
             <field name="image_1920" type="base64" file="base/static/img/res_partner_10-image.jpg"/>
             <field name="vat">US12345676</field>
+            <field name="tz">UTC</field>
         </record>
 
         <record id="res_partner_12" model="res.partner">
@@ -142,6 +149,7 @@
             <field name="website">http://www.azure-interior.com</field>
             <field name="image_1920" type="base64" file="base/static/img/res_partner_12-image.png"/>
             <field name="vat">US12345677</field>
+            <field name="tz">UTC</field>
         </record>
 
         <record id="res_partner_18" model="res.partner">
@@ -157,6 +165,7 @@
             <field name="website">http://www.lumber-inc.com</field>
             <field name="image_1920" type="base64" file="base/static/img/res_partner_18-image.png"/>
             <field name="vat">US12345678</field>
+            <field name="tz">UTC</field>
         </record>
 
         <record id="res_partner_address_1" model="res.partner">
@@ -165,6 +174,7 @@
             <field name="function">Service Manager</field>
             <field name="email">willie.burke80@example.com</field>
             <field name="phone">(846)-523-2111</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_2" model="res.partner">
             <field name="name">Ron Gibson</field>
@@ -172,6 +182,7 @@
             <field name="function">Store Manager</field>
             <field name="email">ron.gibson76@example.com</field>
             <field name="phone">(976)-397-4091</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_3" model="res.partner">
             <field name="name">Douglas Fletcher</field>
@@ -179,6 +190,7 @@
             <field name="function">Functional Consultant</field>
             <field name="email">douglas.fletcher51@example.com</field>
             <field name="phone">(132)-553-7242</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_4" model="res.partner">
             <field name="name">Floyd Steward</field>
@@ -186,6 +198,7 @@
             <field name="function">Analyst</field>
             <field name="email">floyd.steward34@example.com</field>
             <field name="phone">(145)-138-3401</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_5" model="res.partner">
             <field name="name">Edwin Hansen</field>
@@ -193,6 +206,7 @@
             <field name="function">Marketing Manager</field>
             <field name="email">edwin.hansen58@example.com</field>
             <field name="phone">(943)-352-2555</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_7" model="res.partner">
             <field name="name">Billy Fox</field>
@@ -200,6 +214,7 @@
             <field name="function">Production Supervisor</field>
             <field name="email">billy.fox45@example.com</field>
             <field name="phone">(915)-498-5611</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_10" model="res.partner">
             <field name="name">Jesse Brown</field>
@@ -208,6 +223,7 @@
             <field name="email">jesse.brown74@example.com</field>
             <field name="phone">(829)-386-3277</field>
             <field name="company_id" ref="base.main_company"/>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_11" model="res.partner">
             <field name="name">Soham Palmer</field>
@@ -215,6 +231,7 @@
             <field name="function">Director</field>
             <field name="email">soham.palmer15@example.com</field>
             <field name="phone">(379)-167-2040</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_13" model="res.partner">
             <field name="name">Kim Snyder</field>
@@ -222,6 +239,7 @@
             <field name="function">Senior Associate</field>
             <field name="email">kim.snyder96@example.com</field>
             <field name="phone">(215)-379-4865</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_14" model="res.partner">
             <field name="name">Edith Sanchez</field>
@@ -229,6 +247,7 @@
             <field name="function">Analyst</field>
             <field name="email">edith.sanchez68@example.com</field>
             <field name="phone">(938)-175-2048</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_15" model="res.partner">
             <field name="name">Brandon Freeman</field>
@@ -236,6 +255,7 @@
             <field name="parent_id" ref="res_partner_12"/>
             <field name="email">brandon.freeman55@example.com</field>
             <field name="phone">(355)-687-3262</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_16" model="res.partner">
             <field name="name">Nicole Ford</field>
@@ -243,6 +263,7 @@
             <field name="parent_id" ref="res_partner_12"/>
             <field name="email">nicole.ford75@example.com</field>
             <field name="phone">(946)-638-6034</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_17" model="res.partner">
             <field name="name">Toni Rhodes</field>
@@ -250,6 +271,7 @@
             <field name="parent_id" ref="res_partner_10"/>
             <field name="email">toni.rhodes11@example.com</field>
             <field name="phone">(198)-539-4948</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_18" model="res.partner">
             <field name="name">Gordon Owens</field>
@@ -257,6 +279,7 @@
             <field name="parent_id" ref="res_partner_10"/>
             <field name="email">gordon.owens47@example.com</field>
             <field name="phone">(336)-723-6569</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_24" model="res.partner">
             <field name="name">Theodore Gardner</field>
@@ -264,6 +287,7 @@
             <field name="parent_id" ref="res_partner_4"/>
             <field name="email">theodore.gardner36@example.com</field>
             <field name="phone">(186)-612-6561</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_25" model="res.partner">
             <field name="name">Oscar Morgan</field>
@@ -271,6 +295,7 @@
             <field name="function">Order Clerk</field>
             <field name="email">oscar.morgan11@example.com</field>
             <field name="phone">(561)-239-1744</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_27" model="res.partner">
             <field name="name">Tom Ruiz</field>
@@ -278,6 +303,7 @@
             <field name="function">Software Developer</field>
             <field name="email">tom.ruiz89@example.com</field>
             <field name="phone">(102)-834-1602</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_28" model="res.partner">
             <field name="name">Colleen Diaz</field>
@@ -285,6 +311,7 @@
             <field name="parent_id" ref="res_partner_12"/>
             <field name="email">colleen.diaz83@example.com</field>
             <field name="phone">(255)-595-8393</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_30" model="res.partner">
             <field name="name">Lorraine Douglas</field>
@@ -292,6 +319,7 @@
             <field name="parent_id" ref="res_partner_18"/>
             <field name="email">lorraine.douglas35@example.com</field>
             <field name="phone">(443)-648-9155</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_31" model="res.partner">
             <field name="name">Addison Olson</field>
@@ -299,6 +327,7 @@
             <field name="function">Sales Representative</field>
             <field name="email">addison.olson28@example.com</field>
             <field name="phone">(223)-399-7637</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_32" model="res.partner">
             <field name="name">Sandra Neal</field>
@@ -306,6 +335,7 @@
             <field name="function">Sales Manager</field>
             <field name="email">sandra.neal80@example.com</field>
             <field name="phone">(430)-371-7293</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_33" model="res.partner">
             <field name="name">Julie Richards</field>
@@ -313,6 +343,7 @@
             <field name="function">Financial Manager</field>
             <field name="email">julie.richards84@example.com</field>
             <field name="phone">(225)-148-7811</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_address_34" model="res.partner">
             <field name="name">Travis Mendoza</field>
@@ -320,6 +351,7 @@
             <field name="function">Knowledge Manager</field>
             <field name="email">travis.mendoza24@example.com</field>
             <field name="phone">(840)-944-8661</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_main1" model="res.partner">
             <field name="name">Chester Reed</field>
@@ -327,6 +359,7 @@
             <field name="function">Chief Executive Officer (CEO)</field>
             <field name="email">chester.reed79@example.com</field>
             <field name="phone">(979)-904-8902</field>
+            <field name="tz">UTC</field>
         </record>
         <record id="res_partner_main2" model="res.partner">
             <field name="name">Dwayne Newman</field>
@@ -334,6 +367,7 @@
             <field name="parent_id" ref="main_partner"/>
             <field name="email">dwayne.newman28@example.com</field>
             <field name="phone">(614)-177-4937</field>
+            <field name="tz">UTC</field>
         </record>
     </data>
 </odoo>
