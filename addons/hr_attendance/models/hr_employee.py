@@ -49,6 +49,8 @@ class HrEmployee(models.Model):
     total_overtime = fields.Float(
         compute='_compute_total_overtime', compute_sudo=True, groups="hr_attendance.group_hr_attendance_officer,hr.group_hr_user")
 
+    employee_faces = fields.One2many('hr.employee.face', 'employee_id')
+
     @api.model_create_multi
     def create(self, vals_list):
         officer_group = self.env.ref('hr_attendance.group_hr_attendance_officer', raise_if_not_found=False)

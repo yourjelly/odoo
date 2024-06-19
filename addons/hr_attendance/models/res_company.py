@@ -5,7 +5,7 @@ from odoo import fields, models, api
 from odoo.osv.expression import OR
 import uuid
 from werkzeug.urls import url_join
-
+import tensorflow as tf
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
@@ -33,6 +33,8 @@ class ResCompany(models.Model):
     attendance_kiosk_url = fields.Char(compute="_compute_attendance_kiosk_url")
     attendance_kiosk_use_pin = fields.Boolean(string='Employee PIN Identification')
     attendance_from_systray = fields.Boolean(string='Attendance From Systray', default=True)
+
+    facenet_weights = fields.Binary()
 
     @api.depends("attendance_kiosk_key")
     def _compute_attendance_kiosk_url(self):
@@ -125,3 +127,6 @@ class ResCompany(models.Model):
             'target': 'self',
             'url': f'/hr_attendance/kiosk_mode_menu/{self.env.company.id}',
         }
+
+    def _train_face_net(self):
+        pass
