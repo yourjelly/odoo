@@ -32,16 +32,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
         logged_in = not request.env.user._is_public()
         partner_sudo = request.env.user.partner_id if logged_in else invoice_sudo.partner_id
-        self._validate_transaction_kwargs(kwargs)
-        kwargs.update({
-            'currency_id': invoice_sudo.currency_id.id,
-            'partner_id': partner_sudo.id,
-        })  # Inject the create values taken from the invoice into the kwargs.
-        tx_sudo = self._create_transaction(
-            custom_create_values={'invoice_ids': [Command.set([invoice_id])]}, **kwargs,
-        )
-
-        return tx_sudo._get_processing_values()
+        return self._process_transaction(partner_sudo.id, invoice_sudo.currency_id.id, [invoice_id], False, **kwargs)
 
     @route('/invoice/transaction/overdue', type='json', auth='public')
     def overdue_invoices_transaction(self, access_token, **kwargs):
@@ -55,7 +46,6 @@ class PaymentPortal(payment_portal.PaymentPortal):
         :raise: ValidationError if the invoice id or the access token is invalid
         """
         #TODO receive invoice_ids as parameter? that means the check for single currency must be done ahead as well... not sure
-        #TODO receive payment_reference from parameter
         logged_in = not request.env.user._is_public()
         if not logged_in:
             raise ValidationError(_("Please log in to pay your overdue invoices"))
@@ -63,19 +53,25 @@ class PaymentPortal(payment_portal.PaymentPortal):
         invoices_per_currency = request.env['account.move']._read_group(domain=self._get_overdue_invoices_domain(), groupby=['currency_id'], aggregates=['id:recordset'])
         if not len(invoices_per_currency) == 1:
             raise ValidationError(_("Impossible to pay all the overdue invoices if they don't share the same currency."))
+        #TODO receive payment_reference from parameter
+        payment_reference = ''    
+        return self._process_transaction(partner.id, invoices_per_currency[0][0].id, invoices_per_currency[0][1].ids, payment_reference, **kwargs)
+
+    def _process_transaction(self, partner_id, currency_id, invoice_ids, payment_reference, **kwargs):
         self._validate_transaction_kwargs(kwargs)
         kwargs.update({
-            'currency_id': invoices_per_currency[0][0].id,
-            'partner_id': partner.id,
-        })
+            'currency_id': currency_id,
+            'partner_id': partner_id,
+        })  # Inject the create values taken from the invoice into the kwargs.
         tx_sudo = self._create_transaction(
             custom_create_values={
-                'invoice_ids': [Command.set(invoices_per_currency[0][1].ids)],
-                #'reference': payment_reference,
-            }, **kwargs,
+                'invoice_ids': [Command.set(invoice_ids)],
+                'reference': payment_reference,
+                },
+            **kwargs,
         )
-
         return tx_sudo._get_processing_values()
+
 
     # Payment overrides
 
