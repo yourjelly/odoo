@@ -192,6 +192,12 @@ $utilities: map-merge(
             opacity: $-opacity-level!important;
         }
     }
+
+    .bg-#{$-opacity-key}-hover {
+        &:hover, .opacity-trigger-hover:hover & {
+            --bg-opacity: #{$-opacity-level} !important;
+        }
+    }
 }
 
 // Hide empty elements
