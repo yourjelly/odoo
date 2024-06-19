@@ -55,6 +55,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
         :raise: ValidationError if the invoice id or the access token is invalid
         """
         #TODO receive invoice_ids as parameter? that means the check for single currency must be done ahead as well... not sure
+        #TODO receive payment_reference from parameter
         logged_in = not request.env.user._is_public()
         if not logged_in:
             raise ValidationError(_("Please log in to pay your overdue invoices"))
@@ -66,9 +67,12 @@ class PaymentPortal(payment_portal.PaymentPortal):
         kwargs.update({
             'currency_id': invoices_per_currency[0][0].id,
             'partner_id': partner.id,
-        }) 
+        })
         tx_sudo = self._create_transaction(
-            custom_create_values={'invoice_ids': [Command.set(invoices_per_currency[0][1].ids)]}, **kwargs,
+            custom_create_values={
+                'invoice_ids': [Command.set(invoices_per_currency[0][1].ids)],
+                #'reference': payment_reference,
+            }, **kwargs,
         )
 
         return tx_sudo._get_processing_values()
