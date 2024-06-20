@@ -1352,6 +1352,17 @@ input[type="checkbox"]:checked {
 .whitespace-nowrap {
     white-space: nowrap;
 }
+.HootSideBar button:hover {
+    background-color: var(--gray-300);
+}
+
+.HootSideBar button .visibleIfHovered {
+    display: none;
+}
+
+.HootSideBar button:hover .visibleIfHovered {
+    display: block;
+}
 
 /* Z-index */
 

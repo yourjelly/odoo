@@ -129,9 +129,9 @@ export class HootSideBar extends Component {
                                     unfolded="state.unfolded.has(item.id)"
                                 />
                             </div>
-                            <t t-if="state.hovered === item.id">
+                            <div t-if="true" class="visibleIfHovered">
                                 <HootJobButtons job="item" />
-                            </t>
+                            </div>
                             <t t-else="">
                                 <HootSideBarCounter reporting="item.reporting" statusFilter="uiState.statusFilter" />
                             </t>
