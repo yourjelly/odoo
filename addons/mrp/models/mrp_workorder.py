@@ -546,10 +546,10 @@ class MrpWorkorder(models.Model):
         vals['leave_id'] = leave.id
         self.write(vals)
 
-    def _cal_cost(self):
+    def _cal_cost(self, domain=None):
         total = 0
         for wo in self:
-            duration = sum(wo.time_ids.mapped('duration'))
+            duration = sum(wo.time_ids.filtered_domain(domain).mapped('duration'))
             total += (duration / 60.0) * wo.workcenter_id.costs_hour
         return total
 

@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models
+from odoo import models, fields
 
 from collections import defaultdict
 
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
+
+    productivity_ids = fields.One2many('mrp.workcenter.productivity', 'account_move_line_id')
 
     def _get_invoiced_qty_per_product(self):
         # Replace the kit-type products with their components

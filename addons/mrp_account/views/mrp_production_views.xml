@@ -62,4 +62,18 @@
             </xpath>
         </field>
     </record>
+
+    <record id="action_post_wip" model="ir.actions.server">
+        <field name="name">Post WIP</field>
+        <field name="model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="groups_id" eval="[(4, ref('mrp_account.group_mrp_wip'))]"/>
+        <field name="code">action = records.action_post_wip()</field>
+    </record>
+
+    <record id="mrp.action_mrp_production_moves" model="ir.actions.act_window">
+        <field name="domain">['|', '|', ('move_id.raw_material_production_id', '=', active_id), ('move_id.production_id', '=', active_id), ('move_id.wip_production_id', '=', active_id)]</field>
+    </record>
 </odoo>
