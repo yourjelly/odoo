@@ -54,6 +54,7 @@ var defaults = {
 
     // Callback function to execute when the flyout is attached to the target.
     beforeAttach: function () {},
+
 };
 
 /**
@@ -292,6 +293,7 @@ ZoomOdoo.prototype._onLoad = function (e) {
  */
 ZoomOdoo.prototype._loadImage = function (href, callback) {
     var zoom = new Image();
+
     this.zoom = zoom;
     zoom.addEventListener("load", this._onLoad.bind(this));
 
@@ -337,6 +339,7 @@ ZoomOdoo.prototype._move = function (e) {
 
         this.opts.onMove.call(this, top, left);
     }
+
 };
 
 /**
@@ -352,6 +355,7 @@ ZoomOdoo.prototype.hide = function () {
     this.opts.onHide.call(this);
 };
 
+// jQuery plugin wrapper
 HTMLElement.prototype.zoomOdoo = function (options) {
     var api = this.dataset.zoomOdoo;
 

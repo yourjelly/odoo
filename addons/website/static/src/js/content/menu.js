@@ -36,46 +36,40 @@ const BaseAnimatedHeader = animations.Animation.extend({
      * @override
      */
     start: function () {
-        this.mainEl = this.el.nextElementSibling;
-        this.isOverlayHeader = !!(
-            this.el.closest(".o_header_overlay") || this.el.closest(".o_header_overlay_theme")
-        );
+        this.main = this.el.nextElementSibling;
+        this.isOverlayHeader = !!this.el.closest('.o_header_overlay, .o_header_overlay_theme');
         this.hiddenOnScrollEl = this.el.querySelector(".o_header_hide_on_scroll");
 
         // While scrolling through navbar menus on medium devices, body should
         // not be scrolled with it.
         const disableScroll = function () {
             if (uiUtils.getSize() < SIZES.LG) {
-                document.body.classList.add("overflow-hidden");
+                document.body.classList.add('overflow-hidden');
             }
         };
         const enableScroll = function () {
-            document.body.classList.remove("overflow-hidden");
+            document.body.classList.remove('overflow-hidden');
         };
-        this.navbarOffcanvasEls = this.el.querySelectorAll(".offcanvas");
-        this.navbarOffcanvasEls.forEach((el) => {
-            el.on("show.bs.offcanvas.BaseAnimatedHeader", disableScroll);
-            el.on("hide.bs.offcanvas.BaseAnimatedHeader", enableScroll);
-        });
+        this.navbarOffcanvases = this.el.querySelectorAll(".offcanvas");
+        $(this.navbarOffcanvases)
+            .on("show.bs.offcanvas.BaseAnimatedHeader", disableScroll)
+            .on("hide.bs.offcanvas.BaseAnimatedHeader", enableScroll);
 
         // Compatibility: can probably be removed, there is no such elements in
         // default navbars... although it could be used by custo.
-        this.navbarCollapseEls = this.el.querySelectorAll(".navbar-collapse");
-        this.navbarCollapseEls.forEach((el) => {
-            el.on("show.bs.collapse.BaseAnimatedHeader", disableScroll)
-            el.on("hide.bs.collapse.BaseAnimatedHeader", enableScroll);    
-        });
+        this.navbarCollapses = this.el.querySelectorAll('.navbar-collapse');
+        $(this.navbarCollapses)
+            .on("show.bs.collapse.BaseAnimatedHeader", disableScroll)
+            .on("hide.bs.collapse.BaseAnimatedHeader", enableScroll);
 
         // We can rely on transitionend which is well supported but not on
         // transitionstart, so we listen to a custom odoo event.
         this._transitionCount = 0;
-        this.el.on("odoo-transitionstart.BaseAnimatedHeader", () => {
-            this.el.classList.add("o_transitioning");
+        $(this.el).on('odoo-transitionstart.BaseAnimatedHeader', () => {
+            this.el.classList.add('o_transitioning');
             this._adaptToHeaderChangeLoop(1);
         });
-        this.el.on("transitionend.BaseAnimatedHeader", () =>
-            this._adaptToHeaderChangeLoop(-1)
-        );
+        $(this.el).on('transitionend.BaseAnimatedHeader', () => this._adaptToHeaderChangeLoop(-1));
 
         return this._super(...arguments);
     },
@@ -84,19 +78,13 @@ const BaseAnimatedHeader = animations.Animation.extend({
      */
     destroy: function () {
         this._toggleFixedHeader(false);
-        this.el.classList.remove(
-            "o_header_affixed",
+        this.el.classList.remove("o_header_affixed",
             "o_header_is_scrolled",
             "o_header_no_transition",
-            "o_transitioning",
-        );
-        this.navbarOffcanvasEls.forEach((el) => {
-            el.off(".BaseAnimatedHeader");
-        });
-        this.navbarCollapseEls.forEach((el) => {
-            el.off(".BaseAnimatedHeader");
-        });
-        this.el.off(".BaseAnimatedHeader");
+            "o_transitioning");
+        $(this.navbarOffcanvases).off(".BaseAnimatedHeader");
+        $(this.navbarCollapses).off('.BaseAnimatedHeader');
+        $(this.el).off('.BaseAnimatedHeader');
         this._super(...arguments);
     },
 
@@ -111,7 +99,7 @@ const BaseAnimatedHeader = animations.Animation.extend({
      * @private
      */
     _adaptFixedHeaderPosition() {
-        compensateScrollbar(this.el, this.fixedHeader, false, "right");
+        compensateScrollbar(this.el,this.fixedHeader, false, 'right');
     },
     /**
      * @private
@@ -202,7 +190,7 @@ const BaseAnimatedHeader = animations.Animation.extend({
         if (this.isOverlayHeader) {
             return;
         }
-        this.mainEl.style.paddingTop = this.fixedHeader ? headerHeight : "";
+        this.main.style.paddingTop = this.fixedHeader ? headerHeight : '';
     },
     /**
      * Checks if the size of the header will decrease by adding the
@@ -261,14 +249,14 @@ const BaseAnimatedHeader = animations.Animation.extend({
             this.scrollHeightTooShort = headerIsScrolled && this._scrollHeightTooShort();
             if (!this.scrollHeightTooShort) {
                 this.el.classList.toggle('o_header_is_scrolled', headerIsScrolled);
-                this.el.dispatchEvent(new CustomEvent("odoo-transitionstart.BaseAnimatedHeader", { bubbles: true }));
+                $(this.el).trigger('odoo-transitionstart');
                 this.headerIsScrolled = headerIsScrolled;
             }
         }
 
         if (this.closeOpenedMenus) {
             // Hide only the open dropdowns.
-            this.el.querySelectorAll(".dropdown-toggle.show").forEach((dropdownToggleEl) => {
+            this.el.querySelectorAll(".dropdown-toggle.show").forEach(dropdownToggleEl => {
                 Dropdown.getOrCreateInstance(dropdownToggleEl).hide();
             });
         }
@@ -345,7 +333,8 @@ publicWidget.registry.StandardAffixedHeader = BaseAnimatedHeader.extend({
         const showUpdate = (this.fixedHeaderShow !== reachPosScrolled);
 
         if (fixedUpdate || showUpdate) {
-            this.el.style.transform = reachPosScrolled
+            this.el.style.transform = 
+                reachPosScrolled
                 ? `translate(0, -${this.topGap}px)`
                 : mainPosScrolled
                 ? 'translate(0, -100%)'
@@ -421,7 +410,7 @@ publicWidget.registry.FixedHeader = BaseAnimatedHeader.extend({
         } else {
             this._toggleFixedHeader(false);
             void this.el.offsetWidth; // Force a paint refresh
-            this.el.style.transform = "";
+            this.el.style.transform = '';
         }
 
         if (this.hiddenOnScrollEl) {
@@ -529,8 +518,7 @@ const BaseDisappearingHeader = publicWidget.registry.FixedHeader.extend({
      * @private
      */
     _hideHeader: function () {
-        // TODO: VISP remove when the widget get converted
-        this.el.dispatchEvent(new CustomEvent("odoo-transitionstart.BaseAnimatedHeader", { bubbles: true }));
+        $(this.el).trigger('odoo-transitionstart');
     },
     /**
      * @override
@@ -542,8 +530,7 @@ const BaseDisappearingHeader = publicWidget.registry.FixedHeader.extend({
      * @private
      */
     _showHeader: function () {
-        // TODO: VISP remove when the widget get converted
-        this.el.dispatchEvent(new CustomEvent("odoo-transitionstart.BaseAnimatedHeader", { bubbles: true }));
+        $(this.el).trigger('odoo-transitionstart');
     },
 
     //--------------------------------------------------------------------------
@@ -602,7 +589,7 @@ publicWidget.registry.DisappearingHeader = BaseDisappearingHeader.extend({
      */
     _hideHeader: function () {
         this._super(...arguments);
-        this.el.style.transform = "translate(0, -100%)";
+        this.el.style.transform = 'translate(0, -100%)';
     },
     /**
      * @override
@@ -629,8 +616,7 @@ publicWidget.registry.FadeOutHeader = BaseDisappearingHeader.extend({
      */
     _hideHeader: function () {
         this._super(...arguments);
-        // TODO: To discuss with MSH SIR
-        this.el.classList.replace("show", "hide");
+        $(this.el).stop(false, true).fadeOut();
     },
     /**
      * @override
@@ -638,8 +624,7 @@ publicWidget.registry.FadeOutHeader = BaseDisappearingHeader.extend({
     _showHeader: function () {
         this._super(...arguments);
         this.el.style.transform = this.atTop ? "" : `translate(0, -${this.topGap}px)`;
-        // TODO: To discuss with MSH SIR
-        this.el.classList.replace("hide", "show");
+        $(this.el).stop(false, true).fadeIn();
     },
 });
 
@@ -686,16 +671,14 @@ publicWidget.registry.hoverableDropdown = animations.Animation.extend({
      * @private
      */
     _dropdownHover: function () {
-        this.dropdownMenus.forEach((menuEl) => {
-            menuEl.setAttribute("data-bs-popper", "none");
-            if (uiUtils.getSize() >= SIZES.LG) {
-                menuEl.style.marginTop = "0";
-                menuEl.style.top = "unset";
-            } else {
-                menuEl.style.marginTop = "";
-                menuEl.style.top = "";
-            }
-        });
+        this.dropdownMenus.setAttribute("data-bs-popper", "none");
+        if (uiUtils.getSize() >= SIZES.LG) {
+            this.dropdownMenus.style.marginTop = "0";
+            this.dropdownMenus.style.top = "unset";
+        } else {
+            this.dropdownMenus.style.marginTop = "";
+            this.dropdownMenus.style.top = "";
+        }
     },
     /**
      * Hides all opened dropdowns.
@@ -703,7 +686,7 @@ publicWidget.registry.hoverableDropdown = animations.Animation.extend({
      * @private
      */
     _hideDropdowns() {
-        for (const toggleEl of this.el.querySelectorAll(".dropdown-toggle.show")) {
+        for (const toggleEl of this.el.querySelectorAll('.dropdown-toggle.show')) {
             Dropdown.getOrCreateInstance(toggleEl).hide();
         }
     },
