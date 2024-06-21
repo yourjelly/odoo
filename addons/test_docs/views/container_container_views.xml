@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="container_container_view_tree" model="ir.ui.view">
+        <field name="name">container.container.view.tree</field>
+        <field name="model">container.container</field>
+        <field name="arch" type="xml">
+            <tree string="Documents">
+                <field name="name"/>
+                <field name="access"/>
+                <field name="document_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="container_container_view_form" model="ir.ui.view">
+        <field name="name">container.container.view.form</field>
+        <field name="model">container.container</field>
+        <field name="arch" type="xml">
+            <form string="Document" duplicate="0">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="access"/>
+                        <field name="document_id"
+                            widget="many2one"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="container_container_action" model="ir.actions.act_window">
+        <field name="name">Documents</field>
+        <field name="res_model">container.container</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

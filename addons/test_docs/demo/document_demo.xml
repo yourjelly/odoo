@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="document_1" model="document.document">
+        <field name="name">Test UUID</field>
+        <field name="access">uuid</field>
+    </record>
+
+    <record id="document_2" model="document.document">
+        <field name="name">Test internal</field>
+        <field name="access">internal</field>
+    </record>
+
+</odoo>

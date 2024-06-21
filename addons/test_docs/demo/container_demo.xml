@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="container_1" model="container.container">
+        <field name="name">All: Holds UUID</field>
+        <field name="access">all</field>
+        <field name="document_id" ref="document_1"/>
+    </record>
+
+</odoo>

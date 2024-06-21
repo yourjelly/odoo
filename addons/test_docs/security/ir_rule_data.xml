@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_rule_document_document_portal" model="ir.rule">
+        <field name="name">docuemnt.document: portal</field>
+        <field name="model_id" ref="test_docs.model_document_document"/>
+        <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+        <field name="domain_force">[("access", "=", "uuid")]</field>
+    </record>
+    <record id="ir_rule_document_document_user" model="ir.rule">
+        <field name="name">docuemnt.document: user</field>
+        <field name="model_id" ref="test_docs.model_document_document"/>
+        <field name="groups" eval="[Command.link(ref('base.group_user'))]"/>
+        <field name="domain_force">['|', ("access", "=", "uuid"), ("access", "=", "internal")]</field>
+    </record>
+</odoo>

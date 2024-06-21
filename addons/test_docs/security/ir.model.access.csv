@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_container_container_user,access_container_container_user,model_container_container,base.group_user,1,1,1,1
+access_document_document_portal,access_document_document_portal,model_document_document,base.group_portal,1,1,1,1
+access_document_document_user,access_document_document_user,model_document_document,base.group_user,1,1,1,1

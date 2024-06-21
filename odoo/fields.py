@@ -3303,6 +3303,17 @@ class Many2oneReference(Integer):
         return model_ids
 
 
+
+class Many2oneUUID(Many2one):
+    """ Relational field mixed with UUID
+    """
+    type = 'many2one_uuid'
+
+    uuid_field = None
+
+    _uuid_field = property(attrgetter('uuid_field'))
+
+
 class Json(Field):
     """ JSON Field that contain unstructured information in jsonb PostgreSQL column.
     This field is still in beta

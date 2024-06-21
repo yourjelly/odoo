@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+     <menuitem name="Test Docs"
+        id="menu_test_docs"
+        sequence="20"
+        web_icon="contacts,static/description/icon.png"/>
+
+    <menuitem id="document_document_menu"
+        name="Documents"
+        action="document_document_action"
+        parent="menu_test_docs"
+        sequence="1"/>
+
+    <menuitem id="container_container_menu"
+        name="Containers"
+        action="container_container_action"
+        parent="menu_test_docs"
+        sequence="2"/>
+</odoo>
