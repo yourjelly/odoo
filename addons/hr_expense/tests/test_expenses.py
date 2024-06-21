@@ -158,6 +158,7 @@ class TestExpenses(TestExpenseCommon):
         product_c_account_id = self.product_c.property_account_expense_id.id
         company_payment_account_id = self.company_data['company'].account_journal_payment_credit_account_id.id
         # One payment per expense
+        # TODO: 'name' is not False because sync_terms_lines is not recomputed when posting the invoice.
         self.assertRecordValues(expense_sheets.account_move_ids.line_ids.sorted(lambda line: (line.move_id.expense_sheet_id, line)), [
             # own_account expense sheet move
             # Invoice date should be the one set as accounting date in the expense sheet

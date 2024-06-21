@@ -72,6 +72,7 @@ export class PosStore extends Reactive {
             alert,
         }
     ) {
+        debugger;
         this.env = env;
         this.numberBuffer = number_buffer;
         this.barcodeReader = barcode_reader;

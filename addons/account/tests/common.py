@@ -477,62 +477,6 @@ class AccountTestInvoicingCommon(ProductCommon):
         self.assertRecordValues(sort_lines(move.line_ids.sorted()), expected_lines_values)
         self.assertRecordValues(move, [expected_move_values])
 
-    def assert_tax_totals(self, tax_totals, currency, expected_values):
-        main_keys_to_ignore = {'formatted_amount_total', 'formatted_amount_untaxed'}
-        group_keys_to_ignore = {'group_key', 'formatted_tax_group_amount', 'formatted_tax_group_base_amount', 'display_formatted_tax_group_base_amount'}
-        subtotals_keys_to_ignore = {'formatted_amount'}
-        comp_curr_keys = {'tax_group_amount_company_currency', 'tax_group_base_amount_company_currency', 'amount_company_currency'}
-        to_compare = dict(tax_totals)
-
-        for key in main_keys_to_ignore:
-            del to_compare[key]
-
-        # Exclude company currency fields if not checked.
-        need_comp_curr_fields = False
-        for subtotals in expected_values.get('subtotals', []):
-            if any(x in subtotals for x in comp_curr_keys):
-                need_comp_curr_fields = True
-                break
-        if not need_comp_curr_fields:
-            for groups in expected_values.get('groups_by_subtotal').values():
-                if any(x in groups for x in comp_curr_keys):
-                    need_comp_curr_fields = True
-                    break
-        if not need_comp_curr_fields:
-            for key in comp_curr_keys:
-                group_keys_to_ignore.add(key)
-                subtotals_keys_to_ignore.add(key)
-
-        for group_key, groups in to_compare['groups_by_subtotal'].items():
-            expected_groups = expected_values['groups_by_subtotal'].get(group_key)
-            for i, group in enumerate(groups):
-                for key in group_keys_to_ignore:
-                    group.pop(key, None)
-
-                # Fix monetary field to avoid 40.8 != 40.8000000004
-                expected_group = i < len(expected_groups) and expected_groups[i]
-                if expected_group:
-                    for monetary_field in ('tax_group_amount', 'tax_group_base_amount'):
-                        if (
-                            expected_group
-                            and monetary_field in expected_group
-                            and currency.compare_amounts(
-                                expected_group[monetary_field],
-                                group[monetary_field],
-                            ) == 0
-                        ):
-                            expected_group[monetary_field] = group[monetary_field]
-
-        for key in subtotals_keys_to_ignore:
-            for subtotal in to_compare['subtotals']:
-                subtotal.pop(key, None)
-
-        self.assertEqual(to_compare, expected_values)
-
-    def assert_document_tax_totals(self, document, expected_values):
-        document.invalidate_model(fnames=['tax_totals'])
-        self.assert_tax_totals(document.tax_totals, document.currency_id, expected_values)
-
     def assert_invoice_outstanding_to_reconcile_widget(self, invoice, expected_amounts):
         """ Check the outstanding widget before the reconciliation.
         :param invoice:             An invoice.
@@ -720,6 +664,10 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         cls.number = 0
         cls.maxDiff = None
 
+    def setUp(self):
+        super().setUp()
+        self.js_tests = []
+
     def new_currency(self, rounding):
         self.number += 1
         return self.env.company.currency_id.copy({
@@ -763,214 +711,398 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
             'amount': amount,
         })
 
-    def _prepare_taxes_computation_test(self, taxes, price_unit, expected_values, evaluation_context_kwargs=None, compute_kwargs=None):
-        """ Prepare the values to test a taxes computation.
-
-        :param taxes:                       A recordset of account.tax.
-        :param price_unit:                  The price unit on which apply the computation of taxes.
-        :param expected_values:             The expected result of '_eval_taxes_computation'.
-        :param evaluation_context_kwargs:   Some extra values about the computation:
-            * quantity:                 1 by default.
-            * product:                  An optional product record if you are using taxes that depend on the product.
-            * rounding_method:          The taxes rounding method that is 'round_per_line' by default.
-            * excluded_special_modes:   By default, when using the 'round_globally' method, both special modes are tested as well
-                                        ('total_excluded' & 'total_included') to ensure the computations are symmetrical.
-                                        The taxes computation is called first with 'special_mode=False'.
-                                        Then, we call it again with "special_mode='total_excluded'" using the 'total_excluded' found during
-                                        the previous evaluation as price_unit.
-                                        Then, we call it again but this time using 'total_included'.
-                                        The all 3 computations should give exactly the same expected results. In rare cases, you would want
-                                        to use a configuration that is not symmetrical. In that case, 'excluded_special_modes' could be
-                                        used to excluded 'total_excluded', 'total_included' or both.
-        :param compute_kwargs:  Extra parameters to be passed to the '_prepare_taxes_computation' method.
-        :return: A dictionary representing a test that will be used py-side & js-side to assert the taxes computation.
-        """
-        evaluation_context_kwargs = evaluation_context_kwargs or {}
-        quantity = evaluation_context_kwargs.pop('quantity', 1)
-        product = evaluation_context_kwargs.pop('product', None)
-        compute_kwargs = compute_kwargs or {}
-        is_round_globally = evaluation_context_kwargs.get('rounding_method') == 'round_globally'
-        excluded_special_modes = evaluation_context_kwargs.pop('excluded_special_modes', [])
-
-        taxes_data = taxes._convert_to_dict_for_taxes_computation()
-        product_values = taxes._eval_taxes_computation_turn_to_product_values(taxes_data, product=product)
+    def init_document(self, lines, currency=None, rate=None):
         return {
-            'expected_values': expected_values,
-            'params': {
-                'test': 'taxes_computation',
-                'taxes_data': taxes_data,
-                'price_unit': price_unit,
-                'quantity': quantity,
-                'product_values': product_values,
-                'evaluation_context_kwargs': evaluation_context_kwargs,
-                'compute_kwargs': compute_kwargs,
-                'is_round_globally': is_round_globally,
-                'excluded_special_modes': excluded_special_modes,
-            },
+            'currency_id': currency or self.env.company.currency_id,
+            'rate': rate if rate is not None else 1.0,
+            'line_ids': lines,
         }
 
-    def _prepare_adapt_price_unit_to_another_taxes_test(self, price_unit, original_taxes, new_taxes, expected_price_unit, product=None):
-        original_taxes_data = original_taxes._convert_to_dict_for_taxes_computation()
-        new_taxes_data = new_taxes._convert_to_dict_for_taxes_computation()
-        product_values = new_taxes._eval_taxes_computation_turn_to_product_values(
-            original_taxes_data + new_taxes_data,
-            product=product,
-        )
-        return {
-            'expected_price_unit': expected_price_unit,
-            'params': {
-                'test': 'adapt_price_unit_to_another_taxes',
-                'original_taxes_data': original_taxes_data,
-                'new_taxes_data': new_taxes_data,
-                'price_unit': price_unit,
-                'product_values': product_values,
-            },
-        }
-
-    def _add_test_py_results(self, test):
+    def populate_document(self, document):
         AccountTax = self.env['account.tax']
-        params = test['params']
-        if params['test'] == 'taxes_computation':
-            evaluation_context = AccountTax._eval_taxes_computation_prepare_context(
-                params['price_unit'],
-                params['quantity'],
-                params['product_values'],
-                **params['evaluation_context_kwargs'],
+        base_lines = []
+        for i, line in enumerate(document['line_ids']):
+            base_line = AccountTax._prepare_base_line_for_taxes_computation(
+                None,
+                id=i,
+                currency_id=line['currency_id'] if 'currency_id' in line else document['currency_id'],
+                quantity=1.0,
+                rate=line['rate'] if 'rate' in line else document['rate'],
+                **line,
             )
-            taxes_computation = AccountTax._prepare_taxes_computation(params['taxes_data'], **params['compute_kwargs'])
-            test['py_results'] = {
-                'results': AccountTax._eval_taxes_computation(taxes_computation, evaluation_context),
-            }
+            AccountTax._add_base_line_tax_details(base_line, self.env.company)
+            base_lines.append(base_line)
+        return {
+            **document,
+            'line_ids': base_lines,
+        }
 
-            if params['is_round_globally']:
-                taxes_computation = AccountTax._prepare_taxes_computation(
-                    params['taxes_data'],
-                    **params['compute_kwargs'],
-                    special_mode='total_excluded',
-                )
-                evaluation_context = AccountTax._eval_taxes_computation_prepare_context(
-                    test['py_results']['results']['total_excluded'] / params['quantity'],
-                    params['quantity'],
-                    params['product_values'],
-                    **params['evaluation_context_kwargs'],
-                )
-                test['py_results']['total_excluded_results'] = AccountTax._eval_taxes_computation(taxes_computation, evaluation_context)
-                taxes_computation = AccountTax._prepare_taxes_computation(
-                    params['taxes_data'],
-                    **params['compute_kwargs'],
-                    special_mode='total_included',
-                )
-                evaluation_context = AccountTax._eval_taxes_computation_prepare_context(
-                    test['py_results']['results']['total_included'] / params['quantity'],
-                    params['quantity'],
-                    params['product_values'],
-                    **params['evaluation_context_kwargs'],
-                )
-                test['py_results']['total_included_results'] = AccountTax._eval_taxes_computation(taxes_computation, evaluation_context)
-        elif params['test'] == 'adapt_price_unit_to_another_taxes':
-            test['py_results'] = self.env['account.tax']._adapt_price_unit_to_another_taxes(
-                params['price_unit'],
-                params['product_values'],
-                params['original_taxes_data'],
-                params['new_taxes_data'],
-            )
-        else:
-            assert False, f"Unknown tax test method: {params['test']}"
+    def _jsonify_currency(self, currency):
+        if not currency:
+            return None
+        return {
+            'id': currency.id,
+            'rounding': currency.rounding,
+        }
 
-    def _add_tests_py_results(self, tests):
-        for test in tests:
-            self._add_test_py_results(test)
+    def _jsonify_product(self, product, taxes):
+        return taxes._eval_taxes_computation_turn_to_product_values(product=product)
 
-    def _add_tests_js_results(self, tests):
+    def _jsonify_tax(self, tax):
+        return {
+            'id': tax.id,
+            'name': tax.name,
+            'amount_type': tax.amount_type,
+            'sequence': tax.sequence,
+            'amount': tax.amount,
+            'price_include': tax.price_include,
+            'include_base_amount': tax.include_base_amount,
+            'is_base_affected': tax.is_base_affected,
+            'total_tax_factor': tax.total_tax_factor,
+            'children_tax_ids': [self._jsonify_tax(child) for child in tax.children_tax_ids],
+        }
+
+    def _jsonify_partner(self, partner):
+        if not partner:
+            return None
+        return {
+            'id': partner.id,
+        }
+
+    def _jsonify_base_line(self, base_line):
+        return {
+            **base_line,
+            'product_id': self._jsonify_product(base_line['product_id'], base_line['tax_ids']),
+            'tax_ids': [self._jsonify_tax(tax) for tax in base_line['tax_ids']],
+            'currency_id': self._jsonify_currency(base_line['currency_id']),
+            'partner_id': self._jsonify_partner(base_line['partner_id']),
+        }
+
+    def _jsonify_document(self, document):
+        return {
+            **document,
+            'currency_id': self._jsonify_currency(document['currency_id']),
+            'line_ids': [self._jsonify_base_line(base_line) for base_line in document['line_ids']],
+        }
+
+    def convert_document_to_invoice(self, document, cash_rounding=None):
+        invoice_date = '2020-01-01'
+        usd = self.setup_other_currency('EUR', rates=[(invoice_date, document['rate'])])
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'invoice_date': invoice_date,
+            'currency_id': document['currency_id'].id,
+            'invoice_cash_rounding_id': cash_rounding and cash_rounding.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': base_line['product_id'].id,
+                    'price_unit': base_line['price_unit'],
+                    'discount': base_line['discount'],
+                    'quantity': base_line['quantity'],
+                    'tax_ids': [Command.set(base_line['tax_ids'].ids)],
+                })
+                for base_line in document['line_ids']
+            ],
+        })
+        usd.rate_ids.unlink()
+        return invoice
+
+    @contextmanager
+    def with_tax_calculation_rounding_method(self, rounding_method):
+        self.env.company.tax_calculation_rounding_method = rounding_method
+        yield
+
+    def _create_assert_test(
+        self,
+        expected_values,
+        py_function,
+        js_function,
+        assert_function,
+        *args,
+        extra_function=None,
+    ):
+        if py_function:
+            py_results = py_function(*args)
+            if extra_function:
+                extra_function(py_results)
+            assert_function(py_results, expected_values)
+        if js_function:
+            js_test = js_function(*args)
+            if extra_function:
+                extra_function(js_test)
+            self.js_tests.append((js_test, expected_values, assert_function))
+
+    def _run_js_tests(self):
+        if not self.js_tests:
+            return
+
         self.env['ir.config_parameter'].set_param(
             'account.tests_shared_js_python',
-            json.dumps([test['params'] for test in tests]),
+            json.dumps([test for test, _expected_values, _assert_function in self.js_tests]),
         )
 
         self.start_tour('/account/init_tests_shared_js_python', 'tests_shared_js_python', login=self.env.user.login)
         results = json.loads(self.env['ir.config_parameter'].get_param('account.tests_shared_js_python', '[]'))
-        self.assertEqual(len(results), len(tests))
 
-        for test, result in zip(tests, results):
-            test['js_results'] = result
+        self.assertEqual(len(results), len(self.js_tests))
+        index = 1
+        for (js_test, expected_values, assert_function), results in zip(self.js_tests, results):
+            js_test.update(results)
+            with self.subTest(test=js_test['test'], index=index):
+                assert_function(js_test, expected_values)
+            index += 1
 
-    def _assert_sub_test_taxes_computation(self, test, results):
+    # -------------------------------------------------------------------------
+    # taxes_computation
+    # -------------------------------------------------------------------------
 
-        def compare_taxes_computation_values(results, expected_values, rounding):
+    def _assert_sub_test_taxes_computation(self, results, expected_values):
+
+        def compare_taxes_computation_values(sub_results, rounding):
             self.assertEqual(
-                float_round(results['total_included'], precision_rounding=rounding),
+                float_round(sub_results['total_included'], precision_rounding=rounding),
                 float_round(expected_values['total_included'], precision_rounding=rounding),
             )
             self.assertEqual(
-                float_round(results['total_excluded'], precision_rounding=rounding),
+                float_round(sub_results['total_excluded'], precision_rounding=rounding),
                 float_round(expected_values['total_excluded'], precision_rounding=rounding),
             )
-            self.assertEqual(len(results['taxes_data']), len(expected_values['taxes_data']))
-            for tax_data, (expected_base, expected_tax) in zip(results['taxes_data'], expected_values['taxes_data']):
+            self.assertEqual(len(sub_results['taxes_data']), len(expected_values['taxes_data']))
+            for tax_data, (expected_base, expected_tax) in zip(sub_results['taxes_data'], expected_values['taxes_data']):
                 self.assertEqual(
-                    float_round(tax_data['base'], precision_rounding=rounding),
+                    float_round(tax_data['base_amount'], precision_rounding=rounding),
                     float_round(expected_base, precision_rounding=rounding),
                 )
                 self.assertEqual(
-                    float_round(tax_data['tax_amount_factorized'], precision_rounding=rounding),
+                    float_round(tax_data['tax_amount'], precision_rounding=rounding),
                     float_round(expected_tax, precision_rounding=rounding),
                 )
 
-        params = test['params']
-        is_round_globally = params['is_round_globally']
-        excluded_special_modes = params['excluded_special_modes']
+        is_round_globally = results['rounding_method'] == 'round_globally'
+        excluded_special_modes = results['excluded_special_modes'] or []
         rounding = 0.000001 if is_round_globally else 0.01
-        compare_taxes_computation_values(results['results'], test['expected_values'], rounding)
+        compare_taxes_computation_values(results['results'], rounding)
 
         # Check the special modes in case of round_globally.
         if is_round_globally:
             # special_mode == 'total_excluded'.
             if 'total_excluded' not in excluded_special_modes:
-                compare_taxes_computation_values(results['total_excluded_results'], test['expected_values'], rounding)
-                delta = sum(x['tax_amount_factorized'] for x in results['total_excluded_results']['taxes_data'] if x['_original_price_include'])
+                compare_taxes_computation_values(results['total_excluded_results'], rounding)
+                delta = sum(
+                    x['tax_amount']
+                    for x in results['total_excluded_results']['taxes_data']
+                    if x['tax']['price_include']
+                )
 
                 self.assertEqual(
                     float_round(
-                        (results['total_excluded_results']['total_excluded'] + delta) / params['quantity'],
+                        (results['total_excluded_results']['total_excluded'] + delta) / results['quantity'],
                         precision_rounding=rounding,
                     ),
-                    float_round(params['price_unit'], precision_rounding=rounding),
+                    float_round(results['price_unit'], precision_rounding=rounding),
                 )
 
             # special_mode == 'total_included'.
             if 'total_included' not in excluded_special_modes:
-                compare_taxes_computation_values(results['total_included_results'], test['expected_values'], rounding)
-                delta = sum(x['tax_amount_factorized'] for x in results['total_included_results']['taxes_data'] if not x['_original_price_include'])
+                compare_taxes_computation_values(results['total_included_results'], rounding)
+                delta = sum(
+                    x['tax_amount']
+                    for x in results['total_included_results']['taxes_data']
+                    if not x['tax']['price_include']
+                )
 
                 self.assertEqual(
                     float_round(
-                        (results['total_included_results']['total_included'] - delta) / params['quantity'],
+                        (results['total_included_results']['total_included'] - delta) / results['quantity'],
                         precision_rounding=rounding,
                     ),
-                    float_round(params['price_unit'], precision_rounding=rounding),
+                    float_round(results['price_unit'], precision_rounding=rounding),
                 )
 
-    def _assert_sub_test(self, test, results):
-        params = test['params']
-        if params['test'] == 'taxes_computation':
-            self._assert_sub_test_taxes_computation(test, results)
-        elif params['test'] == 'adapt_price_unit_to_another_taxes':
-            self.assertEqual(results, test['expected_price_unit'])
+    def _create_py_sub_test_taxes_computation(self, taxes, price_unit, quantity, product, precision_rounding, rounding_method):
+        kwargs = {
+            'product': product,
+            'precision_rounding': precision_rounding,
+            'rounding_method': rounding_method,
+        }
+        results = {'results': taxes._evaluate_taxes_computation(price_unit, quantity, **kwargs)}
+        if rounding_method == 'round_globally':
+            results['total_excluded_results'] = taxes._evaluate_taxes_computation(
+                price_unit=results['results']['total_excluded'] / quantity,
+                quantity=quantity,
+                special_mode='total_excluded',
+                **kwargs,
+            )
+            results['total_included_results'] = taxes._evaluate_taxes_computation(
+                price_unit=results['results']['total_included'] / quantity,
+                quantity=quantity,
+                special_mode='total_included',
+                **kwargs,
+            )
+        return results
 
-    def _assert_test(self, test, results_keys):
-        for results_key in results_keys:
-            with self.subTest(test=test['params']['test'], results_key=results_key):
-                results = test[results_key]
-                self._assert_sub_test(test, results)
+    def _create_js_sub_test_taxes_computation(self, taxes, price_unit, quantity, product, precision_rounding, rounding_method):
+        return {
+            'test': 'taxes_computation',
+            'taxes': [self._jsonify_tax(tax) for tax in taxes],
+            'price_unit': price_unit,
+            'quantity': quantity,
+            'product': self._jsonify_product(product, taxes),
+            'precision_rounding': precision_rounding,
+            'rounding_method': rounding_method,
+        }
 
-    def _assert_tests(self, tests, mode='py_js'):
-        results_keys = []
-        if mode in ('py_js', 'py'):
-            self._add_tests_py_results(tests)
-            results_keys.append('py_results')
-        if mode in ('py_js', 'js'):
-            self._add_tests_js_results(tests)
-            results_keys.append('js_results')
-        for i, test in enumerate(tests, start=1):
-            with self.subTest(test_index=i):
-                self._assert_test(test, results_keys)
+    def assert_taxes_computation(
+        self,
+        taxes,
+        price_unit,
+        expected_values,
+        quantity=1,
+        product=None,
+        precision_rounding=0.01,
+        rounding_method='round_per_line',
+        excluded_special_modes=None,
+    ):
+        def extra_function(results):
+            results['excluded_special_modes'] = excluded_special_modes
+            results['rounding_method'] = rounding_method
+            results['price_unit'] = price_unit
+            results['quantity'] = quantity
+
+        self._create_assert_test(
+            expected_values,
+            self._create_py_sub_test_taxes_computation,
+            None,
+            # self._create_js_sub_test_taxes_computation,
+            self._assert_sub_test_taxes_computation,
+            taxes,
+            price_unit,
+            quantity,
+            product,
+            precision_rounding,
+            rounding_method,
+            extra_function=extra_function,
+        )
+
+    # -------------------------------------------------------------------------
+    # adapt_price_unit_to_another_taxes
+    # -------------------------------------------------------------------------
+
+    def _assert_sub_test_adapt_price_unit_to_another_taxes(self, results, expected_price_unit):
+        self.assertEqual(results['price_unit'], expected_price_unit)
+
+    def _create_py_sub_test_adapt_price_unit_to_another_taxes(self, price_unit, original_taxes, new_taxes, product):
+        return {'price_unit': self.env['account.tax']._adapt_price_unit_to_another_taxes(price_unit, product, original_taxes, new_taxes)}
+
+    def _create_js_sub_test_adapt_price_unit_to_another_taxes(self, price_unit, original_taxes, new_taxes, product):
+        return {
+            'test': 'adapt_price_unit_to_another_taxes',
+            'price_unit': price_unit,
+            'product': self._jsonify_product(product, original_taxes + new_taxes),
+            'original_taxes': [self._jsonify_tax(tax) for tax in original_taxes],
+            'new_taxes': [self._jsonify_tax(tax) for tax in new_taxes],
+        }
+
+    def assert_adapt_price_unit_to_another_taxes(self, price_unit, original_taxes, new_taxes, expected_price_unit, product=None):
+        self._create_assert_test(
+            expected_price_unit,
+            self._create_py_sub_test_adapt_price_unit_to_another_taxes,
+            self._create_js_sub_test_adapt_price_unit_to_another_taxes,
+            self._assert_sub_test_adapt_price_unit_to_another_taxes,
+            price_unit,
+            original_taxes,
+            new_taxes,
+            product,
+        )
+
+    # -------------------------------------------------------------------------
+    # tax_totals_summary
+    # -------------------------------------------------------------------------
+
+    def _assert_sub_test_tax_totals_summary(self, results, expected_values):
+        multi_currency = results['currency_id'] != results['company_currency_id']
+        excluded_fields = set() if multi_currency else {
+            'tax_amount',
+            'base_amount',
+            'display_base_amount',
+            'company_currency_id',
+            'untaxed_amount',
+            'total_amount',
+       }
+        excluded_fields.add('group_name')
+        excluded_fields.add('involved_tax_ids')
+
+        self.assertEqual(
+            {k: len(v) if k == 'subtotals' else v for k, v in results.items() if k not in excluded_fields},
+            {k: len(v) if k == 'subtotals' else v for k, v in expected_values.items()},
+        )
+        for subtotal, expected_subtotal in zip(results['subtotals'], expected_values['subtotals']):
+            self.assertEqual(
+                {k: len(v) if k == 'tax_groups' else v for k, v in subtotal.items() if k not in excluded_fields},
+                {k: len(v) if k == 'tax_groups' else v for k, v in expected_subtotal.items()},
+            )
+            for tax_group, expected_tax_group in zip(subtotal['tax_groups'], expected_subtotal['tax_groups']):
+                self.assertDictEqual(
+                    {k: v for k, v in tax_group.items() if k not in excluded_fields},
+                    expected_tax_group,
+                )
+
+    def _create_py_sub_test_tax_totals_summary(self, document):
+        return self.env['account.tax']._get_tax_totals_summary(document['line_ids'], document['currency_id'], self.env.company)
+
+    def _create_js_sub_test_tax_totals_summary(self, document):
+        return {
+            'test': 'tax_totals_summary',
+            'document': self._jsonify_document(document),
+            'rounding_method': self.env.company.tax_calculation_rounding_method,
+        }
+
+    def assert_tax_totals_summary(self, document, expected_values):
+        self._create_assert_test(
+            expected_values,
+            self._create_py_sub_test_tax_totals_summary,
+            None,
+            # self._create_js_sub_test_tax_totals_summary,
+            self._assert_sub_test_tax_totals_summary,
+            document,
+        )
+
+    # -------------------------------------------------------------------------
+    # tax_totals_summary, tax_amount_currency only
+    # -------------------------------------------------------------------------
+
+    def _assert_sub_test_tax_total(self, tax_amount, expected_tax_amount):
+        self.assertAlmostEqual(tax_amount, expected_tax_amount)
+
+    def _create_py_sub_test_tax_total(self, document):
+        tax_totals = self.env['account.tax']._get_tax_totals_summary(document['line_ids'], document['currency_id'], self.env.company)
+        return tax_totals['tax_amount_currency']
+
+    def _create_js_sub_test_tax_total(self, document):
+        return {
+            'test': 'tax_total',
+            'document': self._jsonify_document(document),
+            'rounding_method': self.env.company.tax_calculation_rounding_method,
+        }
+
+    def assert_tax_total(self, document, expected_tax_amount):
+        self._create_assert_test(
+            expected_tax_amount,
+            self._create_py_sub_test_tax_total,
+            None,
+            # self._create_js_sub_test_tax_total,
+            self._assert_sub_test_tax_total,
+            document,
+        )
+
+    # -------------------------------------------------------------------------
+    # invoice tax_totals_summary
+    # -------------------------------------------------------------------------
+
+    def assert_invoice_tax_totals_summary(self, invoice, expected_values):
+        self._assert_sub_test_tax_totals_summary(invoice.tax_totals, expected_values)
+        self.assertRecordValues(invoice, [{
+            'amount_untaxed': expected_values['base_amount_currency'],
+            'amount_tax': expected_values['tax_amount_currency'],
+            'amount_total': expected_values['total_amount_currency'],
+        }])

@@ -101,7 +101,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'date_maturity': False,
         }
         cls.term_line_vals_1 = {
-            'name': '',
+            'name': cls.invoice.name,
             'product_id': False,
             'account_id': cls.company_data['default_account_receivable'].id,
             'partner_id': cls.partner_a.id,
@@ -598,7 +598,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': 'installment #1',
+                'name': f'{self.invoice.name} installment #1',
                 'account_id': self.partner_b.property_account_receivable_id.id,
                 'partner_id': self.partner_b.id,
                 'amount_currency': 423.0,
@@ -606,7 +606,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': 'installment #2',
+                'name': f'{self.invoice.name} installment #2',
                 'account_id': self.partner_b.property_account_receivable_id.id,
                 'partner_id': self.partner_b.id,
                 'amount_currency': 987.0,
@@ -654,7 +654,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': 'installment #1',
+                'name': f'{self.invoice.name} installment #1',
                 'account_id': self.partner_b.property_account_receivable_id.id,
                 'partner_id': self.partner_b.id,
                 'amount_currency': 414.0,
@@ -662,7 +662,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': 'installment #2',
+                'name': f'{self.invoice.name} installment #2',
                 'account_id': self.partner_b.property_account_receivable_id.id,
                 'partner_id': self.partner_b.id,
                 'amount_currency': 966.0,
@@ -1517,6 +1517,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
+                'name': biggest_tax_invoice.name,
                 'amount_currency': 1409.95,
                 'debit': 1409.95,
                 'tax_repartition_line_id': None,
@@ -1601,6 +1602,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
+                'name': self.invoice.name,
                 'currency_id': self.other_currency.id,
                 'amount_currency': 1410.0,
                 'debit': 470.0,
@@ -1651,6 +1653,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
+                'name': self.invoice.name,
                 'currency_id': self.other_currency.id,
                 'amount_currency': 260.006,
                 'debit': 86.67,
@@ -1689,6 +1692,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             self.tax_line_vals_2,
             {
                 **self.term_line_vals_1,
+                'name': self.invoice.name,
                 'amount_currency': 260.01,
                 'debit': 260.01,
                 'date_maturity': fields.Date.from_string('2016-01-01'),
@@ -1834,7 +1838,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': '',
+                'name': reverse_move.name,
                 'amount_currency': -1410.0,
                 'debit': 0.0,
                 'credit': 1410.0,
@@ -1896,7 +1900,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': '',
+                'name': new_move.name,
                 'amount_currency': 1410.0,
                 'debit': 1410.0,
                 'credit': 0.0,
@@ -1964,7 +1968,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': '',
+                'name': reverse_move.name,
                 'amount_currency': -1410.0,
                 'currency_id': self.other_currency.id,
                 'debit': 0.0,
@@ -2021,7 +2025,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': '',
+                'name': new_move.name,
                 'amount_currency': 1410.0,
                 'currency_id': self.other_currency.id,
                 'debit': 705.0,
@@ -2107,6 +2111,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
+                'name': move.name,
                 'currency_id': self.other_currency.id,
                 'amount_currency': 1410.0,
                 'debit': 705.0,
@@ -2203,6 +2208,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
+                'name': move.name,
                 'currency_id': self.other_currency.id,
                 'amount_currency': 1410.0,
                 'debit': 705.0,
@@ -2490,6 +2496,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
+                'name': move.name,
                 'currency_id': self.other_currency.id,
                 'amount_currency': -1410.0,
                 'credit': 705.0,
@@ -2563,6 +2570,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
+                'name': move.name,
                 'currency_id': self.other_currency.id,
                 'amount_currency': -1410.0,
                 'credit': 705.0,
@@ -2610,6 +2618,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
+                'name': move.name,
                 'currency_id': self.other_currency.id,
                 'amount_currency': -1410.0,
                 'credit': 705.0,
@@ -4024,22 +4033,22 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         payment_term_lines = invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term')
 
         self.assertRecordValues(payment_term_lines, [
-            {'name': 'installment #1'},
-            {'name': 'installment #2'},
+            {'name': f'{invoice.name} installment #1'},
+            {'name': f'{invoice.name} installment #2'},
         ])
 
         move_form.save()
 
         self.assertRecordValues(payment_term_lines, [
-            {'name': 'installment #1'},
-            {'name': 'installment #2'},
+            {'name': f'{invoice.name} installment #1'},
+            {'name': f'{invoice.name} installment #2'},
         ])
 
         invoice = move_form.save()
 
         self.assertRecordValues(payment_term_lines, [
-            {'name': 'installment #1'},
-            {'name': 'installment #2'},
+            {'name': f'{invoice.name} installment #1'},
+            {'name': f'{invoice.name} installment #2'},
         ])
 
         invoice.action_post()

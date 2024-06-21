@@ -186,7 +186,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
 
     def _apply_invoice_tax_filter(self, base_line, tax_values):
         """ Override to filter out withholding tax """
-        tax_id = self.env['account.tax'].browse(tax_values['id'])
+        tax_id = tax_values['tax']
         res = not tax_id.l10n_sa_is_retention
         # If the move that is being sent is not a down payment invoice, and the sale module is installed
         # we need to make sure the line is neither retention, nor a down payment line
@@ -330,8 +330,8 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
     def _get_invoice_line_vals(self, line, line_id, taxes_vals):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
 
-        def grouping_key_generator(base_line, tax_values):
-            tax = tax_values['tax_repartition_line'].tax_id
+        def grouping_key_generator(base_line, tax_data):
+            tax = tax_data['tax']
             tax_category_vals = self._get_tax_category_list(line.move_id, tax)[0]
             grouping_key = {
                 'tax_category_id': tax_category_vals['id'],

@@ -891,6 +891,7 @@
                         <field name="show_delivery_date" invisible="1"/>
                         <field name="is_being_sent" invisible="1"/>
                         <field name="show_update_fpos" invisible="1"/>
+                        <field name="tax_totals_manual_amounts" force_save="1" invisible="1"/>
 
                         <div class="oe_title">
                             <span class="o_form_label"><field name="move_type" readonly="1" invisible="move_type == 'entry'" nolabel="1"/></span>
@@ -988,7 +989,7 @@
                                     <span class="o_form_label mx-3 oe_edit_only"
                                           invisible="state != 'draft' or invoice_payment_term_id"> or </span>
                                     <field name="invoice_payment_term_id"
-                                           context="{'example_date': invoice_date, 'example_amount': tax_totals['amount_total']}"
+                                           context="{'example_date': invoice_date, 'example_amount': tax_totals['total_amount_currency']}"
                                            placeholder="Payment Terms"
                                            options="{'no_quick_create':True}" readonly="state in ['cancel', 'posted']"/>
                                 </div>
@@ -1105,6 +1106,8 @@
                                         <field name="company_id" column_invisible="True"/>
                                         <field name="company_currency_id" column_invisible="True"/>
                                         <field name="display_type" force_save="1" column_invisible="True"/>
+                                        <field name="tax_details_dirty" force_save="1" column_invisible="True"/>
+                                        <field name="tax_details" force_save="1" column_invisible="True"/>
                                     </tree>
                                     <kanban class="o_kanban_mobile">
                                         <!-- Displayed fields -->
@@ -1150,6 +1153,8 @@
                                         <field name="currency_id"/>
                                         <field name="company_currency_id"/>
                                         <field name="display_type" force_save="1"/>
+                                        <field name="tax_details_dirty" force_save="1"/>
+                                        <field name="tax_details" force_save="1"/>
                                     </kanban>
 
                                     <!-- Form view to cover mobile use -->
@@ -1157,6 +1162,8 @@
                                         <sheet>
                                             <field name="tax_calculation_rounding_method" invisible="1"/>
                                             <field name="display_type" invisible="1"/>
+                                            <field name="tax_details_dirty" force_save="1" invisible="1"/>
+                                            <field name="tax_details" force_save="1" invisible="1"/>
                                             <field name="company_id" invisible="1"/>
                                             <field name="partner_id" invisible="1"/>
                                             <group>
@@ -1306,6 +1313,8 @@
                                         <field name="id" column_invisible="True"/>
                                         <field name="account_internal_group" column_invisible="True"/>
                                         <field name="account_type" column_invisible="True"/>
+                                        <field name="tax_details_dirty" force_save="1" column_invisible="True"/>
+                                        <field name="tax_details" force_save="1" column_invisible="True"/>
                                     </tree>
                                     <!-- Form view to cover mobile use -->
                                     <form>
@@ -1323,6 +1332,8 @@
                                         <field name="balance" invisible="1"/>
                                         <field name="tax_ids" string="Taxes Applied" widget="autosave_many2many_tags" options="{'no_create': True}"/>
                                         <field name="date_maturity" required="0" invisible="context.get('view_no_maturity', False)"/>
+                                        <field name="tax_details_dirty" force_save="1" invisible="1"/>
+                                        <field name="tax_details" force_save="1" invisible="1"/>
                                       </group>
                                     </form>
                                 </field>

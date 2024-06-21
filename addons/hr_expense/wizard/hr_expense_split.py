@@ -55,13 +55,10 @@ class HrExpenseSplit(models.TransientModel):
     @api.depends('total_amount_currency', 'tax_ids')
     def _compute_tax_amount_currency(self):
         for split in self:
-            taxes = split.tax_ids.with_context(force_price_include=True).compute_all(
-                price_unit=split.total_amount_currency,
-                currency=split.currency_id,
-                quantity=1,
-                product=split.product_id
-            )
-            split.tax_amount_currency = taxes['total_included'] - taxes['total_excluded']
+            base_line = split._prepare_base_line_for_taxes_computation()
+            self.env['account.tax']._add_base_line_tax_details(base_line, split.company_id)
+            tax_details = base_line['tax_details']
+            split.tax_amount_currency = tax_details['total_included_currency'] - tax_details['total_excluded_currency']
 
     @api.depends('product_id')
     def _compute_from_product_id(self):
@@ -85,6 +82,18 @@ class HrExpenseSplit(models.TransientModel):
     def _compute_product_has_tax(self):
         for split in self:
             split.product_has_tax = split.product_id and split.product_id.supplier_taxes_id.filtered_domain(self.env['account.tax']._check_company_domain(split.company_id))
+
+    def _prepare_base_line_for_taxes_computation(self):
+        self.ensure_one()
+        return self.env['account.tax']._prepare_base_line_for_taxes_computation(
+            self,
+            product_id=self.product_id,
+            tax_ids=self.tax_ids,
+            price_unit=self.total_amount_currency,
+            quantity=1,
+            currency_id=self.currency_id,
+            special_mode='total_included',
+        )
 
     def _get_values(self):
         self.ensure_one()

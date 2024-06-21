@@ -31,27 +31,49 @@ class AccountMove(models.Model):
             return _("Expense entry created from: %s", self.expense_sheet_id._get_html_link())
         return super()._creation_message()
 
+    def _prepare_product_base_line_for_taxes_computation(self, product_line, reverse_quantity_sign=False):
+        # EXTENDS account
+        values = super()._prepare_product_base_line_for_taxes_computation(product_line, reverse_quantity_sign=reverse_quantity_sign)
+        if self.expense_sheet_id:
+            values['special_mode'] = 'total_included'
+        return values
+
+    def _prepare_epd_base_line_for_taxes_computation(self, grouping_key, amounts):
+        # EXTENDS account
+        values = super()._prepare_epd_base_line_for_taxes_computation(grouping_key, amounts)
+        if self.expense_sheet_id:
+            values['special_mode'] = 'total_included'
+        return values
+
     @api.depends('expense_sheet_id')
-    def _compute_needed_terms(self):
+    def _compute_sync_term_lines(self):
         # EXTENDS account
         # We want to set the account destination based on the 'payment_mode'.
-        super()._compute_needed_terms()
+        super()._compute_sync_term_lines()
         for move in self:
-            if move.expense_sheet_id and move.expense_sheet_id.payment_mode == 'company_account':
-                term_lines = move.line_ids.filtered(lambda l: l.display_type != 'payment_term')
-                move.needed_terms = {
-                    frozendict(
-                        {
-                            "move_id": move.id,
-                            "date_maturity": move.expense_sheet_id.accounting_date or fields.Date.context_today(move.expense_sheet_id),
-                        }
-                    ): {
-                        "balance": -sum(term_lines.mapped("balance")),
-                        "amount_currency": -sum(term_lines.mapped("amount_currency")),
-                        "name": "",
-                        "account_id": move.expense_sheet_id._get_expense_account_destination(),
-                    }
-                }
+            if move.expense_sheet_id.payment_mode == 'company_account':
+                date_maturity = move.expense_sheet_id.accounting_date or fields.Date.context_today(move)
+                account_id = move.expense_sheet_id._get_expense_account_destination()
+                key = frozendict({
+                    'move_id': move.id,
+                    'date_maturity': date_maturity,
+                    'discount_date': False,
+                    'account_id': account_id,
+                    'display_type': 'payment_term',
+                })
+                new_sync_term_lines = {}
+                for grouping_key, amounts in (move.sync_term_lines or {}).items():
+                    new_amounts = new_sync_term_lines.setdefault(key, {
+                        'name': False,
+                        'amount_currency': 0.0,
+                        'balance': 0.0,
+                        'discount_balance': 0.0,
+                        'discount_amount_currency': 0.0,
+                    })
+                    new_amounts['balance'] += amounts['balance']
+                    new_amounts['amount_currency'] += amounts['amount_currency']
+
+                move.sync_term_lines = new_sync_term_lines
 
     def _reverse_moves(self, default_values_list=None, cancel=False):
         # EXTENDS account

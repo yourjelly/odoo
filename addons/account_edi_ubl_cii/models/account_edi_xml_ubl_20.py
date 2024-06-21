@@ -428,8 +428,8 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                 tax_to_discount[tax.amount] += line.amount_currency
         return tax_to_discount
 
-    def _get_tax_grouping_key(self, base_line, tax_values):
-        tax = tax_values['tax_repartition_line'].tax_id
+    def _get_tax_grouping_key(self, base_line, tax_data):
+        tax = tax_data['tax']
         tax_category_vals = self._get_tax_category_list(base_line['record'].move_id, tax)[0]
         grouping_key = {
             'tax_category_id': tax_category_vals['id'],
