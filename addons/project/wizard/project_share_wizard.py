@@ -25,7 +25,7 @@ class ProjectShareWizard(models.TransientModel):
             project = self.env[result['res_model']].browse(result['res_id'])
             collaborator_vals_list = []
             collaborator_ids = []
-            for collaborator in project.collaborator_ids:
+            for collaborator in self.collaborator_ids:
                 collaborator_ids.append(collaborator.partner_id.id)
                 collaborator_vals_list.append({
                     'partner_id': collaborator.partner_id.id,
@@ -79,7 +79,7 @@ class ProjectShareWizard(models.TransientModel):
             project = wizard.resource_ref
             project_collaborator_ids_to_remove = [
                 c.id
-                for c in project.collaborator_ids
+                for c in self.collaborator_ids
                 if c.partner_id not in wizard.collaborator_ids.partner_id
             ]
             project_followers = project.message_partner_ids
