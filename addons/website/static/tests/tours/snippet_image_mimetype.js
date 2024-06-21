@@ -13,7 +13,13 @@ export const mockCanvasToDataURLStep = {
     },
 };
 
-export function uploadImageFromDialog(mimetype, filename, data, targetSelector) {
+export function uploadImageFromDialog(
+    mimetype,
+    filename,
+    data,
+    confirmChoice = true,
+    targetSelector = ".o_we_existing_attachments .o_we_attachment_selected img",
+) {
     return [
         {
             content: "Upload an image",
@@ -29,10 +35,22 @@ export function uploadImageFromDialog(mimetype, filename, data, targetSelector) 
             },
         },
         ...wTourUtils.waitForImageToLoad(targetSelector),
+        ...(confirmChoice ? [{
+            content: "Confirm choice",
+            trigger: '.o_select_media_dialog footer button:contains("Add")',
+            extraTrigger: ".o_we_existing_attachments .o_we_attachment_selected",
+        }] : []),
     ];
 }
 
-const SMALL_PNG = "iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAAAiSURBVAhbYyz0Tv/PAAWMIE7flhkMRT4ZDIz/gQDEAAkAAO19DkSaJvA9AAAAAElFTkSuQmCC";
+export const PNG_THAT_CONVERTS_TO_BIGGER_WEBP = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NgAAIAAAUAAR4f7BQAAAAASUVORK5CYII=";
+
+export function generateTestPng(size) {
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    return canvas.toDataURL("image/png");
+}
 
 const selectImage = {
     content: "Select image",
@@ -136,7 +154,7 @@ function testImageMimetypeIs(targetMimetype, originalMimetype) {
     return [
         {
             content: `Check image mimetype before save is ${targetMimetype}`,
-            trigger: "iframe .s_text_image .o_modified_image_to_save",
+            trigger: "iframe .o_modified_image_to_save",
             run() {
                 const actualMimetype = this.$anchor[0].dataset.mimetype;
                 const expectedMimetype = targetMimetype;
@@ -148,7 +166,7 @@ function testImageMimetypeIs(targetMimetype, originalMimetype) {
         ...wTourUtils.clickOnSave(),
         {
             content: `Check image mimetype after save is ${targetMimetype}`,
-            trigger: `iframe .s_text_image img[data-mimetype-before-conversion="${originalMimetype}"]`,
+            trigger: `iframe img[data-mimetype-before-conversion="${originalMimetype}"]`,
             run() {
                 const actualMimetype = this.$anchor[0].dataset.mimetype;
                 const expectedMimetype = targetMimetype;
@@ -161,6 +179,27 @@ function testImageMimetypeIs(targetMimetype, originalMimetype) {
     ];
 }
 
+function testImageSnippet(imageFormat, originalMimetype, targetMimetype, firstTargetMimetype = targetMimetype) {
+    return [
+        ...setImageFormat(imageFormat),
+        ...testImageMimetypeIs(firstTargetMimetype, originalMimetype),
+
+        ...setOriginalImageFormat(),
+        ...testImageMimetypeIs(originalMimetype, originalMimetype),
+
+        ...setImageFormat(imageFormat),
+
+        ...setImageShape(),
+        ...testImageMimetypeIs("image/svg+xml", originalMimetype),
+
+        ...removeImageShape(targetMimetype),
+        ...testImageMimetypeIs(targetMimetype, originalMimetype),
+
+        ...cropImage(targetMimetype),
+        ...testImageMimetypeIs(targetMimetype, originalMimetype),
+    ];
+}
+
 wTourUtils.registerWebsitePreviewTour("website_image_mimetype", {
     test: true,
     url: "/",
@@ -170,22 +209,7 @@ wTourUtils.registerWebsitePreviewTour("website_image_mimetype", {
         id: "s_text_image",
         name: "Text - Image",
     }),
-    ...setImageFormat("128 image/webp"),
-    ...testImageMimetypeIs("image/webp", "image/jpeg"),
-
-    ...setOriginalImageFormat(),
-    ...testImageMimetypeIs("image/jpeg", "image/jpeg"),
-
-    ...setImageFormat("128 image/webp"),
-
-    ...setImageShape(),
-    ...testImageMimetypeIs("image/svg+xml", "image/jpeg"),
-
-    ...removeImageShape("image/webp"),
-    ...testImageMimetypeIs("image/webp", "image/jpeg"),
-
-    ...cropImage("image/webp"),
-    ...testImageMimetypeIs("image/webp", "image/jpeg"),
+    ...testImageSnippet("128 image/webp", "image/jpeg", "image/webp"),
 ]);
 
 wTourUtils.registerWebsitePreviewTour("website_image_mimetype_no_webp", {
@@ -198,22 +222,7 @@ wTourUtils.registerWebsitePreviewTour("website_image_mimetype_no_webp", {
         id: "s_text_image",
         name: "Text - Image",
     }),
-    ...setImageFormat("128 image/jpeg"),
-    ...testImageMimetypeIs("image/jpeg", "image/jpeg"),
-
-    ...setOriginalImageFormat(),
-    ...testImageMimetypeIs("image/jpeg", "image/jpeg"),
-
-    ...setImageFormat("128 image/jpeg"),
-
-    ...setImageShape(),
-    ...testImageMimetypeIs("image/svg+xml", "image/jpeg"),
-
-    ...removeImageShape("image/jpeg"),
-    ...testImageMimetypeIs("image/jpeg", "image/jpeg"),
-
-    ...cropImage("image/jpeg"),
-    ...testImageMimetypeIs("image/jpeg", "image/jpeg"),
+    ...testImageSnippet("128 image/jpeg", "image/jpeg", "image/jpeg"),
 ]);
 
 wTourUtils.registerWebsitePreviewTour("website_image_mimetype_bigger_output", {
@@ -229,20 +238,58 @@ wTourUtils.registerWebsitePreviewTour("website_image_mimetype_bigger_output", {
         ...selectImage,
         run: "dblclick",
     },
-    ...uploadImageFromDialog("image/png", "o.png", SMALL_PNG, selectImage.trigger),
+    ...uploadImageFromDialog("image/png", "o.png", PNG_THAT_CONVERTS_TO_BIGGER_WEBP, false, selectImage.trigger),
+    ...testImageSnippet("1 image/webp", "image/png", "image/png", "image/webp"),
+]);
 
-    ...setImageFormat("3 image/webp"),
-    ...testImageMimetypeIs("image/webp", "image/png"), // isChanged
+function testImageGallerySnippet(imageData, targetMimetype) {
+    return [
+        wTourUtils.dragNDrop({
+            id: "s_image_gallery",
+            name: "Image Gallery",
+        }),
+        {
+            content: "Open snippet options",
+            trigger: "iframe .s_image_gallery img",
+        },
+        {
+            content: "Click on Images - Add button",
+            trigger: 'we-button[data-add-images="true"]',
+        },
+        ...uploadImageFromDialog(
+            "image/png",
+            "o.png",
+            imageData,
+        ),
+        {
+            content: "Navigate to last carousel image",
+            trigger: 'iframe [data-bs-slide-to="3"]',
+        },
+        ...testImageMimetypeIs(targetMimetype, "image/png"),
+    ];
+}
 
-    ...setOriginalImageFormat("image/png"),
-    ...testImageMimetypeIs("image/png", "image/png"), // !isChanged
+wTourUtils.registerWebsitePreviewTour("website_image_mimetype_image_gallery", {
+    test: true,
+    url: "/",
+    edition: true,
+}, () => [
+    ...testImageGallerySnippet(generateTestPng(1024).split(",")[1], "image/webp"),
+]);
 
-    ...setImageShape(),
-    ...testImageMimetypeIs("image/svg+xml", "image/png"),
+wTourUtils.registerWebsitePreviewTour("website_image_mimetype_image_gallery_no_webp", {
+    test: true,
+    url: "/",
+    edition: true,
+}, () => [
+    mockCanvasToDataURLStep,
+    ...testImageGallerySnippet(generateTestPng(1024).split(",")[1], "image/png"),
+]);
 
-    ...removeImageShape("image/png"),
-    ...testImageMimetypeIs("image/png", "image/png"),
-
-    ...cropImage("image/png"),
-    ...testImageMimetypeIs("image/png", "image/png"),
+wTourUtils.registerWebsitePreviewTour("website_image_mimetype_image_gallery_bigger_output", {
+    test: true,
+    url: "/",
+    edition: true,
+}, () => [
+    ...testImageGallerySnippet(PNG_THAT_CONVERTS_TO_BIGGER_WEBP, "image/png"),
 ]);

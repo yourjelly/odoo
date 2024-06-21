@@ -2992,11 +2992,13 @@ options.registry.CoverProperties = options.Class.extend({
                     "image/webp",
                 ].includes(imgEl.dataset.mimetype)) {
                     // Convert to webp but keep original width.
-                    imgEl.dataset.mimetype = "image/webp";
-                    const base64src = await applyModifications(imgEl, {
-                        mimetype: "image/webp",
-                    });
-                    widgetValue = base64src;
+                    const { dataURL, mimetype } = await applyModifications(
+                        imgEl,
+                        { mimetype: "image/webp" },
+                        true, // TODO: remove in master
+                    );
+                    imgEl.dataset.mimetype = mimetype;
+                    widgetValue = dataURL;
                     this.$image[0].classList.add("o_b64_image_to_save");
                 }
             }

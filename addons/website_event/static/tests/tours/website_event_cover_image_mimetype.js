@@ -2,14 +2,14 @@
 
 import wTourUtils from "@website/js/tours/tour_utils";
 import {
+    generateTestPng,
     mockCanvasToDataURLStep,
-    uploadImageFromDialog
+    uploadImageFromDialog,
+    PNG_THAT_CONVERTS_TO_BIGGER_WEBP,
 } from "@website/../tests/tours/snippet_image_mimetype";
 
-const DUMMY_PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NgAAIAAAUAAR4f7BQAAAAASUVORK5CYII=";
-
 // TODO run tests
-function testPngUploadImplicitConversion(expectedMimetype) {
+function testPngUploadImplicitConversion(testImageData, expectedMimetype) {
     return [
         {
             content: "Click on the first event's cover",
@@ -17,13 +17,14 @@ function testPngUploadImplicitConversion(expectedMimetype) {
         },
         {
             content: "Open add image dialog",
-            trigger: '.snippet-option-CoverProperties we-button[data-bs-original-title="Image"]',
+            trigger: '.snippet-option-CoverProperties we-button[data-background].active',
         },
         ...uploadImageFromDialog(
             "image/png",
             "fake_file.png",
-            DUMMY_PNG,
-            ".o_record_has_cover .o_b64_image_to_save", // TODO find a better way to wait for image to load
+            testImageData,
+            false,
+            undefined,
         ),
         ...wTourUtils.clickOnSave(),
         {
@@ -58,7 +59,7 @@ wTourUtils.registerWebsitePreviewTour("website_event_cover_image_mimetype", {
     edition: true,
     url: "/event",
 }, () => [
-    ...testPngUploadImplicitConversion("image/webp"),
+    ...testPngUploadImplicitConversion(generateTestPng(1024).split(",")[1], "image/webp"),
 ]);
 
 wTourUtils.registerWebsitePreviewTour("website_event_cover_image_mimetype_no_webp", {
@@ -67,5 +68,13 @@ wTourUtils.registerWebsitePreviewTour("website_event_cover_image_mimetype_no_web
     url: "/event",
 }, () => [
     mockCanvasToDataURLStep,
-    ...testPngUploadImplicitConversion("image/png"),
+    ...testPngUploadImplicitConversion(generateTestPng(1024).split(",")[1], "image/png"),
+]);
+
+wTourUtils.registerWebsitePreviewTour("website_event_cover_image_mimetype_bigger_output", {
+    test: true,
+    edition: true,
+    url: "/event",
+}, () => [
+    ...testPngUploadImplicitConversion(PNG_THAT_CONVERTS_TO_BIGGER_WEBP, "image/png"),
 ]);

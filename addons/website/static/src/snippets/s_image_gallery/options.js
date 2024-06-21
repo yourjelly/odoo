@@ -527,11 +527,11 @@ options.registry.GalleryImageList = options.registry.GalleryLayout.extend({
                                     "image/webp",
                                 ].includes(imgEl.dataset.mimetype)) {
                                     // Convert to webp but keep original width.
-                                    imgEl.dataset.mimetype = "image/webp";
                                     applyModifications(imgEl, {
                                         mimetype: "image/webp",
-                                    }).then(src => {
-                                        imgEl.src = src;
+                                    }).then(({ dataURL, mimetype }) => {
+                                        imgEl.dataset.mimetype = mimetype;
+                                        imgEl.src = dataURL;
                                         imgEl.classList.add("o_modified_image_to_save");
                                         resolve();
                                     });

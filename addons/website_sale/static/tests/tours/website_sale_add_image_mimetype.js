@@ -30,13 +30,7 @@ function testWebpUploadImplicitConversion(expectedMimetype) {
             "image/webp",
             "fake_file.webp",
             DUMMY_WEBP,
-            ".o_we_existing_attachments .o_we_attachment_selected img",
         ),
-        {
-            content: "Confirm choice",
-            trigger: '.o_select_media_dialog footer button:contains("Add")',
-            extraTrigger: ".o_we_existing_attachments .o_we_attachment_selected",
-        },
         {
             content: "Go to last carousel image",
             trigger: 'iframe [data-bs-target="#o-carousel-product"][data-bs-slide-to="1"]',
