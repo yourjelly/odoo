@@ -252,4 +252,4 @@ class LivechatController(http.Controller):
         This allows also to re-send a new chat request to the visitor, as while the visitor is
         in conversation with an operator, it's not possible to send the visitor a chat request."""
         if channel := request.env["discuss.channel"].search([("id", "=", channel_id)]):
-            channel._close_livechat_session()
+            channel.with_context(is_visitor=True).action_unfollow()

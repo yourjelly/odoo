@@ -33,4 +33,4 @@ class TestUploadAttachment(HttpCase):
                 },
                 files={"ufile": file},
             )
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 404)

@@ -62,13 +62,13 @@ class DiscussChannel(models.Model):
         recent_history = self.env['website.track'].search([('page_id', '!=', False), ('visitor_id', '=', visitor.id)], limit=3)
         return ' → '.join(visit.page_id.name + ' (' + visit.visit_datetime.strftime('%H:%M') + ')' for visit in reversed(recent_history))
 
-    def _get_visitor_leave_message(self, operator=False, cancel=False):
+    def _get_leave_message(self):
+        cancel = self.env.context.get("cancel")
         if not cancel:
-            if self.livechat_visitor_id.id:
-                return _("Visitor #%(id)d left the conversation.", id=self.livechat_visitor_id.id)
-            return _("Visitor left the conversation.")
+            return super()._get_leave_message()
+        operator = self.env.context.get("operator")
         return _(
-            "%(visitor)s started a conversation with %(operator)s.\nThe chat request has been cancelled",
+            "started a conversation with %(operator)s.\nThe chat request has been cancelled",
             visitor=self.livechat_visitor_id.display_name or _("The visitor"),
             operator=operator or _("an operator"),
         )

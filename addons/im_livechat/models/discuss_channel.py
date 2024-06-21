@@ -108,32 +108,15 @@ class DiscussChannel(models.Model):
             message_body = '<ul>%s</ul>' % (''.join(html_links))
         self._send_transient_message(self.env['res.partner'].browse(pid), message_body)
 
-    def _get_visitor_leave_message(self, operator=False, cancel=False):
+    def _get_visitor_leave_message(self):
         return _('Visitor left the conversation.')
 
-    def _close_livechat_session(self, **kwargs):
-        """ Set deactivate the livechat channel and notify (the operator) the reason of closing the session."""
-        self.ensure_one()
-        if self.livechat_active:
-            member = self.channel_member_ids.filtered(lambda m: m.is_self)
-            if member:
-                member.fold_state = "closed"
-                # sudo: discuss.channel.rtc.session - member of current user can leave call
-                member.sudo()._rtc_leave_call()
-            # sudo: discuss.channel - visitor left the conversation, state must be updated
+    def _action_unfollow(self, partner, guest=None, post_left_message=True):
+        if self.env.context.get("is_visitor"):
             self.sudo().livechat_active = False
-            # avoid useless notification if the channel is empty
             if not self.message_ids:
-                return
-            # Notify that the visitor has left the conversation
-            # sudo: mail.message - posting visitor leave message is allowed
-            self.sudo().message_post(
-                author_id=self.env.ref('base.partner_root').id,
-                body=Markup('<div class="o_mail_notification o_hide_author">%s</div>')
-                % self._get_visitor_leave_message(**kwargs),
-                message_type='notification',
-                subtype_xmlid='mail.mt_comment'
-            )
+                post_left_message = False
+        super()._action_unfollow(partner=partner, guest=guest, post_left_message=post_left_message)
 
     # Rating Mixin
 

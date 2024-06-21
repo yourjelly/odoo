@@ -331,9 +331,13 @@ class Channel(models.Model):
         )
 
     def action_unfollow(self):
-        self._action_unfollow(self.env.user.partner_id)
+        self._action_unfollow(partner=self.env.user.partner_id, guest=self.env["mail.guest"]._get_guest_from_context())
 
-    def _action_unfollow(self, partner):
+    def _get_leave_message(self):
+        return _("left the channel")
+
+    def _action_unfollow(self, partner, guest=None, post_left_message=True):
+        guest = guest or self.env["mail.guest"]
         self.message_unsubscribe(partner.ids)
         custom_channel_info = {
             "id": self.id,
@@ -342,20 +346,25 @@ class Channel(models.Model):
             "model": "discuss.channel",
         }
         custom_store = Store("Thread", custom_channel_info)
-        member = self.env["discuss.channel.member"].search(
-            [("channel_id", "=", self.id), ("partner_id", "=", partner.id)]
-        )
+        member = self.env["discuss.channel.member"].search(expression.AND([
+            [("channel_id", "=", self.id)],
+            expression.OR([
+                [("partner_id", "in", partner.ids)],
+                [("guest_id", "in", guest.ids)]
+            ])
+        ]))
         if not member:
             self.env["bus.bus"]._sendone(partner, "discuss.channel/leave", custom_store.get_result())
             return
         member.unlink()
-        notification = Markup('<div class="o_mail_notification">%s</div>') % _("left the channel")
-        # sudo: mail.message - post as sudo since the user just unsubscribed from the channel
-        self.sudo().message_post(
-            body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id
-        )
+        if post_left_message:
+            notification = Markup('<div class="o_mail_notification">%s</div>') % self._get_leave_message()
+            # sudo: mail.message - post as sudo since the user just unsubscribed from the channel
+            self.sudo().message_post(
+                body=notification, subtype_xmlid="mail.mt_comment", author_id=False if guest else partner.id
+            )
         # send custom store after message_post to avoid is_pinned reset to True
-        self.env["bus.bus"]._sendone(partner, "discuss.channel/leave", custom_store.get_result())
+        self.env["bus.bus"]._sendone(guest or partner, "discuss.channel/leave", custom_store.get_result())
         channel_info = {
             "channelMembers": [("DELETE", {"id": member.id})],
             "id": self.id,

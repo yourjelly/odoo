@@ -22,6 +22,6 @@ class ImLivechatChannel(models.Model):
             for discuss_channel in chat_request_channel:
                 operator = discuss_channel.livechat_operator_id
                 operator_name = operator.user_livechat_username or operator.name
-                discuss_channel._close_livechat_session(cancel=True, operator=operator_name)
+                discuss_channel.with_context(is_visitor=True, cancel=True, operator=operator_name).action_unfollow()
 
         return discuss_channel_vals

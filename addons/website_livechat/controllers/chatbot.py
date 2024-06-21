@@ -21,7 +21,7 @@ class WebsiteLivechatChatbotScriptController(http.Controller):
             ["chatbot_current_step_id.chatbot_script_id", "=", chatbot_script.id],
         ])
         for channel in channels:
-            channel._close_livechat_session()
+            channel.with_context(is_visitor=True).action_unfollow()
 
         discuss_channel_values = {
             "channel_member_ids": [

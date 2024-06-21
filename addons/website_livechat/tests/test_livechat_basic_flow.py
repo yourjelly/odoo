@@ -76,7 +76,7 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
 
         self._send_rating(channel, self.visitor, 5, "This deboulonnage was fine but not topitop.")
 
-        channel._close_livechat_session()
+        channel.with_context(is_visitor=True).action_unfollow()
 
         self.assertEqual(len(channel.message_ids), 4)
         self.assertEqual(channel.message_ids[0].author_id, self.env.ref('base.partner_root'), "Odoobot must be the sender of the 'left the conversation' message.")
@@ -87,7 +87,7 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
         channel = self._common_basic_flow()
 
         # left the conversation
-        channel._close_livechat_session()
+        channel.with_context(is_visitor=True).action_unfollow()
         self.assertEqual(len(channel.message_ids), 3)
         self.assertEqual(channel.message_ids[0].author_id, self.env.ref('base.partner_root'), "Odoobot must be the author the message.")
         self.assertIn(f"Visitor #{channel.livechat_visitor_id.id}", channel.message_ids[0].body)

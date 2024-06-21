@@ -70,7 +70,7 @@ class TestLivechatRequestHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
         self.assertEqual(len(channel.message_ids), 2)
 
         # Visitor Leave the conversation
-        channel._close_livechat_session()
+        channel.with_context(is_visitor=True).action_unfollow()
         self.assertEqual(len(channel.message_ids), 3)
         self.assertEqual(channel.message_ids[0].author_id, self.env.ref('base.partner_root'), "Odoobot must be the sender of the 'left the conversation' message.")
         self.assertIn(f"Visitor #{channel.livechat_visitor_id.id}", channel.message_ids[0].body)
@@ -82,7 +82,7 @@ class TestLivechatRequestHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
         # clean every possible mail channel linked to the visitor
         active_channels = self.env['discuss.channel'].search([('livechat_visitor_id', '=', self.visitor.id), ('livechat_active', '=', True)])
         for active_channel in active_channels:
-            active_channel._close_livechat_session()
+            active_channel.with_context(is_visitor=True).action_unfollow()
 
     def test_update_guest_of_chat_request_if_outdated(self):
         self.visitor.with_user(self.operator).sudo().action_send_chat_request()
