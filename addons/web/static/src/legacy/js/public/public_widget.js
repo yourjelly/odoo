@@ -263,7 +263,7 @@ export const PublicWidget = Class.extend(mixins.PropertiesMixin, ServicesMixin, 
     insertAfter: function (targetEl) {
         var self = this;
         return this._widgetRenderAndInsert(function (t) {
-            self.el.insertBefore(self.el, t.nextSibling);
+            self.el.append(t.nextSibling);
         }, targetEl);
     },
     /**
@@ -381,9 +381,9 @@ export const PublicWidget = Class.extend(mixins.PropertiesMixin, ServicesMixin, 
 
             event += '.widget_events';
             if (!selector) {
-                self.el.on(event, method);
+                self.el?.on(event, method);
             } else {
-                self.el.on(event, selector, method);
+                self.el?.on(event, selector, method);
             }
         };
         Object.entries(this.events || {}).forEach(([event, method]) => {
@@ -489,7 +489,7 @@ export const PublicWidget = Class.extend(mixins.PropertiesMixin, ServicesMixin, 
      * @private
      */
     _undelegateEvents: function () {
-        this.el.off(".widget_events");
+        this.el?.off(".widget_events");
     },
     /**
      * Render the widget.  This is a private method, and should really never be

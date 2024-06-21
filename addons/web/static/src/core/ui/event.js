@@ -5,6 +5,12 @@ const delegateEvent = function (ev) {
             target = target.parentElement;
         }
         if (target && target.matches(this.selector)) {
+            // Create a new event and set its currentTarget
+            // const newEvent = new ev.constructor(ev.type, ev);
+            Object.defineProperty(ev, "currentTarget", {
+                get: () => target,
+                configurable: true,
+            });
             this.handler.call(target, ev);
         }
     } else {
