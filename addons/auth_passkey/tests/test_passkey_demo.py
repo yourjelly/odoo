@@ -232,24 +232,14 @@ class PasskeyTest(HttpCase):
                 csrf_token = etree.fromstring(
                     self.url_open('/web/login').content
                 ).xpath('//input[@name="csrf_token"]')[0].get('value')
-                with mute_logger('odoo.http'):
-                    response = self.url_open('/web/login', data={
-                        'type': 'webauthn',
-                        'webauthn_response': json.dumps(webauthn_response),
-                        'csrf_token': csrf_token,
-                    })
-                # TODO: Currently the code raises an exception because of
-                # File "/home/odoo/src/odoo/master/addons/auth_passkey/models/res_users.py", line 67, in _check_credentials
-                #     bytes.fromhex(request.session.pop('webauthn_challenge')),
-                # File "/usr/lib/python3.10/_collections_abc.py", line 962, in pop
-                #     value = self[key]
-                # File "/home/odoo/src/odoo/master/odoo/http.py", line 1004, in __getitem__
-                #     return self.__data[item]
-                # KeyError: 'webauthn_challenge'
-                # I must be handled to return a clean failing status code, the same when you put a wrong login/password
-                # Are we asserting the challenge has been removed from the session,
-                # or that the webauthn counter has been increased ?
-                self.assertEqual(response.status_code, 500)
+                response = self.url_open('/web/login', data={
+                    'type': 'webauthn',
+                    'webauthn_response': json.dumps(webauthn_response),
+                    'csrf_token': csrf_token,
+                })
+                self.assertEqual(response.status_code, 200)
+                error = etree.fromstring(response.content).xpath('//p[@class="alert alert-danger"]')[0].text.strip()
+                self.assertEqual(error, 'Cannot find a challenge for this session')
 
     def test_check_identity(self):
         for passkey in self.passkeys.values():
@@ -294,7 +284,11 @@ class PasskeyTest(HttpCase):
                 # Assert the authentication failed
                 self.assertFalse(response.get('result'))
                 self.assertTrue(response.get('error'))
-                self.assertEqual(response['error']['data']['name'], 'builtins.KeyError') # TODO: shouldn't be a keyerror
+                self.assertEqual(response['error']['data']['name'], 'odoo.exceptions.UserError')
+                self.assertEqual(
+                    response['error']['data']['message'],
+                    'Incorrect Passkey. Please provide a valid passkey or use a different authentication method.'
+                )
                 # The authentication fail, hence the sign count doesn't increase
                 self.assertEqual(passkey['passkey'].sign_count, sign_count)
 

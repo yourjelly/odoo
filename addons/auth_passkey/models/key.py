@@ -4,6 +4,7 @@ import logging
 from werkzeug.urls import url_parse
 
 from odoo import api, Command, fields, models, _
+from odoo.exceptions import AccessDenied
 from odoo.http import request
 from odoo.tools import sql, SQL
 from odoo.addons.base.models.res_users import check_identity
@@ -54,6 +55,13 @@ class PassKey(models.Model):
         pass
 
     @api.model
+    def _get_session_challenge(self):
+        challenge = request.session.pop('webauthn_challenge', None)
+        if not challenge:
+            raise AccessDenied('Cannot find a challenge for this session')
+        return challenge
+
+    @api.model
     def _start_auth(self):
         assert request
         authentication_options = json.loads(options_to_json(generate_authentication_options(
@@ -68,7 +76,7 @@ class PassKey(models.Model):
         parsed_url = url_parse(self.get_base_url())
         auth_verification = verify_authentication_response(
             credential=auth,
-            expected_challenge=base64url_to_bytes(request.session.pop('webauthn_challenge')),
+            expected_challenge=base64url_to_bytes(self._get_session_challenge()),
             expected_origin=parsed_url.replace(path='').to_url(),
             expected_rp_id=parsed_url.host,
             credential_public_key=base64url_to_bytes(public_key),
@@ -97,7 +105,7 @@ class PassKey(models.Model):
         parsed_url = url_parse(self.get_base_url())
         verification = verify_registration_response(
             credential=registration,
-            expected_challenge=base64url_to_bytes(request.session.pop('webauthn_challenge')),
+            expected_challenge=base64url_to_bytes(self._get_session_challenge()),
             expected_origin=parsed_url.replace(path='').to_url(),
             expected_rp_id=parsed_url.host,
         )
