@@ -2,12 +2,12 @@
 <odoo>
 
     <template id="portal_tasks_list_inherit" inherit_id="project.portal_tasks_list">
-        <xpath expr="//t[@t-foreach='grouped_tasks']/tbody/tr[hasclass('table-light')]" position="inside">
+        <xpath expr="//th[@name='colspan_project_tasks']" position="before">
             <th t-if="groupby == 'sale_order_id'" t-attf-colspan="{{grouped_tasks_colspan}}">
                 <span t-if="tasks[0].sudo().sale_order_id" class="text-truncate" t-field="tasks[0].sudo().sale_order_id"/>
                 <span t-else="">Not Billed</span>
             </th>
-            <th t-if="groupby == 'sale_line_id'" t-attf-colspan="{{grouped_tasks_colspan}}">
+            <th name="header_group_sale_line_id" t-if="groupby == 'sale_line_id'" t-attf-colspan="{{6 if allow_timesheets else grouped_tasks_colspan}}">
                 <span t-if="tasks[0].sudo().sale_line_id" class="text-truncate" t-field="tasks[0].sudo().sale_line_id"/>
                 <span t-else="">Not Billed</span>
             </th>
