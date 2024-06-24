@@ -40,10 +40,6 @@ import { callWithUnloadCheck } from "./tour_utils";
  * @property {"top" | "botton" | "left" | "right"} [position] The position where the UI helper is shown.
  * @property {"community" | "enterprise"} [edition]
  * @property {RunCommand} [run] The action to perform when trigger conditions are verified.
- * @property {boolean} [allowInvisible] Allow trigger nodes (any of them) to be invisible
- * @property {boolean} [allowDisabled] Allow the trigger node to be disabled.
- === run() {}``` (mainly to avoid clicking on the trigger by default)
- allows that trigger node can be disabled. run() {} does not allow this behavior.
  * @property {boolean} [auto]
  * @property {boolean} [in_modal] When true, check that trigger node is present in the last visible .modal.
  * @property {number} [width]
@@ -73,8 +69,6 @@ function checkTourStepKeyValues(tourStep) {
         content: { type: [String, Object], optional: true }, //allow object for _t && markup
         position: { type: String, optional: true },
         run: { type: [String, Function], optional: true },
-        allowInvisible: { type: Boolean, optional: true },
-        allowDisabled: { type: Boolean, optional: true },
         in_modal: { type: Boolean, optional: true },
         width: { type: Number, optional: true },
         timeout: { type: Number, optional: true },

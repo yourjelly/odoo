@@ -33,7 +33,6 @@ export function isConfirmationButtonDisabled() {
     return {
         content: "try to click `confirm` without having made all the selections",
         trigger: `${confirmationButtonTrigger}[disabled]`,
-        allowDisabled: true,
         in_modal: true,
     };
 }

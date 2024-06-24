@@ -224,7 +224,6 @@
         run(helpers) {
             this.anchor.value = "/";
         },
-        allowInvisible: true,
     },
     {
         content: "Submit login",
@@ -397,7 +396,6 @@
         run(helpers) {
             this.anchor.value = "/shop/cart";
         },
-        allowInvisible: true,
     },
     {
         content: "Submit login",
@@ -438,7 +436,6 @@
         run(helpers) {
             this.anchor.value = "/shop?search=Storage Box Test";
         },
-        allowInvisible: true,
     },
     {
         content: "Submit login",

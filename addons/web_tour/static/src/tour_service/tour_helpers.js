@@ -58,7 +58,9 @@ export class TourHelpers {
      */
     click(selector) {
         const element = this._get_action_element(selector);
-        hoot.click(element);
+        if (this._notDisabled(element, "click") && this._notInvisible(element, "click")) {
+            hoot.click(element);
+        }
     }
 
     /**
@@ -72,7 +74,9 @@ export class TourHelpers {
      */
     dblclick(selector) {
         const element = this._get_action_element(selector);
-        hoot.dblclick(element);
+        if (this._notDisabled(element, "dblclick") && this._notInvisible(element, "dblclick")) {
+            hoot.dblclick(element);
+        }
     }
 
     /**
@@ -130,8 +134,10 @@ export class TourHelpers {
      */
     edit(text, selector) {
         const element = this._get_action_element(selector);
-        hoot.click(element);
-        hoot.edit(text);
+        if (this._notInvisible(element, "edit") && this._notDisabled(element, "edit")) {
+            hoot.click(element);
+            hoot.edit(text);
+        }
     }
 
     /**
@@ -141,14 +147,16 @@ export class TourHelpers {
      */
     editor(text, selector) {
         const element = this._get_action_element(selector);
-        hoot.click(element);
-        this._set_range(element, "start");
-        hoot.keyDown("_");
-        element.textContent = text;
-        hoot.manuallyDispatchProgrammaticEvent(element, "input");
-        this._set_range(element, "stop");
-        hoot.keyUp("_");
-        hoot.manuallyDispatchProgrammaticEvent(element, "change");
+        if (this._notInvisible(element, "wysiwyg") && this._notDisabled(element, "wysiwyg")) {
+            hoot.click(element);
+            this._set_range(element, "start");
+            hoot.keyDown("_");
+            element.textContent = text;
+            hoot.manuallyDispatchProgrammaticEvent(element, "input");
+            this._set_range(element, "stop");
+            hoot.keyUp("_");
+            hoot.manuallyDispatchProgrammaticEvent(element, "change");
+        }
     }
 
     /**
@@ -162,8 +170,10 @@ export class TourHelpers {
      */
     fill(value, selector) {
         const element = this._get_action_element(selector);
-        hoot.click(element);
-        hoot.fill(value);
+        if (this._notInvisible(element, "fill") && this._notDisabled(element, "fill")) {
+            hoot.click(element);
+            hoot.fill(value);
+        }
     }
 
     /**
@@ -174,7 +184,9 @@ export class TourHelpers {
      */
     hover(selector) {
         const element = this._get_action_element(selector);
-        hoot.hover(element);
+        if (this._notInvisible(element, "hover")) {
+            hoot.hover(element);
+        }
     }
 
     /**
@@ -184,8 +196,10 @@ export class TourHelpers {
      */
     range(value, selector) {
         const element = this._get_action_element(selector);
-        hoot.click(element);
-        hoot.setInputRange(element, value);
+        if (this._notInvisible(element, "range") && this._notDisabled(element, "range")) {
+            hoot.click(element);
+            hoot.setInputRange(element, value);
+        }
     }
 
     /**
@@ -212,8 +226,10 @@ export class TourHelpers {
      */
     select(value, selector) {
         const element = this._get_action_element(selector);
-        hoot.click(element);
-        hoot.select(value, { target: element });
+        if (this._notDisabled(element, "select") && this._notInvisible(element, "select")) {
+            hoot.click(element);
+            hoot.select(value, { target: element });
+        }
     }
 
     /**
@@ -226,11 +242,16 @@ export class TourHelpers {
      */
     selectByIndex(index, selector) {
         const element = this._get_action_element(selector);
-        hoot.click(element);
-        const value = hoot.queryValue(`option:eq(${index})`, { root: element });
-        if (value) {
-            hoot.select(value, { target: element });
-            element.dispatchEvent(new Event("input"));
+        if (
+            this._notDisabled(element, "selectByIndex") &&
+            this._notInvisible(element, "selectByIndex")
+        ) {
+            hoot.click(element);
+            const value = hoot.queryValue(`option:eq(${index})`, { root: element });
+            if (value) {
+                hoot.select(value, { target: element });
+                element.dispatchEvent(new Event("input"));
+            }
         }
     }
 
@@ -244,9 +265,14 @@ export class TourHelpers {
      */
     selectByLabel(contains, selector) {
         const element = this._get_action_element(selector);
-        hoot.click(element);
-        const values = hoot.queryAllValues(`option:contains(${contains})`, { root: element });
-        hoot.select(values, { target: element });
+        if (
+            this._notDisabled(element, "selectByLabel") &&
+            this._notInvisible(element, "selectByLabel")
+        ) {
+            hoot.click(element);
+            const values = hoot.queryAllValues(`option:contains(${contains})`, { root: element });
+            hoot.select(values, { target: element });
+        }
     }
 
     /**
@@ -292,5 +318,19 @@ export class TourHelpers {
         range.setStart(node, length);
         range.setEnd(node, length);
         selection.addRange(range);
+    }
+
+    _notDisabled(element, action = "proceed an action") {
+        if (element.disabled) {
+            throw new Error(`Trigger can't be disabled when you want to ${action} on it`);
+        }
+        return true;
+    }
+
+    _notInvisible(element, action = "proceed an action") {
+        if (!hoot.isVisible(element)) {
+            throw new Error(`Trigger can't be inivislbe when you want to ${action} on it`);
+        }
+        return true;
     }
 }

@@ -21,5 +21,4 @@ wTourUtils.registerWebsitePreviewTour("carousel_content_removal", {
 }, {
     trigger: ":iframe .carousel .carousel-item.active .container:not(:has(*))",
     content: "Check for a carousel slide with an empty container tag",
-    allowInvisible: true,
 }]);

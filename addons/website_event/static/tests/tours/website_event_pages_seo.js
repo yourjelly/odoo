@@ -35,12 +35,10 @@ registry.category("web_tour.tours").add("website_event_pages_seo", {
         },
         {
             trigger: ":iframe head:has(title:contains(/^Hello, world!$/))",
-            allowInvisible: true,
         },
         {
             content: "Check that the page title is adapted, inside and outside the iframe",
             trigger: "head:has(title:contains(/^Hello, world!$/))",
-            allowInvisible: true,
         },
     ],
 });

@@ -62,7 +62,6 @@ registry.category("web_tour.tours").add('shop_wishlist', {
         {
             content: "check the first variant is already in wishlist",
             trigger: '#product_detail .o_add_wishlist_dyn:disabled',
-            allowDisabled: true,
         },
         {
             content: "change variant",

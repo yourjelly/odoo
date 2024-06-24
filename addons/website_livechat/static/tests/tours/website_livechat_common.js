@@ -100,7 +100,6 @@ export const close = [
     {
         content: "Check that the button is not displayed anymore",
         trigger: ".o-livechat-root:shadow .o-mail-ChatWindowContainer",
-        allowInvisible: true,
         run() {
             if (this.anchor.querySelectorAll(".o-livechat-livechatButton").length === 0) {
                 document.body.classList.add("tour_success");

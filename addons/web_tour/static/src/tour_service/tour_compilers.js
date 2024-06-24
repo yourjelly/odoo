@@ -2,7 +2,6 @@
 
 import { browser } from "@web/core/browser/browser";
 import { debounce } from "@web/core/utils/timing";
-import { _legacyIsVisible, isVisible } from "@web/core/utils/ui";
 import { omit } from "@web/core/utils/objects";
 import { tourState } from "./tour_state";
 import * as hoot from "@odoo/hoot-dom";
@@ -59,9 +58,7 @@ function tryFindTrigger(tour, step, elKey) {
     const in_modal = elKey === "extra_trigger" ? false : step.in_modal;
     try {
         const nodes = findTrigger(selector, in_modal);
-        //TODO : change _legacyIsVisible by isVisible (hoot lib)
-        //Failed with tour test_snippet_popup_with_scrollbar_and_animations > snippet_popup_and_animations
-        return !step.allowInvisible ? nodes.find(_legacyIsVisible) : nodes.at(0);
+        return nodes.at(0);
     } catch (error) {
         throwError(tour, step, [`Trigger was not found : ${selector} : ${error.message}`]);
     }
@@ -103,12 +100,6 @@ function describeWhyStepFailed(step) {
         return `The cause is that trigger (${step.trigger}) element cannot be found in DOM.`;
     } else if (step.alt_trigger && !stepState.altTriggerFound) {
         return `The cause is that alt(ernative) trigger (${step.alt_trigger}) element cannot be found in DOM.`;
-    } else if (!stepState.isVisible) {
-        return "Element has been found but isn't displayed. (Use 'step.allowInvisible: true,' if you want to skip this check)";
-    } else if (!stepState.isEnabled) {
-        return "Element has been found but is disabled.";
-    } else if (stepState.isBlocked) {
-        return "Element has been found but DOM is blocked by UI.";
     } else if (!stepState.hasRun) {
         return `Element has been found. The error seems to be with step.run`;
     }
@@ -214,41 +205,11 @@ function isActive(step, mode) {
     return checkEdition && checkDevice && checkMode;
 }
 
-/**
- * IMPROVEMENT: Consider transitioning (moving) elements?
- * @param {Element} el
- * @param {TourStep} step
- */
-function canContinue(el, step) {
-    step.state = step.state || {};
-    const state = step.state;
-    const rootNode = el.getRootNode();
-    state.isInDoc =
-        rootNode instanceof ShadowRoot
-            ? el.ownerDocument.contains(rootNode.host)
-            : el.ownerDocument.contains(el);
-    state.isElement = el instanceof el.ownerDocument.defaultView.Element || el instanceof Element;
-    state.isVisible = step.allowInvisible || isVisible(el);
-    const isBlocked =
-        document.body.classList.contains("o_ui_blocked") || document.querySelector(".o_blockUI");
-    state.isBlocked = !!isBlocked;
-    state.isEnabled = step.allowDisabled || !el.disabled;
-    state.canContinue = !!(
-        state.isInDoc &&
-        state.isElement &&
-        state.isVisible &&
-        state.isEnabled &&
-        !state.isBlocked
-    );
-    return state.canContinue;
-}
-
 function getStepState(step) {
     step.state = step.state || {};
     const checkRun =
         (["string", "function"].includes(typeof step.run) && step.state.hasRun) || !step.run;
-    const check = checkRun && step.state.canContinue;
-    return check ? "succeeded" : "errored";
+    return checkRun ? "succeeded" : "errored";
 }
 
 /**
@@ -340,7 +301,7 @@ export function compileStepManual(stepIndex, step, options) {
 
                 const stepEl = extraTriggerOkay && (triggerEl || altEl);
 
-                if (stepEl && canContinue(stepEl, step)) {
+                if (stepEl) {
                     const consumeEvent = step.consumeEvent || getConsumeEventType(stepEl, step.run);
                     const anchorEl = getAnchorEl(stepEl, consumeEvent);
                     const debouncedToggleOpen = debounce(pointer.showContent, 50, true);
@@ -441,7 +402,7 @@ export function compileStepAuto(stepIndex, step, options) {
                     return false;
                 }
 
-                return canContinue(stepEl, step) && stepEl;
+                return stepEl;
             },
             action: async (stepEl) => {
                 //if stepEl is found, timeout can be cleared.
