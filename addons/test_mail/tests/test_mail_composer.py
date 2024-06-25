@@ -17,7 +17,7 @@ from odoo.addons.test_mail.tests.common import TestRecipients
 from odoo.fields import Datetime as FieldDatetime
 from odoo.exceptions import AccessError
 from odoo.tests import Form, tagged, users
-from odoo.tools import email_normalize, mute_logger, formataddr
+from odoo.tools import email_normalize, mute_logger, formataddr, misc
 
 
 @tagged('mail_composer')
@@ -100,7 +100,7 @@ class TestMailComposer(MailCommon, TestRecipients):
             'mail_server_id': cls.mail_server_domain.id,
             'model_id': cls.env['ir.model']._get('mail.test.ticket.mc').id,
             'reply_to': '{{ ctx.get("custom_reply_to") or "info@test.example.com" }}',
-            'scheduled_date': '{{ (object.create_date or datetime.datetime(2022, 12, 26, 18, 0, 0)) + datetime.timedelta(days=2) }}',
+            'scheduled_date': '{{ ((object.create_date or datetime.datetime(2022, 12, 26, 18, 0, 0)) + datetime.timedelta(days=2)).strftime(tools.misc.DEFAULT_SERVER_DATETIME_FORMAT) }}',
         })
 
         # activate translations
@@ -283,7 +283,7 @@ class TestComposerForm(TestMailComposer):
         self.assertEqual(composer_form.reply_to, 'info@test.example.com')
         self.assertFalse(composer_form.reply_to_force_new)
         self.assertEqual(literal_eval(composer_form.res_ids), self.test_record.ids)
-        self.assertEqual(composer_form.scheduled_date, FieldDatetime.to_string(self.reference_now + timedelta(days=2)))
+        self.assertEqual(FieldDatetime.to_string(composer_form.scheduled_date), FieldDatetime.to_string(self.reference_now + timedelta(days=2)))
         self.assertEqual(composer_form.subject, f'TemplateSubject {self.test_record.name}')
         self.assertEqual(composer_form.subtype_id, self.env.ref('mail.mt_comment'))
         self.assertFalse(composer_form.subtype_is_log)
@@ -385,7 +385,7 @@ class TestComposerForm(TestMailComposer):
         self.assertEqual(composer_form.reply_to, 'info@test.example.com')
         self.assertFalse(composer_form.reply_to_force_new)
         self.assertFalse(composer_form.res_ids)
-        self.assertEqual(composer_form.scheduled_date,
+        self.assertEqual(composer_form.scheduled_date.strftime(misc.DEFAULT_SERVER_DATETIME_FORMAT),
                          '2022-12-28 18:00:00',
                          'No record but rendered, see expression in template')
         self.assertEqual(composer_form.subject, 'TemplateSubject ')
@@ -820,7 +820,7 @@ class TestComposerInternals(TestMailComposer):
                 composer = self.env['mail.compose.message'].with_context(ctx).create({
                     'body': '<p>Test Body <t t-out="record.name>/></p>',
                     'mail_server_id': self.mail_server_default.id,
-                    'scheduled_date': '{{ datetime.datetime(2023, 1, 10, 10, 0, 0) }}',
+                    'scheduled_date': '{{ datetime.datetime(2023, 1, 10, 10, 0, 0).strftime(tools.misc.DEFAULT_SERVER_DATETIME_FORMAT) }}',
                     'subject': 'My amazing subject for {{ record.name }}',
                 })
 
@@ -1595,7 +1595,7 @@ class TestComposerResultsComment(TestMailComposer, CronMixinCase):
 
         for batch_mode, scheduled_date, email_layout_xmlid, use_lang in product(
             (False, True, 'domain'),
-            (False, '{{ (object.create_date or datetime.datetime(2022, 12, 26, 18, 0, 0)) + datetime.timedelta(days=2) }}'),
+            (False, '{{ ((object.create_date or datetime.datetime(2022, 12, 26, 18, 0, 0)) + datetime.timedelta(days=2)).strftime(tools.misc.DEFAULT_SERVER_DATETIME_FORMAT) }}'),
             (False, 'mail.test_layout'),
             (False, True),
         ):
@@ -2535,7 +2535,7 @@ class TestComposerResultsMass(TestMailComposer):
 
         for use_domain, scheduled_date, email_layout_xmlid, use_lang in product(
             (False, True),
-            (False, '{{ (object.create_date or datetime.datetime(2022, 12, 26, 18, 0, 0)) + datetime.timedelta(days=2) }}'),
+            (False, '{{ ((object.create_date or datetime.datetime(2022, 12, 26, 18, 0, 0)) + datetime.timedelta(days=2)).strftime(tools.misc.DEFAULT_SERVER_DATETIME_FORMAT) }}'),
             (False, 'mail.test_layout'),
             (False, True),
         ):
