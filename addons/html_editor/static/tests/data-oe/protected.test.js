@@ -212,3 +212,28 @@ test("should protect disconnected nodes", async () => {
         `<div data-oe-protected="true"></div>`
     );
 });
+
+test("should not crash when changing attributes and removing a protecting anchor", async () => {
+    let historyPlugin;
+    patchWithCleanup(HistoryPlugin.prototype, {
+        setup() {
+            super.setup();
+            historyPlugin = this;
+        },
+    });
+    const { editor, el } = await setupEditor(
+        `<div data-oe-protected="true" data-attr="value"><p>a</p></div><p>a</p>`
+    );
+    const div = el.querySelector("div");
+    div.dataset.attr = "other";
+    div.remove();
+    editor.dispatch("ADD_STEP");
+    await animationFrame();
+    const lastStep = editor.shared.getHistorySteps().at(-1);
+    expect(lastStep.mutations.length).toBe(2);
+    expect(lastStep.mutations[0].type).toBe("attributes");
+    expect(lastStep.mutations[1].type).toBe("remove");
+    expect(historyPlugin.unserializeNode(lastStep.mutations[1].node).outerHTML).toBe(
+        `<div data-oe-protected="true" data-attr="other"><p>a</p></div>`
+    );
+});
