@@ -15,7 +15,7 @@ wTourUtils.registerWebsitePreviewTour('website_start_cloned_snippet', {
     dragNDropOutOfFooter.run = 'drag_and_drop :iframe #wrapwrap #wrap';
     return [
         dragNDropOutOfFooter,
-        wTourUtils.clickOnSnippet(countdownSnippet),
+        ...wTourUtils.clickOnSnippet(countdownSnippet),
         {
             content: 'Click on clone snippet',
             trigger: '.oe_snippet_clone',

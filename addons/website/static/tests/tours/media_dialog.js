@@ -7,10 +7,10 @@ wTourUtils.registerWebsitePreviewTour("website_media_dialog_undraw", {
     url: '/',
     edition: true,
 }, () => [
-wTourUtils.dragNDrop({
-    id: 's_text_image',
-    name: 'Text - Image',
-}),
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
 {
     content: "Open the media dialog from the snippet",
     trigger: ":iframe .s_text_image img",
@@ -30,10 +30,10 @@ wTourUtils.registerWebsitePreviewTour("website_media_dialog_external_library", {
     url: "/",
     edition: true,
 }, () => [
-    wTourUtils.dragNDrop({
-        id: "s_text_image",
-        name: "Text - Image",
-    }),
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
     {
         content: "Open the media dialog from the snippet",
         trigger: "iframe .s_text_image img",
@@ -79,10 +79,10 @@ wTourUtils.registerWebsitePreviewTour('website_media_dialog_icons', {
     url: '/',
     edition: true,
 }, () => [
-    wTourUtils.dragNDrop({
-        id: 's_process_steps',
-        name: 'Steps',
-    }),
+        ...wTourUtils.dragNDrop({
+            id: "s_process_steps",
+            name: "Steps",
+        }),
     {
         content: "Open MediaDialog from a snippet icon",
         trigger: ':iframe .s_process_steps .fa-unlock-alt',
@@ -121,10 +121,10 @@ wTourUtils.registerWebsitePreviewTour("website_media_dialog_image_shape", {
     url: "/",
     edition: true,
 }, () => [
-    wTourUtils.dragNDrop({
-        id: "s_text_image",
-        name: "Text - Image",
-    }),
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
     {
         content: "Click on the image",
         trigger: ":iframe .s_text_image img",

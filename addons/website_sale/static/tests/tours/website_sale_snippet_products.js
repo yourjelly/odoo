@@ -29,7 +29,6 @@ function changeTemplate(templateKey) {
         {
             content: 'Check the template is applied',
             trigger: `:iframe .s_dynamic_snippet_products.${templateClass} .carousel`,
-            run: () => null, // It's a check
         },
     ];
 }
@@ -45,8 +44,8 @@ wTourUtils.registerWebsitePreviewTour('website_sale.snippet_products', {
         templatesSteps = templatesSteps.concat(changeTemplate(templateKey));
     }
     return [
-        wTourUtils.dragNDrop(productsSnippet),
-        wTourUtils.clickOnSnippet(productsSnippet),
+        ...wTourUtils.dragNDrop(productsSnippet),
+        ...wTourUtils.clickOnSnippet(productsSnippet),
         ...templatesSteps,
         ...changeTemplate('dynamic_filter_template_product_product_add_to_cart'),
         ...wTourUtils.clickOnSave(),
@@ -64,8 +63,8 @@ wTourUtils.registerWebsitePreviewTour('website_sale.products_snippet_recently_vi
     edition: true,
 },
 () => [
-    wTourUtils.dragNDrop(productsSnippet),
-    wTourUtils.clickOnSnippet(productsSnippet),
+        ...wTourUtils.dragNDrop(productsSnippet),
+    ...wTourUtils.clickOnSnippet(productsSnippet),
     ...changeTemplate('dynamic_filter_template_product_product_add_to_cart'),
     wTourUtils.changeOption(optionBlock, 'we-select[data-name="filter_opt"] we-toggler', 'filter'),
     wTourUtils.changeOption(optionBlock, 'we-select[data-name="filter_opt"] we-button:contains("Recently Viewed")', 'filter'),

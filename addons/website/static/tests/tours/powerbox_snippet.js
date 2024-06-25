@@ -5,11 +5,11 @@ wTourUtils.registerWebsitePreviewTour("website_powerbox_snippet",{
     test: true,
 },
 () => [
-wTourUtils.dragNDrop({
-    id: "s_text_block",
-    name: "Text",
-}),
-wTourUtils.clickOnSnippet({
+        ...wTourUtils.dragNDrop({
+            id: "s_text_block",
+            name: "Text",
+        }),
+...wTourUtils.clickOnSnippet({
     id: "s_text_block",
     name: "Text",
 }),

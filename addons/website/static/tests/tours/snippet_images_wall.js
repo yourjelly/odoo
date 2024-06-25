@@ -54,13 +54,14 @@ wTourUtils.registerWebsitePreviewTour("snippet_images_wall", {
     url: "/",
     edition: true,
 }, () => [
-    wTourUtils.dragNDrop({
-        id: "s_images_wall",
-        name: "Images Wall",
-}), wTourUtils.clickOnSnippet({
-    id: "s_image_gallery",
-    name: "Images Wall",
-}),
+        ...wTourUtils.dragNDrop({
+            id: "s_images_wall",
+            name: "Images Wall",
+        }),
+        ...wTourUtils.clickOnSnippet({
+            id: "s_image_gallery",
+            name: "Images Wall",
+        }),
         ...selectSignImageStep,
 {
     content: "Click on add a link",

@@ -31,11 +31,11 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover_1', {
     url: '/',
     edition: true,
 }, () => [
-    // 1. Test links in page content (web_editor)
-    wTourUtils.dragNDrop({
-        id: 's_text_image',
-        name: 'Text - Image',
-    }),
+        // 1. Test links in page content (web_editor)
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
     {
         content: "Click on a paragraph",
         trigger: FIRST_PARAGRAPH,
@@ -148,11 +148,11 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover_2', {
     url: '/',
     edition: true,
 }, () => [
-    // 1. Test links in page content (web_editor)
-    wTourUtils.dragNDrop({
-        id: 's_text_image',
-        name: 'Text - Image',
-    }),
+        // 1. Test links in page content (web_editor)
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
     // 3. Test other links (CTA in navbar & links in footer)
     {
         content: "Click CTA in navbar",

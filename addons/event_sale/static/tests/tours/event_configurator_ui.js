@@ -81,5 +81,7 @@ registry.category("web_tour.tours").add('event_configurator_tour', {
     // click somewhere else to exit cell focus
 }, {
     trigger: "td[name='name'] span:contains('Standard')",
-}, ...stepUtils.saveForm()
-]});
+        },
+        ...stepUtils.saveForm(),
+    ],
+});

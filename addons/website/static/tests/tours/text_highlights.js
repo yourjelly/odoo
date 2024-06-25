@@ -7,11 +7,11 @@ wTourUtils.registerWebsitePreviewTour("text_highlights", {
     url: "/",
     edition: true,
 }, () => [
-    wTourUtils.dragNDrop({
-        id: "s_cover",
-        name: "Cover",
-    }),
-    {
+        ...wTourUtils.dragNDrop({
+            id: "s_cover",
+            name: "Cover",
+        }),
+        {
         content: "Select the snippet title",
         trigger: ":iframe .s_cover h1",
         run: "dblclick",

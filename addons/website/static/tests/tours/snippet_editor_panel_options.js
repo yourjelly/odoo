@@ -8,10 +8,10 @@ wTourUtils.registerWebsitePreviewTour('snippet_editor_panel_options', {
     url: '/',
     edition: true,
 }, () => [
-wTourUtils.dragNDrop({
-    id: 's_text_image',
-    name: 'Text - Image',
-}),
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
 // Test keeping the text selection when using the width option.
 {
     content: "Click on the first paragraph.",
@@ -79,10 +79,10 @@ wTourUtils.dragNDrop({
 },
 // Test keeping the text selection when adding columns to a snippet with none.
 wTourUtils.goBackToBlocks(),
-wTourUtils.dragNDrop({
-    id: 's_text_block',
-    name: 'Text',
-}),
+        ...wTourUtils.dragNDrop({
+            id: "s_text_block",
+            name: "Text",
+        }),
 {
     content: "Click on the first paragraph.",
     trigger: ':iframe .s_text_block p',

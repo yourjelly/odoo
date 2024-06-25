@@ -15,11 +15,11 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
     url: '/',
     edition: true,
 }, () => [
-    // Base case: remove both columns from text - image
-    wTourUtils.dragNDrop({
-        id: 's_text_image',
-        name: 'Text - Image',
-    }),
+        // Base case: remove both columns from text - image
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
     {
         content: "Click on second column",
         trigger: ':iframe #wrap .s_text_image .row > :nth-child(2)',
@@ -37,15 +37,15 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
         trigger: ':iframe #wrap:empty',
     },
 
-    // Cover: test that parallax, bg-filter and shape are not treated as content
-    wTourUtils.dragNDrop({
-        id: 's_cover',
-        name: 'Cover',
-    }),
-    wTourUtils.clickOnSnippet({
-        id: 's_cover',
-        name: 'Cover',
-    }),
+        // Cover: test that parallax, bg-filter and shape are not treated as content
+        ...wTourUtils.dragNDrop({
+            id: "s_cover",
+            name: "Cover",
+        }),
+        ...wTourUtils.clickOnSnippet({
+            id: "s_cover",
+            name: "Cover",
+        }),
     // Add a shape
     wTourUtils.changeOption('ColoredLevelBackground', 'Shape'),
     {

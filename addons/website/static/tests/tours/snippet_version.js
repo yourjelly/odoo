@@ -7,14 +7,14 @@ wTourUtils.registerWebsitePreviewTour("snippet_version_1", {
     url: "/",
     test: true,
 }, () => [
-    wTourUtils.dragNDrop({
-        id: 's_test_snip',
-        name: 'Test snip',
-    }),
-    wTourUtils.dragNDrop({
-        id: 's_text_image',
-        name: 'Text - Image',
-    }),
+        ...wTourUtils.dragNDrop({
+            id: "s_test_snip",
+            name: "Test snip",
+        }),
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
     {
     content: "Test t-snippet and t-snippet-call: snippets have data-snippet set",
     trigger: '#oe_snippets .o_panel_body > .oe_snippet',

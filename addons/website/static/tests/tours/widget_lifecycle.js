@@ -13,12 +13,13 @@ wTourUtils.registerWebsitePreviewTour("widget_lifecycle", {
     test: true,
     url: "/",
     edition: true,
-}, () => [
-    wTourUtils.dragNDrop({
-        id: "s_countdown",
-        name: "Countdown",
-    }),
-    {
+    },
+    () => [
+        ...wTourUtils.dragNDrop({
+            id: "s_countdown",
+            name: "Countdown",
+        }),
+        {
         content: "Wait for the widget to be started and empty the widgetAndWysiwygLifecycle list",
         trigger: ":iframe .s_countdown.public_widget_started",
         run: () => {

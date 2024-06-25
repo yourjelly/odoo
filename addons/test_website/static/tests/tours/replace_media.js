@@ -33,10 +33,10 @@ wTourUtils.registerWebsitePreviewTour('test_replace_media', {
             });
         },
     },
-    wTourUtils.dragNDrop({
-        name: 'Title - Image',
-        id: 's_picture'
-    }),
+        ...wTourUtils.dragNDrop({
+            name: "Title - Image",
+            id: "s_picture",
+        }),
     {
         content: "select image",
         trigger: ":iframe .s_picture figure img",

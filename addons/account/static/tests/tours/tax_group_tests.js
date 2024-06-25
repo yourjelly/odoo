@@ -55,7 +55,7 @@ registry.category("web_tour.tours").add('account_tax_group', {
         run: "click",
     },
     // Save account.move
-    ...stepUtils.saveForm(),
+        ...stepUtils.saveForm(),
     // Edit tax group amount
     {
         content: "Edit tax group amount",

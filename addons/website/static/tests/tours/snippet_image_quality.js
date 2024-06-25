@@ -7,10 +7,10 @@ wTourUtils.registerWebsitePreviewTour('website_image_quality', {
     url: '/',
     edition: true,
 }, () => [
-    wTourUtils.dragNDrop({
-        id: 's_text_image',
-        name: 'Text - Image',
-    }),
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
     {
         content: "Select image",
         trigger: ':iframe .s_text_image img',

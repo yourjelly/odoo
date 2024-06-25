@@ -7,10 +7,10 @@ wTourUtils.registerWebsitePreviewTour('drop_404_ir_attachment_url', {
     url: '/',
     edition: true,
 }, () => [
-    wTourUtils.dragNDrop({
-        id: 's_404_snippet',
-        name: '404 Snippet',
-    }),
+        ...wTourUtils.dragNDrop({
+            id: "s_404_snippet",
+            name: "404 Snippet",
+        }),
     {
         content: 'Click on the snippet image',
         trigger: ':iframe .s_404_snippet img',

@@ -12,7 +12,7 @@ function waitForCSSReload() {
         // that the mutex is cleared, and therefore we can apply the saturation
         // step.
         wTourUtils.goBackToBlocks(),
-        wTourUtils.goToTheme(),
+        ...wTourUtils.goToTheme(),
         {
             content: "Wait for no loading",
             trigger: 'body:not(:has(.o_we_ui_loading)) :iframe body:not(:has(.o_we_ui_loading))',
@@ -26,7 +26,7 @@ wTourUtils.registerWebsitePreviewTour('website_gray_color_palette', {
     url: '/',
     edition: true,
 }, () => [
-    wTourUtils.goToTheme(),
+        ...wTourUtils.goToTheme(),
     {
         content: "Toggle gray color palette",
         trigger: '.o_we_gray_preview.o_we_collapse_toggler',

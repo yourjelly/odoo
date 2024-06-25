@@ -22,10 +22,10 @@ wTourUtils.registerWebsitePreviewTour('test_image_link', {
     url: '/',
     edition: true,
 }, () => [
-    wTourUtils.dragNDrop({
-        id: 's_text_image',
-        name: 'Text - Image',
-    }),
+        ...wTourUtils.dragNDrop({
+            id: "s_text_image",
+            name: "Text - Image",
+        }),
     ...selectImageSteps,
     {
         content: "enable link",

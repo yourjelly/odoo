@@ -148,12 +148,11 @@ export const stepUtils = {
         };
     },
 
-    autoExpandMoreButtons(extra_trigger) {
+    autoExpandMoreButtons() {
         return {
             isActive: ["auto"],
             content: `autoExpandMoreButtons`,
             trigger: ".o-form-buttonbox",
-            extra_trigger: extra_trigger,
             run: (actions) => {
                 const more = hoot.queryFirst(".o-form-buttonbox .o_button_more");
                 if (more) {
@@ -161,22 +160,6 @@ export const stepUtils = {
                 }
             },
         };
-    },
-
-    goBackBreadcrumbsMobile(description, ...extraTrigger) {
-        return extraTrigger.map((element) => ({
-            isActive: ["mobile"],
-            trigger: ".o_back_button",
-            extra_trigger: element,
-            content: description,
-            position: "bottom",
-            run: "click",
-            debugHelp: this._getHelpMessage(
-                "goBackBreadcrumbsMobile",
-                description,
-                ...extraTrigger
-            ),
-        }));
     },
 
     goToAppSteps(dataMenuXmlid, description) {
@@ -201,61 +184,48 @@ export const stepUtils = {
         );
     },
 
-    openBurgerMenu(extraTrigger) {
+    openBurgerMenu() {
         return {
             isActive: ["mobile"],
             trigger: ".o_mobile_menu_toggle",
-            extra_trigger: extraTrigger,
             content: _t("Open bugger menu."),
             position: "bottom",
             run: "click",
-            debugHelp: this._getHelpMessage("openBurgerMenu", extraTrigger),
         };
     },
 
     statusbarButtonsSteps(innerTextButton, description, extraTrigger) {
-        return [
-            {
+        const steps = [];
+        if (extraTrigger) {
+            steps.push({
                 isActive: ["auto", "mobile"],
-                trigger: ".o_statusbar_buttons",
-                extra_trigger: extraTrigger,
-                run: (actions) => {
-                    const node = hoot.queryFirst(
-                        ".o_statusbar_buttons .btn.dropdown-toggle:contains(Action)"
-                    );
-                    if (node) {
-                        hoot.click(node);
-                    }
-                },
+                trigger: extraTrigger,
+            });
+        }
+        steps.push({
+            isActive: ["auto", "mobile"],
+            trigger: ".o_statusbar_buttons",
+            run: (actions) => {
+                const node = hoot.queryFirst(
+                    ".o_statusbar_buttons .btn.dropdown-toggle:contains(Action)"
+                );
+                if (node) {
+                    hoot.click(node);
+                }
             },
-            {
-                trigger: `.o_statusbar_buttons button:enabled:contains('${innerTextButton}'), .dropdown-item button:enabled:contains('${innerTextButton}')`,
-                content: description,
-                position: "bottom",
-                run: "click",
-            },
-        ].map((step) =>
+        });
+        steps.push({
+            trigger: `.o_statusbar_buttons button:enabled:contains('${innerTextButton}'), .dropdown-item button:enabled:contains('${innerTextButton}')`,
+            content: description,
+            position: "bottom",
+            run: "click",
+        });
+        return steps.map((step) =>
             this.addDebugHelp(
-                this._getHelpMessage(
-                    "statusbarButtonsSteps",
-                    innerTextButton,
-                    description,
-                    extraTrigger
-                ),
+                this._getHelpMessage("statusbarButtonsSteps", innerTextButton, description),
                 step
             )
         );
-    },
-
-    simulateEnterKeyboardInSearchModal() {
-        return {
-            isActive: ["mobile"],
-            trigger: ".o_searchview_input",
-            extra_trigger: ".dropdown-menu.o_searchview_autocomplete",
-            position: "bottom",
-            run: "press Enter",
-            debugHelp: this._getHelpMessage("simulateEnterKeyboardInSearchModal"),
-        };
     },
 
     mobileKanbanSearchMany2X(modalTitle, valueSearched) {
@@ -268,12 +238,23 @@ export const stepUtils = {
             },
             {
                 isActive: ["mobile"],
+                trigger: `.modal:not(.o_inactive_modal) .modal-title:contains('${modalTitle}')`,
+            },
+            {
+                isActive: ["mobile"],
                 trigger: ".o_searchview_input",
-                extra_trigger: `.modal:not(.o_inactive_modal) .modal-title:contains('${modalTitle}')`,
                 position: "bottom",
                 run: `edit ${valueSearched}`,
             },
-            this.simulateEnterKeyboardInSearchModal(),
+            {
+                trigger: ".dropdown-menu.o_searchview_autocomplete",
+            },
+            {
+                isActive: ["mobile"],
+                trigger: ".o_searchview_input",
+                position: "bottom",
+                run: "press Enter",
+            },
             {
                 isActive: ["mobile"],
                 trigger: `.o_kanban_record:contains('${valueSearched}')`,
@@ -290,17 +271,14 @@ export const stepUtils = {
     /**
      * Utility steps to save a form and wait for the save to complete
      *
-     * @param {object} [options]
-     * @param {string} [options.content]
-     * @param {string} [options.extra_trigger] additional save-condition selector
+     * @param {string} [content]
      */
-    saveForm(options = {}) {
+    saveForm(content) {
         return [
             {
                 isActive: ["auto"],
-                content: options.content || "save form",
+                content: content || "save form",
                 trigger: ".o_form_button_save",
-                extra_trigger: options.extra_trigger,
                 run: "click",
             },
             {
@@ -322,7 +300,6 @@ export const stepUtils = {
                 isActive: ["auto"],
                 content: options.content || "exit the form",
                 trigger: ".o_form_button_cancel",
-                extra_trigger: options.extra_trigger,
                 run: "click",
             },
             {

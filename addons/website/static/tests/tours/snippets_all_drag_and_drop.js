@@ -110,13 +110,13 @@ registry.category("web_tour.tours").add("snippets_all_drag_and_drop", {
             unpatchWysiwygAdapter = patchWysiwygAdapter();
         },
     },
-    // This first step is needed as it will be used later for inner snippets
-    // Without this, it will dropped inside the footer and will need an extra
-    // selector.
-    websiteTourUtils.dragNDrop({
-        id: "s_text_image",
-        name: "Text - Image"
-    }),
+            // This first step is needed as it will be used later for inner snippets
+            // Without this, it will dropped inside the footer and will need an extra
+            // selector.
+            ...websiteTourUtils.dragNDrop({
+                id: "s_text_image",
+                name: "Text - Image",
+            }),
     {
         content: "Edit s_text_image snippet",
         trigger: ":iframe #wrap.o_editable [data-snippet='s_text_image']",
