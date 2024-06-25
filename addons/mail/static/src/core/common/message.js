@@ -191,7 +191,7 @@ export class Message extends Component {
         return {
             [this.props.className]: true,
             "o-selfAuthored": this.message.isSelfAuthored && !this.env.messageCard,
-            "o-selected": this.props.messageToReplyTo?.isSelected(
+            "o-selected alert bg-info border-0 border-start border-3 border-info rounded-0 text-body mx-n3 px-3 mb-0" : this.props.messageToReplyTo?.isSelected(
                 this.props.thread,
                 this.props.message
             ),

@@ -1,8 +1,12 @@
 .o-mail-Message {
     transition: opacity .5s ease-out, box-shadow .5s ease-out, transform .2s ease-out;
 
-    &.o-highlighted {
-        transform: translateY(-#{map-get($spacers, 3)});
+    &.o-selected, &.o-highlighted {
+        --bg-opacity: .075;
+
+        .o-mail-Message-bubble {
+            --bg-opacity: 1;
+        }
     }
 }
 

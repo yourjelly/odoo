@@ -17,6 +17,7 @@
 
     .o-mail-Composer-coreHeader {
         grid-area: core-header;
+        background-color: var(--o-mail-Composer-coreHeader-bg, $o-gray-200);
     }
 
     .o-mail-Composer-coreMain {

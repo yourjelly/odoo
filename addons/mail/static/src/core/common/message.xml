@@ -3,7 +3,7 @@
 
     <t t-name="mail.Message">
         <ActionSwiper onRightSwipe="hasTouch() and isInInbox ? { action: () => this.message.setDone(), bgColor: 'bg-success', icon: 'fa-check-circle' } : undefined">
-            <div class="o-mail-Message position-relative py-2 opacity-trigger-hover bg-opacity-0 bg-75-hover bg-200"
+            <div class="o-mail-Message position-relative py-2"
                 t-att-class="attClass"
                 role="group"
                 t-att-aria-label="messageTypeText"
@@ -82,9 +82,11 @@
                                             <div class="position-relative overflow-x-auto d-inline-block" t-att-class="{ 'w-100': state.isEditing }">
                                                 <div class="o-mail-Message-bubble rounded-bottom-3 position-absolute top-0 start-0 w-100 h-100" t-att-class="{
                                                     'border': state.isEditing and !message.is_note,
-                                                    'bg-info-light border border-info opacity-25': !message.isSelfAuthored and !message.is_note and !message.isHighlightedFromMention,
-                                                    'bg-success-light border border-success opacity-25': message.isSelfAuthored and !message.is_note and !message.isHighlightedFromMention,
+                                                    'bg-info-light border border-info opacity-25': !message.isSelfAuthored and !message.is_note and !message.isHighlightedFromMention and !this.props.messageToReplyTo?.isSelected(this.props.thread,this.props.message),
+                                                    'bg-success-light border border-success opacity-25': message.isSelfAuthored and !message.is_note and !message.isHighlightedFromMention and !this.props.messageToReplyTo?.isSelected(this.props.thread,this.props.message),
                                                     'bg-warning-light border border-warning opacity-50': message.isHighlightedFromMention,
+                                                    'bg-info-subtle border border-info-subtle': !message.isSelfAuthored and !message.is_note and !message.isHighlightedFromMention and this.props.messageToReplyTo?.isSelected(this.props.thread,this.props.message),
+                                                    'bg-success-subtle border border-success-subtle': message.isSelfAuthored and !message.is_note and !message.isHighlightedFromMention and this.props.messageToReplyTo?.isSelected(this.props.thread,this.props.message),
                                                     }" t-attf-class="{{ isAlignedRight ? 'rounded-start-3' : 'rounded-end-3' }}"/>
                                                 <div class="position-relative text-break o-mail-Message-body" t-att-class="{
                                                             'p-1': message.is_note,
