@@ -26,6 +26,7 @@ class ResPartner(models.Model):
              " specified transactions, correspondence, and so on.\n"
              "Thus, PAN acts as an identifier for the person with the tax department."
     )
+    l10n_in_pan_entity_id = fields.Many2one('l10n_in.pan.entity', string="PAN Entity")
 
     display_pan_warning = fields.Boolean(string="Display pan warning", compute="_compute_display_pan_warning")
 
@@ -72,3 +73,17 @@ class ResPartner(models.Model):
         if vat == TEST_GST_NUMBER:
             return True
         return super().check_vat_in(vat)
+
+    @api.onchange('vat')
+    def create_pan_entity(self):
+        self.ensure_one()
+        pan_entity = self.env['l10n_in.pan.entity']
+        if self.vat and self.check_vat_in(self.vat):
+            pan_entity_rec = pan_entity.search([('name', '=', self.vat[2:12])])
+            if not pan_entity_rec:
+                pan = pan_entity.create({
+                    'name': self.vat[2:12]
+                })
+                self.l10n_in_pan_entity_id = pan
+            else:
+                self.l10n_in_pan_entity_id = pan_entity_rec
