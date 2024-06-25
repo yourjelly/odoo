@@ -169,6 +169,28 @@ test("should not revert the step of another peer", async () => {
         },
     });
 });
+describe("collaborative makeSavePoint", () => {
+    test("After a savePoint, local steps should be discarded in collaboration and external steps should not", async () => {
+        const peerInfos = await setupMultiEditor({
+            peerIds: ["c1", "c2"],
+            contentBefore: `<p>[c1}{c1]</p><p>[c2}{c2]</p>`,
+        });
+        const savepoint = peerInfos.c1.editor.shared.makeSavePoint();
+        insert(peerInfos.c2.editor, "a");
+        mergePeersSteps(peerInfos);
+        insert(peerInfos.c1.editor, "z");
+        mergePeersSteps(peerInfos);
+        insert(peerInfos.c2.editor, "b");
+        mergePeersSteps(peerInfos);
+        savepoint();
+        mergePeersSteps(peerInfos);
+        peerInfos.c1.editor.dispatch("CLEAN", { root: peerInfos.c1.editor.editable });
+        peerInfos.c2.editor.dispatch("CLEAN", { root: peerInfos.c2.editor.editable });
+        renderTextualSelection(peerInfos);
+        expect(peerInfos.c1.editor.editable.innerHTML).toBe(`<p>[c1}{c1]</p><p>ab[c2}{c2]</p>`);
+        expect(peerInfos.c2.editor.editable.innerHTML).toBe(`<p>[c1}{c1]</p><p>ab[c2}{c2]</p>`);
+    });
+});
 test("should reset from snapshot", async () => {
     await testMultiEditor({
         peerIds: ["c1", "c2"],
