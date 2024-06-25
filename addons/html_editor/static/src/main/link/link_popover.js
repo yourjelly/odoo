@@ -44,9 +44,12 @@ export class LinkPopover extends Component {
             url: this.props.linkEl.href || "",
             label: cleanZWChars(this.props.linkEl.textContent),
             previewImg: false,
-            showFullUrl: false,
             faIcon: "fa-globe",
             urlTitle: "",
+            urlDescription:
+                "From ERP to CRM, eCommerce and CMS. Download Odoo or use it in the cloud. Grow Your Business.",
+            previewOdooKeywords: { left: "", right: "" },
+
             imgSrc: "",
             classes: this.props.linkEl.className || "",
             type:
@@ -58,6 +61,7 @@ export class LinkPopover extends Component {
         this.notificationService = useService("notification");
 
         this.keepLastPromise = new KeepLast();
+        this.http = useService("http");
 
         this.editingWrapper = useRef("editing-wrapper");
 
@@ -115,6 +119,10 @@ export class LinkPopover extends Component {
             this.onClickApply();
         }
     }
+    onClickReplaceTitle() {
+        this.state.label = this.state.urlTitle;
+        this.onClickApply();
+    }
 
     /**
      * @private
@@ -150,12 +158,13 @@ export class LinkPopover extends Component {
         this.state.faIcon = "fa-globe";
         this.state.previewImg = false;
         this.state.urlTitle = this.state.url || _t("No URL specified");
-        this.state.showFullUrl = false;
+        // this.state.urlDescription = "";
+        this.state.previewOdooKeywords = { left: "", right: "" };
     }
     async loadAsyncLinkPreview() {
         let url;
         if (this.state.url === "") {
-            this.resetPreview("");
+            this.resetPreview();
             this.state.faIcon = "fa-question-circle-o";
             return;
         }
@@ -170,7 +179,7 @@ export class LinkPopover extends Component {
             });
             return;
         }
-        this.resetPreview(url);
+        this.resetPreview();
         const protocol = url.protocol;
         if (!protocol.startsWith("http")) {
             const faMap = { "mailto:": "fa-envelope-o", "tel:": "fa-phone" };
@@ -187,9 +196,34 @@ export class LinkPopover extends Component {
                 url
             )}`;
             this.state.previewImg = true;
+
+            // TODO: fetch the metadata from the server for external links
+            // Fetch the metadata
+            fetch(url, {
+                header: {
+                    "Access-Control-Allow-Origin": "*",
+                },
+            })
+                .then((response) => response.text())
+                .then((data) => {
+                    const parser = new window.DOMParser();
+                    const contentDocument = parser.parseFromString(data, "text/html");
+                    const title = contentDocument.querySelector("title");
+                    const description = contentDocument.querySelector("meta[name='description']");
+
+                    this.state.urlTitle = title ? title.textContent : this.state.url;
+                    this.state.urlDescription = description
+                        ? description.getAttribute("content")
+                        : "";
+                })
+                .catch((error) => {
+                    // if fetching external link fails, we don't want to block the user
+                    // and the related preview data is set as default
+                    return;
+                });
         } else {
             await this.keepLastPromise
-                .add(fetch(this.state.href))
+                .add(fetch(this.state.url))
                 .then((response) => response.text())
                 .then((content) => {
                     const parser = new window.DOMParser();
@@ -199,6 +233,7 @@ export class LinkPopover extends Component {
                     const favicon = doc.querySelector("link[rel~='icon']");
                     const ogTitle = doc.querySelector("[property='og:title']");
                     const title = doc.querySelector("title");
+                    this.state.previewOdooKeywords = this.getPreviewOdooKeywords(this.state.url);
 
                     // Set
                     if (favicon) {
@@ -210,7 +245,16 @@ export class LinkPopover extends Component {
                             ? ogTitle.getAttribute("content")
                             : title.text.trim();
                     }
-                    this.state.showFullUrl = true;
+                    const internalTitle =
+                        this.state.previewOdooKeywords.left +
+                        " | " +
+                        this.state.previewOdooKeywords.right;
+                    if (
+                        this.state.previewOdooKeywords.left &&
+                        this.state.previewOdooKeywords.right
+                    ) {
+                        this.state.urlTitle = internalTitle;
+                    }
                 })
                 .catch((error) => {
                     // HTTP error codes should not prevent to edit the links, so we
@@ -233,5 +277,15 @@ export class LinkPopover extends Component {
             (this.state.type ? `btn btn-${style}${this.state.type}` : "") +
             (this.state.type && shapeClasses ? ` ${shapeClasses}` : "") +
             (this.state.type && this.state.buttonSize ? " btn-" + this.state.buttonSize : "");
+    }
+    /**
+     * @param {string} url the internal url to fetch
+     * @param {boolean} isExternal whether the url is external
+     * @returns {Object} left and right keywords for the preview based on the internal records
+     * E.g. for task module, the preview keywords: task name | project name;
+     *      for Sales order, the preview keywords: SO ref | Customer name;
+     */
+    getPreviewOdooKeywords(url) {
+        return { left: "test 1", right: "test 2" };
     }
 }
