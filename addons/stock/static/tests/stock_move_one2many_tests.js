@@ -79,7 +79,7 @@ QUnit.module("StockMoveX2ManyField", {}, function (hooks) {
                     <header>
                         <field name="state" widget="statusbar" />
                     </header>
-                    <field name="moves" widget="stock_move_one2many">
+                    <field name="moves">
                         <list editable="bottom">
                             <field name="display_name"/>
                             <field name="show_details_visible" column_invisible="True"/>
@@ -104,7 +104,7 @@ QUnit.module("StockMoveX2ManyField", {}, function (hooks) {
             },
         });
 
-        await click(target, "button[name='Open Move']");
+        await click(target, "button[name='action_show_details']");
         await click(target, ".modal-dialog .o_field_x2many_list_row_add a");
         await editInput(
             target,
