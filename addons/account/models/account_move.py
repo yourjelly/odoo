@@ -2550,6 +2550,21 @@ class AccountMove(models.Model):
         if to_delete:
             self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
         if to_create:
+            moves = container['records']
+            if line_type == 'payment_term':
+                total_sum = sum(abs(val['amount_currency']) for val in to_create.values())
+                if float_compare(
+                        total_sum,
+                        moves.tax_totals['amount_total'],
+                        precision_rounding=moves.currency_id.rounding
+                ) != 0:
+                    last_line = list(to_create.values())[-1]
+                    last_line['amount_currency'] = moves.tax_totals['amount_total']
+                    last_line['balance'] = moves.tax_totals['total_amount']
+            if line_type == 'tax':
+                total_sum = abs(sum(moves.line_ids.mapped('balance')))
+                if float_compare(total_sum, moves.tax_totals['amount_untaxed'], precision_rounding=moves.currency_id.rounding) != 0:
+                    moves.line_ids[-1].balance += moves.company_currency_id.round(total_sum - moves.tax_totals['amount_untaxed'])
             self.env['account.move.line'].create([
                 {**key, **values, 'display_type': line_type}
                 for key, values in to_create.items()
