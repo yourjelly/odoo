@@ -45,7 +45,7 @@ class TestTodoUi(HttpCase):
         # Ensure that all activities appear in the systray under the good category
         # name and that clicking on this category opens the correct view where only
         # records of this category are listed.
-        self.start_tour("/web", 'project_task_activities_split', login="admin")
+        self.start_tour("/web", 'project_task_activities_split', login="admin", step_delay=1)
 
     def test_tour_todo_main_ui_functions(self):
         """ This test ensure that the main ui functionalities are working including:
