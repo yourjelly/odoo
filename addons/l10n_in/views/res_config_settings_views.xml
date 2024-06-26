@@ -29,6 +29,41 @@
                     </setting>
                 </block>
             </app>
+            <xpath expr="//block[@name='fiscal_localization_setting_container']" position="after">
+                <block title="Indian Localization" invisible="country_code != 'IN'">
+                    <setting>
+                        <field name="module_l10n_in_tds" readonly="module_l10n_in_tds" force_save="1"/>
+                        <div invisible="not module_l10n_in_tds">
+                            <field name="module_accountant" widget="upgrade_boolean" force_save="1" readonly="module_accountant"/>
+                            <label class="ps-2" for="module_accountant" string="TDS Report"/>
+                        </div>
+                    </setting>
+                    <setting>
+                        <field name="module_l10n_in_tcs" readonly="module_l10n_in_tcs" force_save="1"/>
+                        <div invisible="not module_l10n_in_tcs">
+                            <field name="module_accountant" widget="upgrade_boolean" force_save="1" readonly="module_accountant"/>
+                            <label class="ps-2" for="module_accountant" string="TCS Report"/>
+                        </div>
+                    </setting>
+                    <setting>
+                        <field name="l10n_in_gst" readonly="l10n_in_gst" force_save="1"/>
+                        <div invisible="not l10n_in_gst">
+                            <div>
+                                <field name="module_l10n_in_reports_gstr" widget="upgrade_boolean" force_save="1" readonly="module_l10n_in_reports_gstr"/>
+                                <label class="ps-2" for="module_l10n_in_reports_gstr" string="GST Report"/>
+                            </div>
+                            <div>
+                                <field name="module_l10n_in_edi" widget="upgrade_boolean" force_save="1" readonly="module_l10n_in_edi"/>
+                                <label class="ps-2" for="module_l10n_in_edi" string="GST E-Invoice"/>
+                            </div>
+                            <div>
+                                <field name="module_l10n_in_edi_ewaybill" widget="upgrade_boolean" force_save="1" readonly="module_l10n_in_edi_ewaybill"/>
+                                <label class="ps-2" for="module_l10n_in_edi_ewaybill" string="GST E-WayBill"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
         </field>
     </record>
 </odoo>
