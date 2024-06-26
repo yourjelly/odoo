@@ -218,10 +218,11 @@ class TestAPI(SavepointCaseWithUserDemo):
         """Check the expected behavior of `env.uid_origin`"""
         user_demo = self.user_demo
         user_admin = self.env.ref('base.user_admin')
-        self.assertEqual(self.env.uid_origin, None)
-        self.assertEqual(self.env['base'].with_user(user_demo).env.uid_origin, user_demo.id)
-        self.assertEqual(self.env['base'].with_user(user_demo).with_user(user_admin).env.uid_origin, user_demo.id)
-        self.assertEqual(self.env['base'].with_user(user_admin).with_user(user_demo).env.uid_origin, user_admin.id)
+        env = api.Environment(self.cr, 1, {})
+        self.assertEqual(env.uid_origin, None)
+        self.assertEqual(env['base'].with_user(user_demo).env.uid_origin, user_demo.id)
+        self.assertEqual(env['base'].with_user(user_demo).with_user(user_admin).env.uid_origin, user_demo.id)
+        self.assertEqual(env['base'].with_user(user_admin).with_user(user_demo).env.uid_origin, user_admin.id)
 
     @mute_logger('odoo.models')
     def test_60_cache(self):
