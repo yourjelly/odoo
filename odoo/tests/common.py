@@ -772,7 +772,7 @@ class TransactionCase(BaseCase):
     env: api.Environment = None
     cr: Cursor = None
     muted_registry_logger = mute_logger(odoo.modules.registry._logger.name)
-
+    default_uid: int = 2
 
     @classmethod
     def _gc_filestore(cls):
@@ -822,7 +822,7 @@ class TransactionCase(BaseCase):
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(cls.cr.close)
 
-        cls.env = api.Environment(cls.cr, 2, {})
+        cls.env = api.Environment(cls.cr, cls.default_uid, {})
 
         # speedup CryptContext. Many user an password are done during tests, avoid spending time hasing password with many rounds
         def _crypt_context(self):  # noqa: ARG001
