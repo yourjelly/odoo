@@ -1,3 +1,4 @@
+import { browser } from "@web/core/browser/browser";
 import { rpc } from "@web/core/network/rpc";
 import { Cache } from "@web/core/utils/cache";
 import { session } from "@web/session";
@@ -126,3 +127,37 @@ export function _makeUser(session) {
 }
 
 export const user = _makeUser(session);
+
+const LAST_CONNECTED_USER_KEY = "web.lastConnectedUser";
+
+export const lastUsers = () => {
+    const lastConnectedUsers = browser.localStorage.getItem(LAST_CONNECTED_USER_KEY);
+    return lastConnectedUsers ? JSON.parse(lastConnectedUsers) : [];
+};
+
+export const registerUsers = (users) => {
+    browser.localStorage.setItem(LAST_CONNECTED_USER_KEY, JSON.stringify(users));
+};
+
+const registerUser = () => {
+    if (!user.login) {
+        return;
+    }
+    const users = lastUsers();
+    const lastedUsers = [
+        {
+            login: user.login,
+            name: user.name,
+            partnerId: user.partnerId,
+            partnerWriteDate: user.writeDate,
+            userId: user.userId,
+        },
+    ];
+    for (let i = 0; i < Math.min(5, users.length); i++) {
+        if (lastedUsers[0].userId !== users[i].userId) {
+            lastedUsers.push(users[i]);
+        }
+    }
+    registerUsers(lastedUsers);
+};
+registerUser();

@@ -137,7 +137,8 @@
 
     <template id="web.login" name="Login">
         <t t-call="web.login_layout">
-            <form class="oe_login_form" role="form" t-attf-action="/web/login" method="post" onsubmit="this.action = '/web/login' + location.hash">
+            <form t-attf-class="oe_login_form #{'' if login else 'd-none'}" role="form" t-attf-action="/web/login" method="post" onsubmit="this.action = '/web/login' + location.hash">
+                <owl-component t-if="not login" name="web.user_switch" />
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
                 <div class="mb-3" t-if="databases and len(databases) &gt; 1">
@@ -150,7 +151,7 @@
 
                 <div class="mb-3 field-login">
                     <label for="login" class="form-label">Email</label>
-                    <input type="text" placeholder="Email" name="login" t-att-value="login" id="login" class="form-control" required="required" autofocus="autofocus" autocapitalize="off"/>
+                    <input type="text" placeholder="Email" name="login" t-att-value="login" id="login" class="form-control" required="required" t-att-autofocus="'autofocus' if not login else None" autocapitalize="off"/>
                 </div>
 
                 <div class="mb-3">
