@@ -11,11 +11,11 @@ class TestEquipment(TransactionCase):
     def setUp(self):
         super(TestEquipment, self).setUp()
         self.equipment = self.env['maintenance.equipment']
-        self.maintenance_request = self.env['maintenance.request']
+        self.maintenance_request = self.env['project.task'].with_context(default_is_maintenance_task=True)
         self.res_users = self.env['res.users']
-        self.maintenance_team = self.env['maintenance.team']
+        self.maintenance_team = self.env['project.project'].with_context(default_is_maintenance_project=True)
         self.main_company = self.env.ref('base.main_company')
-        res_user = self.env.ref('base.group_user')
+        res_user = self.env.ref('project.group_project_user')
         res_manager = self.env.ref('maintenance.group_equipment_manager')
 
         self.user = self.res_users.create(dict(
@@ -63,7 +63,7 @@ class TestEquipment(TransactionCase):
             'equipment_id': equipment_01.id,
             'color': 7,
             'stage_id': self.ref('maintenance.stage_0'),
-            'maintenance_team_id': self.ref('maintenance.equipment_team_maintenance')
+            'project_id': self.ref('maintenance.equipment_team_maintenance')
         })
 
         # I check that maintenance_request is created or not
@@ -83,17 +83,19 @@ class TestEquipment(TransactionCase):
         Test that a maintenance request with repeat_type = forever will be duplicated when it
         is moved to a 'done' stage, and the new request will be placed in the first stage.
         """
-        maintenance_request = self.env['maintenance.request'].create({
+        maintenance_request = self.env['project.task'].create({
             'name': 'Test forever maintenance',
             'repeat_type': 'forever',
             'maintenance_type': 'preventive',
-            'recurring_maintenance': True,
+            'recurring_task': True,
+            'is_maintenance_task': True,
         })
-        done_maintenance_stage = self.env['maintenance.stage'].create({
+        done_maintenance_stage = self.env['project.task.type'].create({
             'name': 'Test Done',
             'done': True,
+            'is_maintenance_task_type': True,
         })
-        maintenance_stages = self.env['maintenance.stage'].search([])
+        maintenance_stages = self.env['project.task.type'].search([('is_maintenance_task_type', '=', True)])
         maintenance_request.with_context(default_stage_id=maintenance_stages[1].id).stage_id = done_maintenance_stage
-        new_maintenance = self.env['maintenance.request'].search([('name', '=', 'Test forever maintenance'), ('stage_id', '=', maintenance_stages[0].id)])
+        new_maintenance = self.env['project.task'].search([('name', 'ilike', 'Test forever maintenance'), ('stage_id', '=', maintenance_stages[0].id)])
         self.assertTrue(new_maintenance)

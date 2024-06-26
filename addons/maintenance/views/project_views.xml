@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Project actions -->
+    <record id="project.open_view_project_all" model="ir.actions.act_window">
+        <field name="domain">[('is_maintenance_project', '=', False)]</field>
+    </record>
+    <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
+        <field name="domain">[('is_maintenance_project', '=', False)]</field>
+    </record>
+
+    <!-- Task actions -->
+    <record id="project.action_view_all_task" model="ir.actions.act_window">
+        <field name="domain">[('display_in_project', '=', True), ('is_maintenance_task', '=', False)]</field>
+    </record>
+
+    <!-- Stage actions -->
+    <record id="project.open_task_type_form" model="ir.actions.act_window">
+        <field name="domain">[('user_id', '=', False), ('is_maintenance_task_type', '=', False)]</field>
+    </record>
+
+    <record id="project.open_task_type_form_domain" model="ir.actions.act_window">
+        <field name="domain">[('project_ids','=', project_id), ('is_maintenance_task_type', '=', False)]</field>
+    </record>
+</odoo>

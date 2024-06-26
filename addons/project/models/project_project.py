@@ -486,6 +486,10 @@ class Project(models.Model):
         projects = super().create(vals_list)
         return projects
 
+    def read(self, fields=None, load='_classic_read'):
+        result = super().read(fields=fields, load=load)
+        return result
+
     def write(self, vals):
         # Here we modify the project's stage according to the selected company (selecting the first
         # stage in sequence that is linked to the company).

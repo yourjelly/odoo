@@ -14,14 +14,14 @@ class TestEquipmentMulticompany(TransactionCase):
 
         # Use full models
         Equipment = self.env['maintenance.equipment']
-        MaintenanceRequest = self.env['maintenance.request']
+        MaintenanceRequest = self.env['project.task'].with_context(default_is_maintenance_task=True)
         Category = self.env['maintenance.equipment.category']
         ResUsers = self.env['res.users']
         ResCompany = self.env['res.company']
-        MaintenanceTeam = self.env['maintenance.team']
+        MaintenanceTeam = self.env['project.project'].with_context(default_is_maintenance_project=True)
 
         # Use full reference.
-        group_user = self.env.ref('base.group_user')
+        group_user = self.env.ref('project.group_project_user')
         group_manager = self.env.ref('maintenance.group_equipment_manager')
 
         # Company A
@@ -148,12 +148,6 @@ class TestEquipmentMulticompany(TransactionCase):
                 'technician_user_id': user.id,
             })
 
-        # create an maintenance stage BY user
-        with self.assertRaises(AccessError):
-            self.env['maintenance.stage'].with_user(user).create({
-                'name': 'identify corrective maintenance requirements',
-            })
-
         # Create an maintenance request for ( User Follower ).
         MaintenanceRequest.with_user(user).create({
             'name': 'Some keys are not working',
@@ -171,5 +165,5 @@ class TestEquipmentMulticompany(TransactionCase):
         })
 
         # Now here is total 1 maintenance request can be view by Normal User
-        self.assertEqual(MaintenanceRequest.with_user(equipment_manager).with_context(allowed_company_ids=cids).search_count([]), 2)
-        self.assertEqual(MaintenanceRequest.with_user(user).search_count([]), 1)
+        self.assertEqual(MaintenanceRequest.with_user(equipment_manager).with_context(allowed_company_ids=cids).search_count([('is_maintenance_task', '=', True)]), 2)
+        self.assertEqual(MaintenanceRequest.with_user(user).search_count([('is_maintenance_task', '=', True)]), 1)

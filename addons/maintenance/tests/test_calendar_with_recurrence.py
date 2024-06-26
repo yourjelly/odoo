@@ -7,29 +7,36 @@ from datetime import timedelta, date, datetime
 class TestCalendarWithRecurrence(HttpCase):
 
     def test_dblclick_event_from_calendar(self):
-        self.env['maintenance.team'].create({
+        team = self.env['project.project'].create({
             'name': 'the boys',
+            'is_maintenance_project': True,
         })
         equipment = self.env['maintenance.equipment'].create({
-            'name': 'room'
+            'name': 'room',
         })
-        self.env['maintenance.request'].create({
+        self.env['project.task'].create({
             'name': 'send the mails',
             'schedule_date': datetime.today() - timedelta(weeks=2),
+            'project_id': team.id,
+            'is_maintenance_task': True,
         })
-        request = self.env['maintenance.request'].create({
+        request = self.env['project.task'].create({
             'name': 'clean the room',
             'schedule_date': datetime.combine(date.today(), (datetime.min + timedelta(hours=10)).time()),  # today at 10.00 AM
             'equipment_id': equipment.id,  # necessary for the tour to work with mrp_maintenance installed
             'maintenance_type': 'preventive',
-            'recurring_maintenance': True,
+            'recurring_task': True,
             'repeat_interval': 1,
             'repeat_unit': 'day',
             'duration': 1,
+            'project_id': team.id,
+            'is_maintenance_task': True,
         })
-        self.env['maintenance.request'].create({
+        self.env['project.task'].create({
             'name': 'wash the car',
             'schedule_date': datetime.today() + timedelta(weeks=1),
+            'project_id': team.id,
+            'is_maintenance_task': True,
         })
 
         # The event should have a different id from the record
@@ -42,25 +49,32 @@ class TestCalendarWithRecurrence(HttpCase):
         self.assertEqual(float_compare(request.duration, 2, 0), 0)
 
     def test_drag_and_drop_calendar_event(self):
-        self.env['maintenance.team'].create({
+        team = self.env['project.project'].create({
             'name': 'the boys',
+            'is_maintenance_project': True,
         })
-        self.env['maintenance.request'].create({
+        self.env['project.task'].create({
             'name': 'send the mails',
             'schedule_date': datetime.today() - timedelta(weeks=2),
+            'project_id': team.id,
+            'is_maintenance_task': True,
         })
-        request = self.env['maintenance.request'].create({
+        request = self.env['project.task'].create({
             'name': 'clean the room',
             'schedule_date': datetime.combine(date.today(), (datetime.min + timedelta(hours=10)).time()),  # today at 10.00 AM
             'maintenance_type': 'preventive',
-            'recurring_maintenance': True,
+            'recurring_task': True,
             'repeat_interval': 1,
             'repeat_unit': 'day',
             'duration': 1,
+            'project_id': team.id,
+            'is_maintenance_task': True,
         })
-        self.env['maintenance.request'].create({
+        self.env['project.task'].create({
             'name': 'wash the car',
             'schedule_date': datetime.today() + timedelta(weeks=1),
+            'project_id': team.id,
+            'is_maintenance_task': True,
         })
 
         # The event should have a different id from the record

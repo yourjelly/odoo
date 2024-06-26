@@ -14,7 +14,7 @@ export class CalendarWithRecurrenceModel extends CalendarModel {
                 id: recordsCounter,
             };
             recordsCounter++;
-            if (rawRecord.recurring_maintenance && !rawRecord.done && !rawRecord.archive) {
+            if (rawRecord.recurring_task && !rawRecord.done && rawRecord.active) {
                 let { start, end } = data.range;
                 if (rawRecord.repeat_type == 'until') {
                     end = luxon.DateTime.min(end, deserializeDateTime(rawRecord.repeat_until)).endOf('day');

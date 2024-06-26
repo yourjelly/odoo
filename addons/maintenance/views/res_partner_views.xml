@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="view_partner_form_maintenance_project" model="ir.ui.view">
+        <field name="name">view.res.partner.form.maintenance_project</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <div name="button_box" position="inside">
+                    <button class="oe_stat_button" type="action"
+                        name="%(maintenance.hr_equipment_action)d"
+                        icon="fa-cubes"
+                        context="{'search_default_customer_id': id, 'default_customer_id': id}"
+                        invisible="equipment_count == 0">
+                        <field name="equipment_count" widget="statinfo"/>
+                    </button>
+                </div>
+            </data>
+        </field>
+    </record>
+</odoo>
