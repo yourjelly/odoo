@@ -5,7 +5,7 @@
     <div class="o-mail-Discuss d-flex h-100 flex-grow-1" t-att-class="{ 'flex-column align-items-center bg-view': ui.isSmall }" t-ref="root">
         <div t-if="ui.isSmall and store.discuss.activeTab === 'main'" class="w-100 border-bottom" t-call="mail.Discuss.mobileTopbar" t-ref="mobileTopbar"/>
         <div t-if="store.inPublicPage or !(ui.isSmall and store.discuss.activeTab !== 'main')" class="o-mail-Discuss-content d-flex flex-column h-100 w-100 overflow-auto" t-ref="content">
-            <div class="o-mail-Discuss-header px-3 bg-view d-flex flex-shrink-0 align-items-center border-bottom z-1" t-att-class="{ 'flex-grow-1': !ui.isSmall and !store.inPublicPage }" t-ref="header">
+            <div class="o-mail-Discuss-header px-3 bg-view d-flex flex-shrink-0 align-items-center border-bottom z-1 p-1" t-att-class="{ 'flex-grow-1': !ui.isSmall and !store.inPublicPage }" t-ref="header">
                 <t t-if="thread">
                     <div t-if="['channel', 'group', 'chat'].includes(thread.channel_type)" class="o-mail-Discuss-threadAvatar position-relative align-self-center align-items-center mt-2 mb-2 me-2">
                         <img class="rounded" t-att-src="thread.avatarUrl" alt="Thread Image"/>
@@ -23,7 +23,7 @@
                     <ImStatus t-if="thread.channel_type === 'chat' and thread.correspondent" className="'me-1'" persona="thread.correspondent.persona" thread="thread" />
                     <div class="d-flex flex-grow-1 align-self-center align-items-center h-100 py-2">
                         <AutoresizeInput
-                            className="'o-mail-Discuss-threadName lead fw-bold flex-shrink-1 text-dark py-0'"
+                            className="'o-mail-Discuss-threadName lead fw-bold flex-shrink-1 text-dark py-1'"
                             enabled="thread.is_editable or thread.channel_type === 'chat'"
                             onValidate.bind="renameThread"
                             value="thread.displayName"
@@ -40,9 +40,9 @@
                             />
                         </t>
                     </div>
-                    <div class="o-mail-Discuss-headerActions flex-shrink-0 d-flex align-items-center ms-1">
+                    <div class="o-mail-Discuss-headerActions flex-shrink-0 d-flex align-items-center ms-2">
                         <t t-foreach="threadActions.actions" t-as="action" t-key="action.id">
-                            <button class="btn px-1" t-attf-class="{{ action.isActive ? 'o-isActive' : '' }}" t-att-disabled="action.disabledCondition" t-att-title="action.name" t-att-name="action.id" t-on-click="() => action.onSelect()">
+                            <button class="btn btn-light" t-attf-class="{{ action.isActive ? 'o-isActive' : '' }}" t-att-disabled="action.disabledCondition" t-att-title="action.name" t-att-name="action.id" t-on-click="() => action.onSelect()">
                                 <i t-if="action.iconLarge" t-att-class="action.iconLarge"/> <span t-if="action.text" t-esc="action.text"/>
                             </button>
                         </t>

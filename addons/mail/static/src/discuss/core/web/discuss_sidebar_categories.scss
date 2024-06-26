@@ -3,6 +3,9 @@
         width: 15px;
         height: 15px;
     }
+    .o-mail-DiscussSidebarCategory:not(.o-mail-DiscussSidebarCategory-channel) {
+        margin-top: map-get($spacers, 3);
+    }
 }
 
 .o-mail-DiscussSidebar-item {

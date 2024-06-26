@@ -1,6 +1,9 @@
 .o-mail-AutoresizeInput {
     --o-input-border-color: transparent;
 
+    &:disabled {
+        background-color: transparent;
+    }
     &:not([disabled]) {
         &:hover {
             --o-input-border-color: #{$border-color};
