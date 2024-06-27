@@ -40,6 +40,8 @@ def on_message(ws, messages):
         When a message is receive, this function is triggered
         The message is load and if its type is 'iot_action', is sent to the device
     """
+    _logger.critical("IN WEBSOCKET CLIENT on_message")
+    import pdb; pdb.set_trace()
     messages = json.loads(messages)
     for message in messages:
         if (message['message']['type'] == 'iot_action'):

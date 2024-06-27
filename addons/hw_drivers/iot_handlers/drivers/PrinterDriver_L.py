@@ -373,6 +373,8 @@ class PrinterDriver(Driver):
             self.print_raw(drawer)
 
     def _action_default(self, data):
+        _logger.critical("IN PRINTER DRIVER_L _action_default")
+        import pdb; pdb.set_trace()
         self.print_raw(b64decode(data['document']))
         send_to_controller(self.connection_type, {'print_id': data['print_id'], 'device_identifier': self.device_identifier})
 
