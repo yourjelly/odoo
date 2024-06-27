@@ -1,12 +1,12 @@
 // ! WARNING: this module cannot depend on modules not ending with ".hoot" (except libs) !
 
 import { describe, dryRun, globals, start, stop } from "@odoo/hoot";
+import { setupEventActions } from "@odoo/hoot-dom";
 import { Deferred, watchKeys, watchListeners } from "@odoo/hoot-mock";
 import { whenReady } from "@odoo/owl";
 
 import { mockBrowserFactory } from "./mock_browser.hoot";
 import { mockCurrencyFactory } from "./mock_currency.hoot";
-import { TEST_SUFFIX } from "./mock_module_loader";
 import { mockSessionFactory } from "./mock_session.hoot";
 import { makeTemplateFactory } from "./mock_templates.hoot";
 import { mockUserFactory } from "./mock_user.hoot";
@@ -207,13 +207,15 @@ const getSuitePath = (name) => name.replace("../tests/", "");
  * Keeps the original definition of a factory.
  *
  * @param {string} name
+ * @param {OdooModule} module
  */
-const makeFixedFactory = (name) => {
-    return () => {
-        if (!loader.modules.has(name)) {
-            loader.startModule(name);
+const makeFixedFactory = (name, { fn }) => {
+    let moduleInstance;
+    return (...args) => {
+        if (!moduleInstance) {
+            moduleInstance = fn(...args);
         }
-        return loader.modules.get(name);
+        return moduleInstance;
     };
 };
 
@@ -274,13 +276,21 @@ const resolveAddonDependencies = (dependencies) => {
 };
 
 const runTests = async () => {
-    // Sort modules to accelerate loading time
-    /** @type {Record<string, Deferred>} */
-    const defs = {};
-    /** @type {Map<string, string[]>} */
-    const nonLoaded = new Map();
+    if (window.frameElement) {
+        const topLoader = window.top.odoo.loader;
+
+        const hootTop = topLoader.modules.get("@odoo/hoot");
+        const domCurrent = loader.modules.get("@odoo/hoot-dom");
+
+        if (hootTop && domCurrent) {
+            domCurrent.enableEventLogs(hootTop.__debug__.debug);
+        }
+    }
+
     /** @type {string[]} */
     const testModuleNames = [];
+    /** @type {[string, string[]][]} */
+    const moduleDependencies = [];
     for (const [name, { deps }] of loader.factories) {
         // Register test module
         if (name.endsWith(TEST_SUFFIX)) {
@@ -288,37 +298,25 @@ const runTests = async () => {
             testModuleNames.push(baseName);
         }
 
-        // Register module dependencies
-        nonLoaded.set(name, deps);
-        const [modDef, ...depDefs] = [name, ...deps].map((dep) => (defs[dep] ||= new Deferred()));
-        Promise.all(depDefs).then(() => {
-            sortedModuleNames.push(name);
-            modDef.resolve();
-            nonLoaded.delete(name);
-        });
+        moduleDependencies.push([name, loader.modules.has(name) ? [] : [...deps]]);
     }
 
-    let timeout;
-    await Promise.race([
-        Promise.all(Object.values(defs)),
-        new Promise((resolve, reject) => {
-            timeout = setTimeout(
-                () =>
-                    reject(
-                        [
-                            `Missing dependencies:`,
-                            ...new Set(
-                                [...nonLoaded].flatMap(([name, deps]) =>
-                                    deps.filter((d) => !sortedModuleNames.includes(d))
-                                )
-                            ),
-                        ].join("\n")
-                    ),
-                1000
-            );
-        }),
-    ]);
-    clearTimeout(timeout);
+    // Sort modules to accelerate loading time
+    /** @type {[string, string[]] | null} */
+    let current = null;
+    while ((current = moduleDependencies.find(([, deps]) => !deps.length))) {
+        const [name] = current;
+        sortedModuleNames.push(name);
+        moduleDependencies.splice(moduleDependencies.indexOf(current), 1);
+        for (const module of moduleDependencies) {
+            module[1] = module[1].filter((dep) => dep !== name);
+        }
+    }
+
+    const nonLoaded = moduleDependencies.flatMap(([, deps]) => deps);
+    if (nonLoaded.length) {
+        throw new Error([`Missing dependencies:`, ...new Set(nonLoaded)].join("\n"));
+    }
 
     // Dry run
     const [{ suites }] = await Promise.all([
@@ -405,7 +403,7 @@ class ModuleSetLoader extends loader.constructor {
         this.cleanups.push(
             watchKeys(window.odoo, WHITE_LISTED_KEYS),
             watchKeys(window, WHITE_LISTED_KEYS),
-            watchListeners()
+            watchListeners(window.EventTarget)
         );
 
         // Load module set modules (without entry point)
@@ -460,6 +458,7 @@ const MODULE_MOCKS_BY_REGEX = new Map([
 ]);
 const R_DEFAULT_MODULE = /^@odoo\/(owl|hoot)/;
 const R_PATH_ADDON = /^[@/]?(\w+)/;
+const TEST_SUFFIX = ".test";
 const WHITE_LISTED_KEYS = [
     "ace", // Ace editor
     "Chart", // Chart.js
@@ -503,6 +502,7 @@ console.warn = function throwInsteadOfWarn(...args) {
     }
 };
 
+setupEventActions(window);
 // Invoke tests after the module loader finished loading.
 setTimeout(runTests);
 

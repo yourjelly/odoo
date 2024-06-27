@@ -1,4 +1,4 @@
-import { beforeEach, destroy, expect, test } from "@odoo/hoot";
+import { beforeEach, expect, test } from "@odoo/hoot";
 import { queryAll, queryAllAttributes, queryAllTexts, resize } from "@odoo/hoot-dom";
 import { advanceTime, animationFrame, runAllTimers } from "@odoo/hoot-mock";
 import {
@@ -6,6 +6,7 @@ import {
     contains,
     defineMenus,
     defineParams,
+    destroy,
     getService,
     makeMockEnv,
     mountWithCleanup,
@@ -379,7 +380,7 @@ test.tags("desktop")("can adapt with 'more' menu sections behavior", async () =>
     ]);
 
     // Force the parent width, to make this test independent of screen size
-    resize({ width: 1080 });
+    await resize({ width: 1080 });
 
     await makeMockEnv();
 
@@ -391,7 +392,7 @@ test.tags("desktop")("can adapt with 'more' menu sections behavior", async () =>
     });
     expect(".o_menu_sections_more").toHaveCount(0, { message: "the 'more' menu should not exist" });
     // Force minimal width
-    resize({ width: 0 });
+    await resize({ width: 1 });
     await advanceTime(navbarDebounceTime);
     expect(".o_menu_sections > *:not(.d-none)").toHaveCount(1, {
         message: "only one menu section should be displayed",
@@ -406,7 +407,7 @@ test.tags("desktop")("can adapt with 'more' menu sections behavior", async () =>
         { message: "'more' menu should contain all hidden sections in correct order" }
     );
     // Reset to full width
-    resize({ width: 1366 });
+    await resize({ width: "100%" });
     await advanceTime(navbarDebounceTime);
     expect(".o_menu_sections > *:not(.o_menu_sections_more):not(.d-none)").toHaveCount(3, {
         message: "should have 3 menu sections displayed (that are not the 'more' menu)",
@@ -461,7 +462,7 @@ test.tags("desktop")(
         ]);
 
         // Force the parent width, to make this test independent of screen size
-        resize({ width: 600 });
+        await resize({ width: 600 });
 
         const navbar = await mountWithCleanup(MyNavbar);
         expect(navbar.currentAppSections).toHaveLength(0, { message: "0 app sub menus" });
@@ -472,7 +473,7 @@ test.tags("desktop")(
         });
 
         // Force minimal width
-        resize({ width: 0 });
+        await resize({ width: 1 });
         await advanceTime(navbarDebounceTime);
         expect(".o_navbar").toHaveProperty("offsetWidth", 0);
         expect(adaptCount).toBe(2);
@@ -494,7 +495,7 @@ test.tags("desktop")(
         });
 
         // Force small width
-        resize({ width: 240 });
+        await resize({ width: 240 });
         await advanceTime(navbarDebounceTime);
         expect(navbar.currentAppSectionsExtra).toHaveLength(3, {
             message: "all app sub menus are inside the more menu",
@@ -506,7 +507,7 @@ test.tags("desktop")(
         });
 
         // Reset to full width
-        resize({ width: 1366 });
+        await resize({ width: "100%" });
         await advanceTime(navbarDebounceTime);
         expect(navbar.currentAppSections).toHaveLength(3, { message: "still 3 app sub menus" });
         expect(navbar.currentAppSectionsExtra).toHaveLength(0, {
@@ -571,7 +572,7 @@ test.tags("desktop")("'more' menu sections properly updated on app change", asyn
     ]);
 
     // Force the parent width, to make this test independent of screen size
-    resize({ width: 1080 });
+    await resize({ width: 1080 });
 
     await makeMockEnv();
 
@@ -580,7 +581,7 @@ test.tags("desktop")("'more' menu sections properly updated on app change", asyn
     await mountWithCleanup(NavBar);
 
     // Force minimal width
-    resize({ width: 0 });
+    await resize({ width: 1 });
     await advanceTime(navbarDebounceTime);
     expect(".o_menu_sections > *:not(.d-none)").toHaveCount(1, {
         message: "only one menu section should be displayed",
@@ -626,10 +627,10 @@ test("Do not execute adapt when navbar is destroyed", async () => {
     getService("menu").setCurrentMenu(1);
     const navbar = await mountWithCleanup(MyNavbar);
     expect.verifySteps(["adapt NavBar"]);
-    resize();
+    await resize({ width: "101%" });
     await runAllTimers();
     expect.verifySteps(["adapt NavBar"]);
-    resize();
+    await resize({ width: "100%" });
     destroy(navbar);
     await runAllTimers();
     expect.verifySteps([]);

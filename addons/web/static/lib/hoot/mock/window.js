@@ -1,8 +1,8 @@
 /** @odoo-module */
 
-import { EventBus, whenReady } from "@odoo/owl";
-import { getCurrentDimensions, mockedMatchMedia } from "@web/../lib/hoot-dom/helpers/dom";
-import { getRunner } from "../main_runner";
+import { whenReady } from "@odoo/owl";
+import { mockedMatchMedia } from "@web/../lib/hoot-dom/helpers/dom";
+import { getRunner, getTargetWindow, protectOriginalValue, setTargetWindow } from "../hoot_globals";
 import { mockNavigator } from "./navigator";
 import {
     MockBroadcastChannel,
@@ -30,37 +30,6 @@ import {
 } from "./time";
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    document,
-    Document,
-    HTMLBodyElement,
-    HTMLHeadElement,
-    HTMLHtmlElement,
-    innerHeight,
-    innerWidth,
-    MessagePort,
-    Number: { isNaN: $isNaN, parseFloat: $parseFloat },
-    Object: {
-        defineProperty: $defineProperty,
-        entries: $entries,
-        getOwnPropertyDescriptor: $getOwnPropertyDescriptor,
-        getPrototypeOf: $getPrototypeOf,
-        hasOwn: $hasOwn,
-    },
-    ontouchstart,
-    outerHeight,
-    outerWidth,
-    Reflect: { ownKeys: $ownKeys },
-    Set,
-    SharedWorker,
-    Window,
-    Worker,
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -69,10 +38,12 @@ const {
  * @param {Record<string, PropertyDescriptor>} descriptors
  */
 const applyPropertyDescriptors = (target, descriptors) => {
-    for (const [property, rawDescriptor] of $entries(descriptors)) {
+    for (const [property, rawDescriptor] of Object.entries(descriptors)) {
+        protectOriginalValue(target, property);
+
         const owner = findPropertyOwner(target, property);
         originalDescriptors.push({
-            descriptor: $getOwnPropertyDescriptor(owner, property),
+            descriptor: Object.getOwnPropertyDescriptor(owner, property),
             owner,
             property,
             target,
@@ -81,7 +52,7 @@ const applyPropertyDescriptors = (target, descriptors) => {
         if ("value" in descriptor) {
             descriptor.writable = false;
         }
-        $defineProperty(owner, property, descriptor);
+        Object.defineProperty(owner, property, descriptor);
     }
 };
 
@@ -105,33 +76,15 @@ const findOriginalDescriptor = (target, property) => {
  * @returns {any}
  */
 const findPropertyOwner = (object, property) => {
-    if ($hasOwn(object, property)) {
+    if (Object.hasOwn(object, property)) {
         return object;
     }
-    const prototype = $getPrototypeOf(object);
+    const prototype = Object.getPrototypeOf(object);
     if (prototype) {
         return findPropertyOwner(prototype, property);
     }
     return object;
 };
-
-const EVENT_TARGET_PROTOTYPES = new Map(
-    [
-        // Top level objects
-        Window,
-        Document,
-        // Permanent DOM elements
-        HTMLBodyElement,
-        HTMLHeadElement,
-        HTMLHtmlElement,
-        // Workers
-        MessagePort,
-        SharedWorker,
-        Worker,
-        // Others
-        EventBus,
-    ].map((cls) => [cls.prototype, cls.prototype.addEventListener])
-);
 
 /** @type {{ descriptor: PropertyDescriptor; owner: any; property: string; target: any }[]} */
 const originalDescriptors = [];
@@ -160,14 +113,10 @@ const WINDOW_MOCK_DESCRIPTORS = {
     Date: { value: MockDate, writable: false },
     fetch: { value: mockedFetch, writable: false },
     history: { value: mockHistory },
-    innerHeight: { get: () => getCurrentDimensions().height || innerHeight },
-    innerWidth: { get: () => getCurrentDimensions().width || innerWidth },
     localStorage: { value: mockLocalStorage, writable: false },
     matchMedia: { value: mockedMatchMedia },
     navigator: { value: mockNavigator },
     Notification: { value: MockNotification },
-    outerHeight: { get: () => getCurrentDimensions().height || outerHeight },
-    outerWidth: { get: () => getCurrentDimensions().width || outerWidth },
     Request: { value: MockRequest, writable: false },
     requestAnimationFrame: { value: mockedRequestAnimationFrame, writable: false },
     Response: { value: MockResponse, writable: false },
@@ -192,9 +141,6 @@ export function cleanupWindow() {
 
     // Title
     mockTitle = "";
-
-    // Touch
-    globalThis.ontouchstart = ontouchstart;
 }
 
 export function getTitle() {
@@ -210,17 +156,29 @@ export function getTitle() {
  * @param {boolean} setTouch
  */
 export function mockTouch(setTouch) {
+    const window = getTargetWindow();
+    const previous = window.ontouchstart;
     if (setTouch) {
-        globalThis.ontouchstart ||= null;
+        window.ontouchstart ||= null;
     } else {
-        delete globalThis.ontouchstart;
+        delete window.ontouchstart;
     }
+
+    getRunner().after(() => {
+        if (previous === undefined) {
+            delete window.ontouchstart;
+        } else {
+            window.ontouchstart = previous;
+        }
+    });
 }
 
 /**
  * @param {typeof globalThis} global
  */
-export function patchWindow({ document, window } = globalThis) {
+export function patchWindow({ document, window }) {
+    setTargetWindow(window);
+
     applyPropertyDescriptors(window, WINDOW_MOCK_DESCRIPTORS);
     whenReady(() => {
         applyPropertyDescriptors(document, DOCUMENT_MOCK_DESCRIPTORS);
@@ -239,10 +197,17 @@ export function setTitle(value) {
     }
 }
 
-export function watchListeners() {
+/**
+ * @param {...typeof EventTarget} TargetClasses
+ */
+export function watchListeners(...TargetClasses) {
     const remaining = [];
+    /** @type {[EventTarget, EventTarget["addEventListener"]][]} */
+    const originalFunctions = [];
 
-    for (const [proto, addEventListener] of EVENT_TARGET_PROTOTYPES) {
+    for (const cls of TargetClasses) {
+        const [proto, addEventListener] = [cls.prototype, cls.prototype.addEventListener];
+        originalFunctions.push([proto, addEventListener]);
         proto.addEventListener = function mockedAddEventListener(...args) {
             const runner = getRunner();
             if (runner.dry) {
@@ -266,7 +231,7 @@ export function watchListeners() {
             target.removeEventListener(...args);
         }
 
-        for (const [proto, addEventListener] of EVENT_TARGET_PROTOTYPES) {
+        for (const [proto, addEventListener] of originalFunctions) {
             proto.addEventListener = addEventListener;
         }
     };
@@ -284,14 +249,14 @@ export function watchListeners() {
  *  afterEach(watchKeys(window, ["odoo"]));
  */
 export function watchKeys(target, whiteList) {
-    const acceptedKeys = new Set([...$ownKeys(target), ...(whiteList || [])]);
+    const acceptedKeys = new Set([...Reflect.ownKeys(target), ...(whiteList || [])]);
 
     return function checkKeys() {
-        const keysDiff = $ownKeys(target).filter(
-            (key) => $isNaN($parseFloat(key)) && !acceptedKeys.has(key)
+        const keysDiff = Reflect.ownKeys(target).filter(
+            (key) => Number.isNaN(Number.parseFloat(key)) && !acceptedKeys.has(key)
         );
         for (const key of keysDiff) {
-            const descriptor = $getOwnPropertyDescriptor(target, key);
+            const descriptor = Object.getOwnPropertyDescriptor(target, key);
             if (descriptor.configurable) {
                 delete target[key];
             } else if (descriptor.writable) {

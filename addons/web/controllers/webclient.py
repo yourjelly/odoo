@@ -98,6 +98,10 @@ class WebClient(http.Controller):
         return odoo.service.common.exp_version()
 
     @http.route('/web/tests/next', type='http', auth='user', readonly=True)
+    def unit_tests_runner(self, mod=None, **kwargs):
+        return request.render('web.unit_tests_runner')
+
+    @http.route('/web/tests/suite', type='http', auth='user', readonly=True)
     def unit_tests_suite(self, mod=None, **kwargs):
         return request.render('web.unit_tests_suite')
 

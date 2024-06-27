@@ -1,9 +1,10 @@
-import { describe, destroy, expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { keyDown, keyUp, press, queryAllTexts, queryOne, resize } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Component, onMounted, useState, xml } from "@odoo/owl";
 import {
     contains,
+    destroy,
     getService,
     makeDialogMockEnv,
     mountWithCleanup,
@@ -384,7 +385,7 @@ test("dialog's position is reset on resize", async () => {
         top: `${modalRect.x + 50}px`,
     });
 
-    resize();
+    await resize({ width: "99%" });
     await animationFrame();
     expect(".modal-content").toHaveStyle({
         left: "0px",

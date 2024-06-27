@@ -1,4 +1,4 @@
-import { after, expect, getFixture } from "@odoo/hoot";
+import { after, expect } from "@odoo/hoot";
 import { formatXml } from "@odoo/hoot-dom";
 import { Deferred } from "@odoo/hoot-mock";
 import { Component, onMounted, useSubEnv, xml } from "@odoo/owl";
@@ -208,7 +208,7 @@ export async function mountViewInDialog(params) {
 export async function mountView(params, target = null) {
     const actionManagerEl = document.createElement("div");
     actionManagerEl.classList.add("o_action_manager");
-    (target ?? getFixture()).append(actionManagerEl);
+    (target ?? document.body).append(actionManagerEl);
     after(() => actionManagerEl.remove());
     const config = { ...getDefaultConfig(), ...params.config };
     return mountWithCleanup(View, {

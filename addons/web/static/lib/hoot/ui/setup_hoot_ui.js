@@ -1,8 +1,7 @@
 /** @odoo-module */
 
 import { mount, reactive, whenReady } from "@odoo/owl";
-import { getRunner } from "../main_runner";
-import { patchWindow } from "../mock/window";
+import { getRunner } from "../hoot_globals";
 import { generateStyleSheets, setColorRoot } from "./hoot_colors";
 import { HootMain } from "./hoot_main";
 
@@ -11,17 +10,6 @@ import { HootMain } from "./hoot_main";
  *
  * @typedef {ReturnType<typeof makeUiState>} UiState
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    customElements,
-    document,
-    HTMLElement,
-    Object: { entries: $entries },
-} = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -40,60 +28,25 @@ const makeUiState = () =>
         totalResults: 0,
     });
 
-class HootContainer extends HTMLElement {
-    constructor() {
-        super(...arguments);
-
-        this.attachShadow({ mode: "open" });
-
-        const colorStyleElement = document.createElement("style");
-        let colorStyleContent = "";
-        for (const [className, content] of $entries(generateStyleSheets())) {
-            const selector = className === "default" ? ":host" : `:host(.${className})`;
-            colorStyleContent += `${selector}{${content}}`;
-        }
-        colorStyleElement.innerText = colorStyleContent;
-        this.shadowRoot.appendChild(colorStyleElement);
-
-        for (const href of STYLE_SHEETS) {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = href;
-            this.shadowRoot.appendChild(link);
-        }
-    }
-
-    connectedCallback() {
-        setColorRoot(this);
-    }
-
-    disconnectedCallback() {
-        setColorRoot(null);
-    }
-}
-
-const STYLE_SHEETS = [
-    "/web/static/src/libs/fontawesome/css/font-awesome.css",
-    "/web/static/lib/hoot/ui/hoot_style.css",
-];
-
-customElements.define("hoot-container", HootContainer);
-
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
 
 export function setupHootUI() {
-    // - Patch window before code from other modules is executed
-    patchWindow();
-
     // - Mount the main UI component
     whenReady(() => {
-        const container = document.createElement("hoot-container");
-        container.style.display = "contents";
-        document.body.appendChild(container);
+        setColorRoot(document.body);
 
-        mount(HootMain, container.shadowRoot, {
+        const colorStyleElement = document.createElement("style");
+        let colorStyleContent = "";
+        for (const [className, content] of Object.entries(generateStyleSheets())) {
+            const selector = className === "default" ? ":root" : `.${className}`;
+            colorStyleContent += `${selector}{${content}}`;
+        }
+        colorStyleElement.innerText = colorStyleContent;
+        document.head.appendChild(colorStyleElement);
+
+        mount(HootMain, document.body, {
             // TODO <<< remove when lib is stable
             dev: true,
             warnIfNoStaticProps: true,

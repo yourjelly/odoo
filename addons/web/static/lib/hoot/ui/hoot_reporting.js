@@ -4,7 +4,7 @@ import { Component, onWillRender, useState, xml } from "@odoo/owl";
 import { parseRegExp } from "../../hoot-dom/hoot_dom_utils";
 import { Test } from "../core/test";
 import { EXCLUDE_PREFIX } from "../core/url";
-import { formatTime, getFuzzyScore, normalize } from "../hoot_utils";
+import { formatTime, getFuzzyScore, isInstanceOf, normalize } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
 import { HootTestPath } from "./hoot_test_path";
 import { HootTestResult } from "./hoot_test_result";
@@ -15,12 +15,6 @@ import { HootTestResult } from "./hoot_test_result";
  *
  * @typedef {import("../core/test").Test} Test
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const { Boolean, RegExp } = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -228,7 +222,7 @@ export class HootReporting extends Component {
             return null;
         }
         const nFilter = parseRegExp(normalize(filter), { safe: true });
-        if (nFilter instanceof RegExp) {
+        if (isInstanceOf(nFilter, RegExp)) {
             return (key) => nFilter.test(key);
         }
 

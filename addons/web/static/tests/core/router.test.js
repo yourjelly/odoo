@@ -1,4 +1,4 @@
-import { describe, expect, getFixture, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { click, on } from "@odoo/hoot-dom";
 import { tick } from "@odoo/hoot-mock";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
@@ -1689,10 +1689,9 @@ describe("internal links", () => {
     test("click on internal link does a loadState instead of a full reload", async () => {
         redirect("/odoo");
         createRouter({ onPushState: () => expect.step("pushState") });
-        const fixture = getFixture();
         const link = document.createElement("a");
         link.href = "/odoo/some-action/2";
-        fixture.appendChild(link);
+        document.body.appendChild(link);
 
         expect(router.current).toEqual({});
 
@@ -1724,12 +1723,11 @@ describe("internal links", () => {
     test("click on internal link with children does a loadState instead of a full reload", async () => {
         redirect("/odoo");
         createRouter({ onPushState: () => expect.step("pushState") });
-        const fixture = getFixture();
         const link = document.createElement("a");
         const span = document.createElement("span");
         link.appendChild(span);
         link.href = "/odoo/some-action/2";
-        fixture.appendChild(link);
+        document.body.appendChild(link);
 
         expect(router.current).toEqual({});
 
@@ -1761,10 +1759,9 @@ describe("internal links", () => {
     test("click on internal link with different protocol does a loadState", async () => {
         redirect("/odoo");
         createRouter({ onPushState: () => expect.step("pushState") });
-        const fixture = getFixture();
         const link = document.createElement("a");
         link.href = "http://" + browser.location.host + "/odoo/some-action/2";
-        fixture.appendChild(link);
+        document.body.appendChild(link);
 
         expect(router.current).toEqual({});
         expect(browser.location.protocol).not.toBe(link.protocol, {
@@ -1803,10 +1800,9 @@ describe("internal links", () => {
             onPushState: () => expect.step("pushState"),
             onReplaceState: () => expect.step("replaceState"),
         });
-        const fixture = getFixture();
         const link = document.createElement("a");
         link.href = "/web#action=114&active_id=1&id=22";
-        fixture.appendChild(link);
+        document.body.appendChild(link);
 
         expect(router.current).toEqual({});
 
@@ -1841,11 +1837,10 @@ describe("internal links", () => {
     test("click on internal link with target _blank doesn't do a loadState", async () => {
         redirect("/odoo");
         createRouter({ onPushState: () => expect.step("pushState") });
-        const fixture = getFixture();
         const link = document.createElement("a");
         link.href = "/odoo/some-action/2";
         link.target = "_blank";
-        fixture.appendChild(link);
+        document.body.appendChild(link);
 
         expect(router.current).toEqual({});
 

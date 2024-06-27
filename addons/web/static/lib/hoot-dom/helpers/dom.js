@@ -3,11 +3,9 @@
 import { HootDomError, getTag, isFirefox, isIterable, parseRegExp } from "../hoot_dom_utils";
 
 /**
- * @typedef {{
- *  w?: number;
- *  h?: number;
- *  width?: number;
- *  height?: number;
+ * @typedef {string | [number | string] | [number | string, number | string] | {
+ *  width?: number | string;
+ *  height?: number | string;
  * }} Dimensions
  *
  * @typedef {{
@@ -75,28 +73,6 @@ import { HootDomError, getTag, isFirefox, isIterable, parseRegExp } from "../hoo
  * @template T
  * @typedef {T | Iterable<T>} MaybeIterable
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Boolean,
-    cancelAnimationFrame,
-    clearTimeout,
-    document,
-    DOMParser,
-    Map,
-    Math: { floor: $floor },
-    MutationObserver,
-    Number: { isInteger: $isInteger, isNaN: $isNaN, parseInt: $parseInt, parseFloat: $parseFloat },
-    Object: { keys: $keys, values: $values },
-    Promise,
-    RegExp,
-    requestAnimationFrame,
-    Set,
-    setTimeout,
-} = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -230,6 +206,8 @@ const generateStringFromLayers = (layers, tabSize) => {
     }
     return result.join("\n");
 };
+
+const getContainer = () => window.frameElement || getDefaultRoot();
 
 /**
  * @param {string} string
@@ -450,19 +428,19 @@ const matchesQueryPart = (query, width, height) => {
                 break;
             }
             case "max-height": {
-                result = height <= $parseFloat(value);
+                result = height <= Number.parseFloat(value);
                 break;
             }
             case "max-width": {
-                result = width <= $parseFloat(value);
+                result = width <= Number.parseFloat(value);
                 break;
             }
             case "min-height": {
-                result = height >= $parseFloat(value);
+                result = height >= Number.parseFloat(value);
                 break;
             }
             case "min-width": {
-                result = width >= $parseFloat(value);
+                result = width >= Number.parseFloat(value);
                 break;
             }
             case "orientation": {
@@ -472,11 +450,11 @@ const matchesQueryPart = (query, width, height) => {
             case "pointer": {
                 switch (value) {
                     case "coarse": {
-                        result = globalThis.ontouchstart !== undefined;
+                        result = getWindow().ontouchstart !== undefined;
                         break;
                     }
                     case "fine": {
-                        result = globalThis.ontouchstart === undefined;
+                        result = getWindow().ontouchstart === undefined;
                         break;
                     }
                 }
@@ -661,7 +639,7 @@ const parseXml = (xmlString, type) => {
  *
  * @param {string} val
  */
-const pixelValueToNumber = (val) => $parseFloat(val.endsWith("px") ? val.slice(0, -2) : val);
+const pixelValueToNumber = (val) => Number.parseFloat(val.endsWith("px") ? val.slice(0, -2) : val);
 
 /**
  * @param {Node[]} nodes
@@ -805,10 +783,6 @@ const NEXT_SIBLINGS = (node, selector) => {
 
 /** @type {Map<HTMLElement, { callbacks: Set<MutationCallback>, observer: MutationObserver }>} */
 const observers = new Map();
-const currentDimensions = {
-    width: null,
-    height: null,
-};
 let getDefaultRoot = () => document;
 
 //-----------------------------------------------------------------------------
@@ -831,8 +805,8 @@ customPseudoClasses
         };
     })
     .set("eq", (content) => {
-        const index = $parseInt(content);
-        if (!$isInteger(index)) {
+        const index = Number.parseInt(content);
+        if (!Number.isInteger(index)) {
             throw selectorError("eq", `expected index to be an integer (got ${content})`);
         }
         return function eq(node, i, nodes) {
@@ -913,10 +887,6 @@ let rCustomPseudoClass = compilePseudoClassRegex();
 //-----------------------------------------------------------------------------
 
 export function cleanupDOM() {
-    // Dimensions
-    currentDimensions.width = null;
-    currentDimensions.height = null;
-
     // Observers
     const remainingObservers = observers.size;
     if (remainingObservers) {
@@ -929,16 +899,10 @@ export function cleanupDOM() {
 }
 
 /**
- * @param {Node | () => Node} node
+ * @param {() => Node} getNode
  */
-export function defineRootNode(node) {
-    if (typeof node === "function") {
-        getDefaultRoot = node;
-    } else if (node) {
-        getDefaultRoot = () => node;
-    } else {
-        getDefaultRoot = () => document;
-    }
+export function defineRootNode(getNode) {
+    getDefaultRoot = getNode;
 }
 
 /**
@@ -957,17 +921,13 @@ export function formatXml(value, options) {
  */
 export function getActiveElement(node) {
     const { activeElement } = getDocument(node);
-    if (activeElement.contentDocument) {
+    if (activeElement?.contentDocument) {
         return getActiveElement(activeElement.contentDocument);
     }
-    if (activeElement.shadowRoot) {
+    if (activeElement?.shadowRoot) {
         return activeElement.shadowRoot.activeElement;
     }
     return activeElement;
-}
-
-export function getCurrentDimensions() {
-    return currentDimensions;
 }
 
 export function getDefaultRootNode() {
@@ -1011,23 +971,7 @@ export function getFocusableElements(options) {
     }
     const withTabIndexZero = byTabIndex[0] || [];
     delete byTabIndex[0];
-    return [...$values(byTabIndex).flat(), ...withTabIndexZero];
-}
-
-/**
- * @param {Dimensions} dimensions
- * @returns {number}
- */
-export function getHeight(dimensions) {
-    if (dimensions) {
-        for (const prop of ["h", "height"]) {
-            const value = $parseFloat(dimensions[prop]);
-            if (!$isNaN(value)) {
-                return value;
-            }
-        }
-    }
-    return NaN;
+    return [...Object.values(byTabIndex).flat(), ...withTabIndexZero];
 }
 
 /**
@@ -1175,22 +1119,6 @@ export function getStyle(node) {
 }
 
 /**
- * @param {Dimensions} dimensions
- * @returns {number}
- */
-export function getWidth(dimensions) {
-    if (dimensions) {
-        for (const prop of ["w", "width"]) {
-            const value = $parseFloat(dimensions[prop]);
-            if (!$isNaN(value)) {
-                return value;
-            }
-        }
-    }
-    return NaN;
-}
-
-/**
  * @param {Node} [node]
  * @returns {Window}
  */
@@ -1205,8 +1133,8 @@ export function getWindow(node) {
 export function getX(position) {
     if (position) {
         for (const prop of ["x", "left", "clientX", "pageX", "screenX"]) {
-            const value = $parseFloat(position[prop]);
-            if (!$isNaN(value)) {
+            const value = Number.parseFloat(position[prop]);
+            if (!Number.isNaN(value)) {
                 return value;
             }
         }
@@ -1221,8 +1149,8 @@ export function getX(position) {
 export function getY(position) {
     if (position) {
         for (const prop of ["y", "top", "clientY", "pageY", "screenY"]) {
-            const value = $parseFloat(position[prop]);
-            if (!$isNaN(value)) {
+            const value = Number.parseFloat(position[prop]);
+            if (!Number.isNaN(value)) {
                 return value;
             }
         }
@@ -1293,7 +1221,7 @@ export function isEmpty(value) {
             return isEmpty(getNodeContent(value));
         }
         if (!isIterable(value)) {
-            value = $keys(value);
+            value = Object.keys(value);
         }
         return [...value].length === 0;
     }
@@ -1353,8 +1281,9 @@ export function isInDOM(target) {
     if (frame) {
         return isInDOM(frame);
     }
+    const topDocument = window.top.document;
     while (target) {
-        if (target === document) {
+        if (target === topDocument) {
             return true;
         }
         target = target.parentNode;
@@ -1518,14 +1447,6 @@ export function observe(target, callback) {
 }
 
 /**
- * @param {Dimensions} dimensions
- * @returns {[number, number]}
- */
-export function parseDimensions(dimensions) {
-    return [getWidth(dimensions), getHeight(dimensions)];
-}
-
-/**
  * @param {Position} position
  * @returns {[number, number]}
  */
@@ -1653,7 +1574,7 @@ export function queryAll(target, options) {
     }
 
     const count = nodes.length;
-    if ($isInteger(exact) && count !== exact) {
+    if (Number.isInteger(exact) && count !== exact) {
         const s = count === 1 ? "" : "s";
         const strPrefix = prefixes.length ? ` ${and(prefixes)}` : "";
         const strSelector = typeof target === "string" ? `(selector: "${target}")` : "";
@@ -1783,7 +1704,7 @@ export function queryOne(target, options) {
     if (target.raw) {
         return queryOne(String.raw(...arguments));
     }
-    if ($isInteger(options?.exact)) {
+    if (Number.isInteger(options?.exact)) {
         throw new HootDomError(
             `cannot call \`queryOne\` with 'exact'=${options.exact}: did you mean to use \`queryAll\`?`
         );
@@ -1845,18 +1766,30 @@ export function registerPseudoClass(pseudoClass, predicate) {
 }
 
 /**
- * @param {number} width
- * @param {number} height
+ * @param {HTMLElement} target
+ * @param {Dimensions} dimensions
  */
-export function setDimensions(width, height) {
-    const defaultRoot = getDefaultRoot();
-    if (!$isNaN(width)) {
-        currentDimensions.width = width;
-        defaultRoot.style?.setProperty("width", `${width}px`, "important");
-    }
-    if (!$isNaN(height)) {
-        currentDimensions.height = height;
-        defaultRoot.style?.setProperty("height", `${height}px`, "important");
+export function setStyle(target, dimensions) {
+    if (typeof dimensions === "string") {
+        const style = target.getAttribute("style");
+        target.setAttribute("style", style ? [style, dimensions].join(";") : dimensions);
+    } else if (dimensions && typeof dimensions === "object") {
+        const properties = {};
+        if (isIterable(dimensions)) {
+            [properties.width, properties.height] = dimensions;
+        } else {
+            Object.assign(properties, dimensions);
+        }
+        for (const [property, value] of Object.entries(properties)) {
+            if (value === null || value === undefined) {
+                continue;
+            }
+            target.style?.setProperty(
+                property,
+                isNaN(value) ? value : `${value}px`,
+                "important"
+            );
+        }
     }
 }
 
@@ -1875,7 +1808,7 @@ export function toSelector(node, options) {
     if (node.classList?.length) {
         parts.class = `.${[...node.classList].join(".")}`;
     }
-    return options?.object ? parts : $values(parts).join("");
+    return options?.object ? parts : Object.values(parts).join("");
 }
 
 /**
@@ -1961,7 +1894,7 @@ export async function waitUntil(predicate, options) {
             }
         };
 
-        const timeout = $floor(options?.timeout ?? 200);
+        const timeout = Math.floor(options?.timeout ?? 200);
         timeoutId = setTimeout(() => {
             let message = options?.message || `'waitUntil' timed out after %timeout% milliseconds`;
             if (typeof message === "function") {

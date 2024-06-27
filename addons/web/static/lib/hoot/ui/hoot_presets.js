@@ -2,7 +2,7 @@
 
 import { Component, useRef, useState, xml } from "@odoo/owl";
 import { refresh } from "../core/url";
-import { useWindowListener } from "../hoot_utils";
+import { useTrustedListener } from "../hoot_utils";
 
 /**
  * @typedef {{
@@ -73,13 +73,13 @@ export class HootPresets extends Component {
         this.config = useState(this.env.runner.config);
         this.state = useState({ open: false });
 
-        useWindowListener("keydown", (ev) => {
+        useTrustedListener(window, "keydown", (ev) => {
             if (this.state.open && ev.key === "Escape") {
                 ev.preventDefault();
                 this.state.open = false;
             }
         });
-        useWindowListener("click", (ev) => {
+        useTrustedListener(window, "click", (ev) => {
             const path = ev.composedPath();
             if (!path.includes(this.rootRef.el)) {
                 this.state.open = false;

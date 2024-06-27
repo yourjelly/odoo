@@ -22,14 +22,6 @@ import { ensureArray } from "../hoot_utils";
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Object: { fromEntries: $fromEntries, keys: $keys },
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
 
@@ -80,12 +72,14 @@ export class HootLink extends Component {
     }
 
     computeHref() {
-        const clearAll = () => $keys(nextParams).forEach((key) => nextParams[key].clear());
+        const clearAll = () => Object.keys(nextParams).forEach((key) => nextParams[key].clear());
 
         const { type, id, options } = this.props;
         const ids = ensureArray(id);
         const { config } = this.env.runner;
-        const nextParams = $fromEntries(FILTER_KEYS.map((k) => [k, new Set(config[k] || [])]));
+        const nextParams = Object.fromEntries(
+            FILTER_KEYS.map((k) => [k, new Set(config[k] || [])])
+        );
         if (config.filter) {
             nextParams.filter = new Set([config.filter]);
         }

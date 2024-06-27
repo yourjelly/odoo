@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { getOriginalValue, getTargetWindow } from "../hoot_globals";
 import { isNil } from "../hoot_utils";
 
 /**
@@ -14,27 +15,6 @@ import { isNil } from "../hoot_utils";
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    cancelAnimationFrame,
-    clearInterval,
-    clearTimeout,
-    Date,
-    Error,
-    Math: { ceil: $ceil, max: $max, min: $min },
-    performance,
-    Promise,
-    requestAnimationFrame,
-    setInterval,
-    setTimeout,
-} = globalThis;
-const { now: $now, UTC: $UTC } = Date;
-/** @type {Performance["now"]} */
-const $performanceNow = performance.now.bind(performance);
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -42,6 +22,14 @@ const $performanceNow = performance.now.bind(performance);
  * @param {number} id
  */
 const animationToId = (id) => ID_PREFIX.animation + String(id);
+
+/**
+ * @template {keyof Window} T
+ * @param {T} method
+ * @param  {Parameters<Window[T]>} args
+ */
+const callWindow = (method, ...args) =>
+    freezed ? nextDummyId++ : getOriginalValue(getTargetWindow(), method)(...args);
 
 const getDateParams = () => [
     ...dateParams.slice(0, -1),
@@ -75,7 +63,7 @@ const getOffsetFromTimeZone = (timeZone, baseDate) => {
     return (utcDate.getTime() - tzDate.getTime()) / 60_000; // in minutes
 };
 
-const getTimeStampDiff = () => (freezed ? 0 : $now() - dateTimeStamp);
+const getTimeStampDiff = () => (freezed ? 0 : Date.now() - dateTimeStamp);
 
 /**
  * @param {string} id
@@ -97,7 +85,7 @@ const idToTimeout = (id) => Number(id.slice(ID_PREFIX.timeout.length));
  */
 const intervalToId = (id) => ID_PREFIX.interval + String(id);
 
-const now = () => $performanceNow() + timeOffset;
+const now = () => performance.now() + timeOffset;
 
 /**
  * @param {string | DateSpecs} dateSpecs
@@ -122,7 +110,7 @@ const parseDateParams = (dateSpecs) => {
  */
 const setDateParams = (newDateParams) => {
     dateParams = newDateParams;
-    dateTimeStamp = $now();
+    dateTimeStamp = Date.now();
     timeOffset = 0;
 };
 
@@ -146,7 +134,7 @@ const timers = new Map();
 
 let allowTimers = true;
 let dateParams = DEFAULT_DATE;
-let dateTimeStamp = $now();
+let dateTimeStamp = Date.now();
 let freezed = false;
 let frameDelay = 1000 / 60;
 let nextDummyId = 1;
@@ -162,7 +150,7 @@ let timeOffset = 0;
  * @param {number} [frameCount]
  */
 export async function advanceFrame(frameCount) {
-    return advanceTime(frameDelay * $max(1, frameCount));
+    return advanceTime(frameDelay * Math.max(1, frameCount));
 }
 
 /**
@@ -183,8 +171,8 @@ export async function advanceTime(ms) {
         const [timeout, handler, id] = timerValues;
         const diff = timeout - now();
         if (diff > 0) {
-            timeOffset += $min(remaining, diff);
-            remaining = $max(remaining - diff, 0);
+            timeOffset += Math.min(remaining, diff);
+            remaining = Math.max(remaining - diff, 0);
         }
         if (timers.has(id)) {
             handler(timeout);
@@ -201,7 +189,7 @@ export async function advanceTime(ms) {
     await animationFrame();
 
     // Reduce the offset by the time of the animation frame
-    timeOffset = $max(timeOffset - (now() - beforeAnimationFrame), 0);
+    timeOffset = Math.max(timeOffset - (now() - beforeAnimationFrame), 0);
 
     return ms;
 }
@@ -223,11 +211,11 @@ export async function animationFrame() {
 export function cancelAllTimers() {
     for (const id of timers.keys()) {
         if (id.startsWith(ID_PREFIX.animation)) {
-            globalThis.cancelAnimationFrame(idToAnimation(id));
+            mockedCancelAnimationFrame(idToAnimation(id));
         } else if (id.startsWith(ID_PREFIX.interval)) {
-            globalThis.clearInterval(idToInterval(id));
+            mockedClearInterval(idToInterval(id));
         } else if (id.startsWith(ID_PREFIX.timeout)) {
-            globalThis.clearTimeout(idToTimeout(id));
+            mockedClearTimeout(idToTimeout(id));
         }
     }
 }
@@ -293,25 +281,19 @@ export function mockDate(date, tz) {
 
 /** @type {typeof cancelAnimationFrame} */
 export function mockedCancelAnimationFrame(handle) {
-    if (!freezed) {
-        cancelAnimationFrame(handle);
-    }
+    callWindow("cancelAnimationFrame", handle);
     timers.delete(animationToId(handle));
 }
 
 /** @type {typeof clearInterval} */
 export function mockedClearInterval(intervalId) {
-    if (!freezed) {
-        clearInterval(intervalId);
-    }
+    callWindow("clearInterval", intervalId);
     timers.delete(intervalToId(intervalId));
 }
 
 /** @type {typeof clearTimeout} */
 export function mockedClearTimeout(timeoutId) {
-    if (!freezed) {
-        clearTimeout(timeoutId);
-    }
+    callWindow("clearTimeout", timeoutId);
     timers.delete(timeoutToId(timeoutId));
 }
 
@@ -330,7 +312,7 @@ export function mockedRequestAnimationFrame(callback) {
     };
 
     const animationValues = [handler, now(), frameDelay];
-    const handle = freezed ? nextDummyId++ : requestAnimationFrame(handler);
+    const handle = callWindow("requestAnimationFrame", handler);
     const internalId = animationToId(handle);
     timers.set(internalId, animationValues);
 
@@ -357,7 +339,7 @@ export function mockedSetInterval(callback, ms, ...args) {
     };
 
     const intervalValues = [handler, now(), ms];
-    const intervalId = freezed ? nextDummyId++ : setInterval(handler, ms);
+    const intervalId = callWindow("setInterval", handler, ms);
     const internalId = intervalToId(intervalId);
     timers.set(internalId, intervalValues);
 
@@ -380,7 +362,7 @@ export function mockedSetTimeout(callback, ms, ...args) {
     };
 
     const timeoutValues = [handler, now(), ms];
-    const timeoutId = freezed ? nextDummyId++ : setTimeout(handler, ms);
+    const timeoutId = callWindow("setTimeout", handler, ms);
     const internalId = timeoutToId(timeoutId);
     timers.set(internalId, timeoutValues);
 
@@ -425,8 +407,8 @@ export async function runAllTimers(preventTimers = false) {
         allowTimers = false;
     }
 
-    const endts = $max(...[...timers.values()].map(([, init, delay]) => init + delay));
-    const ms = await advanceTime($ceil(endts - now()));
+    const endts = Math.max(...[...timers.values()].map(([, init, delay]) => init + delay));
+    const ms = await advanceTime(Math.ceil(endts - now()));
 
     if (preventTimers) {
         allowTimers = true;
@@ -509,7 +491,7 @@ export class MockDate extends Date {
             for (let i = 0; i < params.length; i++) {
                 args[i] ??= params[i];
             }
-            super($UTC(...args));
+            super(Date.UTC(...args));
         }
     }
 

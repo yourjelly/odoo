@@ -3,17 +3,6 @@
 import { isNil, stringToNumber } from "../hoot_utils";
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Math,
-    Number: { isNaN: $isNaN, parseFloat: $parseFloat },
-    Object: { defineProperties: $defineProperties },
-} = globalThis;
-const { floor: $floor, random: $random } = Math;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -24,8 +13,8 @@ const toValidSeed = (seed) => {
     if (isNil(seed)) {
         return generateSeed();
     }
-    const nSeed = $parseFloat(seed);
-    return $isNaN(nSeed) ? stringToNumber(nSeed) : nSeed;
+    const nSeed = Number.parseFloat(seed);
+    return Number.isNaN(nSeed) ? stringToNumber(nSeed) : nSeed;
 };
 
 const DEFAULT_SEED = 1e16;
@@ -39,7 +28,7 @@ const DEFAULT_SEED = 1e16;
  * This function uses the native (unpatched) {@link Math.random} method.
  */
 export function generateSeed() {
-    return $floor($random() * 1e16);
+    return Math.floor(Math.random() * 1e16);
 }
 
 /**
@@ -69,7 +58,7 @@ export function makeSeededRandom(seed) {
 
     let state = seed;
 
-    $defineProperties(random, {
+    Object.defineProperties(random, {
         seed: {
             get() {
                 return seed;

@@ -1,7 +1,6 @@
 /** @odoo-module alias=@odoo/hoot-dom default=false */
 
 /**
- * @typedef {import("./helpers/dom").Dimensions} Dimensions
  * @typedef {import("./helpers/dom").FormatXmlOptions} FormatXmlOptions
  * @typedef {import("./helpers/dom").Position} Position
  * @typedef {import("./helpers/dom").QueryOptions} QueryOptions
@@ -57,6 +56,7 @@ export {
     dblclick,
     drag,
     edit,
+    enableEventLogs,
     fill,
     hover,
     keyDown,
@@ -72,6 +72,7 @@ export {
     select,
     setInputFiles,
     setInputRange,
+    setupEventActions,
     uncheck,
     unload,
 } from "./helpers/events";

@@ -1,6 +1,6 @@
 import { busModels } from "@bus/../tests/bus_test_helpers";
 import { mailGlobal } from "@mail/utils/common/misc";
-import { after, before, getFixture } from "@odoo/hoot";
+import { after, before } from "@odoo/hoot";
 import { resize } from "@odoo/hoot-dom";
 import {
     MockServer,
@@ -261,7 +261,7 @@ export async function start(options) {
     if (!MockServer.current) {
         await startServer();
     }
-    let target = getFixture();
+    let target = document.body;
     const pyEnv = MockServer.env;
     if ("res.users" in pyEnv) {
         const adminUser = pyEnv["res.users"].search_read([["id", "=", serverState.userId]])[0];

@@ -4,21 +4,6 @@ import { formatTime } from "../hoot_utils";
 import { urlParams } from "./url";
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    console: {
-        debug: $debug,
-        dir: $dir,
-        groupCollapsed: $groupCollapsed,
-        groupEnd: $groupEnd,
-        log: $log,
-        trace: $trace,
-    },
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -77,9 +62,9 @@ export function makeNetworkLogger(prefix, title) {
             }
             const color = `color: #66e`;
             const styles = [`${color}; font-weight: bold;`, color];
-            $groupCollapsed(`-> %c${prefix}#${id}%c<${title}>`, ...styles, await getData());
-            $trace("request trace");
-            $groupEnd();
+            console.groupCollapsed(`-> %c${prefix}#${id}%c<${title}>`, ...styles, await getData());
+            console.trace("request trace");
+            console.groupEnd();
         },
         /**
          * Response logger: orange.
@@ -91,7 +76,7 @@ export function makeNetworkLogger(prefix, title) {
             }
             const color = `color: #f80`;
             const styles = [`${color}; font-weight: bold;`, color];
-            $log(`<- %c${prefix}#${id}%c<${title}>`, ...styles, await getData());
+            console.log(`<- %c${prefix}#${id}%c<${title}>`, ...styles, await getData());
         },
     };
 }
@@ -112,7 +97,7 @@ export const logger = {
      * @param {...any} args
      */
     debug(...args) {
-        $debug(...styledArguments(args));
+        console.debug(...styledArguments(args));
     },
     /**
      * @param {...any} args
@@ -124,7 +109,7 @@ export const logger = {
      * @param {...any} args
      */
     groupCollapsed(...args) {
-        $groupCollapsed(...styledArguments(args));
+        console.groupCollapsed(...styledArguments(args));
     },
     /**
      * @param {...any} args
@@ -142,7 +127,7 @@ export const logger = {
         if (logger.level < logLevels.DEBUG) {
             return;
         }
-        $debug(...styledArguments(args));
+        console.debug(...styledArguments(args));
     },
     /**
      * @param {import("./test").Test} test
@@ -152,7 +137,7 @@ export const logger = {
             return;
         }
         const { fullName, lastResults } = test;
-        $log(
+        console.log(
             ...styledArguments([
                 `Test "${fullName}" passed`,
                 lastResults.assertions.length,
@@ -181,7 +166,7 @@ export const logger = {
         if (withArgs.length) {
             args.push("(", ...withArgs, ")");
         }
-        $log(...styledArguments(args));
+        console.log(...styledArguments(args));
     },
     /**
      * @param {...any} args
@@ -190,12 +175,12 @@ export const logger = {
         if (logger.level < logLevels.RUNNER) {
             return;
         }
-        $log(...styledArguments(args));
+        console.log(...styledArguments(args));
     },
     /**
      * @param {...any} args
      */
     logGlobal(...args) {
-        $dir(...unstyledArguments(args));
+        console.dir(...unstyledArguments(args));
     },
 };

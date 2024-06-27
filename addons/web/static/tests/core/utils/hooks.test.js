@@ -1,4 +1,4 @@
-import { describe, expect, getFixture, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { click, queryOne } from "@odoo/hoot-dom";
 import { Deferred, animationFrame, mockTouch } from "@odoo/hoot-mock";
 import {
@@ -442,7 +442,7 @@ describe("useSpellCheck", () => {
         expect(".textArea").toBeFocused();
 
         // Click out to trigger blur
-        click(getFixture());
+        click("body");
 
         expect(".textArea").toHaveProperty("spellcheck", false);
         expect(".textArea").toHaveAttribute("spellcheck", "false");
@@ -473,7 +473,7 @@ describe("useSpellCheck", () => {
         expect(".textArea").toBeFocused();
 
         // Click out to trigger blur
-        click(getFixture());
+        click("body");
 
         // Once these assertions pass, it means that the hook is working.
         expect(".textArea").toHaveProperty("spellcheck", false);
@@ -509,7 +509,7 @@ describe("useSpellCheck", () => {
         expect(".editableDiv").toBeFocused();
 
         // Click out to trigger blur
-        click(getFixture());
+        click("body");
 
         expect(".textArea").toHaveProperty("spellcheck", false);
         expect(".editableDiv").toHaveProperty("spellcheck", false);
@@ -562,7 +562,7 @@ describe("useSpellCheck", () => {
         expect(".editableDiv").toBeFocused();
 
         // Click out to trigger blur
-        click(getFixture());
+        click("body");
 
         expect(".textArea").toHaveProperty("spellcheck", false);
         expect(".textArea").toHaveAttribute("spellcheck", "false");

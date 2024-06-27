@@ -1,6 +1,6 @@
 /** @odoo-module alias=@web/../tests/utils default=false */
 
-import { __debug__, after, afterEach, expect, getFixture } from "@odoo/hoot";
+import { __debug__, after, afterEach, expect } from "@odoo/hoot";
 import { queryAll, queryFirst } from "@odoo/hoot-dom";
 import { Deferred, tick } from "@odoo/hoot-mock";
 import { isMacOS } from "@web/core/browser/feature_detection";
@@ -535,7 +535,7 @@ afterEach(() => (hasUsedContainsPositively = false));
  * @property {boolean} [shadowRoot] if provided, targets the shadowRoot of the found elements.
  * @property {number|"bottom"} [setScroll] if provided, sets the scrollTop on the first found
  *  element.
- * @property {HTMLElement|OdooEnv} [target=getFixture()]
+ * @property {HTMLElement|OdooEnv} [target=document.body]
  * @property {string[]} [triggerEvents] if provided, triggers the given events on the found element
  * @property {string} [text] if provided, the textContent of the found element(s) or one of their
  *  descendants must match. Use `textContent` option for a match on the found element(s) only.
@@ -563,7 +563,7 @@ class Contains {
         if (!targetParam) {
             targetParam = this.options.target;
         }
-        this.options.target = targetParam || getFixture();
+        this.options.target = targetParam || document.body;
         let selectorMessage = `${this.options.count} of "${this.selector}"`;
         if (this.options.visible !== undefined) {
             selectorMessage = `${selectorMessage} ${
@@ -835,7 +835,7 @@ class Contains {
             return;
         }
         let elems;
-        if (target === getFixture() && queryFirst(this.selector) === target) {
+        if (target === document.body && queryFirst(this.selector) === target) {
             elems = [target];
         } else {
             elems = [...queryAll(this.selector, { root: target })];

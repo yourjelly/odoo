@@ -12,15 +12,6 @@ import { Markup, toExplicitString } from "../hoot_utils";
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Object: { keys: $keys },
-    console: { log: $log },
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -146,7 +137,7 @@ export class HootTechnicalValue extends Component {
     }
 
     getSize() {
-        const values = isIterable(this.value) ? [...this.value] : $keys(this.value);
+        const values = isIterable(this.value) ? [...this.value] : Object.keys(this.value);
         return values.length;
     }
 
@@ -159,6 +150,6 @@ export class HootTechnicalValue extends Component {
             return;
         }
         this.logged = true;
-        $log(this.value);
+        console.log(this.value);
     }
 }

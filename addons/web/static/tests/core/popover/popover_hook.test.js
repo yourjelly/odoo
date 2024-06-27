@@ -1,11 +1,11 @@
-import { test, expect, getFixture, destroy } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Component, xml } from "@odoo/owl";
+import { contains, destroy, mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
 
 test("close popover when component is unmounted", async () => {
-    const target = getFixture();
+    const target = document.body;
     class Comp extends Component {
         static template = xml`<div t-att-id="props.id">in popover</div>`;
         static props = ["*"];

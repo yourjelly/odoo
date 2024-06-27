@@ -29,17 +29,6 @@
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Boolean,
-    navigator: { userAgent: $userAgent },
-    RegExp,
-    SyntaxError,
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -60,7 +49,7 @@ export function getTag(node) {
  * @returns {boolean}
  */
 export function isFirefox() {
-    return /firefox/i.test($userAgent);
+    return /firefox/i.test(navigator.userAgent);
 }
 
 /**

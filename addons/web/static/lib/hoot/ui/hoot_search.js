@@ -13,7 +13,7 @@ import {
     lookup,
     normalize,
     title,
-    useWindowListener,
+    useTrustedListener,
 } from "../hoot_utils";
 import { HootTagButton } from "./hoot_tag_button";
 
@@ -29,16 +29,6 @@ import { HootTagButton } from "./hoot_tag_button";
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Boolean,
-    localStorage,
-    Object: { entries: $entries, values: $values },
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -47,7 +37,7 @@ const {
  * @param {Record<string, number>} values
  */
 const formatIncludes = (values) =>
-    $entries(values)
+    Object.entries(values)
         .filter(([id, value]) => Math.abs(value) === INCLUDE_LEVEL.url)
         .map(([id, value]) => (value >= 0 ? id : `${EXCLUDE_PREFIX}${id}`));
 
@@ -387,7 +377,7 @@ export class HootSearch extends Component {
         });
         this.runnerState = useState(runner.state);
 
-        useWindowListener("click", (ev) => this.onWindowClick(ev));
+        useTrustedListener(window, "click", (ev) => this.onWindowClick(ev));
     }
 
     /**
@@ -437,7 +427,7 @@ export class HootSearch extends Component {
         for (const category of this.categories) {
             let include = 0;
             let exclude = 0;
-            for (const value of $values(includeSpecs[category])) {
+            for (const value of Object.values(includeSpecs[category])) {
                 switch (value) {
                     case 1:
                     case 2: {
@@ -459,8 +449,8 @@ export class HootSearch extends Component {
     }
 
     getHasIncludeValue() {
-        return $values(this.runnerState.includeSpecs).some((values) =>
-            $values(values).some((value) => value > 0)
+        return Object.values(this.runnerState.includeSpecs).some((values) =>
+            Object.values(values).some((value) => value > 0)
         );
     }
 
@@ -494,8 +484,8 @@ export class HootSearch extends Component {
     hasFilters() {
         return Boolean(
             this.state.query.trim() ||
-                $values(this.runnerState.includeSpecs).some((values) =>
-                    $values(values).some((value) => Math.abs(value) === INCLUDE_LEVEL.url)
+                Object.values(this.runnerState.includeSpecs).some((values) =>
+                    Object.values(values).some((value) => Math.abs(value) === INCLUDE_LEVEL.url)
                 )
         );
     }
@@ -687,7 +677,7 @@ export class HootSearch extends Component {
         const checked = this.runnerState.includeSpecs;
         for (const category of [...this.categories].reverse()) {
             let foundItemToUncheck = false;
-            for (const [key, value] of $entries(checked[category])) {
+            for (const [key, value] of Object.entries(checked[category])) {
                 if (this.isReadonly(value)) {
                     continue;
                 }

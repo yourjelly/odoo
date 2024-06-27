@@ -1,4 +1,4 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAllTexts } from "@odoo/hoot-dom";
 import {
     clickSave,
@@ -199,7 +199,7 @@ test("basic flow in editable list view", async () => {
     await contains('.o_field_widget[name="price"] input').edit("-28");
     expect("td.o_data_cell:first").toHaveText("-28");
     expect('.o_field_widget[name="price"] input').toHaveValue("10");
-    await contains(getFixture()).click();
+    await contains("body").click();
     expect(queryAllTexts("td.o_data_cell")).toEqual(["-28", "10"]);
 });
 

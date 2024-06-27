@@ -3,6 +3,7 @@
 import { HootDomError, getTag, isFirefox, isIterable } from "../hoot_dom_utils";
 import {
     getActiveElement,
+    getDefaultRootNode,
     getDocument,
     getNextFocusableElement,
     getNodeRect,
@@ -14,11 +15,10 @@ import {
     isEventTarget,
     isNode,
     isNodeFocusable,
-    parseDimensions,
     parsePosition,
     queryAll,
     queryOne,
-    setDimensions,
+    setStyle,
     toSelector,
 } from "./dom";
 
@@ -68,25 +68,6 @@ import {
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    console: { dir: $dir, groupCollapsed: $groupCollapsed, groupEnd: $groupEnd, log: $log },
-    DataTransfer,
-    document,
-    Math: { ceil: $ceil, max: $max, min: $min },
-    Object: { assign: $assign, values: $values },
-    String,
-    Touch,
-    TypeError,
-} = globalThis;
-/** @type {Document["createRange"]} */
-const $createRange = document.createRange.bind(document);
-/** @type {Document["hasFocus"]} */
-const $hasFocus = document.hasFocus.bind(document);
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -94,9 +75,17 @@ const $hasFocus = document.hasFocus.bind(document);
  * @param {EventTarget} target
  * @param {EventType} type
  */
-const catchNextEvent = (target, type) => {
-    target.addEventListener(type, (event) => currentEvents.push(event), { once: true });
-};
+const catchNextEvent = (target, type) =>
+    new Promise((resolve) => {
+        target.addEventListener(
+            type,
+            (event) => {
+                currentEvents.push(event);
+                resolve(event);
+            },
+            { once: true }
+        );
+    });
 
 /**
  * @param {EventTarget} target
@@ -367,7 +356,7 @@ const getPosition = (element, options) => {
         if (positions.includes("left")) {
             clientX -= 1;
         } else if (positions.includes("right")) {
-            clientX += $ceil(width) + 1;
+            clientX += Math.ceil(width) + 1;
         } else {
             clientX += width / 2;
         }
@@ -376,7 +365,7 @@ const getPosition = (element, options) => {
         if (positions.includes("top")) {
             clientY -= 1;
         } else if (positions.includes("bottom")) {
-            clientY += $ceil(height) + 1;
+            clientY += Math.ceil(height) + 1;
         } else {
             clientY += height / 2;
         }
@@ -421,8 +410,7 @@ const getStringSelection = (target) =>
  */
 const hasTagName = (node, ...tagNames) => tagNames.includes(getTag(node));
 
-const hasTouch = () =>
-    globalThis.ontouchstart !== undefined || globalThis.matchMedia("(pointer:coarse)").matches;
+const hasTouch = () => window.ontouchstart !== undefined || matchMedia("(pointer:coarse)").matches;
 
 /**
  * @param {unknown} value
@@ -444,7 +432,7 @@ const logEvents = (actionName) => {
         return events;
     }
     const groupName = [`${actionName}: dispatched`, events.length, `events`];
-    $groupCollapsed(...groupName);
+    console.groupCollapsed(...groupName);
     for (const event of events) {
         /** @type {(keyof typeof LOG_COLORS)[]} */
         const colors = ["blue"];
@@ -468,7 +456,7 @@ const logEvents = (actionName) => {
             if (targetParts.class) {
                 colors.push("lightBlue");
             }
-            const targetString = $values(targetParts)
+            const targetString = Object.values(targetParts)
                 .map((part) => `%c${part}%c`)
                 .join("");
             message += ` @${targetString}`;
@@ -478,12 +466,12 @@ const logEvents = (actionName) => {
             `color: ${LOG_COLORS.reset}`,
         ]);
 
-        $groupCollapsed(message, ...messageColors);
-        $dir(event);
-        $log(event.target);
-        $groupEnd();
+        console.groupCollapsed(message, ...messageColors);
+        console.dir(event);
+        console.log(event.target);
+        console.groupEnd();
     }
-    $groupEnd();
+    console.groupEnd();
     return events;
 };
 
@@ -717,13 +705,13 @@ const triggerFocus = (target) => {
         return;
     }
     if (previous !== target.ownerDocument.body) {
-        if ($hasFocus()) {
+        if (document.hasFocus()) {
             catchNextEvent(previous, "blur");
             catchNextEvent(previous, "focusout");
         }
         // If document is focused, this will trigger a trusted "blur" event
         previous.blur();
-        if (!$hasFocus()) {
+        if (!document.hasFocus()) {
             // When document is not focused: manually trigger a "blur" event
             const eventInit = { relatedTarget: target };
             dispatch(previous, "blur", eventInit);
@@ -734,12 +722,12 @@ const triggerFocus = (target) => {
         const previousSelection = getStringSelection(target);
 
         // If document is focused, this will trigger a trusted "focus" event
-        if ($hasFocus()) {
+        if (document.hasFocus()) {
             catchNextEvent(target, "focus");
             catchNextEvent(target, "focusin");
         }
         target.focus();
-        if (!$hasFocus()) {
+        if (!document.hasFocus()) {
             // When document is not focused: manually trigger a "focus" event
             const eventInit = { relatedTarget: previous };
             dispatch(target, "focus", eventInit);
@@ -837,7 +825,7 @@ const _fill = (target, value, options) => {
 
     if (options?.instantly) {
         // Simulates filling the clipboard with the value (can be from external source)
-        globalThis.navigator.clipboard.writeTextSync(value);
+        navigator.clipboard?.writeTextSync(value);
         _press(target, { ctrlKey: true, key: "v" });
     } else {
         if (options?.composition) {
@@ -1009,8 +997,8 @@ const _keyDown = (target, eventInit) => {
                     // Move the cursor left or right
                     selectionTarget = start ? selectionStart - 1 : selectionEnd + 1;
                 }
-                target.selectionStart = target.selectionEnd = $max(
-                    $min(selectionTarget, value.length),
+                target.selectionStart = target.selectionEnd = Math.max(
+                    Math.min(selectionTarget, value.length),
                     0
                 );
                 break;
@@ -1082,8 +1070,8 @@ const _keyDown = (target, eventInit) => {
                         target.selectionEnd = target.value.length;
                     }
                 } else {
-                    const selection = globalThis.getSelection();
-                    const range = $createRange();
+                    const selection = getSelection();
+                    const range = document.createRange();
                     range.selectNodeContents(target);
                     selection.removeAllRanges();
                     selection.addRange(range);
@@ -1099,8 +1087,8 @@ const _keyDown = (target, eventInit) => {
         case "c": {
             if (ctrlKey) {
                 // Get selection from window
-                const text = globalThis.getSelection().toString();
-                globalThis.navigator.clipboard.writeTextSync(text);
+                const text = getSelection().toString();
+                navigator.clipboard.writeTextSync(text);
 
                 dispatch(target, "copy", {
                     clipboardData: eventInit.dataTransfer || new DataTransfer(),
@@ -1158,7 +1146,7 @@ const _keyDown = (target, eventInit) => {
         case "v": {
             if (ctrlKey && isEditable(target)) {
                 // Set target value (synchonously)
-                const value = globalThis.navigator.clipboard.readTextSync();
+                const value = navigator.clipboard.readTextSync();
                 nextValue = value;
 
                 inputType = "insertFromPaste";
@@ -1177,8 +1165,8 @@ const _keyDown = (target, eventInit) => {
         case "x": {
             if (ctrlKey && isEditable(target)) {
                 // Get selection from window
-                const text = globalThis.getSelection().toString();
-                globalThis.navigator.clipboard.writeTextSync(text);
+                const text = getSelection().toString();
+                navigator.clipboard.writeTextSync(text);
 
                 nextValue = deleteSelection(target);
                 inputType = "deleteByCut";
@@ -1314,11 +1302,9 @@ const _pointerUp = (target, options) => {
 
     setPointerDownTarget(null);
     if (runTime.currentPointerDownTimeout) {
-        globalThis.clearTimeout(runTime.currentPointerDownTimeout);
+        clearTimeout(runTime.currentPointerDownTimeout);
     }
-    runTime.currentPointerDownTimeout = globalThis.setTimeout(() => {
-        // Use `globalThis.setTimeout` to potentially make use of the mock timeouts
-        // since the events run in the same temporal context as the tests
+    runTime.currentPointerDownTimeout = setTimeout(() => {
         runTime.currentClickCount = 0;
         runTime.currentPointerDownTimeout = 0;
     }, DOUBLE_CLICK_DELAY);
@@ -2105,16 +2091,19 @@ export function press(keyStrokes, options) {
  * attributes.
  *
  * @param {Dimensions} dimensions
- * @returns {Event[]}
+ * @returns {Promise<Event[]>}
  * @example
  *  resize("body", { width: 1000, height: 500 }); // Resizes <body> to 1000x500
  */
-export function resize(dimensions) {
-    const [width, height] = parseDimensions(dimensions);
+export async function resize(dimensions) {
+    const container = window.frameElement || getDefaultRootNode();
 
-    setDimensions(width, height);
-
-    dispatch(getWindow(), "resize");
+    // This will trigger a trusted "resize" event
+    setStyle(container, dimensions);
+    const promise = catchNextEvent(getWindow(), "resize");
+    if (container.querySelector("body")) {
+        await promise;
+    }
 
     return logEvents("resize");
 }
@@ -2224,22 +2213,22 @@ export function setInputRange(target, value, options) {
 }
 
 /**
- * @param {HTMLElement} fixture
+ * @param {EventTarget} target
  */
-export function setupEventActions(fixture) {
+export function setupEventActions(target) {
     if (runTime.currentPointerDownTimeout) {
-        globalThis.clearTimeout(runTime.currentPointerDownTimeout);
+        clearTimeout(runTime.currentPointerDownTimeout);
     }
 
     removeChangeTargetListeners();
 
-    fixture.addEventListener("click", registerFileInput, { capture: true });
+    target.addEventListener("click", registerFileInput, { capture: true });
 
     // Runtime global variables
-    $assign(runTime, getDefaultRunTimeValue());
+    Object.assign(runTime, getDefaultRunTimeValue());
 
     // Special keys
-    $assign(specialKeys, getDefaultSpecialKeysValue());
+    Object.assign(specialKeys, getDefaultSpecialKeysValue());
 }
 
 /**

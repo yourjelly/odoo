@@ -1,6 +1,7 @@
-import { expect, getFixture, mountOnFixture, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAllTexts } from "@odoo/hoot-dom";
-import { Component, useChildSubEnv, xml } from "@odoo/owl";
+import { Component, mount, useChildSubEnv, xml } from "@odoo/owl";
+import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { ErrorHandler, WithEnv } from "@web/core/utils/components";
 
 test("ErrorHandler component", async () => {
@@ -31,8 +32,8 @@ test("ErrorHandler component", async () => {
         }
     }
 
-    await mountOnFixture(Parent);
-    expect(getFixture()).toHaveText("not boom");
+    await mountWithCleanup(Parent);
+    expect("body").toHaveText("not boom");
 });
 
 test("WithEnv component", async () => {
@@ -59,7 +60,7 @@ test("WithEnv component", async () => {
             this.childEnv = { A: "gnap" };
         }
     }
-    await mountOnFixture(Parent, { env: { A: "foo", B: "bar" } });
+    await mount(Parent, document.body, { env: { A: "foo", B: "bar" } });
     expect(queryAllTexts("ul.outer > li")).toEqual(["A=blip", "B=bar"]);
     expect(queryAllTexts("ul.inner > li")).toEqual(["A=gnap"]);
 });
