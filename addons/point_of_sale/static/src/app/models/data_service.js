@@ -147,7 +147,7 @@ export class PosData extends Reactive {
             );
         }
 
-        const results = this.models.loadData(data, [], true);
+        const results = this.models.loadData(newData, [], true);
         for (const [model, data] of Object.entries(results)) {
             for (const record of data) {
                 if (record.raw.JSONuiState) {
