@@ -1,9 +1,17 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import options from "@web_editor/js/editor/snippets.options.legacy";
+import { registry } from "@web/core/registry";
+import {
+    MultipleItems,
+    SnippetMove,
+    SnippetOption,
+} from "@web_editor/js/editor/snippets.options";
+import {
+    registerWebsiteOption,
+} from "@website/js/editor/snippets.registry";
 
-options.registry.ProductCatalog = options.Class.extend({
+export class ProductCatalogOption extends SnippetOption {
 
     //--------------------------------------------------------------------------
     // Options
@@ -14,7 +22,7 @@ options.registry.ProductCatalog = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    toggleDescription: function (previewMode, widgetValue, params) {
+    toggleDescription(previewMode, widgetValue, params) {
         const $dishes = this.$('.s_product_catalog_dish');
         const $name = $dishes.find('.s_product_catalog_dish_name');
         $name.toggleClass('s_product_catalog_dish_dot_leaders', !widgetValue);
@@ -42,7 +50,7 @@ options.registry.ProductCatalog = options.Class.extend({
                 }
             });
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -51,11 +59,36 @@ options.registry.ProductCatalog = options.Class.extend({
     /**
      * @override
      */
-    _computeWidgetState: function (methodName, params) {
+    _computeWidgetState(methodName, params) {
         if (methodName === 'toggleDescription') {
             const $description = this.$('.s_product_catalog_dish_description');
             return $description.length && !$description.hasClass('d-none');
         }
-        return this._super(...arguments);
-    },
+        return super._computeWidgetState(...arguments);
+    }
+}
+
+registerWebsiteOption("Product Catalog (multiple item add product)", {
+    Class: MultipleItems,
+    template: "website.s_product_catalog_add_product_option",
+    selector: ".s_product_catalog",
+    applyTo: "> :has(.s_product_catalog_dish):not(:has(.row > div:has(.s_product_catalog_dish)))",
 });
+registerWebsiteOption("Product Catalog (multiple item add product in row)", {
+    Class: MultipleItems,
+    template: "website.s_product_catalog_add_product_option",
+    selector: ".s_product_catalog .row > div",
+    applyTo: "> :has(.s_product_catalog_dish)",
+});
+registerWebsiteOption("Product Catalog (Description)", {
+    Class: ProductCatalogOption,
+    template: "website.s_product_catalog_option",
+    selector: ".s_product_catalog",
+});
+registerWebsiteOption("Product Catalog (Drop)", {
+    selector: ".s_product_catalog_dish",
+    dropNear: ".s_product_catalog_dish",
+});
+const SnippetMoveOption = registry.category("snippet_options").get("SnippetMove (Vertical)");
+SnippetMoveOption.selector = SnippetMoveOption.selector + ", .s_product_catalog_dish";
+registry.category("snippet_options").add("SnippetMove (Vertical)", SnippetMoveOption, { force: true });
