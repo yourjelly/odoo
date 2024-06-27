@@ -30,6 +30,7 @@ export class Store extends BaseStore {
     CHAT_WINDOW_WIDTH = 360; // same value as $o-mail-ChatWindow-width
     CHAT_WINDOW_HIDDEN_WIDTH = 55;
     isReady = new Deferred();
+    isSetupDone = false;
 
     /** @returns {import("models").Store|import("models").Store[]} */
     static insert() {
@@ -388,6 +389,7 @@ export class Store extends BaseStore {
 
     setup() {
         super.setup();
+        this.isSetupDone = true;
         this._fetchDataDebounced = debounce(
             this._fetchDataDebounced,
             Store.FETCH_DATA_DEBOUNCE_DELAY
@@ -731,6 +733,7 @@ export const storeService = {
         const store = makeStore(env);
         store.discuss = { activeTab: "main" };
         store.insert(session.storeData);
+        console.warn(store.isSetupDone);
         /**
          * Add defaults for `self` and `settings` because in livechat there could be no user and no
          * guest yet (both undefined at init), but some parts of the code that loosely depend on
