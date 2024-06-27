@@ -6284,22 +6284,17 @@ export class Overlay extends Component {
 registry.category("snippet_widgets").add("Overlay", Overlay);
 
 
+
 /**
  * Allows snippets to be moved before the preceding element or after the following.
  */
-legacyRegistry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutUtils, {
-    displayOverlayOptions: true,
-
+export class SnippetMove extends ColumnLayoutMixin(SnippetOption) {
+    static displayOverlayOptions = true;
+    
     /**
      * @override
      */
-    start: function () {
-        var $buttons = this.$el.find('we-button');
-        var $overlayArea = this.$overlay.find('.o_overlay_move_options');
-        // Putting the arrows side by side.
-        $overlayArea.prepend($buttons[1]);
-        $overlayArea.prepend($buttons[0]);
-
+    willStart() {
         // Needed for compatibility (with already dropped snippets).
         // If the target is a column, check if all the columns are either mobile
         // ordered or not. If they are not consistent, then we remove the mobile
@@ -6313,13 +6308,13 @@ legacyRegistry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutUtils, {
             }
         }
 
-        return this._super(...arguments);
-    },
+        return super.willStart(...arguments);
+    }
     /**
      * @override
      */
     onClone(options) {
-        this._super.apply(this, arguments);
+        super.onClone(arguments);
         const mobileOrder = this.$target[0].style.order;
         // If the order has been adapted on mobile, it must be different
         // for each clone.
@@ -6336,20 +6331,20 @@ legacyRegistry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutUtils, {
                 }
             });
         }
-    },
+    }
     /**
      * @override
      */
     onMove() {
-        this._super.apply(this, arguments);
+        super.onMove(arguments);
         // Remove all the mobile order classes after a drag and drop.
         this._removeMobileOrders(this.$target[0].parentElement.children);
-    },
+    }
     /**
      * @override
      */
     onRemove() {
-        this._super.apply(this, arguments);
+        super.onRemove(arguments);
         const targetMobileOrder = this.$target[0].style.order;
         // If the order has been adapted on mobile, the gap created by the
         // removed snippet must be filled in.
@@ -6357,7 +6352,7 @@ legacyRegistry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutUtils, {
             const targetOrder = parseInt(targetMobileOrder);
             this._fillRemovedItemGap(this.$target[0].parentElement, targetOrder);
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Options
@@ -6368,7 +6363,7 @@ legacyRegistry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutUtils, {
      *
      * @see this.selectClass for parameters
      */
-    moveSnippet: function (previewMode, widgetValue, params) {
+    moveSnippet(previewMode, widgetValue, params) {
         const isMobile = this._isMobile();
         const isNavItem = this.$target[0].classList.contains('nav-item');
         const $tabPane = isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
@@ -6431,14 +6426,20 @@ legacyRegistry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutUtils, {
                 });
             }
         }
+        // TODO: @owl-options were parameters even used in there ?
+        this.options.optionUpdate("StepsConnector", "move_snippet");
+        /*
         this.trigger_up('option_update', {
             optionName: 'StepsConnector',
             name: 'move_snippet',
         });
+        */
         // Update the "Invisible Elements" panel as the order of invisible
         // snippets could have changed on the page.
-        this.trigger_up("update_invisible_dom");
-    },
+        // TODO: @owl-options ?
+        // this.options._updateInvisibleDom();
+        // this.trigger_up("update_invisible_dom");
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -6490,8 +6491,8 @@ legacyRegistry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutUtils, {
             }
             return !!siblingEl;
         }
-        return this._super(...arguments);
-    },
+        return super._computeWidgetVisibility(...arguments);
+    }
     /**
      * Swaps the mobile orders.
      *
@@ -6513,14 +6514,30 @@ legacyRegistry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutUtils, {
             comparedEl.style.order = targetMobileOrder;
             break;
         }
-    },
+    }
     /**
      * @returns {Boolean}
      */
     _isMobile() {
         return false;
-    },
+    }
+}
+
+registerOption("SnippetMove (Vertical)", {
+    Class: SnippetMove,
+    template: "web_editor.snippet_move_option_vertical",
+    selector: "section, .accordion > .card, .s_showcase .row:not(.s_col_no_resize) > div, .s_hr",
+    noScroll: ".accordion > .card",
 });
+
+registerOption("SnippetMove (Horizontal)", {
+    Class: SnippetMove,
+    template: "web_editor.snippet_move_option_horizontal",
+    selector: ".row:not(.s_col_no_resize) > div, .nav-item",
+    exclude: ".s_showcase .row > div",
+    name: "move_horizontally_opt",
+});
+
 
 /**
  * Allows for media to be replaced.
