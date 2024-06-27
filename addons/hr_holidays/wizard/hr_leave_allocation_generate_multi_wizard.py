@@ -8,6 +8,26 @@ class HrLeaveAllocationGenerateMultiWizard(models.TransientModel):
     _name = "hr.leave.allocation.generate.multi.wizard"
     _description = 'Generate time off allocations for multiple employees'
 
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        if self.env.context.get('active_model') != 'hr.leave.allocation':
+            return res
+
+        if len(self.env.context.get('active_ids', [])) == 1:
+            allocation = self.env['hr.leave.allocation'].browse(self.env.context.get('active_ids'))
+            res.update({
+                'name': allocation.name,
+                'duration': allocation.number_of_days,
+                'holiday_status_id': allocation.holiday_status_id.id,
+                'allocation_type': allocation.allocation_type,
+                'accrual_plan_id': allocation.accrual_plan_id.id,
+                'date_from': allocation.date_from,
+                'date_to': allocation.date_to,
+            })
+        res['employee_ids'] = [
+            (6, 0, self.env['hr.leave.allocation'].browse(self.env.context.get('active_ids')).employee_id.ids)]
+        return res
+
     name = fields.Char("Description")
     duration = fields.Float(string="Allocation")
     holiday_status_id = fields.Many2one(
