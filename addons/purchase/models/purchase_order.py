@@ -154,6 +154,14 @@ class PurchaseOrder(models.Model):
 
     receipt_reminder_email = fields.Boolean('Receipt Reminder Email', compute='_compute_receipt_reminder_email')
     reminder_date_before_receipt = fields.Integer('Days Before Receipt', compute='_compute_receipt_reminder_email')
+    check_count = fields.Boolean("count check", default=False, store=True)
+
+    # @api.depends("invoice_count")
+    # def _compute_check_multiple_records(self):
+    #     breakpoint()
+    #     if self.ids == 1:
+    #         return False
+    #     return True
 
     @api.constrains('company_id', 'order_line')
     def _check_order_line_company_id(self):
@@ -564,15 +572,16 @@ class PurchaseOrder(models.Model):
                 # supplier info should be added regardless of the user access rights
                 line.product_id.product_tmpl_id.sudo().write(vals)
 
-    def action_create_invoice(self):
+    def action_create_invoice(self, purchase_order_ids, consolidated_billing):
         """Create the invoice associated to the PO.
         """
+        # breakpoint()
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
 
         # 1) Prepare invoice vals and clean-up the section lines
         invoice_vals_list = []
         sequence = 10
-        for order in self:
+        for order in purchase_order_ids:
             if order.invoice_status != 'to invoice':
                 continue
 
@@ -600,29 +609,30 @@ class PurchaseOrder(models.Model):
 
         if not invoice_vals_list:
             raise UserError(_('There is no invoiceable line. If a product has a control policy based on received quantity, please make sure that a quantity has been received.'))
-
-        # 2) group by (company_id, partner_id, currency_id) for batch creation
-        new_invoice_vals_list = []
-        for grouping_keys, invoices in groupby(invoice_vals_list, key=lambda x: (x.get('company_id'), x.get('partner_id'), x.get('currency_id'))):
-            origins = set()
-            payment_refs = set()
-            refs = set()
-            ref_invoice_vals = None
-            for invoice_vals in invoices:
-                if not ref_invoice_vals:
-                    ref_invoice_vals = invoice_vals
-                else:
-                    ref_invoice_vals['invoice_line_ids'] += invoice_vals['invoice_line_ids']
-                origins.add(invoice_vals['invoice_origin'])
-                payment_refs.add(invoice_vals['payment_reference'])
-                refs.add(invoice_vals['ref'])
-            ref_invoice_vals.update({
-                'ref': ', '.join(refs)[:2000],
-                'invoice_origin': ', '.join(origins),
-                'payment_reference': len(payment_refs) == 1 and payment_refs.pop() or False,
-            })
-            new_invoice_vals_list.append(ref_invoice_vals)
-        invoice_vals_list = new_invoice_vals_list
+        
+        if consolidated_billing:
+            # 2) group by (company_id, partner_id, currency_id) for batch creation
+            new_invoice_vals_list = []
+            for grouping_keys, invoices in groupby(invoice_vals_list, key=lambda x: (x.get('company_id'), x.get('partner_id'), x.get('currency_id'))):
+                origins = set()
+                payment_refs = set()
+                refs = set()
+                ref_invoice_vals = None
+                for invoice_vals in invoices:
+                    if not ref_invoice_vals:
+                        ref_invoice_vals = invoice_vals
+                    else:
+                        ref_invoice_vals['invoice_line_ids'] += invoice_vals['invoice_line_ids']
+                    origins.add(invoice_vals['invoice_origin'])
+                    payment_refs.add(invoice_vals['payment_reference'])
+                    refs.add(invoice_vals['ref'])
+                ref_invoice_vals.update({
+                    'ref': ', '.join(refs)[:2000],
+                    'invoice_origin': ', '.join(origins),
+                    'payment_reference': len(payment_refs) == 1 and payment_refs.pop() or False,
+                })
+                new_invoice_vals_list.append(ref_invoice_vals)
+            invoice_vals_list = new_invoice_vals_list
 
         # 3) Create invoices.
         moves = self.env['account.move']

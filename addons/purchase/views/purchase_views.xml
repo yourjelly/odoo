@@ -137,13 +137,21 @@
                     <button name="print_quotation" string="Print RFQ" type="object" invisible="state != 'draft'" class="oe_highlight" groups="base.group_user" data-hotkey="k"/>
                     <button name="button_confirm" type="object" invisible="state != 'sent'" string="Confirm Order" context="{'validate_analytic': True}" class="oe_highlight" id="bid_confirm" data-hotkey="q"/>
                     <button name="button_approve" type="object" invisible="state != 'to approve'" string="Approve Order" class="oe_highlight" groups="purchase.group_purchase_manager" data-hotkey="z"/>
-                    <button name="action_create_invoice" string="Create Bill" type="object" class="oe_highlight" context="{'create_bill':True}" invisible="state not in ('purchase', 'done') or invoice_status in ('no', 'invoiced')" data-hotkey="w"/>
+                    <button name="%(purchase.action_view_purchase_advance_payment_inv)d"
+                        type="action"
+                        string="Create Bills"
+                        class="btn-secondary"/>
+                    <!-- <button name="action_create_invoice" string="Create Bill" type="object" class="oe_highlight" context="{'create_bill':True}" invisible="state not in ('purchase', 'done') or invoice_status in ('no', 'invoiced')" data-hotkey="w"/> -->
                     <button name="action_rfq_send" invisible="state != 'sent'" string="Re-Send by Email" type="object" context="{'send_rfq':True}" data-hotkey="g"/>
                     <button name="print_quotation" string="Print RFQ" type="object" invisible="state != 'sent'" groups="base.group_user" data-hotkey="k"/>
                     <button name="button_confirm" type="object" invisible="state != 'draft'" context="{'validate_analytic': True}" string="Confirm Order" id="draft_confirm" data-hotkey="q"/>
                     <button name="action_rfq_send" invisible="state != 'purchase'" string="Send PO by Email" type="object" context="{'send_rfq':False}" data-hotkey="g"/>
                     <button name="confirm_reminder_mail" string="Confirm Receipt Date" type="object" invisible="state not in ('purchase', 'done') or mail_reminder_confirmed or not date_planned" groups="base.group_no_one" data-hotkey="o"/>
-                    <button name="action_create_invoice" string="Create Bill" type="object" context="{'create_bill':True}" invisible="state not in ('purchase', 'done') or invoice_status not in ('no', 'invoiced') or not order_line" data-hotkey="w"/>
+                    <!-- <button name="%(purchase.action_view_purchase_advance_payment_inv)d"
+                        type="action"
+                        string="Create Billsss"
+                        class="btn-secondary"/> -->
+                    <!-- <button name="action_create_invoice" string="Create Bill" type="object" context="{'create_bill':True}" invisible="state not in ('purchase', 'done') or invoice_status not in ('no', 'invoiced') or not order_line" data-hotkey="w"/> -->
                     <button name="button_draft" invisible="state != 'cancel'" string="Set to Draft" type="object" data-hotkey="o"/>
                     <button name="button_cancel" invisible="state not in ('draft', 'to approve', 'sent', 'purchase')" string="Cancel" type="object" data-hotkey="x" />
                     <button name="button_done" type="object" string="Lock" invisible="state != 'purchase'" data-hotkey="l"/>
@@ -593,9 +601,15 @@
                 <tree string="Purchase Order" decoration-info="state in ['draft', 'sent']"
                 decoration-muted="state == 'cancel'"
                 class="o_purchase_order" js_class="purchase_dashboard_list" sample="1">
+                    <!-- <field name="check_count" invisible="1"/> -->
                     <header>
-                        <button name="action_create_invoice" type="object" string="Create Bills"/>
+                        <button name="%(purchase.action_view_purchase_advance_payment_inv)d"
+                        type="action"
+                        string="Create Billsaa"
+                        class="btn-secondary"
+                        />
                     </header>
+                    <field name="check_count" column_invisible="True"/>
                     <field name="priority" optional="show" widget="priority" nolabel="1"/>
                     <field name="partner_ref" optional="hide"/>
                     <field name="name" string="Reference" readonly="1" decoration-bf="1"/>
@@ -620,6 +634,7 @@
                     <field name="state" optional="show" widget="badge" decoration-success="state == 'purchase' or state == 'done'"
                         decoration-warning="state == 'to approve'" decoration-info="state == 'draft' or state == 'sent'"/>
                     <field name="invoice_status" optional="hide"/>
+
                 </tree>
             </field>
         </record>
@@ -634,7 +649,10 @@
                     class="o_purchase_order"
                     sample="1">
                     <header>
-                        <button name="action_create_invoice" type="object" string="Create Bills"/>
+                        <button name="%(purchase.action_view_purchase_advance_payment_inv)d"
+                        type="action"
+                        string="Create Billsss"
+                        class="btn-secondary"/>
                     </header>
                     <field name="priority" optional="show" widget="priority" nolabel="1"/>
                     <field name="partner_ref" optional="hide"/>

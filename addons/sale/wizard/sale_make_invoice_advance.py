@@ -148,6 +148,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
     #=== BUSINESS METHODS ===#
 
     def _create_invoices(self, sale_orders):
+        breakpoint()
         self.ensure_one()
         if self.advance_payment_method == 'delivered':
             return sale_orders._create_invoices(final=self.deduct_down_payments, grouped=not self.consolidated_billing)
