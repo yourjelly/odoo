@@ -4,3 +4,7 @@
     }
 }
 
+.o_tree_col_size table tbody tr td:has(button .fa-list),
+.o_tree_col_size table tbody tr td:has(button.fa-list) {
+    width: 45px;
+}
