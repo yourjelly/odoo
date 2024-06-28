@@ -279,6 +279,7 @@
             'website/static/src/snippets/s_media_list/options.js',
             'website/static/src/snippets/s_media_list/options.xml',
             'website/static/src/snippets/s_google_map/options.js',
+            'website/static/src/snippets/s_google_map/options.xml',
             'website/static/src/snippets/s_map/options.js',
             'website/static/src/snippets/s_map/options.xml',
             'website/static/src/snippets/s_dynamic_snippet/options.js',
