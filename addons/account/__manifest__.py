@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+# Just making a change to push a runbot
 {
     'name' : 'Invoicing',
     'version' : '1.2',
