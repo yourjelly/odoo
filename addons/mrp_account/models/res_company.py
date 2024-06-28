@@ -25,6 +25,8 @@ class ResCompany(models.Model):
                 'usage': 'production',
                 'location_id': parent,
                 'company_id': company.id,
+                'valuation_in_account_id': company.account_production_wip_account_id.id,
+                'valuation_out_account_id': company.account_production_wip_account_id.id,
             })
             self.env['ir.property']._set_default(
                 "production_wip_location",

@@ -51,5 +51,6 @@ class AccountChartTemplate(models.AbstractModel):
                 'default_cash_difference_expense_account_id': 'cash_diff_expense',
                 'account_journal_early_pay_discount_loss_account_id': 'cash_discount_loss',
                 'account_journal_early_pay_discount_gain_account_id': 'cash_discount_gain',
+                'account_production_wip_account_id': 'wip',
             }
         }
