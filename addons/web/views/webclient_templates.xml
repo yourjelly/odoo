@@ -360,7 +360,7 @@
             <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
             <t t-set="title" t-value="app_name"/>
             <t t-set="head">
-                <link rel="apple-touch-icon" href="/web/static/img/odoo-icon-ios.png"/>
+                <link rel="apple-touch-icon" t-att-href="app_icon"/>
                 <link rel="manifest" t-att-href="safe_manifest_url" crossorigin="use-credentials" />
                 <style>
                     @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&amp;display=swap');
@@ -492,7 +492,7 @@
                         <path fill="#FFF" d="M8 8V1a1 1 0 1 1 2 0v8a1 1 0 0 1-1 1H1a1 1 0 1 1 0-2h7z"></path>
                     </svg>
                 </button>
-                <img style="width:80px;margin:5vmin;background:white;height:80px;padding:5vmin;border-radius:20px;" t-attf-src="{{app_icon}}"/>
+                <img style="width:80px;margin:5vmin;background:white;height:80px;padding:5vmin;border-radius:20px;" t-att-src="app_icon"/>
                 <div style="margin:auto 20px;">
                     <h1 style="margin:0;" t-esc="app_name"></h1>
                     <a style="display:flex;" href="https://odoo.com" alt="Odoo" target="_blank">Odoo S.A.</a>

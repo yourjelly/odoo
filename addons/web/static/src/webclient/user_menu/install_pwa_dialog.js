@@ -40,7 +40,7 @@ export class InstallPWADialog extends Component {
         // While the feature could work with all apps, we have decided to only
         // support the installation of the apps contained in the following list
         // The list can grow in the future, by simply adding the name of the module
-        return ["barcode", "field-service"].includes(app.actionPath);
+        return true; //["barcode", "field-service"].includes(app.actionPath);
     }
 
     launchInstallProcess() {
