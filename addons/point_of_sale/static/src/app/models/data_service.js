@@ -147,7 +147,19 @@ export class PosData extends Reactive {
             );
         }
 
-        const results = this.models.loadData(newData, [], true);
+        if (data["pos.order"]) {
+            data["pos.order"] = data["pos.order"].filter(
+                (p) => !this.models["pos.order"].get(p.id)
+            );
+        }
+
+        if (data["pos.order.line"]) {
+            data["pos.order.line"] = data["pos.order.line"].filter(
+                (p) => !this.models["pos.order.line"].get(p.id)
+            );
+        }
+
+        const results = this.models.loadData(data, [], true);
         for (const [model, data] of Object.entries(results)) {
             for (const record of data) {
                 if (record.raw.JSONuiState) {
