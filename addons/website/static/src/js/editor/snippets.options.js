@@ -18,7 +18,7 @@ import {
     isImageSupportedForStyle,
     loadImageInfo,
 } from "@web_editor/js/editor/image_processing";
-import "@website/snippets/s_popup/options";
+import { SnippetPopup } from "../../snippets/s_popup/options";
 import { range } from "@web/core/utils/numbers";
 import { _t } from "@web/core/l10n/translation";
 import {Domain} from "@web/core/domain";
@@ -3056,7 +3056,7 @@ options.registry.HeaderBox = options.registry.Box.extend({
     },
 });
 
-options.registry.CookiesBar = options.registry.SnippetPopup.extend({
+export class CookiesBar extends SnippetPopup {
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
@@ -3066,16 +3066,9 @@ options.registry.CookiesBar = options.registry.SnippetPopup.extend({
      *
      * @see this.selectClass for parameters
      */
-    selectLayout: function (previewMode, widgetValue, params) {
-        let websiteId;
-        this.trigger_up('context_get', {
-            callback: function (ctx) {
-                websiteId = ctx['website_id'];
-            },
-        });
-
+    selectLayout(previewMode, widgetValue, params) {
         const $template = $(renderToElement(`website.cookies_bar.${widgetValue}`, {
-            websiteId: websiteId,
+            websiteId: this.website.currentWebsite.id,
         }));
 
         const $content = this.$target.find('.modal-content');
@@ -3114,7 +3107,14 @@ options.registry.CookiesBar = options.registry.SnippetPopup.extend({
         }
 
         $content.empty().append($template);
-    },
+    }
+}
+
+registerWebsiteOption("CookiesBar", {
+    Class: CookiesBar,
+    template: "website.cookie_bar_options",
+    selector: "#website_cookies_bar",
+    target: ".modal",
 });
 
 /**
