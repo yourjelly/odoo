@@ -265,6 +265,15 @@ class AccountMove(models.Model):
     secure_sequence_number = fields.Integer(string="Inalterability No Gap Sequence #", readonly=True, copy=False, index=True)
     inalterable_hash = fields.Char(string="Inalterability Hash", readonly=True, copy=False, index='btree_not_null')
 
+    sync_tax_lines = fields.Binary(compute='_compute_sync_tax_product_lines', exportable=False)
+    sync_tax_lines_dirty = fields.Boolean(compute='_compute_sync_tax_product_lines')
+    sync_product_lines = fields.Binary(compute='_compute_sync_tax_product_lines', exportable=False)
+    sync_product_lines_dirty = fields.Boolean(compute='_compute_sync_tax_product_lines')
+    sync_cash_rounding_lines = fields.Binary(compute='_compute_sync_cash_rounding_lines', exportable=False)
+    sync_cash_rounding_lines_dirty = fields.Boolean(compute='_compute_sync_cash_rounding_lines')
+    sync_term_lines = fields.Binary(compute='_compute_sync_term_lines', exportable=False)
+    sync_term_lines_dirty = fields.Boolean(compute='_compute_sync_term_lines')
+
     # ==============================================================================================
     #                                          INVOICE
     # ==============================================================================================
@@ -1283,98 +1292,102 @@ class AccountMove(models.Model):
                 move.invoice_payments_widget = False
 
     @api.depends_context('lang')
-    @api.depends(
-        'invoice_line_ids.currency_rate',
-        'invoice_line_ids.tax_base_amount',
-        'invoice_line_ids.tax_line_id',
-        'invoice_line_ids.price_total',
-        'invoice_line_ids.price_subtotal',
-        'invoice_payment_term_id',
-        'partner_id',
-        'currency_id',
-    )
+    @api.depends('sync_term_lines')
     def _compute_tax_totals(self):
         """ Computed field used for custom widget's rendering.
             Only set on invoices.
         """
+        AccountTax = self.env['account.tax']
         for move in self:
             if move.is_invoice(include_receipts=True):
-                base_lines = move.invoice_line_ids.filtered(lambda line: line.display_type == 'product')
-                base_line_values_list = [line._convert_to_tax_base_line_dict() for line in base_lines]
-                sign = move.direction_sign
-                if move.id:
-                    # The invoice is stored so we can add the early payment discount lines directly to reduce the
-                    # tax amount without touching the untaxed amount.
-                    base_line_values_list += [
-                        {
-                            **line._convert_to_tax_base_line_dict(),
-                            'handle_price_include': False,
-                            'quantity': 1.0,
-                            'price_unit': sign * line.amount_currency,
-                        }
-                        for line in move.line_ids.filtered(lambda line: line.display_type == 'epd')
-                    ]
+                base_lines = [
+                    line._prepare_base_line_for_taxes_computation(tax_details=line.tax_details)
+                    for line in move.invoice_line_ids if line.tax_details
+                ]
+                move.tax_totals = AccountTax._get_tax_totals_summary(
+                    base_lines,
+                    move.currency_id,
+                    move.company_id,
+                    cash_rounding=move.invoice_cash_rounding_id,
+                    manual_tax_amounts=move._get_manual_tax_amounts_from_sync_tax_lines(),
+                )
 
-                kwargs = {
-                    'base_lines': base_line_values_list,
-                    'company': move.company_id,
-                    'currency': move.currency_id or move.journal_id.currency_id or move.company_id.currency_id,
-                }
-
-                if move.id:
-                    kwargs['tax_lines'] = [
-                        line._convert_to_tax_line_dict()
-                        for line in move.line_ids.filtered(lambda line: line.display_type == 'tax')
-                    ]
-                else:
-                    # In case the invoice isn't yet stored, the early payment discount lines are not there. Then,
-                    # we need to simulate them.
-                    epd_aggregated_values = {}
-                    for base_line in base_lines:
-                        if not base_line.epd_needed:
-                            continue
-                        for grouping_dict, values in base_line.epd_needed.items():
-                            epd_values = epd_aggregated_values.setdefault(grouping_dict, {'price_subtotal': 0.0})
-                            epd_values['price_subtotal'] += values['price_subtotal']
-
-                    for grouping_dict, values in epd_aggregated_values.items():
-                        taxes = None
-                        if grouping_dict.get('tax_ids'):
-                            taxes = self.env['account.tax'].browse(grouping_dict['tax_ids'][0][2])
-
-                        kwargs['base_lines'].append(self.env['account.tax']._convert_to_tax_base_line_dict(
-                            grouping_dict,
-                            partner=move.partner_id,
-                            currency=move.currency_id,
-                            taxes=taxes,
-                            price_unit=values['price_subtotal'],
-                            quantity=1.0,
-                            account=self.env['account.account'].browse(grouping_dict['account_id']),
-                            analytic_distribution=values.get('analytic_distribution'),
-                            price_subtotal=values['price_subtotal'],
-                            is_refund=move.move_type in ('out_refund', 'in_refund'),
-                            handle_price_include=False,
-                        ))
-                move.tax_totals = self.env['account.tax']._prepare_tax_totals(**kwargs)
-                if move.invoice_cash_rounding_id:
-                    rounding_amount = move.invoice_cash_rounding_id.compute_difference(move.currency_id, move.tax_totals['amount_total'])
-                    totals = move.tax_totals
-                    totals['display_rounding'] = True
-                    if rounding_amount:
-                        if move.invoice_cash_rounding_id.strategy == 'add_invoice_line':
-                            totals['rounding_amount'] = rounding_amount
-                            totals['formatted_rounding_amount'] = formatLang(self.env, totals['rounding_amount'], currency_obj=move.currency_id)
-                        elif move.invoice_cash_rounding_id.strategy == 'biggest_tax':
-                            if totals['subtotals_order']:
-                                max_tax_group = max((
-                                    tax_group
-                                    for tax_groups in totals['groups_by_subtotal'].values()
-                                    for tax_group in tax_groups
-                                ), key=lambda tax_group: tax_group['tax_group_amount'])
-                                max_tax_group['tax_group_amount'] += rounding_amount
-                                max_tax_group['formatted_tax_group_amount'] = formatLang(self.env, max_tax_group['tax_group_amount'], currency_obj=move.currency_id)
-                        totals['amount_total'] += rounding_amount
-                        totals['formatted_amount_total'] = formatLang(self.env, totals['amount_total'], currency_obj=move.currency_id)
+                # base_lines = move.invoice_line_ids.filtered(lambda line: line.display_type == 'product')
+                # base_line_values_list = [line._convert_to_tax_base_line_dict() for line in base_lines]
+                # sign = move.direction_sign
+                # if move.id:
+                #     # The invoice is stored so we can add the early payment discount lines directly to reduce the
+                #     # tax amount without touching the untaxed amount.
+                #     base_line_values_list += [
+                #         {
+                #             **line._convert_to_tax_base_line_dict(),
+                #             'handle_price_include': False,
+                #             'quantity': 1.0,
+                #             'price_unit': sign * line.amount_currency,
+                #         }
+                #         for line in move.line_ids.filtered(lambda line: line.display_type == 'epd')
+                #     ]
+                #
+                # kwargs = {
+                #     'base_lines': base_line_values_list,
+                #     'company': move.company_id,
+                #     'currency': move.currency_id or move.journal_id.currency_id or move.company_id.currency_id,
+                # }
+                #
+                # if move.id:
+                #     kwargs['tax_lines'] = [
+                #         line._convert_to_tax_line_dict()
+                #         for line in move.line_ids.filtered(lambda line: line.display_type == 'tax')
+                #     ]
+                # else:
+                #     # In case the invoice isn't yet stored, the early payment discount lines are not there. Then,
+                #     # we need to simulate them.
+                #     epd_aggregated_values = {}
+                #     for base_line in base_lines:
+                #         if not base_line.epd_needed:
+                #             continue
+                #         for grouping_dict, values in base_line.epd_needed.items():
+                #             epd_values = epd_aggregated_values.setdefault(grouping_dict, {'price_subtotal': 0.0})
+                #             epd_values['price_subtotal'] += values['price_subtotal']
+                #
+                #     for grouping_dict, values in epd_aggregated_values.items():
+                #         taxes = None
+                #         if grouping_dict.get('tax_ids'):
+                #             taxes = self.env['account.tax'].browse(grouping_dict['tax_ids'][0][2])
+                #
+                #         kwargs['base_lines'].append(self.env['account.tax']._convert_to_tax_base_line_dict(
+                #             grouping_dict,
+                #             partner=move.partner_id,
+                #             currency=move.currency_id,
+                #             taxes=taxes,
+                #             price_unit=values['price_subtotal'],
+                #             quantity=1.0,
+                #             account=self.env['account.account'].browse(grouping_dict['account_id']),
+                #             analytic_distribution=values.get('analytic_distribution'),
+                #             price_subtotal=values['price_subtotal'],
+                #             is_refund=move.move_type in ('out_refund', 'in_refund'),
+                #             handle_price_include=False,
+                #         ))
+                # move.tax_totals = self.env['account.tax']._prepare_tax_totals(**kwargs)
+                # if move.invoice_cash_rounding_id:
+                #     rounding_amount = move.invoice_cash_rounding_id.compute_difference(move.currency_id, move.tax_totals['amount_total'])
+                #     totals = move.tax_totals
+                #     totals['display_rounding'] = True
+                #     if rounding_amount:
+                #         if move.invoice_cash_rounding_id.strategy == 'add_invoice_line':
+                #             totals['rounding_amount'] = rounding_amount
+                #             totals['formatted_rounding_amount'] = formatLang(self.env, totals['rounding_amount'], currency_obj=move.currency_id)
+                #         elif move.invoice_cash_rounding_id.strategy == 'biggest_tax':
+                #             if totals['subtotals_order']:
+                #                 max_tax_group = max((
+                #                     tax_group
+                #                     for tax_groups in totals['groups_by_subtotal'].values()
+                #                     for tax_group in tax_groups
+                #                 ), key=lambda tax_group: tax_group['tax_group_amount'])
+                #                 max_tax_group['tax_group_amount'] += rounding_amount
+                #                 max_tax_group['formatted_tax_group_amount'] = formatLang(self.env, max_tax_group['tax_group_amount'], currency_obj=move.currency_id)
+                #         totals['amount_total'] += rounding_amount
+                #         totals['formatted_amount_total'] = formatLang(self.env, totals['amount_total'], currency_obj=move.currency_id)
             else:
                 # Non-invoice moves don't support that field (because of multicurrency: all lines of the invoice share the same currency)
                 move.tax_totals = None
@@ -1820,38 +1833,284 @@ class AccountMove(models.Model):
                 if not is_html_empty(tax.invoice_legal_notes)
             )
 
+    @api.depends('line_ids.tax_details', 'invoice_line_ids.tax_details')
+    def _compute_sync_tax_product_lines(self):
+        AccountTax = self.env['account.tax']
+        for move in self:
+            amls = move.invoice_line_ids if move.is_invoice(include_receipts=True) else move.line_ids
+            base_lines = [
+                line._prepare_base_line_for_taxes_computation(tax_details=line.tax_details)
+                for line in amls if line.tax_details
+            ]
+
+            # If nothing changed on the lines, don't recompute anything.
+            dirty = False
+            for base_line in base_lines:
+                if base_line['tax_details']['dirty']:
+                    base_line['tax_details']['dirty'] = False
+                    dirty = True
+
+            manual_tax_amounts_per_currency = defaultdict(lambda: defaultdict(lambda: {
+                'tax_amount_currency': 0.0,
+                'tax_amount': 0.0,
+            }))
+            if move.id and not dirty:
+                sign = move.direction_sign
+                for tax_line in move.line_ids.filtered(lambda aml: aml.display_type == 'tax'):
+                    manual_tax_amounts_per_currency[tax_line.currency_id][tax_line.tax_line_id.id]['tax_amount_currency'] += sign * tax_line.amount_currency
+                    manual_tax_amounts_per_currency[tax_line.currency_id][tax_line.tax_line_id.id]['tax_amount'] += sign * tax_line.balance
+
+            results = AccountTax._prepare_tax_lines(
+                base_lines,
+                move.company_id,
+                force_caba_exigibility=move.always_tax_exigible,
+                manual_tax_amounts_per_currency=manual_tax_amounts_per_currency,
+            )
+            move.sync_tax_lines = {
+                frozendict({**grouping_key, 'move_id': move.id, 'display_type': 'tax'}): amounts
+                for grouping_key, amounts in results['tax_lines_to_add'].items()
+            }
+            move.sync_tax_lines_dirty = True
+            move.sync_product_lines = {
+                frozendict({'id': record_id}): amounts
+                for record_id, amounts in results['base_lines_to_update'].items()
+            }
+            move.sync_product_lines_dirty = True
+            print("===manual_tax_amounts_per_currency===")
+            print(manual_tax_amounts_per_currency)
+            print("===sync_tax_lines===")
+            import pprint
+            print(pprint.pformat(move.sync_tax_lines))
+            print("===sync_product_lines===")
+            import pprint
+            print(pprint.pformat(move.sync_product_lines))
+
+    def _get_manual_tax_amounts_from_sync_tax_lines(self):
+        self.ensure_one()
+
+        manual_tax_amounts = defaultdict(lambda: {
+            'tax_amount_currency': 0.0,
+            'tax_amount': 0.0,
+        })
+        sign = self.direction_sign
+        for grouping_key, amounts in self.sync_tax_lines.items():
+            if tax_repartition_line_id := grouping_key.get('tax_repartition_line_id'):
+                tax_rep = self.env['account.tax.repartition.line'].browse(tax_repartition_line_id)
+                tax = tax_rep.tax_id
+                manual_tax_amounts[tax.id]['tax_amount_currency'] += sign * amounts['amount_currency']
+                manual_tax_amounts[tax.id]['tax_amount'] += sign * amounts['balance']
+        return manual_tax_amounts
+
+    @api.depends('sync_tax_lines', 'sync_product_lines', 'invoice_cash_rounding_id')
+    def _compute_sync_cash_rounding_lines(self):
+        AccountTax = self.env['account.tax']
+        for move in self:
+            if not move.is_invoice(include_receipts=True):
+                move.sync_cash_rounding_lines = {}
+                move.sync_cash_rounding_lines_dirty = False
+                continue
+
+            move.sync_cash_rounding_lines = {}
+            move.sync_cash_rounding_lines_dirty = True
+
+            cash_rounding = move.invoice_cash_rounding_id
+            sign = move.direction_sign
+            base_lines = [
+                line._prepare_base_line_for_taxes_computation(tax_details=line.tax_details)
+                for line in move.invoice_line_ids if line.tax_details
+            ]
+            results = AccountTax._aggregate_base_lines_taxes(
+                base_lines,
+                move.company_id,
+                cash_rounding=cash_rounding,
+                manual_tax_amounts=move._get_manual_tax_amounts_from_sync_tax_lines(),
+            )
+            rate = move.invoice_currency_rate
+            if 'cash_rounding_base_amount_currency' in results:
+                # Cash rounding as a new 'product' line.
+                diff_amount_currency = results['cash_rounding_base_amount_currency']
+                account = cash_rounding.loss_account_id if diff_amount_currency > 0.0 else cash_rounding.profit_account_id
+                if not account:
+                    continue
+
+                move.sync_cash_rounding_lines[frozendict({
+                    'move_id': move.id,
+                    'partner_id': move.commercial_partner_id.id,
+                    'currency_id': move.currency_id.id,
+                    'account_id': account.id,
+                    'tax_ids': [Command.set([])],
+                    'display_type': 'rounding',
+                })] = {
+                    'name': move.invoice_cash_rounding_id.name,
+                    'amount_currency': sign * diff_amount_currency,
+                    'balance': sign * move.company_currency_id.round(diff_amount_currency / rate) if rate else 0.0,
+                }
+
+            else:
+                # Cash rounding on a tax line.
+                for grouping_key, subtotal in results['subtotals'].items():
+                    if 'cash_rounding_tax_amount_currency' in subtotal:
+                        tax = grouping_key['tax_id']
+                        is_refund = move.move_type in ('out_refund', 'in_refund')
+                        tax_rep_field = f"{'refund' if is_refund else 'invoice'}_repartition_line_ids"
+
+                        # Find the tax repartition line having the biggest amount.
+                        candidates = sorted(
+                            [
+                                (grouping_key, amounts)
+                                for grouping_key, amounts in move.sync_tax_lines.items()
+                                if grouping_key.get('tax_repartition_line_id') in tax[tax_rep_field].ids
+                            ],
+                            key=lambda x: -x[1]['amount_currency']
+                        )
+                        if not candidates:
+                            break
+
+                        grouping_key, amounts = candidates[0]
+                        diff_amount_currency = subtotal['cash_rounding_tax_amount_currency']
+                        move.sync_cash_rounding_lines[frozendict({
+                            **grouping_key,
+                            'display_type': 'rounding',
+                        })] = {
+                            'name': _("%(tax_name)s (rounding)", tax_name=amounts['name']),
+                            'amount_currency': sign * diff_amount_currency,
+                            'balance': sign * move.company_currency_id.round(diff_amount_currency / rate) if rate else 0.0,
+                        }
+                        break
+
+    @api.depends('sync_tax_lines', 'sync_product_lines', 'sync_cash_rounding_lines', 'invoice_payment_term_id', 'invoice_date', 'invoice_date_due', 'payment_reference')
+    def _compute_sync_term_lines(self):
+        for move in self:
+            if not move.is_invoice(include_receipts=True) or not move.invoice_line_ids:
+                move.sync_term_lines = {}
+                move.sync_term_lines_dirty = False
+                continue
+
+            base_amount_currency = 0.0
+            base_amount = 0.0
+            tax_amount_currency = 0.0
+            tax_amount = 0.0
+            sign = move.direction_sign
+
+            for sync_field, accept_func in (
+                ('sync_tax_lines', lambda gk, amounts: True),
+                ('sync_cash_rounding_lines', lambda gk, amounts: gk.get('tax_repartition_line_id')),
+            ):
+                for grouping_key, amounts in move[sync_field].items():
+                    if accept_func(grouping_key, amounts):
+                        tax_amount_currency += sign * amounts['amount_currency']
+                        tax_amount += sign * amounts['balance']
+            for sync_field, accept_func in (
+                ('sync_product_lines', lambda gk, amounts: True),
+                ('sync_cash_rounding_lines', lambda gk, amounts: not gk.get('tax_repartition_line_id')),
+            ):
+                for grouping_key, amounts in move[sync_field].items():
+                    if accept_func(grouping_key, amounts):
+                        base_amount_currency += sign * amounts['amount_currency']
+                        base_amount += sign * amounts['balance']
+
+            move.sync_term_lines = {}
+            move.sync_term_lines_dirty = True
+            term_line_name = move.payment_reference
+            if move.invoice_payment_term_id:
+                invoice_payment_terms = move.invoice_payment_term_id._compute_terms(
+                    date_ref=move.invoice_date or move.date or fields.Date.context_today(move),
+                    currency=move.currency_id,
+                    tax_amount_currency=tax_amount_currency,
+                    tax_amount=tax_amount,
+                    untaxed_amount_currency=base_amount_currency,
+                    untaxed_amount=base_amount,
+                    company=move.company_id,
+                    sign=1,
+                )
+                need_installment = len(invoice_payment_terms['line_ids']) > 1
+                for index, term_line in enumerate(invoice_payment_terms['line_ids'], start=1):
+                    if need_installment:
+                        name = _('%(name)s installment #%(number)s', name=term_line_name, number=index).lstrip()
+                    else:
+                        name = term_line_name
+
+                    key = frozendict({
+                        'move_id': move.id,
+                        'date_maturity': fields.Date.to_date(term_line.get('date')),
+                        'discount_date': invoice_payment_terms.get('discount_date'),
+                        'display_type': 'payment_term',
+                    })
+                    values = {
+                        'name': name,
+                        'balance': -sign * term_line['company_amount'],
+                        'amount_currency': -sign * term_line['foreign_amount'],
+                        'discount_balance': -sign * (invoice_payment_terms.get('discount_balance') or 0.0),
+                        'discount_amount_currency': -sign * (invoice_payment_terms.get('discount_amount_currency') or 0.0),
+                    }
+                    if key not in move.sync_term_lines:
+                        move.sync_term_lines[key] = values
+                    else:
+                        move.sync_term_lines[key]['balance'] += values['balance']
+                        move.sync_term_lines[key]['amount_currency'] += values['amount_currency']
+            else:
+                move.sync_term_lines[frozendict({
+                    'move_id': move.id,
+                    'date_maturity': fields.Date.to_date(move.invoice_date_due),
+                    'discount_date': False,
+                    'display_type': 'payment_term',
+                })] = {
+                    'name': term_line_name,
+                    'amount_currency': -sign * (base_amount_currency + tax_amount_currency),
+                    'balance': -sign * (base_amount + tax_amount),
+                    'discount_balance': 0.0,
+                    'discount_amount_currency': 0.0,
+                }
+            print("===sync_term_lines===")
+            import pprint
+            print(pprint.pformat(move.sync_term_lines))
+
     # -------------------------------------------------------------------------
     # INVERSE METHODS
     # -------------------------------------------------------------------------
 
     def _inverse_tax_totals(self):
-        if self.env.context.get('skip_invoice_sync'):
-            return
-        with self._sync_dynamic_line(
-            existing_key_fname='term_key',
-            needed_vals_fname='needed_terms',
-            needed_dirty_fname='needed_terms_dirty',
-            line_type='payment_term',
-            container={'records': self},
-        ):
-            for move in self:
-                if not move.is_invoice(include_receipts=True):
-                    continue
-                invoice_totals = move.tax_totals
+        self.ensure_one()
+        # NEW STUFF NOT NECESSARY I THINK
+        # if not self.tax_totals.get('changed_tax_group_id'):
+        #     return
+        #
+        # changed_tax_group_id = self.tax_totals['changed_tax_group_id']
+        # current_amount_currency = 0.0
+        # current_tax_line = None
+        # for tax_line in self.line_ids.filtered(lambda aml: aml.display_type == 'tax'):
+        #     tax_group = tax_line.tax_line_id.tax_group_id
+        #     if tax_group.id != changed_tax_group_id:
+        #         continue
+        #
+        #     current_tax_line = tax_line
+        #     current_amount_currency += tax_line.amount_currency
+        #
+        # sign = self.direction_sign
+        # for subtotal in self.tax_totals['subtotals']:
+        #     for tax_group in subtotal['tax_groups']:
+        #         if tax_group['id'] != changed_tax_group_id:
+        #             continue
+        #
+        #         delta_amount = current_amount_currency * sign - tax_group['tax_amount_currency']
+        #         if not self.currency_id.is_zero(delta_amount):
+        #             current_tax_line.amount_currency -= delta_amount * sign
+        #             return
 
-                for amount_by_group_list in invoice_totals['groups_by_subtotal'].values():
-                    for amount_by_group in amount_by_group_list:
-                        tax_lines = move.line_ids.filtered(lambda line: line.tax_group_id.id == amount_by_group['tax_group_id'])
-
-                        if tax_lines:
-                            first_tax_line = tax_lines[0]
-                            tax_group_old_amount = sum(tax_lines.mapped('amount_currency'))
-                            sign = -1 if move.is_inbound() else 1
-                            delta_amount = tax_group_old_amount * sign - amount_by_group['tax_group_amount']
-
-                            if not move.currency_id.is_zero(delta_amount):
-                                first_tax_line.amount_currency -= delta_amount * sign
-            self._compute_amount()
+        # OLD STUFF
+        # if self.env.context.get('skip_invoice_sync'):
+        #     return
+        # with self._sync_dynamic_line(
+        #     existing_key_fname='term_key',
+        #     needed_vals_fname='needed_terms',
+        #     needed_dirty_fname='needed_terms_dirty',
+        #     line_type='payment_term',
+        #     container={'records': self},
+        # ):
+        #     for move in self:
+        #         if move.is_invoice(include_receipts=True):
+        #             move._update_sync_tax_lines_from_tax_totals()
+        #     self._compute_amount()
 
     def _inverse_amount_total(self):
         for move in self:
@@ -2053,6 +2312,39 @@ class AccountMove(models.Model):
                     'message': _("You must specify the Profit Account (company dependent)")
                 }}
 
+    @api.onchange('tax_totals')
+    def _onchange_tax_totals(self):
+        self.ensure_one()
+        if not self.tax_totals.get('changed_tax_group_id'):
+            return
+
+        changed_tax_group_id = self.tax_totals['changed_tax_group_id']
+        current_amount_currency = 0.0
+        current_grouping_key = None
+        for grouping_key, amounts in self.sync_tax_lines.items():
+            if tax_repartition_line_id := grouping_key.get('tax_repartition_line_id'):
+                tax_rep = self.env['account.tax.repartition.line'].browse(tax_repartition_line_id)
+                tax_group = tax_rep.tax_id.tax_group_id
+                if tax_group.id != changed_tax_group_id:
+                    continue
+
+                current_grouping_key = grouping_key
+                current_amount_currency += amounts['amount_currency']
+
+        sign = self.direction_sign
+        for subtotal in self.tax_totals['subtotals']:
+            for tax_group in subtotal['tax_groups']:
+                if tax_group['id'] != changed_tax_group_id:
+                    continue
+
+                delta_amount = current_amount_currency * sign - tax_group['tax_amount_currency']
+                if not self.currency_id.is_zero(delta_amount):
+                    self.sync_tax_lines[current_grouping_key]['amount_currency'] -= delta_amount * sign
+
+                    # Notice the orm the value has changed.
+                    self.sync_tax_lines = self.sync_tax_lines
+                    return
+
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
@@ -2072,6 +2364,8 @@ class AccountMove(models.Model):
             error_msg = _("An error has occurred.")
             for move_id, sum_debit, sum_credit in unbalanced_moves:
                 move = self.browse(move_id)
+                print(move.line_ids.mapped('name'))
+                print(move.line_ids.mapped('balance'))
                 error_msg += _(
                     "\n\n"
                     "The move (%(move)s) is not balanced.\n"
@@ -2294,125 +2588,6 @@ class AccountMove(models.Model):
     # DYNAMIC LINES
     # -------------------------------------------------------------------------
 
-    def _recompute_cash_rounding_lines(self):
-        ''' Handle the cash rounding feature on invoices.
-
-        In some countries, the smallest coins do not exist. For example, in Switzerland, there is no coin for 0.01 CHF.
-        For this reason, if invoices are paid in cash, you have to round their total amount to the smallest coin that
-        exists in the currency. For the CHF, the smallest coin is 0.05 CHF.
-
-        There are two strategies for the rounding:
-
-        1) Add a line on the invoice for the rounding: The cash rounding line is added as a new invoice line.
-        2) Add the rounding in the biggest tax amount: The cash rounding line is added as a new tax line on the tax
-        having the biggest balance.
-        '''
-        self.ensure_one()
-        def _compute_cash_rounding(self, total_amount_currency):
-            ''' Compute the amount differences due to the cash rounding.
-            :param self:                    The current account.move record.
-            :param total_amount_currency:   The invoice's total in invoice's currency.
-            :return:                        The amount differences both in company's currency & invoice's currency.
-            '''
-            difference = self.invoice_cash_rounding_id.compute_difference(self.currency_id, total_amount_currency)
-            if self.currency_id == self.company_id.currency_id:
-                diff_amount_currency = diff_balance = difference
-            else:
-                diff_amount_currency = difference
-                diff_balance = self.currency_id._convert(diff_amount_currency, self.company_id.currency_id, self.company_id, self.invoice_date or self.date)
-            return diff_balance, diff_amount_currency
-
-        def _apply_cash_rounding(self, diff_balance, diff_amount_currency, cash_rounding_line):
-            ''' Apply the cash rounding.
-            :param self:                    The current account.move record.
-            :param diff_balance:            The computed balance to set on the new rounding line.
-            :param diff_amount_currency:    The computed amount in invoice's currency to set on the new rounding line.
-            :param cash_rounding_line:      The existing cash rounding line.
-            :return:                        The newly created rounding line.
-            '''
-            rounding_line_vals = {
-                'balance': diff_balance,
-                'amount_currency': diff_amount_currency,
-                'partner_id': self.partner_id.id,
-                'move_id': self.id,
-                'currency_id': self.currency_id.id,
-                'company_id': self.company_id.id,
-                'company_currency_id': self.company_id.currency_id.id,
-                'display_type': 'rounding',
-            }
-
-            if self.invoice_cash_rounding_id.strategy == 'biggest_tax':
-                biggest_tax_line = None
-                for tax_line in self.line_ids.filtered('tax_repartition_line_id'):
-                    if not biggest_tax_line or abs(tax_line.balance) > abs(biggest_tax_line.balance):
-                        biggest_tax_line = tax_line
-
-                # No tax found.
-                if not biggest_tax_line:
-                    return
-
-                rounding_line_vals.update({
-                    'name': _("%(tax_name)s (rounding)", tax_name=biggest_tax_line.name),
-                    'account_id': biggest_tax_line.account_id.id,
-                    'tax_repartition_line_id': biggest_tax_line.tax_repartition_line_id.id,
-                    'tax_tag_ids': [(6, 0, biggest_tax_line.tax_tag_ids.ids)],
-                    'tax_ids': [Command.set(biggest_tax_line.tax_ids.ids)]
-                })
-
-            elif self.invoice_cash_rounding_id.strategy == 'add_invoice_line':
-                if diff_balance > 0.0 and self.invoice_cash_rounding_id.loss_account_id:
-                    account_id = self.invoice_cash_rounding_id.loss_account_id.id
-                else:
-                    account_id = self.invoice_cash_rounding_id.profit_account_id.id
-                rounding_line_vals.update({
-                    'name': self.invoice_cash_rounding_id.name,
-                    'account_id': account_id,
-                    'tax_ids': [Command.clear()]
-                })
-
-            # Create or update the cash rounding line.
-            if cash_rounding_line:
-                cash_rounding_line.write(rounding_line_vals)
-            else:
-                cash_rounding_line = self.env['account.move.line'].create(rounding_line_vals)
-
-        existing_cash_rounding_line = self.line_ids.filtered(lambda line: line.display_type == 'rounding')
-
-        # The cash rounding has been removed.
-        if not self.invoice_cash_rounding_id:
-            existing_cash_rounding_line.unlink()
-            # self.line_ids -= existing_cash_rounding_line
-            return
-
-        # The cash rounding strategy has changed.
-        if self.invoice_cash_rounding_id and existing_cash_rounding_line:
-            strategy = self.invoice_cash_rounding_id.strategy
-            old_strategy = 'biggest_tax' if existing_cash_rounding_line.tax_line_id else 'add_invoice_line'
-            if strategy != old_strategy:
-                # self.line_ids -= existing_cash_rounding_line
-                existing_cash_rounding_line.unlink()
-                existing_cash_rounding_line = self.env['account.move.line']
-
-        others_lines = self.line_ids.filtered(lambda line: line.account_id.account_type not in ('asset_receivable', 'liability_payable'))
-        others_lines -= existing_cash_rounding_line
-        total_amount_currency = sum(others_lines.mapped('amount_currency'))
-
-        diff_balance, diff_amount_currency = _compute_cash_rounding(self, total_amount_currency)
-
-        # The invoice is already rounded.
-        if self.currency_id.is_zero(diff_balance) and self.currency_id.is_zero(diff_amount_currency):
-            existing_cash_rounding_line.unlink()
-            # self.line_ids -= existing_cash_rounding_line
-            return
-
-        # No update needed
-        if existing_cash_rounding_line \
-            and float_compare(existing_cash_rounding_line.balance, diff_balance, precision_rounding=self.currency_id.rounding) == 0 \
-            and float_compare(existing_cash_rounding_line.amount_currency, diff_amount_currency, precision_rounding=self.currency_id.rounding) == 0:
-            return
-
-        _apply_cash_rounding(self, diff_balance, diff_amount_currency, existing_cash_rounding_line)
-
     @contextmanager
     def _sync_unbalanced_lines(self, container):
         yield
@@ -2454,23 +2629,17 @@ class AccountMove(models.Model):
                     self.env['account.move.line'].create(vals)
 
     @contextmanager
-    def _sync_rounding_lines(self, container):
-        yield
-        for invoice in container['records']:
-            if invoice.state != 'posted':
-                invoice._recompute_cash_rounding_lines()
-
-    @contextmanager
     def _sync_dynamic_line(self, existing_key_fname, needed_vals_fname, needed_dirty_fname, line_type, container):
         def existing():
             return {
                 line: line[existing_key_fname]
-                for line in container['records'].line_ids
+                for line in filter_records('line_ids')
                 if line[existing_key_fname]
             }
+
         def needed():
             res = {}
-            for computed_needed in container['records'].mapped(needed_vals_fname):
+            for computed_needed in filter_records(needed_vals_fname):
                 if computed_needed is False:
                     continue  # there was an invalidation, let's hope nothing needed to be changed...
                 for key, values in computed_needed.items():
@@ -2500,12 +2669,16 @@ class AccountMove(models.Model):
 
             return res
 
+        def filter_records(field_name):
+            field_names = field_name.split('.')
+            if field_names[0] == 'line_ids':
+                trailing_field_name = '.'.join(field_names[1:])
+                return container['records'].line_ids.filtered(lambda aml: aml.display_type == line_type).mapped(trailing_field_name)
+            return container['records'].mapped(field_name)
+
         def dirty():
             *path, dirty_fname = needed_dirty_fname.split('.')
-            eligible_recs = container['records'].mapped('.'.join(path))
-            if eligible_recs._name == 'account.move.line':
-                eligible_recs = eligible_recs.filtered(lambda l: l.display_type != 'cogs')
-            dirty_recs = eligible_recs.filtered(dirty_fname)
+            dirty_recs = filter_records('.'.join(path)).filtered(dirty_fname)
             return dirty_recs, dirty_fname
 
         def filter_trivial(mapping):
@@ -2624,13 +2797,26 @@ class AccountMove(models.Model):
             with ExitStack() as stack:
                 stack.enter_context(self._sync_dynamic_line(
                     existing_key_fname='term_key',
-                    needed_vals_fname='needed_terms',
-                    needed_dirty_fname='needed_terms_dirty',
+                    needed_vals_fname='sync_term_lines',
+                    needed_dirty_fname='sync_term_lines_dirty',
                     line_type='payment_term',
                     container=invoice_container,
                 ))
+                # stack.enter_context(self._sync_dynamic_line(
+                #     existing_key_fname='term_key',
+                #     needed_vals_fname='needed_terms',
+                #     needed_dirty_fname='needed_terms_dirty',
+                #     line_type='payment_term',
+                #     container=invoice_container,
+                # ))
                 stack.enter_context(self._sync_unbalanced_lines(misc_container))
-                stack.enter_context(self._sync_rounding_lines(invoice_container))
+                # stack.enter_context(self._sync_dynamic_line(
+                #     existing_key_fname='cash_rounding_key',
+                #     needed_vals_fname='sync_cash_rounding_lines',
+                #     needed_dirty_fname='sync_cash_rounding_lines_dirty',
+                #     line_type='rounding',
+                #     container=invoice_container,
+                # ))
                 stack.enter_context(self._sync_dynamic_line(
                     existing_key_fname='discount_allocation_key',
                     needed_vals_fname='line_ids.discount_allocation_needed',
@@ -2640,11 +2826,25 @@ class AccountMove(models.Model):
                 ))
                 stack.enter_context(self._sync_dynamic_line(
                     existing_key_fname='tax_key',
-                    needed_vals_fname='line_ids.compute_all_tax',
-                    needed_dirty_fname='line_ids.compute_all_tax_dirty',
+                    needed_vals_fname='sync_tax_lines',
+                    needed_dirty_fname='sync_tax_lines_dirty',
                     line_type='tax',
                     container=tax_container,
                 ))
+                stack.enter_context(self._sync_dynamic_line(
+                    existing_key_fname='product_key',
+                    needed_vals_fname='sync_product_lines',
+                    needed_dirty_fname='sync_product_lines_dirty',
+                    line_type='product',
+                    container=tax_container,
+                ))
+                # stack.enter_context(self._sync_dynamic_line(
+                #     existing_key_fname='tax_key',
+                #     needed_vals_fname='line_ids.compute_all_tax',
+                #     needed_dirty_fname='line_ids.compute_all_tax_dirty',
+                #     line_type='tax',
+                #     container=tax_container,
+                # ))
                 stack.enter_context(self._sync_dynamic_line(
                     existing_key_fname='epd_key',
                     needed_vals_fname='line_ids.epd_needed',

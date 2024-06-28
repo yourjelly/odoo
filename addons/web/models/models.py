@@ -857,6 +857,7 @@ class Base(models.AbstractModel):
         """
         # this is for tests using `Form`
         self.env.flush_all()
+        import pudb; pudb.set_trace()
 
         env = self.env
         cache = env.cache

@@ -99,6 +99,47 @@ class TestTaxTotals(AccountTestInvoicingCommon):
             'invoice_line_ids': invoice_lines_vals,
         })
 
+    def test_consistency_round_globally_1(self):
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        tax_21_incl = self.env['account.tax'].create({
+            'name': "tax_21_incl",
+            'amount_type': 'percent',
+            'amount': 21.0,
+            'price_include': True,
+        })
+        invoice = self._create_document_for_tax_totals_test([
+            (21.53, tax_21_incl),
+            (21.53, tax_21_incl),
+        ])
+
+        # self.assert_document_tax_totals(invoice, {
+        #     'amount_total': 43.06,
+        #     'amount_untaxed': 35.59,
+        #     'display_tax_base': False,
+        #     'groups_by_subtotal': {
+        #         'Untaxed Amount': [
+        #             {
+        #                 'tax_group_name': self.tax_group1.name,
+        #                 'tax_group_amount': 7.47,
+        #                 'tax_group_base_amount': 35.59,
+        #                 'tax_group_id': self.tax_group1.id,
+        #             },
+        #         ],
+        #     },
+        #     'subtotals': [
+        #         {
+        #             'name': "Untaxed Amount",
+        #             'amount': 35.586776859504134,
+        #         }
+        #     ],
+        #     'subtotals_order': ["Untaxed Amount"],
+        # })
+        self.assertRecordValues(invoice, [{
+            'amount_untaxed': 35.59,
+            'amount_tax': 7.47,
+            'amount_total': 43.06,
+        }])
+
     def test_multiple_tax_lines(self):
         tax_10 = self.env['account.tax'].create({
             'name': "tax_10",
