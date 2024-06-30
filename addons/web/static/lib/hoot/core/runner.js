@@ -854,13 +854,13 @@ export class Runner {
                 this._rejectCurrent = reject;
                 this._resolveCurrent = resolve;
 
-                if (timeout && !this.debug) {
-                    // Set timeout
-                    timeoutId = setTimeout(
-                        () => reject(new HootError(`test timed out after ${timeout} milliseconds`)),
-                        timeout
-                    );
-                }
+                // if (timeout && !this.debug) {
+                //     // Set timeout
+                //     timeoutId = setTimeout(
+                //         () => reject(new HootError(`test timed out after ${timeout} milliseconds`)),
+                //         timeout
+                //     );
+                // }
             }).then(() => {
                 this.aborted = true;
                 this.debug = false; // Remove debug mode to let the runner stop
