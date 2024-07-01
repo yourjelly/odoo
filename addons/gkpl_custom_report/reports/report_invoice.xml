@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="extended_report_invoice_document" inherit_id="account.report_invoice_document">
+            <xpath expr="//span[@t-field='line.price_unit']" position="replace">
+                <span t-field="line.discounted_price_invoice"/>
+            </xpath>
+            <xpath expr="//th[@t-if='display_discount']" position="replace"/>
+            <xpath expr="//td[@name='td_discount']" position="replace"/>
+            <xpath expr="//td[@name='account_invoice_line_name']" position="replace">
+                <td>
+                    <span t-field="line.product_id.name"/>
+                </td>
+            </xpath>
+            <xpath expr="//div[@name='address_same_as_shipping']" position="after">
+                Phone:<span t-field="o.partner_id.phone"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>
