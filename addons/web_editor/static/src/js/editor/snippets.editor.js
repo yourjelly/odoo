@@ -853,6 +853,9 @@ var SnippetEditor = Widget.extend({
                 if (option.Class?.displayOverlayOptions) {
                     option.displayOverlayOptions = true;
                 }
+                if (option.Class?.isTopOption) {
+                    option.isTopOption = true;
+                }
             } else {
                 option = new (options.registry[optionName] || options.Class)(
                     this,
