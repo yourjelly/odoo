@@ -3050,11 +3050,20 @@ class AccountMove(models.Model):
             if param.get('anti_regex') and not self.journal_id.sequence_override_regex:
                 where_string += " AND sequence_prefix !~ %(anti_regex)s "
 
+        last_move = self.env["account.move"].search([('move_type', 'in', ("out_refund", "in_refund")), ('sequence_prefix', '!=', '')], order='id DESC', limit=1)
         if self.journal_id.refund_sequence:
             if self.move_type in ('out_refund', 'in_refund'):
-                where_string += " AND move_type IN ('out_refund', 'in_refund') "
+                if self.journal_id.is_sequence_chanage:
+                    pre_sequence_prefix = last_move.sequence_prefix if last_move.sequence_prefix else ''
+                    print('\n\n\n\n============================== last_move:',last_move.id, pre_sequence_prefix)
+                    where_string += " AND move_type IN ('out_refund', 'in_refund') AND sequence_prefix != %(pre_sequence_prefix)s "
+                    param['pre_sequence_prefix'] = pre_sequence_prefix
+                else:
+                    where_string += " AND move_type IN ('out_refund', 'in_refund') "
             else:
                 where_string += " AND move_type NOT IN ('out_refund', 'in_refund') "
+        elif not self.journal_id.refund_sequence and self.move_type in ('out_refund', 'in_refund', 'out_invoice', 'in_invoice'):
+            where_string += " AND move_type IN ('out_invoice', 'in_invoice') "
         elif self.journal_id.payment_sequence:
             if is_payment:
                 where_string += " AND payment_id IS NOT NULL "
@@ -4540,6 +4549,9 @@ class AccountMove(models.Model):
             }
         if other_moves:
             other_moves._post(soft=False)
+        for line in self:
+            if line.journal_id.is_sequence_chanage and line.move_type in ('out_refund', 'in_refund'):
+                line.journal_id.is_sequence_chanage = False
         return False
 
     def js_assign_outstanding_line(self, line_id):

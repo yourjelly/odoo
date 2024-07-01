@@ -76,6 +76,13 @@ class AccountJournal(models.Model):
                                          'expense_depreciation', 'expense_direct_cost', 'off_balance'))
         ]"""
 
+    is_sequence_chanage = fields.Boolean(compute='_compute_is_sequence_chanage', default=False, store=True)
+
+    @api.depends('refund_sequence')
+    def _compute_is_sequence_chanage(self):
+        for line in self:
+            line.is_sequence_chanage = True
+
     name = fields.Char(string='Journal Name', required=True, translate=True)
     code = fields.Char(
         string='Short Code',
