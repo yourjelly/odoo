@@ -6304,7 +6304,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test(
         "parent data is properly sent on an onchange rpc (existing x2many record)",
         async function (assert) {
-            assert.expect(4);
+            assert.expect(12);
 
             serverData.models.partner.onchanges = {
                 display_name: function () {},
@@ -6334,16 +6334,64 @@ QUnit.module("Fields", (hooks) => {
                 mockRPC(route, args) {
                     if (args.method === "onchange") {
                         const fieldValues = args.args[1];
-                        if (count === 1) {
-                            assert.deepEqual(fieldValues.trululu, {
-                                foo: "hello",
-                                id: 1,
+                        if (count === 0) {
+                            // onchange on the parent record
+                            assert.deepEqual(fieldValues, {"foo": "hello"});
+                        } else if (count === 1) {
+                            // onchange on the child record
+                            assert.deepEqual(fieldValues, {
+                                "display_name": "new val",
+                                "trululu": {
+                                    "foo": "hello",
+                                    "id": 1
+                                }
                             });
                         } else if (count === 2) {
-                            assert.deepEqual(fieldValues.trululu, {
-                                foo: "hello",
-                                id: 1,
-                                p: [[1, 1, { display_name: "new val" }]],
+                            // onchange on the child record
+                            assert.deepEqual(fieldValues,{
+                                "display_name": "new val",
+                                "foo": "new foo",
+                                "trululu": {
+                                  "foo": "hello",
+                                  "id": 1,
+                                  "p": [] // Shouldn't contains information of the root record
+                                }
+                            });
+                        } else if (count === 3) {
+                            // onchange on the parent record, make sense ?
+                            assert.deepEqual(fieldValues,{
+                                "trululu": {
+                                    "foo": "hello",
+                                    "id": 1,
+                                    "p": [
+                                        [1, 1, {
+                                            "display_name": "new val",
+                                            "foo": "new foo"
+                                        }]
+                                    ]
+                                }
+                            });
+                        } else if (count === 4) {
+                            // onchange on the parent record, MAKES NO SENSE
+                            assert.deepEqual(fieldValues,{
+                                "display_name": "new line",
+                                "foo": "My little Foo Value",
+                                "trululu": {
+                                    "foo": "hello",
+                                    "id": 1,
+                                    "p": [
+                                        [1, 1, {
+                                            "display_name": "new val",
+                                            "foo": "new foo",
+                                        }],
+                                    ]
+                                },
+                                "turtles": []
+                            });
+                        } else if (count === 5) {
+                            // onchange on the child record
+                            assert.deepEqual(fieldValues,{
+
                             });
                         }
                         count++;
@@ -6355,13 +6403,27 @@ QUnit.module("Fields", (hooks) => {
             await editInput(target, "[name=foo] input", "hello");
             await click(target.querySelector(".o_data_row .o_data_cell"));
             assert.containsOnce(target, ".o_data_row.o_selected_row");
+            assert.equal(count, 1);
 
             await editInput(
                 target,
                 ".o_selected_row .o_field_widget[name=display_name] input",
                 "new val"
             );
+            assert.equal(count, 2);
+
             await editInput(target, ".o_selected_row .o_field_widget[name=foo] input", "new foo");
+            assert.equal(count, 3);
+
+            await click(target.querySelector(".o_field_x2many_list_row_add a"));
+            assert.equal(count, 4);
+
+            await editInput(
+                target,
+                ".o_selected_row .o_field_widget[name=display_name] input",
+                "new line"
+            );
+            assert.equal(count, 5);
         }
     );
 

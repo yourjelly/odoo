@@ -761,6 +761,7 @@ export class StaticList extends DataPoint {
             resModel: this.resModel,
             fields: params.fields || this.fields,
             relationField: this.config.relationField,
+            relationSourceField: this.config.relationSourceField || false,
             resId,
             resIds: resId ? [resId] : [],
             mode: params.mode || "readonly",

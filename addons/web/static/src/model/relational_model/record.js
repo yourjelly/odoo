@@ -505,6 +505,7 @@ export class Record extends DataPoint {
             activeFields: (related && related.activeFields) || {},
             fields: (related && related.fields) || {},
             relationField: this.fields[fieldName].relation_field || false,
+            relationSourceField: fieldName || false,
             offset: 0,
             resIds: data.map((r) => r.id),
             orderBy: defaultOrderBy || [],
@@ -1180,6 +1181,17 @@ export class Record extends DataPoint {
         );
         if (this.config.relationField) {
             localChanges[this.config.relationField] = this._parentRecord._getChanges();
+            if (
+                this.config.relationSourceField
+                && localChanges[this.config.relationField].hasOwnProperty(this.config.relationSourceField)
+            ) {
+                // Delete line concerning the same record than this one
+                const commands = localChanges[this.config.relationField][this.config.relationSourceField]
+                const index = commands.findIndex((value) => (value[0] === 1 && value[1] === this.config.resId) || (value[0] === 0 && value[1] === this._virtualId))
+                if (index !== -1) {
+                    commands.splice(index, 1)
+                }
+            }
             if (!this._parentRecord.isNew) {
                 localChanges[this.config.relationField].id = this._parentRecord.resId;
             }
