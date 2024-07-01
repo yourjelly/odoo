@@ -555,16 +555,12 @@ class Contains {
         this.selector = selector;
         this.options = options;
         this.options.count ??= 1;
-        this.options.targetParam = this.options.target?.target ?? this.options.target; // when OdooEnv, special key `target`. See @start
-        this.options.target = this.options.targetParam ?? getFixture();
+        this.options.target ??= getFixture();
         let selectorMessage = `${this.options.count} of "${this.selector}"`;
         if (this.options.visible !== undefined) {
             selectorMessage = `${selectorMessage} ${
                 this.options.visible ? "visible" : "invisible"
             }`;
-        }
-        if (this.options.targetParam) {
-            selectorMessage = `${selectorMessage} inside a specific target`;
         }
         if (this.options.parent) {
             selectorMessage = `${selectorMessage} inside a specific parent`;
@@ -661,7 +657,7 @@ class Contains {
      */
     runOnce(whenMessage, { crashOnFail = false, executeOnSuccess = true } = {}) {
         const res = this.select();
-        if (res?.length === this.options.count || crashOnFail) {
+        if ((res?.length ?? 0) === this.options.count || crashOnFail) {
             // clean before doing anything else to avoid infinite loop due to side effects
             this.observer?.disconnect();
             clearTimeout(this.timer);
@@ -670,7 +666,7 @@ class Contains {
             }
             this.done = true;
         }
-        if (res?.length === this.options.count) {
+        if ((res?.length ?? 0)=== this.options.count) {
             this.successMessage = `Found ${this.selectorMessage} (${whenMessage})`;
             if (executeOnSuccess) {
                 this.executeAction(res[0]);

@@ -45,6 +45,13 @@ test("add_link utility function", () => {
     }
 });
 
+test.debug("testtesttest", async() => {
+    await start();
+    await openDiscuss();
+    await contains("a.o-active");
+    await contains("a.o-active", { contains : [".badge", { count: 0 }]})
+})
+
 test("addLink: utility function and special entities", () => {
     const testInputs = {
         // textContent not unescaped
