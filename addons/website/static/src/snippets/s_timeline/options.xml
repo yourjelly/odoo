@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<t t-name="website.s_timeline_multiple_option">
+    <WeRow title.translate="Year">
+        <WeButton addItem="''" item="'.s_timeline_row:first'" selectItem="''" addBefore="'true'" noPreview="'true'" class="'o_we_bg_brand_primary'">
+            Add Year
+        </WeButton>
+    </WeRow>
+</t>
+
+<t t-name="website.s_timeline_overlay_option">
+    <Overlay targetEl="$overlay[0].querySelector('.o_overlay_options_wrap')">
+        <WeButton timelineCard="''" noPreview="'true'" class="'o_we_overlay_opt'"><i class="fa fa-fw fa-angle-left"/><i class="fa fa-fw fa-angle-right"/></WeButton>
+    </Overlay>
+</t>
+
+<t t-name="website.s_timeline_color_option">
+    <WeRow title.translate="Line Color">
+        <WeColorpicker selectStyle="'true'" cssProperty="'border-color'" colorPrefix="'border-'" applyTo="'.s_timeline_line'"/>
+    </WeRow>
+</t>
+
+</templates>

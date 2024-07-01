@@ -1,20 +1,16 @@
 /** @odoo-module **/
 
-import options from "@web_editor/js/editor/snippets.options.legacy";
+import { registry } from "@web/core/registry";
+import {
+    MultipleItems,
+    SnippetOption,
+} from "@web_editor/js/editor/snippets.options";
+import {
+    registerWebsiteOption,
+} from "@website/js/editor/snippets.registry";
 
-options.registry.Timeline = options.Class.extend({
-    displayOverlayOptions: true,
-
-    /**
-     * @override
-     */
-    start: function () {
-        var $buttons = this.$el.find('we-button.o_we_overlay_opt');
-        var $overlayArea = this.$overlay.find('.o_overlay_options_wrap');
-        $overlayArea.append($buttons);
-
-        return this._super(...arguments);
-    },
+export class TimelineOption extends SnippetOption {
+    static displayOverlayOptions = true;
 
     //--------------------------------------------------------------------------
     // Options
@@ -25,8 +21,31 @@ options.registry.Timeline = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    timelineCard: function (previewMode, widgetValue, params) {
+    timelineCard(previewMode, widgetValue, params) {
         const $timelineRow = this.$target.closest('.s_timeline_row');
         $timelineRow.toggleClass('flex-row-reverse flex-row');
-    },
+    }
+}
+
+registerWebsiteOption("Timeline (Multiple)", {
+    Class: MultipleItems,
+    template: "website.s_timeline_multiple_option",
+    selector: ".s_timeline",
 });
+registerWebsiteOption("Timeline (Move row)", {
+    selector: ".s_timeline_row",
+    "drop-near": ".s_timeline_row",
+});
+registerWebsiteOption("Timeline (Overlay)", {
+    Class: TimelineOption,
+    template: "website.s_timeline_overlay_option",
+    selector: ".s_timeline_card",
+});
+registerWebsiteOption("Timeline (Color)", {
+    template: "website.s_timeline_color_option",
+    selector: ".s_timeline",
+});
+
+const SnippetMoveOption = registry.category("snippet_options").get("SnippetMove (Vertical)");
+SnippetMoveOption.selector = SnippetMoveOption.selector + ", .s_timeline_row";
+registry.category("snippet_options").add("SnippetMove (Vertical)", SnippetMoveOption, { force: true });
