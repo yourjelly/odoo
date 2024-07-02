@@ -46,6 +46,7 @@ patch(SlideUploadCategory.prototype, {
         const tempId = uniqueId("temp");
         this.state.choices.certifications.push({ value: tempId, label: categoryName });
         this.state.choices.certificationId = tempId;
+        document.querySelector('.o_error_no_certification').classList.add('d-none');
     },
 
     //--------------------------------------------------------------------------
@@ -70,4 +71,12 @@ patch(SlideUploadCategory.prototype, {
 
         return result;
     },
+
+    _formValidate() {
+        if (!this.state.choices.certificationId) {
+            document.querySelector('.o_error_no_certification').classList.remove('d-none');
+            return;
+        }
+        return super._formValidate(...arguments);
+    }
 });
