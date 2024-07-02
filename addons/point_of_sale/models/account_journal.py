@@ -7,7 +7,7 @@ from odoo.exceptions import ValidationError
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
-    pos_payment_method_ids = fields.One2many('pos.payment.method', 'journal_id', string='Point of Sale Payment Methods')
+    pos_payment_method_ids = fields.One2many('pos.payment.method', 'journal_id', string='Point of Sale Payment Methods. Changed to get a runbot')
 
     @api.constrains('type')
     def _check_type(self):
