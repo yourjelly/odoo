@@ -38,8 +38,8 @@ threadActionsRegistry
         },
         icon: "fa fa-fw fa-gear",
         iconLarge: "fa fa-fw fa-lg fa-gear",
-        name: _t("Show Call Settings"),
-        nameActive: _t("Hide Call Settings"),
+        name: _t("Show Settings"),
+        nameActive: _t("Hide Settings"),
         sequence(component) {
             return component.props.chatWindow && component.thread?.eq(component.rtc.state.channel)
                 ? 6

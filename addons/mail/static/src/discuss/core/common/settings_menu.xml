@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="discuss.SettingsMenu">
+        <ActionPanel title="title">
+            <div class="d-flex flex-column">
+                <div class="btn-group btn-group-toggle pb-2" data-toggle="buttons">
+                    <!-- <label class="btn btn-secondary" t-att-class="{'active': state.isOnCallSettings}" t-on-click="()=>{this.state.isOnCallSettings=true}">
+                        Voice &amp; Video
+                    </label> -->
+                    <label class="btn btn-secondary active">
+                        Notifications
+                    </label>
+                </div>
+                <DiscussNotificationSettings t-else="" t-props="props"/>
+            </div>
+        </ActionPanel>
+    </t>
+
+</templates>
