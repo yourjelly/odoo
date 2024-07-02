@@ -215,12 +215,12 @@ var AnimationEffect = Class.extend(mixins.ParentedMixin, {
              * the startEvents are triggered on the $startTarget and pause when
              * the endEvents are triggered on the $endTarget.
              */
-            $(this.startTarget).on(this.startEvents, (function (e) {
+            this.startTarget.on(this.startEvents, (function (e) {
                 if (this._paused) {
                     setTimeout(() => this.play.bind(this, e));
                 }
             }).bind(this));
-            $(this.endTarget).on(this.endEvents, (function () {
+            this.endTarget.on(this.endEvents, (function () {
                 if (!this._paused) {
                     setTimeout(() => this.pause.bind(this));
                 }
@@ -251,7 +251,7 @@ var AnimationEffect = Class.extend(mixins.ParentedMixin, {
                 }).bind(this)
             );
             var pauseTimer = null;
-            $(this.startTarget).on(this.startEvents, this.throttleOnStartEvents);
+            this.startTarget.on(this.startEvents, this.throttleOnStartEvents);
         }
     },
     /**
@@ -259,9 +259,9 @@ var AnimationEffect = Class.extend(mixins.ParentedMixin, {
      * animation to be played or paused.
      */
     stop: function () {
-        $(this.startTarget).off(this.startEvents);
+        this.startTarget.off(this.startEvents);
         if (this.endEvents) {
-            $(this.endTarget).off(this.endEvents);
+            this.endTarget.off(this.endEvents);
         }
         this.pause();
     },
@@ -465,7 +465,9 @@ registry.slider = publicWidget.Widget.extend({
      * @override
      */
     start: function () {
-        this.$('img').on('load.slider', () => this._computeHeights());
+        this.el.querySelectorAll('img')?.forEach((imgEl) => {
+            imgEl.on('load.slider', () => this._computeHeights());
+        });
         this._computeHeights();
         // Initialize carousel and pause if in edit mode.
         this.carousel = window.Carousel.getOrCreateInstance(this.el);
@@ -473,13 +475,13 @@ registry.slider = publicWidget.Widget.extend({
         {
             this.carousel.pause();
         }
-        $(window).on('resize.slider', debounce(() => this._computeHeights(), 250));
+        window.on('resize.slider', debounce(() => this._computeHeights(), 250));
         if (this.editableMode) {
             // Prevent carousel slide to be an history step.
-            $(this.el).on("slide.bs.carousel.slider", () => {
+            this.el.on("slide.bs.carousel.slider", () => {
                 this.options.wysiwyg.odooEditor.observerUnactive();
             });
-            $(this.el).on("slid.bs.carousel.slider", () => {
+            this.el.on("slid.bs.carousel.slider", () => {
                 this.options.wysiwyg.odooEditor.observerActive();
             });
         }
@@ -490,7 +492,9 @@ registry.slider = publicWidget.Widget.extend({
      */
     destroy: function () {
         this._super.apply(this, arguments);
-        this.$('img').off('.slider');
+        this.el.querySelectorAll('img')?.forEach((imgEl) => {
+            imgEl.off('.slider', () => this._computeHeights());
+        });
         const carousel = window.Carousel.getOrCreateInstance(this.el);
         carousel.pause();
         this.el?.removeAttribute("data-bs-carousel");
@@ -498,8 +502,8 @@ registry.slider = publicWidget.Widget.extend({
             .forEach((el) => {
                 el.style.minHeight = "";
             });
-        $(window).off('.slider');
-        $(this.el).off('.slider');
+        window.off('.slider');
+        this.el.off('.slider');
     },
 
     //--------------------------------------------------------------------------
@@ -560,10 +564,10 @@ registry.Parallax = Animation.extend({
      */
     start: function () {
         this._rebuild();
-        $(window).on('resize.animation_parallax', debounce(this._rebuild.bind(this), 500));
+        window.on('resize.animation_parallax', debounce(this._rebuild.bind(this), 500));
         this.modalEl = this.target.closest('.modal');
         if (this.modalEl) {
-            $(this.modalEl).on('shown.bs.modal.animation_parallax', () => {
+            this.modalEl.on('shown.bs.modal.animation_parallax', () => {
                 this._rebuild();
                 this.modalEl.dispatchEvent(new Event('scroll'));
             });
@@ -581,9 +585,9 @@ registry.Parallax = Animation.extend({
             bottom: '',
         });
 
-        $(window).off('.animation_parallax');
+        window.off('.animation_parallax');
         if (this.modalEl) {
-            $(this.modalEl).off('.animation_parallax');
+            this.modalEl.off('.animation_parallax');
         }
     },
 
@@ -774,12 +778,19 @@ registry.mediaVideo = publicWidget.Widget.extend(MobileYoutubeAutoplayMixin, {
     _generateIframe: function () {
         // Bug fix / compatibility: empty the <div/> element as all information
         // to rebuild the iframe should have been saved on the <div/> element
-        this.el.innerHTML = '';
+        while(this.el.firstChild){
+            this.el.removeChild(this.el.firstChild);
+        }
+        const newDiv1 = document.createElement("div");
+        newDiv1.classList.add("css_editable_mode_display");
+        newDiv1.textContent = "\u00A0";
 
-        // Add extra content for size / edition
-        this.el.innerHTML += 
-            '<div class="css_editable_mode_display">&nbsp;</div>' +
-            '<div class="media_iframe_video_size">&nbsp;</div>';
+        const newDiv2 = document.createElement("div");
+        newDiv2.classList.add("media_iframe_video_size");
+        newDiv2.textContent = "\u00A0";
+
+        this.el.appendChild(newDiv1);
+        this.el.appendChild(newDiv2);
 
         // Rebuild the iframe. Depending on version / compatibility / instance,
         // the src is saved in the 'data-src' attribute or the
@@ -834,18 +845,18 @@ registry.backgroundVideo = publicWidget.Widget.extend(MobileYoutubeAutoplayMixin
         var dropdownMenu = this.el.closest('.dropdown-menu');
         if (dropdownMenu) {
             this.dropdownParent = dropdownMenu.parentElement;
-            $(this.dropdownParent).on("shown.bs.dropdown.backgroundVideo", this.throttledUpdate);
+            this.dropdownParent.on("shown.bs.dropdown.backgroundVideo", this.throttledUpdate);
         }
 
-        $(window).on("resize." + this.iframeID, this.throttledUpdate);
+        window.on("resize." + this.iframeID, this.throttledUpdate);
 
         const modal = this.el.closest('.modal');
         if (modal) {
-            $(modal).on('show.bs.modal', () => {
+            modal.on('show.bs.modal', () => {
                 const videoContainerEl = this.el.querySelector('.o_bg_video_container');
                 videoContainerEl.classList.add('d-none');
             });
-            $(modal).on('shown.bs.modal', () => {
+            modal.on('shown.bs.modal', () => {
                 this._adjustIframe();
                 const videoContainerEl = this.el.querySelector('.o_bg_video_container');
                 videoContainerEl.classList.remove('d-none');
@@ -860,10 +871,10 @@ registry.backgroundVideo = publicWidget.Widget.extend(MobileYoutubeAutoplayMixin
         this._super.apply(this, arguments);
 
         if (this.dropdownParent) {
-            $(this.dropdownParent).off('.backgroundVideo');
+            this.dropdownParent.off('.backgroundVideo');
         }
 
-        $(window).off('resize.' + this.iframeID);
+        window.off('resize.' + this.iframeID);
 
         this.throttledUpdate.cancel();
 
@@ -921,10 +932,10 @@ registry.backgroundVideo = publicWidget.Widget.extend(MobileYoutubeAutoplayMixin
             iframeID: this.iframeID,
         });
         this.iframe = this.bgVideoContainer.querySelector('.o_bg_video_iframe');
-        $(this.iframe).one('load', () => {
+        this.iframe.on('load', () => {
             this.bgVideoContainer.querySelectorAll(".o_bg_video_loading").forEach((el) => {
                 el.remove();
-            });
+            }, { once: true });
             // When there is a "slide in (left or right) animation" element, we
             // need to adjust the iframe size once it has been loaded, otherwise
             // an horizontal scrollbar may appear.
@@ -1056,7 +1067,7 @@ registry.FullScreenHeight = publicWidget.Widget.extend({
             // rules may alter the full-screen-height class behavior in some
             // cases (blog...).
             this._adaptSize();
-            $(window).on('resize.FullScreenHeight', debounce(() => this._adaptSize(), 250));
+            window.on('resize.FullScreenHeight', debounce(() => this._adaptSize(), 250));
         }
         return this._super(...arguments);
     },
@@ -1065,7 +1076,7 @@ registry.FullScreenHeight = publicWidget.Widget.extend({
      */
     destroy() {
         this._super(...arguments);
-        $(window).off('.FullScreenHeight');
+        window.off('.FullScreenHeight');
         this.el.style.setProperty('min-height', '');
     },
 
@@ -1182,8 +1193,8 @@ registry.BottomFixedElement = publicWidget.Widget.extend({
         this.scrollingElement = getScrollingElement();
         this.scrollingTarget = getScrollingTarget(this.scrollingElement);
         this.__hideBottomFixedElements = debounce(() => this._hideBottomFixedElements(), 100);
-        $(this.scrollingTarget).on('scroll.bottom_fixed_element', this.__hideBottomFixedElements);
-        $(window).on('resize.bottom_fixed_element', this.__hideBottomFixedElements);
+        this.scrollingTarget.on('scroll.bottom_fixed_element', this.__hideBottomFixedElements);
+        window.on('resize.bottom_fixed_element', this.__hideBottomFixedElements);
         return this._super(...arguments);
     },
     /**
@@ -1191,8 +1202,8 @@ registry.BottomFixedElement = publicWidget.Widget.extend({
      */
     destroy() {
         this._super(...arguments);
-        $(this.scrollingTarget).off('.bottom_fixed_element');
-        $(window).off('.bottom_fixed_element');
+        this.scrollingTarget.off('.bottom_fixed_element');
+        window.off('.bottom_fixed_element');
         this._restoreBottomFixedElements(this.el.querySelectorAll(".o_bottom_fixed_element"));
     },
 
@@ -1328,10 +1339,11 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
         this.__onScrollWebsiteAnimate = throttleForAnimation(this._onScrollWebsiteAnimate.bind(this));
         this.scrollingTarget.addEventListener('scroll', this.__onScrollWebsiteAnimate, {capture: true});
 
-        $(window).on('resize.o_animate, shown.bs.modal.o_animate, slid.bs.carousel.o_animate, shown.bs.tab.o_animate, shown.bs.collapse.o_animate', () => {
+        window.on('resize.o_animate shown.bs.modal.o_animate slid.bs.carousel.o_animate shown.bs.tab.o_animate shown.bs.collapse.o_animate', () => {
             this.windowsHeight = window.innerHeight;
             this._scrollWebsiteAnimate(this.scrollingElement);
-        }).trigger("resize");
+        })
+        window.dispatchEvent(new Event("resize", { bubbles: true }));
 
         return this._super(...arguments);
     },
@@ -1352,7 +1364,7 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
             element.style.animationPlayState = "";
             element.style.visibility = "";
         });
-        $(window).off('.o_animate');
+        window.off('.o_animate');
         this.__onScrollWebsiteAnimate.cancel();
         this.scrollingTarget.removeEventListener('scroll', this.__onScrollWebsiteAnimate, {capture: true});
         this.scrollingElement.classList.remove('o_wanim_overflow_xy_hidden');
@@ -1374,12 +1386,12 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
             this._toggleOverflowXYHidden(true);
             el.style.animationPlayState = "running";
             el.classList.add("o_animating")
-            $(el).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', () => {
+            el.on('webkitAnimationEnd oanimationend msAnimationEnd animationend', () => {
                 el.classList.add("o_animated")
                 el.classList.remove("o_animating");
                 this._toggleOverflowXYHidden(false);
-                $(window).trigger("resize");
-            });
+                window.dispatchEvent(new Event("resize", { bubbles: true }));
+            }, { once: true });
         });
     },
     /**
@@ -1444,17 +1456,20 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
             const elHeight = el.offsetHeight;
             const animateOnScroll = el.classList.contains('o_animate_on_scroll');
             let elOffset = animateOnScroll ? 0 : Math.max((elHeight * this.offsetRatio), this.offsetMin);
-            const state = el.style.animationPlayState
+            const state = el.style.animationPlayState;
 
             // We need to offset for the change in position from some animation.
             // So we get the top value by not taking CSS transforms into calculations.
             // Cookies bar might be opened and considered as a modal but it is
             // not really one when there is no backdrop (eg 'discrete' layout),
             // and should not be used as scrollTop value.
-            const closestEl = el.closest(".modal");
-            const closestModal = closestEl ? closestEl.getBoundingClientRect().width && closestEl.getBoundingClientRect().height &&
-                            getComputedStyle(closestEl).display !== 'none' && getComputedStyle(closestEl).visibility !== 'hidden' &&
-                            closestEl.offsetParent ? closestEl : null : null;
+            let closestEl = el.closest(".modal");
+            while (closestEl && (closestEl.offsetWidth === 0 || closestEl.offsetHeight === 0 || 
+                getComputedStyle(closestEl).display === "none" || 
+                getComputedStyle(closestEl).visibility === "hidden")) {
+                closestEl = closestEl.parentElement.closest(".modal");
+            }
+            const closestModal = closestEl || null;
             let scrollTop = this.scrollingElement.scrollTop;
             if (closestModal) {
                 scrollTop = closestModal.classList.contains("s_popup_no_backdrop") ?

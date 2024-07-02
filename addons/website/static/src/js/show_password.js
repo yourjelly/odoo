@@ -21,7 +21,7 @@ publicWidget.registry.ShowPassword = publicWidget.Widget.extend({
      */
     destroy: function () {
         this._super(...arguments);
-        $('body').off(".ShowPassword");
+        document.body.off(".ShowPassword");
     },
 
     //--------------------------------------------------------------------------
@@ -40,7 +40,7 @@ publicWidget.registry.ShowPassword = publicWidget.Widget.extend({
      * @private
      */
     _onShowText: function () {
-        $('body').one('mouseup.ShowPassword touchend.ShowPassword', this._onShowPassword.bind(this));
+        document.body.on('mouseup.ShowPassword touchend.ShowPassword', this._onShowPassword.bind(this), { once: true });
         this.el.closest('.input-group').querySelectorAll('#password').forEach((el) => {
             el.setAttribute('type', 'text');
         });

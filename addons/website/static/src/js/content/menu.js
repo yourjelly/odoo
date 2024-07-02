@@ -50,26 +50,26 @@ const BaseAnimatedHeader = animations.Animation.extend({
         const enableScroll = function () {
             document.body.classList.remove('overflow-hidden');
         };
-        this.navbarOffcanvases = this.el.querySelectorAll(".offcanvas");
-        $(this.navbarOffcanvases)
-            .on("show.bs.offcanvas.BaseAnimatedHeader", disableScroll)
-            .on("hide.bs.offcanvas.BaseAnimatedHeader", enableScroll);
-
+        this.navbarOffcanvasEls = this.el.querySelectorAll(".offcanvas");
+        this.navbarOffcanvasEls.forEach((offcanvasEl) => {
+            offcanvasEl.on("show.bs.offcanvas.BaseAnimatedHeader", disableScroll)
+            offcanvasEl.on("hide.bs.offcanvas.BaseAnimatedHeader", enableScroll);
+        });
         // Compatibility: can probably be removed, there is no such elements in
         // default navbars... although it could be used by custo.
-        this.navbarCollapses = this.el.querySelectorAll('.navbar-collapse');
-        $(this.navbarCollapses)
-            .on("show.bs.collapse.BaseAnimatedHeader", disableScroll)
-            .on("hide.bs.collapse.BaseAnimatedHeader", enableScroll);
-
+        this.navbarCollapseEls = this.el.querySelectorAll('.navbar-collapse');
+        this.navbarCollapseEls.forEach((navbarCollapse) => {
+            navbarCollapse.on("show.bs.collapse.BaseAnimatedHeader", disableScroll)
+            navbarCollapse.on("hide.bs.collapse.BaseAnimatedHeader", enableScroll);
+        });
         // We can rely on transitionend which is well supported but not on
         // transitionstart, so we listen to a custom odoo event.
         this._transitionCount = 0;
-        $(this.el).on('odoo-transitionstart.BaseAnimatedHeader', () => {
+        this.el.on('odoo-transitionstart.BaseAnimatedHeader', () => {
             this.el.classList.add('o_transitioning');
             this._adaptToHeaderChangeLoop(1);
         });
-        $(this.el).on('transitionend.BaseAnimatedHeader', () => this._adaptToHeaderChangeLoop(-1));
+        this.el.on('transitionend.BaseAnimatedHeader', () => this._adaptToHeaderChangeLoop(-1));
 
         return this._super(...arguments);
     },
@@ -82,9 +82,13 @@ const BaseAnimatedHeader = animations.Animation.extend({
             "o_header_is_scrolled",
             "o_header_no_transition",
             "o_transitioning");
-        $(this.navbarOffcanvases).off(".BaseAnimatedHeader");
-        $(this.navbarCollapses).off('.BaseAnimatedHeader');
-        $(this.el).off('.BaseAnimatedHeader');
+        this.navbarOffcanvasEls.forEach((navbarOffcanvas) => {
+            navbarOffcanvas.off(".BaseAnimatedHeader");
+        });
+        this.navbarCollapseEls.forEach((navbarCollapse) => {
+            navbarCollapse.off('.BaseAnimatedHeader');
+        });
+        this.el.off('.BaseAnimatedHeader');
         this._super(...arguments);
     },
 
@@ -249,7 +253,7 @@ const BaseAnimatedHeader = animations.Animation.extend({
             this.scrollHeightTooShort = headerIsScrolled && this._scrollHeightTooShort();
             if (!this.scrollHeightTooShort) {
                 this.el.classList.toggle('o_header_is_scrolled', headerIsScrolled);
-                $(this.el).trigger('odoo-transitionstart');
+                this.el.dispatchEvent(new CustomEvent("odoo-transitionstart", { bubbles: true }));
                 this.headerIsScrolled = headerIsScrolled;
             }
         }
@@ -518,7 +522,7 @@ const BaseDisappearingHeader = publicWidget.registry.FixedHeader.extend({
      * @private
      */
     _hideHeader: function () {
-        $(this.el).trigger('odoo-transitionstart');
+        this.el.dispatchEvent(new CustomEvent("odoo-transitionstart", { bubbles: true }));
     },
     /**
      * @override
@@ -530,7 +534,7 @@ const BaseDisappearingHeader = publicWidget.registry.FixedHeader.extend({
      * @private
      */
     _showHeader: function () {
-        $(this.el).trigger('odoo-transitionstart');
+        this.el.dispatchEvent(new CustomEvent("odoo-transitionstart", { bubbles: true }));
     },
 
     //--------------------------------------------------------------------------
@@ -616,7 +620,7 @@ publicWidget.registry.FadeOutHeader = BaseDisappearingHeader.extend({
      */
     _hideHeader: function () {
         this._super(...arguments);
-        $(this.el).stop(false, true).fadeOut();
+        this.el.classList.replace("show", "hide");
     },
     /**
      * @override
@@ -624,7 +628,7 @@ publicWidget.registry.FadeOutHeader = BaseDisappearingHeader.extend({
     _showHeader: function () {
         this._super(...arguments);
         this.el.style.transform = this.atTop ? "" : `translate(0, -${this.topGap}px)`;
-        $(this.el).stop(false, true).fadeIn();
+        this.el.classList.replace("hide", "show");
     },
 });
 

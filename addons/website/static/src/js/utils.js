@@ -94,9 +94,9 @@ function onceAllImagesLoaded(element, excluded) {
             return; // Already loaded
         }
         var def = new Promise(function (resolve, reject) {
-            $(img).one('load', function () {
+            img.on('load', function () {
                 resolve();
-            });
+            }, { once: true });
         });
         return def;
     });
@@ -180,7 +180,7 @@ function prompt(options, _qweb) {
             }
             Modal.getOrCreateInstance(dialog).show();
             field.focus();
-            $(dialog).on('click', '.btn-primary', function () {
+            dialog.on('click', '.btn-primary', function () {
                 var backdrop = document.querySelectorAll('.modal-backdrop');
                 resolve({ val: field.value, field: field, dialog: dialog });
                 Modal.getOrCreateInstance(dialog).hide();
@@ -190,7 +190,7 @@ function prompt(options, _qweb) {
                 });
             });
         });
-        $(dialog).on('hidden.bs.modal', function () {
+        dialog.on('hidden.bs.modal', function () {
             var backdrop = document.querySelectorAll('.modal-backdrop');
             reject();
             dialog.remove();
