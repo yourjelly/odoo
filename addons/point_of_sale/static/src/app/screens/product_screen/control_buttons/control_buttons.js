@@ -149,7 +149,7 @@ export class ControlButtons extends Component {
 export class ControlButtonsPopup extends Component {
     static components = { Dialog, ControlButtons };
     static template = xml`
-        <Dialog bodyClass="'d-flex flex-column'" footer="false" title="''" t-on-click="props.close">
+        <Dialog bodyClass="'d-flex flex-column'" footer="false" size="'md'" title="'Actions'" t-on-click="props.close">
             <ControlButtons wrapped="false"/>
         </Dialog>
     `;

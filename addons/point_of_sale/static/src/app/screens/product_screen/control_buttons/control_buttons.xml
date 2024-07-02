@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="point_of_sale.ControlButtons">
-        <div t-attf-class="flex-{{!props.wrapped ? (ui.isSmall ? 'column' : 'wrap') : 'wrap'}}" class="control-buttons d-flex bg-300 border-bottom">
+        <div t-attf-class="flex-{{!props.wrapped ? (ui.isSmall ? 'column border-bottom bg-300' : 'wrap gap-2') : 'wrap'}}" class="control-buttons d-flex">
             <!-- All buttons always displayed -->
             <SelectPartnerButton partner="partner" t-if="props.wrapped"/>
             <t t-if="props.wrapped || (ui.isSmall and !props.wrapped)">
@@ -27,16 +27,16 @@
             <!-- All these buttons will only be displayed in a dialog -->
             <t t-if="!props.wrapped">
                 <OrderlineNoteButton t-if="pos.config.module_pos_restaurant" />
-                <button class="o_pricelist_button btn btn-light rounded-0 fw-bolder" t-on-click="() => this.clickPricelist()">
+                <button t-attf-class="o_pricelist_button fw-bolder btn {{ !ui.isSmall ? 'btn-secondary rounded' : 'btn-light rounded-0' }}" t-on-click="() => this.clickPricelist()">
                     <i class="fa fa-th-list me-2" role="img" aria-label="Price list" title="Price list" />
                     <t t-if="currentOrder?.pricelist_id" t-esc="currentOrder.pricelist_id.display_name" />
                     <t t-else="">Pricelist</t>
                 </button>
-                <button class="btn btn-light rounded-0 fw-bolder" t-on-click="() => this.clickRefund()">
+                <button t-attf-class="fw-bolder btn {{ !ui.isSmall ? 'btn-secondary rounded' : 'btn-light rounded-0' }}" t-on-click="() => this.clickRefund()">
                     <i class="fa fa-undo me-1" role="img" aria-label="Refund" title="Refund" />
                     Refund
                 </button>
-                <button class="btn btn-light rounded-0 fw-bolder" t-on-click="onClickSave">
+                <button t-attf-class="fw-bolder btn {{ !ui.isSmall ? 'btn-secondary rounded' : 'btn-light rounded-0' }}" t-on-click="onClickSave">
                     <i class="fa fa-upload" role="img" aria-label="Save" title="Save" />
                     Park Order
                 </button>
