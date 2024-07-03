@@ -103,6 +103,7 @@ export class SearchPanel extends Component {
         onWillUpdateProps(async () => {
             await this.env.searchModel.sectionsPromise;
             this.updateActiveValues();
+            this.expandDefaultValue(true);
         });
 
         onMounted(() => {
@@ -161,13 +162,13 @@ export class SearchPanel extends Component {
     /**
      * Expands category values holding the default value of a category.
      */
-    expandDefaultValue() {
+    expandDefaultValue(updateOnly = false) {
         if (this.hasImportedState) {
             return;
         }
         const categories = this.env.searchModel.getSections((s) => s.type === "category");
         for (const category of categories) {
-            this.state.expanded[category.id] = {};
+            this.state.expanded[category.id] = updateOnly ? this.state.expanded[category.id] : {};
             if (category.activeValueId) {
                 const ancestorIds = this.getAncestorValueIds(category, category.activeValueId);
                 for (const ancestorId of ancestorIds) {
