@@ -46,8 +46,9 @@ class StockPickingBatch(models.Model):
         return res
 
     def _update_sequences(self):
-        sorted_records = self.picking_ids.sorted(key=lambda r: r.zip_code or '0')
-        for idx, record in enumerate(sorted_records):
+        priority_records = self.picking_ids.filtered(lambda x: x.priority == '1').sorted(key=lambda r: r.zip_code or '0')
+        sorted_records = (self.picking_ids - priority_records).sorted(key=lambda r: r.zip_code or '0')
+        for idx, record in enumerate(priority_records + sorted_records):
             record.sequence = idx
 
     @api.depends('vehicle_id')
@@ -101,8 +102,9 @@ class StockPickingBatch(models.Model):
     @api.depends('dock_id')
     def _compute_move_ids(self):
         super()._compute_move_ids()
-        if self.dock_id:
-            parent_path_id = [int(parent_id) for parent_id in self.dock_id.parent_path.split('/')[:-1]]
-            for line in self.move_line_ids:
-                if line.location_dest_id.id in parent_path_id:
-                    line.location_dest_id = self.dock_id
+        for record in self:
+            if record.dock_id:
+                parent_path_id = [int(parent_id) for parent_id in record.dock_id.parent_path.split('/')[:-1]]
+                for line in record.move_line_ids:
+                    if line.location_dest_id.id in parent_path_id:
+                        line.location_dest_id = record.dock_id
