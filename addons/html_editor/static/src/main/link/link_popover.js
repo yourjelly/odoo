@@ -46,9 +46,8 @@ export class LinkPopover extends Component {
             previewImg: false,
             faIcon: "fa-globe",
             urlTitle: "",
-            urlDescription:
-                "From ERP to CRM, eCommerce and CMS. Download Odoo or use it in the cloud. Grow Your Business.",
-            previewOdooKeywords: { left: "", right: "" },
+            urlDescription: "",
+            linkPreviewName: { left: "", right: "" },
 
             imgSrc: "",
             classes: this.props.linkEl.className || "",
@@ -159,7 +158,7 @@ export class LinkPopover extends Component {
         this.state.previewImg = false;
         this.state.urlTitle = this.state.url || _t("No URL specified");
         // this.state.urlDescription = "";
-        this.state.previewOdooKeywords = { left: "", right: "" };
+        this.state.linkPreviewName = { left: "", right: "" };
     }
     async loadAsyncLinkPreview() {
         let url;
@@ -199,11 +198,14 @@ export class LinkPopover extends Component {
 
             // TODO: fetch the metadata from the server for external links
             // Fetch the metadata
-            fetch(url, {
-                header: {
-                    "Access-Control-Allow-Origin": "*",
-                },
-            })
+            this.keepLastPromise
+                .add(
+                    fetch(url, {
+                        header: {
+                            "Access-Control-Allow-Origin": "*",
+                        },
+                    })
+                )
                 .then((response) => response.text())
                 .then((data) => {
                     const parser = new window.DOMParser();
@@ -222,38 +224,47 @@ export class LinkPopover extends Component {
                     return;
                 });
         } else {
+            // fetch the metadata using jsonify
+            const jsonify_url =
+                url.origin + url.pathname.replace("odoo", "json") + "?link_preview=1";
+            const internalUrlData = await this.keepLastPromise
+                .add(fetch(jsonify_url))
+                .then((response) => response.json())
+                .catch((error) => {
+                    if (error instanceof Error) {
+                        return Promise.reject(error);
+                    }
+                });
+            this.state.linkPreviewName = internalUrlData.link_preview_name;
+            const html_parser = new window.DOMParser();
+            this.state.urlDescription = internalUrlData.description
+                ? html_parser.parseFromString(internalUrlData.description, "text/html").body
+                    .textContent
+                : "";
+            this.state.urlTitle = this.state.linkPreviewName
+                ? this.state.linkPreviewName
+                : this.state.url;
+            // fetch the favicon and the title
             await this.keepLastPromise
                 .add(fetch(this.state.url))
                 .then((response) => response.text())
                 .then((content) => {
-                    const parser = new window.DOMParser();
-                    const doc = parser.parseFromString(content, "text/html");
+                    const doc = html_parser.parseFromString(content, "text/html");
 
                     // Get
                     const favicon = doc.querySelector("link[rel~='icon']");
                     const ogTitle = doc.querySelector("[property='og:title']");
                     const title = doc.querySelector("title");
-                    this.state.previewOdooKeywords = this.getPreviewOdooKeywords(this.state.url);
 
                     // Set
                     if (favicon) {
                         this.state.imgSrc = favicon.href;
                         this.state.previewImg = true;
                     }
-                    if (ogTitle || title) {
+                    if ((ogTitle || title) && !this.state.linkPreviewName) {
                         this.state.urlTitle = ogTitle
                             ? ogTitle.getAttribute("content")
                             : title.text.trim();
-                    }
-                    const internalTitle =
-                        this.state.previewOdooKeywords.left +
-                        " | " +
-                        this.state.previewOdooKeywords.right;
-                    if (
-                        this.state.previewOdooKeywords.left &&
-                        this.state.previewOdooKeywords.right
-                    ) {
-                        this.state.urlTitle = internalTitle;
                     }
                 })
                 .catch((error) => {
@@ -277,15 +288,5 @@ export class LinkPopover extends Component {
             (this.state.type ? `btn btn-${style}${this.state.type}` : "") +
             (this.state.type && shapeClasses ? ` ${shapeClasses}` : "") +
             (this.state.type && this.state.buttonSize ? " btn-" + this.state.buttonSize : "");
-    }
-    /**
-     * @param {string} url the internal url to fetch
-     * @param {boolean} isExternal whether the url is external
-     * @returns {Object} left and right keywords for the preview based on the internal records
-     * E.g. for task module, the preview keywords: task name | project name;
-     *      for Sales order, the preview keywords: SO ref | Customer name;
-     */
-    getPreviewOdooKeywords(url) {
-        return { left: "test 1", right: "test 2" };
     }
 }
