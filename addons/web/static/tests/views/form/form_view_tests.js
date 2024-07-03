@@ -14833,4 +14833,36 @@ QUnit.module("Views", (hooks) => {
             assert.verifySteps(["web_save"]);
         }
     );
+
+    QUnit.test(
+        "edit one2many field from form, readonly in list but editable in form",
+        async function (assert) {
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+            <form>
+                <field name="p">
+                    <tree><field name="foo" readonly="1"/></tree>
+                    <form><field name="foo"/></form>
+                </field>
+            </form>`,
+                mockRPC(route, args) {
+                    if (args.method === "web_save") {
+                        assert.step("web_save");
+                        assert.deepEqual(args.args[1].p[0][2], {
+                            foo: "blop",
+                        });
+                    }
+                },
+            });
+
+            await click(target.querySelector(".o_field_x2many_list_row_add a"));
+            await editInput(target, "[name='foo'] input", "blop");
+            await click(target, ".o_dialog .o_form_button_save");
+            await click(target, ".o_form_button_save");
+            assert.verifySteps(["web_save"]);
+        }
+    );
 });
