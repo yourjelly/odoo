@@ -44,15 +44,8 @@ patch(Thread.prototype, {
         );
         this.store.insert(data);
     },
+
     open(replaceNewMessageChatWindow, options) {
-        if (!this.store.discuss.isActive && !this.store.env.services.ui.isSmall) {
-            this._openChatWindow(replaceNewMessageChatWindow, options);
-            return;
-        }
-        if (this.store.env.services.ui.isSmall && this.model === "discuss.channel") {
-            this._openChatWindow(replaceNewMessageChatWindow, options);
-            return;
-        }
         if (this.model !== "discuss.channel") {
             this.store.env.services.action.doAction({
                 type: "ir.actions.act_window",
@@ -62,7 +55,7 @@ patch(Thread.prototype, {
             });
             return;
         }
-        super.open(replaceNewMessageChatWindow);
+        super.open(replaceNewMessageChatWindow, options);
     },
     async unpin() {
         const chatWindow = this.store.discuss.chatWindows.find((c) => c.thread?.eq(this));

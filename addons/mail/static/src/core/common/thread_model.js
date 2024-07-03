@@ -935,16 +935,17 @@ export class Thread extends Record {
 
     /**
      * @param {boolean} replaceNewMessageChatWindow
-     * @param {Object} [options]
+     * @param {Object} [chatWindowData]
      */
-    open(replaceNewMessageChatWindow, options) {
-        this.setAsDiscussThread();
+    open(replaceNewMessageChatWindow, chatWindowData) {
+        this.openChatWindow(replaceNewMessageChatWindow, chatWindowData);
     }
 
-    openChatWindow(replaceNewMessageChatWindow) {
+    openChatWindow(replaceNewMessageChatWindow, chatWindowData = {}) {
         const chatWindow = this.store.ChatWindow.insert({
             folded: false,
             thread: this,
+            ...chatWindowData,
             replaceNewMessageChatWindow,
         });
         chatWindow.autofocus++;
