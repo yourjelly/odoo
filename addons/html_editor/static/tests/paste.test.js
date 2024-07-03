@@ -1576,6 +1576,16 @@ describe("Special cases", () => {
                 contentAfter: "<ul><li>123</li><li>456[]abc</li><li>def</li><li>ghi</li></ul>",
             });
         });
+
+        // test.debug("should pafzfzste the text of an li into another li and insert a new li at the end of a list", async () => {
+        //     await testEditor({
+        //         contentBefore: '<ul class="o_checklist"><li>abc</li><li>[]</li></ul>',
+        //         stepFunction: async (editor) => {
+        //             pasteOdooEditorHtml(editor, "<h1>Plop</h1>");
+        //         },
+        //         contentAfter: '<ul class="o_checklist"><li>abc</li><h1>Plop</h1><li>[]</li></ul>',
+        //     });
+        // });
     });
 });
 

@@ -246,6 +246,12 @@ export class ClipboardPlugin extends Plugin {
             this.shared.sanitize(fragment, { IN_PLACE: true });
             if (fragment.hasChildNodes()) {
                 this.shared.domInsert(fragment);
+                // debugger
+                console.log("ddddd");
+                console.log(this.shared.getEditableSelection());
+
+                this.shared.setSelection(this.shared.getEditableSelection({ deep: true }));
+                console.log(this.shared.getEditableSelection());
             }
             return true;
         }
