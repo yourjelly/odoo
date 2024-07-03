@@ -43,7 +43,8 @@ import {
     LayoutColumn,
     legacyRegistry,
     Many2oneUserValue,
-    owlRegistry,
+    registerBackgroundOptions,
+    registerOption,
     SelectUserValue,
     SnippetOption,
     UnitUserValue,
@@ -53,6 +54,7 @@ import {
     WeInput,
     WeSelect,
 } from '@web_editor/js/editor/snippets.options';
+import { registerWebsiteOption } from "./snippets.registry";
 
 options.UserValueWidget.include({
     loadMethodsData() {
@@ -4386,7 +4388,7 @@ class WebsiteLayoutColumn extends LayoutColumn {
         return this.env.services.website.context.isMobile;
     }
 }
-registry.category("snippet_options").add("WebsiteLayoutColumns", {
+registerWebsiteOption("WebsiteLayoutColumns", {
     Class: WebsiteLayoutColumn,
     template: "website.layout_column",
     selector: "section, section.s_carousel_wrapper .carousel-item",
