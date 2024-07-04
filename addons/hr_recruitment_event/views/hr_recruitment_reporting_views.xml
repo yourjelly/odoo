@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="hr_applicant_stage_report_menu"
+            parent="hr_recruitment.report_hr_recruitment"
+            action="recruitment_stage_report_action" sequence="3"/>
+</odoo>
