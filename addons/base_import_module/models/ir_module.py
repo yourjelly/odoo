@@ -61,6 +61,12 @@ class IrModule(models.Model):
             ], limit=1)
             if attachment:
                 module.icon_image = attachment.datas
+    
+    @ormcache()
+    @api.model
+    def _get_imported_module_names(self):
+        imported_module_data = self.search_read([('imported', '=', True), ('state', '=', 'installed')], ['name'])
+        return {mod['name'] for mod in imported_module_data}
 
     def _import_module(self, module, path, force=False, with_demo=False):
         known_mods = self.search([])
@@ -156,6 +162,39 @@ class IrModule(models.Model):
                             'module': module,
                             'res_id': attachment.id,
                         })
+        
+        # store translation files as attachments to allow loading new langs later
+        path_lang = opj(path, 'i18n')
+        lang_attachments = dict()
+        if os.path.isdir(path_lang):
+            for entry in os.scandir(path_lang):
+                if not entry.is_file():
+                    # we don't support sub-directories in i18n
+                    continue
+                with file_open(entry.path, 'rb', env=self.env) as fp:
+                    data = base64.b64encode(fp.read())
+                # .pot file are saved according to a different naming convention
+                is_pot_file = entry.name.endswith('.pot')
+                lang = entry.name.split('.')[0]
+                # store as binary ir.attachment
+                values = {
+                    'name': f"{module}_{lang}.po" if not is_pot_file else f"{module}.pot",
+                    'url': f"/{module}/i18n/{lang}.po" if not is_pot_file else f"/{module}/i18n/{module}.pot",
+                    'type': 'binary',
+                    'datas': data,
+                }
+                attachment = IrAttachment.sudo().search([('url', '=', values['url']), ('type', '=', 'binary'), ('name', '=', values['name'])])
+                if attachment:
+                    attachment.write(values)
+                else:
+                    attachment = IrAttachment.create(values)
+                    self.env['ir.model.data'].create({
+                        'name': f"attachment_{module}_{lang}".replace('.', '_').replace(' ', '_'),
+                        'model': 'ir.attachment',
+                        'module': module,
+                        'res_id': attachment.id,
+                    })
+                lang_attachments[lang] = attachment
 
         IrAsset = self.env['ir.asset']
         assets_vals = []
@@ -218,6 +257,7 @@ class IrModule(models.Model):
         translation_importer = TranslationImporter(self.env.cr, verbose=False)
         for lang_ in self.env['res.lang'].get_installed():
             lang = lang_[0]
+            lang_attachment = lang_attachments.get(lang)
             po_paths = get_po_paths(module, lang, env=self.env)
             for po_path in po_paths:
                 _logger.info('module %s: loading translation file %s for language %s', module, po_path, lang)
@@ -291,6 +331,49 @@ class IrModule(models.Model):
                             module=mod_name, error_message=exception_to_unicode(e),
                         ))
         return "", module_names
+
+    @api.model
+    def _load_single_module_terms(self, module, langs, importer, overwrite=False):
+        """ Override to load translations from attachments in the case of an importable module . """
+        if module in self._get_imported_module_names():
+            IrAttachment = self.env['ir.attachment']
+            # find the pot file and write to a temporary directory
+            pot_attachment = IrAttachment.search([
+                ('name', '=', f"{module}.pot"),
+                ('url', '=', f"/{module}/i18n/{module}.pot"),
+                ('type', '=', 'binary'),
+            ], limit=1)
+            if not pot_attachment:
+                return False
+            with file_open_temporary_directory(self.env) as translation_dir:
+                pot_file_content = BytesIO(base64.b64decode(pot_attachment.datas))
+                with open(opj(translation_dir, f"{module}.pot"), 'wb') as pot_file:
+                    pot_file.write(pot_file_content.read())
+                    for lang in langs:
+                        lang_base = lang.split('_')[0]
+                        if lang_base == 'es' and lang != 'es_ES':
+                            # force es_419 as fallback language for the spanish variations
+                            if lang == 'es_419':
+                                langs = ['es_419']
+                            else:
+                                langs = ['es_419', lang]
+                        else:
+                            langs = [lang_base, lang]
+                        for lang_ in langs:
+                            lang_attachment = IrAttachment.search([
+                                ('name', '=', f"{module}_{lang_}.po"),
+                                ('url', '=', f"/{module}/i18n/{lang_}.po"),
+                                ('type', '=', 'binary'),
+                            ], limit=1)
+                            if lang_attachment:
+                                _logger.info('module %s: loading translation file %s from ir.attachment %s for language %s', module, lang_attachment.name, lang_attachment.id, lang)
+                                po_file_content = BytesIO(base64.b64decode(lang_attachment.datas))
+                                with open(opj(translation_dir, f"{module}_{lang_}.po"), 'wb') as po_file:
+                                    po_file.write(po_file_content.read())
+                                    importer.load_file(po_file.name, lang)
+            return True
+        else:
+            return super()._load_single_module_terms(module, langs, importer, overwrite)
 
     def module_uninstall(self):
         # Delete an ir_module_module record completely if it was an imported

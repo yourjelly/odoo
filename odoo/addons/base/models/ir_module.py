@@ -924,19 +924,23 @@ class Module(models.Model):
         translation_importer = TranslationImporter(self.env.cr, verbose=False)
 
         for module_name in modules:
-            modpath = get_module_path(module_name)
-            if not modpath:
-                continue
-            for lang in langs:
-                po_paths = get_po_paths(module_name, lang)
-                for po_path in po_paths:
-                    _logger.info('module %s: loading translation file %s for language %s', module_name, po_path, lang)
-                    translation_importer.load_file(po_path, lang)
-                if lang != 'en_US' and not po_paths:
-                    _logger.info('module %s: no translation for language %s', module_name, lang)
+            self._load_single_module_terms(module_name, langs, translation_importer, overwrite=overwrite)
 
         translation_importer.save(overwrite=overwrite)
 
+    @api.model
+    def _load_single_module_terms(self, module, langs, importer, overwrite=False):
+        """ Load PO files of the given module for the given languages. """
+        modpath = get_module_path(module)
+        if not modpath:
+            return
+        for lang in langs:
+            po_paths = get_po_paths(module, lang)
+            for po_path in po_paths:
+                _logger.info('module %s: loading translation file %s for language %s', module, po_path, lang)
+                importer.load_file(po_path, lang)
+            if lang != 'en_US' and not po_paths:
+                _logger.info('module %s: no translation for language %s', module, lang)
 
 DEP_STATES = STATES + [('unknown', 'Unknown')]
 
