@@ -1,8 +1,23 @@
 const delegateEvent = function (ev) {
-    const target = ev.target;
+    let target = ev.target;
+    const pseudoSelectorRegex = /:[\w-]+(\([^)]*\))?/g;
 
     if (typeof this.selector === "string") {
-        if (target?.matches(this.selector)) {
+        // Remove pseudo selectors from the selector
+        const cleanSelector = pseudoSelectorRegex.test(this.selector)
+            ? this.selector.replace(pseudoSelectorRegex, "")
+            : this.selector;
+
+        // Attempt to find the matching target
+        while (target.parentElement && target !== this.element && !target?.matches(cleanSelector)) {
+            target = target.parentElement;
+        }
+        if (target?.matches(cleanSelector)) {
+            // Create a new event and set its currentTarget
+            Object.defineProperty(ev, "currentTarget", {
+                get: () => target,
+                configurable: true,
+            });
             this.handler.call(target, ev);
         }
     } else {
@@ -55,6 +70,12 @@ HTMLElement.prototype.on = function (eventName, selector, handler, options = {})
 // Event delegation for Window
 // Since Window is not a HTMLElement, we need to extend it to support on/off events.
 Window.prototype.on = function (eventName, selector, handler, options = {}) {
+    HTMLElement.prototype.on.call(this, eventName, selector, handler, options);
+};
+
+// Event delegation for Document
+// Since Document is not a HTMLElement, we need to extend it to support on/off events.
+Document.prototype.on = function (eventName, selector, handler, options = {}) {
     HTMLElement.prototype.on.call(this, eventName, selector, handler, options);
 };
 
@@ -117,5 +138,9 @@ HTMLElement.prototype.off = function (eventName = "", selector, handler, options
 };
 
 Window.prototype.off = function (eventName, selector, handler, options = {}) {
+    HTMLElement.prototype.off.call(this, eventName, selector, handler, options);
+};
+
+Document.prototype.off = function (eventName, selector, handler, options = {}) {
     HTMLElement.prototype.off.call(this, eventName, selector, handler, options);
 };
