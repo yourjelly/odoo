@@ -54,8 +54,8 @@
             <div t-else="" class="d-flex flex-column" data-prevent-closing-overlay="true">
                 <div class="d-flex" style="min-width: 250px;">
                     <span class="col-1 o_we_preview_favicon">
-                        <i t-if="!state.previewImg" t-attf-class="fa {{state.faIcon}}"></i>
-                        <img t-else="" t-attf-src="{{state.imgSrc}}" class="align-content-center"></img>
+                        <i t-if="!state.previewIcon" t-attf-class="fa {{state.faIcon}}"></i>
+                        <img t-else="" t-attf-src="{{state.iconSrc}}" class="align-content-center"></img>
                     </span>
                     <div class="w-100">
                         <div class="d-flex me-1">

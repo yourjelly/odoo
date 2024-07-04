@@ -43,13 +43,13 @@ export class LinkPopover extends Component {
             editing: this.props.linkEl.href ? false : true,
             url: this.props.linkEl.href || "",
             label: cleanZWChars(this.props.linkEl.textContent),
-            previewImg: false,
+            previewIcon: false,
             faIcon: "fa-globe",
             urlTitle: "",
             urlDescription: "",
             linkPreviewName: { left: "", right: "" },
 
-            imgSrc: "",
+            iconSrc: "",
             classes: this.props.linkEl.className || "",
             type:
                 this.props.linkEl.className.match(/btn(-[a-z0-9_-]*)(primary|secondary)/)?.pop() ||
@@ -155,7 +155,7 @@ export class LinkPopover extends Component {
      */
     resetPreview() {
         this.state.faIcon = "fa-globe";
-        this.state.previewImg = false;
+        this.state.previewIcon = false;
         this.state.urlTitle = this.state.url || _t("No URL specified");
         // this.state.urlDescription = "";
         this.state.linkPreviewName = { left: "", right: "" };
@@ -191,10 +191,10 @@ export class LinkPopover extends Component {
             // most of the time raise a CORS error. To avoid that error, we
             // would need to fetch the page through the server (s2s), involving
             // enduser fetching problematic pages such as illicit content.
-            this.state.imgSrc = `https://www.google.com/s2/favicons?sz=16&domain=${encodeURIComponent(
+            this.state.iconSrc = `https://www.google.com/s2/favicons?sz=16&domain=${encodeURIComponent(
                 url
             )}`;
-            this.state.previewImg = true;
+            this.state.previewIcon = true;
 
             // TODO: fetch the metadata from the server for external links
             // Fetch the metadata
@@ -258,8 +258,8 @@ export class LinkPopover extends Component {
 
                     // Set
                     if (favicon) {
-                        this.state.imgSrc = favicon.href;
-                        this.state.previewImg = true;
+                        this.state.iconSrc = favicon.href;
+                        this.state.previewIcon = true;
                     }
                     if ((ogTitle || title) && !this.state.linkPreviewName) {
                         this.state.urlTitle = ogTitle
