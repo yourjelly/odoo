@@ -149,7 +149,11 @@ class Rest(Controller):
         view = model.get_view(view_type=view_type or (
             'form' if record_id else action.view_mode.split(',')[0]
         ))
-        spec = request.env['ir.ui.view']._get_fields_spec(view)
+
+        if request.params.get('link_preview'):
+            spec = {"link_preview_name": {}, "description": {}}
+        else:
+            spec = request.env['ir.ui.view']._get_fields_spec(view)
 
         if record_id:
             res = model.browse(int(record_id)).web_read(spec)[0]

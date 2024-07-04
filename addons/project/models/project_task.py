@@ -298,6 +298,7 @@ class Task(models.Model):
             ! Set the task a high priority\n
             Make sure to use the right format and order e.g. Improve the configuration screen #feature #v16 @Mitchell !""",
     )
+    link_preview_name = fields.Char(compute='_compute_link_preview_name', help="Name used in the link preview")
 
     _sql_constraints = [
         ('recurring_task_has_no_parent', 'CHECK (NOT (recurring_task IS TRUE AND parent_id IS NOT NULL))', "A subtask cannot be recurrent."),
@@ -777,6 +778,10 @@ class Task(models.Model):
                     if match.group(group):
                         extract_data(task)
                 task.name = task.display_name.strip()
+
+    def _compute_link_preview_name(self):
+        for task in self:
+            task.link_preview_name = task.name + ' | ' + task.project_id.name
 
     def copy_data(self, default=None):
         default = dict(default or {})
