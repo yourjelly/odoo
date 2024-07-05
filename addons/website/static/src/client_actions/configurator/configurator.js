@@ -2,6 +2,7 @@
 
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { delay } from "@web/core/utils/concurrency";
+import { extractBase64PartFromDataURL } from "@web/core/utils/image_processing";
 import { getDataURLFromFile } from "@web/core/utils/urls";
 import weUtils from '@web_editor/js/common/utils';
 import { _t } from "@web/core/l10n/translation";
@@ -257,17 +258,17 @@ class PaletteSelectionScreen extends Component {
         if (logoSelectInput.files.length === 1) {
             const previousLogoAttachmentId = this.state.logoAttachmentId;
             const file = logoSelectInput.files[0];
-            const data = await getDataURLFromFile(file);
+            const dataURL = await getDataURLFromFile(file);
             const attachment = await this.rpc('/web_editor/attachment/add_data', {
                 'name': 'logo',
-                'data': data.split(',')[1],
+                data: extractBase64PartFromDataURL(dataURL),
                 'is_image': true,
             });
             if (!attachment.error) {
                 if (previousLogoAttachmentId) {
                     await this._removeAttachments([previousLogoAttachmentId]);
                 }
-                this.state.changeLogo(data, attachment.id);
+                this.state.changeLogo(dataURL, attachment.id);
                 this.updatePalettes();
             } else {
                 this.notification.add(
@@ -288,7 +289,7 @@ class PaletteSelectionScreen extends Component {
         if (img.startsWith('data:image/webp')) {
             img = await webpToPNG(img);
         }
-        img = img.split(',')[1];
+        img = extractBase64PartFromDataURL(img);
         const [color1, color2] = await this.orm.call('base.document.layout',
             'extract_image_primary_secondary_colors',
             [img],

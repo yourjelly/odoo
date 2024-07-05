@@ -1,6 +1,10 @@
 /** @odoo-module **/
 
 import { registry } from '@web/core/registry';
+import {
+    convertCanvasToDataURL,
+    extractBase64PartFromDataURL,
+} from "@web/core/utils/image_processing";
 import { UploadProgressToast } from './upload_progress_toast';
 import { _t } from "@web/core/l10n/translation";
 import { checkFileSize } from "@web/core/utils/files";
@@ -120,9 +124,10 @@ export const uploadService = {
                             // Don't show yet success as backend code only starts now
                             file.progress = 100;
                         });
+                        const dataURLBase64Part = extractBase64PartFromDataURL(dataURL);
                         const attachment = await rpc('/web_editor/attachment/add_data', {
                             'name': file.name,
-                            'data': dataURL.split(',')[1],
+                            data: dataURLBase64Part,
                             'res_id': resId,
                             'res_model': resModel,
                             'is_image': !!isImage,
@@ -136,7 +141,7 @@ export const uploadService = {
                             if (attachment.mimetype === 'image/webp') {
                                 // Generate alternate format for reports.
                                 const image = document.createElement('img');
-                                image.src = `data:image/webp;base64,${dataURL.split(',')[1]}`;
+                                image.src = `data:image/webp;base64,${dataURLBase64Part}`;
                                 await new Promise(resolve => image.addEventListener('load', resolve));
                                 const canvas = document.createElement('canvas');
                                 canvas.width = image.width;
@@ -145,10 +150,15 @@ export const uploadService = {
                                 ctx.fillStyle = 'rgb(255, 255, 255)';
                                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                                 ctx.drawImage(image, 0, 0);
-                                const altDataURL = canvas.toDataURL('image/jpeg', 0.75);
+                                const altImageData = convertCanvasToDataURL(
+                                    canvas,
+                                    "image/jpeg",
+                                    0.75
+                                );
+                                const fileBasename = file.name.replace(/\.webp$/, "");
                                 await rpc('/web_editor/attachment/add_data', {
-                                    'name': file.name.replace(/\.webp$/, '.jpg'),
-                                    'data': altDataURL.split(',')[1],
+                                    name: `${fileBasename}.${altImageData.defaultFileExtension}`,
+                                    data: altImageData.base64Part,
                                     'res_id': attachment.id,
                                     'res_model': 'ir.attachment',
                                     'is_image': true,

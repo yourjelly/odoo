@@ -2,6 +2,7 @@
 
 import {
     convertCanvasToDataURL,
+    extractBase64PartFromDataURL,
     extractMimetypeFromDataURL,
 } from "@web/core/utils/image_processing";
 import { pick } from "@web/core/utils/objects";
@@ -624,7 +625,7 @@ export function createDataURL(blob) {
  */
 export function getDataURLBinarySize(dataURL) {
     // Every 4 bytes of base64 represent 3 bytes.
-    return dataURL.split(',')[1].length / 4 * 3;
+    return (extractBase64PartFromDataURL(dataURL).length / 4) * 3;
 }
 
 export const removeOnImageChangeAttrs = [...cropperDataFields, ...modifierFields];

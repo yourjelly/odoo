@@ -1,6 +1,10 @@
 /** @odoo-module **/
 
 import { uniqueId } from '@web/core/utils/functions';
+import {
+    convertCanvasToDataURL,
+    extractBase64PartFromDataURL,
+} from "@web/core/utils/image_processing";
 import { renderToElement } from "@web/core/utils/render";
 import { getDataURLFromFile } from "@web/core/utils/urls";
 import Dialog from '@web/legacy/js/core/dialog';
@@ -190,7 +194,7 @@ var SlideUploadDialog = Dialog.extend({
         var canvas = this.$('#data_canvas')[0];
         if (this.file.type === 'application/pdf') {
             Object.assign(values, {
-                'image_1920': canvas.toDataURL().split(',')[1],
+                image_1920: convertCanvasToDataURL(canvas).base64Part,
                 'slide_category': 'document',
                 'binary_content': this.file.data
             });
@@ -418,7 +422,7 @@ var SlideUploadDialog = Dialog.extend({
     _svgToPNG: async function () {
         const imgEl = this.$el.find('img#slide-image')[0];
         const png = await wUtils.svgToPNG(imgEl);
-        return png.split(',')[1];
+        return extractBase64PartFromDataURL(png);
     },
 
     /**

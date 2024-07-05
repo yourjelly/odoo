@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
+import { extractBase64PartFromDataURL } from "@web/core/utils/image_processing";
 import { getDataURLFromFile } from "@web/core/utils/urls";
 import { checkFileSize } from "@web/core/utils/files";
 
@@ -29,7 +30,7 @@ export class FileUploader extends Component {
                 return null;
             }
             this.state.isUploading = true;
-            const data = await getDataURLFromFile(file);
+            const dataURL = await getDataURLFromFile(file);
             if (!file.size) {
                 console.warn(`Error while uploading file : ${file.name}`);
                 this.notification.add(_t("There was a problem while uploading your file."), {
@@ -41,7 +42,7 @@ export class FileUploader extends Component {
                     name: file.name,
                     size: file.size,
                     type: file.type,
-                    data: data.split(",")[1],
+                    data: extractBase64PartFromDataURL(dataURL),
                     objectUrl: file.type === "application/pdf" ? URL.createObjectURL(file) : null,
                 });
             } finally {

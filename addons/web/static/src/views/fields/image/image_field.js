@@ -185,15 +185,16 @@ export class ImageField extends Component {
                     ],
                 ]);
                 referenceId = referenceId || resizedId; // Keep track of original.
+                const altImageData = convertCanvasToDataURL(canvas, "image/jpeg", 0.75);
                 await this.orm.call("ir.attachment", "create_unique", [
                     [
                         {
-                            name: `${fileBasename}.jpg`,
+                            name: `${fileBasename}.${altImageData.defaultFileExtension}`,
                             description: "format: jpeg",
-                            datas: canvas.toDataURL("image/jpeg", 0.75).split(",")[1],
+                            datas: altImageData.base64Part,
                             res_id: resizedId,
                             res_model: "ir.attachment",
-                            mimetype: "image/jpeg",
+                            mimetype: altImageData.mimetype,
                         },
                     ],
                 ]);

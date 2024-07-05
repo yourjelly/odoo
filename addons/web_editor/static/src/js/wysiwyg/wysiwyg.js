@@ -20,7 +20,12 @@ import weUtils from "@web_editor/js/common/utils";
 import { isSelectionInSelectors, peek } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
 import { PeerToPeer, RequestError } from "@web_editor/js/wysiwyg/PeerToPeer";
 import { uniqueId } from "@web/core/utils/functions";
-import { canExportCanvasAsWebp, convertCanvasToDataURL } from "@web/core/utils/image_processing";
+import {
+    canExportCanvasAsWebp,
+    convertCanvasToDataURL,
+    extractBase64PartFromDataURL,
+    extractMimetypeFromDataURL,
+} from "@web/core/utils/image_processing";
 import { groupBy } from "@web/core/utils/arrays";
 import { debounce } from "@web/core/utils/timing";
 import { registry } from "@web/core/registry";
@@ -3504,11 +3509,12 @@ export class Wysiwyg extends Component {
         // elsewhere if the snippet was duplicated or was saved as a custom one.
         let altData = undefined;
         const isImageField = !!el.closest("[data-oe-type=image]");
+        const dataURL = isBackground ? el.dataset.bgSrc : el.getAttribute("src");
         if (el.dataset.mimetype === 'image/webp' && isImageField) {
             // Generate alternate sizes and format for reports.
             altData = {};
             const image = document.createElement('img');
-            image.src = isBackground ? el.dataset.bgSrc : el.getAttribute('src');
+            image.src = dataURL;
             await new Promise(resolve => image.addEventListener('load', resolve));
             const originalSize = Math.max(image.width, image.height);
             const smallerSizes = [1024, 512, 256, 128].filter(size => size < originalSize);
@@ -3542,9 +3548,9 @@ export class Wysiwyg extends Component {
             {
                 res_model: resModel,
                 res_id: parseInt(resId),
-                data: (isBackground ? el.dataset.bgSrc : el.getAttribute('src')).split(',')[1],
+                data: extractBase64PartFromDataURL(dataURL),
                 alt_data: altData,
-                mimetype: (isBackground ? el.dataset.mimetype : el.getAttribute('src').split(":")[1].split(";")[0]),
+                mimetype: isBackground ? el.dataset.mimetype : extractMimetypeFromDataURL(dataURL),
                 name: (el.dataset.fileName ? el.dataset.fileName : null),
             },
         );

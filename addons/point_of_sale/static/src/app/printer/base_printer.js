@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { htmlToCanvas } from "@point_of_sale/app/printer/render_service";
+import { convertCanvasToDataURL } from "@web/core/utils/image_processing";
 /**
  * Implements basic printer functions.
  */
@@ -60,7 +61,7 @@ export class BasePrinter {
      * @param {DOMElement} canvas
      */
     processCanvas(canvas) {
-        return canvas.toDataURL("image/jpeg").replace("data:image/jpeg;base64,", "");
+        return convertCanvasToDataURL(canvas, "image/jpeg").base64Part;
     }
 
     /**

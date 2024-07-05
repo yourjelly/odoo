@@ -12,6 +12,10 @@ import {
     markup,
 } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import {
+    extractMimetypeFromDataURL,
+    getMimetypeForFileExtension,
+} from "@web/core/utils/image_processing";
 import dom from "@web/legacy/js/core/dom";
 
 export class ImageCrop extends Component {
@@ -122,11 +126,11 @@ export class ImageCrop extends Component {
         const data = {...this.media.dataset};
         this.initialSrc = src;
         this.aspectRatio = data.aspectRatio || "0/0";
-        const mimetype = data.mimetype ||
-                src.endsWith('.png') ? 'image/png' :
-                src.endsWith('.webp') ? 'image/webp' :
-                'image/jpeg';
-        this.mimetype = this.props.mimetype || mimetype;
+        this.mimetype =
+            this.props.mimetype ||
+            data.mimetype ||
+            (/^data:.+;base64,.*/.test(src) && extractMimetypeFromDataURL(src)) ||
+            getMimetypeForFileExtension(src.split(".").at(-1));
 
         await loadImageInfo(this.media, this.props.rpc);
         const isIllustration = /^\/web_editor\/shape\/illustration\//.test(this.media.dataset.originalSrc);

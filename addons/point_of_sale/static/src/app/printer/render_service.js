@@ -3,6 +3,7 @@
 
 import { registry } from "@web/core/registry";
 import { Component, onRendered, reactive, useRef, xml } from "@odoo/owl";
+import { convertCanvasToDataURL } from "@web/core/utils/image_processing";
 
 export class RenderContainer extends Component {
     static props = ["comp", "onRendered"];
@@ -61,7 +62,7 @@ const renderService = {
         };
         const toJpeg = async (component, props, options) => {
             const canvas = await toCanvas(component, props, options);
-            return canvas.toDataURL("image/jpeg").replace("data:image/jpeg;base64,", "");
+            return convertCanvasToDataURL(canvas, "image/jpeg").base64Part;
         };
         const whenMounted = async ({ el, container, callback }) => {
             container ||= document.querySelector(".render-container");
