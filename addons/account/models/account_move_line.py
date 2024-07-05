@@ -1738,17 +1738,38 @@ class AccountMoveLine(models.Model):
         return vals_list
 
     def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None, flush: bool = True) -> SQL:
-        if fname != 'payment_date':
-            return super()._field_to_sql(alias, fname, query, flush)
-        return SQL("""
-            CASE
-                 WHEN %(discount_date)s >= %(today)s THEN %(discount_date)s
-                 ELSE %(date_maturity)s
-            END""",
-            today=fields.Date.context_today(self),
-            discount_date=super()._field_to_sql(alias, "discount_date", query, flush),
-            date_maturity=super()._field_to_sql(alias, "date_maturity", query, flush),
-        )
+        if fname == 'payment_date':
+            return SQL("""
+                CASE
+                     WHEN %(discount_date)s >= %(today)s THEN %(discount_date)s
+                     ELSE %(date_maturity)s
+                END""",
+                today=fields.Date.context_today(self),
+                discount_date=super()._field_to_sql(alias, "discount_date", query, flush),
+                date_maturity=super()._field_to_sql(alias, "date_maturity", query, flush),
+            )
+
+        if fname == 'account_id' and len(self.env.companies) > 1:
+            query.add_join(
+                'LEFT JOIN',
+                'account_account__consolidation_account_property',
+                'ir_property',
+                SQL(
+                    """
+                        account_account__consolidation_account_property.res_id = 'account.account,'||account_move_line.account_id
+                        AND account_account__consolidation_account_property.company_id = %s
+                    """,
+                    self.env.company.id
+                ),
+            )
+            return SQL("""
+                COALESCE(
+                    CAST(REGEXP_REPLACE(account_account__consolidation_account_property.value_reference, 'account.account,', '') AS INTEGER),
+                    account_move_line.account_id
+                )
+            """)
+
+        return super()._field_to_sql(alias, fname, query, flush)
 
     def _search_panel_domain_image(self, field_name, domain, set_count=False, limit=False):
         if field_name != 'account_root_id' or set_count:

@@ -76,13 +76,23 @@ class AccountInvoiceReport(models.Model):
 
     @api.model
     def _select(self) -> SQL:
+        if len(self.env.companies) > 1:
+            account_select = SQL("""
+                COALESCE(
+                    CAST(REGEXP_REPLACE(account_account__consolidation_account_property.value_reference, 'account.account,', '') AS INTEGER),
+                    line.account_id
+                )
+            """)
+        else:
+            account_select = SQL('line.account_id')
+
         return SQL(
             '''
             SELECT
                 line.id,
                 line.move_id,
                 line.product_id,
-                line.account_id,
+                %(account_select)s AS account_id,
                 line.journal_id,
                 line.company_id,
                 line.company_currency_id,
@@ -121,10 +131,23 @@ class AccountInvoiceReport(models.Model):
                 COALESCE(partner.country_id, commercial_partner.country_id) AS country_id,
                 line.currency_id                                            AS currency_id
             ''',
+            account_select=account_select,
         )
 
     @api.model
     def _from(self) -> SQL:
+        if len(self.env.companies) > 1:
+            consolidation_join = SQL(
+                """
+                    LEFT JOIN ir_property account_account__consolidation_account_property
+                        ON account_account__consolidation_account_property.res_id = 'account.account,'||line.account_id
+                        AND account_account__consolidation_account_property.company_id = %s
+                """,
+                self.env.company.id
+            )
+        else:
+            consolidation_join = SQL()
+
         return SQL(
             '''
             FROM account_move_line line
@@ -141,8 +164,10 @@ class AccountInvoiceReport(models.Model):
                     AND product_standard_price.name = 'standard_price'
                     AND product_standard_price.company_id = line.company_id
                 JOIN %(currency_table)s ON currency_table.company_id = line.company_id
+                %(consolidation_join)s
             ''',
             currency_table=self.env['res.currency']._get_query_currency_table(self.env.companies.ids, fields.Date.today()),
+            consolidation_join=consolidation_join,
         )
 
     @api.model

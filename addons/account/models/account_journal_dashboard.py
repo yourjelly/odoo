@@ -541,7 +541,7 @@ class account_journal(models.Model):
                 SQL("SUM(account_move_line.amount_residual) AS amount_total_company"),
                 SQL("COUNT(*)"),
             )
-            query += " GROUP BY company_id, journal_id, late"
+            query += " GROUP BY account_move_line.company_id, journal_id, late"
             self.env.cr.execute(query, params)
             query_result = group_by_journal(self.env.cr.dictfetchall())
             for journal in journals:

@@ -129,6 +129,8 @@ class AccountAccount(models.Model):
                                help="If set, this account will belong to Non Trade Receivable/Payable in reports and filters.\n"
                                     "If not, this account will belong to Trade Receivable/Payable in reports and filters.")
 
+    consolidation_account_id = fields.Many2one(string="Consolidation Account", comodel_name='account.account', company_dependent=True)
+
     def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None, flush: bool = True) -> SQL:
         if fname == 'internal_group':
             return SQL("split_part(account_account.account_type, '_', 1)", to_flush=self._fields['account_type'])
@@ -343,6 +345,12 @@ class AccountAccount(models.Model):
 
         if self._cr.fetchone():
             raise ValidationError(_("You cannot change the type of an account set as Bank Account on a journal to Receivable or Payable."))
+
+    @api.constrains('consolidation_account_id', 'account_type', 'currency_id')
+    def _check_consolidation_account_id(self):
+        for account in self:
+            if account.consolidation_account_id and (account.consolidation_account_id.account_type != account.account_type or account.consolidation_account_id.currency_id != account.currency_id):
+                raise ValidationError(_("The consolidation account's type and currency must match the one of the account."))
 
     @api.depends('code')
     def _compute_account_root(self):
