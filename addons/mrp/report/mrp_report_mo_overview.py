@@ -658,6 +658,8 @@ class ReportMoOverview(models.AbstractModel):
             some_unavailable = False
             some_estimated = False
             for component in components:
+                if 'receipt' not in component['summary']:
+                    continue
                 if component['summary']['receipt']['date']:
                     max_date_start = max(max_date_start, component['summary']['receipt']['date'])
                 all_available = all_available and component['summary']['receipt']['type'] == 'available'
