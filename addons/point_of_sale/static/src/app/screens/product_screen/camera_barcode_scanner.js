@@ -1,13 +1,7 @@
-import { xml } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { BarcodeDialog } from "@web/webclient/barcode/barcode_scanner";
+import { BarcodeVideoScanner } from "@web/webclient/barcode/barcode_scanner";
 
-export class CameraBarcodeScanner extends BarcodeDialog {
-    static template = xml`
-        <CropOverlay onResize.bind="this.onResize" isReady="state.isReady">
-            <video t-ref="videoPreview" muted="true" autoplay="true" playsinline="true" class="w-100 h-100"/>
-        </CropOverlay>
-    `;
+export class CameraBarcodeScanner extends BarcodeVideoScanner {
     static props = [];
     setup() {
         super.setup();

@@ -10,10 +10,9 @@ import { CropOverlay } from "./crop_overlay";
 import { Component, onMounted, onWillStart, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 
-export class BarcodeDialog extends Component {
-    static template = "web.BarcodeDialog";
+export class BarcodeVideoScanner extends Component {
+    static template = "web.BarcodeVideoScanner";
     static components = {
-        Dialog,
         CropOverlay,
     };
     static props = ["facingMode", "close", "onResult", "onError"];
@@ -119,26 +118,6 @@ export class BarcodeDialog extends Component {
     }
 
     /**
-     * Detection success handler
-     *
-     * @param {string} result found code
-     */
-    onResult(result) {
-        this.props.close();
-        this.props.onResult(result);
-    }
-
-    /**
-     * Detection error handler
-     *
-     * @param {Error} error
-     */
-    onError(error) {
-        this.props.close();
-        this.props.onError(error);
-    }
-
-    /**
      * Attempt to detect codes in the current camera preview's frame
      */
     async detectCode() {
@@ -156,11 +135,11 @@ export class BarcodeDialog extends Component {
                         continue;
                     }
                 }
-                this.onResult(code.rawValue);
+                this.props.onResult(code.rawValue);
                 break;
             }
         } catch (err) {
-            this.onError(err);
+            this.props.onError(err);
         }
     }
 
@@ -174,6 +153,39 @@ export class BarcodeDialog extends Component {
             }
         }
         return newObject;
+    }
+}
+
+export class BarcodeDialog extends Component {
+    static template = "web.BarcodeDialog";
+    static components = {
+        BarcodeVideoScanner,
+        Dialog,
+    };
+    static props = ["facingMode", "close", "onResult", "onError"];
+
+    setup() {
+        this.barcodeScannerSupported = isBarcodeScannerSupported();
+    }
+
+    /**
+     * Detection success handler
+     *
+     * @param {string} result found code
+     */
+    onResult(result) {
+        this.props.close();
+        this.props.onResult(result);
+    }
+
+    /**
+     * Detection error handler
+     *
+     * @param {Error} error
+     */
+    onError(error) {
+        this.props.close();
+        this.props.onError(error);
     }
 }
 

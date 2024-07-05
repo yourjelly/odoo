@@ -2,9 +2,20 @@
 <templates xml:space="preserve">
     <t t-name="web.BarcodeDialog">
         <Dialog title="this.title" fullscreen="true" footer="false" contentClass="'o-barcode-modal'">
-            <CropOverlay onResize.bind="this.onResize" isReady="state.isReady">
-                <video t-ref="videoPreview" muted="true" autoplay="true" playsinline="true" class="w-100 h-100"/>
-            </CropOverlay>
+            <BarcodeVideoScanner t-if="barcodeScannerSupported" t-props="props"
+                                 onError.bind="onError" onResult.bind="onResult"/>
+            <div t-else="" t-ref="videoPreview"
+                 class="h-100 d-flex flex-column justify-content-center align-items-center gap-1">
+                <i class="fa fa-2x fa-camera text-muted"></i>
+                <strong>Unable to access camera</strong>
+                <span class="text-muted">Check your browser permissions</span>
+            </div>
         </Dialog>
+    </t>
+
+    <t t-name="web.BarcodeVideoScanner">
+        <CropOverlay onResize.bind="this.onResize" isReady="state.isReady">
+            <video t-ref="videoPreview" muted="true" autoplay="true" playsinline="true" class="w-100 h-100"/>
+        </CropOverlay>
     </t>
 </templates>
