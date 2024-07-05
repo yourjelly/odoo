@@ -30,8 +30,4 @@ export class DiscussNotificationSettings extends Component {
         this.store.settings.setMuteDuration(parseInt(ev.target.value));
         this.state.selectedDuration = parseInt(ev.target.value);
     }
-
-    onChangeCustomNotifications(value) {
-        this.store.settings.setChannelNotifications(value);
-    }
 }

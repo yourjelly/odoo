@@ -3,6 +3,7 @@ import { sprintf } from "@web/core/utils/strings";
 import { browser } from "@web/core/browser/browser";
 import { Record } from "./record";
 import { debounce } from "@web/core/utils/timing";
+import { rpc } from "@web/core/network/rpc";
 
 export class Settings extends Record {
     id;
@@ -127,27 +128,27 @@ export class Settings extends Record {
     }
 
     /**
-     * @param {string} notif
+     * @param {string} custom_notifications
+     * @param {import("models").Thread} thread
      */
-    setChannelNotifications(notif) {
-        this.store.env.services.orm.call(
-            "res.users.settings",
-            "set_res_users_settings",
-            [[this.id]],
-            {
-                new_settings: {
-                    channel_notifications: notif === "mentions" ? false : notif,
-                },
-            }
-        );
+    async setCustomNotifications(custom_notifications, thread = undefined) {
+        return rpc("/discuss/settings/custom_notifications", {
+            custom_notifications:
+                !thread && custom_notifications === "mentions" ? false : custom_notifications,
+            res_users_settings_id: thread ? undefined : this.id,
+            channel_id: thread?.id,
+        });
     }
 
     /**
      * @param {integer|false} minutes
+     * @param {import("models").Thread} thread
      */
-    setMuteDuration(minutes) {
-        this.store.env.services.orm.call("res.users.settings", "mute", [[this.id]], {
-            minutes: minutes,
+    async setMuteDuration(minutes, thread = undefined) {
+        return rpc("/discuss/settings/mute", {
+            minutes,
+            res_users_settings_id: thread ? undefined : this.id,
+            channel_id: thread?.id,
         });
     }
 
