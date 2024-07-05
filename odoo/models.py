@@ -5375,6 +5375,8 @@ class BaseModel(metaclass=MetaModel):
         sql_field = self._field_to_sql(alias, field_name, query)
         if field.type == 'boolean':
             sql_field = SQL("COALESCE(%s, FALSE)", sql_field)
+        elif field.type in ('integer', 'float', 'monetary') and field.name != 'id':
+            sql_field = SQL("COALESCE(%s, 0)", sql_field)
 
         return SQL("%s %s %s", sql_field, direction, nulls)
 

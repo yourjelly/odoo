@@ -1997,6 +1997,11 @@ class EmptyInt(models.Model):
 
     number = fields.Integer('Number')
 
+class EmptyFloat(models.Model):
+    _name = 'test_new_api.empty_float'
+    _description = 'A model to test empty float'
+
+    number = fields.Float('Number')
 
 class Team(models.Model):
     _name = 'test_new_api.team'

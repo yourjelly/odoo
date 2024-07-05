@@ -1136,3 +1136,27 @@ class TestDatePartNumber(TransactionCase):
 
         result = self.env["test_new_api.person.account"].search([('person_id.birthday.month_number', '=', 2)])
         self.assertEqual(result, account)
+
+    def test_order_by_empty_int(self):
+        EmptyInt = self.env['test_new_api.empty_int']
+        records = EmptyInt.create([
+            {'number': 42},  # stored as 42
+            {'number': 0},  # stored as 0
+            {'number': -1},  # stored as -1
+            {'number': False},  # stored as 0
+            {},  # stored as NULL
+        ])
+        result = EmptyInt.search([], order="number").mapped("number")
+        self.assertEqual(result, [-1, 0, 0, 0, 42])
+
+    def test_order_by_empty_float(self):
+        EmptyFloat = self.env['test_new_api.empty_float']
+        records = EmptyFloat.create([
+            {'number': 42},  # stored as 42
+            {'number': 0},  # stored as 0
+            {'number': -1},  # stored as -1
+            {'number': False},  # stored as 0
+            {},  # stored as NULL
+        ])
+        result = EmptyFloat.search([], order="number").mapped("number")
+        self.assertEqual(result, [-1.0, 0.0, 0.0, 0.0, 42.0])
