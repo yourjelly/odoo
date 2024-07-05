@@ -52,13 +52,16 @@ export class Chatbot extends Record {
     }
 
     async triggerNextStep() {
+        console.log("\n\n fonction triggerNextStep")
         if (this.currentStep) {
             await this._simulateTyping();
         }
+        console.log("(début)  this.currentStep", this.currentStep)
         await this._goToNextStep();
         if (!this.currentStep || this.currentStep.completed || !this.thread) {
             return;
         }
+        console.log("(milieu)  this.currentStep", this.currentStep)
         const { Message: messages = [] } = this.store.insert(this.currentStep.data, { html: true });
         this.currentStep.message =
             messages[0] ??
@@ -72,6 +75,9 @@ export class Chatbot extends Record {
                 { html: true }
             );
         this.thread.messages.add(this.currentStep.message);
+        console.log("\n\n\n\nEn théorie celui là fonctionne bien : \n\n\n\n")
+        console.log("(fin) this.currentStep", this.currentStep)
+        console.log("this.currentStep?.scriptStep?.id", this.currentStep?.scriptStep?.id)
     }
 
     get completed() {
@@ -138,12 +144,42 @@ export class Chatbot extends Record {
             return true;
         }
         const answer = this.currentStep.answers.find(({ label }) => message.body.includes(label));
+        
+        if (answer == undefined){
+            console.log("\n\n\n\n\n\n\n BUG DETECTE : answer == undefined")
+            console.log("D'après mes observations, je crois que message.body est à jour mais que currentStep est en retard d'une question")
+            console.log("En effet, currentStep est passé à la bonne étape après le click sur la réponse précédente, puis est revenu")
+            console.log("à la question d'avant en soum soum avant d'arriver à la réponse actuelle")
+
+            console.log("affichage des données utiles :")
+            console.log("this.currentStep", this.currentStep)
+            console.log("this.currentStep.answers.forEach((x) => console.log(x));")
+            this.currentStep.answers.forEach((x) => console.log(x)); // x correspond à label
+
+            console.log("\n\n\n\n12345678 J'appelle le debugger :")
+            debugger
+        }
+        if (this.currentStep.message == undefined){
+            console.log("\n\n\n\n\n\n\nBUG DETECTE : this.currentStep.message == undefined")
+            
+            console.log("affichage des données utiles :")
+            console.log('answer', answer)
+            console.log("this.currentStep", this.currentStep)
+            console.log("this.currentStep?.message", this.currentStep?.message)
+            console.log("this.currentStep.answers.forEach((x) => console.log(x));")
+            this.currentStep.answers.forEach((x) => console.log(x)); // x correspond à label
+
+            console.log("\n\n\n\n12345678 J'appelle le debugger :")
+            debugger
+        }
+
         this.currentStep.selectedAnswer = answer;
         await rpc("/chatbot/answer/save", {
             channel_id: this.thread.id,
             message_id: this.currentStep.message.id,
             selected_answer_id: answer.id,
         });
+        console.log("En cas de bug, ce label n'apparaîtra jamais")
         if (!answer.redirectLink) {
             return true;
         }
