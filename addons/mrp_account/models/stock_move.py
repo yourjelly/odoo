@@ -116,3 +116,10 @@ class StockMove(models.Model):
                 acc_src, acc_dest, journal_id, qty, description, svl_id, -cost
             ))
         return am_vals_list
+
+    def _action_done(self, cancel_backorder=False):
+        super()._action_done(cancel_backorder)
+        # We only need the WIP finalization SVLs to create the accounting entries.
+        # The value of this stock was already removed at the time of the original WIP move,
+        # so we delete the SVL here to avoid moving it out twice and ending up with an incorrect valuation.
+        self.filtered(lambda move: move._is_wip()).stock_valuation_layer_ids.sudo().unlink()

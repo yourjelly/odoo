@@ -84,17 +84,21 @@ class MrpProduction(models.Model):
         """Set a price unit on the finished move according to `consumed_moves`.
         """
         super(MrpProduction, self)._cal_price(consumed_moves)
-        self._post_labour()
         finished_move = self.move_finished_ids.filtered(
             lambda x: x.product_id == self.product_id and x.state not in ('done', 'cancel') and x.quantity > 0)
         if finished_move:
             finished_move.ensure_one()
-            work_center_cost = sum(self.workorder_ids.time_ids.account_move_line_id.mapped('balance'))
+            byproduct_moves = self.move_byproduct_ids.filtered(lambda m: m.state not in ('done', 'cancel') and m.quantity > 0)
+            if (finished_move.product_id.valuation == 'real_time' and finished_move.product_id.cost_method in ('fifo', 'average')
+                    and all((p.valuation == 'real_time' and p.cost_method in ('fifo', 'average')) for p in byproduct_moves.product_id)):
+                self._post_labour()
+                work_center_cost = sum(self.workorder_ids.time_ids.account_move_line_id.mapped('balance'))
+            else:
+                work_center_cost = sum(wo._cal_cost() for wo in self.workorder_ids)
             quantity = finished_move.product_uom._compute_quantity(
                 finished_move.quantity, finished_move.product_id.uom_id)
             extra_cost = self.extra_cost * quantity
             total_cost = - sum(consumed_moves.sudo().stock_valuation_layer_ids.mapped('value')) + work_center_cost + extra_cost
-            byproduct_moves = self.move_byproduct_ids.filtered(lambda m: m.state not in ('done', 'cancel') and m.quantity > 0)
             byproduct_cost_share = 0
             for byproduct in byproduct_moves:
                 if byproduct.cost_share == 0:
