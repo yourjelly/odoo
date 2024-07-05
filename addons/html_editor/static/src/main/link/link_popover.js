@@ -213,6 +213,9 @@ export class LinkPopover extends Component {
             this.state.urlTitle = metadata?.og_title || this.state.url;
             this.state.urlDescription = metadata?.og_description || "";
             this.state.imgSrc = metadata?.og_image || "";
+            if (metadata?.og_image && this.state.label && this.state.urlTitle === this.state.url) {
+                this.state.urlTitle = this.state.label;
+            }
         } else {
             // fetch the metadata using jsonify
             const jsonify_url =
