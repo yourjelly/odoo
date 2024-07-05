@@ -7,6 +7,7 @@ import weUtils from "@web_editor/js/common/utils";
 import "@website/js/editor/snippets.options";
 import { unique } from "@web/core/utils/arrays";
 import { _t } from "@web/core/l10n/translation";
+import { memoize } from "@web/core/utils/functions";
 import { renderToElement } from "@web/core/utils/render";
 import { formatDate, formatDateTime } from "@web/core/l10n/dates";
 import wUtils from '@website/js/utils';
@@ -955,6 +956,9 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
     init: function () {
         this._super.apply(this, arguments);
         this.rerender = true;
+        this._getVisibilityConditionCachedRecords = memoize((...args) => {
+            return this.orm.searchRead(...args);
+        });
     },
     /**
      * @override
@@ -1297,8 +1301,16 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                 }
                 return (['text', 'email', 'tel', 'url', 'search', 'password', 'number'].includes(dependencyEl.type)
                     || dependencyEl.nodeName === 'TEXTAREA') && !['set', '!set'].includes(this.$target[0].dataset.visibilityComparator);
-            case 'hidden_condition_no_text_opt':
-                return dependencyEl && (dependencyEl.type === 'checkbox' || dependencyEl.type === 'radio' || dependencyEl.nodeName === 'SELECT');
+            case "hidden_condition_no_text_opt": {
+                const containerEl = dependencyEl?.closest(".s_website_form_field");
+                const fieldType = containerEl?.dataset.type;
+                return (
+                    dependencyEl &&
+                    (["checkbox", "radio"].includes(dependencyEl.type) ||
+                        dependencyEl.nodeName === "SELECT" ||
+                        fieldType === "record")
+                );
+            }
             case 'hidden_condition_num_opt':
                 return dependencyEl && dependencyEl.type === 'number';
             case 'hidden_condition_text_opt':
@@ -1426,7 +1438,9 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         // Update available visibility dependencies
         const selectDependencyEl = uiFragment.querySelector('we-select[data-name="hidden_condition_opt"]');
         const existingDependencyNames = [];
-        for (const el of this.formEl.querySelectorAll('.s_website_form_field:not(.s_website_form_dnone)')) {
+        for (const el of this.formEl.querySelectorAll(
+            ".s_website_form_field:not(.s_website_form_dnone), .s_website_form_field[data-type]"
+        )) {
             const inputEl = el.querySelector('.s_website_form_input');
             if (el.querySelector('.s_website_form_label_content') && inputEl && inputEl.name
                     && inputEl.name !== this.$target[0].querySelector('.s_website_form_input').name
@@ -1442,7 +1456,13 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         const comparator = this.$target[0].dataset.visibilityComparator;
         const dependencyEl = this._getDependencyEl();
         if (dependencyEl) {
-            if ((['radio', 'checkbox'].includes(dependencyEl.type) || dependencyEl.nodeName === 'SELECT')) {
+            const containerEl = dependencyEl.closest(".s_website_form_field");
+            const fieldType = containerEl?.dataset.type;
+            if (
+                ["radio", "checkbox"].includes(dependencyEl.type) ||
+                dependencyEl.nodeName === "SELECT" ||
+                fieldType === "record"
+            ) {
                 // Update available visibility options
                 const selectOptEl = uiFragment.querySelectorAll('we-select[data-name="hidden_condition_no_text_opt"]')[1];
                 const inputContainerEl = this.$target[0];
@@ -1456,6 +1476,24 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                     }
                     if (!inputContainerEl.dataset.visibilityCondition) {
                         inputContainerEl.dataset.visibilityCondition = dependencyEl.querySelector('option').value;
+                    }
+                } else if (fieldType === "record") {
+                    const model = containerEl.dataset.model;
+                    const idField = containerEl.dataset.idField || "id";
+                    const displayNameField = containerEl.dataset.displayNameField || "display_name";
+                    const records = await this._getVisibilityConditionCachedRecords(
+                        model,
+                        [],
+                        [idField, displayNameField]
+                    );
+                    for (const record of records) {
+                        const button = document.createElement("we-button");
+                        button.textContent = record[displayNameField];
+                        button.dataset.selectDataAttribute = record[idField];
+                        selectOptEl.append(button);
+                    }
+                    if (!inputContainerEl.dataset.visibilityCondition) {
+                        inputContainerEl.dataset.visibilityCondition = records[0]?.[idField];
                     }
                 } else { // DependecyEl is a radio or a checkbox
                     const dependencyContainerEl = dependencyEl.closest('.s_website_form_field');
