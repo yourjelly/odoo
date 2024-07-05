@@ -76,21 +76,19 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
 
         self._send_rating(channel, self.visitor, 5, "This deboulonnage was fine but not topitop.")
 
-        channel.with_context(is_visitor=True).action_unfollow()
+        self.opener.post(url=self.leave_session_url, json={'params': {'channel_id': channel.id}})
 
         self.assertEqual(len(channel.message_ids), 4)
-        self.assertEqual(channel.message_ids[0].author_id, self.env.ref('base.partner_root'), "Odoobot must be the sender of the 'left the conversation' message.")
-        self.assertIn(f"Visitor #{channel.livechat_visitor_id.id}", channel.message_ids[0].body)
+        self.assertTrue(bool(channel.message_ids[0].author_guest_id), "Guest Visitor must be the sender of the 'left the channel' message.")
         self.assertEqual(channel.livechat_active, False, "The livechat session must be inactive as the visitor sent his feedback.")
 
     def test_basic_flow_without_rating(self):
         channel = self._common_basic_flow()
 
         # left the conversation
-        channel.with_context(is_visitor=True).action_unfollow()
+        self.opener.post(url=self.leave_session_url, json={'params': {'channel_id': channel.id}})
         self.assertEqual(len(channel.message_ids), 3)
-        self.assertEqual(channel.message_ids[0].author_id, self.env.ref('base.partner_root'), "Odoobot must be the author the message.")
-        self.assertIn(f"Visitor #{channel.livechat_visitor_id.id}", channel.message_ids[0].body)
+        self.assertTrue(bool(channel.message_ids[0].author_guest_id), "Guest Visitor must be the sender of the 'left the channel' message.")
         self.assertEqual(channel.livechat_active, False, "The livechat session must be inactive since visitor left the conversation.")
 
     def test_visitor_info_access_rights(self):
@@ -113,8 +111,8 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
         # Open a new live chat
         res = self.opener.post(url=self.open_chat_url, json=self.open_chat_params)
         self.assertEqual(res.status_code, 200)
-
-        channel = self.env['discuss.channel'].search([('livechat_visitor_id', '=', self.visitor.id), ('livechat_active', '=', True)], limit=1)
+        # sudo - discuss.channel: public user can access channel
+        channel = self.env['discuss.channel'].sudo().search([('livechat_visitor_id', '=', self.visitor.id), ('livechat_active', '=', True)], limit=1)
 
         # Check Channel and Visitor naming
         self.assertEqual(self.visitor.display_name, "%s #%s" % (_("Website Visitor"), self.visitor.id))

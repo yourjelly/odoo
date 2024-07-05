@@ -91,6 +91,6 @@ class TestLivechatCommon(TransactionCaseWithUserDemo):
             'reason': reason,
         }})
         res_model_id = self.env['ir.model'].sudo().search([('model', '=', channel._name)], limit=1).id
-        rating = self.env['rating.rating'].search([('res_id', '=', channel.id), ('res_model_id', '=', res_model_id)])
+        rating = self.env['rating.rating'].sudo().search([('res_id', '=', channel.id), ('res_model_id', '=', res_model_id)])
         self.assertEqual(rating.rating, rating_value, "The rating is not correct.")
         self.assertEqual(len(channel.message_ids), channel_messages_count + 1)
