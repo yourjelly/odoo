@@ -379,6 +379,7 @@ class Form:
             'active_ids': self._record.ids,
             'active_model': self._record._name,
             'current_date': date.today().strftime("%Y-%m-%d"),
+            'allowed_company_ids': self._record.env.companies.ids,
             **self._env.context,
         }
         if values is None:
