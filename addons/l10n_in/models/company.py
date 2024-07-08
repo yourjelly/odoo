@@ -16,6 +16,17 @@ class ResCompany(models.Model):
         store=True,
         readonly=False,
     )
+    l10n_in_pan = fields.Char(
+        string="PAN",
+        help="PAN enables the department to link all transactions of the person with the department.\n"
+             "These transactions include taxpayments, TDS/TCS credits, returns of income/wealth/gift/FBT,"
+             " specified transactions, correspondence, and so on.\n"
+             "Thus, PAN acts as an identifier for the person with the tax department."
+    )
+    module_l10n_in_tds = fields.Boolean(string="TDS")
+    module_l10n_in_tcs = fields.Boolean(string="TCS")
+    l10n_in_tan = fields.Char(string="TAN", help="Tax Deduction and Collection Account Number")
+    l10n_in_gst = fields.Boolean(string="GST")
 
     @api.depends('vat')
     def _compute_l10n_in_hsn_code_digit(self):

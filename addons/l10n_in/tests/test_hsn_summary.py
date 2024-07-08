@@ -34,6 +34,9 @@ class TestHSNsummary(TestTaxCommon):
         cls.cess_5_plus_1591 = cls.env['account.chart.template'].ref('cess_5_plus_1591_sale')
         cls.exempt_0 = cls.env['account.chart.template'].ref('exempt_sale')
 
+        # === Activate Taxes === #
+        cls.env['res.config.settings'].create({'l10n_in_gst': False}).execute()
+
     def _add_test_py_results(self, test):
         params = test['params']
         if params['test'] == 'l10n_in_hsn_summary':

@@ -18,6 +18,7 @@ class AccountChartTemplate(models.AbstractModel):
     def _get_demo_data(self, company=False):
         demo_data = {}
         if company.account_fiscal_country_id.code == "IN":
+            self.env['res.config.settings'].create({'l10n_in_gst': True}).execute()
             if company.state_id:
                 demo_data = {
                     'res.partner.category': self._get_demo_data_res_partner_category(company),
@@ -552,7 +553,6 @@ class AccountChartTemplate(models.AbstractModel):
             }
         else:
             return super()._get_demo_data_attachment(company)
-
 
     @api.model
     def _get_demo_data_mail_message(self, company=False):
