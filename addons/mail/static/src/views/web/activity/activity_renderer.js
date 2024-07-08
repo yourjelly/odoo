@@ -54,9 +54,7 @@ export class ActivityRenderer extends Component {
      * @returns filtered resIds first then the rest.
      */
     get activityResIds() {
-        return [...this.props.activityResIds].sort((a) =>
-            this.activeFilter.resIds.has(a) ? -1 : 0
-        );
+        return [...this.props.activityResIds]
     }
 
     getGroupInfo(activityType) {
