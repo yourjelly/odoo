@@ -59,6 +59,12 @@ class MrpRoutingWorkcenter(models.Model):
                                      domain="[('allow_operation_dependencies', '=', True), ('id', '!=', id), ('bom_id', '=', bom_id)]",
                                      copy=False)
 
+    @api.constrains('bom_id')
+    def _check_awt(self):
+        for routing in self:
+            if routing.bom_id.type == 'phantom':
+                raise ValidationError('Nop')
+
     @api.depends('time_mode', 'time_mode_batch')
     def _compute_time_computed_on(self):
         for operation in self:
