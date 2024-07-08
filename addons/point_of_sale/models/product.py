@@ -74,6 +74,18 @@ class ProductTemplate(models.Model):
             raise UserError(_("Combo products cannot contains variants or attributes"))
         return super()._onchange_type()
 
+    def write(self, vals):
+        if 'detailed_type' in vals and vals.get('detailed_type') == 'combo':
+            self.taxes_id = None
+        return super().write(vals)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if 'detailed_type' in vals and vals.get('detailed_type') == 'combo':
+                vals['taxes_id'] = None
+        return super().create(vals_list)
+
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
