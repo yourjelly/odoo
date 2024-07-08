@@ -10,7 +10,6 @@
                 <field name="user_ids"/>
                 <field name="stage_id" />
                 <field name="is_closed"/>
-                <field name="project_id" />
                 <field name="milestone_id" groups="project.group_project_milestone"/>
                 <field name="partner_id" filter_domain="[('partner_id', 'child_of', self)]"/>
                 <separator/>
@@ -50,8 +49,8 @@
         <field name="res_model">project.task.burndown.chart.report</field>
         <field name="view_mode">graph</field>
         <field name="search_view_id" ref="project_task_burndown_chart_report_view_search"/>
-        <field name="context">{'search_default_project_id': active_id, 'search_default_date': 1, 'search_default_stage': 1, 'search_default_filter_date': 1}</field>
-        <field name="domain">[('project_id', '!=', False)]</field>
+        <field name="context">{'search_default_date': 1, 'search_default_stage': 1, 'search_default_filter_date': 1}</field>
+        <field name="domain">[('project_id', '=', active_id)]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">
                 No data yet!

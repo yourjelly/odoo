@@ -26,18 +26,6 @@ registry.category("web_tour.tours").add('burndown_chart_tour', {
     trigger: '.o_graph_renderer:not(:has(.btn-group[role=toolbar][aria-label="Sort graph"]))',
     run: "click",
 }, {
-    content: 'Remove the project search "Burndown Chart Test"',
-    trigger: '.o_searchview_facet:contains("Burndown Chart Test") .o_facet_remove',
-    run: "click",
-}, {
-    content: 'Search Burndown Chart',
-    trigger: 'input.o_searchview_input',
-    run: `edit Burndown`,
-}, {
-    content: 'Validate search',
-    trigger: '.o_searchview_autocomplete .o_menu_item:contains("Project")',
-    run: "click",
-}, {
     content: 'Remove the group by "Date: Month > Stage"',
     trigger: '.o_searchview_facet:contains("Stage") .o_facet_remove',
     run: "click",
