@@ -229,7 +229,7 @@ class RatingMixin(models.AbstractModel):
         if not rating:
             raise ValueError('Invalid token or rating.')
 
-        rating.write({'rating': rate, 'feedback': feedback, 'consumed': True})
+        rating.write({'rating': rate, 'feedback': feedback, 'consumed': True, 'rated_at': fields.Datetime.now()})
         if isinstance(self, self.env.registry['mail.thread']):
             if subtype_xmlid is None:
                 subtype_id = self._rating_apply_get_default_subtype_id()

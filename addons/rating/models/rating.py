@@ -51,6 +51,7 @@ class Rating(models.Model):
     is_internal = fields.Boolean('Visible Internally Only', readonly=False, related='message_id.is_internal', store=True)
     access_token = fields.Char('Security Token', default=_default_access_token)
     consumed = fields.Boolean(string="Filled Rating")
+    rated_at = fields.Datetime(string="Rated At")
 
     _sql_constraints = [
         ('rating_range', 'check(rating >= 0 and rating <= 5)', 'Rating should be between 0 and 5'),
