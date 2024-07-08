@@ -57,7 +57,7 @@
                                 <div class="o_kanban_record_body">
                                     <field name="picking_properties" widget="properties"/>
                                 </div>
-                                <div class="o_kanban_record_bottom">
+                                <div class="o_kanban_record_bottom small">
                                     <div class="oe_kanban_bottom_left">
                                         <t t-esc="record.partner_id.value"/>
                                         <field name="activity_ids" widget="kanban_activity"/>
