@@ -1,19 +1,34 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+
 from collections import defaultdict
 from datetime import timedelta
 from itertools import groupby
 
 from odoo import SUPERUSER_ID, _, api, fields, models
-from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.exceptions import (
+    AccessError,
+    RedirectWarning,
+    UserError,
+    ValidationError,
+)
 from odoo.fields import Command
 from odoo.http import request
 from odoo.osv import expression
-from odoo.tools import float_is_zero, format_amount, format_date, is_html_empty
+from odoo.tools import (
+    create_index,
+    float_is_zero,
+    format_amount,
+    format_date,
+    is_html_empty,
+    SQL,
+)
 from odoo.tools.mail import html_keep_url
-from odoo.tools.sql import create_index
 
 from odoo.addons.payment import utils as payment_utils
+
+_logger = logging.getLogger(__name__)
 
 INVOICE_STATUS = [
     ('upselling', 'Upselling Opportunity'),
@@ -274,6 +289,7 @@ class SaleOrder(models.Model):
         compute='_compute_amount_undiscounted', digits=0)
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code', string="Country code")
     company_price_include = fields.Selection(related='company_id.account_price_include')
+    duplicated_order_ids = fields.Many2many(comodel_name='sale.order', compute='_compute_duplicated_order_ids')
     expected_date = fields.Datetime(
         string="Expected Date",
         compute='_compute_expected_date', store=False,  # Note: can not be stored since depends on today()
@@ -611,6 +627,56 @@ class SaleOrder(models.Model):
             for line in order.order_line:
                 total += (line.price_subtotal * 100)/(100-line.discount) if line.discount != 100 else (line.price_unit * line.product_uom_qty)
             order.amount_undiscounted = total
+
+    @api.depends('client_order_ref', 'date_order', 'origin', 'partner_id', 'tax_totals')
+    def _compute_duplicated_order_ids(self):
+        order_to_duplicate_orders = self._fetch_duplicate_orders()
+        for order in self:
+            order.duplicated_order_ids = [Command.set(order_to_duplicate_orders.get(order.id, []))]
+
+    def _fetch_duplicate_orders(self):
+        """ Fectch duplicated orders.
+
+        :return: Dictionary mapping order to it's related duplicated orders.
+        :rtype: dict
+        """
+        orders = self.filtered('client_order_ref')
+        if not orders:
+            return {}
+
+        used_fields = (
+            'company_id',
+            'partner_id',
+            'client_order_ref',
+            'origin',
+            'date_order',
+            'state',
+            'amount_total',
+        )
+        self.env["sale.order"].flush_model(used_fields)
+
+        result = self.env.execute_query(SQL("""
+            SELECT
+                sale_order.id AS order_id,
+                array_agg(duplicate_order.id) AS duplicate_ids
+              FROM sale_order
+              JOIN sale_order AS duplicate_order
+                ON sale_order.company_id = duplicate_order.company_id
+                 AND sale_order.id != duplicate_order.id
+                 AND duplicate_order.state != 'cancel'
+                 AND sale_order.partner_id = duplicate_order.partner_id
+                 AND sale_order.amount_total = duplicate_order.amount_total
+                 AND sale_order.client_order_ref = duplicate_order.client_order_ref
+                 AND sale_order.origin = duplicate_order.origin
+             WHERE sale_order.id IN %(orders)s
+             GROUP BY sale_order.id
+            """,
+            orders=tuple(orders.ids),
+        ))
+        return {
+            order_id: set(duplicate_ids)
+            for order_id, duplicate_ids in result
+        }
 
     @api.depends('order_line.customer_lead', 'date_order', 'state')
     def _compute_expected_date(self):
@@ -979,11 +1045,7 @@ class SaleOrder(models.Model):
         :rtype: bool
         :raise: UserError if trying to confirm cancelled SO's
         """
-        if not all(order._can_be_confirmed() for order in self):
-            raise UserError(_(
-                "The following orders are not in a state requiring confirmation: %s",
-                ", ".join(self.mapped('display_name')),
-            ))
+        self._check_can_be_confirmed()
 
         self.order_line._validate_analytic_distribution()
 
@@ -1016,9 +1078,23 @@ class SaleOrder(models.Model):
         user = self[:1].create_uid
         return user and user.sudo().has_group('sale.group_auto_done_setting')
 
-    def _can_be_confirmed(self):
-        self.ensure_one()
-        return self.state in {'draft', 'sent'}
+    def _check_can_be_confirmed(self):
+        """ Check whether order can be confirmed or not if not then raise error. """
+        for order in self:
+            if order.state not in {'draft', 'sent'}:
+                raise UserError(_(
+                    "The following orders are not in a state requiring confirmation: %s",
+                    ", ".join(self.mapped('display_name')),
+                ))
+            if any(
+                not line.display_type
+                and not line.is_downpayment
+                and not line.product_id
+                for line in order.order_line
+            ):
+                raise ValidationError(_(
+                    "A line on these orders missing a product, you cannot confirm it."
+                ))
 
     def _prepare_confirmation_values(self):
         """ Prepare the sales order confirmation values.
@@ -1211,6 +1287,16 @@ class SaleOrder(models.Model):
 
     def _get_product_catalog_domain(self):
         return expression.AND([super()._get_product_catalog_domain(), [('sale_ok', '=', True)]])
+
+    def action_open_business_doc(self):
+        self.ensure_one()
+        return {
+            'name': _("Order"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'sale.order',
+            'res_id': self.id,
+            'views': [(False, 'form')],
+        }
 
     # INVOICING #
 
@@ -1710,6 +1796,104 @@ class SaleOrder(models.Model):
             'amount_max': amount_max,
             'amount_paid': self.amount_paid,
         }
+
+    # EDI #
+
+    def create_document_from_attachment(self, attachment_ids):
+        """ Create the sale orders from given attachment_ids and redirect newly create order view.
+
+        :param list attachment_ids: List of attachments process.
+        :return: An action redirecting to related sale order view.
+        :rtype: dict
+        """
+        orders = self._create_order_from_attachment(attachment_ids)
+        action_vals = {
+            'name': _("Generated Orders"),
+            'domain': [('id', 'in', orders.ids)],
+            'res_model': 'sale.order',
+            'type': 'ir.actions.act_window',
+            'context': self._context
+        }
+        if len(orders) == 1:
+            action_vals.update({
+                'views': [[False, 'form']],
+                'res_id': orders.id,
+            })
+        else:
+            action_vals.update({
+                'views': [[False, 'list'], [False, 'kanban'], [False, 'form']],
+            })
+
+        return action_vals
+
+    @api.model
+    def _create_order_from_attachment(self, attachment_ids):
+        """ Create the sale orders from given attachment_ids and fill data by extracting detail
+        from attachments and return generated orders.
+
+        :param list attachment_ids: List of attachments process.
+        :return: Recordset of order.
+        """
+        attachments = self.env['ir.attachment'].browse(attachment_ids)
+        if not attachments:
+            raise UserError(_("No attachment was provided"))
+
+        orders = self
+        for attachment in attachments:
+            order = self.create({
+                'partner_id': self.env.user.partner_id.id,
+            })
+            order._extend_with_attachments(attachment)
+            orders |= order
+            order.message_post(attachment_ids=attachment.ids)
+            attachment.write({'res_model': self._name, 'res_id': order.id})
+
+        return orders
+
+    def _extend_with_attachments(self, attachment):
+        """ Main entry point to extend/enhance order with attachment.
+
+        :param attachment: A recordset of ir.attachment.
+        :returns: None
+        """
+        self.ensure_one()
+
+        def close_file(file_data):
+            if file_data.get('on_close'):
+                file_data['on_close']()
+
+        file_data = attachment._unwrap_edi_attachments()[0]
+        decoder = self._get_order_edi_decoder(file_data)
+        if decoder:
+            try:
+                with self.env.cr.savepoint():
+                    decoder(self, file_data)
+            except RedirectWarning:
+                raise
+            except Exception:
+                message = _(
+                    "Error importing attachment '%(file_name)s' as order (decoder=%(decoder)s)",
+                    file_name=file_data['filename'],
+                    decoder=decoder.__name__,
+                )
+                self.sudo().message_post(body=message)
+                _logger.exception(message)
+
+        close_file(file_data)
+        return True
+
+    def _get_order_edi_decoder(self, file_data):
+        """ To be extended with decoding capabilities of order data from file data.
+
+        :returns:  Function to be later used to import the file.
+                   Function' args:
+                   - order: sale.order
+                   - file_data: attachemnt information / value
+                   returns True if was able to process the order
+        """
+        if file_data['type'] in ('pdf', 'binary'):
+            return lambda *args: False
+        return
 
     # PORTAL #
 
