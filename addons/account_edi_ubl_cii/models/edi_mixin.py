@@ -219,7 +219,7 @@ class EdiMixin(models.AbstractModel):
             logs.append(_("Could not retrieve a partner corresponding to '%s'. A new partner was created.", name))
         return partner, logs
 
-    def _import_document_allowance_charges(self, tree, company_id, tax_type, qty_factor):
+    def _import_document_allowance_charges(self, tree, company_id, tax_type, qty_factor=1):
         logs = []
         xpaths = self._get_document_allowance_charge_xpaths()
         line_vals = []

@@ -237,6 +237,7 @@ class ProductProduct(models.Model):
     # EDI
     # -------------------------------------------------------------------------
 
+    @api.model
     def _retrieve_product(self, name=None, default_code=None, barcode=None, company=None, extra_domain=None):
         '''Search all products and find one that matches one of the parameters.
 
