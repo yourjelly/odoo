@@ -201,6 +201,9 @@ export class Editor {
     }
 
     dispatch(command, payload = {}) {
+        if (this.isDestroyed) {
+            return;
+        }
         if (!this.editable) {
             throw new Error("Cannot dispatch command while not attached to an element");
         }
