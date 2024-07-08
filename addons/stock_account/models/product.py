@@ -781,6 +781,16 @@ class ProductCategory(models.Model):
         domain="[('deprecated', '=', False)]", check_company=True,
         help="""When automated inventory valuation is enabled on a product, this account will hold the current value of the products.""",)
 
+    @api.model_create_multi
+    def create(self, vals):
+        for category in vals:
+            # if self.env.user.has_group('group_stock_accounting_automatic'):
+            if self.env.company.stock_accounting_automatic:
+                category['property_valuation'] = 'real_time'
+            else:
+                category['property_valuation'] = 'manual_periodic'
+        return super().create(vals)
+
     @api.model
     def _get_stock_account_property_field_names(self):
         return [
