@@ -4501,8 +4501,3 @@ websiteRegisterBackgroundOptions("OnlyBgImage", {
     withVideos: true,
     withShapes: true,
 });
-
-const oldExport = {
-    // UrlPickerUserValueWidget: UrlPickerUserValueWidget,
-    // FontFamilyPickerUserValueWidget: FontFamilyPickerUserValueWidget,
-};
