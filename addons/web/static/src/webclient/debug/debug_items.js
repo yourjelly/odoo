@@ -3,37 +3,43 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
-function runHootItem() {
+function runHootItem({ env }) {
     const href = "/web/tests/next?debug=assets";
-    return {
+    if (env.debug === "assets") {
+      return {
         type: "item",
         description: _t("Run unit tests"),
         href,
         callback: () => browser.open(href),
         sequence: 10,
-    };
-}
+      };
+    }
+  }
 
-function runJSTestsItem() {
+function runJSTestsItem({ env }) {
     const href = "/web/tests?debug=assets";
-    return {
-        type: "item",
-        description: _t("Run QUnit tests (legacy)"),
-        href,
-        callback: () => browser.open(href),
-        sequence: 20,
-    };
+    if (env.debug === "assets") {
+        return {
+            type: "item",
+            description: _t("Run QUnit tests (legacy)"),
+            href,
+            callback: () => browser.open(href),
+            sequence: 20,
+        };
+    }
 }
 
-function runJSTestsMobileItem() {
+function runJSTestsMobileItem({ env }) {
     const href = "/web/tests/mobile?debug=assets";
-    return {
-        type: "item",
-        description: _t("Run QUnit mobile tests (legacy)"),
-        href,
-        callback: () => browser.open(href),
-        sequence: 30,
-    };
+    if (env.debug === "assets") {
+        return {
+            type: "item",
+            description: _t("Run QUnit mobile tests (legacy)"),
+            href,
+            callback: () => browser.open(href),
+            sequence: 30,
+        };
+    }
 }
 
 export function openViewItem({ env }) {
