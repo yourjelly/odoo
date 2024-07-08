@@ -1,0 +1,3 @@
+"id","name","country_id","sequence","tax_payable_account_id","tax_receivable_account_id"
+"tcs_group","TCS","base.in","100","p11239","p10059"
+"tax_collected_at_source_group","Tax Collected at Source","base.in","100","p11239","p10059"

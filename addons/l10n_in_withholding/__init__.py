@@ -14,6 +14,7 @@ def _l10n_in_withholding_post_init(env):
         model: env['account.chart.template']._parse_csv('in', model, module='l10n_in_withholding')
         for model in [
             'account.account',
+            'account.tax.group',
             'account.tax',
         ]
     }

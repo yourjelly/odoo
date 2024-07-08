@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import api, fields, models
 
+
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
@@ -21,6 +22,10 @@ class ResCompany(models.Model):
         help="Enable the use of production credentials",
         groups="base.group_system",
     )
+    module_l10n_in_withholding = fields.Boolean(string="TDS")
+    module_l10n_in_tcs = fields.Boolean(string="TCS")
+    l10n_in_gst = fields.Boolean(string="GST")
+    l10n_in_tan = fields.Char(string="TAN", help="Tax Deduction and Collection Account Number")
 
     @api.depends('vat')
     def _compute_l10n_in_hsn_code_digit(self):

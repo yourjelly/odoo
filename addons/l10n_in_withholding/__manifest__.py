@@ -8,6 +8,7 @@
     'depends': ['l10n_in'],
     'data': [
         'security/ir.model.access.csv',
+        'data/account_tax_report_tds_data.xml',
         'wizard/l10n_in_withhold_wizard.xml',
         'views/account_move_views.xml',
         'views/account_payment_views.xml',

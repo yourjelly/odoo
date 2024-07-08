@@ -1,0 +1,3 @@
+"id","name","country_id","sequence","tax_payable_account_id","tax_receivable_account_id"
+"tds_group","TDS","base.in","100","p11239","p10059"
+"tax_deducted_at_source_group","Tax Deducted at Source","base.in","100","p11239","p10059"
