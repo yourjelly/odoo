@@ -801,8 +801,10 @@ class IrTranslation(models.Model):
                 lang_code = tools.get_iso_codes(lang)
                 lang_overwrite = overwrite
                 base_lang_code = None
-                if '_' in lang_code:
+                if '_' in lang_code and lang_code != 'sr_RS':
                     base_lang_code = lang_code.split('_')[0]
+                elif lang_code == 'sr@latin':
+                    base_lang_code = 'sr'
 
                 # Step 1: for sub-languages, load base language first (e.g. es_CL.po is loaded over es.po)
                 if base_lang_code:
