@@ -102,6 +102,8 @@ class Message(models.Model):
 
     def _compute_account_audit_log_partner_id(self):
         self._compute_audit_log_related_record_id('res.partner', 'account_audit_log_partner_id', [
+            '|', ('partner_share', '=', False),
+            '&',
             '|', ('company_id', '=', False), ('company_id.check_account_audit_trail', '=', True),
             '|', ('customer_rank', '>', 0), ('supplier_rank', '>', 0),
         ])
@@ -143,6 +145,8 @@ class Message(models.Model):
                 ('company_id.check_account_audit_trail', operator, value),
             ]))],
             [('model', '=', 'res.partner'), ('res_id', 'in', self.env['res.partner']._search([
+                '|', ('partner_share', '=', False),
+                '&',
                 '|', ('company_id', '=', False), ('company_id.check_account_audit_trail', operator, value),
                 '|', ('customer_rank', '>', 0), ('supplier_rank', '>', 0),
             ]))],

@@ -2,6 +2,8 @@
 
 from collections import defaultdict
 
+from markupsafe import Markup
+
 from odoo import _, api, Command, fields, models, modules, tools
 from odoo.tools import email_normalize
 
@@ -69,30 +71,59 @@ class Users(models.Model):
     def SELF_WRITEABLE_FIELDS(self):
         return super().SELF_WRITEABLE_FIELDS + ['notification_type']
 
+    def _tracked_groups(self):
+        return {'base.group_portal'}
+
+    def _log_groups_diff(self, all_previous):
+        if self._context.get('mail_create_nolog') or self._context.get('mail_notrack'):
+            return
+        tracked_groups = sorted(self._tracked_groups())
+        for user in self:
+            previous_user = all_previous.get(user.id, {})
+            bodies = []
+            for group in tracked_groups:
+                if user.has_group(group) != previous_user.get(group):
+                    group_name = self.env.ref(group).name
+                    if user.has_group(group):
+                        bodies.append(_("Rights granted: %s", group_name))
+                    else:
+                        bodies.append(_("Rights revoked: %s", group_name))
+            if bodies:
+                user.partner_id.message_post(
+                    body=Markup('<br/>').join(bodies),
+                    message_type='notification',
+                    subtype_xmlid='mail.mt_note'
+                )
+
     @api.model_create_multi
     def create(self, vals_list):
 
         users = super(Users, self).create(vals_list)
 
-        # log a portal status change (manual tracking)
-        log_portal_access = not self._context.get('mail_create_nolog') and not self._context.get('mail_notrack')
-        if log_portal_access:
-            for user in users:
-                if user.has_group('base.group_portal'):
-                    body = user._get_portal_access_update_body(True)
-                    user.partner_id.message_post(
-                        body=body,
-                        message_type='notification',
-                        subtype_xmlid='mail.mt_note'
-                    )
+        # log groups status change (manual tracking)
+        users._log_groups_diff({})
         return users
 
     def write(self, vals):
-        log_portal_access = 'groups_id' in vals and not self._context.get('mail_create_nolog') and not self._context.get('mail_notrack')
-        user_portal_access_dict = {
-            user.id: user.has_group('base.group_portal')
-            for user in self
-        } if log_portal_access else {}
+        log_groups = (
+            not self._context.get('mail_create_nolog')
+            and not self._context.get('mail_notrack')
+            and (
+                'groups_id' in vals
+                or any(fname.startswith(('sel_groups_', 'in_group_')) for fname in vals)
+            )
+        )
+        if log_groups:
+            tracked_groups = self._tracked_groups()
+            user_previous_groups_dict = {
+                user.id: {
+                    xml_id: user.has_group(xml_id)
+                    for xml_id in tracked_groups
+                }
+                for user in self
+            }
+        else:
+            user_previous_groups_dict = {}
 
         previous_email_by_user = {}
         if vals.get('email'):
@@ -104,18 +135,9 @@ class Users(models.Model):
 
         write_res = super(Users, self).write(vals)
 
-        # log a portal status change (manual tracking)
-        if log_portal_access:
-            for user in self:
-                user_has_group = user.has_group('base.group_portal')
-                portal_access_changed = user_has_group != user_portal_access_dict[user.id]
-                if portal_access_changed:
-                    body = user._get_portal_access_update_body(user_has_group)
-                    user.partner_id.message_post(
-                        body=body,
-                        message_type='notification',
-                        subtype_xmlid='mail.mt_note'
-                    )
+        # log groups status change (manual tracking)
+        if log_groups:
+            self._log_groups_diff(user_previous_groups_dict)
 
         if 'login' in vals:
             self._notify_security_setting_update(
@@ -209,12 +231,6 @@ class Users(models.Model):
             'user': self,
             'update_datetime': fields.Datetime.now(),
         }
-
-    def _get_portal_access_update_body(self, access_granted):
-        body = _('Portal Access Granted') if access_granted else _('Portal Access Revoked')
-        if self.partner_id.email:
-            return '%s (%s)' % (body, self.partner_id.email)
-        return body
 
     def _deactivate_portal_user(self, **post):
         """Blacklist the email of the user after deleting it.

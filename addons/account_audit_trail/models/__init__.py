@@ -7,3 +7,4 @@ from . import mail_message
 from . import mail_tracking_value
 from . import res_company
 from . import res_config_settings
+from . import res_users
