@@ -21,7 +21,7 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     _populate_sizes = {
-        'small': 1000,
+        'small': 100,
         'medium': 10000,
         'large': 500000,
     }

@@ -56,8 +56,9 @@ class Populate(Command):
 
             _logger.log(25, 'Populating database')
             for model in ordered_models:
-                if profiling_enabled:
+                if True or profiling_enabled:
                     profiling_context = odoo.tools.profiler.Profiler(
+                        collectors=['sql', odoo.tools.profiler.PeriodicCollector(interval=0.1)],
                         description=f'{model} {size}',
                         db=env.cr.dbname
                     )
