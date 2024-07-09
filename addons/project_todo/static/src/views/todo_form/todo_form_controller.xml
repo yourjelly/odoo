@@ -30,6 +30,28 @@
                     viewType="'form'"
                 />
             </t>
+            <t t-set-slot="todo-tag-ids">
+                <t t-set="record" t-value="model.root"/>
+                <TodoTagIds
+                    name="'tag_ids'"
+                    record="record"
+                    id="'tag_ids'"
+                />
+            </t>
+            <t t-set-slot="todo-user-ids">
+                <t t-set="record" t-value="model.root"/>
+                <TodoUserIds
+                    name="'user_ids'"
+                    record="record"
+                    id="'user_ids'"
+                />
+            </t>
+            <t t-set-slot="todo-chatter-panel">
+                <t t-set="record" t-value="model.root"/>
+                <TodoChatterPanel
+                    record="record"
+                />
+            </t>
         </xpath>
     </t>
 

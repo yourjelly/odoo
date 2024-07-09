@@ -7,8 +7,10 @@ import { TodoEditableBreadcrumbName } from "@project_todo/components/todo_editab
 import { TodoDoneCheckmark } from "@project_todo/components/todo_done_checkmark/todo_done_checkmark";
 import { PriorityField } from "@web/views/fields/priority/priority_field";
 
-import { onWillStart } from "@odoo/owl";
-
+import { onWillStart, useState } from "@odoo/owl";
+import { TodoTagIds } from "../../components/todo_tag_ids/todo_tag_ids";
+import { TodoUserIds } from "../../components/todo_user_ids/todo_user_ids";
+import { TodoChatterPanel } from "../../components/todo_chatter_panel/todo_chatter_panel";
 /**
  *  The FormController is overridden to be able to manage the edition of the name of a to-do directly
  *  in the breadcrumb as well as the mark as done button next to it.
@@ -21,9 +23,15 @@ export class TodoFormController extends FormController {
         TodoEditableBreadcrumbName,
         TodoDoneCheckmark,
         PriorityField,
+        TodoTagIds,
+        TodoUserIds,
+        TodoChatterPanel,
     };
     setup() {
         super.setup();
+        this.state = useState({
+            displayChatter: false
+        });
         onWillStart(async () => {
             this.projectAccess = await user.hasGroup("project.group_project_user");
         });
@@ -53,5 +61,12 @@ export class TodoFormController extends FormController {
         menuItems.action = filteredActions;
         menuItems.print = [];
         return menuItems;
+    }
+
+    toggleChatter() {
+        if (this.props.record.resId) {
+            this.state.displayChatter = !this.state.displayChatter;
+            this.env.bus.trigger('TODO:TOGGLE_CHATTER', {displayChatter: this.state.displayChatter});
+        }
     }
 }

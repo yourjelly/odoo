@@ -28,6 +28,9 @@ beforeEach(() => {
             <form string="To-do" class="o_todo_form_view" js_class="todo_form">
                 <field name="name"/>
                 <field name="state" invisible="1"/>
+                <field name="tag_ids"/>
+                <field name="user_ids"/>
+                <field name="priority"/>
             </form>`,
         search: `
             <search/>`,

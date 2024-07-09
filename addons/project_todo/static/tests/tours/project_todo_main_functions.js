@@ -83,6 +83,11 @@ registry.category("web_tour.tours").add('project_todo_main_functions', {
     trigger: ".o_todo_form_view",
 },
 {
+    trigger: ".todo_toggle_chatter",
+    content: "Click on chatter button to send message",
+    run: "click",
+},
+{
     trigger: ".o-mail-Chatter-topbar button.o-mail-Chatter-sendMessage",
     content: "A 'send message' button should be present in the chatter",
     run: "click",
@@ -111,7 +116,7 @@ registry.category("web_tour.tours").add('project_todo_main_functions', {
     trigger: ".o_todo_form_view",
 },
 {
-    trigger: ".o_field_widget[name='user_ids'] input",
+    trigger: ".o-autocomplete--input[id='user_ids']",
     content: "Assign a responsible to your task",
     run: "click",
 }, {
@@ -135,7 +140,7 @@ registry.category("web_tour.tours").add('project_todo_main_functions', {
     content: "Save the record",
     run: "click",
 }, {
-    trigger: '.o_breadcrumb .o_control_panel_breadcrumbs_actions button',
+    trigger: '.o_control_panel_breadcrumbs_actions button',
     content: 'Convert the Todo to a task belonging to a project',
     run: "click",
 }, {

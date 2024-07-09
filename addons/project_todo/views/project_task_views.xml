@@ -104,7 +104,7 @@
                   js_class="todo_form">
                 <field name="name" invisible="1"/>
                 <field name="priority" invisible="1"/>
-                <header>
+                <header invisible="1">
                     <div class="py-1 px-2 border rounded bg-view">
                         <field name="tag_ids"
                                widget="many2many_tags"
@@ -125,11 +125,12 @@
                     <field name="active" invisible="1"/>
                     <field name="state" invisible="1"/>
                 </header>
+
                 <sheet class="o_todo_form_sheet_bg">
                     <widget name="web_ribbon" class="todo_archived" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="description" type="html" class="oe_description" default_focus="1" options="{'resizable': false, 'collaborative': true}"/>
                 </sheet>
-                <chatter/>
+                <widget name="todo_chatter_panel" groups="base.group_user"/>
             </form>
         </field>
     </record>

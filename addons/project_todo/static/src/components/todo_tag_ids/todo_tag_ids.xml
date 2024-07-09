@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="project_todo.TodoTagIds" t-inherit="web.Many2ManyTagsField" t-inherit-mode="primary">
+        <TagsList position="attributes">
+            <attribute name="t-if">!env.isSmall</attribute>
+        </TagsList>
+        <xpath expr="//div[@t-if='showM2OSelectionField']" position="attributes">
+            <attribute name="t-if">showM2OSelectionField and !env.isSmall</attribute>
+        </xpath>
+        <xpath expr="//Many2XAutocomplete" position="attributes">
+            <attribute name="placeholder">placeholder</attribute>
+        </xpath>
+        <xpath expr="//div[@t-ref='many2ManyTagsField']" position="after">
+            <a t-if="env.isSmall" t-on-click.stop.prevent="openTagPopover" tabIndex="-1" href="#" title="Tag"
+                aria-label="Tag" class="mx-3 o_quick_assign fa fa-tags btn-link d-flex align-items-center gap-2 text-dark" role="button"/>
+        </xpath>
+    </t>
+</templates>

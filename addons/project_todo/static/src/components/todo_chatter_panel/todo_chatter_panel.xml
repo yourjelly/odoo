@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<templates xml:space="preserve">
+    <t t-name="project_todo.TodoChatter" t-ref="root">
+        <chatter t-if="this.state.displayChatter" class="o_FormRenderer_chatterContainer o_scroll_view_lg">
+            <Chatter
+                threadModel="'project.task'"
+                threadId="this.props.record.resId"
+                webRecord="this.props.record"
+                hasParentReloadOnAttachmentsChanged="true"
+                hasParentReloadOnFollowersUpdate="true"
+                hasParentReloadOnMessagePosted="true"
+                isChatterAside="isChatterAside"
+                saveRecord="props.record.save.bind(props.record, { reload: false })"
+            />
+        </chatter>
+    </t>
+    <t t-name="project_todo.TodoChatterPanel" t-ref="root">
+        <a t-if="this.isInternalUser" role="button"
+            t-attf-class="btn btn-light btn-chatter todo_toggle_chatter #{state.displayChatter ? 'active' : ''}" data-hotkey="d" t-on-click="toggleChatter" title="Toggle chatter">
+            <i class="fa fa-comments"/>
+        </a>
+    </t>
+
+</templates>

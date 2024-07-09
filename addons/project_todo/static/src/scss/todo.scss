@@ -66,3 +66,43 @@
 .o_todo_hide_avatar .o_avatar {
     display: none;
 }
+
+.o_tags_input.o_input {
+    @include media-breakpoint-up(md) {
+        overflow: auto;
+    }
+}
+
+.o_control_panel_main_buttons{
+    @include media-breakpoint-up(sm) {
+        margin-inline: 10px;
+    }
+    @include media-breakpoint-down(sm) {
+        margin-right: 5px;
+    }
+}
+
+.o_m2m_tags_avatar_field_popover{
+    @include media-breakpoint-down(sm) {
+        width: 250px;
+    }
+}
+
+.o_todo_chatter {
+    .o_FormRenderer_chatterContainer {
+        padding: 0;
+    }
+    li.nav-item {
+        display: none;
+    }
+}
+
+.o_form_view {
+    .o_form_sheet_bg {
+        max-width: none;
+    }
+}
+
+.o_control_panel_navigation{
+    overflow-x: auto;
+}

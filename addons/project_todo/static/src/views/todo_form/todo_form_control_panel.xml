@@ -7,15 +7,37 @@
                 <t t-call="project_todo.TodoBreadcrumbs"/>
             </t>
         </xpath>
-
+        <xpath expr="//div[hasclass('o_control_panel_navigation')]/t[@t-if='state.embeddedInfos.embeddedActions?.length and env.isSmall']" position="before">
+            <t t-slot="todo-tag-ids"/>
+            <t t-slot="todo-user-ids"/>
+            <xpath expr="//div[hasclass('o_control_panel_main_buttons')]" position="move"/>
+            <t t-slot="control-panel-priority-field" />
+            <t t-slot="todo-chatter-panel"/>
+            <div class="align-self-center">
+                <t t-call="web.Breadcrumb.Actions"/>
+            </div>
+        </xpath>
+        <xpath expr="//div/t/t[@t-slot='control-panel-breadcrumb']" position="before">
+            <xpath expr="//div[hasclass('o_cp_pager')]" position="move"/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_control_panel_navigation')]" position="attributes">
+            <attribute name="class" add="align-items-center overflow-x-auto" separator=" "/>
+            <attribute name="class" remove="justify-content-end flex-wrap" separator=" "/>
+            <attribute name="t-attf-class" add="{{ !env.isSmall ? 'justify-content-end flex-wrap' : '' }}" separator=" "/>
+        </xpath>
     </t>
 
     <t t-name="project_todo.TodoBreadcrumbs" t-inherit="web.Breadcrumbs" t-inherit-mode="primary">
         <xpath expr="//div[hasclass('o_last_breadcrumb_item')]//span" position="replace">
-            <t t-slot="control-panel-priority-field" />
             <t t-slot="control-panel-todo-name" />
             <t t-slot="todo-mark-as-done-button" />
         </xpath>
+        <xpath expr="//div[hasclass('o_breadcrumb')]" position="attributes">
+            <attribute name="class" remove="align-self-stretch" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_breadcrumb')]//t[@t-call='web.Breadcrumb.Actions']" position="replace"/>
+        <xpath expr="//t[@t-call='web.Breadcrumb.Actions']" position="replace"/>
     </t>
+
 
 </templates>
