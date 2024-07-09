@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
 import random
 import werkzeug.urls
 
@@ -9,6 +10,10 @@ from datetime import datetime, timedelta
 
 from odoo import api, exceptions, fields, models, _
 from odoo.tools import sql
+
+logger = logging.getLogger(__name__)
+
+
 class SignupError(Exception):
     pass
 
@@ -85,6 +90,8 @@ class ResPartner(models.Model):
             if partner.sudo().signup_token and signup_type:
                 query['token'] = partner.sudo().signup_token
             elif partner.user_ids:
+                import traceback
+                logger.warning(''.join(traceback.format_stack()))
                 query['login'] = partner.user_ids[0].login
             else:
                 continue        # no signup token, no user, thus no signup url!
