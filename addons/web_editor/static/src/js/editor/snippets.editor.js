@@ -776,7 +776,7 @@ var SnippetEditor = Widget.extend({
                 this._customize$Elements = this._customize$Elements
                     .concat(parentEditor._customize$Elements);
                 // TODO: @owl-options This was meant to have the same behavior
-                // as the old editor, but as of now, options are just added 
+                // as the old editor, but as of now, options are just added
                 // with a loop on "enabledEditorHierarchy", so this would lead
                 // to duplicate option Components.
                 // this.snippetOptions = [...this.snippetOptions,...parentEditor.snippetOptions];
@@ -5179,8 +5179,8 @@ class SnippetsMenu extends Component {
         // Delay the mutex until all post drop actions are done. It cannot be
         // awaited inside the mutex because callPostSnippetDrop locks the mutex
         // and it needs to be awaited because callPostSnippetDrop also creates
-        // editors, but it does so outside the mutex. However, calling 
-        // updateOptionsUI while editors are being created creates race 
+        // editors, but it does so outside the mutex. However, calling
+        // updateOptionsUI while editors are being created creates race
         // conditions
         if (this.postSnippetDropPromise) {
             await this.postSnippetDropPromise;

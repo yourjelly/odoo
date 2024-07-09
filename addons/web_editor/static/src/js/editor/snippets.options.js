@@ -966,7 +966,7 @@ export class UserValueComponent extends Component {
     }
     /**
      * Sets all props as data attributes to match with existing tours.
-     * @TODO this should be removed or only shown when tours are actually 
+     * @TODO this should be removed or only shown when tours are actually
      * activated. However, some SCSS styles are using attributes to style some
      * buttons (e.g. BackgroundShape).
      */
@@ -980,7 +980,7 @@ export class UserValueComponent extends Component {
     }
     /**
      * Prepare the values that will be passed as parameters to the state.
-     * 
+     *
      * @private
      * @return {Objectl}
      */
@@ -1919,7 +1919,7 @@ class WeMulti extends UserValueComponent {
 registry.category("snippet_widgets").add("WeMulti", WeMulti);
 
 export class ColorpickerUserValue extends SelectUserValue {
-    /** 
+    /**
      * The Color Combination value, which is a string ranging from 1 to 5
      *
      * @type {string}
@@ -2937,7 +2937,7 @@ class RangeUserValue extends UnitUserValue {
     }
     /**
      * @private
-     * @param {string} inputValue 
+     * @param {string} inputValue
      */
     _computeDisplayValue(inputValue) {
         if (this.toRatio) {
@@ -3707,7 +3707,7 @@ export class SnippetOptionComponent extends Component {
         this.$overlay = this.props.snippetOption.instance.$overlay;
         this.renderContext = useState(this.props.snippetOption.instance.renderContext);
         // When a component is mounted or unmounted, the state of other
-        // components might be impacted. (i.e. dependencies behaving 
+        // components might be impacted. (i.e. dependencies behaving
         // differently when a component is in the DOM or when it isn't)
         this.updateUI = false;
 
@@ -6297,7 +6297,7 @@ registry.category("snippet_widgets").add("Overlay", Overlay);
  */
 export class SnippetMove extends ColumnLayoutMixin(SnippetOption) {
     static displayOverlayOptions = true;
-    
+
     /**
      * @override
      */
@@ -7498,7 +7498,7 @@ export class ImageTools extends ImageHandlerOption {
     /**
      * Replace animation durations in SVG and CSS with modified values.
      *
-     * This function takes a ratio and an SVG string containing animations. It 
+     * This function takes a ratio and an SVG string containing animations. It
      * uses regular expressions to find and replace the duration values in both
      * CSS animation rules and SVG duration attributes based on the provided
      * ratio.
@@ -7507,7 +7507,7 @@ export class ImageTools extends ImageHandlerOption {
      *                       durations. If speed is 0.0, the original
      *                       durations are preserved.
      * @param {string} svg The SVG string containing animations.
-     * @returns {string} The modified SVG string with updated animation 
+     * @returns {string} The modified SVG string with updated animation
      *                   durations.
      */
     _replaceAnimationDuration(speed, svg) {
@@ -7534,7 +7534,7 @@ export class ImageTools extends ImageHandlerOption {
             // Replace the CSS --animation_ratio variable for future purpose.
             svg = svg.replace(CSS_ANIMATION_RATIO_REGEX, `--animation_ratio: ${ratio};`);
         } else {
-            // Add the style tag with the root variable --animation ratio for 
+            // Add the style tag with the root variable --animation ratio for
             // future purpose.
             const regex = /<svg .*>/m;
             const subst = `$&\n\t<style>\n\t\t:root { \n\t\t\t--animation_ratio: ${ratio};\n\t\t}\n\t</style>`;
