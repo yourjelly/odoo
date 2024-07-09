@@ -78,8 +78,8 @@ const BaseAnimatedHeader = animations.Animation.extend({
     destroy: function () {
         this._toggleFixedHeader(false);
         this.$el.removeClass('o_header_affixed o_header_is_scrolled o_header_no_transition o_transitioning');
-        this.$navbarOffcanvases.off(".BaseAnimatedHeader");
-        this.$navbarCollapses.off('.BaseAnimatedHeader');
+        this.$navbarOffcanvases?.off(".BaseAnimatedHeader");
+        this.$navbarCollapses?.off('.BaseAnimatedHeader');
         this.$el.off('.BaseAnimatedHeader');
         this._super(...arguments);
     },
@@ -186,7 +186,7 @@ const BaseAnimatedHeader = animations.Animation.extend({
         if (this.isOverlayHeader) {
             return;
         }
-        this.$main.css('padding-top', this.fixedHeader ? headerHeight : '');
+        this.$main?.css('padding-top', this.fixedHeader ? headerHeight : '');
     },
     /**
      * Checks if the size of the header will decrease by adding the

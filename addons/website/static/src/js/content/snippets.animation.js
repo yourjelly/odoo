@@ -1319,9 +1319,11 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
                 'visibility': '',
             });
         $(window).off('.o_animate');
-        this.__onScrollWebsiteAnimate.cancel();
-        this.$scrollingTarget[0].removeEventListener('scroll', this.__onScrollWebsiteAnimate, {capture: true});
-        this.$scrollingElement[0].classList.remove('o_wanim_overflow_xy_hidden');
+        this.__onScrollWebsiteAnimate?.cancel();
+        if (this.$scrollingTarget) {
+            this.$scrollingTarget[0]?.removeEventListener('scroll', this.__onScrollWebsiteAnimate, {capture: true});
+            this.$scrollingElement[0]?.classList.remove('o_wanim_overflow_xy_hidden');
+        }
     },
 
     //--------------------------------------------------------------------------

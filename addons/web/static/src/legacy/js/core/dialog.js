@@ -132,7 +132,8 @@ const Dialog = PublicWidget.extend({
                 self.$footer = self.$modal.find(".modal-footer");
                 self.set_buttons(self.buttons);
             }
-            self.$modal.on('hidden.bs.modal', self.destroy.bind(self));
+            // To change when jquery is removed
+            self.$modal[0].on('hidden.bs.modal', self.destroy.bind(self));
         });
     },
     /**
@@ -268,7 +269,8 @@ const Dialog = PublicWidget.extend({
      * its DOM.
      */
     rebindButtonBehavior: function () {
-        this.$footer.on('keydown', this._onFooterButtonKeyDown);
+        // To change when jquery is removed
+        this.$footer[0].on('keydown', this._onFooterButtonKeyDown);
     },
     //--------------------------------------------------------------------------
     // Private
@@ -302,7 +304,8 @@ const Dialog = PublicWidget.extend({
                 icon: buttonData.icon,
                 text: buttonData.text,
             });
-            $button.on('click', function (e) {
+            // TO-change when jquery is removed
+            $button[0].on('click', function (e) {
                 var def;
                 if (buttonData.click) {
                     def = buttonData.click.call(self, e);

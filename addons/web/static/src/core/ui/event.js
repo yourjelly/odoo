@@ -1,18 +1,33 @@
 const delegateEvent = function (ev) {
     let target = ev.target;
-    const pseudoSelectorRegex = /:[\w-]+(\([^)]*\))?/g;
+    const pseudoSelectorRegex = /(:first|:last)/g;
 
     if (typeof this.selector === "string") {
         // Remove pseudo selectors from the selector
-        const cleanSelector = pseudoSelectorRegex.test(this.selector)
+        const validSelector = pseudoSelectorRegex.test(this.selector)
             ? this.selector.replace(pseudoSelectorRegex, "")
             : this.selector;
 
         // Attempt to find the matching target
-        while (target.parentElement && target !== this.element && !target?.matches(cleanSelector)) {
-            target = target.parentElement;
+        while (target.parentElement && target !== this.element) {
+            // Use closest to find the nearest matching ancestor or the element itself
+            const matchingAncestor = target.closest(validSelector);
+
+            // If matchingAncestor is found, check if it is not the this.element
+            if (matchingAncestor && matchingAncestor !== this.element) {
+                // If the matching ancestor is not the target itself, move to its parentElement
+                if (matchingAncestor !== target) {
+                    target = target.parentElement;
+                } else {
+                    // If the matching ancestor is the target, break the loop as we've found the match
+                    break;
+                }
+            } else {
+                // If no matching ancestor is found, move up the DOM tree
+                target = target.parentElement;
+            }
         }
-        if (target?.matches(cleanSelector)) {
+        if (target.closest(validSelector)) {
             // Create a new event and set its currentTarget
             Object.defineProperty(ev, "currentTarget", {
                 get: () => target,
