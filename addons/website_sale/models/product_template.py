@@ -272,7 +272,7 @@ class ProductTemplate(models.Model):
 
         res = {}
         for template in self:
-            pricelist_price, rule_id = pricelist_prices[template.id]
+            pricelist_price, pricelist_rule_id = pricelist_prices[template.id]
 
             product_taxes = template.sudo().taxes_id._filter_taxes_by_company(self.env.company)
             taxes = fiscal_position.map_tax(product_taxes)
@@ -283,22 +283,21 @@ class ProductTemplate(models.Model):
                     pricelist_price, currency, product_taxes, taxes, self, website=website,
                 ),
             }
-            if rule_id:
-                pricelist_rule = template.env['product.pricelist.item'].browse(rule_id)
-                combination = template._get_first_possible_combination()
-                base_price = pricelist_rule._compute_price_before_discount(
-                    product=template.with_context(
-                        **template._get_product_price_context(combination),
-                    ),
+            if pricelist_rule_id:  # If a rule was applied, there might be a discount
+                # For ecommerce flows, the base price is always the product sales price
+                # which can be computed by calling `_compute_base_price` without a pricelist rule
+                pricelist_base_price = template.env['product.pricelist.item']._compute_base_price(
+                    product=template,
                     quantity=1.0,
                     date=date,
                     uom=self.uom_id,
                     currency=currency,
-                    show_discount=True,
                 )
-                template_price_vals['base_price'] = self._apply_taxes_to_price(
-                    base_price, currency, product_taxes, taxes, self, website=website,
-                )
+                if pricelist_base_price != pricelist_price:
+                    base_price = pricelist_base_price
+                    template_price_vals['base_price'] = self._apply_taxes_to_price(
+                        base_price, currency, product_taxes, taxes, self, website=website,
+                    )
 
             if not base_price and comparison_prices_enabled and template.compare_list_price:
                 template_price_vals['base_price'] = template.currency_id._convert(
@@ -468,22 +467,15 @@ class ProductTemplate(models.Model):
         )
 
         price_before_discount = pricelist_price
-        if pricelist_rule_id:
-            pricelist_rule = self.env['product.pricelist.item'].browse(pricelist_rule_id)
-            if product_or_template._name == 'product.template':
-                combination = product_or_template._get_first_possible_combination()
-            else:
-                combination = product_or_template.product_template_attribute_value_ids
-
-            price_before_discount = pricelist_rule._compute_price_before_discount(
-                product=product_or_template.with_context(
-                    **product_or_template._get_product_price_context(combination),
-                ),
+        if pricelist_rule_id:  # If a rule was applied, there might be a discount
+            # For ecommerce flows, the base price is always the product sales price
+            # which can be computed by calling `_compute_base_price` without a pricelist rule
+            price_before_discount = self.env['product.pricelist.item']._compute_base_price(
+                product=product_or_template,
                 quantity=quantity or 1.0,
                 date=date,
                 uom=self.uom_id,
                 currency=currency,
-                show_discount=True,
             )
 
         combination_info = {
