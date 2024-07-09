@@ -1,39 +1,32 @@
+// delegateEvent.js
+import { filterByPseudoSelectors } from "../utils/filter";
+
 const delegateEvent = function (ev) {
     let target = ev.target;
-    const pseudoSelectorRegex = /(:first|:last)/g;
+    const pseudoSelectorRegex = /:(\w+)(\([^)]+\))?/g;
 
     if (typeof this.selector === "string") {
-        // Remove pseudo selectors from the selector
-        const validSelector = pseudoSelectorRegex.test(this.selector)
-            ? this.selector.replace(pseudoSelectorRegex, "")
-            : this.selector;
+        // Extract pseudo-classes
+        const pseudoSelectors = [...this.selector.matchAll(pseudoSelectorRegex)];
+        const validSelector = this.selector.replace(pseudoSelectorRegex, "");
 
         // Attempt to find the matching target
         while (target.parentElement && target !== this.element) {
-            // Use closest to find the nearest matching ancestor or the element itself
-            const matchingAncestor = target.closest(validSelector);
+            if (target.matches(validSelector)) {
+                const potentialTargets = document.querySelectorAll(validSelector);
+                const filteredTargets = filterByPseudoSelectors(potentialTargets, pseudoSelectors);
 
-            // If matchingAncestor is found, check if it is not the this.element
-            if (matchingAncestor && matchingAncestor !== this.element) {
-                // If the matching ancestor is not the target itself, move to its parentElement
-                if (matchingAncestor !== target) {
-                    target = target.parentElement;
-                } else {
-                    // If the matching ancestor is the target, break the loop as we've found the match
-                    break;
+                if (filteredTargets.includes(target)) {
+                    // Create a new event and set its currentTarget
+                    Object.defineProperty(ev, "currentTarget", {
+                        get: () => target,
+                        configurable: true,
+                    });
+                    this.handler.call(target, ev);
+                    return; // Stop further processing
                 }
-            } else {
-                // If no matching ancestor is found, move up the DOM tree
-                target = target.parentElement;
             }
-        }
-        if (target.closest(validSelector)) {
-            // Create a new event and set its currentTarget
-            Object.defineProperty(ev, "currentTarget", {
-                get: () => target,
-                configurable: true,
-            });
-            this.handler.call(target, ev);
+            target = target.parentElement;
         }
     } else {
         // Selector is not provided, directly use this.element as the context
@@ -41,6 +34,8 @@ const delegateEvent = function (ev) {
         this.handler.call(this.element, ev);
     }
 };
+
+export { delegateEvent };
 
 const events = new WeakMap();
 
