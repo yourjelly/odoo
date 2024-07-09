@@ -3,7 +3,7 @@
 
 from datetime import timedelta
 
-from odoo.fields import Command, Datetime
+from odoo.fields import Datetime
 from odoo.tests.common import TransactionCase
 
 
@@ -71,7 +71,7 @@ class TestWebsiteEventSaleCommon(TransactionCase):
                     'percent_price': 10,
                 })],
                 'name': name,
-                'website_ids': [Command.link(cls.current_website.id)],
+                'selectable': True,
             })
 
         cls.pricelist_without_discount = create_pricelist(currency=cls.env.company.currency_id, name='EUR Without Discount Included')
