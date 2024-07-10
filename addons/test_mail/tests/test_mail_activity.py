@@ -652,12 +652,7 @@ class TestActivityMixin(TestActivityCommon):
             record = self.env['mail.test.activity'].search([('my_activity_date_deadline', '=', date_today)])
             self.assertEqual(test_record_1, record)
 
-
-@tests.tagged('mail_activity')
-class TestORM(TestActivityCommon):
-    """Test for read_progress_bar"""
-
-    def test_week_grouping(self):
+    def test_read_progress_bar_week_grouping(self):
         """The labels associated to each record in read_progress_bar should match
         the ones from read_group, even in edge cases like en_US locale on sundays
         """
@@ -719,3 +714,66 @@ class TestORM(TestActivityCommon):
         self.assertEqual(groups[0][groupby], pg_groups["overdue"])
         self.assertEqual(groups[1][groupby], pg_groups["today"])
         self.assertEqual(groups[2][groupby], pg_groups["planned"])
+
+    def test_read_progress_bar_security(self):
+        """ Test that ``ir.rules`` are applied when reading the progress bar. """
+        TestModel = self.env['mail.test.activity'].with_context(lang='en_US')
+        today = fields.Date.context_today(TestModel)
+
+        self.env['ir.rule'].create([
+            {
+                "domain_force": "[('user_id', '=', user.id)]",
+                "groups": [(4, self.env.ref("base.group_user").id)],
+                "model_id": self.env["ir.model"]._get_id("mail.activity"),
+                "name": "User: See own activities",
+            },
+            {
+                "domain_force": "[(1, '=', 1)]",
+                "groups": [(4, self.env.ref("base.group_user").id)],
+                "model_id": self.env["ir.model"]._get_id("mail.activity"),
+                "name": 'Admin: See all activities',
+            }
+        ])
+        test_record = TestModel.create({
+            "date": fields.Date.today(),
+            "name": "Test Record",
+        })
+        for date_dl, user in [
+            # admin: overdue
+            (today - timedelta(days=7), self.user_admin),
+            (today, self.user_admin),
+            (today + timedelta(days=7), self.user_admin),
+            # employee: just a planned one
+            (today + timedelta(days=7), self.user_employee),
+        ]:
+            test_record.with_user(user).activity_schedule(
+                "test_mail.mail_act_test_todo",
+                summary=f"For {user.name} at {date_dl}",
+                date_deadline=date_dl,
+            )
+
+        rpb_domain = [('id', 'in', test_record.ids)]
+        progress_bar = {
+            "field": "activity_state",
+            "colors": {
+                "overdue": "danger",
+                "today": "warning",
+                "planned": "success",
+            },
+        }
+
+        res = TestModel.read_progress_bar(rpb_domain, group_by="date:week", progress_bar=progress_bar)
+        print("cacaboum", res)
+        with self.subTest(reason="Admin sees all"):
+            group = list(res.values())[0]
+            self.assertEqual(group['overdue'], 1, "Admin sees the overdue activity, thus the progress bar is red")
+            self.assertFalse(group['planned'])
+            self.assertFalse(group['today'])
+
+        res = TestModel.with_user(self.user_employee).read_progress_bar(rpb_domain, group_by="date:week", progress_bar=progress_bar)
+        print("cacaboum", res)
+        with self.subTest(reason="Employee sees own"):
+            group = list(res.values())[0]
+            self.assertEqual(group['planned'], 1, "Employee sees only his activities, thus the progress bar is green")
+            self.assertFalse(group['overdue'])
+            self.assertFalse(group['today'])
