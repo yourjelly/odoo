@@ -12,6 +12,7 @@
                     <field name="can_edit_wizard" invisible="1" force_save="1"/>
                     <field name="can_group_payments" invisible="1" force_save="1"/>
                     <field name="early_payment_discount_mode" invisible="1" force_save="1"/>
+                    <field name="installments_mode" invisible="1"/>
                     <field name="payment_type" invisible="1" force_save="1"/>
                     <field name="partner_type" invisible="1" force_save="1"/>
                     <field name="source_amount" invisible="1" force_save="1"/>
@@ -60,6 +61,40 @@
                                    context="{'display_account_trust': True, 'default_partner_id': partner_id}"/>
                             <field name="group_payment"
                                    invisible="not can_group_payments"/>
+                            <label for="payment_difference" invisible="payment_difference == 0.0 or early_payment_discount_mode or not can_edit_wizard or can_group_payments and not group_payment"/>
+                            <div invisible="payment_difference == 0.0 or early_payment_discount_mode or not can_edit_wizard or can_group_payments and not group_payment">
+                                <field name="payment_difference"/>
+                                <field name="payment_difference_handling" widget="radio" nolabel="1"/>
+                                <div class="o_inner_group grid col-lg-12 p-0"
+                                     invisible="hide_writeoff_section or payment_difference_handling == 'open'">
+                                    <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0">
+                                        <div class="o_cell o_wrap_label text-break text-900">
+                                            <label for="writeoff_account_id"
+                                                   string="Post Difference In"
+                                                   class="oe_edit_only"/>
+                                        </div>
+                                        <div class="o_cell o_wrap_input text-break">
+                                            <field name="writeoff_account_id"
+                                                   string="Post Difference In"
+                                                   options="{'no_create': True}"
+                                                   required="payment_difference_handling == 'reconcile' and not early_payment_discount_mode"/>
+                                        </div>
+                                    </div>
+                                    <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0">
+                                        <div class="o_cell o_wrap_label text-break text-900">
+                                            <label for="writeoff_label"
+                                                   class="oe_edit_only"
+                                                   string="Label"
+                                                   invisible="writeoff_is_exchange_account"/>
+                                        </div>
+                                        <div class="o_cell o_wrap_input text-break">
+                                            <field name="writeoff_label"
+                                                   required="payment_difference_handling == 'reconcile'"
+                                                   invisible="writeoff_is_exchange_account"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </group>
                         <group name="group2">
                             <label for="amount"
@@ -72,31 +107,22 @@
                                        options="{'no_create': True, 'no_open': True}"
                                        groups="base.group_multi_currency"/>
                             </div>
+                            <div invisible="is_amount_forced_by_user or not installments_mode or currency_id != source_currency_id or not can_edit_wizard or can_group_payments and not group_payment"/>
+                            <div invisible="is_amount_forced_by_user or installments_mode != 'overdue' or not can_edit_wizard or can_group_payments and not group_payment">
+                                This is the overdue amount.<br/>
+                                Consider paying the <button name="action_switch_installments" type="object" class="btn btn-link p-0 align-baseline">full amount</button>.
+                            </div>
+                            <div invisible="is_amount_forced_by_user or installments_mode != 'next' or currency_id != source_currency_id or not can_edit_wizard or can_group_payments and not group_payment">
+                                This is the next unreconciled installment.<br/>
+                                Consider paying the <button name="action_switch_installments" type="object" class="btn btn-link p-0 align-baseline">full amount</button>.
+                            </div>
+                            <div invisible="is_amount_forced_by_user or installments_mode != 'full' or currency_id != source_currency_id or not can_edit_wizard or can_group_payments and not group_payment">
+                                This is the full amount.<br/>
+                                Consider paying in <button name="action_switch_installments" type="object" class="btn btn-link p-0 align-baseline">installments</button> instead.
+                            </div>
                             <field name="payment_date"/>
                             <field name="communication"
                                    invisible="not can_edit_wizard or (can_group_payments and not group_payment)"/>
-                        </group>
-                        <group name="group3"
-                               invisible="payment_difference == 0.0 or early_payment_discount_mode or not can_edit_wizard or can_group_payments and not group_payment">
-                            <label for="payment_difference"/>
-                            <div>
-                                <field name="payment_difference"/>
-                                <field name="payment_difference_handling" widget="radio" nolabel="1"/>
-                                <div invisible="hide_writeoff_section or payment_difference_handling == 'open'">
-                                    <label for="writeoff_account_id" string="Post Difference In" class="oe_edit_only"/>
-                                    <field name="writeoff_account_id"
-                                           string="Post Difference In"
-                                           options="{'no_create': True}"
-                                           required="payment_difference_handling == 'reconcile' and not early_payment_discount_mode"/>
-                                    <label for="writeoff_label"
-                                           class="oe_edit_only"
-                                           string="Label"
-                                           invisible="writeoff_is_exchange_account"/>
-                                    <field name="writeoff_label"
-                                           required="payment_difference_handling == 'reconcile'"
-                                           invisible="writeoff_is_exchange_account"/>
-                                </div>
-                            </div>
                         </group>
                         <field name="qr_code" invisible="1"/>
                         <div invisible="not qr_code" colspan="2" class="text-center">

@@ -4836,6 +4836,72 @@ class AccountMove(models.Model):
     def is_outbound(self, include_receipts=True):
         return self.move_type in self.get_outbound_types(include_receipts)
 
+    def _get_installments_payment_data(self):
+        """Get the installments data for this move, containing the installment number, date, total amount and
+        residual amount. The amounts returned are always positive. If there are no installments, the function
+        returns an empty list.
+
+        :return: A list with installments, each of them in the form
+            ```py
+            {
+                'number': 1,
+                'date': datetime.date(2024, 8, 31),
+                'amount': 1000.0,
+                'amount_residual': 100.0,
+            }
+            ```
+        :rtype: list
+        """
+        self.ensure_one()
+        installments = []
+        for i, line in enumerate(
+            self.line_ids.filtered(lambda l: l.display_type == 'payment_term').sorted('date_maturity'), 1
+        ):
+            installments.append(
+                {
+                    'number': i,
+                    'date': line.date_maturity,
+                    'amount': -self.direction_sign * line.amount_currency,
+                    'amount_residual': -self.direction_sign * line.amount_residual_currency,
+                }
+            )
+        return installments if len(installments) > 1 else []
+
+    def get_next_installment_due(self):
+        """Get the next installment due when there are installments and the residual amount of the next installment
+        is smaller than the total residual amount of the invoice.
+
+        :return: A dict in the form
+            ```py
+            {
+                'number': 1,
+                'date': datetime.date(2024, 8, 31),
+                'amount': 1000.0,
+                'amount_residual': 100.0,
+            }
+            ```
+            or False
+        :rtype: dict | bool
+        """
+        self.ensure_one()
+        for installment in self._get_installments_payment_data():
+            if installment['amount_residual'] > 0 and installment['amount_residual'] < self.amount_residual:
+                return installment
+        return False
+
+    def get_overdue_installments_amount(self):
+        """Get the total overdue amount of all installments, if there are installments overdue.
+
+        :return: The total overdue amount of the installments or 0.0 if there are no installments or no overdue ones.
+        :rtype: float
+        """
+        self.ensure_one()
+        overdue_amount = 0.0
+        for installment in self._get_installments_payment_data():
+            if installment['date'] < fields.Date.today():
+                overdue_amount += installment['amount_residual']
+        return overdue_amount
+
     def _get_accounting_date(self, invoice_date, has_tax, lock_dates=None):
         """Get correct accounting date for previous periods, taking tax lock date and affected journal into account.
         When registering an invoice in the past, we still want the sequence to be increasing.

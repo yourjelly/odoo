@@ -114,10 +114,29 @@
                     <t t-set="classes" t-value="'col-lg-4 col-xxl-3 d-print-none'"/>
                     <t t-set="title">
                         <h2 class="mb-0 text-break">
-                            <span t-if="invoice.amount_residual > 0" t-field="invoice.amount_residual"/>
-                            <span t-else="1" t-field="invoice.amount_total"/>
+                            <span t-field="invoice.amount_total"/>
                         </h2>
-                        <div class="small" t-if="invoice.payment_state not in ('paid', 'in_payment', 'reversed') and invoice.move_type == 'out_invoice'"><i class="fa fa-clock-o"/><span class="o_portal_sidebar_timeago ml4" t-att-datetime="invoice.invoice_date_due"/></div>
+                        <div class="small" t-if="invoice.payment_state not in ('paid', 'in_payment', 'reversed') and invoice.move_type == 'out_invoice'">
+                            <i class="fa fa-clock-o"/><span class="o_portal_sidebar_timeago ml4" t-att-datetime="invoice.invoice_date_due"/>
+                        </div>
+                        <div class="my-3 w-100">
+                            <div class="alert alert-success w-100 px-2 py-1 text-center" t-if="invoice.amount_total != invoice.amount_residual">
+                                Amount Paid: <span t-out="invoice.amount_total - invoice.amount_residual" t-options="{'widget': 'monetary', 'display_currency': invoice.currency_id}"/>
+                            </div>
+                            <div class="alert alert-warning w-100 px-2 py-1 text-center" t-if="invoice.amount_residual">
+                                Amount Due: <span t-field="invoice.amount_residual"/>
+                            </div>
+                        </div>
+                        <t t-set="next_installment" t-value="invoice.get_next_installment_due()"/>
+                        <h4 class="w-100" t-if="(next_installment or amount_custom) and invoice.payment_state not in ('paid', 'in_payment', 'reversed') and invoice.move_type == 'out_invoice'">
+                            Next Installment
+                        </h4>
+                        <h3 class="mb-0 text-break" t-if="(next_installment or amount_custom) and invoice.payment_state not in ('paid', 'in_payment', 'reversed') and invoice.move_type == 'out_invoice'">
+                            <span t-out="amount_custom or next_installment['amount_residual']" t-options="{'widget': 'monetary', 'display_currency': invoice.currency_id}"/>
+                        </h3>
+                        <div class="small" t-if="(next_installment or amount_custom) and invoice.payment_state not in ('paid', 'in_payment', 'reversed') and invoice.move_type == 'out_invoice'">
+                            <i class="fa fa-clock-o"/><span class="o_portal_sidebar_timeago ml4" t-att-datetime="(next_installment and next_installment['date']) or invoice.invoice_date_due"/>
+                        </div>
                     </t>
 
                     <t t-set="entries">
