@@ -43,7 +43,7 @@ registry.category("web_tour.tours").add("test_user_switch", {
         },
         {
             content: "Check back button to back on the quick login page",
-            trigger: ".oe_login_form .btn",
+            trigger: ".oe_login_form .o_back_button",
             run: "click",
         },
         {
@@ -98,7 +98,7 @@ registry.category("web_tour.tours").add("test_user_switch", {
         },
         {
             content: "Check back button to back on the quick login page",
-            trigger: ".oe_login_form .btn",
+            trigger: ".oe_login_form .o_back_button",
             run: "click",
         },
         {
@@ -124,7 +124,7 @@ registry.category("web_tour.tours").add("test_user_switch", {
         },
         {
             content: "Check back button to back on the quick login page",
-            trigger: ".oe_login_form .btn",
+            trigger: ".oe_login_form .o_back_button",
             run: "click",
         },
         {
@@ -138,7 +138,7 @@ registry.category("web_tour.tours").add("test_user_switch", {
             run() {
                 assertEqual(document.querySelector("input#login").value, "");
                 assertEqual(document.querySelector("input#password").value, "");
-                document.querySelector(".oe_login_form .btn").click();
+                document.querySelector(".oe_login_form .o_back_button").click();
             },
         },
         {

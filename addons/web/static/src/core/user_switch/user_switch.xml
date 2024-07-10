@@ -18,11 +18,9 @@
                 </div>
             </div>
         </t>
-        <t t-if="displayBackButton">
-            <div class="btn p-0" style="filter:invert(.5)" t-on-click="() => this.toggleFormDisplay()">
-                <svg style="transform:rotate(135deg);" xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="-7 -7 24 24" preserveAspectRatio="xMinYMin">
-                    <path fill="#FFF" d="M8 8V1a1 1 0 1 1 2 0v8a1 1 0 0 1-1 1H1a1 1 0 1 1 0-2h7z"/>
-                </svg>
+        <t t-if="displayBackButton" t-portal="'.oe_login_buttons > *:nth-child(2)'">
+            <div class="o_back_button btn btn-sm btn-link p-0" t-on-click="() => this.toggleFormDisplay()">
+                Choose a previous user
             </div>
         </t>
     </t>
