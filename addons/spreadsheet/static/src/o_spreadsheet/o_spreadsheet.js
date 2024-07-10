@@ -11372,7 +11372,7 @@
                 operand = descr;
             }
         }
-        if (isNumber(operand)) {
+        if (isNumber(operand) || isDateTime(operand)) {
             operand = toNumber(operand);
         }
         else if (operand === "TRUE" || operand === "FALSE") {
@@ -43436,8 +43436,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.47';
-    __info__.date = '2024-07-08T05:55:12.647Z';
-    __info__.hash = 'f52ca6f';
+    __info__.date = '2024-07-10T12:38:59.932Z';
+    __info__.hash = '5776d5f';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
