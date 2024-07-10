@@ -22,6 +22,7 @@ from odoo.tools import (
     float_compare,
     float_is_zero,
     float_repr,
+    float_round,
     format_amount,
     format_date,
     formatLang,
@@ -3507,6 +3508,9 @@ class AccountMove(models.Model):
             aml = aml_values['aml']
             invoice = aml.move_id
 
+            if invoice.invoice_payment_term_id.early_pay_credit_note:
+                continue
+
             if invoice not in res_per_invoice:
                 res_per_invoice[invoice] = invoice._get_invoice_counterpart_amls_for_early_payment_discount_per_payment_term_line()
 
@@ -3554,6 +3558,58 @@ class AccountMove(models.Model):
             ]
             for key, mapping in res.items()
         }
+
+    @api.model
+    def _create_credit_note_for_early_payment_discount(self, aml_values_list, open_balance):
+        for aml_value in aml_values_list:
+            partner_id = aml_value['aml'].partner_id.id
+            journal_id = aml_value['aml'].move_id.journal_id.id
+            invoice = aml_value['aml'].move_id
+            payment_term = invoice.invoice_payment_term_id
+
+            if not payment_term.early_pay_credit_note:
+                return
+
+            move_type = (
+                "out_refund"
+                if invoice.is_sale_document()
+                else "in_refund" if invoice.is_purchase_document() else None
+            )
+            cash_discount_account = (
+                invoice.company_id.account_journal_early_pay_discount_loss_account_id
+                if invoice.is_inbound(include_receipts=True)
+                else invoice.company_id.account_journal_early_pay_discount_gain_account_id
+            )
+            credit_note_vals = {
+                'move_type': move_type,
+                'partner_id': partner_id,
+                'journal_id': journal_id,
+                'invoice_origin': invoice.name,
+                'reversed_entry_id': invoice.id,
+                'invoice_line_ids': [],
+            }
+            for line in invoice.invoice_line_ids:
+                discount_amount = float_round(
+                    line.price_subtotal * (
+                        open_balance / (
+                            invoice.amount_total
+                            if payment_term.early_pay_discount_computation == "included"
+                            else invoice.amount_untaxed
+                        )
+                    ),
+                    precision_rounding=line.currency_id.rounding,
+                )
+                if not float_is_zero(discount_amount, precision_rounding=line.currency_id.rounding):
+                    credit_note_line_vals = {
+                        'name': "Early Discount: " + line.name,
+                        'account_id': cash_discount_account.id,
+                        'quantity': 1,
+                        'price_unit': discount_amount * (-1 if move_type == "in_refund" else 1),
+                        'tax_ids': [(6, 0, line.tax_ids.ids)] if payment_term.early_pay_discount_computation == 'included' else []
+                    }
+                    credit_note_vals['invoice_line_ids'].append((0, 0, credit_note_line_vals))
+
+            self.env['account.move'].create(credit_note_vals)
 
     def _affect_tax_report(self):
         return any(line._affect_tax_report() for line in (self.line_ids | self.invoice_line_ids))

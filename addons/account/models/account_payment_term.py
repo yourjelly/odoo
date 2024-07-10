@@ -43,6 +43,7 @@ class AccountPaymentTerm(models.Model):
         ('excluded', 'Never'),
         ('mixed', 'Always (upon invoice)'),
     ], string='Cash Discount Tax Reduction', readonly=False, store=True, compute='_compute_discount_computation')
+    early_pay_credit_note = fields.Boolean(string='Create Credit Note', help="Create credit note of early payment discount")
     early_discount = fields.Boolean(string='Early Discount')
 
     @api.depends('company_id')

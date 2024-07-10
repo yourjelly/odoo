@@ -33,6 +33,11 @@ class AccountPaymentRegister(models.TransientModel):
         compute='_compute_journal_id', store=True, readonly=False, precompute=True,
         check_company=True,
         domain="[('id', 'in', available_journal_ids)]")
+    journal_for_credit_note = fields.Many2one(
+        comodel_name='account.journal',
+        compute="_compute_journal_for_credit_note",
+        check_company=True
+    )
     available_journal_ids = fields.Many2many(
         comodel_name='account.journal',
         compute='_compute_available_journal_ids'
@@ -435,6 +440,15 @@ class AccountPaymentRegister(models.TransientModel):
                     ('id', 'in', self.available_journal_ids.ids)
                 ], limit=1)
 
+    @api.depends('can_edit_wizard', 'early_payment_discount_mode')
+    def _compute_journal_for_credit_note(self):
+        for wizard in self:
+            if wizard.can_edit_wizard and wizard.early_payment_discount_mode:
+                batch = wizard._get_batches()[0]
+                wizard.journal_for_credit_note = batch['lines']['journal_id']
+            else:
+                wizard.journal_for_credit_note = False
+
     @api.depends('can_edit_wizard', 'journal_id')
     def _compute_available_partner_bank_ids(self):
         for wizard in self:
@@ -708,6 +722,7 @@ class AccountPaymentRegister(models.TransientModel):
                 early_payment_values = self.env['account.move']._get_invoice_counterpart_amls_for_early_payment_discount(epd_aml_values_list, open_balance)
                 for aml_values_list in early_payment_values.values():
                     payment_vals['write_off_line_vals'] += aml_values_list
+                self.env['account.move']._create_credit_note_for_early_payment_discount(epd_aml_values_list, open_balance)
 
             elif not self.currency_id.is_zero(self.payment_difference):
 
@@ -785,6 +800,7 @@ class AccountPaymentRegister(models.TransientModel):
                 ._get_invoice_counterpart_amls_for_early_payment_discount(epd_aml_values_list, open_balance)
             for aml_values_list in early_payment_values.values():
                 payment_vals['write_off_line_vals'] += aml_values_list
+            self.env['account.move']._create_credit_note_for_early_payment_discount(epd_aml_values_list, open_balance)
 
         return payment_vals
 
