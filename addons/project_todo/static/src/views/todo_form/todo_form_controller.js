@@ -11,6 +11,7 @@ import { onWillStart, useState } from "@odoo/owl";
 import { TodoTagIds } from "../../components/todo_tag_ids/todo_tag_ids";
 import { TodoUserIds } from "../../components/todo_user_ids/todo_user_ids";
 import { TodoChatterPanel } from "../../components/todo_chatter_panel/todo_chatter_panel";
+import { StatusBarField } from "@web/views/fields/statusbar/statusbar_field";
 /**
  *  The FormController is overridden to be able to manage the edition of the name of a to-do directly
  *  in the breadcrumb as well as the mark as done button next to it.
@@ -26,6 +27,7 @@ export class TodoFormController extends FormController {
         TodoTagIds,
         TodoUserIds,
         TodoChatterPanel,
+        StatusBarField,
     };
     setup() {
         super.setup();

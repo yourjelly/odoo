@@ -31,6 +31,7 @@ beforeEach(() => {
                 <field name="tag_ids"/>
                 <field name="user_ids"/>
                 <field name="priority"/>
+                <field name="personal_stage_type_id"/>
             </form>`,
         search: `
             <search/>`,

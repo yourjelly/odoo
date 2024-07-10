@@ -46,6 +46,14 @@
                     id="'user_ids'"
                 />
             </t>
+            <t t-set-slot="todo-personal-stage">
+                <t t-set="record" t-value="model.root"/>
+                <StatusBarField 
+                    name="'personal_stage_type_id'"
+                    record="record"
+                    id="'personal_stage_type_id'"
+                />
+            </t>
             <t t-set-slot="todo-chatter-panel">
                 <t t-set="record" t-value="model.root"/>
                 <TodoChatterPanel

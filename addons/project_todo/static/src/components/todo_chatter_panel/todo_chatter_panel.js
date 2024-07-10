@@ -1,4 +1,5 @@
 /** @odoo-module */
+
 import { Component, useState, useRef, onWillStart } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from '@web/views/widgets/standard_widget_props';
@@ -6,7 +7,6 @@ import { Chatter } from '@mail/chatter/web_portal/chatter';
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
 import { SIZES } from "@web/core/ui/ui_service";
-
 
 export class TodoChatter extends Component {
     static template = "project_todo.TodoChatter";
@@ -37,7 +37,6 @@ export class TodoChatter extends Component {
         return this.ui.size >= SIZES.LG;
     }
 }
-
 
 export const todoChatter = {
     component: TodoChatter,

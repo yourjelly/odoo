@@ -4,7 +4,7 @@ import { mailModels } from "@mail/../tests/mail_test_helpers";
 import { projectModels } from "@project/../tests/project_models";
 
 import { ProjectTask } from "./mock_server/mock_models/project_task";
-import { ProjectTags } from "./mock_server/mock_models/project_tags";
+import { ProjectTags, ProjectTaskStagePersonal } from "./mock_server/mock_models/project_tags";
 import { MailActivityTodoCreate } from "./mock_server/mock_models/mail_activity_todo_create";
 
 export function defineTodoModels() {
@@ -17,4 +17,5 @@ export const todoodoModels = {
     ProjectTask,
     ProjectTags,
     MailActivityTodoCreate,
+    ProjectTaskStagePersonal,
 };
