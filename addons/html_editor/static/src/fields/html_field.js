@@ -101,6 +101,16 @@ export class HtmlField extends Component {
         return `${this.props.record.resId}_${this.state.key}`;
     }
 
+    get wysiwygProps() {
+        return {
+            iframe: false,
+            config: this.getConfig(),
+            onLoad: this.onEditorLoad.bind(this),
+            contentClass: "note-editable p-1",
+            onBlur: this.onBlur.bind(this),
+        };
+    }
+
     get sandboxedPreview() {
         // @todo @phoenix maybe remove containsComplexHTML and alway use sandboxedPreview options
         return this.props.sandboxedPreview || this.state.containsComplexHTML;

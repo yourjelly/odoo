@@ -1914,7 +1914,7 @@ class SnippetsMenu extends Component {
             // TODO: Remove this and instead, use a callback once the editor is
             // ready, or make the parent component independent of SnippetsMenu
             // being mounted.
-            this.props.mountedProm.resolve();
+            // this.props.mountedProm.resolve();
             this.el.classList.add("o_loaded");
             this.el.ownerDocument.body.classList.toggle('editor_has_snippets', !this.folded);
         });
@@ -2009,11 +2009,13 @@ class SnippetsMenu extends Component {
 
         const toolbarEl = this._toolbarWrapperEl.firstChild;
         toolbarEl.classList.remove('oe-floating');
-        this.options.wysiwyg.toolbarEl.classList.add('d-none');
-        this.options.wysiwyg.setupToolbar(toolbarEl);
-        this._addToolbar();
+        if (this.options.wysiwyg.toolbarEl) {
+            this.options.wysiwyg.toolbarEl.classList.add('d-none');
+            this.options.wysiwyg.setupToolbar(toolbarEl);
+        }
+        // this._addToolbar();
         this._checkEditorToolbarVisibilityCallback = this._checkEditorToolbarVisibility.bind(this);
-        $(this.options.wysiwyg.odooEditor.document.body).on('click', this._checkEditorToolbarVisibilityCallback);
+        // $(this.options.wysiwyg.odooEditor.document.body).on('click', this._checkEditorToolbarVisibilityCallback);
 
         // Prepare snippets editor environment
         this.$snippetEditorArea = $('<div/>', {

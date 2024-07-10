@@ -629,4 +629,4 @@ export const massMailingHtmlField = {
     fieldDependencies: [{ name: 'body_html', type: 'html', readonly: 'false' }],
 };
 
-registry.category("fields").add("mass_mailing_html", massMailingHtmlField);
+// registry.category("fields").add("mass_mailing_html", massMailingHtmlField);

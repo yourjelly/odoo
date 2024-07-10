@@ -1,0 +1,8 @@
+<templates xml:space="preserve">
+    <t t-name="mass_mailing.MassMailingHtmlField" t-inherit="html_editor.HtmlField">
+        <xpath expr="//Wysiwyg" position="after">
+        
+             <t t-component="this.MassMailingSnippetsMenu" t-props="this.menuProps"/>
+        </xpath>
+    </t>
+</templates>

@@ -523,7 +523,6 @@ export class HistoryPlugin extends Plugin {
         // mutations of the revert itself will be added to the same step and
         // grow exponentially at each undo.
         lastStep.mutations = [];
-
         const pos = this.getNextUndoIndex();
         if (pos > 0) {
             // Consider the position consumed.

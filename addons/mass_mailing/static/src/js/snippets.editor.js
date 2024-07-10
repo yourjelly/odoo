@@ -4,6 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import snippetsEditor from "@web_editor/js/editor/snippets.editor";
 import { MassMailingMobilePreviewDialog } from "./mass_mailing_mobile_preview";
 import { markup, useEffect, useState } from "@odoo/owl";
+import { registry } from "@web/core/registry";
 
 export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
     static tabs = Object.assign({}, snippetsEditor.SnippetsMenu.tabs, {
@@ -221,3 +222,5 @@ export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
         });
     }
 }
+
+registry.category("lazy_components").add("MassMailingSnippetsMenu", MassMailingSnippetsMenu);

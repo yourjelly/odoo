@@ -6,7 +6,7 @@ import { Toolbar } from "./main/toolbar/toolbar";
  * @typedef { import("./editor").EditorConfig } EditorConfig
  **/
 
-function copyCssRules(sourceDoc, targetDoc) {
+export function copyCssRules(sourceDoc, targetDoc) {
     for (const sheet of sourceDoc.styleSheets) {
         const rules = [];
         for (const r of sheet.cssRules) {
