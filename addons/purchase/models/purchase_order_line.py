@@ -88,6 +88,11 @@ class PurchaseOrderLine(models.Model):
             "Forbidden values on non-accountable purchase order line"),
     ]
 
+    @api.depends('name', 'order_id')
+    def _compute_display_name(self):
+        for line in self:
+            line.display_name = f"{line.order_id.name}: {line.name}"
+
     @api.depends('product_qty', 'price_unit', 'taxes_id', 'discount')
     def _compute_amount(self):
         for line in self:
