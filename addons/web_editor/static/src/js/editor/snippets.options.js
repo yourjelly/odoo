@@ -8777,7 +8777,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
                 ? Math.min(viewportBottom, rect.bottom) - rect.top // Starts inside
                 : 0; // Starts after
         if (visibleHeight < 200) {
-            await scrollTo(this.$target[0], {extraOffset: 50});
+            await scrollTo(this.$target[0], { behavior: "smooth", offset: 50 });
         }
         this._toggleBgOverlay(true);
     },

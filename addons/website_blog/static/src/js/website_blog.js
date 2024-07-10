@@ -97,6 +97,6 @@ publicWidget.registry.websiteBlog = publicWidget.Widget.extend({
      * @param {Function} callback - to be executed after the scroll is performed
      */
     _forumScrollAction: function ($el, duration, callback) {
-        scrollTo($el[0], {duration: duration}).then(() => callback());
+        scrollTo($el[0], { behavior: "smooth" }).then(() => callback());
     },
 });

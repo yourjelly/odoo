@@ -329,7 +329,7 @@ publicWidget.registry.portalChatter = publicWidget.Widget.extend({
         await Promise.all(proms);
         // scroll to the right place after chatter loaded
         if (window.location.hash === `#${this.el.id}`) {
-            scrollTo(this.el, {duration: 0});
+            scrollTo(this.el, { behavior: "instant" });
         }
     },
 });

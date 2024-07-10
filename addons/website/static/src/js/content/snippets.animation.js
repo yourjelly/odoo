@@ -941,8 +941,8 @@ registry.anchorSlide = publicWidget.Widget.extend({
      */
     async _scrollTo($el, scrollValue = 'true') {
         return scrollTo($el[0], {
-            duration: scrollValue === 'true' ? 500 : 0,
-            extraOffset: this._computeExtraOffset(),
+            behavior: scrollValue === 'true' ? "smooth" : "instant",
+            offset: this._computeExtraOffset(),
         });
     },
     /**
@@ -1012,8 +1012,8 @@ registry.anchorSlide = publicWidget.Widget.extend({
             // or to the bottom of the document even if the header or the
             // footer is removed from the DOM.
             scrollTo(hash, {
-                duration: 500,
-                extraOffset: this._computeExtraOffset(),
+                behavior: "smooth",
+                offset: this._computeExtraOffset(),
             });
         } else {
             this._scrollTo($anchor, scrollValue);

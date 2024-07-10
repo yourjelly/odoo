@@ -174,7 +174,8 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
             const replyEl = document.querySelector('#post_reply');
             const scrollingElement = $(replyEl.parentNode).closestScrollable()[0];
             scrollTo(replyEl, {
-                forcedOffset: $(scrollingElement).innerHeight() - $(replyEl).innerHeight(),
+                behavior: "smooth",
+                offset: $(scrollingElement).innerHeight() - $(replyEl).innerHeight(),
             });
         });
         document.querySelectorAll('.o_wforum_question, .o_wforum_answer, .o_wforum_post_comment, .o_wforum_last_activity')

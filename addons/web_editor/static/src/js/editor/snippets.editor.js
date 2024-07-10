@@ -3719,7 +3719,7 @@ class SnippetsMenu extends Component {
             return;
         }
         const scrollable = $scrollable?.get(0);
-        return scrollTo($el[0], {extraOffset: 50, scrollable: scrollable});
+        return scrollTo($el[0], { behavior: "smooth", offset: 50, scrollable: scrollable });
     }
     /**
      * @private

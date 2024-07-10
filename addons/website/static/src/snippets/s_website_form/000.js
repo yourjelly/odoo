@@ -426,8 +426,8 @@ import wUtils from '@website/js/utils';
                                         window.location.href = successPage;
                                     } else {
                                         await scrollTo(successAnchorEl, {
-                                            duration: 500,
-                                            extraOffset: 0,
+                                            behavior: "smooth",
+                                            offset: 0,
                                         });
                                     }
                                 }

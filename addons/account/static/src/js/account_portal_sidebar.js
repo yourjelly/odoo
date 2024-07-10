@@ -57,7 +57,7 @@ publicWidget.registry.AccountPortalSidebar = PortalSidebar.extend({
         if (!$target.length) {
             return;
         }
-        scrollTo($target[0], {duration: 0});
+        scrollTo($target[0], { behavior: "instant" });
     },
     /**
      * @private
