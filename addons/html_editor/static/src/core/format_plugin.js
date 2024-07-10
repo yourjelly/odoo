@@ -42,11 +42,14 @@ export class FormatPlugin extends Plugin {
             { hotkey: "control+u", command: "FORMAT_UNDERLINE" },
             { hotkey: "control+5", command: "FORMAT_STRIKETHROUGH" },
         ],
-        toolbarCategory: { id: "decoration", sequence: 20 },
+        toolbarCategory: [
+            { id: "style", sequence: 20 },
+            { id: "remove_format", sequence: 26 },
+        ],
         toolbarItems: [
             {
                 id: "bold",
-                category: "decoration",
+                category: "style",
                 action(dispatch) {
                     dispatch("FORMAT_BOLD");
                 },
@@ -56,7 +59,7 @@ export class FormatPlugin extends Plugin {
             },
             {
                 id: "italic",
-                category: "decoration",
+                category: "style",
                 action(dispatch) {
                     dispatch("FORMAT_ITALIC");
                 },
@@ -66,7 +69,7 @@ export class FormatPlugin extends Plugin {
             },
             {
                 id: "underline",
-                category: "decoration",
+                category: "style",
                 action(dispatch) {
                     dispatch("FORMAT_UNDERLINE");
                 },
@@ -76,7 +79,7 @@ export class FormatPlugin extends Plugin {
             },
             {
                 id: "strikethrough",
-                category: "decoration",
+                category: "style",
                 action(dispatch) {
                     dispatch("FORMAT_STRIKETHROUGH");
                 },

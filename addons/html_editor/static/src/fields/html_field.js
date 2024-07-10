@@ -77,11 +77,7 @@ export class HtmlField extends Component {
         useRecordObserver((record) => {
             // Reset Wysiwyg when we discard or onchange value
             if (!this.isDirty && this.lastValue !== record.data[this.props.name].toString()) {
-                this.state.key++;
-                this.state.containsComplexHTML = computeContainsComplexHTML(
-                    record.data[this.props.name]
-                );
-                this.lastValue = record.data[this.props.name].toString();
+                this.onApplyExternalContent(record);
             }
         });
         useRecordObserver((record) => {
@@ -105,6 +101,16 @@ export class HtmlField extends Component {
         return `${this.props.record.resId}_${this.state.key}`;
     }
 
+    get wysiwygProps() {
+        return {
+            iframe: false,
+            config: this.getConfig(),
+            onLoad: this.onEditorLoad.bind(this),
+            contentClass: "note-editable p-1",
+            onBlur: this.onBlur.bind(this),
+        };
+    }
+
     get sandboxedPreview() {
         // @todo @phoenix maybe remove containsComplexHTML and alway use sandboxedPreview options
         return this.props.sandboxedPreview || this.state.containsComplexHTML;
@@ -112,6 +118,14 @@ export class HtmlField extends Component {
 
     get isTranslatable() {
         return this.props.record.fields[this.props.name].translate;
+    }
+
+    onApplyExternalContent(record) {
+        this.state.key++;
+        this.state.containsComplexHTML = computeContainsComplexHTML(
+            record.data[this.props.name]
+        );
+        this.lastValue = record.data[this.props.name].toString();
     }
 
     async updateValue(value) {
@@ -277,6 +291,7 @@ export const htmlField = {
             codeview: Boolean(odoo.debug && options.codeview),
         };
     },
+    additionalClasses: ["o_field_html"],
 };
 
 registry.category("fields").add("html", htmlField, { force: true });

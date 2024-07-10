@@ -35,6 +35,7 @@ export class ColorSelector extends Component {
     static components = { Dropdown, Colorpicker, GradientPicker };
     static props = {
         type: String, // either foreground or background
+        dispatch: Function,
         getUsedCustomColors: Function,
         getSelectedColors: Function,
         ...toolbarButtonProps,
