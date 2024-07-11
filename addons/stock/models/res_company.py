@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, fields, models
+from odoo.tools import SQL
 
 
 class Company(models.Model):
@@ -217,13 +218,24 @@ class Company(models.Model):
         if not self.env.user.has_group('base.group_multi_company'):
             return
         other_companies = self.env['res.company'].search([('id', '!=', self.id)])
-        other_companies.partner_id.with_company(self).write({
-            'property_stock_customer': inter_company_location.id,
-            'property_stock_supplier': inter_company_location.id,
-        })
-        for company in other_companies:
-            # Still need to insert those one by one, as the env company must be different every time
-            self.partner_id.with_company(company).write({
-                'property_stock_customer': inter_company_location.id,
-                'property_stock_supplier': inter_company_location.id,
-            })
+        properties = [
+            self.env['ir.model.fields']._get('res.partner', 'property_stock_customer'),
+            self.env['ir.model.fields']._get('res.partner', 'property_stock_supplier'),
+        ]
+        self.env['ir.property'].create([
+            {
+                'name': prop.name,
+                'res_id': 'res.partner,%s' % partner.id,
+                'company_id': company.id,
+                'fields_id': prop.id,
+                'value_reference': 'stock.location,%s' % inter_company_location.id,
+            }
+            for prop in properties
+            for company, partner in [
+                (self, other_partner)
+                for other_partner in other_companies.partner_id
+            ] + [
+                (other_company, self.partner_id)
+                for other_company in other_companies
+            ]
+        ])
