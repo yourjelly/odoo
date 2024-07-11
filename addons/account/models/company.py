@@ -175,6 +175,11 @@ class ResCompany(models.Model):
 
     # Multivat
     fiscal_position_ids = fields.One2many(comodel_name="account.fiscal.position", inverse_name="company_id")
+    account_foreign_fiscal_position_ids = fields.One2many(
+        comodel_name='account.fiscal.position',
+        inverse_name='company_id',
+        domain=[('foreign_vat', '!=', False), ('country_id', '!=', False)],
+    )
     multi_vat_foreign_country_ids = fields.Many2many(
         string="Foreign VAT countries",
         help="Countries for which the company has a VAT number",
@@ -235,21 +240,10 @@ class ResCompany(models.Model):
             if move_count:
                 raise UserError(_("Can't disable audit trail when there are existing records."))
 
-    @api.depends('fiscal_position_ids.foreign_vat')
+    @api.depends('account_foreign_fiscal_position_ids.country_id')
     def _compute_multi_vat_foreign_country(self):
-        company_to_foreign_vat_country = {
-            company.id: country_ids
-            for company, country_ids in self.env['account.fiscal.position']._read_group(
-                domain=[
-                    *self.env['account.fiscal.position']._check_company_domain(self),
-                    ('foreign_vat', '!=', False),
-                ],
-                groupby=['company_id'],
-                aggregates=['country_id:array_agg'],
-            )
-        }
         for company in self:
-            company.multi_vat_foreign_country_ids = self.env['res.country'].browse(company_to_foreign_vat_country.get(company.id))
+            company.multi_vat_foreign_country_ids = company.account_foreign_fiscal_position_ids.country_id
 
     @api.depends('country_id')
     def compute_account_tax_fiscal_country(self):
