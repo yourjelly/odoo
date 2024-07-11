@@ -515,6 +515,7 @@ class Websocket:
 
     def _send_close_frame(self, code, reason=None):
         """ Send a close frame. """
+        _logger.info(code, reason)
         self._send_frame(CloseFrame(code, reason))
 
     def _send_ping_frame(self):
@@ -635,7 +636,9 @@ class Websocket:
         """
         session = root.session_store.get(self._session.sid)
         if not session:
-            raise SessionExpiredException()
+            raise SessionExpiredException()     
+        import time
+        time = time.time()
         with acquire_cursor(session.db) as cr:
             env = api.Environment(cr, session.uid, dict(session.context, lang=None))
             if session.uid is not None and not check_session(session, env):
@@ -643,6 +646,7 @@ class Websocket:
             # Mark the notification request as processed.
             self.__notif_sock_r.recv(1)
             notifications = env['bus.bus']._poll(self._channels, self._last_notif_sent_id)
+        _logger.info("Websocket waited for semaphore: %sms", time - time() * 1000)
         if not notifications:
             return
         self._last_notif_sent_id = notifications[-1]['id']

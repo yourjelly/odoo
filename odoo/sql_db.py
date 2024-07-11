@@ -619,6 +619,12 @@ class PsycoConnection(psycopg2.extensions.connection):
             return PsycoConnectionInfo(self)
 
 
+from odoo.tools import config
+
+WS_CURSORS_COUNT = int(int(config.get("db_maxconn_gevent") or config["db_maxconn"]))
+WS_CURSORS_SEM = threading.Semaphore(WS_CURSORS_COUNT)
+
+
 class ConnectionPool(object):
     """ The pool of connections to database(s)
 
