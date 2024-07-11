@@ -327,6 +327,10 @@ export class KanbanRenderer extends Component {
     getGroupUnloadedCount(group) {
         const records = group.list.records.filter((r) => !r.isInQuickCreation);
         const count = this.props.progressBarState?.getGroupCount(group) || group.count;
+        if(records.length === 0 || (this.props.progressBarState.getGroupInfo(group).activeBar === null && count !== records.length))
+        {
+            return 0;
+        }
         return count - records.length;
     }
 
