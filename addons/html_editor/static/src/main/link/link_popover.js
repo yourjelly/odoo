@@ -4,6 +4,7 @@ import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { cleanZWChars, deduceURLfromText } from "./utils";
 import { KeepLast } from "@web/core/utils/concurrency";
+import { rpc } from "@web/core/network/rpc";
 
 export class LinkPopover extends Component {
     static template = "html_editor.linkPopover";
@@ -48,7 +49,7 @@ export class LinkPopover extends Component {
             urlTitle: "",
             urlDescription: "",
             linkPreviewName: { left: "", right: "" },
-
+            imgSrc: "",
             iconSrc: "",
             classes: this.props.linkEl.className || "",
             type:
@@ -196,33 +197,22 @@ export class LinkPopover extends Component {
             )}`;
             this.state.previewIcon = true;
 
-            // TODO: fetch the metadata from the server for external links
+            let metadata = {};
             // Fetch the metadata
-            this.keepLastPromise
-                .add(
-                    fetch(url, {
-                        header: {
-                            "Access-Control-Allow-Origin": "*",
-                        },
+            try {
+                metadata = await this.keepLastPromise.add(
+                    rpc("/html_editor/link_preview", {
+                        preview_url: url,
                     })
-                )
-                .then((response) => response.text())
-                .then((data) => {
-                    const parser = new window.DOMParser();
-                    const contentDocument = parser.parseFromString(data, "text/html");
-                    const title = contentDocument.querySelector("title");
-                    const description = contentDocument.querySelector("meta[name='description']");
+                );
+            } catch {
+                // when it's not possible to fetch the metadata we don't want to block the ui
+                return;
+            }
 
-                    this.state.urlTitle = title ? title.textContent : this.state.url;
-                    this.state.urlDescription = description
-                        ? description.getAttribute("content")
-                        : "";
-                })
-                .catch((error) => {
-                    // if fetching external link fails, we don't want to block the user
-                    // and the related preview data is set as default
-                    return;
-                });
+            this.state.urlTitle = metadata?.og_title || this.state.url;
+            this.state.urlDescription = metadata?.og_description || "";
+            this.state.imgSrc = metadata?.og_image || "";
         } else {
             // fetch the metadata using jsonify
             const jsonify_url =
@@ -239,7 +229,7 @@ export class LinkPopover extends Component {
             const html_parser = new window.DOMParser();
             this.state.urlDescription = internalUrlData.description
                 ? html_parser.parseFromString(internalUrlData.description, "text/html").body
-                    .textContent
+                      .textContent
                 : "";
             this.state.urlTitle = this.state.linkPreviewName
                 ? this.state.linkPreviewName

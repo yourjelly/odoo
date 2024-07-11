@@ -53,11 +53,11 @@
             </div>
             <div t-else="" class="d-flex flex-column" data-prevent-closing-overlay="true">
                 <div class="d-flex" style="min-width: 250px;">
-                    <span class="col-1 o_we_preview_favicon">
+                    <span class="ms-1 o_we_preview_favicon">
                         <i t-if="!state.previewIcon" t-attf-class="fa {{state.faIcon}}"></i>
                         <img t-else="" t-attf-src="{{state.iconSrc}}" class="align-content-center"></img>
                     </span>
-                    <div class="w-100">
+                    <div class="w-100 ms-1">
                         <div class="d-flex me-1">
                             <a href="#" target="_blank" t-attf-href="{{state.url}}" class="o_we_url_link fw-bold flex-grow-1 text-truncate" style="max-width: 160px;" t-attf-title="{{state.urlTitle}}">
                                 <t t-esc="state.urlTitle"/>
@@ -72,23 +72,28 @@
                                 <i class="fa fa-chain-broken"></i>
                             </a>
                         </div>
+                        <div t-if="state.urlTitle and state.url and state.urlTitle !== state.url" class="text-truncate" style="max-width: 210px; font-size: 12px;">
+                            <span t-attf-class="o_we_full_url mt-1 text-muted o_we_webkit_box" t-attf-title="{{state.url}}">
+                                <t t-esc="state.url || 'No URL specified'"/>
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div class="o_extra_info_card" style="max-width: 235px">
-                    <div t-if="state.urlTitle and state.url and state.urlTitle !== state.url" class="text-truncate offset-md-1" style="font-size: 12px; padding-left: 3px;">
-                        <a href="#" target="_blank" t-attf-href="{{state.url}}" t-attf-class="o_we_full_url mt-1 text-muted o_we_webkit_box" title="Open in a new tab">
-                            <t t-esc="state.url || 'No URL specified'"/>
+                <div class="o_extra_info_card" style="align-self: center; max-width: 235px">
+                    <div t-if="state.imgSrc">
+                        <a href="#" target="_blank" t-attf-href="{{state.url}}" title="Open in a new tab">
+                            <img t-att-src="state.imgSrc" class="img-fluid mb-1" style="max-width: 230; max-height: 100%;"/>
                         </a>
                     </div>
-                    <div t-if="state.urlDescription" class="d-flex">
-                        <i class="fa fa-align-right ms-1 me-1 align-content-center"></i>
-                        <span style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 12px;color: gray; overflow: hidden;" t-attf-title="{{state.urlDescription}}">
-                            <t t-esc="state.urlDescription"/>
-                        </span>
-                    </div>
+                </div>
+                <div t-if="state.urlDescription" class="d-flex">
+                    <i class="fa fa-align-right ms-1 me-1 align-content-center"></i>
+                    <span style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 12px;color: gray; overflow: hidden;" t-attf-title="{{state.urlDescription}}">
+                        <t t-esc="state.urlDescription"/>
+                    </span>
                 </div>
                 <div t-if="state.urlTitle and state.urlTitle !== state.label and state.urlTitle !== state.url" class="d-flex align-items-baseline" style="background-color: #71639e;">
-                    <i class="fa fa-bell fa-fw ms-1 me-1" style="color: white;"></i>
+                    <i class="fa fa-bell fa-fw m-1" style="color: white;"></i>
                     <span class="me-2 flex-grow-1" style="color: white;">Replace URL with its title?</span>
                     <button class=" btn btn-sm btn-primary m-1" t-on-click="onClickReplaceTitle">Yes</button>
                 </div>

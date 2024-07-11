@@ -11,6 +11,8 @@ from os.path import join as opj
 from odoo import _, http, tools, SUPERUSER_ID
 from odoo.addons.html_editor.tools import get_video_url_data
 from odoo.exceptions import UserError, MissingError, AccessError
+# from odoo.addons.html_editor.tools import get_link_preview_from_url
+from odoo.addons.mail.tools import link_preview
 from odoo.http import request
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.addons.http_routing.models.ir_http import slug, unslug
@@ -546,3 +548,7 @@ class HTML_Editor(http.Controller):
         bus_data.update({'model_name': model_name, 'field_name': field_name, 'res_id': res_id})
         request.env['bus.bus']._sendone(channel, 'editor_collaboration', bus_data)
 
+    
+    @http.route('/html_editor/link_preview', type="json", auth="public", cors="*", methods=['POST'])
+    def link_preview_metadata(self, preview_url):
+        return link_preview.get_link_preview_from_url(preview_url)

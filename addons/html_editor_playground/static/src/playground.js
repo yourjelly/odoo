@@ -44,7 +44,7 @@ const testHtml = `Hello Phoenix editor!
     <t t-esc="test">T-esc</t>
     <t t-esc="test">T-field</t>
 </div>
-<p>this is a link: <a href="http://test.com">link</a></p>
+<p>this is a link: <a href="http://github.com">link</a></p>
 <p>this is another link: <a>link2</a></p>
 <p><span contenteditable="false" class="o_stars"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i></span></p>
 <div data-embedded="card" data-title="Some Title">
@@ -170,7 +170,6 @@ export class Playground extends Component {
         this.updateContent();
     }
 
-
     /**
      * @returns {import("@html_editor/plugin").EditorConfig}
      */
@@ -187,8 +186,8 @@ export class Playground extends Component {
                 busService: this.busService,
                 ormService: this.ormService,
                 collaborationChannel: {
-                    collaborationModelName: 'res.users',
-                    collaborationFieldName: 'help',
+                    collaborationModelName: "res.users",
+                    collaborationFieldName: "help",
                     collaborationResId: 1,
                 },
                 peerId: this.generateId(),
