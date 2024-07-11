@@ -67,7 +67,7 @@ export class PosStore extends Reactive {
             pos_data,
             action,
             alert,
-            sound
+            sound,
         }
     ) {
         this.env = env;
