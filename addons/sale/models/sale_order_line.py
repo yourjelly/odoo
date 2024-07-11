@@ -245,7 +245,10 @@ class SaleOrderLine(models.Model):
     def _compute_display_name(self):
         name_per_id = self._additional_name_per_id()
         for so_line in self.sudo():
-            name = '{} - {}'.format(so_line.order_id.name, so_line.name and so_line.name.split('\n')[0] or so_line.product_id.name)
+            name = '{} - {}'.format(
+                so_line.order_id.name,
+                so_line.name and so_line.name.split('\n')[0] or so_line.product_id.name,
+            )
             additional_name = name_per_id.get(so_line.id)
             if additional_name:
                 name = f'{name} {additional_name}'
@@ -317,14 +320,10 @@ class SaleOrderLine(models.Model):
             line.name = line._get_sale_order_line_multiline_description_sale()
 
     def _get_sale_order_line_multiline_description_sale(self):
-        """ Compute a default multiline description for this sales order line.
+        """Compute a default multiline description for this sales order line.
 
-        In most cases the product description is enough but sometimes we need to append information that only
-        exists on the sale order line itself.
-        e.g:
-        - custom attributes and attributes that don't create variants, both introduced by the "product configurator"
-        - in event_sale we need to know specifically the sales order line as well as the product to generate the name:
-          the product is not sufficient because we also need to know the event_id and the event_ticket_id (both which belong to the sale order line).
+        In most cases the product description is enough but sometimes we need to append information
+        that is specified on the sale order line itself.
         """
         self.ensure_one()
         description = (
@@ -341,9 +340,7 @@ class SaleOrderLine(models.Model):
         return description
 
     def _get_sale_order_line_multiline_description_variants(self):
-        """When using no_variant attributes or is_custom values, the product
-        itself is not sufficient to create the description: we need to add
-        information about those special attributes and values.
+        """Generate a description for the product configuration specific to this line.
 
         :return: the description related to special variant attributes/values
         :rtype: string
@@ -376,7 +373,8 @@ class SaleOrderLine(models.Model):
         # Sort the values according to _order settings, because it doesn't work for virtual records in onchange
         sorted_custom_ptav = self.product_custom_attribute_value_ids.custom_product_template_attribute_value_id.sorted()
         for patv in sorted_custom_ptav:
-            pacv = self.product_custom_attribute_value_ids.filtered(lambda pcav: pcav.custom_product_template_attribute_value_id == patv)
+            pacv = self.product_custom_attribute_value_ids.filtered(
+                lambda pcav: pcav.custom_product_template_attribute_value_id == patv)
             name += "\n" + pacv.display_name
 
         return name
@@ -430,8 +428,9 @@ class SaleOrderLine(models.Model):
                 line.tax_ids = result
 
     def _get_custom_compute_tax_cache_key(self):
-        """Hook method to be able to set/get cached taxes while computing them"""
-        return tuple()
+        """Define additional keys for the taxes computation cache."""
+        self.ensure_one()
+        return ()
 
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
     def _compute_pricelist_item_id(self):
@@ -461,9 +460,7 @@ class SaleOrderLine(models.Model):
                 price = line._get_display_price()
                 line.price_unit = line.product_id._get_tax_included_unit_price_from_price(
                     price,
-                    product_taxes=line.product_id.taxes_id.filtered(
-                        lambda tax: tax.company_id == line.env.company
-                    ),
+                    product_taxes=line.product_id.taxes_id._filter_taxes_by_company(line.env.company),
                     fiscal_position=line.order_id.fiscal_position_id,
                 )
 
@@ -498,7 +495,7 @@ class SaleOrderLine(models.Model):
         self.ensure_one()
         self.product_id.ensure_one()
 
-        price = self.pricelist_item_id._compute_price(
+        return self.pricelist_item_id._compute_price(
             product=self.product_id.with_context(**self._get_product_price_context()),
             quantity=self.product_uom_qty or 1.0,
             uom=self.product_uom,
@@ -506,10 +503,8 @@ class SaleOrderLine(models.Model):
             currency=self.currency_id,
         )
 
-        return price
-
     def _get_product_price_context(self):
-        """Gives the context for product price computation.
+        """Give the context for product price computation.
 
         :return: additional context to consider extra prices from attributes in the base product price.
         :rtype: dict
@@ -578,26 +573,6 @@ class SaleOrderLine(models.Model):
                     # otherwise it's a surcharge which shouldn't be shown to the customer
                     line.discount = discount
 
-    def _convert_to_tax_base_line_dict(self, **kwargs):
-        """ Convert the current record to a dictionary in order to use the generic taxes computation method
-        defined on account.tax.
-
-        :return: A python dictionary.
-        """
-        self.ensure_one()
-        return self.env['account.tax']._convert_to_tax_base_line_dict(
-            self,
-            partner=self.order_id.partner_id,
-            currency=self.order_id.currency_id,
-            product=self.product_id,
-            taxes=self.tax_ids,
-            price_unit=self.price_unit,
-            quantity=self.product_uom_qty,
-            discount=self.discount,
-            price_subtotal=self.price_subtotal,
-            **kwargs,
-        )
-
     @api.depends('product_uom_qty')
     def _compute_amount(self):
         super()._compute_amount()
@@ -641,13 +616,10 @@ class SaleOrderLine(models.Model):
 
     @api.depends('is_expense')
     def _compute_qty_delivered_method(self):
-        """ Sale module compute delivered qty for product [('type', 'in', ['consu']), ('service_type', '=', 'manual')]
-                - consu + expense_policy : analytic (sum of analytic unit_amount)
-                - consu + no expense_policy : manual (set manually on SOL)
-                - service (+ service_type='manual', the only available option) : manual
+        """Define the methodology used to compute the delivered quantities.
 
-            This is true when only sale is installed: sale_stock redifine the behavior for 'consu' type,
-            and sale_timesheet implements the behavior of 'service' + service_type=timesheet.
+        Modules with additional logic are expected to define their own methodology, and handle the
+        computation of the delivered quantity for the lines using this methodology.
         """
         for line in self:
             if line.is_expense:
@@ -661,12 +633,6 @@ class SaleOrderLine(models.Model):
         'analytic_line_ids.unit_amount',
         'analytic_line_ids.product_uom_id')
     def _compute_qty_delivered(self):
-        """ This method compute the delivered quantity of the SO lines: it covers the case provide by sale module, aka
-            expense/vendor bills (sum of unit_amount of AAL), and manual case.
-            This method should be overridden to provide other way to automatically compute delivered qty. Overrides should
-            take their concerned so lines, compute and set the `qty_delivered` field, and call super with the remaining
-            records.
-        """
         # compute for analytic lines
         lines_by_analytic = self.filtered(lambda sol: sol.qty_delivered_method == 'analytic')
         mapping = lines_by_analytic._get_delivered_quantity_by_analytic([('amount', '<=', 0.0)])
@@ -674,9 +640,11 @@ class SaleOrderLine(models.Model):
             so_line.qty_delivered = mapping.get(so_line.id or so_line._origin.id, 0.0)
 
     def _get_delivered_quantity_by_analytic(self, additional_domain):
-        """ Compute and write the delivered quantity of current SO lines, based on their related
-            analytic lines.
-            :param additional_domain: domain to restrict AAL to include in computation (required since timesheet is an AAL with a project ...)
+        """Compute the delivered quantity of current SO lines, based on their analytic lines.
+
+        :param list additional_domain: domain to restrict AAL to include in computation
+        :return: mapping from line to computed quantity
+        :rtype: dict
         """
         result = defaultdict(float)
 
@@ -709,11 +677,13 @@ class SaleOrderLine(models.Model):
 
     @api.depends('account_move_line_ids.move_id.state', 'account_move_line_ids.quantity')
     def _compute_qty_invoiced(self):
-        """
-        Compute the quantity invoiced. If case of a refund, the quantity invoiced is decreased. Note
-        that this is the case only if the refund is generated from the SO and that is intentional: if
-        a refund made would automatically decrease the invoiced quantity, then there is a risk of reinvoicing
-        it automatically, which may not be wanted at all. That's why the refund has to be created from the SO
+        """Compute the invoiced quantity.
+
+        If case of a refund, the quantity invoiced is decreased. Note that this is the case only if
+        the refund is generated from the SO and that is intentional: if a refund made would
+        automatically decrease the invoiced quantity, then there is a risk of reinvoicing it
+        automatically, which may not be wanted at all.
+        That's why the refund has to be created from the SO.
         """
         for line in self:
             qty_invoiced = 0.0
@@ -728,10 +698,6 @@ class SaleOrderLine(models.Model):
     # no trigger product_id.invoice_policy to avoid retroactively changing SO
     @api.depends('qty_invoiced', 'qty_delivered', 'product_uom_qty', 'state')
     def _compute_qty_to_invoice(self):
-        """
-        Compute the quantity to invoice. If the invoice policy is order, the quantity to invoice is
-        calculated from the ordered quantity. Otherwise, the quantity delivered is used.
-        """
         super()._compute_qty_to_invoice()
         for line in self:
             if line.state == 'sale' and not line.display_type:
@@ -744,8 +710,9 @@ class SaleOrderLine(models.Model):
 
     @api.depends('state', 'product_uom_qty', 'qty_delivered', 'qty_to_invoice', 'qty_invoiced')
     def _compute_invoice_status(self):
-        """
-        Compute the invoice status of a SO line. Possible statuses:
+        """Compute the invoice status of a SO line.
+
+        Possible statuses:
         - no: if the SO is not in status 'sale', we consider that there is nothing to
           invoice. This is also the default value if the conditions of no other status is met.
         - to invoice: we refer to the quantity to invoice of the line. Refer to method
@@ -764,9 +731,12 @@ class SaleOrderLine(models.Model):
                 line.invoice_status = 'invoiced'
             elif not float_is_zero(line.qty_to_invoice, precision_digits=precision):
                 line.invoice_status = 'to invoice'
-            elif line.state == 'sale' and line.product_id.invoice_policy == 'order' and\
-                    line.product_uom_qty >= 0.0 and\
-                    float_compare(line.qty_delivered, line.product_uom_qty, precision_digits=precision) == 1:
+            elif (
+                line.state == 'sale'
+                and line.product_id.invoice_policy == 'order'
+                and line.product_uom_qty >= 0.0
+                and float_compare(line.qty_delivered, line.product_uom_qty, precision_digits=precision) == 1
+            ):
                 line.invoice_status = 'upselling'
             elif float_compare(line.qty_invoiced, line.product_uom_qty, precision_digits=precision) >= 0:
                 line.invoice_status = 'invoiced'
@@ -774,7 +744,7 @@ class SaleOrderLine(models.Model):
                 line.invoice_status = 'no'
 
     def _can_be_invoiced_alone(self):
-        """ Whether a given line is meaningful to invoice alone.
+        """Decide whether a given line is meaningful to invoice alone.
 
         It is generally meaningless/confusing or even wrong to invoice some specific SOlines
         (delivery, discounts, rewards, ...) without others, unless they are the only left to invoice
@@ -958,7 +928,7 @@ class SaleOrderLine(models.Model):
 
         # Prevent writing on a locked SO.
         protected_fields = self._get_protected_fields()
-        if any(self.order_id.mapped('locked')) and any(f in values.keys() for f in protected_fields):
+        if any(self.order_id.mapped('locked')) and any(f in values for f in protected_fields):
             protected_fields_modified = list(set(protected_fields) & set(values.keys()))
 
             if 'name' in protected_fields_modified and all(self.mapped('is_downpayment')):
@@ -982,7 +952,7 @@ class SaleOrderLine(models.Model):
         return result
 
     def _get_protected_fields(self):
-        """ Give the fields that should not be modified on a locked SO.
+        """Give the fields that should not be modified on a locked SO.
 
         :returns: list of field names
         :rtype: list
@@ -1014,7 +984,7 @@ class SaleOrderLine(models.Model):
             order.message_post(body=msg)
 
     def _check_line_unlink(self):
-        """ Check whether given lines can be deleted or not.
+        """Check whether given lines can be deleted or not.
 
         * Lines cannot be deleted if the order is confirmed.
         * Down payment lines who have not yet been invoiced bypass that exception.
@@ -1033,8 +1003,11 @@ class SaleOrderLine(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_confirmed(self):
         if self._check_line_unlink():
-            raise UserError(_("Once a sales order is confirmed, you can't remove one of its lines (we need to track if something gets invoiced or delivered).\n\
-                Set the quantity to 0 instead."))
+            raise UserError(_(
+                "Once a sales order is confirmed, you can't remove one of its lines"
+                " (we need to track if something gets invoiced or delivered).\n"
+                "Set the quantity to 0 instead."
+            ))
 
     #=== ACTION METHODS ===#
 
@@ -1055,17 +1028,77 @@ class SaleOrderLine(models.Model):
     def compute_uom_qty(self, new_qty, stock_move, rounding=True):
         return self.product_uom._compute_quantity(new_qty, stock_move.product_uom, rounding)
 
+    # CATALOG #
+
+    def _get_product_catalog_lines_data(self, **kwargs):
+        """Return the catalog information for the given order lines.
+
+        Note: This method cannot be called with lines that have different products.
+
+        :rtype: dict
+        :return: A dict with the following structure:
+            {
+                'quantity': float,
+                'price': float,
+                'readOnly': bool,
+                'warning': String
+            }
+        """
+        if len(self) == 1:
+            res = {
+                'quantity': self.product_uom_qty,
+                'price': self.price_unit,
+                'readOnly': (
+                    self.order_id._is_readonly()
+                    or self.product_id.sale_line_warn == 'block'  # Product cannot be sold
+                ),
+            }
+            if self.product_id.sale_line_warn != 'no-message' and self.product_id.sale_line_warn_msg:
+                res['warning'] = self.product_id.sale_line_warn_msg
+            return res
+        elif self:
+            self.product_id.ensure_one()
+            order_line = self[0]
+            order = order_line.order_id
+            res = {
+                'readOnly': True,  # Multiple lines, we don't know which one should be updated.
+                'price': order.pricelist_id._get_product_price(
+                    product=order_line.product_id,
+                    quantity=1.0,
+                    currency=order.currency_id,
+                    date=order.date_order,
+                    **kwargs,
+                ),
+                'quantity': sum(
+                    self.mapped(
+                        lambda line: line.product_uom._compute_quantity(
+                            qty=line.product_uom_qty,
+                            to_unit=line.product_id.uom_id,
+                        )
+                    )
+                )
+            }
+            if self.product_id.sale_line_warn != 'no-message' and self.product_id.sale_line_warn_msg:
+                res['warning'] = self.product_id.sale_line_warn_msg
+            return res
+        else:
+            # No order lines, zero quantity
+            return {
+                'quantity': 0,
+                # price will be computed in batch with pricelist utils so not given here
+            }
+
     # INVOICING #
 
+    @api.model
     def _get_invoice_line_sequence(self, new=0, old=0):
-        """
-        Method intended to be overridden in third-party module if we want to prevent the resequencing
-        of invoice lines.
+        """Define the new sequence of a given invoice line when invoices are grouped together.
 
-        :param int new:   the new line sequence
-        :param int old:   the old line sequence
+        :param int new: the new line sequence
+        :param int old: the old line sequence
 
-        :return:          the sequence of the SO line, by default the new one.
+        :return: the sequence of the SO line, by default the new one.
+        :rtype: int
         """
         return new or old
 
@@ -1138,79 +1171,27 @@ class SaleOrderLine(models.Model):
         # True if the line is a computed line (reward, delivery, ...) that user cannot add manually
         return False
 
-    def _get_product_catalog_lines_data(self, **kwargs):
-        """ Return information about sale order lines in `self`.
-
-        If `self` is empty, this method returns only the default value(s) needed for the product
-        catalog. In this case, the quantity that equals 0.
-
-        Otherwise, it returns a quantity and a price based on the product of the SOL(s) and whether
-        the product is read-only or not.
-
-        A product is considered read-only if the order is considered read-only (see
-        ``SaleOrder._is_readonly`` for more details) or if `self` contains multiple records
-        or if it has sale_line_warn == "block".
-
-        Note: This method cannot be called with multiple records that have different products linked.
-
-        :raise odoo.exceptions.ValueError: ``len(self.product_id) != 1``
-        :rtype: dict
-        :return: A dict with the following structure:
-            {
-                'quantity': float,
-                'price': float,
-                'readOnly': bool,
-                'warning': String
-            }
-        """
-        if len(self) == 1:
-            res = {
-                'quantity': self.product_uom_qty,
-                'price': self.price_unit,
-                'readOnly': self.order_id._is_readonly() or (self.product_id.sale_line_warn == "block"),
-            }
-            if self.product_id.sale_line_warn != 'no-message' and self.product_id.sale_line_warn_msg:
-                res['warning'] = self.product_id.sale_line_warn_msg
-            return res
-        elif self:
-            self.product_id.ensure_one()
-            order_line = self[0]
-            order = order_line.order_id
-            res = {
-                'readOnly': True,
-                'price': order.pricelist_id._get_product_price(
-                    product=order_line.product_id,
-                    quantity=1.0,
-                    currency=order.currency_id,
-                    date=order.date_order,
-                    **kwargs,
-                ),
-                'quantity': sum(
-                    self.mapped(
-                        lambda line: line.product_uom._compute_quantity(
-                            qty=line.product_uom_qty,
-                            to_unit=line.product_id.uom_id,
-                        )
-                    )
-                )
-            }
-            if self.product_id.sale_line_warn != 'no-message' and self.product_id.sale_line_warn_msg:
-                res['warning'] = self.product_id.sale_line_warn_msg
-            return res
-        else:
-            return {
-                'quantity': 0,
-                # price will be computed in batch with pricelist utils so not given here
-            }
-
-    def _prepare_procurement_values(self, group_id=False):
-        """ Prepare specific key for moves or other components that will be created from a stock rule
-        coming from a sale order line. This method could be override in order to add other custom key that could
-        be used in move/po creation.
-        """
-        return {}
-
     #=== TOOLING ===#
+
+    def _convert_to_tax_base_line_dict(self, **kwargs):
+        """Convert the record to a dictionary for the generic taxes computation logic.
+
+        :return: A python dictionary.
+        :rtype: dict
+        """
+        self.ensure_one()
+        return self.env['account.tax']._convert_to_tax_base_line_dict(
+            self,
+            partner=self.order_id.partner_id,
+            currency=self.order_id.currency_id,
+            product=self.product_id,
+            taxes=self.tax_ids,
+            price_unit=self.price_unit,
+            quantity=self.product_uom_qty,
+            discount=self.discount,
+            price_subtotal=self.price_subtotal,
+            **kwargs,
+        )
 
     def _convert_to_sol_currency(self, amount, currency):
         """Convert the given amount from the given currency to the SO(L) currency.

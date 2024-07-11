@@ -252,12 +252,11 @@ class SaleOrderLine(models.Model):
         coming from a sale order line. This method could be override in order to add other custom key that could
         be used in move/po creation.
         """
-        values = super(SaleOrderLine, self)._prepare_procurement_values(group_id)
         self.ensure_one()
         # Use the delivery date if there is else use date_order and lead time
         date_deadline = self.order_id.commitment_date or self._expected_date()
         date_planned = date_deadline - timedelta(days=self.order_id.company_id.security_lead)
-        values.update({
+        return {
             'group_id': group_id,
             'sale_line_id': self.id,
             'date_planned': date_planned,
@@ -270,8 +269,7 @@ class SaleOrderLine(models.Model):
             'company_id': self.order_id.company_id,
             'product_packaging_id': self.product_packaging_id,
             'sequence': self.sequence,
-        })
-        return values
+        }
 
     def _get_qty_procurement(self, previous_product_uom_qty=False):
         self.ensure_one()
