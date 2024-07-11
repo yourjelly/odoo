@@ -1102,7 +1102,7 @@ export function makeActionManager(env, router = _router) {
     async function _executeActWindowAction(action, options) {
         const views = [];
         for (const [, type] of action.views) {
-            if (type !== "search" && session.view_info[type]) {
+            if (type !== "search") {
                 const { icon, display_name, multi_record: multiRecord } = session.view_info[type];
                 views.push({ icon, display_name, multiRecord, type });
             }
