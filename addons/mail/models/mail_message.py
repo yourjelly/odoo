@@ -68,18 +68,16 @@ class Message(models.Model):
     _order = 'id desc'
     _rec_name = 'record_name'
 
-    @api.model
-    def default_get(self, fields):
-        res = super(Message, self).default_get(fields)
-        missing_author = 'author_id' in fields and 'author_id' not in res
-        missing_email_from = 'email_from' in fields and 'email_from' not in res
-        if missing_author or missing_email_from:
-            author_id, email_from = self.env['mail.thread']._message_compute_author(res.get('author_id'), res.get('email_from'), raise_on_email=False)
-            if missing_email_from:
-                res['email_from'] = email_from
-            if missing_author:
-                res['author_id'] = author_id
-        return res
+    def _add_missing_default_values(self, vals):
+        vals = super()._add_missing_default_values(vals)
+        if 'author_id' not in vals or 'email_from' not in vals:
+            author_id, email_from = self.env['mail.thread']._message_compute_author(
+                vals.get('author_id'), vals.get('email_from'), raise_on_email=False)
+            if 'email_from' not in vals:
+                vals['email_from'] = email_from
+            if 'author_id' not in vals:
+                vals['author_id'] = author_id
+        return vals
 
     # content
     subject = fields.Char('Subject')
