@@ -9,6 +9,10 @@ from .eu_tag_map import EU_TAG_MAP
 from .eu_tax_map import EU_TAX_MAP
 
 
+def group_xmlid(company, tax_amount):
+    return f"account.{company.id}_oss_tax_group_{str(tax_amount).replace('.', '_')}_{company.account_fiscal_country_id.code}"
+
+
 class Company(models.Model):
     _inherit = 'res.company'
 
@@ -29,6 +33,8 @@ class Company(models.Model):
             ('model', '=', 'account.tax.group')])
         for company in self.root_id:  # instantiate OSS taxes on the root company only
             invoice_repartition_lines, refund_repartition_lines = company._get_repartition_lines_oss()
+            oss_countries = eu_countries - company.account_fiscal_country_id - company.account_foreign_fiscal_position_ids.country_id
+
             taxes = self.env['account.tax'].search([
                 *self.env['account.tax']._check_company_domain(company),
                 ('type_tax_use', '=', 'sale'),
@@ -36,67 +42,114 @@ class Company(models.Model):
                 ('country_id', '=', company.account_fiscal_country_id.id),
                 ('tax_group_id', 'not in', oss_tax_groups.mapped('res_id'))])
 
-            multi_tax_reports_countries_fpos = self.env['account.fiscal.position'].search([
-                ('foreign_vat', '!=', False),
-            ])
-            oss_countries = eu_countries - company.account_fiscal_country_id - multi_tax_reports_countries_fpos.country_id
-            for destination_country in oss_countries:
-                mapping = []
-                fpos = self.env['account.fiscal.position'].search([
-                            *self.env['account.fiscal.position']._check_company_domain(company),
-                            ('country_id', '=', destination_country.id),
-                            ('auto_apply', '=', True),
-                            ('vat_required', '=', False),
-                            ('foreign_vat', '=', False)], limit=1)
-                if not fpos:
-                    fpos = self.env['account.fiscal.position'].create({
-                        'name': f'OSS B2C {destination_country.name}',
-                        'country_id': destination_country.id,
+            any_tax_group = self.env['account.tax.group'].search([
+                *self.env['account.tax.group']._check_company_domain(company),
+                ('tax_payable_account_id', '!=', False)
+            ], limit=1)
+
+            all_tax_amounts = {
+                tax_amount
+                for destination_country in oss_countries
+                for domestic_tax in taxes
+                if (tax_amount := EU_TAX_MAP.get((company.account_fiscal_country_id.code, domestic_tax.amount, destination_country.code), False))
+            }
+
+            # Fetch or create Fiscal Positions
+            country2fpos = company.fiscal_position_ids.filtered(lambda fpos:
+                fpos.auto_apply
+                and not fpos.vat_required
+                and not fpos.foreign_vat
+            ).grouped('country_id')
+            country2fpos.update(self.env['account.fiscal.position'].create([
+                {
+                    'name': f'OSS B2C {destination_country.name}',
+                    'country_id': destination_country.id,
+                    'company_id': company.id,
+                    'auto_apply': True,
+                }
+                for destination_country in oss_countries
+                if not country2fpos.get(destination_country)
+            ]).grouped('country_id'))
+
+            # Fetch or create Tax Groups
+            amount2tax_group = {
+                amount: tax_group
+                for amount in all_tax_amounts
+                if (tax_group := self.env.ref(group_xmlid(company, amount), raise_if_not_found=False))
+            }
+            missing_group_amounts = list(all_tax_amounts - amount2tax_group.keys())
+            amount2tax_group.update(zip(missing_group_amounts, self.env['account.tax.group']._load_records([
+                {
+                    'xml_id': group_xmlid(company, tax_amount),
+                    'values': {
+                        'name': f'OSS {tax_amount}%',
+                        'country_id': company.account_fiscal_country_id.id,
                         'company_id': company.id,
-                        'auto_apply': True,
-                    })
+                        'tax_payable_account_id': any_tax_group.tax_payable_account_id.id,
+                        'tax_receivable_account_id': any_tax_group.tax_receivable_account_id.id,
+                    },
+                    'noupdate': True,
+                }
+                for tax_amount in missing_group_amounts
+            ])))
 
-                foreign_taxes = {tax.amount: tax for tax in fpos.tax_ids.tax_dest_id if tax.amount_type == 'percent'}
+            # Create missing Taxes
+            country2amount2foreign_tax = {
+                destination_country: {
+                    tax.amount: tax
+                    for tax in country2fpos[destination_country].tax_ids.tax_dest_id
+                    if tax.amount_type == 'percent'
+                }
+                for destination_country in oss_countries
+            }
+            country2missing_amounts = {
+                destination_country: list({
+                    tax_amount
+                    for domestic_tax in taxes
+                    if (tax_amount := EU_TAX_MAP.get((company.account_fiscal_country_id.code, domestic_tax.amount, destination_country.code), False))
+                    and tax_amount not in country2amount2foreign_tax[destination_country]
+                })
+                for destination_country in oss_countries
+            }
 
-                for domestic_tax in taxes:
-                    tax_amount = EU_TAX_MAP.get((company.account_fiscal_country_id.code, domestic_tax.amount, destination_country.code), False)
-                    if tax_amount and domestic_tax not in fpos.tax_ids.tax_src_id:
-                        if not foreign_taxes.get(tax_amount, False):
-                            oss_tax_group_local_xml_id = f"{company.id}_oss_tax_group_{str(tax_amount).replace('.', '_')}_{company.account_fiscal_country_id.code}"
-                            if not self.env.ref(f"account.{oss_tax_group_local_xml_id}", raise_if_not_found=False):
-                                tg = self.env['account.tax.group'].search([
-                                    *self.env['account.tax.group']._check_company_domain(company),
-                                    ('tax_payable_account_id', '!=', False)], limit=1)
-                                self.env['ir.model.data'].create({
-                                    'name': oss_tax_group_local_xml_id,
-                                    'module': 'account',
-                                    'model': 'account.tax.group',
-                                    'res_id': self.env['account.tax.group'].create({
-                                        'name': f'OSS {tax_amount}%',
-                                        'country_id': company.account_fiscal_country_id.id,
-                                        'company_id': company.id,
-                                        'tax_payable_account_id': tg.tax_payable_account_id.id,
-                                        'tax_receivable_account_id': tg.tax_receivable_account_id.id,
-                                    }).id,
-                                    'noupdate': True,
-                                })
-                            foreign_taxes[tax_amount] = self.env['account.tax'].create({
-                                'name': f'{tax_amount}% {destination_country.code} {destination_country.vat_label}',
-                                'amount': tax_amount,
-                                'invoice_repartition_line_ids': invoice_repartition_lines,
-                                'refund_repartition_line_ids': refund_repartition_lines,
-                                'type_tax_use': 'sale',
-                                'description': f"{tax_amount}%",
-                                'tax_group_id': self.env.ref(f'account.{oss_tax_group_local_xml_id}').id,
-                                'country_id': company.account_fiscal_country_id.id,
-                                'sequence': 1000,
-                                'company_id': company.id,
-                            })
-                        mapping.append((0, 0, {'tax_src_id': domestic_tax.id, 'tax_dest_id': foreign_taxes[tax_amount].id}))
-                if mapping:
-                    fpos.write({
-                        'tax_ids': mapping
-                    })
+            new_taxes_iter = iter(self.env['account.tax'].create([
+                {
+                    'name': f'{tax_amount}% {destination_country.code} {destination_country.vat_label}',
+                    'amount': tax_amount,
+                    'invoice_repartition_line_ids': invoice_repartition_lines,
+                    'refund_repartition_line_ids': refund_repartition_lines,
+                    'type_tax_use': 'sale',
+                    'description': f"{tax_amount}%",
+                    'tax_group_id': amount2tax_group[tax_amount].id,
+                    'country_id': company.account_fiscal_country_id.id,
+                    'sequence': 1000,
+                    'company_id': company.id,
+                }
+                for destination_country, tax_amounts in country2missing_amounts.items()
+                for tax_amount in tax_amounts
+            ]))
+            for destination_country, tax_amounts in country2missing_amounts.items():
+                for tax_amount in tax_amounts:
+                    tax = next(new_taxes_iter)
+                    country2amount2foreign_tax[destination_country][tax.amount] = tax
+            assert not next(new_taxes_iter, False)
+
+            # Map new Taxes to Fiscal Positions
+            for destination_country in oss_countries:
+                fpos = country2fpos[destination_country]
+                missing_mapping = {
+                    domestic_tax: tax_amount
+                    for domestic_tax in taxes
+                    if (
+                        (tax_amount := EU_TAX_MAP.get((company.account_fiscal_country_id.code, domestic_tax.amount, destination_country.code), False))
+                        and domestic_tax not in fpos.tax_ids.tax_src_id
+                    )
+                }
+                if missing_mapping:
+                    fpos.tax_ids = [
+                        Command.create({'tax_src_id': src.id, 'tax_dest_id': country2amount2foreign_tax[destination_country][amount].id})
+                        for src, amount in missing_mapping.items()
+                    ]
 
     def _get_repartition_lines_oss(self):
         self.ensure_one()
