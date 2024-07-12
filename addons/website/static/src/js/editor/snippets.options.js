@@ -44,6 +44,7 @@ import {
     BackgroundToggler,
     Box,
     CarouselHandler,
+    GridColumns,
     LayoutColumn,
     Many2oneUserValue,
     registerBackgroundOptions,
@@ -4449,6 +4450,13 @@ class WebsiteLayoutColumn extends LayoutColumn {
         return this.env.services.website.context.isMobile;
     }
 }
+
+registerWebsiteOption("GridColumns", {
+    Class: GridColumns,
+    template: "website.grid_columns_option",
+    selector: ".row:not(.s_col_no_resize) > div",
+});
+
 registerWebsiteOption("WebsiteLayoutColumns", {
     Class: WebsiteLayoutColumn,
     template: "website.layout_column",

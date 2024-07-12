@@ -6185,14 +6185,14 @@ export class LayoutColumn extends ColumnLayoutMixin(SnippetOption) {
     }
 }
 
-legacyRegistry.GridColumns = SnippetOptionWidget.extend({
+export class GridColumns extends SnippetOption {
     /**
      * @override
      */
     cleanUI() {
         // Remove the padding highlights.
         this._removePaddingPreview();
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Options
@@ -6202,7 +6202,7 @@ legacyRegistry.GridColumns = SnippetOptionWidget.extend({
      * @override
      */
     async selectStyle(previewMode, widgetValue, params) {
-        await this._super(...arguments);
+        await super.selectStyle(...arguments);
         if (["--grid-item-padding-y", "--grid-item-padding-x"].includes(params.cssProperty)) {
             // Reset the animation.
             this._removePaddingPreview();
@@ -6216,7 +6216,7 @@ legacyRegistry.GridColumns = SnippetOptionWidget.extend({
             this.removePaddingPreview = this._removePaddingPreview.bind(this);
             this.$target[0].addEventListener("animationend", this.removePaddingPreview);
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -6229,8 +6229,8 @@ legacyRegistry.GridColumns = SnippetOptionWidget.extend({
         if (["grid_padding_y_opt", "grid_padding_x_opt"].includes(widgetName)) {
             return this.$target[0].parentElement.classList.contains("o_grid_mode");
         }
-        return this._super(...arguments);
-    },
+        return super._computeWidgetVisibility(...arguments);
+    }
     /**
      * Removes the padding highlights that were added when changing the grid
      * item padding.
@@ -6243,8 +6243,8 @@ legacyRegistry.GridColumns = SnippetOptionWidget.extend({
         this.$target[0].classList.remove("o_we_padding_highlight");
         delete this.removePaddingPreview;
         this.options.wysiwyg.odooEditor.observerActive("removePaddingPreview");
-    },
-});
+    }
+}
 
 export class vAlignment extends SnippetOption {
     /**

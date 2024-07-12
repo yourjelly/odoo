@@ -37,6 +37,12 @@
         <WeButton selectCount="'custom'" name="'custom_cols_opt'">Custom</WeButton>
     </WeSelect>
 </t>
+<t t-name="website.grid_columns_option">
+    <WeRow title.translate="Padding (Y, X)">
+        <WeInput selectStyle="''" cssProperty="'--grid-item-padding-y'" unit="'px'" name="'grid_padding_y_opt'"/>
+        <WeInput selectStyle="''" cssProperty="'--grid-item-padding-x'" unit="'px'" name="'grid_padding_x_opt'"/>
+    </WeRow>
+</t>
 <t t-name="website.grid_layout_options">
     <WeButtonGroup class="indent and 'o_we_sublevel_1'" noPreview="'true'"
                    dependencies="'grid_mode'" title.translate="Add Elements">
