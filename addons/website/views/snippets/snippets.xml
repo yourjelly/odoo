@@ -424,14 +424,6 @@
         <t t-call="website.snippet_options_shadow_widgets"/>
     </div>
 
-    <!-- COLOR | .s_cards -->
-    <div data-selector=".s_card, .accordion .card">
-        <we-colorpicker string="Color"
-            data-select-style="true"
-            data-css-property="background-color"
-            data-color-prefix="bg-"/>
-    </div>
-
     <!-- H-ALIGN -->
     <div id="so_text_align" data-selector=".s_share, .s_text_highlight, .s_social_media">
         <we-button-group string="Alignment">
@@ -462,7 +454,7 @@
         <we-checkbox string="Color" data-select-class="no_icon_color|"/>
     </div>
 
-    <div id="so_width" data-selector=".s_alert, .s_card, .s_blockquote, .s_text_highlight">
+    <div id="so_width" data-selector=".s_alert, .s_blockquote, .s_text_highlight">
         <we-select string="Width">
             <we-button data-select-class="w-25">25%</we-button>
             <we-button data-select-class="w-50">50%</we-button>
@@ -471,7 +463,7 @@
         </we-select>
     </div>
 
-    <div id="so_block_align" data-selector=".s_alert, .s_card, .s_blockquote, .s_text_highlight">
+    <div id="so_block_align" data-selector=".s_alert, .s_blockquote, .s_text_highlight">
         <we-button-group string="Alignment" data-dependencies="!so_width_100">
             <we-button class="fa fa-fw fa-align-left" title="Left" data-select-class="me-auto"/>
             <we-button class="fa fa-fw fa-align-center" title="Center" data-select-class="mx-auto"/>

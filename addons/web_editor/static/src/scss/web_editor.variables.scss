@@ -400,7 +400,7 @@ $o-color-combinations-preset-number: 1;
 // work for one level of nesting. Note: snippets which can contain other
 // snippets will have problem because of this; this is a limitation of the
 // system until a better solution is found.
-$o-color-extras-nesting-selector: '&, .o_colored_level &';
+$o-color-extras-nesting-selector: '&, .o_colored_level &, &.card';
 
 // Apply colors according to the given identifier. Can either be a preset
 // number, a color name or a css color.

@@ -2,15 +2,119 @@
 <odoo>
 
 <template id="s_card" name="Card">
-    <div class="s_card card bg-white w-100">
-        <h4 class="card-header">Feature Title</h4>
+    <div class="s_card o_card_img_top card o_cc o_cc1">
+        <figure class="o_card_img_wrapper ratio ratio-16x9 mb-0">
+            <img class="o_card_img card-img-top object-fit-cover" src="/web/image/website.s_card_default_image_1"/>
+        </figure>
         <div class="card-body">
+            <h5 class="card-title">Card title</h5>
             <p class="card-text">A card is a flexible and extensible content container. It includes options for headers and footers, a wide variety of content, contextual background colors, and powerful display options.</p>
-        </div>
-        <div class="card-footer">
-            <i class="fa fa-1x fa-clock-o mr8"/><small>2 days ago</small>
+            <a t-att-href="cta_btn_href">Read More</a>
         </div>
     </div>
+</template>
+
+<template id="s_card_options" inherit_id="website.snippet_options">
+    <xpath expr="." position="inside">
+        <t t-call="website.snippet_options_background_options">
+            <t t-set="selector" t-value="'.s_card'"/>
+            <t t-set="with_colors" t-value="True"/>
+            <t t-set="with_images" t-value="True"/>
+            <t t-set="with_shapes" t-value="True"/>
+            <t t-set="with_color_combinations" t-value="True"/>
+            <t t-set="with_gradients" t-value="True"/>
+        </t>
+
+        <div data-js="Box" data-selector=".s_card">
+            <t t-call="website.snippet_options_border_widgets"/>
+            <t t-call="website.snippet_options_shadow_widgets"/>
+        </div>
+
+        <div data-js="CardWidth" data-selector=".s_card">
+            <we-range string="Card Width"
+                data-select-style="0"
+                data-css-property="max-width"
+                data-unit="%"
+                data-min="8"
+                data-max="100"
+                data-display-range-value="true"
+                data-display-range-value-unit="%"/>
+        </div>
+
+        <div data-js="CardImageOptions" data-selector=".s_card">
+            <we-row string="Cover Image">
+                <we-button-group>
+                    <we-button title="Top"
+                        data-name="card_img_top_opt"
+                        data-select-class="o_card_img_top"
+                        data-select-image-class="card-img-top"
+                        data-img="/website/static/src/img/snippets_options/pos_top.svg"/>
+                    <we-button title="Left"
+                        data-select-class="o_card_img_horizontal flex-sm-row"
+                        data-select-image-class="rounded-start"
+                        data-img="/website/static/src/img/snippets_options/pos_left.svg"/>
+                    <we-button title="Right"
+                        data-select-class="o_card_img_horizontal flex-sm-row-reverse"
+                        data-select-image-class="rounded-end"
+                        data-img="/website/static/src/img/snippets_options/pos_right.svg"/>
+                </we-button-group>
+
+                <we-button title="Remove Cover" data-image-remove="" data-no-preview="true" class="fa fa-trash-o fa-fw o_we_bg_danger"/>
+            </we-row>
+
+            <we-select string="Ratio" data-apply-to=".o_card_img_wrapper" class="o_we_sublevel_1">
+                <we-button data-select-class="">Image default</we-button>
+                <we-button data-select-class="ratio ratio-1x1">Square</we-button>
+                <we-button data-select-class="ratio ratio-4x3" data-dependencies="card_img_top_opt">Landscape - 4/3</we-button>
+                <we-button data-select-class="ratio ratio-16x9" data-dependencies="card_img_top_opt">Wide - 16/9</we-button>
+                <we-button data-select-class="ratio ratio-21x9" data-dependencies="card_img_top_opt">Ultrawide - 21/9</we-button>
+                <we-button data-select-class="ratio o_card_img_ratio_custom" data-dependencies="card_img_top_opt">Custom</we-button>
+            </we-select>
+
+            <!-- Get bootstrap default column size -->
+            <t t-set="colSize" t-value="100/12"/>
+            <we-range string="Width"
+                title="Adjust the image width"
+                data-dependencies="!card_img_top_opt"
+                data-select-style="0"
+                data-css-property="--card-img-size-h"
+                data-unit="%"
+                t-att-data-min="colSize"
+                t-att-data-max="colSize * 11"
+                t-att-data-step="colSize"
+                class="o_we_sublevel_1"/>
+
+            <!-- Controller visibility is handled in JS -->
+            <we-range
+                string="Custom Ratio"
+                data-select-style="0"
+                data-css-property="--card-img-aspect-ratio"
+                data-unit="%"
+                data-display-range-value="true"
+                data-display-range-value-unit="%"
+                data-min="8"
+                data-max="132"
+                data-step="4"
+                class="o_card_img_ratio_range_option o_we_sublevel_1"/>
+
+            <!-- Controller visibility is handled in JS -->
+            <we-range
+                string="Alignment"
+                data-select-style="0"
+                data-image-alignment=""
+                data-css-property="--card-img-ratio-align"
+                data-unit="%"
+                data-min="0"
+                data-max="100"
+                class="o_card_img_ratio_align_option o_we_sublevel_1"/>
+        </div>
+
+        <div data-js="CardImageInjection" data-selector=".s_card">
+            <we-row string="Cover Image">
+                <we-button title="Add" data-no-preview="true" data-image-add="" class="o_card_img_add o_we_bg_success">Add</we-button>
+            </we-row>
+        </div>
+    </xpath>
 </template>
 
 <record id="website.s_card_000_scss" model="ir.asset">
