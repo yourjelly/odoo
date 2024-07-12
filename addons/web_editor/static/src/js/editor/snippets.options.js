@@ -6550,12 +6550,12 @@ registerOption("SnippetMove (Horizontal)", {
 /**
  * Allows for media to be replaced.
  */
-legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
-    init: function () {
-        this._super(...arguments);
+export class ReplaceMedia extends SnippetOption {
+    constructor() {
+        super(...arguments);
         this._activateLinkTool = this._activateLinkTool.bind(this);
         this._deactivateLinkTool = this._deactivateLinkTool.bind(this);
-    },
+    }
 
     /**
      * @override
@@ -6566,14 +6566,14 @@ legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
         // When we start editing an image, rerender the UI to ensure the
         // we-select that suggests the anchors is in a consistent state.
         this.rerender = true;
-    },
+    }
     /**
      * @override
      */
     onBlur() {
         this.options.wysiwyg.odooEditor.removeEventListener('activate_image_link_tool', this._activateLinkTool);
         this.options.wysiwyg.odooEditor.removeEventListener('deactivate_image_link_tool', this._deactivateLinkTool);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Options
@@ -6587,7 +6587,7 @@ legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
     async replaceMedia() {
         // open mediaDialog and replace the media.
         await this.options.wysiwyg.openMediaDialog({ node:this.$target[0] });
-    },
+    }
     /**
      * Makes the image a clickable link by wrapping it in an <a>.
      * This function is also called for the opposite operation.
@@ -6612,7 +6612,7 @@ legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
             fragment.append(...parentEl.childNodes);
             parentEl.replaceWith(fragment);
         }
-    },
+    }
     /**
      * Changes the image link so that the URL is opened on another tab or not
      * when it is clicked.
@@ -6626,7 +6626,7 @@ legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
         } else {
             linkEl.removeAttribute('target');
         }
-    },
+    }
     /**
      * Records the target url of the hyperlink.
      *
@@ -6650,18 +6650,18 @@ legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
         linkEl.setAttribute('href', url);
         this.rerender = true;
         this.$target.trigger('href_changed');
-    },
+    }
     /**
      * @override
      */
     async updateUI() {
         if (this.rerender) {
             this.rerender = false;
-            await this._rerenderXML();
+            // await this._rerenderXML();
             return;
         }
-        return this._super.apply(this, arguments);
-    },
+        return super.updateUI(this, arguments);
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -6676,7 +6676,7 @@ legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
         } else {
             this._requestUserValueWidgets('media_link_opt')[0].enable();
         }
-    },
+    }
     /**
      * @private
      */
@@ -6685,7 +6685,7 @@ legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
         if (parentEl.tagName === 'A') {
             this._requestUserValueWidgets('media_link_opt')[0].enable();
         }
-    },
+    }
     /**
      * @override
      */
@@ -6705,8 +6705,8 @@ legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
                 return target && target === '_blank' ? 'true' : '';
             }
         }
-        return this._super(...arguments);
-    },
+        return super._computeWidgetState(...arguments);
+    }
     /**
      * @override
      */
@@ -6717,8 +6717,15 @@ legacyRegistry.ReplaceMedia = SnippetOptionWidget.extend({
             }
             return !this.$target[0].classList.contains('media_iframe_video');
         }
-        return this._super(...arguments);
-    },
+        return super._computeWidgetVisibility(...arguments);
+    }
+}
+
+registerOption("ReplaceMedia", {
+    Class: ReplaceMedia,
+    template: "web_editor.replace_media_option",
+    selector: "img, .media_iframe_video, span.fa, i.fa",
+    exclude: "[data-oe-xpath], a[href^='/website/social/'] > i.fa, a[class*='s_share_'] > i.fa",
 });
 
 /*

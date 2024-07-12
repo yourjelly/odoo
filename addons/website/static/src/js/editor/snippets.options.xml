@@ -603,4 +603,13 @@
 </WeRow>
 </t>
 
+<t t-name="website.replace_media_option" t-inherit="web_editor.replace_media_option" t-inherit-mode="extension">
+    <xpath expr="//t[@t-set='urlInputComponent']" position="after">
+        <t t-if="env.snippetOption.options.isWebsite">
+            <t t-set="urlInputComponent" t-value="'WeUrlPicker'"/>
+            <t t-set="tooltip">Hint: Type '/' to search an existing page and '#' to link to an anchor.</t>
+            <t t-set="extraAttributes" t-value="{tooltip: tooltip}"/>
+        </t>
+    </xpath>
+</t>
 </templates>

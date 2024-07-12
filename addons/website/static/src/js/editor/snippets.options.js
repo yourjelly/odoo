@@ -49,6 +49,7 @@ import {
     Many2oneUserValue,
     registerBackgroundOptions,
     registerOption,
+    ReplaceMedia,
     SelectTemplate,
     SelectUserValue,
     serviceCached,
@@ -1289,7 +1290,7 @@ options.registry.BackgroundShape.include({
     },
 });
 
-options.registry.ReplaceMedia.include({
+patch(ReplaceMedia.prototype, {
     /**
      * Adds an anchor to the url.
      * Here "anchor" means a specific section of a page.
@@ -1319,7 +1320,7 @@ options.registry.ReplaceMedia.include({
             }
             return '';
         }
-        return this._super(...arguments);
+        return super._computeWidgetState(...arguments);
     },
     /**
      * @override
@@ -1331,51 +1332,7 @@ options.registry.ReplaceMedia.include({
             const href = linkEl ? linkEl.getAttribute('href') : false;
             return href && href.startsWith('/');
         }
-        return this._super(...arguments);
-    },
-    /**
-     * Fills the dropdown with the available anchors for the page referenced in
-     * the href.
-     *
-     * @override
-     */
-    async _renderCustomXML(uiFragment) {
-        if (!this.options.isWebsite) {
-            return this._super(...arguments);
-        }
-        await this._super(...arguments);
-
-
-
-        const oldURLWidgetEl = uiFragment.querySelector('[data-name="media_url_opt"]');
-
-        const URLWidgetEl = document.createElement('we-urlpicker');
-        // Copy attributes
-        for (const {name, value} of oldURLWidgetEl.attributes) {
-            URLWidgetEl.setAttribute(name, value);
-        }
-        URLWidgetEl.title = _t("Hint: Type '/' to search an existing page and '#' to link to an anchor.");
-        oldURLWidgetEl.replaceWith(URLWidgetEl);
-
-        const hrefValue = this.$target[0].parentElement.getAttribute('href');
-        if (!hrefValue || !hrefValue.startsWith('/')) {
-            return;
-        }
-        const urlWithoutAnchor = hrefValue.split('#')[0];
-        const selectEl = document.createElement('we-select');
-        selectEl.dataset.name = 'media_link_anchor_opt';
-        selectEl.dataset.dependencies = 'media_url_opt';
-        selectEl.dataset.noPreview = 'true';
-        selectEl.classList.add('o_we_sublevel_1');
-        selectEl.setAttribute('string', _t("Page Anchor"));
-        const anchors = await wUtils.loadAnchors(urlWithoutAnchor);
-        for (const anchor of anchors) {
-            const weButtonEl = document.createElement('we-button');
-            weButtonEl.dataset.setAnchor = anchor;
-            weButtonEl.textContent = anchor;
-            selectEl.append(weButtonEl);
-        }
-        URLWidgetEl.after(selectEl);
+        return super._computeWidgetVisibility(...arguments);
     },
 });
 
