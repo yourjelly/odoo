@@ -347,6 +347,14 @@
     </WeSelect>
 </t>
 
+<t t-name="website.snippet_save_option">
+    <WeButton class="'fa fa-fw fa-save o_we_link o_we_hover_warning'"
+        tooltip.translate="Save the block to use it elsewhere"
+        saveSnippet="''"
+        noPreview="'true'"
+    />
+</t>
+
 <t t-name="website.TestSnippetOption" t-inherit="web_editor.TestSnippetOption" t-inherit-mode="extension">
     <xpath expr="//WeRow" position="before">
         <WeRow title.translate="URL">

@@ -2161,6 +2161,7 @@ class SnippetsMenu extends Component {
             enableLoadingEffect: this._onEnableLoadingEffect.bind(this),
             requestSave: (data) => this._onSaveRequest.call(this, { data }),
             removeSnippet: this._onRemoveSnippet.bind(this),
+            snippetThumbnailUrlRequest: (data) => this._onSnippetThumbnailURLRequest.call(this, { data }),
             isElementSelected: (data) => this._onIsElementSelected.call(this, { data }),
             hideOverlay: this._onHideOverlay.bind(this),
             ownerDocument: (function() { return this.el.ownerDocument }).bind(this),

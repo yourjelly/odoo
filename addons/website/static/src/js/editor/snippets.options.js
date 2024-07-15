@@ -57,6 +57,7 @@ import {
     SnippetMove,
     SnippetOption,
     SnippetOptionComponent,
+    SnippetSave,
     UserValue,
     UserValueComponent,
     vAlignment,
@@ -5012,3 +5013,13 @@ registerWebsiteOption("ColumnsOnly", {
     selector: "section.s_features_grid, section.s_process_steps",
     target: "> *:has(> .row), > .s_allow_columns",
 }, { sequence: 15 });
+
+// TODO: @owl-options What to do with those ?
+let so_submit_button_selector = ".s_donation_donate_btn, .s_website_form_send";
+
+registerWebsiteOption("SnippetSave", {
+    Class: SnippetSave,
+    template: "website.snippet_save_option",
+    selector: "[data-snippet], a.btn",
+    exclude: `.o_no_save, ${so_submit_button_selector}`,
+});

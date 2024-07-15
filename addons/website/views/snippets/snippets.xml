@@ -561,15 +561,6 @@
         t-attf-data-drop-near="p, h1, h2, h3, ul, ol, div:not(.o_grid_item_image) > img, .btn, #{so_content_addition_selector}"
         data-drop-in="nav"/>
 
-    <div data-js="SnippetSave"
-        data-selector="[data-snippet], a.btn"
-        t-attf-data-exclude=".o_no_save, #{so_submit_button_selector}">
-        <we-button class="fa fa-fw fa-save o_we_link o_we_hover_warning"
-                   title="Save the block to use it elsewhere"
-                   data-save-snippet=""
-                   data-no-preview="true"/>
-    </div>
-
     <div data-js="menu_data"
          data-selector=".top_menu li > a, [data-content_menu_id] li > a"
          data-exclude=".dropdown-toggle, li.o_header_menu_button a, [data-toggle], .o_offcanvas_logo"

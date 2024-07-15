@@ -9549,8 +9549,8 @@ legacyRegistry.VersionControl = SnippetOptionWidget.extend({
 /**
  * Handle the save of a snippet as a template that can be reused later
  */
-legacyRegistry.SnippetSave = SnippetOptionWidget.extend({
-    isTopOption: true,
+export class SnippetSave extends SnippetOption {
+    static isTopOption = true;
 
     //--------------------------------------------------------------------------
     // Options
@@ -9559,7 +9559,7 @@ legacyRegistry.SnippetSave = SnippetOptionWidget.extend({
     /**
      * @see this.selectClass for parameters
      */
-    saveSnippet: function (previewMode, widgetValue, params) {
+    saveSnippet(previewMode, widgetValue, params) {
         return new Promise(resolve => {
             this.dialog.add(ConfirmationDialog, {
                 body: _t("To save a snippet, we need to save all your previous modifications and reload the page."),
@@ -9570,13 +9570,9 @@ legacyRegistry.SnippetSave = SnippetOptionWidget.extend({
                     const isButton = this.$target[0].matches("a.btn");
                     const snippetKey = !isButton ? this.$target[0].dataset.snippet : "s_button";
                     let thumbnailURL;
-                    this.trigger_up('snippet_thumbnail_url_request', {
+                    this.env.snippetThumbnailUrlRequest({
                         key: snippetKey,
                         onSuccess: url => thumbnailURL = url,
-                    });
-                    let context;
-                    this.trigger_up('context_get', {
-                        callback: ctx => context = ctx,
                     });
                     if (this.$target[0].matches("[data-snippet=s_popup]")) {
                         // Do not "cleanForSave" the popup before copying the
@@ -9584,7 +9580,7 @@ legacyRegistry.SnippetSave = SnippetOptionWidget.extend({
                         // therefore not visible in the "add snippet" dialog.
                         targetCopyEl = this.$target[0].cloneNode(true);
                     }
-                    this.trigger_up('request_save', {
+                    this.env.requestSave({
                         reloadEditor: true,
                         invalidateSnippetCache: true,
                         onSuccess: async () => {
@@ -9611,20 +9607,16 @@ legacyRegistry.SnippetSave = SnippetOptionWidget.extend({
                                     break;
                                 }
                             }
-                            context['model'] = editableParentEl.dataset.oeModel;
-                            context['field'] = editableParentEl.dataset.oeField;
-                            context['resId'] = editableParentEl.dataset.oeId;
-                            await rpc(`/web/dataset/call_kw/ir.ui.view/save_snippet`, {
-                                model: "ir.ui.view",
-                                method: "save_snippet",
-                                args: [],
-                                kwargs: {
-                                    'name': defaultSnippetName,
-                                    'arch': targetCopyEl.outerHTML,
-                                    'template_key': this.options.snippets,
-                                    'snippet_key': snippetKey,
-                                    'thumbnail_url': thumbnailURL,
-                                    'context': context,
+                            await this.env.services.orm.call("ir.ui.view", "save_snippet", [], {
+                                'name': defaultSnippetName,
+                                'arch': targetCopyEl.outerHTML,
+                                'template_key': this.options.snippets,
+                                'snippet_key': snippetKey,
+                                'thumbnail_url': thumbnailURL,
+                                'context': {
+                                    'model': editableParentEl.dataset.oeModel,
+                                    'field': editableParentEl.dataset.oeField,
+                                    'resId': editableParentEl.dataset.oeId,
                                 },
                             });
                         },
@@ -9633,8 +9625,8 @@ legacyRegistry.SnippetSave = SnippetOptionWidget.extend({
                 },
             });
         });
-    },
-});
+    }
+}
 
 /**
  * Handles the dynamic colors for dynamic SVGs.
