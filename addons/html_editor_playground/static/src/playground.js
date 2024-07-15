@@ -7,8 +7,10 @@ import { MAIN_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_s
 import { parseHTML } from "@html_editor/utils/html";
 import { counter } from "./counter";
 import { card } from "./card";
+import { demoEmbed } from "./demo_embed";
 import { useService } from "@web/core/utils/hooks";
 import { localization } from "@web/core/l10n/localization";
+import { renderToElement } from "@web/core/utils/render";
 
 const testHtml = `Hello Phoenix editor!
 <p>this is a paragraph</p>
@@ -77,6 +79,15 @@ class PlayGroundEmbeddedComponentPlugin extends Plugin {
                     p.addCounter();
                 },
             },
+            {
+                category: "playground",
+                name: "Embed Demo",
+                description: "it's an embed demo",
+                fontawesome: "fa-square",
+                action: () => {
+                    p.addDemoEmbed();
+                },
+            },
         ],
         powerboxCategory: { id: "playground", name: "Playground", sequence: 777 },
     });
@@ -99,6 +110,17 @@ class PlayGroundEmbeddedComponentPlugin extends Plugin {
         );
         this.dispatch("ADD_STEP");
     }
+
+    addDemoEmbed() {
+        const frag = new DocumentFragment();
+        const embeddedProps = JSON.stringify({});
+        const blueprint = renderToElement("html_editor.DemoEmbedBlueprint", {
+            embeddedProps,
+        });
+        frag.append(blueprint);
+        this.shared.domInsert(frag);
+        this.dispatch("ADD_STEP");
+    }
 }
 
 EXTRA_PLUGINS.push(PlayGroundEmbeddedComponentPlugin);
@@ -118,7 +140,7 @@ class WysiwygLoader extends Component {
 
     setup() {
         this.wysiwygOptions = {
-            value: testHtml,
+            value: `<p><br></p>`,
             editorPlugins: [],
         };
         onWillStart(async () => {
@@ -149,7 +171,7 @@ export class Playground extends Component {
         this.config = useState({
             showToolbar: false,
             inIframe: false,
-            pluginSet: "base",
+            pluginSet: "extras",
         });
         this.busService = this.env.services.bus_service;
         this.ormService = useService("orm");
@@ -176,11 +198,11 @@ export class Playground extends Component {
      */
     getConfig() {
         return {
-            content: testHtml,
+            content: `<p><br></p>`,
             Plugins: PluginSets[this.config.pluginSet],
             classList: this.classList,
             resources: {
-                embeddedComponents: [counter, card],
+                embeddedComponents: [counter, card, demoEmbed],
             },
             onChange: this.updateContent.bind(this),
             collaboration: {

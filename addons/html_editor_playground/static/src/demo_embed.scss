@@ -1,0 +1,22 @@
+.oe_demo_embed {
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    background-color: $o-gray-100;
+    outline: 1px solid $o-gray-300;
+    outline-offset: -1px;
+    .oe_demo_embed_content {
+        padding: 5px;
+        border-bottom: 5px solid $o-gray-100;
+        margin: 0 5px;
+        background-color: $o-view-background-color;
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
+    .oe_demo_embed_label {
+        font-family: $font-family-base !important;
+        font-weight: $font-weight-bold;
+        padding: $btn-padding-y-sm $btn-padding-x-sm;
+        color: $o-gray-600;
+    }
+}

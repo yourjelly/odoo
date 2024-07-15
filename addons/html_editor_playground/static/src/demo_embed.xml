@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="html_editor.DemoEmbedBlueprint">
+        <div data-embedded="demoEmbed" t-att-data-embedded-props="embeddedProps">
+            <div data-embedded-editable="edit">
+                <p><br/></p>
+            </div>
+        </div>
+    </t>
+    <t t-name="html_editor.DemoEmbed">
+        <div class="oe_demo_embed" t-ref="border">
+            <div class="oe_demo_embed_label px-2 py-1 text-break">Demo</div>
+            <div class="oe_demo_embed_content">
+                <div t-if="props.list">savedList</div>
+                <div t-out="(props.list || '').toString()"/>
+                <button t-on-click="displayList">displayOwnList</button>
+                <div t-out="(embeddedState.list || '').toString()"/>
+            </div>
+            <div class="oe_demo_embed_content">
+                <div t-if="props.obj">savedObj</div>
+                <div t-out="displayObj(props.obj)"/>
+                <button t-on-click="addProp">addProp</button>
+                <button t-on-click="removeProp">removeProp</button>
+                <div t-out="displayObj(embeddedState.obj)"/>
+            </div>
+            <div class="oe_demo_embed_content">
+                <button t-if="embeddedState.outlineColor !== 'red'" t-on-click="red">red</button>
+                <button t-if="embeddedState.outlineColor !== 'green'" t-on-click="green">green</button>
+                <button t-if="embeddedState.outlineColor !== 'blue'" t-on-click="blue">blue</button>
+                <button t-if="embeddedState.outlineColor" t-on-click="resetColor">reset</button>
+            </div>
+            <div class="oe_demo_embed_content" t-ref="edit"/>
+        </div>
+    </t>
+</templates>
