@@ -577,6 +577,9 @@ class Post(models.Model):
         if 'tag_ids' in vals:
             tag_ids = set(self.new({'tag_ids': vals['tag_ids']}).tag_ids.ids)
 
+        if 'forum_id' in vals:
+            self.env['forum.forum'].browse(vals['forum_id']).check_access_rule('read')
+
         for post in self:
             if 'state' in vals:
                 if vals['state'] in ['active', 'close']:
