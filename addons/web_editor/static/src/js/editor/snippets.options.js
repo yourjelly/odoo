@@ -10025,21 +10025,7 @@ export class SnippetSave extends SnippetOption {
 /**
  * Handles the dynamic colors for dynamic SVGs.
  */
-legacyRegistry.DynamicSvg = SnippetOptionWidget.extend({
-    /**
-     * @override
-     */
-    start() {
-        this.$target.on('image_changed.DynamicSvg', this._onImageChanged.bind(this));
-        return this._super(...arguments);
-    },
-    /**
-     * @override
-     */
-    destroy() {
-        this.$target.off('.DynamicSvg');
-        return this._super(...arguments);
-    },
+export class DynamicSvg extends SnippetOption {
 
     //--------------------------------------------------------------------------
     // Options
@@ -10068,7 +10054,7 @@ legacyRegistry.DynamicSvg = SnippetOptionWidget.extend({
         if (!previewMode) {
             this.previousSrc = src;
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -10082,8 +10068,8 @@ legacyRegistry.DynamicSvg = SnippetOptionWidget.extend({
             case 'color':
                 return new URL(this.$target[0].src, window.location.origin).searchParams.get(params.colorName);
         }
-        return this._super(...arguments);
-    },
+        return super._computeWidgetState(...arguments);
+    }
     /**
      * @override
      */
@@ -10091,25 +10077,20 @@ legacyRegistry.DynamicSvg = SnippetOptionWidget.extend({
         if ('colorName' in params) {
             return new URL(this.$target[0].src, window.location.origin).searchParams.get(params.colorName);
         }
-        return this._super(...arguments);
-    },
+        return super._computeWidgetVisibility(...arguments);
+    }
     /**
      * @override
      */
     _computeVisibility(methodName, params) {
         return this.$target.is("img[src^='/web_editor/shape/']");
-    },
+    }
+}
 
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    _onImageChanged(methodName, params) {
-        return this.updateUI();
-    },
+registerOption("DynamicSvg", {
+    Class: DynamicSvg,
+    template: "web_editor.dynamic_svg_option",
+    selector: "img",
 });
 
 /**

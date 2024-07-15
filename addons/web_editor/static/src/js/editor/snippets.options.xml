@@ -144,6 +144,16 @@
     </WeRow>
 </t>
 
+<t t-name="web_editor.dynamic_svg_option">
+    <WeRow name="'colors'" title.translate="Dynamic Colors">
+        <WeColorpicker color="'true'" colorName="'c1'"/>
+        <WeColorpicker color="'true'" colorName="'c2'"/>
+        <WeColorpicker color="'true'" colorName="'c3'"/>
+        <WeColorpicker color="'true'" colorName="'c4'"/>
+        <WeColorpicker color="'true'" colorName="'c5'"/>
+    </WeRow>
+</t>
+
 <t t-name="web_editor.WeTitle">
     <we-title t-att-class="props.class" t-att-style="props.style"
                 t-att-data-tooltip="props.tooltip">

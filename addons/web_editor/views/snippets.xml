@@ -727,16 +727,6 @@
 
         <we-input string="Padding" data-select-style="" data-unit="px" data-css-property="padding"/>
     </div>
-
-    <div data-js="DynamicSvg" data-selector="img">
-        <we-row string="Dynamic Colors" data-name="colors">
-            <we-colorpicker data-color="true" data-color-name="c1"/>
-            <we-colorpicker data-color="true" data-color-name="c2"/>
-            <we-colorpicker data-color="true" data-color-name="c3"/>
-            <we-colorpicker data-color="true" data-color-name="c4"/>
-            <we-colorpicker data-color="true" data-color-name="c5"/>
-        </we-row>
-    </div>
 </template>
 
 <!-- default block -->
