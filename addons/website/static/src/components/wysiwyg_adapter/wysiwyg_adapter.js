@@ -1126,36 +1126,26 @@ export class WysiwygAdapterComponent extends Wysiwyg {
      */
     async _onSaveRequest(event) {
         const isDirty = this._isDirty();
-        let callback = () => {
+        let callback = async () => {
             this.leaveEditMode({ forceLeave: true });
-            if (isDirty) {
-                const {
-                    mainObject: { id, model },
-                } = this.websiteService.currentWebsite.metadata;
-                const canPublish = this.websiteService.currentWebsite.metadata.canPublish;
-                rpc("/website/get_seo_data", {
+            const {
+                mainObject: { id, model },
+            } = this.websiteService.currentWebsite.metadata;
+            try {
+                const seo_data = await rpc("/website/get_seo_data", {
                     res_id: id,
                     res_model: model,
-                }).then(
-                    async (seo_data) => {
-                        if (canPublish) {
-                            const record = await this.orm.read(model, [id], ["is_published"]);
-                            record[0].is_published &&
-                                checkAndNotifySEO(seo_data, OptimizeSEODialog, {
-                                    notification: this.notificationService,
-                                    dialog: this.dialogs,
-                                });
-                        } else {
-                            checkAndNotifySEO(seo_data, OptimizeSEODialog, {
-                                notification: this.notificationService,
-                                dialog: this.dialogs,
-                            });
-                        }
-                    },
-                    (error) => {
-                        throw error;
-                    }
-                );
+                });
+                if (!isDirty || !seo_data.website_is_published) {
+                    return;
+                }
+
+                checkAndNotifySEO(seo_data, OptimizeSEODialog, {
+                    notification: this.notificationService,
+                    dialog: this.dialogs,
+                });
+            } catch (error) {
+                throw new Error(error);
             }
         };
         if (event.data.reload || event.data.reloadEditor) {
