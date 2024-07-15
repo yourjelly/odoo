@@ -1260,7 +1260,7 @@ class AccountMoveLine(models.Model):
         # Avoid using api.constrains for fields journal_id and account_id as in case of a write on
         # account move and account move line in the same operation, the check would be done
         # before all write are complete, causing a false positive
-        self.flush_recordset()
+
         for line in self.filtered(lambda x: x.display_type not in ('line_section', 'line_note')):
             account = line.account_id
             journal = line.move_id.journal_id
@@ -1652,7 +1652,6 @@ class AccountMoveLine(models.Model):
                         continue # We don't want to track related field.
                     if hasattr(field, 'tracking') and field.tracking:
                         tracking_fields.append(value)
-                ref_fields = self.env['account.move.line'].fields_get(tracking_fields)
 
                 # Get initial values for each line
                 move_initial_values = {}
@@ -1668,10 +1667,11 @@ class AccountMoveLine(models.Model):
             if any(field in vals for field in ['account_id', 'currency_id']):
                 self._check_constrains_account_id_journal_id()
 
-            if not self.env.context.get('tracking_disable', False):
+            if not self.env.context.get('tracking_disable', False) and tracking_fields:
                 # Log changes to move lines on each move
                 for move_id, modified_lines in move_initial_values.items():
                     for line in self.filtered(lambda l: l.move_id.id == move_id):
+                        ref_fields = self.env['account.move.line'].fields_get(tracking_fields, attributes=('string', 'type', 'selection', 'currency_field'))
                         tracking_value_ids = line._mail_track(ref_fields, modified_lines)[1]
                         if tracking_value_ids:
                             msg = _("Journal Item %s updated", line._get_html_link(title=f"#{line.id}"))
