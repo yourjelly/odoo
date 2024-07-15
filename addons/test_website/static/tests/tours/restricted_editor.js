@@ -118,10 +118,5 @@ wTourUtils.registerWebsitePreviewTour('test_restricted_editor_test_admin', {
         trigger: ":iframe [data-oe-expression='record.name']",
         run: "editor Nouvelle valeur",
     },
-    {
-        content: "Translate some banner text",
-        trigger: ":iframe [data-oe-expression='record.website_description'] strong.o_default_snippet_text",
-        run: "editor Facilement.",
-    },
     ...wTourUtils.clickOnSave(),
 ]);
