@@ -4965,9 +4965,6 @@ class BaseModel(metaclass=MetaModel):
 
         # put the new records in cache, and update inverse fields, for many2one
         # (using bin_size=False to put binary values in the right place)
-        #
-        # cachetoclear is an optimization to avoid modified()'s cost until other_fields are processed
-        cachetoclear = []
         records = self.browse(ids)
         inverses_update = defaultdict(list)     # {(field, value): ids}
         common_set_vals = set(LOG_ACCESS_COLUMNS + ['id', 'parent_path'])
@@ -4977,8 +4974,10 @@ class BaseModel(metaclass=MetaModel):
             vals = dict({k: v for d in data['inherited'].values() for k, v in d.items()}, **data['stored'])
             set_vals = common_set_vals.union(vals)
             for field in self._fields.values():
-                if field.type in ('one2many', 'many2many'):
+                if field.type in ('one2many', 'many2many') and field.store:
                     self.env.cache.set(record, field, ())
+                # TODO: It makes "sense" for the attachment to avoid extra request in Binary.write
+                # But it doesn't for every inherited fields, right?
                 elif field.related and not field.column_type:
                     self.env.cache.set(record, field, field.convert_to_cache(None, record))
                 # DLE P123: `test_adv_activity`, `test_message_assignation_inbox`, `test_message_log`, `test_create_mail_simple`, ...
@@ -4988,11 +4987,10 @@ class BaseModel(metaclass=MetaModel):
                 # then we know it can be set to False in the cache in the case of a create.
                 elif field.store and field.name not in set_vals and not field.compute:
                     self.env.cache.set(record, field, field.convert_to_cache(None, record))
+
             for fname, value in vals.items():
                 field = self._fields[fname]
-                if field.type in ('one2many', 'many2many'):
-                    cachetoclear.append((record, field))
-                else:
+                if field.type not in ('one2many', 'many2many'):
                     cache_value = field.convert_to_cache(value, record)
                     self.env.cache.set(record, field, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and self.pool.field_inverses[field]:
@@ -5021,12 +5019,8 @@ class BaseModel(metaclass=MetaModel):
                     ])
 
                 # mark fields to recompute
+                # TODO: It seems useless since the transitive dependencies has be made in the field.create?
                 records.modified([field.name for field in other_fields], create=True)
-
-            # if value in cache has not been updated by other_fields, remove it
-            for record, field in cachetoclear:
-                if self.env.cache.contains(record, field) and not self.env.cache.get(record, field):
-                    self.env.cache.remove(record, field)
 
         # check Python constraints for stored fields
         records._validate_fields(name for data in data_list for name in data['stored'])

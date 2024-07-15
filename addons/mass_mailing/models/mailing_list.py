@@ -10,7 +10,6 @@ from odoo.exceptions import UserError
 class MassMailingList(models.Model):
     """Model of a contact list. """
     _name = 'mailing.list'
-    _order = 'name'
     _description = 'Mailing List'
     _mailing_enabled = True
     _order = 'create_date DESC'

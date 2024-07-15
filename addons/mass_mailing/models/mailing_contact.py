@@ -37,7 +37,7 @@ class MassMailingContact(models.Model):
     email = fields.Char('Email')
     list_ids = fields.Many2many(
         'mailing.list', 'mailing_subscription',
-        'contact_id', 'list_id', string='Mailing Lists')
+        'contact_id', 'list_id', string='Mailing Lists', depends=('subscription_ids',))
     subscription_ids = fields.One2many(
         'mailing.subscription', 'contact_id', string='Subscription Information')
     country_id = fields.Many2one('res.country', string='Country')
