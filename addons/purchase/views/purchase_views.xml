@@ -152,6 +152,16 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button"
+                                name="action_bill_matching"
+                                type="object"
+                                groups="account.group_account_invoice"
+                                icon="fa-bullseye"
+                                invisible="not partner_id or not partner_bill_count or invoice_status == 'invoiced'">
+                            <div class="o_field_statinfo">
+                                <span class="o_stat_text">Bill Matching</span>
+                            </div>
+                        </button>
                         <button type="object"  name="action_view_invoice"
                             class="oe_stat_button"
                             icon="fa-pencil-square-o" invisible="invoice_count == 0 or state in ('draft', 'sent', 'to approve')">
@@ -232,11 +242,11 @@
                                         name="product_id"
                                         widget="product_label_section_and_note_field"
                                         readonly="state in ('purchase', 'to approve', 'done', 'cancel')"
-                                        required="not display_type"
+                                        required="not display_type and not is_downpayment"
                                         context="{'partner_id':parent.partner_id, 'quantity':product_qty, 'company_id': parent.company_id}"
                                         force_save="1" domain="[('purchase_ok', '=', True)]"/>
                                     <field name="name" widget="section_and_note_text" optional="show"/>
-                                    <field name="date_planned" optional="hide" required="not display_type" force_save="1"/>
+                                    <field name="date_planned" optional="hide" required="not display_type and not is_downpayment" force_save="1"/>
                                     <field name="analytic_distribution" widget="analytic_distribution"
                                            optional="hide"
                                            groups="analytic.group_analytic_accounting"
@@ -248,7 +258,7 @@
                                     <field name="qty_invoiced" string="Billed" column_invisible="parent.state not in ('purchase', 'done')" optional="show"/>
                                     <field name="product_uom" string="UoM" groups="uom.group_uom"
                                         readonly="state in ('purchase', 'done', 'cancel')"
-                                        required="not display_type"
+                                        required="not display_type and not is_downpayment"
                                         options="{'no_open': True}"
                                         force_save="1" optional="show"/>
                                     <field name="product_packaging_qty" invisible="not product_id or not product_packaging_id" groups="product.group_stock_packaging" optional="show"/>
@@ -280,7 +290,7 @@
                                                 <label for="product_qty"/>
                                                 <div class="o_row">
                                                     <field name="product_qty"/>
-                                                    <field name="product_uom" groups="uom.group_uom" required="not display_type"/>
+                                                    <field name="product_uom" groups="uom.group_uom" required="not display_type and not is_downpayment"/>
                                                 </div>
                                                 <field name="qty_received_method" invisible="1"/>
                                                 <field name="qty_received" string="Received Quantity" invisible="parent.state not in ('purchase', 'done')" readonly="qty_received_method != 'manual'"/>
@@ -292,7 +302,7 @@
                                                 <field name="taxes_id" widget="many2many_tags" domain="[('type_tax_use', '=', 'purchase'), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id)]" options="{'no_create': True}"/>
                                             </group>
                                             <group>
-                                                <field name="date_planned" required="not display_type"/>
+                                                <field name="date_planned" required="not display_type and not is_downpayment"/>
                                                 <field name="analytic_distribution" widget="analytic_distribution"
                                                        groups="analytic.group_analytic_accounting"
                                                        options="{'product_field': 'product_id', 'business_domain': 'purchase_order'}"/>

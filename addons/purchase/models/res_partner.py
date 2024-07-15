@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.addons.base.models.res_partner import WARNING_MESSAGE, WARNING_HELP
 
 
@@ -36,6 +36,7 @@ class res_partner(models.Model):
         )
         supplier_invoice_groups = self.env['account.move']._read_group(
             domain=[('partner_id', 'in', all_partners.ids),
+                    *self.env['account.move']._check_company_domain(self.env.company),
                     ('move_type', 'in', ('in_invoice', 'in_refund'))],
             groupby=['partner_id'], aggregates=['__count']
         )
@@ -51,6 +52,15 @@ class res_partner(models.Model):
     @api.model
     def _commercial_fields(self):
         return super(res_partner, self)._commercial_fields()
+
+    def open_purchase_matching(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Purchase Matching"),
+            'res_model': 'purchase.bill.line.match',
+            'domain': [('partner_id', '=', self.id), ('company_id', 'in', [self.env.company.id])],
+            'views': [(self.env.ref('purchase.purchase_bill_line_match_tree').id, 'tree')],
+        }
 
     property_purchase_currency_id = fields.Many2one(
         'res.currency', string="Supplier Currency", company_dependent=True,
