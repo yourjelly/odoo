@@ -365,6 +365,7 @@
         <div>
             <input t-ref="input" type="text" class="text-start"
                 autocomplete="chrome-off"
+                t-att-data-tooltip="this.props.tooltip"
                 t-att-placeholder="this.props.placeholder"
                 t-on-input="this._onInputInput"
                 t-on-blur="this._onInputBlur"
