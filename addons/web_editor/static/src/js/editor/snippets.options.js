@@ -9850,7 +9850,7 @@ legacyRegistry.many2one = SnippetOptionWidget.extend({
 /**
  * Allows to display a warning message on outdated snippets.
  */
-legacyRegistry.VersionControl = SnippetOptionWidget.extend({
+class VersionControl extends SnippetOption {
 
     //--------------------------------------------------------------------------
     // Options
@@ -9862,7 +9862,7 @@ legacyRegistry.VersionControl = SnippetOptionWidget.extend({
     async replaceSnippet() {
         // Getting the new block version.
         let newBlockEl;
-        this.trigger_up("find_snippet_template", {
+        this.env.findSnippetTemplate({
             snippet: this.$target[0],
             callback: (snippet) => {
                 newBlockEl = snippet.baseBody.cloneNode(true);
@@ -9882,27 +9882,27 @@ legacyRegistry.VersionControl = SnippetOptionWidget.extend({
                 });
             });
             await new Promise(resolve => {
-                this.trigger_up("remove_snippet",
-                    {$snippet: this.$target, onSuccess: resolve, shouldRecordUndo: false}
-                );
+                this.env.removeSnippet({
+                    data: {$snippet: this.$target, onSuccess: resolve, shouldRecordUndo: false},
+                    stopPropagation: (ev) => {},
+                });
             });
             this.options.wysiwyg.odooEditor.historyUnpauseSteps();
             newBlockEl.classList.remove("oe_snippet_body");
             this.options.wysiwyg.odooEditor.historyStep();
         });
-    },
+    }
     /**
      * Allows to still access the options of an outdated block, despite the
      * warning.
      */
     discardAlert() {
-        const alertEl = this.$el[0].querySelector("we-alert");
+        this.renderContext.showAlert = false;
         const optionsSectionEl = this.$overlay.data("$optionsSection")[0];
-        alertEl.remove();
         optionsSectionEl.classList.remove("o_we_outdated_block_options");
         // Preventing the alert to reappear at each render.
         controlledSnippets.add(this.$target[0].dataset.snippet);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -9911,25 +9911,33 @@ legacyRegistry.VersionControl = SnippetOptionWidget.extend({
     /**
      * @override
      */
-    _renderCustomXML(uiFragment) {
+    async _getRenderContext() {
+        const context = await super._getRenderContext();
         const snippetName = this.$target[0].dataset.snippet;
         // Do not display the alert if it was previously discarded.
-        if (controlledSnippets.has(snippetName)) {
-            return;
+        if (! controlledSnippets.has(snippetName)) {
+            this.env.getSnippetVersions({
+                snippetName: snippetName,
+                onSuccess: snippetVersions => {
+                    const isUpToDate = snippetVersions && ["vjs", "vcss", "vxml"].every(key => this.$target[0].dataset[key] === snippetVersions[key]);
+                    if (!isUpToDate) {
+                        context.showAlert = true;
+                        // uiFragment.prepend(renderToElement("web_editor.outdated_block_message"));
+                        // Hide the other options, to only have the alert displayed.
+                        const optionsSectionEl = this.$overlay.data("$optionsSection")[0];
+                        optionsSectionEl.classList.add("o_we_outdated_block_options");
+                    }
+                },
+            });
         }
-        this.trigger_up("get_snippet_versions", {
-            snippetName: snippetName,
-            onSuccess: snippetVersions => {
-                const isUpToDate = snippetVersions && ["vjs", "vcss", "vxml"].every(key => this.$target[0].dataset[key] === snippetVersions[key]);
-                if (!isUpToDate) {
-                    uiFragment.prepend(renderToElement("web_editor.outdated_block_message"));
-                    // Hide the other options, to only have the alert displayed.
-                    const optionsSectionEl = this.$overlay.data("$optionsSection")[0];
-                    optionsSectionEl.classList.add("o_we_outdated_block_options");
-                }
-            },
-        });
-    },
+        return context;
+    }
+}
+
+registerOption("VersionControl", {
+    Class: VersionControl,
+    template: "web_editor.outdated_block_message_option",
+    selector: "[data-snippet]",
 });
 
 /**

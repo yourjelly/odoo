@@ -103,6 +103,16 @@
     </WeButtonGroup>
 </t>
 
+<t t-name="web_editor.outdated_block_message_option">
+    <we-alert t-if="renderContext.showAlert" class="d-flex flex-column p-3 pt-4 align-items-center text-center text-white">
+        <we-title>This block is outdated.</we-title>
+        <span>You might not be able to customize it anymore.</span>
+        <WeButton class="'o_we_bg_brand_primary py-2 my-4 border-0'" noPreview="'true'" replaceSnippet="''">REPLACE BY NEW VERSION</WeButton>
+        <span>You can still access the block options but it might be ineffective.</span>
+        <WeButton class="'o_we_bg_brand_primary py-2 my-4 border-0'" noPreview="'true'" discardAlert="''">ACCESS OPTIONS ANYWAY</WeButton>
+    </we-alert>
+</t>
+
 <t t-name="web_editor.replace_media_option">
     <!-- Replace a media -->
     <!-- TODO probably review this system once the new editor is merged to not duplicate the selector, etc -->

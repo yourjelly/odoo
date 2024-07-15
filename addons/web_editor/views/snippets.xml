@@ -397,9 +397,6 @@
     <div data-selector=".s_hr"
          data-drop-near="p, h1, h2, h3, blockquote, .s_hr"/>
 
-    <div data-js="VersionControl"
-         data-selector="[data-snippet]"/>
-
     <div data-js="FontawesomeTools" data-selector="span.fa, i.fa" data-exclude="[data-oe-xpath]">
         <we-colorpicker string="Color"
                 title="Color"
