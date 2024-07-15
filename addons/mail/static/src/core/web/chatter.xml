@@ -34,7 +34,7 @@
                         </t>
                     </FileUploader>
                     <t t-else="" t-call="mail.Chatter.attachFiles"/>
-                    <Dropdown t-if="props.hasFollowers" position="'bottom-end'" disabled="isDisabled" class="'o-mail-Followers d-flex me-1'" menuClass="'o-mail-Followers-dropdown flex-column'" menuDisplay="'d-flex'" title="followerButtonLabel" togglerClass="'o-mail-Followers-button btn btn-link d-flex align-items-center text-action px-1 ' + (props.compactHeight ? '' : 'my-2')">
+                    <Dropdown t-if="props.hasFollowers" position="'bottom-end'" disabled="isDisabled or state.isBannerVisible" class="'o-mail-Followers d-flex me-1'" menuClass="'o-mail-Followers-dropdown flex-column'" menuDisplay="'d-flex'" title="followerButtonLabel" togglerClass="'o-mail-Followers-button btn btn-link d-flex align-items-center text-action px-1 ' + (props.compactHeight ? '' : 'my-2')">
                         <t t-set-slot="toggler">
                             <i class="fa fa-user-o me-1" role="img"/>
                             <i t-if="state.thread.id and state.thread.followersCount === undefined" class="fa fa-circle-o-notch fa-spin"/>
@@ -70,7 +70,7 @@
             </div>
             <t t-if="state.composerType">
                 <t t-if="state.composerType === 'message'">
-                    <div class="flex-shrink-0 px-3 pt-3 text-truncate small mb-2" style="margin-left:48px">
+                    <div class="flex-shrink-0 px-3 pt-3 text-truncate small mb-2" style="margin-left:48px" t-att-class="{ 'o-jump-Present-composer-message': state.isBannerVisible }">
                         <span class="fw-bold">To:</span> <t t-out="toRecipientsText"/>
                         <button t-if="state.thread.recipients.length > 0" class="o-mail-Chatter-recipientListButton btn btn-link badge rounded-pill border-0 p-1 ms-1" title="Show all recipients" t-on-click="onClickRecipientList">
                             <i class="fa fa-caret-down"/>
@@ -79,6 +79,7 @@
                 </t>
                 <t t-set="type" t-value="state.composerType === 'message' ? 'message' : 'note'"/>
                 <SuggestedRecipientsList t-if="props.hasFollowers and state.composerType !== 'note'" className="'px-3'" styleString="'margin-left:48px;'" thread="state.thread"/>
+                <div t-if="state.composerType != 'message' &amp;&amp; state.isBannerVisible" class="o-jump-Present-composer-log" />
                 <Composer composer="state.thread.composer" autofocus="true" className="state.composerType === 'message' ? '' : 'pt-4'" mode="'extended'" onPostCallback.bind="onPostCallback" dropzoneRef="rootRef" type="state.composerType" t-key="props.threadId"/>
             </t>
         </div>
