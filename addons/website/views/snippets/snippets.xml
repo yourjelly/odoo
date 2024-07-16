@@ -1648,9 +1648,6 @@
                         data-no-preview="true"
                         data-reload="/"/>
     </div>
-    <div data-js="SwitchableViews" data-selector="#wrapwrap > main" data-no-check="true" groups="website.group_website_designer">
-            <!-- Options will be populated by JS -->
-    </div>
 
     </xpath>
 </template>

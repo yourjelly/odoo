@@ -59,6 +59,7 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
      */
     setup() {
         useSubEnv({
+            getSwitchableRelatedViews: (data) => this._onGetSwitchableRelatedViews.call(this, { data }),
             gmapApiRequest: this._onGMapAPIRequest.bind(this),
             gmapApiKeyRequest: this._onGMapAPIKeyRequest.bind(this),
         });

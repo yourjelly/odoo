@@ -620,4 +620,11 @@
         </t>
     </xpath>
 </t>
+<t t-name="website.switchable_views_option">
+    <t t-foreach="renderContext.switchableRelatedViews" t-as="view" t-key="view.name">
+        <WeRow title="view.name">
+            <WeCheckbox customizeWebsiteViews="view.key" noPreview="'true'" reload="'/'"/>
+        </WeRow>
+    </t>
+</t>
 </templates>

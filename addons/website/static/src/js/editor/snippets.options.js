@@ -4172,45 +4172,47 @@ options.registry.sizing.include({
     },
 });
 
-options.registry.SwitchableViews = options.Class.extend({
+export class SwitchableViews extends SnippetOption {
     /**
      * @override
      */
     async willStart() {
-        const _super = this._super.bind(this);
         this.switchableRelatedViews = await new Promise((resolve, reject) => {
-            this.trigger_up('get_switchable_related_views', {
+            this.env.getSwitchableRelatedViews({
                 onSuccess: resolve,
                 onFailure: reject,
             });
         });
-        return _super(...arguments);
-    },
+        return super.willStart(...arguments);
+    }
     /**
      * @override
      */
-    _renderCustomXML(uiFragment) {
-        for (const view of this.switchableRelatedViews) {
-            const weCheckboxEl = document.createElement('we-checkbox');
-            weCheckboxEl.setAttribute('string', view.name);
-            weCheckboxEl.setAttribute('data-customize-website-views', view.key);
-            weCheckboxEl.setAttribute('data-no-preview', 'true');
-            weCheckboxEl.setAttribute('data-reload', '/');
-            uiFragment.appendChild(weCheckboxEl);
-        }
-    },
+    async _getRenderContext() {
+        return {
+            switchableRelatedViews: this.switchableRelatedViews,
+        };
+    }
     /***
      * @override
      */
     _computeVisibility() {
         return !!this.switchableRelatedViews.length;
-    },
+    }
     /**
      * @override
      */
     _checkIfWidgetsUpdateNeedReload() {
         return true;
     }
+}
+
+registerWebsiteOption("SwitchableViews", {
+    Class: SwitchableViews,
+    template: "website.switchable_views_option",
+    selector: "#wrapwrap > main",
+    noCheck: "true",
+    group: "website.group_website_designer",
 });
 
 options.registry.GridImage = options.Class.extend({
