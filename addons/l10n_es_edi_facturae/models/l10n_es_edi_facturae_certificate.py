@@ -48,7 +48,7 @@ class Certificate(models.Model):
                 raise UserError(_('There has been a problem with the certificate, some usual problems can be:\n'
                                   '\t- The password given or the certificate are not valid.\n'
                                   '\t- The certificate content is invalid.'))
-            if fields.datetime.now() > certif.not_valid_after:
+            if fields.datetime.now().astimezone() > certif.not_valid_after.astimezone():
                 raise UserError(_('The certificate is expired since %s', certif.not_valid_after))
             # Assign extracted values from the certificate
             certificate.write({'serial_number': certif.serial_number, 'date_start': certif.not_valid_before, 'date_end': certif.not_valid_after})

@@ -1,3 +1,4 @@
+import datetime
 from types import SimpleNamespace
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import pkcs12
@@ -30,11 +31,11 @@ def load_key_and_certificates(content, password):
     )
 
     if parse_version(metadata.version('cryptography')) < parse_version('42.0.0'):
-        not_valid_after = certificate.not_valid_after
-        not_valid_before = certificate.not_valid_before
+        not_valid_after = certificate.not_valid_after.localize(datetime.timezone.utc)
+        not_valid_before = certificate.not_valid_before.localize(datetime.timezone.utc)
     else:
-        not_valid_after = certificate.not_valid_after_utc.replace(tzinfo=None)
-        not_valid_before = certificate.not_valid_before_utc.replace(tzinfo=None)
+        not_valid_after = certificate.not_valid_after_utc
+        not_valid_before = certificate.not_valid_before_utc
 
     simple_certificate = SimpleNamespace(
         fingerprint=certificate.fingerprint,
