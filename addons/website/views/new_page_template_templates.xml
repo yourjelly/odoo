@@ -344,10 +344,10 @@ overridden by modules), because:
 
 <template id="new_page_template_about_full_s_text_image" inherit_id="website.new_page_template_about_s_text_image" primary="True">
     <xpath expr="//section" position="attributes">
-        <attribute name="class" add="o_colored_level pt56 pb56" remove="pt32 pb32" separator=" "/>
+        <attribute name="class" add="o_colored_level pt56 pb56" remove="pt80 pb80" separator=" "/>
     </xpath>
     <xpath expr="//h2|//h3" position="replace">
-        <h2>Our Goals</h2>
+        <h2 class="h3-fs">Our Goals</h2>
     </xpath>
     <xpath expr="//p" position="replace">
         <p>We're driven by the aspiration to redefine industry standards, to exceed the expectations of our clients, and to foster a culture of continuous growth.</p>
@@ -356,10 +356,10 @@ overridden by modules), because:
 
 <template id="new_page_template_landing_s_text_image" inherit_id="website.new_page_template_s_text_image" primary="True">
     <xpath expr="//section" position="attributes">
-        <attribute name="class" add="o_colored_level pt56 pb56" remove="pt32 pb32" separator=" "/>
+        <attribute name="class" add="o_colored_level pt56 pb56" remove="pt80 pb80" separator=" "/>
     </xpath>
     <xpath expr="//h2|//h3" position="replace">
-        <h2>Our Approach</h2>
+        <h2 class="h3-fs">Our Approach</h2>
     </xpath>
     <xpath expr="//p" position="replace">
         <p>We believe that every fitness journey is unique. Our approach begins with understanding your fitness aspirations, your current lifestyle, and any challenges you face.</p>
@@ -368,10 +368,10 @@ overridden by modules), because:
 
 <template id="new_page_template_services_s_text_image" inherit_id="website.new_page_template_s_text_image" primary="True">
     <xpath expr="//section" position="attributes">
-        <attribute name="class" add="o_colored_level pt56 pb56" remove="pt32 pb32" separator=" "/>
+        <attribute name="class" add="o_colored_level pt56 pb56" remove="pt80 pb80" separator=" "/>
     </xpath>
     <xpath expr="//h2|//h3" position="replace">
-        <h2>Transform Your Brand</h2>
+        <h2 class="h3-fs">Transform Your Brand</h2>
     </xpath>
     <xpath expr="//p" position="replace">
         <p>From revitalizing your visual identity to realigning your messaging for the digital landscape, we'll guide you through a strategic process that ensures your brand remains relevant and resonates with your audience.</p>
@@ -380,16 +380,16 @@ overridden by modules), because:
 
 <template id="new_page_template_team_s_text_image" inherit_id="website.new_page_template_s_text_image" primary="True">
     <xpath expr="//section" position="attributes">
-        <attribute name="class" add="o_colored_level pt56 pb56" remove="pt32 pb32" separator=" "/>
+        <attribute name="class" add="o_colored_level pt56 pb56" remove="pt80 pb80" separator=" "/>
     </xpath>
     <xpath expr="//h2|//h3" position="replace">
-        <h2>Mich Stark, COO</h2>
+        <h2 class="h3-fs">Mich Stark, COO</h2>
     </xpath>
     <xpath expr="//p" position="replace">
         <p>Mich loves taking on challenges. With his multi-year experience as Commercial Director in the software industry, Mich has helped the company to get where it is today.</p>
     </xpath>
     <xpath expr="//img" position="replace">
-        <img alt="" src="/web/image/website.s_company_team_image_2" class="img img-fluid mx-auto w-100"/>
+        <img alt="" src="/web/image/website.s_company_team_image_2" class="img img-fluid mx-auto w-100 rounded shadow"/>
     </xpath>
 </template>
 

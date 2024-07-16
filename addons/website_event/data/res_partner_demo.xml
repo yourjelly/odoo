@@ -29,7 +29,7 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-3 pt8 pb8 o_colored_level">
-                <img src="/web/image/website.s_image_text_default_image" class="img img-fluid mx-auto" alt=""/>
+                <img src="/web/image/website.s_image_text_default_image" class="img img-fluid mx-auto rounded" alt=""/>
             </div>
             <div class="col-lg-9 pt8 pb8 o_colored_level">
                 <h2 class="o_default_snippet_text">Happy to be Sponsor</h2>
