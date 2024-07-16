@@ -98,5 +98,6 @@ export class Wysiwyg extends Component {
             }
         });
         onWillDestroy(() => this.editor.destroy(true));
+        console.log(this);
     }
 }
