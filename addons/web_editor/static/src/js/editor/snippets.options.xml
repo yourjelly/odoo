@@ -235,7 +235,14 @@
         <WeTitle t-if="props.slots?.title || props.title"
                title="props.title" slots="{title: props.slots?.title}"/>
         <div>
-            <we-toggler t-out="state.toggler.textContent" t-att-class="{ 'active': state.opened }"/>
+            <t t-if="props.slots?.toggler">
+                <we-toggler t-att-class="{ 'active': state.opened }">
+                    <t t-slot="toggler"/>
+                </we-toggler>
+            </t>
+            <t t-else="">
+                <we-toggler t-out="state.toggler.textContent" t-att-class="{ 'active': state.opened }"/>
+            </t>
             <we-selection-items t-ref="menu">
                 <t t-slot="default"/>
             </we-selection-items>
