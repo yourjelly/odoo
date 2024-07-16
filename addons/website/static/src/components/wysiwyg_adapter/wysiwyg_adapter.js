@@ -1126,17 +1126,20 @@ export class WysiwygAdapterComponent extends Wysiwyg {
      */
     async _onSaveRequest(event) {
         const isDirty = this._isDirty();
+        if (!isDirty) {
+            return;
+        }
         let callback = async () => {
             this.leaveEditMode({ forceLeave: true });
             const {
                 mainObject: { id, model },
             } = this.websiteService.currentWebsite.metadata;
-            try {
-                const seo_data = await rpc("/website/get_seo_data", {
-                    res_id: id,
-                    res_model: model,
-                });
-                if (!isDirty || !seo_data.website_is_published) {
+
+            rpc("/website/get_seo_data", {
+                res_id: id,
+                res_model: model,
+            }).then((seo_data) => {
+                if (!seo_data.website_is_published) {
                     return;
                 }
 
@@ -1144,9 +1147,9 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                     notification: this.notificationService,
                     dialog: this.dialogs,
                 });
-            } catch (error) {
-                throw new Error(error);
-            }
+            }).catch((error) =>{
+                throw error;
+            })
         };
         if (event.data.reload || event.data.reloadEditor) {
             this.props.willReload(this._getDummmySnippetsEl());
