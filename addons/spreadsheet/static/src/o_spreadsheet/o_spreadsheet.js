@@ -11372,7 +11372,7 @@
                 operand = descr;
             }
         }
-        if (isNumber(operand)) {
+        if (isNumber(operand) || isDateTime(operand)) {
             operand = toNumber(operand);
         }
         else if (operand === "TRUE" || operand === "FALSE") {
@@ -20464,10 +20464,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             };
         }
         get assistantStyle() {
+            let assistantStyle = `width:${ASSISTANT_WIDTH}px;`;
             if (this.props.delimitation && this.props.rect) {
                 const { x: cellX, y: cellY, height: cellHeight } = this.props.rect;
                 const remainingHeight = this.props.delimitation.height - (cellY + cellHeight);
-                let assistantStyle = "";
                 if (cellY > remainingHeight) {
                     // render top
                     assistantStyle += `
@@ -20479,9 +20479,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     // render left
                     assistantStyle += `right:0px;`;
                 }
-                return (assistantStyle += `width:${ASSISTANT_WIDTH}px;`);
+                return assistantStyle;
             }
-            return `width:${ASSISTANT_WIDTH}px;`;
+            const { width } = this.env.model.getters.getSheetViewDimensionWithHeaders();
+            if (width < ASSISTANT_WIDTH + this.composerRef.el.getBoundingClientRect().left) {
+                assistantStyle += `right: 0px;`;
+                return assistantStyle;
+            }
+            return assistantStyle;
         }
         setup() {
             owl.onMounted(() => {
@@ -43436,8 +43441,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.47';
-    __info__.date = '2024-07-08T05:55:12.647Z';
-    __info__.hash = 'f52ca6f';
+    __info__.date = '2024-07-16T09:15:39.130Z';
+    __info__.hash = 'e1f3a58';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
