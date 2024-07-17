@@ -50,11 +50,11 @@
                     </p>
                 </div>
                 <div class="form-group">
-                    <textarea class="form-control" rows="3" placeholder="Write your translation" t-model="state.suggestedTranslationText" t-ref="popover-button"></textarea>
+                    <textarea class="form-control" rows="3" placeholder="Write your translation" t-model="state.suggestedTranslationText" ></textarea>
                 </div>
                 <div class="d-flex justify-content-end my-3">
                     <button class="btn btn-outline-primary mx-1" t-on-click="onClickClear">Clear</button>
-                    <button class="btn btn-outline-primary mx-1" data-toggle="popover" t-on-click="onClickCopy">Copy</button>
+                    <button class="btn btn-outline-primary mx-1" t-on-click="onClickCopy">Copy</button>
                     <button class="btn btn-primary mx-1" t-on-click="onClickSuggest">Suggest</button>
                 </div>
             </div>

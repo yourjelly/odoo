@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<templates>
-    <t t-name="t9n.copyButtonPopover">
-        <div class="popover-body">Copied to clipboard!</div>
-    </t>
-</templates>

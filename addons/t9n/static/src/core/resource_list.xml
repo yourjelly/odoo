@@ -10,12 +10,12 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th t-on-click="() => this.onClickColumnName('fileName')">Resource <i t-attf-class="btn btn-link fa fa-sort-{{this.state.sorting.column === 'name' and this.state.sorting.order === 'asc' ? 'up' : 'down'}}"></i>
+                        <th t-on-click="() => this.onClickColumnName('file_name')">Resource <i t-attf-class="btn btn-link fa fa-sort-{{this.state.sorting.column === 'file_name' and this.state.sorting.order === 'asc' ? 'up' : 'down'}}"></i>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="props.resources" t-as="resource" t-key="resource.id">
+                    <t t-foreach="resources" t-as="resource" t-key="resource.id">
                         <tr>
                             <td>
                                 <button class="btn btn-link " t-on-click="() => this.onClickResource(resource)">

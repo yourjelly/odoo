@@ -106,40 +106,20 @@ class Resource(models.Model):
                     {
                         "id": msg.id,
                         "body": msg.body,
-                    } for msg in resource.message_ids
+                        "translation_ids": [
+                            {
+                                "id": translation.id,
+                                "body": translation.body,
+                                "lang_id": translation.lang_id.id,
+                            }
+                            for translation in msg.translation_ids
+                        ],
+                    }
+                    for msg in resource.message_ids
                 ],
                 "project_id": {
                     "id": resource.project_id.id,
                 },
-            } for resource in self
+            }
+            for resource in self
         ]
-
-    @api.model
-    def get_resource(self, id, target_lang_id):
-        resource_records = self.browse([id])
-        resource_records.ensure_one()
-        resource_record = next(iter(resource_records))
-        return {
-            "id": resource_record.id,
-            "file_name": resource_record.file_name,
-            "project_id": resource_record.project_id.id,
-            "messages": [
-                {
-                    "id": message.id,
-                    "body": message.body,
-                    "context": message.context,
-                    "translator_comments": message.translator_comments,
-                    "extracted_comments": message.extracted_comments,
-                    "references": message.references,
-                    "translations": [
-                        {
-                            "id": lang.id,
-                            "body": lang.body,
-                        }
-                        for lang in message.translation_ids
-                        if lang.lang_id.id == target_lang_id
-                    ],
-                }
-                for message in resource_record.message_ids
-            ],
-        }

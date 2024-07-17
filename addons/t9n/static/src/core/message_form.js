@@ -1,9 +1,7 @@
-import { Component, useState, useRef } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 
-import { CopyPopover } from "@t9n/core/copy_button_popover";
-
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { usePopover } from "@web/core/popover/popover_hook";
 
 export class MessageForm extends Component {
     static props = {};
@@ -15,13 +13,7 @@ export class MessageForm extends Component {
         });
         this.store = useState(useService("mail.store"));
         this.orm = useService("orm");
-        this.popoverButtonRef = useRef("popover-button");
-        this.copyPopover = usePopover(CopyPopover, {
-            position: "top",
-            animation: true,
-            arrow: true,
-            closeOnClickAway: true,
-        });
+        this.notification = useService("notification");
     }
 
     get message() {
@@ -38,11 +30,11 @@ export class MessageForm extends Component {
 
     async onClickCopy(ev) {
         try {
-            await navigator.clipboard.writeText(this.state.suggestedTranslationText.trim());
-            this.copyPopover.open(this.popoverButtonRef.el, {});
-            setTimeout(() => {
-                this.copyPopover.close();
-            }, 3000);
+            await navigator.clipboard.writeText(this.message.body.trim());
+            this.notification.add(
+                _t("Copied to clipboard!"),
+                { type: "info" }
+            );
         } catch (error) {
             console.error("Error copying text:", error);
         }
@@ -56,7 +48,7 @@ export class MessageForm extends Component {
                 lang_id: this.store.t9n.activeLanguage.id,
             },
         );
-        console.log(data);
+
         this.store["t9n.translation"].insert(data);
         this.state.suggestedTranslationText = "";
     }

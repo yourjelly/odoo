@@ -17,7 +17,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="this.languages" t-as="language" t-key="language.id">
+                    <t t-foreach="languages" t-as="language" t-key="language.id">
                         <tr>
                             <td>
                                 <button class="btn btn-link " t-on-click="() => this.onClickLanguage(language)">

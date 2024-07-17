@@ -7,7 +7,7 @@ export class AppModel extends Record {
     activeLanguage = Record.one("t9n.language");
     activeResource = Record.one("t9n.resource");
     activeMessage = Record.one("t9n.message");
-    /** @type {"ProjectList|"LanguageList"|"ResourceList"|"TranslationEditor"} */
+    /** @type {"ProjectList"|"LanguageList"|"ResourceList"|"TranslationEditor"} */
     activeView = "ProjectList";
 }
 

@@ -13,7 +13,7 @@ export class ResourceList extends Component {
                 searchText: "",
             },
             sorting: {
-                column: "fileName",
+                column: "file_name",
                 order: "asc",
             },
         });
@@ -24,8 +24,8 @@ export class ResourceList extends Component {
     get resources() {
         const searchTerms = this.state.filters.searchText.trim().toUpperCase();
         const resources = searchTerms
-            ? this.store.resources.filter((r) => r.fileName.toUpperCase().includes(searchTerms))
-            : [...this.store.resources];
+            ? this.props.resources.filter((r) => r.file_name.toUpperCase().includes(searchTerms))
+            : [...this.props.resources];
 
         resources.sort((r1, r2) => {
             let r1Col = r1[this.state.sorting.column];
@@ -49,7 +49,7 @@ export class ResourceList extends Component {
         const resourceData = await this.env.services.orm.call(
             "t9n.resource",
             "get_resources",
-            this.props.resources.map(({ id }) => id)
+            [this.props.resources.map(({ id }) => id)],
         );
         this.store["t9n.resource"].insert(resourceData);
     }
