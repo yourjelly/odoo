@@ -180,12 +180,13 @@ class MrpProduction(models.Model):
     def action_post_wip(self):
         # Only split moves that have picked move lines
         moves_to_split = self.move_raw_ids.move_line_ids.filtered(lambda ml: ml.picked).mapped('move_id')
-        
-        # Change location + mark as done (will create backorder)
-        moves_to_split.location_dest_id = self.picking_type_id.production_wip_location
-        done_moves = moves_to_split._action_done()
-        done_moves.wip_production_id = done_moves.raw_material_production_id
-        done_moves.raw_material_production_id = False
+        if moves_to_split:
+            # Change location + mark as done (will create backorder)
+            moves_to_split.location_dest_id = self.picking_type_id.production_wip_location
+            done_moves = moves_to_split._action_done()
+            if done_moves:
+                done_moves.wip_production_id = done_moves.raw_material_production_id
+                done_moves.raw_material_production_id = False
         self._post_labour_wip()
 
     def _create_labour_move(self, line_data, counter_account):

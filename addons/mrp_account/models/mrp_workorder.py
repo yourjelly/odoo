@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, _
+from odoo import fields, models, _, api
 
 
 class MrpWorkorder(models.Model):
@@ -54,3 +54,11 @@ class MrpWorkorder(models.Model):
     def unlink(self):
         (self.mo_analytic_account_line_ids | self.wc_analytic_account_line_ids).unlink()
         return super().unlink()
+
+    @api.onchange('time_ids')
+    def _onchange_time_ids(self):
+        if self.time_ids.account_move_line_id and self.production_id.state not in ['done', 'cancel']:
+            if len(self._origin.time_ids) < len(self.time_ids):  # Time id was removed by user
+                return {'warning': {'message': _('Note that the WIP posting linked to this entry will not be reverted by this action.')}}
+            elif len(self._origin.time_ids) == len(self.time_ids):  # Time id was edited by user
+                return {'warning': {'message': _('Note that any WIP posting linked to this entry will not be impacted by this change. To do so, please create a new time log and post WIP again.')}}
