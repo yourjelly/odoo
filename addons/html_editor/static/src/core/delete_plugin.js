@@ -23,7 +23,6 @@ import {
     descendants,
     firstLeaf,
     getCommonAncestor,
-    getFurthestUneditableParent,
     lastLeaf,
     findFurthest,
 } from "../utils/dom_traversal";
@@ -138,7 +137,7 @@ export class DeletePlugin extends Plugin {
         }
 
         let range = this.adjustRange(selection, [
-            this.expandRangeToIncludeNonEditables,
+            this.fullyIncludeNonEditables,
             this.includeEndOrStartBlock,
             this.fullyIncludeLinks,
         ]);
@@ -886,18 +885,19 @@ export class DeletePlugin extends Plugin {
         return range;
     }
 
-    // Expand the range to fully include all contentEditable=False elements.
+    // Expand the range to fully include partially selected contentEditable=false elements.
     /**
      * @param {Range} range
      * @returns {Range}
      */
-    expandRangeToIncludeNonEditables(range) {
+    fullyIncludeNonEditables(range) {
         const { startContainer, endContainer, commonAncestorContainer: commonAncestor } = range;
-        const startUneditable = getFurthestUneditableParent(startContainer, commonAncestor);
+        const isNonEditable = (node) => !closestElement(node).isContentEditable;
+        const startUneditable = findFurthest(startContainer, commonAncestor, isNonEditable);
         if (startUneditable) {
             range.setStartBefore(startUneditable);
         }
-        const endUneditable = getFurthestUneditableParent(endContainer, commonAncestor);
+        const endUneditable = findFurthest(endContainer, commonAncestor, isNonEditable);
         if (endUneditable) {
             range.setEndAfter(endUneditable);
         }
