@@ -122,34 +122,17 @@ export class DeletePlugin extends Plugin {
     // commands
     // --------------------------------------------------------------------------
 
-    /**
-     * @param {EditorSelection} [selection]
-     */
-    deleteSelection(selection = this.shared.getEditableSelection()) {
+    deleteSelection() {
         // @todo @phoenix: handle non-collapsed selection around a ZWS
         // see collapseIfZWS
 
-        // Normalize selection
-        selection = this.shared.setSelection(selection);
+        // Get normalized selection
+        const selection = this.shared.setSelection(this.shared.getEditableSelection());
 
-        if (selection.isCollapsed) {
-            return;
+        const { commonAncestorContainer } = selection;
+        if (!selection.isCollapsed && closestElement(commonAncestorContainer).isContentEditable) {
+            this.deleteSelectedContents(selection);
         }
-
-        let range = this.adjustRange(selection, [
-            this.fullyIncludeNonEditables,
-            this.includeEndOrStartBlock,
-            this.fullyIncludeLinks,
-        ]);
-
-        for (const { callback } of this.resources["handle_delete_range"]) {
-            if (callback(range)) {
-                return;
-            }
-        }
-
-        range = this.deleteRange(range);
-        this.setCursorFromRange(range);
     }
 
     /**
@@ -157,10 +140,15 @@ export class DeletePlugin extends Plugin {
      * @param {"character"|"word"} granularity
      */
     delete(direction, granularity) {
-        const selection = this.shared.getEditableSelection();
+        // Get normalized selection
+        const selection = this.shared.setSelection(this.shared.getEditableSelection());
+
+        if (!closestElement(selection.commonAncestorContainer).isContentEditable) {
+            return;
+        }
 
         if (!selection.isCollapsed) {
-            this.deleteSelection(selection);
+            this.deleteSelectedContents(selection);
         } else if (direction === "backward") {
             this.deleteBackward(selection, granularity);
         } else if (direction === "forward") {
@@ -173,17 +161,30 @@ export class DeletePlugin extends Plugin {
     }
 
     // --------------------------------------------------------------------------
-    // Delete backward/forward
+    // Delete selected contents / backward / forward
     // --------------------------------------------------------------------------
+
+    deleteSelectedContents(selection) {
+        let range = this.adjustRange(selection, [
+            this.fullyIncludeNonEditables,
+            this.includeEndOrStartBlock,
+            this.fullyIncludeLinks,
+        ]);
+
+        if (this.resources["handle_delete_range"]?.some(({ callback }) => callback(range))) {
+            return;
+        }
+
+        range = this.deleteRange(range);
+        this.setCursorFromRange(range);
+    }
 
     /**
      * @param {EditorSelection} selection
      * @param {"character"|"word"} granularity
      */
     deleteBackward(selection, granularity) {
-        // Normalize selection
-        const { endContainer, endOffset } = this.shared.setSelection(selection);
-
+        const { endContainer, endOffset } = selection;
         let range = this.getRangeForDelete(endContainer, endOffset, "backward", granularity);
 
         const resources = {
@@ -191,10 +192,8 @@ export class DeletePlugin extends Plugin {
             word: this.resources["handle_delete_backward_word"],
             line: this.resources["handle_delete_backward_line"],
         };
-        for (const { callback } of resources[granularity]) {
-            if (callback(range)) {
-                return;
-            }
+        if (resources[granularity]?.some(({ callback }) => callback(range))) {
+            return;
         }
 
         range = this.adjustRange(range, [
@@ -211,9 +210,7 @@ export class DeletePlugin extends Plugin {
      * @param {"character"|"word"} granularity
      */
     deleteForward(selection, granularity) {
-        // Normalize selection
-        const { startContainer, startOffset } = this.shared.setSelection(selection);
-
+        const { startContainer, startOffset } = selection;
         let range = this.getRangeForDelete(startContainer, startOffset, "forward", granularity);
 
         const resources = {
@@ -221,10 +218,8 @@ export class DeletePlugin extends Plugin {
             word: this.resources["handle_delete_forward_word"],
             line: this.resources["handle_delete_forward_line"],
         };
-        for (const { callback } of resources[granularity]) {
-            if (callback(range)) {
-                return;
-            }
+        if (resources[granularity]?.some(({ callback }) => callback(range))) {
+            return;
         }
 
         range = this.adjustRange(range, [
@@ -634,7 +629,7 @@ export class DeletePlugin extends Plugin {
             }[leftType + " + " + rightType] || (() => true)
         ).bind(this);
         // "inline + inline": Nothing to do, consider it joined.
-        // Same any combination involving type "null" (no joinable element).
+        // Same for any combination involving type "null" (no joinable element).
     }
 
     isUnmergeable(node) {
