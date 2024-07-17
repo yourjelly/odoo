@@ -475,7 +475,7 @@ class BaseAutomation(models.Model):
         record = self.env[self.model_name]
         if self.record_getter:
             try:
-                record = safe_eval.safe_eval(self.record_getter, self._get_eval_context(payload=payload))
+                record = safe_eval.safe_eval(self.record_getter, self._get_eval_context(payload=payload), allow_func_calls=True)
             except Exception as e: # noqa: BLE001
                 msg = "Webhook #%s could not be triggered because the record_getter failed:\n%s"
                 msg_args = (self.id, traceback.format_exc())
@@ -579,7 +579,7 @@ class BaseAutomation(models.Model):
                 # this context flag enables to detect the executions of
                 # automations while evaluating their precondition
                 records = records.with_context(__action_feedback=True)
-            domain = safe_eval.safe_eval(self_sudo.filter_pre_domain, self._get_eval_context())
+            domain = safe_eval.safe_eval(self_sudo.filter_pre_domain, self._get_eval_context(), allow_func_calls=True)
             return records.sudo().filtered_domain(domain).with_env(records.env)
         else:
             return records
@@ -595,7 +595,7 @@ class BaseAutomation(models.Model):
                 # this context flag enables to detect the executions of
                 # automations while evaluating their postcondition
                 records = records.with_context(__action_feedback=True)
-            domain = safe_eval.safe_eval(self_sudo.filter_domain, self._get_eval_context())
+            domain = safe_eval.safe_eval(self_sudo.filter_domain, self._get_eval_context(), allow_func_calls=True)
             return records.sudo().filtered_domain(domain).with_env(records.env), domain
         else:
             return records, None
@@ -909,7 +909,7 @@ class BaseAutomation(models.Model):
             domain = []
             context = dict(self._context)
             if automation.filter_domain:
-                domain = safe_eval.safe_eval(automation.filter_domain, eval_context)
+                domain = safe_eval.safe_eval(automation.filter_domain, eval_context, allow_func_calls=True)
             records = self.env[automation.model_name].with_context(context).search(domain)
 
             def get_record_dt(record):

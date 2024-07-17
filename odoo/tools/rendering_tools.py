@@ -68,7 +68,7 @@ def render_inline_template(template_instructions, variables):
         results.append(string)
 
         if expression:
-            result = safe_eval.safe_eval(expression, variables)
+            result = safe_eval.safe_eval(expression, variables, allow_func_calls=True)
             if result:
                 results.append(str(result))
 

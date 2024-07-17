@@ -128,6 +128,12 @@ _EXPR_OPCODES = _CONST_OPCODES.union(to_opcodes([
     'BINARY_SLICE',
 ])) - _BLACKLIST
 
+_FUNC_OPCODES = set(to_opcodes([
+    'MAKE_FUNCTION', 'CALL_FUNCTION', 'CALL_FUNCTION_KW', 'CALL_FUNCTION_EX',
+    # Added in P3.7 https://bugs.python.org/issue26110
+    'CALL_METHOD', 'LOAD_METHOD',
+])) - _BLACKLIST
+
 _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
     'POP_BLOCK', 'POP_EXCEPT',
 
@@ -135,9 +141,6 @@ _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
     'SETUP_LOOP', 'SETUP_EXCEPT', 'BREAK_LOOP', 'CONTINUE_LOOP',
 
     'EXTENDED_ARG',  # P3.6 for long jump offsets.
-    'MAKE_FUNCTION', 'CALL_FUNCTION', 'CALL_FUNCTION_KW', 'CALL_FUNCTION_EX',
-    # Added in P3.7 https://bugs.python.org/issue26110
-    'CALL_METHOD', 'LOAD_METHOD',
 
     'GET_ITER', 'FOR_ITER', 'YIELD_VALUE',
     'JUMP_FORWARD', 'JUMP_ABSOLUTE', 'JUMP_BACKWARD',
@@ -337,7 +340,7 @@ _BUILTINS = {
     'zip': zip,
     'Exception': Exception,
 }
-def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=False, locals_builtins=False, filename=None):
+def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=False, locals_builtins=False, filename=None, allow_func_calls=False):
     """safe_eval(expression[, globals[, locals[, mode[, nocopy]]]]) -> result
 
     System-restricted Python expression evaluation
@@ -385,7 +388,10 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=Fal
         if locals_dict is None:
             locals_dict = {}
         locals_dict.update(_BUILTINS)
-    c = test_expr(expr, _SAFE_OPCODES, mode=mode, filename=filename)
+    opcodes = _SAFE_OPCODES
+    if allow_func_calls:
+        opcodes = opcodes.union(_FUNC_OPCODES)
+    c = test_expr(expr, opcodes, mode=mode, filename=filename)
     try:
         return unsafe_eval(c, globals_dict, locals_dict)
     except odoo.exceptions.UserError:
@@ -404,7 +410,7 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=Fal
         raise ValueError('%s: "%s" while evaluating\n%r' % (ustr(type(e)), ustr(e), expr))
 def test_python_expr(expr, mode="eval"):
     try:
-        test_expr(expr, _SAFE_OPCODES, mode=mode)
+        test_expr(expr, _SAFE_OPCODES.union(_FUNC_OPCODES), mode=mode)
     except (SyntaxError, TypeError, ValueError) as err:
         if len(err.args) >= 2 and len(err.args[1]) >= 4:
             error = {

@@ -66,7 +66,7 @@ class IrRule(models.Model):
         for rule in self:
             if rule.active and rule.domain_force:
                 try:
-                    domain = safe_eval(rule.domain_force, eval_context)
+                    domain = safe_eval(rule.domain_force, eval_context, allow_func_calls=True)
                     expression.expression(domain, self.env[rule.model_id.model].sudo())
                 except Exception as e:
                     raise ValidationError(_('Invalid domain: %s', e))
