@@ -384,7 +384,7 @@ wTourUtils.registerWebsitePreviewTour(
             id: "s_text_image",
             name: "Text - Image",
         }),
-        ...testImageSnippet("128 image/webp", "image/jpeg", "image/png"),
+        ...testImageSnippet("128 image/jpeg", "image/jpeg", "image/jpeg"),
     ]
 );
 
@@ -500,7 +500,7 @@ wTourUtils.registerWebsitePreviewTour(
         ...testImageGallerySnippet(
             extractBase64PartFromDataURL(generateTestImage(1024, "image/jpeg")),
             "image/jpeg",
-            "image/png",
+            "image/jpeg",
             false
         ),
     ]
@@ -535,9 +535,9 @@ wTourUtils.registerWebsitePreviewTour(
         ...cropImage("image/webp"),
         ...testImageMimetypeIs("image/webp"),
         mockCanvasToDataURLStep,
-        ...removeImageCrop("image/png"), // !isChanged && Original format is smaller
-        ...testImageMimetypeIs("image/png"),
-        testFormatSnippetOption("512px webp"),
+        ...removeImageCrop("image/jpeg"), // !isChanged && Original format is smaller
+        ...testImageMimetypeIs("image/jpeg"),
+        testFormatSnippetOption("512px jpeg"),
 
         // No webp -> webp
         ...cropImage("image/png"),
@@ -580,17 +580,17 @@ wTourUtils.registerWebsitePreviewTour(
         ...testImageMimetypeIs("image/webp", true), // Wait for html update
         ...reloadMock(selectTextImageSnippetImage),
         testFormatSnippetOption("512px webp"),
-        ...removeImageShape("image/png"),
-        ...testImageMimetypeIs("image/png"),
-        testFormatSnippetOption("512px webp"),
+        ...removeImageShape("image/jpeg"),
+        ...testImageMimetypeIs("image/jpeg"),
+        testFormatSnippetOption("512px jpeg"),
 
         // No webp browser -> webp browser
         ...setImageShape(),
-        ...setImageFormat("512 image/webp"),
-        ...testImageMimetypeIs("image/png", true),
-        testFormatSnippetOption("512px webp"),
+        ...setImageFormat("512 image/jpeg"),
+        ...testImageMimetypeIs("image/jpeg", true),
+        testFormatSnippetOption("512px jpeg"),
         ...reloadUnmock(selectTextImageSnippetImage),
-        testFormatSnippetOption("512px webp"),
+        testFormatSnippetOption("512px jpeg"),
         ...removeImageShape("image/webp"),
         ...testImageMimetypeIs("image/webp"),
         testFormatSnippetOption("512px webp"),
@@ -598,8 +598,8 @@ wTourUtils.registerWebsitePreviewTour(
         // Set shape webp -> no webp
         ...reloadMock(selectTextImageSnippetImage),
         ...setImageShape(),
-        ...testImageMimetypeIs("image/png", true),
-        testFormatSnippetOption("512px webp"),
+        ...testImageMimetypeIs("image/jpeg", true),
+        testFormatSnippetOption("512px jpeg"),
     ]
 );
 

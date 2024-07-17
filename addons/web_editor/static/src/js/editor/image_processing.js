@@ -223,6 +223,7 @@ export async function applyModifications(img, dataOptions = {}, returnResultWith
         quality,
         filter,
         mimetype,
+        targetMimetype,
         originalSrc,
         glFilter,
         filterOptions,
@@ -345,7 +346,7 @@ export async function applyModifications(img, dataOptions = {}, returnResultWith
     ctx.fillRect(0, 0, result.width, result.height);
 
     // Quality
-    const imageData = convertCanvasToDataURL(result, mimetype, quality / 100);
+    const imageData = convertCanvasToDataURL(result, targetMimetype || mimetype, quality / 100);
     const newSize = getDataURLBinarySize(imageData.dataURL);
     const originalSize = _getImageSizeFromCache(originalSrc);
     const isChanged = !!perspective || !!glFilter ||
