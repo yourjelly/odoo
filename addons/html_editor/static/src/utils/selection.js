@@ -82,7 +82,6 @@ export function normalizeNotEditableNode(node, offset, position = "right") {
 
 export function normalizeCursorPosition(node, offset, position = "right") {
     [node, offset] = normalizeSelfClosingElement(node, offset);
-    [node, offset] = normalizeNotEditableNode(node, offset, position);
     // todo @phoenix: we should maybe remove it
     // // Be permissive about the received offset.
     // offset = Math.min(Math.max(offset, 0), nodeSize(node));
