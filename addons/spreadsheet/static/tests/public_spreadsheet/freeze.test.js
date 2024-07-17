@@ -13,7 +13,8 @@ import { THIS_YEAR_GLOBAL_FILTER } from "@spreadsheet/../tests/helpers/global_fi
 import { createModelWithDataSource } from "@spreadsheet/../tests/helpers/model";
 import { createSpreadsheetWithPivot } from "@spreadsheet/../tests/helpers/pivot";
 import { freezeOdooData } from "@spreadsheet/helpers/model";
-import { OdooPivot, OdooPivotRuntimeDefinition } from "@spreadsheet/pivot/odoo_pivot";
+import { OdooPivot } from "@spreadsheet/pivot/odoo_pivot";
+import { OdooPivotRuntimeDefinition } from "@spreadsheet/pivot/odoo_pivot_data_layer";
 
 const { pivotRegistry } = registries;
 

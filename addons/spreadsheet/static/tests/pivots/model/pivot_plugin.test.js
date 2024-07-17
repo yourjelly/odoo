@@ -223,7 +223,7 @@ test("Format header displays an error for non-existing field", async function ()
     await animationFrame();
     expect(getCellValue(model, "G10")).toBe("#ERROR");
     expect(getCellValue(model, "G11")).toBe("#ERROR");
-    expect(getEvaluatedCell(model, "G10").message).toBe("Field non-existing does not exist");
+    expect(getEvaluatedCell(model, "G10").message).toBe("Field non-existing is not a measure");
     expect(getEvaluatedCell(model, "G11").message).toBe("Field non-existing does not exist");
 });
 
