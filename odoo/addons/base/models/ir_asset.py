@@ -20,6 +20,7 @@ PREPEND_DIRECTIVE = 'prepend'
 AFTER_DIRECTIVE = 'after'
 BEFORE_DIRECTIVE = 'before'
 REMOVE_DIRECTIVE = 'remove'
+REMOVE_LAST = 'remove_last'
 REPLACE_DIRECTIVE = 'replace'
 INCLUDE_DIRECTIVE = 'include'
 # Those are the directives used with a 'target' argument/field.
@@ -233,6 +234,8 @@ class IrAsset(models.Model):
             asset_paths.insert(paths, bundle, target_index)
         elif directive == REMOVE_DIRECTIVE:
             asset_paths.remove(paths, bundle)
+        elif directive == REMOVE_LAST:
+            asset_paths.remove(paths, bundle, last=True)
         elif directive == REPLACE_DIRECTIVE:
             asset_paths.insert(paths, bundle, target_index)
             asset_paths.remove(target_paths, bundle)
@@ -390,43 +393,51 @@ class IrAsset(models.Model):
 class AssetPaths:
     """ A list of asset paths (path, addon, bundle) with efficient operations. """
     def __init__(self):
-        self.list = []
+        self.__list = []
         self.memo = set()
 
     def index(self, path, bundle):
         """Returns the index of the given path in the current assets list."""
-        if path not in self.memo:
-            self._raise_not_found(path, bundle)
         for index, asset in enumerate(self.list):
             if asset[0] == path:
                 return index
+        self._raise_not_found(path, bundle)
 
     def append(self, paths, bundle):
         """Appends the given paths to the current list."""
         for path, full_path, last_modified in paths:
-            if path not in self.memo:
-                self.list.append((path, full_path, bundle, last_modified))
-                self.memo.add(path)
+            self.__list.append((path, full_path, bundle, last_modified))
 
     def insert(self, paths, bundle, index):
         """Inserts the given paths to the current list at the given position."""
         to_insert = []
         for path, full_path, last_modified in paths:
-            if path not in self.memo:
-                to_insert.append((path, full_path, bundle, last_modified))
-                self.memo.add(path)
-        self.list[index:index] = to_insert
+            to_insert.append((path, full_path, bundle, last_modified))
+        self.__list[index:index] = to_insert
 
-    def remove(self, paths_to_remove, bundle):
+    def remove(self, paths_to_remove, bundle, last=False):
         """Removes the given paths from the current list."""
-        paths = {path for path, _full_path, _last_modified in paths_to_remove if path in self.memo}
-        if paths:
-            self.list[:] = [asset for asset in self.list if asset[0] not in paths]
-            self.memo.difference_update(paths)
-            return
-
-        if paths_to_remove:
+        removed = False
+        for path, _full_path, _last_modified in paths_to_remove:
+            for index, elem in zip(range(len(self.__list) - 1, 0, -1), reversed(self.__list)):
+                if elem[0] == path:
+                    del self.__list[index]
+                    removed = True
+                    if last:
+                        break
+        if not removed:
             self._raise_not_found([path for path, _full_path, _last_modified in paths_to_remove], bundle)
 
     def _raise_not_found(self, path, bundle):
         raise ValueError("File(s) %s not found in bundle %s" % (path, bundle))
+
+    @property
+    def list(self):
+        seen = set()
+        result = []
+        for elem in self.__list:
+            path = elem[0]
+            if path not in seen:
+                seen.add(path)
+                result.append(elem)
+        return result

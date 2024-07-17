@@ -76,11 +76,10 @@ class TestAddonPaths(TransactionCase):
             ('/home/user/odoo/addons/web/d', '/web/d', 1),
         ], 'bundle4', 1)
         self.assertEqual(asset_paths.list, [
-
             ('/home/user/odoo/addons/web/a', '/web/a', 'bundle1', 1),
             ('/home/user/odoo/addons/web/b', '/web/b', 'bundle4', 1),
+            ('/home/user/odoo/addons/web/d', '/web/d', 'bundle4', 1),
             ('/home/user/odoo/addons/web/c', '/web/c', 'bundle1', 1),
-            ('/home/user/odoo/addons/web/d', '/web/d', 'bundle1', 1),
             ('/home/user/odoo/addons/web/e', '/web/e', 'bundle3', 1),
             ('/home/user/odoo/addons/web/f', '/web/f', 'bundle2', 1),
         ])
