@@ -1219,6 +1219,80 @@ test("Load pivot spreadsheet with models that cannot be accessed", async functio
     expect(cell.message).toBe("ya done!");
 });
 
+test("can add a calculated measure", async function () {
+    const { model, pivotId } = await createSpreadsheetWithPivot({
+        arch: /* xml */ `
+            <pivot>
+                <field name="probability" type="measure"/>
+            </pivot>
+        `,
+        mockRPC: async function (route, { model, method, kwargs }) {
+            if (model === "partner" && method === "read_group") {
+                expect.step("read_group");
+                expect(kwargs.fields).toEqual(["probability:avg"]);
+            }
+        },
+    });
+    const sheetId = model.getters.getActiveSheetId();
+    expect.verifySteps(["read_group"]);
+    updatePivot(model, pivotId, {
+        measures: [
+            { name: "probability", aggregator: "avg" },
+            { name: "probability*2", computedBy: { sheetId, formula: "=probability*2" } },
+        ],
+    });
+    await waitForDataLoaded(model);
+    setCellContent(model, "A1", '=PIVOT.VALUE(1,"probability")');
+    setCellContent(model, "A2", '=PIVOT.VALUE(1,"probability*2")');
+    expect(getEvaluatedCell(model, "A1").value).toBe(131);
+    expect(getEvaluatedCell(model, "A2").value).toBe(262);
+    expect.verifySteps(["read_group"]);
+});
+
+test("can import a pivot with a calculated field", async function () {
+    const spreadsheetData = {
+        sheets: [
+            {
+                id: "sheet1",
+                cells: {
+                    A1: { content: '=PIVOT.VALUE(1,"probability")' },
+                    A2: { content: '=PIVOT.VALUE(1,"probability*2")' },
+                },
+            },
+        ],
+        pivots: {
+            1: {
+                type: "ODOO",
+                columns: [],
+                domain: [],
+                measures: [
+                    { name: "probability", aggregator: "avg" },
+                    {
+                        name: "probability*2",
+                        computedBy: { sheetId: "sheet1", formula: "=probability*2" },
+                    },
+                ],
+                model: "partner",
+                rows: [],
+                context: {},
+            },
+        },
+    };
+    const model = await createModelWithDataSource({
+        spreadsheetData,
+        mockRPC: function (route, { model, method, kwargs }) {
+            if (model === "partner" && method === "read_group") {
+                expect.step("read_group");
+                expect(kwargs.fields).toEqual(["probability:avg"]);
+            }
+        },
+    });
+    await waitForDataLoaded(model);
+    expect(getEvaluatedCell(model, "A1").value).toBe(131);
+    expect(getEvaluatedCell(model, "A2").value).toBe(262);
+    expect.verifySteps(["read_group"]);
+});
+
 test("Can duplicate a pivot", async () => {
     const { model, pivotId } = await createSpreadsheetWithPivot();
     const matching = { chain: "product_id", type: "many2one" };
