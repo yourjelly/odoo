@@ -79,19 +79,13 @@ publicWidget.registry.subscribe = publicWidget.Widget.extend({
      * @param {boolean} isSubscriber
      */
     _updateSubscribeControlsStatus(isSubscriber) {
+        const thanksWrap = this.el.querySelector('.js_subscribed_wrap');
+        const subscribeWrap = this.el.querySelector('.js_subscribe_wrap');
         const subscribeBtnEl = this.el.querySelector('.js_subscribe_btn');
-        const thanksBtnEl = this.el.querySelector('.js_subscribed_btn');
 
         subscribeBtnEl.disabled = isSubscriber;
-        subscribeBtnEl.classList.toggle('d-none', isSubscriber);
-        thanksBtnEl.classList.toggle('d-none', !isSubscriber);
-        // The active button should always be the last one so that the
-        // design for input-group of Bootstrap works.
-        if (isSubscriber) {
-            subscribeBtnEl.after(thanksBtnEl);
-        } else {
-            thanksBtnEl.after(subscribeBtnEl);
-        }
+        subscribeWrap.classList.toggle('d-none', isSubscriber);
+        thanksWrap.classList.toggle('d-none', !isSubscriber);
 
         // js_subscribe_email is kept by compatibility (it was the old name of js_subscribe_value)
         const valueInputEl = this.el.querySelector('input.js_subscribe_value, input.js_subscribe_email');
