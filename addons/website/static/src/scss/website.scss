@@ -578,6 +578,12 @@ font[class*='bg-'] {
         background: transparent;
     }
 }
+
+// Regular and Smaller container
+.container, .o_container_small {
+    --o-grid-mode-gutter-x-mobile: 0;
+}
+
 // Smaller container
 .o_container_small {
     @extend .container;

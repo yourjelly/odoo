@@ -27,8 +27,8 @@
 // GRID LAYOUT
 .o_grid_mode {
     @include media-breakpoint-down(lg) {
-        // No gaps in mobile view.
-        row-gap: 0px !important;
+        --gutter-x: var(--o-grid-mode-gutter-x-mobile, unset);
+
         column-gap: 0px !important;
     }
     --grid-item-padding-y: 10px;
