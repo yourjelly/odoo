@@ -181,8 +181,11 @@ var VariantMixin = {
         var min = parseFloat($input.data("min") || 0);
         var max = parseFloat($input.data("max") || Infinity);
         var previousQty = parseFloat($input.val() || 0, 10);
-        var quantity = ($link.has(".fa-minus").length ? -1 : 1) + previousQty;
+        var step = parseFloat($input.data("step") || 1);
+
+        var quantity = ($link.has(".fa-minus").length ? -step : step) + previousQty;
         var newQty = quantity > min ? (quantity < max ? quantity : max) : min;
+        newQty = newQty.toFixed(2);
 
         if (newQty !== previousQty) {
             $input.val(newQty).trigger('change');

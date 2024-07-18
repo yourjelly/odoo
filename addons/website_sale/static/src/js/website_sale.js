@@ -219,10 +219,11 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
             display: true,
         }).then((data) => {
             $input.data('update_change', false);
-            var check_value = parseInt($input.val() || 0, 10);
+            var check_value = parseFloat($input.val()).toFixed(2);
             if (isNaN(check_value)) {
                 check_value = 1;
             }
+            console.log(value, check_value);
             if (value !== check_value) {
                 $input.trigger('change');
                 return;
@@ -535,7 +536,8 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
         if ($input.data('update_change')) {
             return;
         }
-        var value = parseInt($input.val() || 0, 10);
+        var value = parseFloat($input.val()).toFixed(2);
+
         if (isNaN(value)) {
             value = 1;
         }
