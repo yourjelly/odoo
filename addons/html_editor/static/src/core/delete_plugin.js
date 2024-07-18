@@ -930,52 +930,51 @@ export class DeletePlugin extends Plugin {
         ).bind(this);
         const adjacentLeaf = (isDirectionForward ? this.nextLeaf : this.previousLeaf).bind(this);
 
+        // Text node
+        if (node.nodeType === Node.TEXT_NODE) {
+            const [char, index] = findInTextNode(node, offset);
+            if (char) {
+                return [node, indexAfterChar(index, char)];
+            }
+        }
+
         // Define search context: closest editable root and closest block.
         const isEditableRoot = (n) => n.isContentEditable && !n.parentNode.isContentEditable;
         const editableRoot = findUpTo(node, this.editable.parentNode, isEditableRoot);
         const refNodeClosestBlock = closestBlock(node);
+        let blockSwitch;
 
-        let blockSwitch = false;
-        for (;;) {
+        let leaf = adjacentLeafFromPos(node, offset, editableRoot);
+        while (leaf) {
+            blockSwitch ||= closestBlock(leaf) !== refNodeClosestBlock;
+
+            if (this.shouldSkip(leaf, blockSwitch)) {
+                leaf = adjacentLeaf(leaf, editableRoot);
+                continue;
+            }
+
             // Look for a visible character in text node.
-            if (node.nodeType === Node.TEXT_NODE) {
-                const [char, index] = findInTextNode(node, offset);
+            if (leaf.nodeType === Node.TEXT_NODE) {
+                const [char, index] = findInTextNode(...textEdgePos(leaf));
                 if (char) {
                     const indexPos = blockSwitch
                         ? indexBeforeChar(index, char)
                         : indexAfterChar(index, char);
                     return [node, indexPos];
                 }
-            }
-            // No success, look in the adjacent leaf node.
-            let leaf = adjacentLeafFromPos(node, offset, editableRoot);
-            if (!leaf) {
-                return [null, null];
-            }
-            // Skip invisible leaves, keeping track whether a block switch occurred.
-            blockSwitch ||= closestBlock(leaf) !== refNodeClosestBlock;
-            while (this.shouldSkip(leaf, blockSwitch)) {
-                leaf = adjacentLeaf(leaf, editableRoot);
-                if (!leaf) {
-                    return [null, null];
-                }
-                blockSwitch ||= closestBlock(leaf) !== refNodeClosestBlock;
-            }
-
-            if (leaf.nodeType === Node.ELEMENT_NODE) {
-                if (!leaf.isContentEditable && isBlock(leaf)) {
-                    // Adjacent positions:
-                    // <p>def[]</p><div contenteditable="false">abc</div>[]
-                    // <p>abc[]</p><hr contenteditable="false">[]
-                    // []<div contenteditable="false">abc</div><p>[]def</p>
-                    // []<hr contenteditable="false"><p>[]abc</p>
-                    return afterPos(leaf);
-                }
+            } else if (!leaf.isContentEditable && isBlock(leaf)) {
+                // Adjacent positions:
+                // <p>def[]</p><div contenteditable="false">abc</div>[]
+                // <p>abc[]</p><hr contenteditable="false">[]
+                // []<div contenteditable="false">abc</div><p>[]def</p>
+                // []<hr contenteditable="false"><p>[]abc</p>
+                return afterPos(leaf);
+            } else {
                 return blockSwitch ? beforePos(leaf) : afterPos(leaf);
             }
-            // Leaf is a text node, repeat search from its start/end.
-            [node, offset] = textEdgePos(leaf);
+            leaf = adjacentLeaf(leaf, editableRoot);
         }
+        return [null, null];
     }
 
     findLineBoundary(container, offset, direction) {
