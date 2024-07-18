@@ -109,7 +109,11 @@ class AccountPaymentTerm(models.Model):
             if terms.line_ids.filtered(lambda r: r.value == 'fixed' and r.discount_percentage):
                 raise ValidationError(_("You can't mix fixed amount with early payment percentage"))
 
-    def _compute_terms(self, date_ref, currency, company, tax_amount, tax_amount_currency, sign, untaxed_amount, untaxed_amount_currency):
+    def _compute_terms(
+        self, date_ref, currency, company,
+        tax_amount, tax_amount_currency, sign, untaxed_amount, untaxed_amount_currency,
+        cash_rounding=None,
+    ):
         """Get the distribution of this payment term.
         :param date_ref: The move date to take into account
         :param currency: the move's currency

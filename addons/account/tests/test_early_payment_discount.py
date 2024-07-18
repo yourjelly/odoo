@@ -529,6 +529,54 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
                 ],
             })
 
+    def test_invoice_cash_rounding_early_payment_included(self):
+        self.env.company.early_pay_discount_computation = 'included'
+
+        early_payment_term = self.env['account.payment.term'].create({
+            'name': "early_payment_term",
+            'company_id': self.company_data['company'].id,
+            'line_ids': [
+                Command.create({
+                    'value': 'balance',
+                    'days': 30,
+                    'discount_percentage': 5,
+                    'discount_days': 7,
+                }),
+            ],
+        })
+
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_payment_term_id': early_payment_term.id,
+            'invoice_cash_rounding_id': self.cash_rounding_a.id,
+            'invoice_date': '2019-01-01',
+            'date': '2019-01-01',
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'line',
+                    'price_unit': 868.25,
+                    'tax_ids': [],
+                }),
+            ],
+        })
+        invoice.action_post()
+        self.assertRecordValues(invoice.line_ids.sorted('balance'), [
+            {'amount_currency': -868.25,    'discount_amount_currency': 0.0},
+            {'amount_currency': 868.25,     'discount_amount_currency': 824.84},
+        ])
+
+        payments = self.env['account.payment.register']\
+            .with_context(active_model='account.move', active_ids=invoice.ids)\
+            .create({'payment_date': '2019-01-01'})\
+            ._create_payments()
+        self.assertTrue(payments.is_reconciled)
+        self.assertRecordValues(payments.line_ids.sorted('balance'), [
+            {'amount_currency': -868.25},
+            {'amount_currency': 43.41},
+            {'amount_currency': 824.84},
+        ])
+
     def test_intracomm_bill_with_early_payment_included(self):
         self.env.company.early_pay_discount_computation = 'included'
 
