@@ -138,6 +138,52 @@ function processModelDefs(modelDefs) {
     return [inverseMap, modelDefs];
 }
 
+export class RelatedProxy {
+    constructor(target, inverseMap) {
+        this.target = target;
+        this.inverseMap = inverseMap;
+        return new Proxy(this.target, {
+            get: (obj, prop) => {
+                return this.processGet(prop);
+            },
+            set: (obj, prop, value) => {
+                obj[prop] = this.processSet(prop, value);
+                return true;
+            },
+        });
+    }
+
+    processGet(prop) {
+        const fieldProps = this.target.model.modelFields[prop];
+        let value;
+
+        if (fieldProps && X2MANY_TYPES.has(fieldProps.type)) {
+            value = [];
+        }
+
+        if (fieldProps && Array.isArray(this.target[prop])) {
+            value = this.target.models[fieldProps.relation]?.readMany(this.target[prop] || []);
+        } else if (fieldProps && fieldProps.type === "many2one") {
+            value = this.target.models[fieldProps.relation].read(this.target[prop]);
+        } else {
+            value = this.target[prop] || value;
+        }
+
+        return value;
+    }
+
+    processSet(prop, value) {
+        let val;
+        if (Array.isArray(value)) {
+            val = value.map((v) => v?.id || v);
+        } else {
+            val = value?.id || value;
+        }
+
+        return val;
+    }
+}
+
 export class Base {
     constructor({ models, records, model }) {
         this.models = models;
@@ -303,50 +349,6 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
         }
     }
 
-    function addItem(record, fieldName, item) {
-        const cacheSet = record._getCacheSet(fieldName);
-        if (!cacheSet.has(toRaw(item))) {
-            cacheSet.add(toRaw(item));
-            record[fieldName].push(item);
-        }
-    }
-
-    function connect(field, ownerRecord, recordToConnect) {
-        const inverse = inverseMap.get(field);
-
-        if (typeof ownerRecord !== "object") {
-            const model = field.model;
-            ownerRecord = records[model].get(ownerRecord);
-        }
-
-        if (typeof recordToConnect !== "object") {
-            const model = field.relation;
-            recordToConnect = records[model].get(ownerRecord);
-        }
-
-        if (field.type === "many2one") {
-            const prevConnectedRecord = ownerRecord[field.name];
-            if (toRaw(prevConnectedRecord) === toRaw(recordToConnect)) {
-                return;
-            }
-            if (recordToConnect && inverse.name in recordToConnect) {
-                addItem(recordToConnect, inverse.name, ownerRecord);
-            }
-            if (prevConnectedRecord) {
-                removeItem(prevConnectedRecord, inverse.name, ownerRecord);
-            }
-            ownerRecord[field.name] = recordToConnect;
-        } else if (field.type === "one2many") {
-            // It's necessary to remove the previous connected in one2many but it would cause issue for inherited one2many field.
-            // Also, we don't do modification in PoS and we can ignore the removing part to prevent issue.
-            recordToConnect[inverse.name] = ownerRecord;
-            addItem(ownerRecord, field.name, recordToConnect);
-        } else if (field.type === "many2many") {
-            addItem(ownerRecord, field.name, recordToConnect);
-            addItem(recordToConnect, inverse.name, ownerRecord);
-        }
-    }
-
     function disconnect(field, ownerRecord, recordToDisconnect) {
         if (!recordToDisconnect) {
             throw new Error("recordToDisconnect is undefined");
@@ -370,10 +372,6 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
         }
     }
 
-    function exists(model, id) {
-        return records[model].has(id);
-    }
-
     function create(
         model,
         vals,
@@ -387,7 +385,8 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
 
         delete orderedArrayCaches[model];
         const Model = modelClasses[model] || Base;
-        const record = reactive(new Model({ models, records, model: models[model] }));
+        const r = new Model({ models, records, model: models[model] });
+        const record = new RelatedProxy(r, inverseMap);
         const id = vals["id"];
         record.id = id;
         record._raw = baseData[model][id];
@@ -405,75 +404,19 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
                 throw new Error(`'${name}' field is required when creating '${model}' record.`);
             }
 
-            if (RELATION_TYPES.has(field.type)) {
-                if (X2MANY_TYPES.has(field.type)) {
-                    record[name] = [];
-                } else if (field.type === "many2one") {
-                    record[name] = undefined;
-                }
+            const val = vals[name]?.id ?? vals[name];
+            record[name] = val;
 
-                if (ignoreRelations) {
-                    continue;
-                }
+            const relatedModel = field.relation;
+            const relatedRecord = records[relatedModel]?.get(val);
+            const inverse = inverseMap.get(field);
 
-                const comodelName = field.relation;
-                if (!(name in vals) || !vals[name]) {
-                    continue;
+            if (inverse && relatedRecord) {
+                if (X2MANY_TYPES.has(inverse.type)) {
+                    relatedRecord[inverse.name] = [...relatedRecord[inverse.name], record];
+                } else {
+                    relatedRecord[inverse.name] = record;
                 }
-
-                if (X2MANY_TYPES.has(field.type)) {
-                    if (fromSerialized) {
-                        const ids = vals[name];
-                        for (const id of ids) {
-                            if (exists(comodelName, id)) {
-                                connect(field, record, records[comodelName].get(id));
-                            }
-                        }
-                    } else {
-                        for (const [command, ...items] of vals[name]) {
-                            if (command === "create") {
-                                const newRecords = items.map((_vals) => {
-                                    const result = create(comodelName, _vals);
-                                    makeRecordsAvailable(
-                                        { [comodelName]: [result] },
-                                        { [comodelName]: [_vals] }
-                                    );
-                                    return result;
-                                });
-                                for (const record2 of newRecords) {
-                                    connect(field, record, record2);
-                                }
-                            } else if (command === "link") {
-                                const existingRecords = items.filter((record) =>
-                                    exists(comodelName, record.id)
-                                );
-                                for (const record2 of existingRecords) {
-                                    connect(field, record, record2);
-                                }
-                            }
-                        }
-                    }
-                } else if (field.type === "many2one") {
-                    const val = vals[name];
-                    if (fromSerialized) {
-                        if (exists(comodelName, val)) {
-                            connect(field, record, records[comodelName].get(val));
-                        }
-                    } else {
-                        if (val instanceof Base) {
-                            if (exists(comodelName, val.id)) {
-                                connect(field, record, val);
-                            }
-                        } else if (models[field.relation]) {
-                            const newRecord = create(comodelName, val);
-                            connect(field, record, newRecord);
-                        } else {
-                            record[name] = val;
-                        }
-                    }
-                }
-            } else {
-                record[name] = vals[name];
             }
         }
 
@@ -496,69 +439,32 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
             if (!(name in fields)) {
                 continue;
             }
-            const field = fields[name];
-            const comodelName = field.relation;
-            if (X2MANY_TYPES.has(field.type)) {
-                for (const command of vals[name]) {
-                    const [type, ...items] = command;
-                    if (type === "unlink") {
-                        for (const record2 of items) {
-                            disconnect(field, record, record2);
-                        }
-                    } else if (type === "clear") {
-                        const linkedRecs = record[name];
-                        for (const record2 of [...linkedRecs]) {
-                            disconnect(field, record, record2);
-                        }
-                    } else if (type === "create") {
-                        const newRecords = items.map((vals) => create(comodelName, vals));
-                        for (const record2 of newRecords) {
-                            connect(field, record, record2);
-                        }
-                    } else if (type === "link") {
-                        const existingRecords = items.filter((record) =>
-                            exists(comodelName, record.id)
-                        );
-                        for (const record2 of existingRecords) {
-                            connect(field, record, record2);
-                        }
-                    }
-                }
-            } else if (field.type === "many2one") {
-                if (vals[name]) {
-                    const id = vals[name]?.id || vals[name];
-                    const exist = exists(comodelName, id);
-
-                    if (exist) {
-                        connect(field, record, vals[name]);
-                    } else if (models[field.relation]) {
-                        const newRecord = create(comodelName, vals[name]);
-                        connect(field, record, newRecord);
-                    } else {
-                        record[name] = vals[name];
-                    }
-                } else if (record[name]) {
-                    const linkedRec = record[name];
-                    disconnect(field, record, linkedRec);
-                }
-            } else {
-                record[name] = vals[name];
-            }
+            record[name] = vals[name]?.id ?? vals[name];
         }
     }
 
     function delete_(model, record) {
         delete orderedArrayCaches[model];
         const id = record.id;
+
         const fields = getFields(model);
         for (const name in fields) {
             const field = fields[name];
-            if (X2MANY_TYPES.has(field.type)) {
+            const inverse = inverseMap.get(field);
+
+            if (!inverse) {
+                continue;
+            }
+
+            if (X2MANY_TYPES.has(inverse.type)) {
                 for (const record2 of [...record[name]]) {
-                    disconnect(field, record, record2);
+                    debugger;
+                    // disconnect(field, record, record2);
                 }
-            } else if (field.type === "many2one" && typeof record[name] === "object") {
-                disconnect(field, record, record[name]);
+            } else if (inverse.type === "many2one") {
+                debugger;
+                // record[name] =
+                // disconnect(field, record, record[name]);
             }
         }
 
@@ -874,46 +780,8 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
             }
 
             const rawRecords = rawData[model];
-            const fields = getFields(model);
-
             for (const rawRec of rawRecords) {
                 const recorded = records[model].get(rawRec.id);
-
-                for (const name in fields) {
-                    const field = fields[name];
-                    alreadyLinkedSet.add(field);
-
-                    if (X2MANY_TYPES.has(field.type)) {
-                        if (name in rawRec) {
-                            for (const id of rawRec[name]) {
-                                if (field.relation in records) {
-                                    const toConnect = records[field.relation].get(id);
-                                    if (toConnect) {
-                                        connect(field, recorded, toConnect);
-                                    }
-                                }
-                            }
-                        }
-                    } else if (field.type === "many2one" && rawRec[name]) {
-                        if (field.relation in records) {
-                            const id = rawRec[name];
-                            const toConnect = records[field.relation].get(id);
-                            if (toConnect) {
-                                connect(field, recorded, toConnect);
-                            }
-                        }
-                    }
-                    // Connect existing records in case of post-loading
-                    if (name.includes("<-")) {
-                        const toConnect = Object.values(records[field.relation]).filter(
-                            (r) => r.raw[field.inverse_name] === rawRec.id
-                        );
-                        for (const rec of toConnect) {
-                            connect(field, recorded, rec);
-                        }
-                    }
-                }
-
                 modelToSetup.push({ raw: rawRec, record: recorded });
             }
         }

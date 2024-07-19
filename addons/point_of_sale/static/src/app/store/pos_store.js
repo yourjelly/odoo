@@ -512,7 +512,7 @@ export class PosStore extends Reactive {
             price_unit: 0,
             order_id: this.get_order(),
             qty: 1,
-            tax_ids: product.taxes_id.map((tax) => ["link", tax]),
+            tax_ids: product.taxes_id,
             ...vals,
         };
 
