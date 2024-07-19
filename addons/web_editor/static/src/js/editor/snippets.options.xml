@@ -173,6 +173,21 @@
     </we-row>
 </t>
 
+<t t-name="web_editor.WeCollapse">
+    <we-collapse t-att-class="{'d-none': !this.state.show, 'active': this.state.active, [props.class]: true}" t-att-data-tooltip="props.title || props.tooltip">
+        <t t-slot="first"/>
+    <!-- TODO @owl-options: supposed to add class on we-title
+        <we-title t-if="props.slots.title" class="o_we_collapse_toggler" t-att-style="props.fontFamily ? `font-family: ${props.fontFamily}` : false ">
+            <t t-slot="title"/>
+        </we-title>
+    -->
+        <we-toggler class="o_we_collapse_toggler" t-att-class="{'active': this.state.active}" t-on-click="toggle"/>
+        <div>
+            <t t-slot="default"/>
+        </div>
+    </we-collapse>
+</t>
+
 <t t-name="web_editor.WeButton">
     <!-- 
          TODO: @owl-options tooltips are not automatically translated. To Check

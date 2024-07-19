@@ -267,7 +267,7 @@ class WeTitle extends Component {
     };
 }
 
-class WeRow extends Component {
+export class WeRow extends Component {
     static template = "web_editor.WeRow";
     static props = {
         class: { type: String, optional: true },
@@ -299,6 +299,16 @@ class WeRow extends Component {
 }
 
 registry.category("snippet_widgets").add("WeRow", WeRow);
+
+export class WeCollapse extends WeRow {
+    static template = "web_editor.WeCollapse";
+
+    toggle() {
+        this.state.active = !this.state.active;
+    }
+}
+
+registry.category("snippet_widgets").add("WeCollapse", WeCollapse);
 
 /**
  * TODO: @owl-options remove when done.
