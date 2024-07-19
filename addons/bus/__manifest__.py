@@ -13,6 +13,8 @@
         'web.assets_backend': [
             'bus/static/src/*.js',
             'bus/static/src/services/**/*.js',
+            '/bus/static/src/wip_workers/**/*',
+            ('remove',             '/bus/static/src/wip_workers/boot.js'      ),
             'bus/static/src/workers/websocket_worker.js',
             'bus/static/src/workers/websocket_worker_utils.js',
         ],
@@ -21,6 +23,7 @@
             'bus/static/src/services/**/*.js',
             ('remove', 'bus/static/src/services/assets_watchdog_service.js'),
             ('remove', 'bus/static/src/simple_notification_service.js'),
+            '/bus/static/src/wip_workers/**/*',
             'bus/static/src/workers/websocket_worker.js',
             'bus/static/src/workers/websocket_worker_utils.js',
         ],
@@ -35,6 +38,10 @@
         'web.qunit_suite_tests': [
             'bus/static/tests/legacy/**/*.js',
             ('remove', 'bus/static/tests/legacy/helpers/**/*'),
+        ],
+        'bus.worker_assets': [
+            'web/static/src/module_loader.js',
+            'bus/static/src/wip_workers/*',
         ],
         'bus.websocket_worker_assets': [
             'web/static/src/module_loader.js',
