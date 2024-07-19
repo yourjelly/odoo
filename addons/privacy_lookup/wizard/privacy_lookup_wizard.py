@@ -130,9 +130,8 @@ class PrivacyLookupWizard(models.TransientModel):
             # 3.2 Search Indirect Personal Data References (aka partner_id)
             conditions.extend(
                 SQL(
-                    "%s.%s in (SELECT id FROM indirect_references)",
-                    table_name,
-                    SQL.identifier(field_name),
+                    "%s in (SELECT id FROM indirect_references)",
+                    model._field_to_sql(model_name.replace('.', '_'), field_name),
                 )
                 for field_name, field in model._fields.items()
                 if field.comodel_name == 'res.partner'

@@ -658,7 +658,8 @@ class ProductTemplate(models.Model):
 
     is_storable = fields.Boolean(
         'Track Inventory', store=True, compute='compute_is_storable', readonly=False,
-        default=False, precompute=True)
+        default=False, precompute=True, help='A storable product is a product for which you manage stock.')
+    # never set ir.default fallback for this field, otherwise default won't be computed
     responsible_id = fields.Many2one(
         'res.users', string='Responsible', default=lambda self: self.env.uid, company_dependent=True, check_company=True,
         help="This user will be responsible of the next activities related to logistic operations for this product.")

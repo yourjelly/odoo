@@ -12,7 +12,7 @@ import datetime
 from odoo import api, fields, models, Command
 from odoo import SUPERUSER_ID, _
 from odoo.exceptions import ValidationError, UserError
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, SQL
 
 _logger = logging.getLogger('odoo.addons.base.partner.merge')
 
@@ -217,21 +217,34 @@ class MergePartnerAutomatic(models.TransientModel):
 
         # Company-dependent fields
         with self._cr.savepoint():
-            params = {
-                'destination_id': f'{referenced_model},{dst_record.id}',
-                'source_ids': tuple(f'{referenced_model},{src}' for src in src_records.ids),
-            }
-            self._cr.execute("""
-        UPDATE ir_property AS _ip1
-        SET res_id = %(destination_id)s
-        WHERE res_id IN %(source_ids)s
-        AND NOT EXISTS (
-             SELECT
-             FROM ir_property AS _ip2
-             WHERE _ip2.res_id = %(destination_id)s
-             AND _ip2.fields_id = _ip1.fields_id
-             AND _ip2.company_id = _ip1.company_id
-        )""", params)
+            for fname, field in dst_record._fields.items():
+                if field.company_dependent:
+                    self._cr.execute(SQL(
+                        # use the specific company dependent value of sources
+                        # to fill the non-specific value of destination. Source
+                        # values for rows with larger id have higher priority
+                        # when aggregated
+                        """
+                        WITH source AS (
+                            SELECT id, %(field)s
+                            FROM  %(table)s
+                            WHERE id IN %(source_ids)s
+                            ORDER BY id
+                        ), source_agg AS (
+                            SELECT jsonb_object_agg(key, value) AS value
+                            FROM  source, jsonb_each(%(field)s)
+                            WHERE id IN %(source_ids)s
+                        )
+                        UPDATE %(table)s
+                        SET %(field)s = source_agg.value || COALESCE(%(table)s.%(field)s, '{}'::jsonb)
+                        FROM source_agg
+                        WHERE id = %(destination_id)s AND source_agg.value IS NOT NULL
+                        """,
+                        table=SQL.identifier(dst_record._table),
+                        field=SQL.identifier(fname),
+                        destination_id=dst_record.id,
+                        source_ids=tuple(src_records.ids),
+                    ))
 
     @api.model
     def _update_foreign_keys(self, src_partners, dst_partner):

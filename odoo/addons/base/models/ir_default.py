@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import fnmatch
 import json
+from datetime import date
 
 from odoo import api, fields, models, tools, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
+from odoo.fields import Datetime
 
 
 class IrDefault(models.Model):
@@ -33,11 +36,15 @@ class IrDefault(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # invalidate all company dependent fields since their fallback value in cache may be changed
+        self.env.invalidate_all()
         self.env.registry.clear_cache()
         return super(IrDefault, self).create(vals_list)
 
     def write(self, vals):
         if self:
+            # invalidate all company dependent fields since their fallback value in cache may be changed
+            self.env.invalidate_all()
             self.env.registry.clear_cache()
         new_default = super().write(vals)
         self.check_access_rule('write')
@@ -45,6 +52,8 @@ class IrDefault(models.Model):
 
     def unlink(self):
         if self:
+            # invalidate all company dependent fields since their fallback value in cache may be changed
+            self.env.invalidate_all()
             self.env.registry.clear_cache()
         return super(IrDefault, self).unlink()
 
@@ -76,6 +85,9 @@ class IrDefault(models.Model):
             model = self.env[model_name]
             field = model._fields[field_name]
             parsed = field.convert_to_cache(value, model)
+            if field.company_dependent:
+                if field.type == 'date' and isinstance(value, date):
+                    value = field.to_string(value)
             json_value = json.dumps(value, ensure_ascii=False)
         except KeyError:
             raise ValidationError(_("Invalid field %(model)s.%(field)s", model=model_name, field=field_name))
@@ -134,7 +146,13 @@ class IrDefault(models.Model):
             ('company_id', '=', company_id),
             ('condition', '=', condition),
         ], limit=1)
-        return json.loads(default.json_value) if default else None
+        if not default:
+            return None
+        default = json.loads(default.json_value)
+        field = self.env[model_name]._fields[field_name]
+        if field.type == 'date':
+            default = field.to_date(default)
+        return default
 
     @api.model
     @tools.ormcache('self.env.uid', 'self.env.company.id', 'model_name', 'condition')
@@ -146,6 +164,7 @@ class IrDefault(models.Model):
             current user), as a dict mapping field names to values.
         """
         cr = self.env.cr
+        self.flush_model()
         query = """ SELECT f.name, d.json_value
                     FROM ir_default d
                     JOIN ir_model_fields f ON d.field_id=f.id
@@ -188,3 +207,103 @@ class IrDefault(models.Model):
         json_vals = [json.dumps(value, ensure_ascii=False) for value in values]
         domain = [('field_id', '=', field.id), ('json_value', 'in', json_vals)]
         return self.search(domain).unlink()
+
+    def _evaluate_leaf_with_fallback(self, model_name, leaf):
+        """
+        when the field value of the leaf is company_dependent without
+        customization, evaluate if its fallback value will be filtered out by
+        the leaf
+        return True/False/None(for unknown)
+        """
+        (key, comparator, value) = leaf
+        field_name, *rest = key.split('.', 1)
+        model = self.env[model_name]
+        fallback = model._fields[field_name].get_company_dependent_fallback(model)
+        if isinstance(fallback, models.BaseModel):
+            # TODO cwg: TBD maybe directly return None
+            #  when comparator in ['company_id', 'company_ids'] and mapped result is not res.company
+            # which will cause search for non res.company records
+            if rest:
+                return bool(fallback.filtered_domain([(rest[0], comparator, value)]))
+            if comparator in ['child_of', 'parent_of']:
+                return bool(fallback.filtered_domain([('id', comparator, value)]))
+            data = fallback
+        else:
+            data = [fallback]
+
+        field = self.env[model_name]._fields[field_name]
+        if comparator in ('like', 'ilike', '=like', '=ilike', 'not ilike', 'not like'):
+            if comparator.endswith('ilike'):
+                # ilike uses unaccent and lower-case comparison
+                # we may get something which is not a string
+                def unaccent(x):
+                    return self.pool.unaccent_python(str(x).lower()) if x else ''
+            else:
+                def unaccent(x):
+                    return str(x) if x else ''
+            value_esc = unaccent(value).replace('_', '?').replace('%', '*').replace('[', '?')
+            if not comparator.startswith('='):
+                value_esc = f'*{value_esc}*'
+        if comparator in ('=', '!=') and field.type in ('char', 'text', 'html') and not value:
+            # use the comparator 'in' for falsy comparison of strings
+            comparator = 'in' if comparator == '=' else 'not in'
+            value = ['', False]
+        if comparator in ('in', 'not in'):
+            if isinstance(value, (list, tuple)):
+                value = set(value)
+            else:
+                value = {value}
+            if field.type in ('date', 'datetime'):
+                value = {Datetime.to_datetime(v) for v in value}
+            elif field.type in ('char', 'text', 'html') and ({False, ""} & value):
+                # compare string to both False and ""
+                value |= {False, ""}
+        elif field.type in ('date', 'datetime'):
+            value = Datetime.to_datetime(value)
+
+        if isinstance(data, models.BaseModel) and comparator not in ('any', 'not any'):
+            v = value
+            if isinstance(value, (list, tuple, set)) and value:
+                v = next(iter(value))
+            if isinstance(v, str):
+                try:
+                    data = data.mapped('display_name')
+                except AccessError:
+                    # failed to access the record, return empty string for comparison
+                    data = ['']
+            else:
+                data = data and data.ids or [False]
+        elif field.type in ('date', 'datetime'):
+            data = [Datetime.to_datetime(d) for d in data]
+
+        if comparator == '=':
+            ok = value in data
+        elif comparator == '!=':
+            ok = value not in data
+        elif comparator == '=?':
+            ok = not value or (value in data)
+        elif comparator == 'in':
+            ok = value and any(x in value for x in data)
+        elif comparator == 'not in':
+            ok = not (value and any(x in value for x in data))
+        elif comparator == '<':
+            ok = any(x is not False and x is not None and x < value for x in data)
+        elif comparator == '>':
+            ok = any(x is not False and x is not None and x > value for x in data)
+        elif comparator == '<=':
+            ok = any(x is not False and x is not None and x <= value for x in data)
+        elif comparator == '>=':
+            ok = any(x is not False and x is not None and x >= value for x in data)
+        elif comparator in ('like', 'ilike', '=like', '=ilike', 'not ilike', 'not like'):
+            # use fnmatchcase to avoid relying on file path case normalization
+            ok = any(fnmatch.fnmatchcase(unaccent(x), value_esc) for x in data)
+            if comparator.startswith('not'):
+                ok = not ok
+        elif comparator == 'any':
+            ok = data.filtered_domain(value)
+        elif comparator == 'not any':
+            ok = not data.filtered_domain(value)
+        else:
+            raise ValueError(f"Invalid term domain '{leaf}', operator '{comparator}' doesn't exist.")
+
+        return bool(ok)

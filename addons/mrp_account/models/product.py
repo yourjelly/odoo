@@ -116,15 +116,34 @@ class ProductProduct(models.Model):
 class ProductCategory(models.Model):
     _inherit = 'product.category'
 
+    property_valuation = fields.Selection(inverse='_inverse_stock_account_property_with_cost')
     property_stock_account_production_cost_id = fields.Many2one(
-        'account.account', 'Production Account', company_dependent=True,
+        'account.account', 'Production Account', company_dependent=True, ondelete='restrict',
         domain="[('deprecated', '=', False)]", check_company=True,
+        inverse='_inverse_property_stock_account_production_cost_id',
         help="""This account will be used as a valuation counterpart for both components and final products for manufacturing orders.
                 If there are any workcenter/employee costs, this value will remain on the account once the production is completed.""")
 
-    def write(self, vals):
-        return super(ProductCategory, self.with_context(product_category_mrp_account_write=True)).write(vals)
-
     def _get_stock_account_property_field_names(self):
-        mrp_value = ['property_stock_account_production_cost_id'] if self.property_stock_account_production_cost_id or not self.env.context.get('product_category_mrp_account_write') else []
-        return super()._get_stock_account_property_field_names() + mrp_value
+        return super()._get_stock_account_property_field_names() + ['property_stock_account_production_cost_id']
+
+    def _inverse_property_stock_account_production_cost_id(self):
+        self.filtered(
+            lambda category: category.property_valuation != 'real_time' and category.property_stock_account_production_cost_id
+        ).property_stock_account_production_cost_id = False
+
+    def _inverse_stock_account_property_with_cost(self):
+        # do the computation only when property_valuation is reset to real_time
+        self._inverse_stock_account_property()
+        fname = 'property_stock_account_production_cost_id'
+        model_defaults = self.env['ir.default']._get_model_defaults(self._name)
+        default = model_defaults.get('property_stock_account_production_cost_id')
+        for category in self:
+            # be careful: don't write the same value to the field to avoid recursion error
+            write_vals = {}
+            if category.property_valuation == 'real_time':
+                if not (category[fname]) and default:
+                    write_vals[fname] = default
+            elif category[fname]:
+                write_vals[fname] = False
+            category.write(write_vals)

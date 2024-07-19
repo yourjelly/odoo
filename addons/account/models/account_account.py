@@ -820,19 +820,6 @@ class AccountAccount(models.Model):
             raise UserError(_('You cannot perform this action on an account that contains journal items.'))
 
     @api.ondelete(at_uninstall=False)
-    def _unlink_except_account_set_on_customer(self):
-        #Checking whether the account is set as a property to any Partner or not
-        values = ['account.account,%s' % (account_id,) for account_id in self.ids]
-        partner_prop_acc = self.env['ir.property'].sudo().search([('value_reference', 'in', values)], limit=1)
-        if partner_prop_acc:
-            account_name = partner_prop_acc.get_by_record().display_name
-            raise UserError(
-                _("You can't delete the account %s, as it is used on a contact.\n\n"
-                    "Think of it as safeguarding your customer's receivables; your CFO would appreciate it :)"
-                    , account_name)
-            )
-
-    @api.ondelete(at_uninstall=False)
     def _unlink_except_linked_to_fiscal_position(self):
         if self.env['account.fiscal.position.account'].search_count(['|', ('account_src_id', 'in', self.ids), ('account_dest_id', 'in', self.ids)], limit=1):
             raise UserError(_('You cannot remove/deactivate the accounts "%s" which are set on the account mapping of a fiscal position.', ', '.join(f"{a.code} - {a.name}" for a in self)))

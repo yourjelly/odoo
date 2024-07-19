@@ -661,7 +661,7 @@ class AccountChartTemplate(models.AbstractModel):
         }.items():
             value = template_data.get(field)
             if value and field in self.env[model]._fields:
-                self.env['ir.property']._set_default(field, model, self.ref(value).id, company=company)
+                self.env['ir.default'].set(model, field, self.ref(value).id, company_id=company.id)
 
     def _get_chart_template_data(self, template_code):
         template_data = defaultdict(lambda: defaultdict(dict))

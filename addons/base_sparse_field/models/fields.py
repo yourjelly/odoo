@@ -81,7 +81,7 @@ class Serialized(fields.Field):
 
     prefetch = False                    # not prefetched by default
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
         return self.convert_to_cache(value, record, validate=validate)
 
     def convert_to_cache(self, value, record, validate=True):

@@ -308,6 +308,7 @@ class MultiTag(models.Model):
 
     name = fields.Char()
     display_name = fields.Char(compute='_compute_display_name')
+    company_ids = fields.One2many('test_new_api.company', 'tag_id')
 
     @api.depends('name')
     @api.depends_context('special_tag')
@@ -635,13 +636,15 @@ class CompanyDependent(models.Model):
 
     foo = fields.Char(company_dependent=True)
     date = fields.Date(company_dependent=True)
-    moment = fields.Datetime(company_dependent=True)
+    # moment = fields.Datetime(company_dependent=True)
     tag_id = fields.Many2one('test_new_api.multi.tag', company_dependent=True)
     truth = fields.Boolean(company_dependent=True)
     count = fields.Integer(company_dependent=True)
     phi = fields.Float(company_dependent=True, digits=(2, 5))
     html1 = fields.Html(company_dependent=True, sanitize=False)
     html2 = fields.Html(company_dependent=True, sanitize_attributes=True, strip_classes=True, strip_style=True)
+    company_id = fields.Many2one('res.company', company_dependent=True)  # child_of and parent_of is optimized
+    partner_id = fields.Many2one('res.partner', company_dependent=True)
 
 
 class CompanyDependentAttribute(models.Model):

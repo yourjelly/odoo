@@ -457,18 +457,17 @@ class Field(MetaField('DummyField', (object,), {})):
                 warnings.warn(f"precompute attribute has no impact on non stored field {self}")
                 attrs['precompute'] = False
         if attrs.get('company_dependent'):
-            # by default, company-dependent fields are not stored, not computed
-            # in superuser mode and not copied
-            attrs['store'] = False
-            attrs['compute_sudo'] = attrs.get('compute_sudo', False)
+            # if attrs.get('required'):
+            #     warnings.warn(f"company_dependent field {self} cannot be required")
+            # if attrs.get('translate'):
+            #     warnings.warn(f"company_dependent field {self} cannot be translated")
+            # if attrs.get('default')"
+            #     warnings.warn(f"company_dependent field {self} should not have default")
             attrs['copy'] = attrs.get('copy', False)
-            attrs['default'] = attrs.get('default', self._default_company_dependent)
-            attrs['compute'] = self._compute_company_dependent
-            if not attrs.get('readonly'):
-                attrs['inverse'] = self._inverse_company_dependent
-            attrs['search'] = self._search_company_dependent
-            attrs['depends_context'] = attrs.get('depends_context', ()) + ('company',)
-
+            # speed up search and on delete
+            attrs['index'] = attrs.get('index', 'btree_not_null')
+            attrs['prefetch'] = attrs.get('prefetch', 'company_dependent')
+            attrs['_depends_context'] = ('company',)
         # parameters 'depends' and 'depends_context' are stored in attributes
         # '_depends' and '_depends_context', respectively
         if 'depends' in attrs:
@@ -774,28 +773,19 @@ class Field(MetaField('DummyField', (object,), {})):
     # Company-dependent fields
     #
 
-    def _default_company_dependent(self, model):
-        return model.env['ir.property']._get(self.name, self.model_name)
-
-    def _compute_company_dependent(self, records):
-        # read property as superuser, as the current user may not have access
-        Property = records.env['ir.property'].sudo()
-        values = Property._get_multi(self.name, self.model_name, records.ids)
-        for record in records:
-            record[self.name] = values.get(record.id)
-
-    def _inverse_company_dependent(self, records):
-        # update property as superuser, as the current user may not have access
-        Property = records.env['ir.property'].sudo()
-        values = {
-            record.id: self.convert_to_write(record[self.name], record)
-            for record in records
-        }
-        Property._set_multi(self.name, self.model_name, values)
-
-    def _search_company_dependent(self, records, operator, value):
-        Property = records.env['ir.property'].sudo()
-        return Property.search_multi(self.name, self.model_name, operator, value)
+    def get_company_dependent_fallback(self, records, format='record'):
+        assert self.company_dependent
+        fallbacks = records.env['ir.default']._get_model_defaults(records._name)
+        fallback = fallbacks.get(self.name, None)
+        fallback = self.convert_to_write(fallback, records)
+        if format == 'column':
+            return self.convert_to_column(fallback, records, validate=False, operation='search')
+        fallback = self.convert_to_cache(fallback, records, validate=False)
+        if format == 'cache':
+            return fallback
+        if format == 'record':
+            return self.convert_to_record(fallback, records)
+        return fallback
 
     #
     # Setup of field triggers
@@ -970,8 +960,17 @@ class Field(MetaField('DummyField', (object,), {})):
     # Conversion of values
     #
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        """ Convert ``value`` from the ``write`` format to the SQL format. """
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        """ Convert ``value`` from the ``write`` format to the SQL format.
+        operation
+            "create": convert from write format to column format to fill the column
+            "flush": convert from to_flush format to column format to update existing values
+                        to_flush format:
+                            translated field: {'lang_code': 'value', ...} or None
+                            company dependent field: {company_id: value}
+                            others: cache format
+            "search": convert from write format to column format for condition
+        """
         if value is None or value is False:
             return None
         return pycompat.to_text(value)
@@ -1461,10 +1460,22 @@ class Field(MetaField('DummyField', (object,), {})):
 class Boolean(Field):
     """ Encapsulates a :class:`bool`. """
     type = 'boolean'
-    column_type = ('bool', 'bool')
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        return bool(value)
+    @property
+    def column_type(self):
+        return ('jsonb', 'jsonb') if self.company_dependent else ('bool', 'bool')
+
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if operation == 'flush':
+            return PsycopgJson(value) if self.company_dependent and value else value
+        value = bool(value)
+        if operation == 'search':
+            return value
+        if self.company_dependent:
+            if value == self.get_company_dependent_fallback(record, format='column'):
+                return None
+            return PsycopgJson({record.env.company.id: value})
+        return value
 
     def convert_to_cache(self, value, record, validate=True):
         return bool(value)
@@ -1476,9 +1487,12 @@ class Boolean(Field):
 class Integer(Field):
     """ Encapsulates an :class:`int`. """
     type = 'integer'
-    column_type = ('int4', 'int4')
 
     aggregator = 'sum'
+
+    @property
+    def column_type(self):
+        return ('jsonb', 'jsonb') if self.company_dependent else ('int4', 'int4')
 
     def _get_attrs(self, model_class, name):
         res = super()._get_attrs(model_class, name)
@@ -1487,8 +1501,17 @@ class Integer(Field):
             res['aggregator'] = None
         return res
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        return int(value or 0)
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if operation == 'flush':
+            return PsycopgJson(value) if self.company_dependent and value else value
+        value = int(value or 0)
+        if operation == 'search':
+            return value
+        if self.company_dependent:
+            if value == self.get_company_dependent_fallback(record, format='column'):
+                return None
+            return PsycopgJson({record.env.company.id: value})
+        return value
 
     def convert_to_cache(self, value, record, validate=True):
         if isinstance(value, dict):
@@ -1571,8 +1594,9 @@ class Float(Field):
         # with all significant digits.
         # FLOAT8 type is still the default when there is no precision because it
         # is faster for most operations (sums, etc.)
-        return ('numeric', 'numeric') if self._digits is not None else \
-               ('float8', 'double precision')
+        return ('jsonb', 'jsonb') if self.company_dependent else \
+            ('numeric', 'numeric') if self._digits is not None else \
+                ('float8', 'double precision')
 
     def get_digits(self, env):
         if isinstance(self._digits, str):
@@ -1586,13 +1610,22 @@ class Float(Field):
     def _description_digits(self, env):
         return self.get_digits(env)
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        result = float(value or 0.0)
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if operation == 'flush':
+            return PsycopgJson(value) if self.company_dependent and value else value
+        value_float = value = float(value or 0.0)
         digits = self.get_digits(record.env)
         if digits:
             precision, scale = digits
-            result = float_repr(float_round(result, precision_digits=scale), precision_digits=scale)
-        return result
+            value_float = float_round(value, precision_digits=scale)
+            value = float_repr(value_float, precision_digits=scale)
+        if operation == 'search':
+            return value
+        if self.company_dependent:
+            if value == self.get_company_dependent_fallback(record, format='column'):
+                return None
+            return PsycopgJson({record.env.company.id: value_float})
+        return value
 
     def convert_to_cache(self, value, record, validate=True):
         # apply rounding here, otherwise value in cache may be wrong!
@@ -1625,10 +1658,13 @@ class Monetary(Field):
     """
     type = 'monetary'
     write_sequence = 10
-    column_type = ('numeric', 'numeric')
 
     currency_field = None
     aggregator = 'sum'
+
+    @property
+    def column_type(self):
+        return ('jsonb', 'jsonb') if self.company_dependent else ('numeric', 'numeric')
 
     def __init__(self, string=Default, currency_field=Default, **kwargs):
         super(Monetary, self).__init__(string=string, currency_field=currency_field, **kwargs)
@@ -1656,7 +1692,10 @@ class Monetary(Field):
         assert self.get_currency_field(model) in model._fields, \
             "Field %s with unknown currency_field %r" % (self, self.get_currency_field(model))
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if operation == 'flush':
+            return PsycopgJson(value) if self.company_dependent and value else value
+
         # retrieve currency from values or record
         currency_field_name = self.get_currency_field(record)
         currency_field = record._fields[currency_field_name]
@@ -1675,9 +1714,15 @@ class Monetary(Field):
             currency = record[:1].with_context(prefetch_fields=False)[currency_field_name]
             currency = currency.with_env(record.env)
 
-        value = float(value or 0.0)
+        value_float = value = float(value or 0.0)
         if currency:
-            return float_repr(currency.round(value), currency.decimal_places)
+            value = float_repr(currency.round(value_float), currency.decimal_places)
+        if operation == 'search':
+            return value
+        if self.company_dependent:
+            if value == self.get_company_dependent_fallback(record, format='column'):
+                return None
+            return PsycopgJson({record.env.company.id: value_float})
         return value
 
     def convert_to_cache(self, value, record, validate=True):
@@ -1741,22 +1786,23 @@ class _String(Field):
         func = getattr(self.translate, 'get_text_content', lambda term: term)
         return func(term)
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if operation == 'flush':
+            """ Convert from cache_raw value to column value """
+            return PsycopgJson(value) if (self.translate or self.company_dependent) and value else value
+        if operation == 'search':
+            return self.convert_to_cache(value, record)
         cache_value = self.convert_to_cache(value, record, validate)
+        if self.company_dependent:
+            return PsycopgJson({record.env.company.id: cache_value})
         if cache_value is None:
             return None
         if callable(self.translate):
             # pylint: disable=not-callable
             cache_value = self.translate(lambda t: None, cache_value)
         if self.translate:
-            cache_value = {'en_US': cache_value, record.env.lang or 'en_US': cache_value}
-        return self._convert_from_cache_to_column(cache_value)
-
-    def _convert_from_cache_to_column(self, value):
-        """ Convert from cache_raw value to column value """
-        if value is None:
-            return None
-        return PsycopgJson(value) if self.translate else value
+            return PsycopgJson({'en_US': cache_value, record.env.lang or 'en_US': cache_value})
+        return cache_value
 
     def convert_to_cache(self, value, record, validate=True):
         if value is None or value is False:
@@ -1986,7 +2032,7 @@ class Char(_String):
 
     @property
     def column_type(self):
-        return ('jsonb', 'jsonb') if self.translate else ('varchar', pg_varchar(self.size))
+        return ('jsonb', 'jsonb') if self.translate or self.company_dependent else ('varchar', pg_varchar(self.size))
 
     def update_db_column(self, model, column):
         if (
@@ -2003,12 +2049,13 @@ class Char(_String):
     _description_size = property(attrgetter('size'))
     _description_trim = property(attrgetter('trim'))
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        if value is None or value is False:
-            return None
-        # we need to convert the string to a unicode object to be able
-        # to evaluate its length (and possibly truncate it) reliably
-        return super().convert_to_column(pycompat.to_text(value)[:self.size], record, values, validate)
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if operation != 'flush' and not (value is None or value is False):
+            # we need to convert the string to a unicode object to be able
+            # to evaluate its length (and possibly truncate it) reliably
+            value = value.decode() if isinstance(value, bytes) else str(value)
+            value = value[:self.size]
+        return super().convert_to_column(value, record, values, validate, operation)
 
     def convert_to_cache(self, value, record, validate=True):
         if value is None or value is False:
@@ -2031,7 +2078,7 @@ class Text(_String):
 
     @property
     def column_type(self):
-        return ('jsonb', 'jsonb') if self.translate else ('text', 'text')
+        return ('jsonb', 'jsonb') if self.translate or self.company_dependent else ('text', 'text')
 
     def convert_to_cache(self, value, record, validate=True):
         if value is None or value is False:
@@ -2075,7 +2122,7 @@ class Html(_String):
 
     @property
     def column_type(self):
-        return ('jsonb', 'jsonb') if self.translate else ('text', 'text')
+        return ('jsonb', 'jsonb') if self.translate or self.company_dependent else ('text', 'text')
 
     _related_sanitize = property(attrgetter('sanitize'))
     _related_sanitize_tags = property(attrgetter('sanitize_tags'))
@@ -2091,8 +2138,10 @@ class Html(_String):
     _description_strip_style = property(attrgetter('strip_style'))
     _description_strip_classes = property(attrgetter('strip_classes'))
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        return super().convert_to_column(self._convert(value, record, validate=True), record, values, validate=False)
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if not (operation == 'flush' and (self.translate or self.company_dependent)):
+            value = self._convert(value, record, validate=True)
+        return super().convert_to_column(value, record, values, validate=False, operation=operation)
 
     def convert_to_cache(self, value, record, validate=True):
         return self._convert(value, record, validate)
@@ -2178,7 +2227,10 @@ class Html(_String):
 class Date(Field):
     """ Encapsulates a python :class:`date <datetime.date>` object. """
     type = 'date'
-    column_type = ('date', 'date')
+
+    @property
+    def column_type(self):
+        return ('jsonb', 'jsonb') if self.company_dependent else ('date', 'date')
 
     start_of = staticmethod(date_utils.start_of)
     end_of = staticmethod(date_utils.end_of)
@@ -2257,6 +2309,20 @@ class Date(Field):
         :rtype: str
         """
         return value.strftime(DATE_FORMAT) if value else False
+
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if operation == 'flush':
+            if self.company_dependent:
+                return PsycopgJson({k: self.to_string(v) or None for k, v in value.items()})
+            return value
+        value = super().convert_to_column(value, record, values, validate, operation)
+        if operation == 'search':
+            return value
+        if self.company_dependent:
+            if value == self.get_company_dependent_fallback(record, format='column'):
+                return None
+            return PsycopgJson({record.env.company.id: value})
+        return value
 
     def convert_to_cache(self, value, record, validate=True):
         if not value:
@@ -2406,7 +2472,7 @@ class Binary(Field):
 
     _description_attachment = property(attrgetter('attachment'))
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
         # Binary values may be byte strings (python 2.6 byte array), but
         # the legacy OpenERP convention is to transfer and store binaries
         # as base64-encoded strings. The base64 string may be provided as a
@@ -2733,7 +2799,6 @@ class Selection(Field):
     ``related`` or extended fields.
     """
     type = 'selection'
-    column_type = ('varchar', pg_varchar())
 
     selection = None            # [(value, string), ...], function or method name
     validate = True             # whether validating upon write
@@ -2742,6 +2807,10 @@ class Selection(Field):
     def __init__(self, selection=Default, string=Default, **kwargs):
         super(Selection, self).__init__(selection=selection, string=string, **kwargs)
         self._selection = dict(selection) if isinstance(selection, list) else None
+
+    @property
+    def column_type(self):
+        return ('jsonb', 'jsonb') if self.company_dependent else ('varchar', pg_varchar())
 
     def setup_nonrelated(self, model):
         super().setup_nonrelated(model)
@@ -2892,10 +2961,19 @@ class Selection(Field):
             selection = determine(selection, env[self.model_name].with_context(lang=None))
         return [value for value, _ in selection]
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if operation == 'flush':
+            return PsycopgJson(value) if self.company_dependent and value else None
         if validate and self.validate:
             value = self.convert_to_cache(value, record)
-        return super(Selection, self).convert_to_column(value, record, values, validate)
+        result = super().convert_to_column(value, record, values, validate, operation)
+        if operation == 'search':
+            return result
+        if self.company_dependent:
+            if result == self.get_company_dependent_fallback(record, format='column'):
+                return None
+            return PsycopgJson({record.env.company.id: result})
+        return result
 
     def convert_to_cache(self, value, record, validate=True):
         if not validate or self._selection is None:
@@ -2928,8 +3006,8 @@ class Reference(Selection):
     def column_type(self):
         return ('varchar', pg_varchar())
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        return Field.convert_to_column(self, value, record, values, validate)
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        return Field.convert_to_column(self, value, record, values, validate, operation)
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: str ("model,id") or None
@@ -3052,11 +3130,14 @@ class Many2one(_Relational):
         domain depending on the field attributes.
     """
     type = 'many2one'
-    column_type = ('int4', 'int4')
 
     ondelete = None                     # what to do when value is deleted
     auto_join = False                   # whether joins are generated upon search
     delegate = False                    # whether self implements delegation
+
+    @property
+    def column_type(self):
+        return ('jsonb', 'jsonb') if self.company_dependent else ('int4', 'int4')
 
     def __init__(self, comodel_name=Default, string=Default, **kwargs):
         super(Many2one, self).__init__(comodel_name=comodel_name, string=string, **kwargs)
@@ -3110,6 +3191,8 @@ class Many2one(_Relational):
         model.pool.post_init(self.update_db_foreign_key, model, column)
 
     def update_db_foreign_key(self, model, column):
+        if self.company_dependent:
+            return
         comodel = model.env[self.comodel_name]
         # foreign keys do not work on views, and users can define custom models on sql views.
         if not model._is_an_ordinary_table() or not comodel._is_an_ordinary_table():
@@ -3129,8 +3212,19 @@ class Many2one(_Relational):
         for record in records:
             cache.set(record, self, self.convert_to_cache(value, record, validate=False))
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        return value or None
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
+        if operation == 'flush':
+            return PsycopgJson(value) if self.company_dependent and value else value
+        if operation == 'search':
+            return value or None
+        value = value or None
+        if isinstance(value, BaseModel):
+            value = value.id
+        if self.company_dependent:
+            if value == self.get_company_dependent_fallback(record, format='column'):
+                return None
+            return PsycopgJson({record.env.company.id: value})
+        return value
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: id or None
@@ -3345,7 +3439,7 @@ class Json(Field):
             return None
         return json.loads(json.dumps(value))
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
         if not value:
             return None
         return PsycopgJson(value)
@@ -3431,7 +3525,7 @@ class Properties(Field):
     #           'aa34746a6851ee4e': 1337,
     #       }
     #
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
         if not value:
             return None
 
@@ -3933,7 +4027,7 @@ class PropertiesDefinition(Field):
         'tags': {'tags'},
     }
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None, validate=True, operation='create'):
         """Convert the value before inserting it in database.
 
         This method accepts a list properties definition.

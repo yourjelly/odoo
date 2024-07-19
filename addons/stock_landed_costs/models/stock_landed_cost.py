@@ -29,7 +29,7 @@ class StockLandedCost(models.Model):
         if self.env.company.lc_journal_id:
             lc_journal = self.env.company.lc_journal_id
         else:
-            lc_journal = self.env['ir.property']._get("property_stock_journal", "product.category")
+            lc_journal = self.env['account.journal'].browse(self.env['ir.default']._get('product.category', 'property_stock_journal', company_id=True))
         return lc_journal
 
     name = fields.Char(

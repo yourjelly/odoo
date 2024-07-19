@@ -2876,6 +2876,23 @@ class BaseModel(metaclass=MetaModel):
             if len(sql_field_langs) == 1:
                 return sql_field_langs[0]
             return SQL("COALESCE(%s)", SQL(", ").join(sql_field_langs))
+        if field.company_dependent:
+            default = field.get_company_dependent_fallback(self, format='column')
+            # in _read_group_orderby the result of field to sql will be mogrified and split to
+            # e.g SQL('COALESCE(%s->%s') and SQL('to_jsonb(%s))::boolean') as 2 orderby values
+            # and concatenated by SQL(',') in the final result, which works in an unexpected way
+            if field.type == 'boolean':
+                return SQL("COALESCE(%s->%s,to_jsonb(%s))::boolean", sql_field, str(self.env.company.id), bool(default))
+            if field.type == 'integer':
+                return SQL("COALESCE(%s->%s,to_jsonb(%s))::int4", sql_field, str(self.env.company.id), 0 if default is None else int(default))
+            if field.type in ('float', 'monetary'):
+                return SQL("COALESCE(%s->%s,to_jsonb(%s))::numeric", sql_field, str(self.env.company.id), 0.0 if default is None else float(default))
+            if field.type in ('char', 'text', 'html', 'selection'):
+                return SQL("(COALESCE(%s->%s,to_jsonb(%s::text))->>0)", sql_field, str(self.env.company.id), None if default is None else str(default))
+            if field.type == 'many2one':
+                return SQL("(COALESCE(%s->%s,to_jsonb(%s::int4))->>0)::int4", sql_field, str(self.env.company.id), default)
+            if field.type == 'date':
+                return SQL("(COALESCE(%s->%s,to_jsonb(%s::text))->>0)::date", sql_field, str(self.env.company.id), default)
 
         return sql_field
 
@@ -3045,7 +3062,7 @@ class BaseModel(metaclass=MetaModel):
 
                 if params:
                     if fname != 'id':
-                        params = [field.convert_to_column(p, self, validate=False) for p in params]
+                        params = [field.convert_to_column(p, self, validate=False, operation='search') for p in params]
                     sql = SQL("(%s %s %s)", sql_field, sql_operator, tuple(params))
                 else:
                     # The case for (fname, 'in', []) or (fname, 'not in', []).
@@ -3092,7 +3109,7 @@ class BaseModel(metaclass=MetaModel):
         elif need_wildcard:
             sql_value = SQL("%s", f"%{pycompat.to_text(value)}%")
         else:
-            sql_value = SQL("%s", field.convert_to_column(value, self, validate=False))
+            sql_value = SQL("%s", field.convert_to_column(value, self, validate=False, operation='search'))
 
         sql_left = sql_field
         if operator.endswith('like'):
@@ -3114,7 +3131,7 @@ class BaseModel(metaclass=MetaModel):
         ):
             sql = SQL("(%s OR %s IS NULL)", sql, sql_field)
 
-        if not need_wildcard and is_number_field:
+        if not need_wildcard and is_number_field and not field.company_dependent:
             cmp_value = field.convert_to_record(field.convert_to_cache(value, self), self)
             if (
                 operator == '>=' and cmp_value <= 0
@@ -3543,6 +3560,7 @@ class BaseModel(metaclass=MetaModel):
 
         # set up fields
         bad_fields = []
+        many2one_company_dependents = self.env.registry.many2one_company_dependents
         for name, field in cls._fields.items():
             try:
                 field.setup(self)
@@ -3555,6 +3573,8 @@ class BaseModel(metaclass=MetaModel):
                     bad_fields.append(name)
                     continue
                 raise
+            if field.type == 'many2one' and field.company_dependent:
+                many2one_company_dependents.add(field.comodel_name, field)
 
         for name in bad_fields:
             self._pop_field(name)
@@ -4351,9 +4371,7 @@ class BaseModel(metaclass=MetaModel):
         cr = self._cr
         Data = self.env['ir.model.data'].sudo().with_context({})
         Defaults = self.env['ir.default'].sudo()
-        Property = self.env['ir.property'].sudo()
         Attachment = self.env['ir.attachment'].sudo()
-        ir_property_unlink = Property
         ir_model_data_unlink = Data
         ir_attachment_unlink = Attachment
 
@@ -4364,17 +4382,6 @@ class BaseModel(metaclass=MetaModel):
 
         for sub_ids in cr.split_for_in_conditions(self.ids):
             records = self.browse(sub_ids)
-
-            # Check if the records are used as default properties.
-            refs = [f'{self._name},{id_}' for id_ in sub_ids]
-            default_properties = Property.search([('res_id', '=', False), ('value_reference', 'in', refs)])
-            if not self._context.get(MODULE_UNINSTALL_FLAG) and default_properties:
-                raise UserError(_('Unable to delete this document because it is used as a default property'))
-            else:
-                ir_property_unlink |= default_properties
-
-            # Delete the records' properties.
-            ir_property_unlink |= Property.search([('res_id', 'in', refs)])
 
             cr.execute(SQL(
                 "DELETE FROM %s WHERE id IN %s",
@@ -4391,10 +4398,6 @@ class BaseModel(metaclass=MetaModel):
             data = Data.search([('model', '=', self._name), ('res_id', 'in', sub_ids)])
             ir_model_data_unlink |= data
 
-            # For the same reason, remove the defaults having some of the
-            # records as value
-            Defaults.discard_records(records)
-
             # For the same reason, remove the relevant records in ir_attachment
             # (the search is performed with sql as the search method of
             # ir_attachment is overridden to hide attachments of deleted
@@ -4405,11 +4408,98 @@ class BaseModel(metaclass=MetaModel):
             ))
             ir_attachment_unlink |= Attachment.browse(row[0] for row in cr.fetchall())
 
+            # delete fallback value in ir.default for company dependent fields
+            if (fields_ := self.env.registry.many2one_company_dependents[self._name]):
+                IrModelFields = self.env["ir.model.fields"]
+                if self._context.get(MODULE_UNINSTALL_FLAG):
+                    set_null_field_ids = tuple(IrModelFields._get_ids(field.model_name).get(field.name) for field in fields_)
+                    restrict_field_ids = tuple()
+                else:
+                    set_null_field_ids = tuple(IrModelFields._get_ids(field.model_name).get(field.name) for field in fields_ if field.ondelete == 'set null')
+                    restrict_field_ids = tuple(IrModelFields._get_ids(field.model_name).get(field.name) for field in fields_ if field.ondelete == 'restrict')
+                sub_ids_json_text = tuple(str(id_) for id_ in sub_ids)
+
+                if restrict_field_ids:
+                    cr.execute(SQL(
+                        """
+                        SELECT json_value::int4, field_id
+                        FROM ir_default
+                        WHERE field_id IN %(field_ids)s
+                        AND json_value IN %(ids)s
+                        LIMIT 1
+                        """,
+                        field_ids=restrict_field_ids,
+                        ids=sub_ids_json_text,
+                    ))
+                    if res := cr.fetchone():
+                        record_id, field_id = res
+                        ir_field = self.env['ir.model.fields'].browse(field_id).sudo()
+                        field = self.env[ir_field.model]._fields[ir_field.name]
+                        record = self.env[field.model].browse(record_id)
+                        raise UserError(_('Unable to delete %(record)s because it is used as the default value of %(field)s', record=record, field=field))
+
+                if set_null_field_ids:
+                    cr.execute(SQL(
+                        """
+                        DELETE FROM ir_default
+                        WHERE field_id IN %(field_ids)s
+                        AND json_value IN %(ids)s
+                        """,
+                        field_ids=set_null_field_ids,
+                        ids=sub_ids_json_text,
+                    ))
+
+            # on delete set null/restrict for jsonb company dependent many2one
+            for field in self.env.registry.many2one_company_dependents[self._name]:
+                if field.ondelete == 'restrict' and not self._context.get(MODULE_UNINSTALL_FLAG):
+                    self.env.cr.execute(SQL(
+                        """
+                        SELECT id, %(field)s
+                        FROM %(table)s
+                        WHERE %(field)s IS NOT NULL
+                        AND %(field)s @? %(jsonpath)s
+                        LIMIT 1
+                        """,
+                        table=SQL.identifier(self.env[field.model_name]._table),
+                        field=SQL.identifier(field.name),
+                        jsonpath=f"$.* ? ({' || '.join(f'@ == {id_}' for id_ in sub_ids)})",
+                    ))
+                    if res := self.env.cr.fetchone():
+                        on_restrict_id, field_json = res
+                        to_delete_id = next(iter(id_ for id_ in field_json.values()))
+                        on_restrict_record = self.env[field.model_name].browse(on_restrict_id)
+                        to_delete_record = self.browse(to_delete_id)
+                        raise UserError(_('You cannot delete %(to_delete_record)s, as it is used by %(on_restrict_record)s',
+                                          to_delete_record=to_delete_record, on_restrict_record=on_restrict_record))
+                else:
+                    cr.execute(SQL(
+                        """
+                        UPDATE %(table)s
+                        SET %(field)s = (
+                            SELECT jsonb_object_agg(
+                                key,
+                                CASE
+                                    WHEN (value->>0)::int4 in %(ids)s THEN NULL
+                                    ELSE value
+                                END)
+                            FROM jsonb_each(%(field)s)
+                        )
+                        WHERE %(field)s IS NOT NULL
+                        AND %(field)s @? %(jsonpath)s
+                        """,
+                        table=SQL.identifier(self.env[field.model_name]._table),
+                        field=SQL.identifier(field.name),
+                        ids=sub_ids,
+                        jsonpath=f"$.* ? ({' || '.join(f'@ == {id_}' for id_ in sub_ids)})",
+                    ))
+
+            # For the same reason, remove the defaults having some of the
+            # records as value
+            Defaults.discard_records(records)
+
         # invalidate the *whole* cache, since the orm does not handle all
         # changes made in the database, like cascading delete!
         self.env.invalidate_all(flush=False)
-        if ir_property_unlink:
-            ir_property_unlink.unlink()
         if ir_model_data_unlink:
             ir_model_data_unlink.unlink()
         if ir_attachment_unlink:
@@ -4667,6 +4757,27 @@ class BaseModel(metaclass=MetaModel):
                         column=column,
                         expr=expr,
                     )
+                if field.company_dependent:
+                    default = field.get_company_dependent_fallback(self, format='column')
+                    default_type = 'text'
+                    if field.type in ('float', 'monetary'):
+                        default_type = 'numeric'
+                    elif field.type in ('many2one', 'integer'):
+                        default_type = 'int4'
+                    elif field.type == 'boolean':
+                        default_type = 'boolean'
+                    elif field.type == 'date':
+                        default_type = 'date'
+                    default_type = SQL(default_type)
+                    expr = SQL(
+                        """(SELECT jsonb_object_agg(key, value)
+                        FROM jsonb_each(COALESCE(%(table)s.%(column)s, '{}'::jsonb) || %(expr)s)
+                        WHERE value != %(default)s)""",
+                        table=SQL.identifier(self._table),
+                        column=column,
+                        expr=expr,
+                        default=SQL("'null'::jsonb") if default is None else SQL('to_jsonb(%s::%s)', default, default_type)
+                    )
                 columns.append(column)
                 assignments.append(SQL("%s = %s", column, expr))
 
@@ -4738,16 +4849,6 @@ class BaseModel(metaclass=MetaModel):
                 field = self._fields.get(key)
                 if not field:
                     raise ValueError("Invalid field %r on model %r" % (key, self._name))
-                if field.company_dependent:
-                    irprop_def = self.env['ir.property']._get(key, self._name)
-                    cached_def = field.convert_to_cache(irprop_def, self)
-                    cached_val = field.convert_to_cache(val, self)
-                    if cached_val == cached_def:
-                        # val is the same as the default value defined in
-                        # 'ir.property'; by design, 'ir.property' will not
-                        # create entries specific to these records; skipping the
-                        # field inverse saves 4 SQL queries
-                        continue
                 if field.store:
                     stored[key] = val
                 if field.inherited:
@@ -6367,13 +6468,13 @@ class BaseModel(metaclass=MetaModel):
                     elif comparator == 'not in':
                         ok = not (value and any(x in value for x in data))
                     elif comparator == '<':
-                        ok = any(x is not None and x < value for x in data)
+                        ok = any(x is not False and x is not None and x < value for x in data)
                     elif comparator == '>':
-                        ok = any(x is not None and x > value for x in data)
+                        ok = any(x is not False and x is not None and x > value for x in data)
                     elif comparator == '<=':
-                        ok = any(x is not None and x <= value for x in data)
+                        ok = any(x is not False and x is not None and x <= value for x in data)
                     elif comparator == '>=':
-                        ok = any(x is not None and x >= value for x in data)
+                        ok = any(x is not False and x is not None and x >= value for x in data)
                     elif comparator in ('like', 'ilike', '=like', '=ilike', 'not ilike', 'not like'):
                         # use fnmatchcase to avoid relying on file path case normalization
                         ok = any(fnmatch.fnmatchcase(unaccent(x), value_esc) for x in data)
@@ -6455,11 +6556,12 @@ class BaseModel(metaclass=MetaModel):
     def _flush(self, fnames=None):
 
         def convert(record, field, value):
-            if field.translate:
-                return field._convert_from_cache_to_column(value)
+            if field.translate or field.company_dependent:
+                return field.convert_to_column(value, record, operation='flush')
             return field.convert_to_column(
                 field.convert_to_write(value, record),
                 record,
+                operation='create',
             )
 
         if fnames is None:
@@ -6485,7 +6587,7 @@ class BaseModel(metaclass=MetaModel):
         # This avoids allocating extra memory for storing the data taken
         # from cache. Beware that this breaks the cache abstraction!
         dirty_field_cache = {
-            field: self.env.cache._get_field_cache(model, field)
+            field: self.env.cache._get_field_cache(model, field) if not field.company_dependent else self.env.cache._get_grouped_context_dependent_field_cache(field)
             for field in dirty_field_ids
         }
 

@@ -27,12 +27,14 @@ class AccountCashRounding(models.Model):
         string='Profit Account',
         company_dependent=True,
         domain="[('deprecated', '=', False)]",
+        ondelete='restrict',
     )
     loss_account_id = fields.Many2one(
         'account.account',
         string='Loss Account',
         company_dependent=True,
         domain="[('deprecated', '=', False)]",
+        ondelete='restrict',
     )
     rounding_method = fields.Selection(string='Rounding Method', required=True,
         selection=[('UP', 'UP'), ('DOWN', 'DOWN'), ('HALF-UP', 'HALF-UP')],

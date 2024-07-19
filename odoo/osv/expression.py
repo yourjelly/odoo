@@ -984,6 +984,14 @@ class expression(object):
             elif field.type in ('one2many', 'many2many'):
                 comodel = model.env[field.comodel_name].with_context(**field.context)
 
+            if field.company_dependent and field.index == 'btree_not_null' and not isinstance(right, (SQL, Query)):
+                if not (field.type == 'date' and len(path) > 1):  # filtered_domain doesn't support READ_GROUP_NUMBER_GRANULARITY
+                    # access error may be raised
+                    if model.env['ir.default']._evaluate_leaf_with_fallback(model._name, leaf) is False:
+                        push('&', model, alias)
+                        sql_col_is_not_null = SQL('%s.%s IS NOT NULL', SQL.identifier(alias), SQL.identifier(field.name))
+                        push_result(sql_col_is_not_null)
+
             if field.inherited:
                 parent_model = model.env[field.related_field.model_name]
                 parent_fname = model._inherits[parent_model._name]
@@ -1198,6 +1206,9 @@ class expression(object):
                         sql_inverse = comodel._field_to_sql(ids2.table, inverse_field.name, ids2)
                         if not inverse_field.required:
                             ids2.add_where(SQL("%s IS NOT NULL", sql_inverse))
+                        if (inverse_field.company_dependent and inverse_field.index == 'btree_not_null'
+                                and not inverse_field.get_company_dependent_fallback(comodel, format='record')):
+                            ids2.add_where(SQL('%s IS NOT NULL', SQL.identifier(ids2.table, inverse_field.name)))
                         push_result(SQL(
                             "(%s %s %s)",
                             SQL.identifier(alias, 'id'),

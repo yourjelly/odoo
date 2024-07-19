@@ -1098,7 +1098,7 @@ class Cache:
         if dirty:
             assert field.column_type and field.store and all(records._ids)
             self._dirty[field].update(records._ids)
-            if field in records.pool.field_depends_context:
+            if not field.company_dependent and field in records.pool.field_depends_context:
                 # put the values under conventional context key values {'context_key': None},
                 # in order to ease the retrieval of those values to flush them
                 records = records.with_env(records.env(context={}))
@@ -1186,7 +1186,7 @@ class Cache:
         """ Return the cached values of ``field`` for ``records``. """
         field_cache = self._get_field_cache(records, field)
         for record_id in records._ids:
-            try:
+            try:  # noqa: SIM105
                 yield field_cache[record_id]
             except KeyError:
                 pass
@@ -1367,7 +1367,7 @@ class Cache:
 
         for field, field_cache in self._data.items():
             # check column fields only
-            if not field.store or not field.column_type or callable(field.translate):
+            if not field.store or not field.column_type or field.translate or field.company_dependent:
                 continue
 
             model = env[field.model_name]
@@ -1385,6 +1385,37 @@ class Cache:
 
         if invalids:
             _logger.warning("Invalid cache: %s", pformat(invalids))
+
+    def _get_grouped_context_dependent_field_cache(self, field, group_key=lambda ck: ck[0]):
+        """
+        get a field cache proxy to group up field value for all context
+        cache data: {field: {context_key: {id: value}}}
+
+        :param field: field for the grouped field cache value
+        :param group_key: a function to convert the context key tuple to a
+               group key. None group key will be ignored
+        :return: a dict like field cache proxy which is logically similar to
+              {id: {group_key(context_key), value}}
+        """
+        field_caches = self._data.get(field, EMPTY_DICT)
+        key_field_cache = {
+            key: field_cache
+            for context_key, field_cache in field_caches.items()
+            if (key := group_key(context_key)) is not None
+        }
+        return GroupedContextDependentFieldCache(key_field_cache)
+
+
+class GroupedContextDependentFieldCache:
+    def __init__(self, key_field_cache):
+        self._key_field_cache = key_field_cache
+
+    def __getitem__(self, id_):
+        return {
+            key: field_cache[id_]
+            for key, field_cache in self._key_field_cache.items()
+            if id_ in field_cache
+        }
 
 
 class Starred:

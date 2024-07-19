@@ -480,7 +480,14 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         # set the production account to False
         product_category_all.property_stock_account_production_cost_id = False
         product_category_all.invalidate_recordset()
+        fname = 'property_stock_account_production_cost_id'
+        self.assertFalse(product_category_all.property_stock_account_production_cost_id.id)
+
+        field_id = self.env['ir.model.fields']._get('product.category', fname).id
+        # remove all fallback values
+        self.env['ir.default'].search([('field_id', '=', field_id)]).unlink()
         self.assertFalse(product_category_all.property_stock_account_production_cost_id)
+
         self.assertEqual(self.bom.type, 'subcontract')
         self.comp1.standard_price = 1.0
         picking_form = Form(self.env['stock.picking'])

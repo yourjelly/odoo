@@ -863,7 +863,7 @@ class account_journal(models.Model):
                 'name': 'Deco Addict',
                 'is_company': True,
             })
-        default_expense_account = self.env['ir.property'].with_company(company)._get('property_account_expense_categ_id', 'product.category')
+        default_expense_account_id = self.env['ir.default']._get('product.category', 'property_account_expense_categ_id', company_id=company.id)
         ref = 'DE%s' % invoice_date.strftime('%Y%m')
         bill = self.env['account.move'].with_context(default_extract_state='done').create({
             'move_type': 'in_invoice',
@@ -875,13 +875,13 @@ class account_journal(models.Model):
             'invoice_line_ids': [
                 Command.create({
                     'name': "[FURN_8999] Three-Seat Sofa",
-                    'account_id': purchase_journal.default_account_id.id or default_expense_account.id,
+                    'account_id': purchase_journal.default_account_id.id or default_expense_account_id,
                     'quantity': 5,
                     'price_unit': 1500,
                 }),
                 Command.create({
                     'name': "[FURN_8220] Four Person Desk",
-                    'account_id': purchase_journal.default_account_id.id or default_expense_account.id,
+                    'account_id': purchase_journal.default_account_id.id or default_expense_account_id,
                     'quantity': 5,
                     'price_unit': 2350,
                 })

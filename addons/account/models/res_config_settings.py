@@ -241,16 +241,16 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends('company_id')
     def _compute_account_default_credit_limit(self):
-        for setting in self:
-            setting.account_default_credit_limit = self.env['ir.property']._get('credit_limit', 'res.partner')
+        company_limit = self.env['res.partner']._fields['credit_limit'].get_company_dependent_fallback(self)
+        self.account_default_credit_limit = company_limit
 
     def _inverse_account_default_credit_limit(self):
         for setting in self:
-            self.env['ir.property']._set_default(
-                'credit_limit',
+            self.env['ir.default'].set(
                 'res.partner',
+                'credit_limit',
                 setting.account_default_credit_limit,
-                setting.company_id.id
+                company_id=setting.company_id.id
             )
 
     @api.depends('company_id')

@@ -1153,3 +1153,44 @@ class TestDatePartNumber(TransactionCase):
 
         result = self.env["test_new_api.person.account"].search([('person_id.birthday.month_number', '=', 2)])
         self.assertEqual(result, account)
+
+
+class TestCompanyDependentQueries(TransactionCase):
+    def setUp(self):
+        super().setUp()
+        self.env.user.company_id
+        self.env['ir.default']._get_model_defaults('test_new_api.company')
+
+    def test_one2many_read(self):
+        # AND "test_new_api_company"."tag_id" IS NOT NULL
+        # is the speed-up when fallback value should be filtered out in condition
+
+        # no fallback
+        with self.assertQueries(["""
+            SELECT "test_new_api_company"."id",
+                   (COALESCE("test_new_api_company"."tag_id"->%s, to_jsonb(%s::int4))->> 0):: int4
+            FROM "test_new_api_company"
+            WHERE (
+                    ((COALESCE("test_new_api_company"."tag_id"->%s, to_jsonb(%s::int4))->> 0):: int4 IN %s)
+                    AND "test_new_api_company"."tag_id" IS NOT NULL
+                  )
+            ORDER BY "test_new_api_company"."id"
+        """]):
+            self.env['test_new_api.multi.tag'].browse(100).company_ids
+
+        with self.assertQueriesContain(['"test_new_api_company"."tag_id" IS NOT NULL']):
+            self.env['test_new_api.multi.tag'].browse([100, 200]).company_ids
+
+        # set default
+        self.env['ir.default'].set('test_new_api.company', 'tag_id', 100)  # cache is invalidated
+        self.setUp()
+
+        with self.assertQueriesNotContain(['"test_new_api_company"."tag_id" IS NOT NULL']):
+            self.env['test_new_api.multi.tag'].browse(100).company_ids
+
+        with self.assertQueriesContain(['"test_new_api_company"."tag_id" IS NOT NULL']):
+            self.env['test_new_api.multi.tag'].browse(200).company_ids
+
+        self.env['test_new_api.multi.tag'].browse([100, 200]).invalidate_recordset()
+        with self.assertQueriesNotContain(['"test_new_api_company"."tag_id" IS NOT NULL']):
+            self.env['test_new_api.multi.tag'].browse([100, 200]).company_ids

@@ -7,7 +7,6 @@ from odoo import api, fields, models
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    # NOT A REAL PROPERTY !!!!
     property_product_pricelist = fields.Many2one(
         comodel_name='product.pricelist',
         string="Pricelist",
@@ -17,7 +16,12 @@ class ResPartner(models.Model):
         domain=lambda self: [('company_id', 'in', (self.env.company.id, False))],
         help="This pricelist will be used, instead of the default one, for sales to the current partner")
 
-    @api.depends('country_id')
+    specific_property_product_pricelist = fields.Many2one(
+        comodel_name='product.pricelist',
+        company_dependent=True,
+    )
+
+    @api.depends('country_id', 'specific_property_product_pricelist')
     @api.depends_context('company')
     def _compute_product_pricelist(self):
         res = self.env['product.pricelist']._get_partner_pricelist_multi(self._ids)
@@ -31,19 +35,10 @@ class ResPartner(models.Model):
                 limit=1
             )
             default_for_country = pls
-            actual = self.env['ir.property']._get(
-                'property_product_pricelist',
-                'res.partner',
-                'res.partner,%s' % partner.id)
+            actual = partner.specific_property_product_pricelist
             # update at each change country, and so erase old pricelist
             if partner.property_product_pricelist or (actual and default_for_country and default_for_country.id != actual.id):
-                # keep the company of the current user before sudo
-                self.env['ir.property']._set_multi(
-                    'property_product_pricelist',
-                    partner._name,
-                    {partner.id: partner.property_product_pricelist or default_for_country.id},
-                    default_value=default_for_country.id
-                )
+                partner.specific_property_product_pricelist = False if partner.property_product_pricelist.id == default_for_country.id else partner.property_product_pricelist.id
 
     def _commercial_fields(self):
         return super()._commercial_fields() + ['property_product_pricelist']
