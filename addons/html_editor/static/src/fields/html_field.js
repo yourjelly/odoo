@@ -2,8 +2,10 @@ import { stripHistoryIds } from "@html_editor/others/collaboration/collaboration
 import {
     COLLABORATION_PLUGINS,
     DYNAMIC_PLACEHOLDER_PLUGINS,
+    EMBEDDED_COMPONENT_PLUGINS,
     MAIN_PLUGINS,
 } from "@html_editor/plugin_sets";
+import { MAIN_EMBEDDINGS } from "@html_editor/others/embedded_components/embedding_sets";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { Component, status, useRef, useState } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
@@ -43,6 +45,7 @@ export class HtmlField extends Component {
         sandboxedPreview: { type: Boolean, optional: true },
         codeview: { type: Boolean, optional: true },
         editorConfig: { type: Object, optional: true },
+        embeddedComponents: { type: Boolean, optional: true },
     };
     static defaultProps = {
         dynamicPlaceholder: false,
@@ -198,6 +201,7 @@ export class HtmlField extends Component {
                 ...MAIN_PLUGINS,
                 ...(this.props.isCollaborative ? COLLABORATION_PLUGINS : []),
                 ...(this.props.dynamicPlaceholder ? DYNAMIC_PLACEHOLDER_PLUGINS : []),
+                ...(this.props.embeddedComponents ? EMBEDDED_COMPONENT_PLUGINS : []),
             ],
             classList: this.classList,
             onChange: this.onChange.bind(this),
@@ -220,8 +224,14 @@ export class HtmlField extends Component {
                 const { resModel, resId } = this.props.record;
                 return { resModel, resId };
             },
+            resources: {},
             ...this.props.editorConfig,
         };
+
+        if (this.props.embeddedComponents) {
+            // TODO @engagement: fill this array with default/base components
+            config.resources.embeddedComponents = MAIN_EMBEDDINGS;
+        }
 
         const { sanitize_tags, sanitize } = this.props.record.fields[this.props.name];
         if (
@@ -284,6 +294,7 @@ export const htmlField = {
             dynamicPlaceholder: options.dynamic_placeholder,
             dynamicPlaceholderModelReferenceField:
                 options.dynamic_placeholder_model_reference_field,
+            embeddedComponents: options.embedded_components,
             sandboxedPreview: Boolean(options.sandboxedPreview),
             cssReadonlyAssetId: options.cssReadonly,
             codeview: Boolean(odoo.debug && options.codeview),
