@@ -3,38 +3,33 @@
 
 <!-- Template to fill with the chosen view -->
 <template id="s_masonry_block" name="Masonry">
-    <section class="s_masonry_block" data-vcss="001" data-vxml="001">
-        <div class="container-fluid">
+    <section class="s_masonry_block pt48 pb48" data-vcss="001" data-vxml="001">
+        <div class="container">
             <t t-call="website.s_masonry_block_default_template"/>
         </div>
     </section>
 </template>
 
 <template id="s_masonry_block_default_template" groups="base.group_user">
-    <div class="row o_grid_mode" data-row-count="10">
-        <div class="o_grid_item col-lg-6 g-col-lg-6 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 1 / 1 / 11 / 7; z-index: 1;">
-            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto" alt=""/>
+    <div class="row o_grid_mode" data-row-count="8" style="gap: 1rem;">
+        <div class="o_grid_item o_grid_item_image text-center g-height-8 g-col-lg-5 col-lg-5" data-name="Block" style="z-index: 1; grid-area: 1 / 1 / 9 / 6;">
+            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto rounded-4" alt=""/>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc2" data-name="Block"
-            style="grid-area: 1 / 7 / 6 / 10; z-index: 2;" >
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item o_cc o_cc3 g-height-4 g-col-lg-4 col-lg-4 justify-content-end rounded-4" data-name="Block" style="--grid-item-padding-y: 20px; --grid-item-padding-x: 20px; z-index: 3; grid-area: 1 / 9 / 5 / 13; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-2) 100%);">
+            <h3>Greater <br class="d-none d-lg-inline"/>Impact</h3>
+            <p>Making a difference every day</p>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc3" data-name="Block"
-            style="grid-area: 1 / 10 / 6 / 13; z-index: 3;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item o_cc o_cc2 g-height-4 g-col-lg-3 col-lg-3 justify-content-end rounded-4" data-name="Block" style="--grid-item-padding-y: 20px; --grid-item-padding-x: 20px; z-index: 2; grid-area: 1 / 6 / 5 / 9;">
+            <h3>Key <br class="d-none d-lg-inline"/>Milestone</h3>
+            <p>Reaching new heights together</p>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc4" data-name="Block"
-            style="grid-area: 6 / 7 / 11 / 10; z-index: 4;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item o_cc o_cc4 g-height-4 g-col-lg-4 col-lg-4 justify-content-end rounded-4" data-name="Block" style="--grid-item-padding-y: 20px; --grid-item-padding-x: 20px; z-index: 4; grid-area: 5 / 6 / 9 / 10; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-1) 100%);">
+            <h3>Innovation <br class="d-none d-lg-inline"/>Hub</h3>
+            <p>Where ideas come to life</p>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc2" data-name="Block"
-            style="grid-area: 6 / 10 / 11 / 13; z-index: 5;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item g-col-lg-3 o_cc o_cc2 g-height-4 col-lg-3 justify-content-end rounded-4" data-name="Block" style="--grid-item-padding-y: 20px; --grid-item-padding-x: 20px; z-index: 5; grid-area: 5 / 10 / 9 / 13;">
+            <h3>Community <br class="d-none d-lg-inline"/>Focus</h3>
+            <p>Building connections</p>
         </div>
     </div>
 </template>
@@ -42,24 +37,24 @@
 <template id="s_masonry_block_reversed_template" groups="base.group_user">
     <div class="row o_grid_mode" data-row-count="10">
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc3" data-name="Block"
-            style="grid-area: 1 / 1 / 6 / 4; z-index: 1;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            style="grid-area: 1 / 1 / 6 / 4; z-index: 1; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-2) 100%);">
+            <h3>Greater <br class="d-none d-lg-inline"/>Impact</h3>
+            <p>Making a difference every day</p>
         </div>
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc2" data-name="Block"
             style="grid-area: 1 / 4 / 6 / 7; z-index: 2;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            <h3>Key <br class="d-none d-lg-inline"/>Milestone</h3>
+            <p>Reaching new heights together</p>
         </div>
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc2" data-name="Block"
             style="grid-area: 6 / 1 / 11 / 4; z-index: 3;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            <h3>Innovation <br class="d-none d-lg-inline"/>Hub</h3>
+            <p>Where ideas come to life</p>
         </div>
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc4" data-name="Block"
-            style="grid-area: 6 / 4 / 11 / 7; z-index: 4;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            style="grid-area: 6 / 4 / 11 / 7; z-index: 4; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-1) 100%);">
+            <h3>Community <br class="d-none d-lg-inline"/>Focus</h3>
+            <p>Building connections</p>
         </div>
         <div class="o_grid_item col-lg-6 g-col-lg-6 g-height-10 o_grid_item_image text-center" data-name="Block"
             style="grid-area: 1 / 7 / 11 / 13; z-index: 5;">
@@ -69,149 +64,136 @@
 </template>
 
 <template id="s_masonry_block_images_template" groups="base.group_user">
-    <div class="row o_grid_mode" data-row-count="10">
-        <div class="o_grid_item col-lg-6 g-col-lg-6 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 1 / 1 / 11 / 7; z-index: 1;">
-            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto" alt=""/>
+    <div class="row o_grid_mode" data-row-count="9" style="column-gap: 16px;">
+        <div class="o_grid_item justify-content-start o_colored_level shadow rounded-3 overflow-hidden o_cc o_cc3 o_draggable oe_img_bg o_bg_img_center g-height-9 g-col-lg-6 col-lg-6" data-name="Block" style="z-index: 1; grid-area: 1 / 7 / 10 / 13; background-image: url(/web/image/website.s_masonry_block_default_image_1); --grid-item-padding-y: 30px; --grid-item-padding-x: 30px;">
+            <div class="o_we_bg_filter bg-black-50"/>
+            <h3 class="display-4">Innovation <br class="d-none d-lg-inline"/>Hub</h3>
+            <p class="lead">Where ideas come to life</p>
         </div>
-        <div class="o_grid_item col-lg-6 g-col-lg-6 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 1 / 7 / 11 / 13; z-index: 2;">
-            <img src="/web/image/website.s_masonry_block_default_image_2" class="img img-fluid mx-auto" alt=""/>
+        <div class="o_grid_item justify-content-start o_colored_level shadow rounded-3 overflow-hidden o_cc o_cc3 o_draggable oe_img_bg o_bg_img_center g-height-9 g-col-lg-6 col-lg-6" data-name="Block" style="z-index: 2; grid-area: 1 / 1 / 10 / 7; background-image: url(/web/image/website.s_masonry_block_default_image_2); --grid-item-padding-y: 30px; --grid-item-padding-x: 30px;">
+            <div class="o_we_bg_filter bg-black-50"/>
+            <h3 class="display-4">Key <br class="d-none d-lg-inline"/>Milestone</h3>
+            <p class="lead">Reaching new heights together</p>
         </div>
     </div>
 </template>
 
 <template id="s_masonry_block_image_texts_image_template" groups="base.group_user">
     <div class="row o_grid_mode" data-row-count="10">
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 1 / 1 / 11 / 4; z-index: 1;">
+        <div class="o_grid_item g-height-10 o_grid_item_image text-center g-col-lg-3 col-lg-3" data-name="Block" style="grid-area: 1 / 9 / 11 / 12; z-index: 4;">
+            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto" alt=""/>
+        </div>
+        <div class="o_grid_item g-height-5 text-center o_cc o_cc4 g-col-lg-4 col-lg-4" data-name="Block" style="z-index: 3; grid-area: 6 / 5 / 11 / 9;">
+            <h3>Community <br class="d-none d-lg-inline"/>Focus</h3>
+            <p>Building connections</p>
+        </div>
+        <div class="o_grid_item text-center o_cc o_cc4 g-col-lg-1 g-height-5 col-lg-1 o_snippet_mobile_invisible" data-name="Block" style="z-index: 3; grid-area: 6 / 12 / 11 / 13;">
+            <h3><br/></h3>
+        </div>
+        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 o_grid_item_image text-center" data-name="Block" style="z-index: 1; grid-area: 1 / 2 / 11 / 5;">
             <img src="/web/image/website.s_masonry_block_default_image_2" class="img img-fluid mx-auto" alt=""/>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc2" data-name="Block"
-            style="grid-area: 1 / 4 / 6 / 7; z-index: 2;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item text-center o_cc o_cc3 g-col-lg-1 g-height-5 col-lg-1 o_snippet_mobile_invisible" data-name="Block" style="z-index: 2; grid-area: 1 / 1 / 6 / 2;">
+            <h3><br/></h3>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc4" data-name="Block"
-            style="grid-area: 6 / 4 / 11 / 7; z-index: 3;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
-        </div>
-        <div class="o_grid_item col-lg-6 g-col-lg-6 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 1 / 7 / 11 / 13; z-index: 4;">
-            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto" alt=""/>
+        <div class="o_grid_item g-height-5 text-center o_cc o_cc3 g-col-lg-4 col-lg-4" data-name="Block" style="z-index: 2; grid-area: 1 / 5 / 6 / 9; position: relative;">
+            <h3>Innovation <br class="d-none d-lg-inline"/>Hub</h3>
+            <p>Where ideas come to life</p>
         </div>
     </div>
 </template>
 
 <template id="s_masonry_block_mosaic_template" groups="base.group_user">
-    <div class="row o_grid_mode" data-row-count="13">
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc3" data-name="Block"
-            style="grid-area: 1 / 1 / 4 / 4; z-index: 1;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+    <div class="row o_grid_mode" data-row-count="11" style="gap: 16px;">
+        <div class="o_grid_item g-col-lg-6 o_grid_item_image text-center o_colored_level o_draggable g-height-8 col-lg-6" data-name="Block" style="grid-area: 5 / 1 / 12 / 7; z-index: 3;">
+            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto rounded-3" alt=""/>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc2" data-name="Block"
-            style="grid-area: 1 / 4 / 4 / 7; z-index: 2;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item g-col-lg-6 o_grid_item_image text-center o_colored_level g-height-8 col-lg-6" data-name="Block" style="grid-area: 2 / 7 / 9 / 13; z-index: 4;">
+            <img src="/web/image/website.s_masonry_block_default_image_2" class="img img-fluid mx-auto rounded-3" alt=""/>
         </div>
-        <div class="o_grid_item col-lg-6 g-col-lg-6 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 4 / 1 / 14 / 7; z-index: 3;">
-            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto" alt=""/>
+        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 o_cc o_cc2 o_colored_level justify-content-start rounded-3" data-name="Block" style="z-index: 2; grid-area: 2 / 4 / 5 / 7; --grid-item-padding-y: 20px; --grid-item-padding-x: 20px;">
+            <h3>Focus</h3>
+            <p>Building connections</p>
         </div>
-
-        <div class="o_grid_item col-lg-6 g-col-lg-6 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 1 / 7 / 11 / 13; z-index: 4;">
-            <img src="/web/image/website.s_masonry_block_default_image_2" class="img img-fluid mx-auto" alt=""/>
+        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 o_cc o_cc3 o_colored_level justify-content-start rounded-3" data-name="Block" style="z-index: 1; grid-area: 2 / 1 / 5 / 4; --grid-item-padding-y: 20px; --grid-item-padding-x: 20px; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-2) 100%);">
+            <h3>Innovation</h3>
+            <p>How ideas come to life</p>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc2" data-name="Block"
-            style="grid-area: 11 / 7 / 14 / 10; z-index: 5;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc2 o_colored_level rounded-3" data-name="Block" style="z-index: 5; --grid-item-padding-y: 20px; --grid-item-padding-x: 20px; grid-area: 9 / 7 / 12 / 10;">
+            <h3><span class="display-1">22&#37;</span></h3>
+            <p>Reaching new heights</p>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc4" data-name="Block"
-            style="grid-area: 11 / 10 / 14 / 13; z-index: 6;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc4 o_colored_level o_draggable rounded-3" data-name="Block" style="z-index: 6; --grid-item-padding-y: 20px; --grid-item-padding-x: 20px; grid-area: 9 / 10 / 12 / 13; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-1) 100%);">
+            <h3><span class="display-1">+12​</span><br/></h3>
+            <p>Making the difference</p>
         </div>
     </div>
 </template>
 
 <template id="s_masonry_block_texts_image_texts_template" groups="base.group_user">
-    <div class="row o_grid_mode" data-row-count="10">
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc3" data-name="Block"
-            style="grid-area: 1 / 1 / 6 / 4; z-index: 1;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+    <div class="row o_grid_mode" data-row-count="9" style="gap: 16px;">
+        <div class="o_grid_item g-col-lg-3 text-center o_cc o_cc3 o_colored_level g-height-5 col-lg-3 rounded-4" data-name="Block" style="grid-area: 1 / 1 / 6 / 4; z-index: 1; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-2) 100%);">
+            <h3>Innovation <br class="d-none d-lg-inline"/>Hub</h3>
+            <p>Where ideas come to life</p>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc2" data-name="Block"
-            style="grid-area: 6 / 1 / 11 / 4; z-index: 2;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item g-col-lg-3 text-center o_cc o_cc2 o_colored_level g-height-4 col-lg-3 rounded-4" data-name="Block" style="grid-area: 6 / 1 / 10 / 4; z-index: 2;">
+            <h3>Community <br class="d-none d-lg-inline"/>Focus</h3>
+            <p>Building connections</p>
         </div>
-
-        <div class="o_grid_item col-lg-6 g-col-lg-6 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 1 / 4 / 11 / 10; z-index: 3;">
-            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto" alt=""/>
+        <div class="o_grid_item g-col-lg-6 o_grid_item_image text-center o_colored_level g-height-9 col-lg-6" data-name="Block" style="grid-area: 1 / 4 / 10 / 10; z-index: 3;">
+            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto rounded-4" alt=""/>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc2" data-name="Block"
-            style="grid-area: 1 / 10 / 6 / 13; z-index: 4;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item g-col-lg-3 text-center o_cc o_cc2 o_colored_level g-height-4 col-lg-3 rounded-4" data-name="Block" style="grid-area: 1 / 10 / 5 / 13; z-index: 4;">
+            <h3>Key <br class="d-none d-lg-inline"/>Milestone</h3>
+            <p>Reaching new heights together</p>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-5 text-center o_cc o_cc4" data-name="Block"
-            style="grid-area: 6 / 10 / 11 / 13; z-index: 5;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item g-col-lg-3 text-center o_cc o_cc4 o_colored_level g-height-5 col-lg-3 rounded-4" data-name="Block" style="grid-area: 5 / 10 / 10 / 13; z-index: 5; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-1) 100%);">
+            <h3>Greater <br class="d-none d-lg-inline"/>Impact</h3>
+            <p>Making a difference every day</p>
         </div>
     </div>
 </template>
 
 <template id="s_masonry_block_alternation_text_template" groups="base.group_user">
-    <div class="row o_grid_mode" data-row-count="3">
+    <div class="row o_grid_mode" data-row-count="3" style="gap: 0 16px;">
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc2" data-name="Block"
             style="grid-area: 1 / 1 / 4 / 4; z-index: 1;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            <h3 class="h4-fs">Innovation Hub</h3>
+            <p>Where ideas come to life</p>
         </div>
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc4" data-name="Block"
-            style="grid-area: 1 / 4 / 4 / 7; z-index: 2;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            style="grid-area: 1 / 4 / 4 / 7; z-index: 2; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-1) 100%);">
+            <h3 class="h4-fs">Community Focus</h3>
+            <p>Building connections</p>
         </div>
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc2" data-name="Block"
             style="grid-area: 1 / 7 / 4 / 10; z-index: 3;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            <h3 class="h4-fs">Key Milestone</h3>
+            <p>Reaching new heights together</p>
         </div>
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-2 text-center o_cc o_cc3" data-name="Block"
-            style="grid-area: 1 / 10 / 4 / 13; z-index: 4;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            style="grid-area: 1 / 10 / 4 / 13; z-index: 4; background-image: linear-gradient(135deg, var(--o-color-4) -400%, var(--o-color-2) 100%);">
+            <h3 class="h4-fs">Greater Impact</h3>
+            <p>Making a difference every day</p>
         </div>
     </div>
 </template>
 
 <template id="s_masonry_block_alternation_text_image_template" groups="base.group_user">
-    <div class="row o_grid_mode" data-row-count="10">
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 text-center o_cc o_cc2" data-name="Block"
-            style="grid-area: 1 / 1 / 11 / 4; z-index: 1;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+    <div class="row o_grid_mode" data-row-count="4" style="gap: 16px;">
+        <div class="o_grid_item g-col-lg-3 o_cc o_cc2 o_colored_level rounded g-height-4 col-lg-3 justify-content-start" data-name="Block" style="z-index: 1; grid-area: 1 / 1 / 5 / 4; --grid-item-padding-y: 20px;">
+            <h3 class="h4-fs">Increadible <br class="d-none d-lg-inline"/>Features</h3>
+            <p>&#160;</p>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 1 / 4 / 11 / 7; z-index: 2;">
-            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto" alt=""/>
+        <div class="o_grid_item g-col-lg-3 o_grid_item_image o_colored_level rounded g-height-4 col-lg-3" data-name="Block" style="z-index: 2; grid-area: 1 / 4 / 5 / 7;">
+            <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto rounded" alt=""/>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 text-center o_cc o_cc2" data-name="Block"
-            style="grid-area: 1 / 7 / 11 / 10; z-index: 3;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item g-col-lg-3 o_cc o_cc2 o_colored_level rounded g-height-4 col-lg-3 justify-content-start" data-name="Block" style="z-index: 3; grid-area: 1 / 7 / 5 / 10; --grid-item-padding-y: 20px; --grid-item-padding-x: 20px;">
+            <h3 class="h4-fs">Advanced <br class="d-none d-lg-inline"/>Capabilities</h3>
+            <p>&#160;</p>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 o_grid_item_image text-center" data-name="Block"
-            style="grid-area: 1 / 10 / 11 / 13; z-index: 4;">
-            <img src="/web/image/website.s_masonry_block_default_image_2" class="img img-fluid mx-auto" alt=""/>
+        <div class="o_grid_item g-col-lg-3 o_grid_item_image o_colored_level rounded g-height-4 col-lg-3" data-name="Block" style="z-index: 4; grid-area: 1 / 10 / 5 / 13;">
+            <img src="/web/image/website.s_masonry_block_default_image_2" class="img img-fluid mx-auto rounded" alt=""/>
         </div>
     </div>
 </template>
@@ -222,19 +204,19 @@
             style="grid-area: 1 / 1 / 11 / 4; z-index: 1;">
             <img src="/web/image/website.s_masonry_block_default_image_1" class="img img-fluid mx-auto" alt=""/>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 text-center o_cc o_cc4" data-name="Block"
-            style="grid-area: 1 / 4 / 11 / 7; z-index: 2;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 text-center o_draggable o_colored_level o_cc o_cc2" data-name="Block" style="grid-area: 1 / 4 / 11 / 7; z-index: 2; position: relative;" data-oe-shape-data="{&quot;shape&quot;:&quot;web_editor/Floats/05&quot;,&quot;flip&quot;:[],&quot;showOnMobile&quot;:false,&quot;shapeAnimationSpeed&quot;:&quot;0&quot;,&quot;animated&quot;:&quot;true&quot;}">
+            <div class="o_we_shape o_web_editor_Floats_05 o_we_animated"/>
+            <h3 class="h2-fs">Innovation Hub</h3>
+            <p>Where ideas come to life</p>
         </div>
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 o_grid_item_image text-center" data-name="Block"
             style="grid-area: 1 / 7 / 11 / 10; z-index: 3;">
             <img src="/web/image/website.s_masonry_block_default_image_2" class="img img-fluid mx-auto" alt=""/>
         </div>
-        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 text-center o_cc o_cc3" data-name="Block"
-            style="grid-area: 1 / 10 / 11 / 13; z-index: 4;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+        <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 text-center o_colored_level o_draggable o_cc o_cc2" data-name="Block" style="grid-area: 1 / 10 / 11 / 13; z-index: 4; position: relative;" data-oe-shape-data="{&quot;shape&quot;:&quot;web_editor/Floats/01&quot;,&quot;flip&quot;:[],&quot;showOnMobile&quot;:false,&quot;shapeAnimationSpeed&quot;:&quot;0&quot;,&quot;animated&quot;:&quot;true&quot;}">
+            <div class="o_we_shape o_web_editor_Floats_01 o_we_animated"/>
+            <h3 class="h2-fs">Key Milestone</h3>
+            <p>Reaching new heights together</p>
         </div>
     </div>
 </template>
@@ -243,8 +225,8 @@
     <div class="row o_grid_mode" data-row-count="10">
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 text-center o_cc o_cc2" data-name="Block"
             style="grid-area: 1 / 1 / 11 / 4; z-index: 1;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            <h3 class="h2-fs">Innovation Hub</h3>
+            <p>Where ideas come to life</p>
         </div>
         <div class="o_grid_item col-lg-6 g-col-lg-6 g-height-10 o_grid_item_image text-center" data-name="Block"
             style="grid-area: 1 / 4 / 11 / 10; z-index: 2;">
@@ -252,8 +234,8 @@
         </div>
         <div class="o_grid_item col-lg-3 g-col-lg-3 g-height-10 text-center o_cc o_cc2" data-name="Block"
             style="grid-area: 1 / 10 / 11 / 13; z-index: 3;">
-            <h3>A great title</h3>
-            <p>And a great subtitle</p>
+            <h3 class="h2-fs">Key Milestone</h3>
+            <p>Reaching new heights together</p>
         </div>
     </div>
 </template>
@@ -307,6 +289,23 @@
                     data-select-data-attribute="alternate_text_image_text"
                     data-img="/website/static/src/img/snippets_options/masonry_template_alternate_text_image_text.svg"/>
             </we-select>
+        </div>
+    </xpath>
+
+    <!--  Box Vertical Alignment -->
+    <xpath expr="//div[@data-js='WebsiteAnimate']" position="after">
+        <div data-selector=".s_masonry_block .o_grid_item">
+            <we-button-group string="Vert. Alignment" title="Vertical Alignment">
+                <we-button title="Align Top"
+                        data-select-class="justify-content-start"
+                        data-img="/website/static/src/img/snippets_options/align_top.svg"/>
+                <we-button title="Align Middle"
+                        data-select-class="justify-content-center"
+                        data-img="/website/static/src/img/snippets_options/align_middle.svg"/>
+                <we-button title="Align Bottom"
+                        data-select-class="justify-content-end"
+                        data-img="/website/static/src/img/snippets_options/align_bottom.svg"/>
+            </we-button-group>
         </div>
     </xpath>
 </template>
