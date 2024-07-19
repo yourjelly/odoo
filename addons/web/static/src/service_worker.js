@@ -28,12 +28,72 @@ const navigateOrDisplayOfflinePage = async (request) => {
     }
 };
 
+const serveShareTarget = (event) => {
+    // Redirect so the user can refresh the page without resending data.
+    event.respondWith(Response.redirect("/odoo?share_target=trigger"));
+    event.waitUntil(
+        (async () => {
+            // The page sends this message to tell the service worker it's ready to receive the file.
+            await waitingMessage("odoo_share_target");
+            const client = await self.clients.get(event.resultingClientId || event.clientId);
+            const data = await event.request.formData();
+            client.postMessage({
+                shared: {
+                    title: data.get("title") || "",
+                    text: data.get("text") || "",
+                    url: data.get("url") || "",
+                    externalMediaFiles: data.getAll("externalMedia") || [],
+                },
+                action: "odoo_share_target_ack",
+            });
+        })()
+    );
+};
+
 self.addEventListener("fetch", (event) => {
+    const { pathname, searchParams } = new URL(event.request.url);
+    if (
+        pathname === "/odoo" &&
+        event.request.method === "POST" &&
+        searchParams.has("share_target")
+    ) {
+        serveShareTarget(event);
+        return;
+    }
     if (
         (event.request.mode === "navigate" && event.request.destination === "document") ||
         // request.mode = navigate isn't supported in all browsers => check for http header accept:text/html
         event.request.headers.get("accept").includes("text/html")
     ) {
         event.respondWith(navigateOrDisplayOfflinePage(event.request));
+    }
+});
+
+/**
+ *
+ * @type {Map<String, Function[]>}
+ */
+const nextMessageMap = new Map();
+/**
+ *
+ * @param message : string
+ * @return {Promise}
+ */
+const waitingMessage = async (message) => {
+    return new Promise((resolve) => {
+        if (!nextMessageMap.has(message)) {
+            nextMessageMap.set(message, []);
+        }
+        nextMessageMap.get(message).push(resolve);
+    });
+};
+
+self.addEventListener("message", (event) => {
+    const messageNotifiers = nextMessageMap.get(event.data);
+    if (messageNotifiers) {
+        for (const messageNotified of messageNotifiers) {
+            messageNotified();
+        }
+        nextMessageMap.delete(event.data);
     }
 });
