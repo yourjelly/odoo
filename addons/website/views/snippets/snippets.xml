@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<!-- Snippets menu -->
+<!-- Snippets menu --> 
 <template id="snippets" inherit_id="web_editor.snippets" primary="True" groups="base.group_user">
     <xpath expr="//t[@id='default_snippets']" position="replace">
         <t id="default_snippets">
