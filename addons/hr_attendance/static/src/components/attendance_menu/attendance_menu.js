@@ -54,6 +54,12 @@ export class ActivityMenu extends Component {
 
     async signInOut() {
         // iOS app lacks permissions to call `getCurrentPosition`
+        const result = await this.rpc("/hr_attendance/attendance_user_data");
+        this.employee = result;
+        if (!this.employee.id) {
+            this.state.isDisplayed = false;
+            return;
+        }
         if (!isIosApp()) {
             navigator.geolocation.getCurrentPosition(
                 async ({coords: {latitude, longitude}}) => {
