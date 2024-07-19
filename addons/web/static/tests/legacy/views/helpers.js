@@ -10,6 +10,7 @@ import { View, getDefaultConfig } from "@web/views/view";
 import {
     fakeCompanyService,
     makeFakeLocalizationService,
+    makeFakeShareTargetService,
     patchUserWithCleanup,
 } from "../helpers/mock_services";
 import {
@@ -118,5 +119,6 @@ export function setupViewRegistries() {
     setupControlPanelServiceRegistry();
     patchUserWithCleanup({ hasGroup: async (group) => group === "base.group_allow_export" });
     serviceRegistry.add("localization", makeFakeLocalizationService());
+    serviceRegistry.add("share_target", makeFakeShareTargetService());
     serviceRegistry.add("company", fakeCompanyService);
 }

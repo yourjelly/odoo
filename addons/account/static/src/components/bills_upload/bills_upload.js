@@ -14,8 +14,9 @@ import { KanbanDropdownMenuWrapper } from "@web/views/kanban/kanban_dropdown_men
 import { KanbanRecord } from "@web/views/kanban/kanban_record";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { useShareTarget } from "@web/webclient/share_target/share_target_hook";
 
-import { Component, useState, onWillStart, useSubEnv, reactive, markup } from "@odoo/owl";
+import { Component, useState, onWillStart, useSubEnv, reactive, markup, useEffect } from "@odoo/owl";
 
 export class AccountFileUploader extends Component {
     static template = "account.AccountFileUploader";
@@ -167,12 +168,28 @@ export class AccountDropZone extends Component {
     setup() {
         this.notificationService = useService("notification");
         this.dashboardState = useState(this.env.dashboardState || {});
+        this.selector = '.account_file_uploader.o_input_file';
+
+        useEffect((files, el) => {
+            if (el && files?.length) {
+                const input = el.querySelector(this.selector);
+                const dataTransfer = new DataTransfer();
+                for (const file of files) {
+                    dataTransfer.items.add(file);
+                }
+
+                input.files = dataTransfer.files;
+                input.dispatchEvent(new Event("change"));
+                this.env.dashboardState.shareTargetFiles = [];
+                this.env.dashboardState.selectedShareTargetElement = null;
+                this.env.disableDragging();
+            }
+        }, () => [this.dashboardState.shareTargetFiles, this.dashboardState.selectedShareTargetElement]);
     }
 
     onDrop(ev) {
-        const selector = '.account_file_uploader.o_input_file';
         // look for the closest uploader Input as it may have a context
-        let uploadInput = ev.target.closest('.o_drop_area').parentElement.querySelector(selector) || document.querySelector(selector);
+        let uploadInput = ev.target.closest('.o_drop_area').parentElement.querySelector(this.selector) || document.querySelector(this.selector);
         let files = ev.dataTransfer ? ev.dataTransfer.files : false;
         if (uploadInput && !!files) {
             uploadInput.files = ev.dataTransfer.files;
@@ -299,12 +316,19 @@ export class DashboardKanbanRecord extends KanbanRecord {
             this.allowDrop = this.recordDropSettings.group ? await user.hasGroup(this.recordDropSettings.group) : true;
         });
         this.dropzoneState = useState({
-            visible: false,
+            visible: !!this.env.dashboardState.shareTargetFiles.length,
         });
     }
 
     get recordDropSettings() {
         return JSON.parse(this.props.record.data.kanban_dashboard).drag_drop_settings;
+    }
+
+    onGlobalClick() {
+        if (!this.env.dashboardState.shareTargetFiles.length) {
+            return super.onGlobalClick(...arguments);
+        }
+        this.env.dashboardState.selectedShareTargetElement = this.rootRef.el;
     }
 
     get dropzoneProps() {
@@ -328,8 +352,16 @@ export class DashboardKanbanRenderer extends KanbanRenderer {
     setup() {
         super.setup();
         useSubEnv({
-            dashboardState: reactive({isDragging: false}),
+            dashboardState: reactive({
+                isDragging: false,
+                shareTargetFiles: [],
+                selectedShareTargetElement: null
+            }),
             disableDragging: this.disableDragging.bind(this),
+        });
+        useShareTarget("accounting", (files) => {
+            this.env.dashboardState.shareTargetFiles = files;
+            this.env.dashboardState.isDragging = true;
         });
     }
     kanbanDragEnter(e) {

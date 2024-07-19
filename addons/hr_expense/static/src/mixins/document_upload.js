@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { useBus, useRefListener, useService } from '@web/core/utils/hooks';
 import { useRef, useEffect, useState } from "@odoo/owl";
+import { useShareTarget } from "@web/webclient/share_target/share_target_hook";
 
 export const ExpenseDocumentDropZone = (T) => class ExpenseDocumentDropZone extends T {
     static props = [
@@ -79,6 +80,7 @@ export const ExpenseDocumentUpload = (T) => class ExpenseDocumentUpload extends 
             this.fileInput.el.files = ev.detail.files;
             await this.onChangeFileInput();
         });
+        useShareTarget("expense", (files) => this._onChangeFileInput(files));
     }
 
     displayCreateReport() {
@@ -101,9 +103,13 @@ export const ExpenseDocumentUpload = (T) => class ExpenseDocumentUpload extends 
     }
 
     async onChangeFileInput() {
+        await this._onChangeFileInput([...this.fileInput.el.files]);
+    }
+
+    async _onChangeFileInput(ufile) {
         const params = {
             csrf_token: odoo.csrf_token,
-            ufile: [...this.fileInput.el.files],
+            ufile,
             model: 'hr.expense',
             id: 0,
         };
@@ -113,7 +119,7 @@ export const ExpenseDocumentUpload = (T) => class ExpenseDocumentUpload extends 
         if (attachments.error) {
             throw new Error(attachments.error);
         }
-        this.onUpload(attachments);
+        await this.onUpload(attachments);
     }
 
     async onUpload(attachments) {

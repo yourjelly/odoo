@@ -41,6 +41,25 @@ class WebManifest(http.Controller):
                 })
         return shortcuts
 
+    def _has_share_target(self):
+        return False
+
+    def _get_share_target(self):
+        return {
+            'action': '/odoo?share_target=trigger',
+            'method': 'POST',
+            'enctype': 'multipart/form-data',
+            'params': {
+                'title': 'title',
+                'text': 'text',
+                'url': 'url',
+                'files': [{
+                    'name': 'externalMedia',
+                    'accept': ['image/*', 'application/pdf'],
+                }]
+            }
+        }
+
     @http.route('/web/manifest.webmanifest', type='http', auth='public', methods=['GET'])
     def webmanifest(self):
         """ Returns a WebManifest describing the metadata associated with a web application.
@@ -64,6 +83,8 @@ class WebManifest(http.Controller):
             'type': 'image/png',
         } for size in icon_sizes]
         manifest['shortcuts'] = self._get_shortcuts()
+        if self._has_share_target():
+            manifest['share_target'] = self._get_share_target()
         body = json.dumps(manifest)
         response = request.make_response(body, [
             ('Content-Type', 'application/manifest+json'),

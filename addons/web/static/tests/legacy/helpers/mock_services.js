@@ -315,6 +315,24 @@ function makeFakeActionService() {
     };
 }
 
+export function makeFakeShareTargetService() {
+    return {
+        start() {
+            return {
+                hasSharedFiles()  {
+                    return false;
+                },
+                selectedApp() {
+                    return null;
+                },
+                getSharedFilesToUpload() {
+                    return null;
+                },
+            };
+        },
+    };
+}
+
 export const mocks = {
     color_scheme: () => fakeColorSchemeService,
     company: () => fakeCompanyService,

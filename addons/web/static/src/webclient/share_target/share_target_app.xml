@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web.ShareTargetApp">
+        <div class="d-flex flex-column align-items-center justify-content-center p-2" t-on-click="() => this.process()">
+            <img class="o_app_icon rounded-3" t-att-src="icon" t-att-alt="name" />
+            <t t-out="name" />
+        </div>
+    </t>
+</templates>

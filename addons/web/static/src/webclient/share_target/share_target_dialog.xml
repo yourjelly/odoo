@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web.ShareTargetDialog">
+        <Dialog title="title" footer="false" withBodyPadding="false">
+            <div role="alert" class="alert alert-secondary text-center mt-4">
+                Select what you want to create from the <t t-out="props.files.length"/> file(s)
+                <button type="button" data-bs-dismiss="alert" aria-label="Discard" t-on-click="() => this.discard()">
+                    Discard
+                </button>
+            </div>
+
+            <div class="d-flex flex-wrap align-center justify-content-center">
+                <t t-foreach="props.shareTargetApps" t-as="app" t-key="app.xmlid">
+                    <ShareTargetApp files="props.files" shareTargetApp="app" onSelectApp="props.onSelectApp"/>
+                </t>
+            </div>
+        </Dialog>
+    </t>
+</templates>
