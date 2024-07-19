@@ -796,15 +796,7 @@ class ProductCategory(models.Model):
 
     @api.constrains(lambda self: tuple(self._get_stock_account_property_field_names() + ['property_valuation']))
     def _check_valuation_accounts(self):
-        fnames = self._get_stock_account_property_field_names()
         for category in self:
-            # "compute" properties in constraint because ORM doesn't support computed properties
-            for property_field in fnames:
-                category[property_field] = category.property_valuation == 'real_time' and (
-                    category[property_field]
-                    or self.env['ir.property']._get(property_field, 'product.category')
-                )
-
             # Prevent to set the valuation account as the input or output account.
             valuation_account = category.property_stock_valuation_account_id
             input_and_output_accounts = category.property_stock_account_input_categ_id | category.property_stock_account_output_categ_id
@@ -869,6 +861,19 @@ class ProductCategory(models.Model):
             }
         }
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        fnames = self._get_stock_account_property_field_names()
+        defaults = {fname: self.env['ir.property']._get(fname, 'product.category') for fname in fnames}
+        for vals in vals_list:
+            if vals.get('property_valuation') == 'real_time':
+                for fname in fnames:
+                    vals[fname] = vals.get(fname) or defaults[fname]
+            else:
+                for fname in fnames:
+                    vals.pop(fname, None)
+        return super().create(vals_list)
+
     def write(self, vals):
         impacted_categories = {}
         move_vals_list = []
@@ -906,7 +911,25 @@ class ProductCategory(models.Model):
                     move_vals_list += Product._svl_empty_stock_am(out_stock_valuation_layers)
                 impacted_categories[product_category] = (products, description, products_orig_quantity_svl)
 
-        res = super(ProductCategory, self).write(vals)
+        property_field_names = self._get_stock_account_property_field_names()
+        defaults = {fname: self.env['ir.property']._get(fname, 'product.category') for fname in property_field_names}
+        if 'property_valuation' in vals:
+            if vals['property_valuation'] == 'real_time':
+                for record in self:
+                    vals_extra = {fname: vals.get(fname, record[fname]) or defaults[fname] for fname in property_field_names}
+                    super(ProductCategory, record).write({**vals, **vals_extra})
+            else:
+                vals_extra = dict.fromkeys(property_field_names, False)
+                super().write({**vals, **vals_extra})
+        elif any(fname in vals for fname in property_field_names):
+            for is_real_time, records in self.grouped(lambda r: r.property_valuation == 'real_time').items():
+                if is_real_time:
+                    vals_extra = {fname: vals[fname] or defaults[fname] for fname in property_field_names if fname in vals}
+                else:
+                    vals_extra = dict.fromkeys(property_field_names, False)
+                super(ProductCategory, records).write({**vals, **vals_extra})
+        else:
+            super().write(vals)
 
         for product_category, (products, description, products_orig_quantity_svl) in impacted_categories.items():
             # Replenish the stock with the new cost method.
@@ -922,4 +945,4 @@ class ProductCategory(models.Model):
         if move_vals_list:
             account_moves = self.env['account.move'].sudo().create(move_vals_list)
             account_moves._post()
-        return res
+        return True
