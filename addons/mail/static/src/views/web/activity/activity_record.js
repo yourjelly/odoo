@@ -4,6 +4,7 @@ import { Component } from "@odoo/owl";
 
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { user } from "@web/core/user";
+import { useMiddleClick } from "@web/core/utils/middle_click_hook";
 import { Field } from "@web/views/fields/field";
 import {
     getFormattedRecord,
@@ -33,6 +34,13 @@ export class ActivityRecord extends Component {
         const { templateDocs } = this.props.archInfo;
         const templates = useViewCompiler(ActivityCompiler, templateDocs);
         this.recordTemplate = templates["activity-box"];
+        useMiddleClick({
+            clickParams: {
+                onCtrlClick: () => {
+                    this.props.openRecord(this.props.record);
+                },
+            },
+        });
     }
 
     getRenderingContext() {

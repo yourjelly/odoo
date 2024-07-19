@@ -6,6 +6,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
+import { useMiddleClick } from "@web/core/utils/middle_click_hook";
 import { imageUrl } from "@web/core/utils/urls";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { Field } from "@web/views/fields/field";
@@ -221,6 +222,16 @@ export class KanbanRecord extends Component {
         useRecordObserver((record) =>
             Object.assign(this.dataState.record, getFormattedRecord(record))
         );
+        useMiddleClick({
+            clickParams: {
+                onCtrlClick:
+                    !this.props.forceGlobalClick && this.props.archInfo.openAction
+                        ? () => this.onGlobalClick()
+                        : undefined,
+                record: this.props.record,
+            },
+            refName: "root",
+        });
         this.rootRef = useRef("root");
     }
 
@@ -297,7 +308,7 @@ export class KanbanRecord extends Component {
      * @param {MouseEvent} ev
      */
     onGlobalClick(ev) {
-        if (ev.target.closest(CANCEL_GLOBAL_CLICK)) {
+        if (ev?.target.closest(CANCEL_GLOBAL_CLICK)) {
             return;
         }
         const { archInfo, forceGlobalClick, openRecord, record } = this.props;
