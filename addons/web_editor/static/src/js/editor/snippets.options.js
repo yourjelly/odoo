@@ -2287,8 +2287,8 @@ class MediapickerUserValue extends UserValue {
             isForBgVideo: true,
             vimeoPreviewIds: ['528686125', '430330731', '509869821', '397142251', '763851966', '486931161',
                 '499761556', '392935303', '728584384', '865314310', '511727912', '466830211'],
-            'res_model': editableEl.dataset.oeModel,
-            'res_id': editableEl.dataset.oeId,
+            'res_model': editableEl ? editableEl.dataset.oeModel : null,
+            'res_id': editableEl ? editableEl.dataset.oeId : null,
             save,
             media: el,
         });
