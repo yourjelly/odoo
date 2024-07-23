@@ -2685,7 +2685,12 @@ options.registry.TopMenuVisibility = VisibilityPageOptionUpdate.extend({
     },
 });
 
-options.registry.topMenuColor = options.Class.extend({
+export class TopMenuColor extends SnippetOption {
+
+    constructor({ options }) {
+        super(...arguments);
+        this.wysiwyg = options.wysiwyg;
+    }
 
     //--------------------------------------------------------------------------
     // Options
@@ -2695,19 +2700,12 @@ options.registry.topMenuColor = options.Class.extend({
      * @override
      */
     async selectStyle(previewMode, widgetValue, params) {
-        await this._super(...arguments);
+        await super.selectStyle(...arguments);
         if (widgetValue && !isCSSColor(widgetValue)) {
             widgetValue = params.colorPrefix + widgetValue;
         }
-        await new Promise((resolve, reject) => {
-            this.trigger_up('action_demand', {
-                actionName: 'toggle_page_option',
-                params: [{name: params.pageOptionName, value: widgetValue}],
-                onSuccess: resolve,
-                onFailure: reject,
-            });
-        });
-    },
+        this.wysiwyg.togglePageOption(params.pageOptionName, widgetValue);
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -2716,20 +2714,20 @@ options.registry.topMenuColor = options.Class.extend({
     /**
      * @override
      */
-    _computeVisibility: async function () {
-        const show = await this._super(...arguments);
+    async _computeVisibility() {
+        const show = await super._computeVisibility(...arguments);
         if (!show) {
             return false;
         }
-        return new Promise((resolve, reject) => {
-            this.trigger_up('action_demand', {
-                actionName: 'get_page_option',
-                params: ['header_overlay'],
-                onSuccess: value => resolve(!!value),
-                onFailure: reject,
-            });
-        });
-    },
+        return !!this.wysiwyg.getPageOption("header_overlay");
+    }
+}
+
+registerWebsiteOption("TopMenuColor", {
+    Class: TopMenuColor,
+    template: "website.TopMenuColor",
+    selector: "[data-main-object^='website.page('] #wrapwrap > header",
+    noCheck: true,
 });
 
 /**
