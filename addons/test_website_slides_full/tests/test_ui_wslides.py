@@ -168,4 +168,4 @@ class TestUi(AccountTestInvoicingCommon, TestUICommon):
             ]
         })
 
-        self.start_tour('/slides', 'certification_member', login=user_demo.login, timeout=90)
+        self.start_tour('/slides', 'certification_member', login=user_demo.login)
