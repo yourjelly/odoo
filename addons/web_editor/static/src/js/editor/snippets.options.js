@@ -5074,12 +5074,12 @@ class TestOption extends SnippetOption {
         return super._computeWidgetState(...arguments);
     }
 }
-
-registerOption("test_option", {
-    Class: TestOption,
-    template: "web_editor.TestSnippetOption",
-    selector: "section",
-});
+// TODO: @owl-options remove this or include it in some tests?
+//registerOption("test_option", {
+//    Class: TestOption,
+//    template: "web_editor.TestSnippetOption",
+//    selector: "section",
+//});
 
 const legacyRegistry = {};
 
