@@ -102,6 +102,7 @@ class TestPayWithGiftCard(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '10% discount',
             })],
         })
         self.assertEqual(order.amount_total, 100)
@@ -143,6 +144,7 @@ class TestPayWithGiftCard(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '10% discount',
             })],
         })
         self.assertEqual(order.amount_total, 100)
@@ -170,6 +172,7 @@ class TestPayWithGiftCard(TestSaleCouponCommon):
                 'discount': 1,
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
+                'description': '$1 discount per point',
             })]
         })
         self.assertFalse(gift_card_program.reward_ids.discount_line_product_id.taxes_id)

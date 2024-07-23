@@ -33,6 +33,7 @@ class TestWebsiteSaleAutoInvoice(WebsiteSaleCommon):
             'reward_ids': [
                 Command.create({
                     'discount': 100,
+                    'description': 'Discount Coupon',
                 })
             ]
             }

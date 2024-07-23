@@ -28,6 +28,7 @@ class TestPoSSaleLoyalty(TestPointOfSaleHttpCommon):
                     'required_points': 1000,
                     'discount_mode': 'percent',
                     'discount_applicability': 'order',
+                    'description': '1% discount on your order',
                 }),
             ],
         })

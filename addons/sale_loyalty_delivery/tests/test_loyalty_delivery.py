@@ -48,6 +48,7 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
                 'discount': 1,
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
+                'description': 'Gift Card',
             })]
         })
         self.env['loyalty.generate.wizard'].with_context(active_id=program_gift_card.id).create({
@@ -90,6 +91,7 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
                 'discount': 1,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': 'eWallet Reward',
             })],
         })
         self.env['loyalty.generate.wizard'].with_context(active_id=program_ewallet.id).create({
@@ -129,6 +131,7 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
                 'discount': 90,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '90% discount on your order',
             })]
         })
 

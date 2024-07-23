@@ -67,6 +67,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
             })],
             'reward_ids': [(0, 0, {
                 'reward_type': 'shipping',
+                'description': 'Free Shipping',
             })],
         })
 
@@ -145,6 +146,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
             })],
             'reward_ids': [(0, 0, {
                 'reward_type': 'shipping',
+                'description': 'Free Shipping',
             })]
         })
         p_2 = self.env['loyalty.program'].create({
@@ -158,6 +160,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount',
             })]
         })
         programs = (p_minimum_threshold_free_delivery | p_2)
@@ -210,6 +213,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
             })],
             'reward_ids': [(0, 0, {
                 'reward_type': 'shipping',
+                'description': 'Free Shipping',
             })],
         })
         p_2 = self.env['loyalty.program'].create({
@@ -224,6 +228,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
                 'reward_product_id': self.iPadMini.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         programs = (p_1 | p_2)
@@ -273,6 +278,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
                 'discount': 20,
                 'discount_mode': 'percent',
                 'discount_applicability': 'cheapest',
+                'description': '20% discount',
             })]
         })
         self._auto_rewards(order, programs)
@@ -299,6 +305,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
             'reward_ids': [(0, 0, {
                 'reward_type': 'shipping',
                 'required_points': 100,
+                'description': 'Free Shipping',
             })],
         })
         # Add points to a partner to trigger the promotion
@@ -332,6 +339,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount on your order',
             })]
         })
         product = self.env['product.product'].create({
@@ -375,6 +383,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
                 'discount_mode': 'percent',
                 'discount': 10.0,
                 'discount_applicability': 'order',
+                'description': '10% discount on your order',
             })],
         })
 
@@ -412,6 +421,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
             })],
             'reward_ids': [(0, 0, {
                 'reward_type': 'shipping',
+                'description': 'Free Shipping',
             })],
         })
         programs = (p_1)

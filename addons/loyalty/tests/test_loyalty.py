@@ -17,7 +17,7 @@ class TestLoyalty(TransactionCase):
         super().setUpClass()
         cls.program = cls.env['loyalty.program'].create({
             'name': 'Test Program',
-            'reward_ids': [(0, 0, {})],
+            'reward_ids': [(0, 0, {'description': 'Reward'})],
         })
 
     def test_loyalty_program_default_values(self):
@@ -174,6 +174,7 @@ class TestLoyalty(TransactionCase):
         })
         reward = self.env['loyalty.reward'].create({
             'program_id': self.program.id,
+            'description': 'Reward Coupon',
             'discount_line_product_id': product.id,
         })
         self.program.write({

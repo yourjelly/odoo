@@ -28,6 +28,7 @@ class TestUnlinkReward(TestSaleCouponCommon):
         cls.reward = cls.env['loyalty.reward'].create({
             'program_id': cls.promotion_program.id,
             'reward_type': 'discount',
+            'description': 'Discount Coupon',
         })
 
     def test_sale_unlink_reward(self):
