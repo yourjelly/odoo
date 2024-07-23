@@ -21,12 +21,12 @@ class MailMessage(models.Model):
         for message in self:
             message.parent_body = message.parent_id.body if message.parent_id else False
 
-    def _to_store(self, store: Store, **kwargs):
+    def _to_store(self, store: Store, /, *, fields=None, **kwargs):
         """If we are currently running a chatbot.script, we include the information about
         the chatbot.message related to this mail.message.
         This allows the frontend display to include the additional features
         (e.g: Show additional buttons with the available answers for this step)."""
-        super()._to_store(store, **kwargs)
+        super()._to_store(store, fields=fields, **kwargs)
         channel_messages = self.filtered(lambda message: message.model == "discuss.channel")
         channel_by_message = channel_messages._record_by_message()
         for message in channel_messages.filtered(

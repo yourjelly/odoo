@@ -512,7 +512,7 @@ GROUP BY fol.id%s%s""" % (
 
         return new, update
 
-    def _to_store(self, store: Store, fields=None):
+    def _to_store(self, store: Store, /, *, fields=None):
         if fields is None:
             fields = {
                 "display_name": True,

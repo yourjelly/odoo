@@ -100,21 +100,20 @@ class LinkPreview(models.Model):
             preview = self.env['mail.link.preview'].create(preview_values)
         return preview
 
-    def _to_store(self, store: Store, /):
+    def _to_store(self, store: Store, /, *, fields=None):
+        if fields is None:
+            fields = [
+                "image_mimetype",
+                "og_description",
+                "og_image",
+                "og_mimetype",
+                "og_site_name",
+                "og_title",
+                "og_type",
+                "source_url",
+            ]
         for preview in self:
-            data = preview._read_format(
-                [
-                    "image_mimetype",
-                    "og_description",
-                    "og_image",
-                    "og_mimetype",
-                    "og_site_name",
-                    "og_title",
-                    "og_type",
-                    "source_url",
-                ],
-                load=False,
-            )[0]
+            data = preview._read_format(fields, load=False)[0]
             data["message"] = Store.one(preview.message_id, only_id=True)
             store.add(preview, data)
 

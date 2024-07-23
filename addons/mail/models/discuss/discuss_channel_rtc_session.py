@@ -136,9 +136,11 @@ class MailRtcSession(models.Model):
         for target, payload in payload_by_target.items():
             target._bus_send("discuss.channel.rtc.session/peer_notification", payload)
 
-    def _to_store(self, store: Store, extra=False):
+    def _to_store(self, store: Store, /, *, fields=None, extra=False):
+        if fields is None:
+            fields = []
         for rtc_session in self:
-            data = rtc_session._read_format([], load=False)[0]
+            data = rtc_session._read_format(fields, load=False)[0]
             data["channelMember"] = Store.one(
                 rtc_session.channel_member_id,
                 fields={"channel": [], "persona": ["name", "im_status"]},

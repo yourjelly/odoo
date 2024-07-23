@@ -785,10 +785,10 @@ class Channel(models.Model):
         channels += self.env["discuss.channel"].search(pinned_member_domain)
         return channels
 
-    def _channel_basic_info(self):
+    def _channel_basic_info(self, /, *, fields=None):
         self.ensure_one()
-        data = self._read_format(
-            [
+        if fields is None:
+            fields = [
                 "allow_public_upload",
                 "channel_type",
                 "create_uid",
@@ -796,9 +796,8 @@ class Channel(models.Model):
                 "last_interest_dt",
                 "name",
                 "uuid",
-            ],
-            load=False,
-        )[0]
+            ]
+        data = self._read_format(fields, load=False)[0]
         data["authorizedGroupFullName"] = self.group_public_id.full_name
         data["avatarCacheKey"] = self.avatar_cache_key
         data["defaultDisplayMode"] = self.default_display_mode
@@ -806,7 +805,7 @@ class Channel(models.Model):
         data["memberCount"] = self.member_count
         return data
 
-    def _to_store(self, store: Store):
+    def _to_store(self, store: Store, /, *, fields=None):
         """Adds channel data to the given store."""
         if not self:
             return []
@@ -846,7 +845,7 @@ class Channel(models.Model):
                 member_of_current_user_by_channel[member.channel_id] = member
         for channel in self:
             member = member_of_current_user_by_channel.get(channel, self.env['discuss.channel.member']).with_prefetch([m.id for m in member_of_current_user_by_channel.values()])
-            info = channel._channel_basic_info()
+            info = channel._channel_basic_info(fields=fields)
             info["is_editable"] = channel.is_editable
             info["fetchChannelInfoState"] = "fetched"
             # find the channel member state
@@ -865,7 +864,7 @@ class Channel(models.Model):
                     )
                     info['state'] = member.fold_state or 'closed'
                     info['custom_notifications'] = member.custom_notifications
-                    info['mute_until_dt'] = fields.Datetime.to_string(member.mute_until_dt)
+                    info['mute_until_dt'] = member.mute_until_dt
                     info['custom_channel_name'] = member.custom_channel_name
                     info['is_pinned'] = member.is_pinned
                     if member.rtc_inviting_session_id:

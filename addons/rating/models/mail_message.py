@@ -26,8 +26,8 @@ class MailMessage(models.Model):
         ])
         return [('id', 'in', ratings.mapped('message_id').ids)]
 
-    def _to_store(self, store: Store, **kwargs):
-        super()._to_store(store, **kwargs)
+    def _to_store(self, store: Store, /, *, fields=None, **kwargs):
+        super()._to_store(store, fields=fields, **kwargs)
         rating_mixin_messages = self.filtered(lambda message:
             message.model
             and message.res_id
