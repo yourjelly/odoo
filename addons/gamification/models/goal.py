@@ -150,6 +150,7 @@ class Goal(models.Model):
     _description = 'Gamification Goal'
     _rec_name = 'definition_id'
     _order = 'start_date desc, end_date desc, definition_id, id'
+    _inherit = 'mail.thread'
 
     definition_id = fields.Many2one('gamification.goal.definition', string="Goal Definition", required=True, ondelete="cascade")
     user_id = fields.Many2one('res.users', string="User", required=True, auto_join=True, ondelete="cascade")
