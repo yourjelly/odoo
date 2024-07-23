@@ -16,6 +16,7 @@ from contextlib import closing, suppress
 from enum import IntEnum
 from psycopg2.pool import PoolError
 from urllib.parse import urlparse
+from uuid import uuid4
 from weakref import WeakSet
 
 from werkzeug.local import LocalStack
@@ -23,7 +24,7 @@ from werkzeug.exceptions import BadRequest, HTTPException, ServiceUnavailable
 
 import odoo
 from odoo import api
-from .models.bus import dispatch
+from .models.bus import dispatch, DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.http import root, Request, Response, SessionExpiredException, get_default_session
 from odoo.modules.registry import Registry
 from odoo.service import model as service_model
@@ -236,6 +237,7 @@ class Websocket:
         self._close_sent = False
         self._close_received = False
         self._timeout_manager = TimeoutManager()
+        self._uuid = str(uuid4())
         # Used for rate limiting.
         self._incoming_frame_timestamps = deque(maxlen=self.RL_BURST)
         # Used to notify the websocket that bus notifications are
@@ -273,6 +275,8 @@ class Websocket:
                         else CloseCode.KEEP_ALIVE_TIMEOUT
                     )
                     continue
+                if self._timeout_manager.should_update_presence():
+                    self._update_presence()
                 if not readables:
                     self._send_ping_frame()
                     continue
@@ -542,6 +546,7 @@ class Websocket:
         self.state = ConnectionState.CLOSED
         dispatch.unsubscribe(self)
         self._trigger_lifecycle_event(LifecycleEvent.CLOSE)
+        self._delete_presence()
 
     def _handle_control_frame(self, frame):
         if frame.opcode is Opcode.PING:
@@ -647,6 +652,50 @@ class Websocket:
         self._last_notif_sent_id = notifications[-1]['id']
         self._send(notifications)
 
+    # ------------------------------------------------------
+    # PRESENCE MANAGEMENT
+    # ------------------------------------------------------
+
+    def _update_presence(self):
+        with acquire_cursor(self._db) as cr:
+            cr.execute("""
+                WITH upsert AS (
+                    INSERT INTO user_presence (user_id, websocket_uuid, last_websocket_presence, status)
+                    VALUES (%(user_id)s, %(websocket_uuid)s, %(last_websocket_presence)s, 'online')
+                    ON CONFLICT (websocket_uuid)
+                    DO UPDATE SET
+                        last_websocket_presence = excluded.last_websocket_presence
+                    RETURNING websocket_uuid
+                )
+                SELECT
+                    CASE
+                        WHEN (SELECT COUNT(*) FROM upsert) = 0 THEN 'update'
+                        ELSE 'insert'
+                    END AS operation_status
+                FROM upsert
+            """, {
+                "user_id": self._session.uid,
+                "websocket_uuid": self._uuid,
+                'last_websocket_presence': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            })
+            self._timeout_manager.acknowledge_presence_updated()
+            if cr.fetchone()[0] == 'update':
+                return
+            cr.execute("SELECT COUNT(*) FROM user_presence WHERE user_id = %s", (self._session.uid,))
+            if cr.fetchone()[0] == 1:
+                self._trigger_status_changed(cr, "online")
+
+    def _delete_presence(self):
+        with acquire_cursor(self._db) as cr:
+            cr.execute("DELETE FROM user_presence WHERE websocket_uuid = %s", (self._uuid,))
+            cr.execute("SELECT count(*) FROM user_presence WHERE user_id = %s", (self._session.uid,))
+            if cr.fetchone()[0] == 0:
+                self._trigger_status_changed(cr, "offline")
+
+    def _trigger_status_changed(self, cr, new_status):
+        env = api.Environment(cr, self._session.uid, {})
+        env["user.presence"]._on_status_change(new_status)
+
 
 class TimeoutReason(IntEnum):
     KEEP_ALIVE = 0
@@ -662,6 +711,9 @@ class TimeoutManager:
     connection has timed out, use the `has_timed_out` method.
     """
     TIMEOUT = 15
+    # Interval at which the websocket presence should be updated on the
+    # database. 10 minutes.
+    PRESENCE_DELAY = 600
     # Timeout specifying how many seconds the connection should be kept
     # alive.
     KEEP_ALIVE_TIMEOUT = int(config['websocket_keep_alive_timeout'])
@@ -680,6 +732,7 @@ class TimeoutManager:
         # Start time recorded when we started awaiting an answer to a
         # PING/CLOSE frame.
         self._waiting_start_time = None
+        self._last_presence_time = None
 
     def acknowledge_frame_receipt(self, frame):
         if self._awaited_opcode is frame.opcode:
@@ -700,6 +753,9 @@ class TimeoutManager:
         if self._awaited_opcode is not None:
             self._waiting_start_time = time.time()
 
+    def acknowledge_presence_updated(self):
+        self._last_presence_time = time.time()
+
     def has_timed_out(self):
         """
         Determine whether the connection has timed out or not. The
@@ -716,6 +772,16 @@ class TimeoutManager:
             return True
         return False
 
+    def should_update_presence(self):
+        """
+        Determine whether the presence of this socket should be
+        updated in database. This is used to determine if a user
+        is online or not.
+        """
+        return (
+            not self._last_presence_time or
+            time.time() - self._last_presence_time >= self.PRESENCE_DELAY
+        )
 
 # ------------------------------------------------------
 # WEBSOCKET SERVING
