@@ -8,6 +8,7 @@ publicWidget.registry.postLink = publicWidget.Widget.extend({
     selector: '.post_link',
     events: {
         'click': '_onClickPost',
+        'change': '_onSelectChange'
     },
 
     /**
@@ -31,6 +32,9 @@ publicWidget.registry.postLink = publicWidget.Widget.extend({
     //--------------------------------------------------------------------------
 
     _onClickPost: function (ev) {
+        if(this.el.tagName === 'SELECT'){
+            return;
+        }
         ev.preventDefault();
         const url = this.el.dataset.post || this.el.href;
         let data = {};
@@ -41,6 +45,21 @@ publicWidget.registry.postLink = publicWidget.Widget.extend({
         }
         wUtils.sendRequest(url, data);
     },
+
+    _onSelectChange: function (ev) {
+        if(this.el.tagName !== 'SELECT'){
+            return;
+        }
+        ev.preventDefault();
+        const url = this.el.value;
+        let data = {};
+        for (let [key, value] of Object.entries(this.el.dataset)) {
+            if (key.startsWith('post_')) {
+                data[key.slice(5)] = value;
+            }
+        }
+        wUtils.sendRequest(url, data);
+    }
 });
 
 });
