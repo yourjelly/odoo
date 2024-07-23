@@ -1,14 +1,8 @@
-import { Reactive, effect } from "@web/core/utils/reactive";
+import { Reactive } from "@web/core/utils/reactive";
 import { createRelatedModels } from "@point_of_sale/app/models/related_models";
 import { registry } from "@web/core/registry";
-import { Mutex } from "@web/core/utils/concurrency";
-import { markRaw } from "@odoo/owl";
-import { batched } from "@web/core/utils/timing";
 import IndexedDB from "./utils/indexed_db";
 import { DataServiceOptions } from "./data_service_options";
-import { uuidv4 } from "@point_of_sale/utils";
-
-const { DateTime } = luxon;
 const INDEXED_DB_VERSION = 1;
 
 export class PosData extends Reactive {
@@ -24,27 +18,107 @@ export class PosData extends Reactive {
         this.orm = orm;
         this.relations = [];
         this.custom = {};
-        this.syncInProgress = false;
-        this.mutex = markRaw(new Mutex());
-        this.records = {};
         this.opts = new DataServiceOptions();
 
         this.network = {
-            warningTriggered: false,
             offline: false,
             loading: true,
-            unsyncData: [],
+            lastSync: Date.now(),
         };
 
         this.initIndexedDB();
         await this.initData();
 
-        effect(
-            batched((records) => {
-                this.syncDataWithIndexedDB(records);
-            }),
-            [this.records]
+        this.oldData = Object.fromEntries(
+            Object.keys(this.records).map((modelName) => [
+                modelName,
+                Object.fromEntries(
+                    Object.keys(this.records[modelName]).map((id) => [
+                        id,
+                        this.records[modelName][id].serialize(),
+                    ])
+                ),
+            ])
         );
+        setInterval(async () => {
+            if (!this.network.loading && this.network.lastSync + 3000 < Date.now()) {
+                // await this.writeToDB();
+                await this.sync();
+            }
+        }, 3000);
+
+        // effect(
+        //     batched((records) => {
+        //         this.syncDataWithIndexedDB(records);
+        //         // for (const model of ["pos.order", "pos.order.line", "pos.payment"]) {
+        //         for (const model of ["pos.order"]) {
+        //             // this.create(
+        //             //     model.name,
+        //             //     Object.keys(this.records[model.name]).filter((id) => typeof id === "string")
+        //             // );
+        //             Object.keys(this.records[model])
+        //                 .filter((id) => typeof id === "string")
+        //                 .forEach((id) => {
+        //                     this.create(model, [this.records[model][id].serialize({ orm: true })]);
+        //                 });
+        //         }
+        //     }),
+        //     [this.records]
+        // );
+    }
+
+    async sync() {
+        this.network.loading = true;
+        const toWrite = [];
+        const toCreate = [];
+        // for (const model of Object.keys(this.records)) {
+        for (const model of ["pos.order"]) {
+            for (const id of Object.entries(this.records[model]).map(([_, o]) => o.id)) {
+                const record = this.records[model][id].serialize({ orm: true });
+                if (typeof id == "string") {
+                    toCreate.push({ model, id, record });
+                    continue;
+                }
+                for (const field of Object.keys(record)) {
+                    if (record[field] !== this.oldData[model][id][field]) {
+                        console.log(
+                            `Model ${model} with id ${id} changed: ${field} from ${this.oldData[model][id][field]} to ${record[field]}`
+                        );
+                        toWrite.push({ model, id, field, value: record[field] });
+                    }
+                    // FIXME only do this if the call to the backend worked
+                    this.oldData[model][id][field] = record[field];
+                }
+            }
+        }
+        try {
+            const res = await this.orm.call("pos.config", "sync", [
+                [odoo.pos_config_id],
+                toCreate,
+                toWrite,
+            ]);
+            console.log("Synced", res);
+            this.network.lastSync = Date.now();
+        } finally {
+            this.network.loading = false;
+        }
+    }
+    async writeToDB() {
+        for (const model of ["pos.order"]) {
+            Object.keys(this.records[model])
+                .filter((id) => typeof id === "string")
+                .forEach(async (id) => {
+                    console.log("Syncing data", model, id);
+                    const serverId = await this.orm.create(model, [
+                        this.records[model][id].serialize({ orm: true }),
+                    ]);
+                    this.records[model][serverId] = this.records[model][id];
+                    this.oldData[model][serverId] = this.records[model][id].serialize({
+                        orm: true,
+                    });
+                    delete this.records[model][id];
+                });
+        }
     }
 
     async resetIndexedDB() {
@@ -161,26 +235,6 @@ export class PosData extends Reactive {
         }
 
         return results;
-    }
-
-    setOffline() {
-        if (!this.network.offline) {
-            this.network.offline = true;
-        }
-    }
-
-    setOnline() {
-        if (this.network.offline) {
-            this.network.offline = false;
-            this.network.warningTriggered = false; // Avoid the display of the offline popup multiple times
-        }
-
-        this.syncData();
-    }
-
-    resetUnsyncQueue() {
-        this.network.unsyncData = [];
-        this.setOnline();
     }
 
     async loadInitialData() {
@@ -353,21 +407,10 @@ export class PosData extends Reactive {
                 result = results[model];
             }
 
-            this.setOnline();
+            this.network.offline = false;
             return result;
         } catch (error) {
-            const uuids = this.network.unsyncData.map((d) => d.uuid);
-            const skipError = error.constructor.name != "ConnectionLostError";
-            if (queue && !uuids.includes(uuid) && method !== "sync_from_ui" && !skipError) {
-                this.network.unsyncData.push({
-                    args: [...arguments],
-                    date: DateTime.now(),
-                    try: 1,
-                    uuid: uuidv4(),
-                });
-            }
-
-            this.setOffline();
+            this.network.offline = true;
             throw error;
         } finally {
             this.network.loading = false;
@@ -432,26 +475,6 @@ export class PosData extends Reactive {
         } else {
             return acc;
         }
-    }
-
-    async syncData() {
-        this.syncInProgress = true;
-
-        await this.mutex.exec(async () => {
-            while (this.network.unsyncData.length > 0) {
-                const data = this.network.unsyncData[0];
-                const result = await this.execute({ ...data.args[0], uuid: data.uuid });
-
-                if (result) {
-                    this.network.unsyncData.shift();
-                } else {
-                    this.network.unsyncData[0].try += 1;
-                    break;
-                }
-            }
-        });
-
-        this.syncInProgress = false;
     }
 
     write(model, ids, vals) {
@@ -558,12 +581,7 @@ export class PosData extends Reactive {
             this.indexedDB.delete(item.model.modelName, [item.uuid]);
             item.delete();
         }
-
         return result;
-    }
-
-    deleteUnsyncData(uuid) {
-        this.network.unsyncData = this.network.unsyncData.filter((d) => d.uuid !== uuid);
     }
 }
 

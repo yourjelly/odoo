@@ -227,7 +227,6 @@ QUnit.test("test unsynch data error filtering", async (assert) => {
         await posmodel.data.create("res.partner", [partner_data]);
     } catch {
         assert.step("create failed");
-        assert.equal(posmodel.data.network.unsyncData.length, 0);
     }
     assert.verifySteps(["create failed"]);
 });

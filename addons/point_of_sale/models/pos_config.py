@@ -214,6 +214,19 @@ class PosConfig(models.Model):
             'fields': fields,
         }
 
+    def sync(self, toCreate, toWrite):
+        self.ensure_one()
+        given_ids = {}
+        for item in toCreate:
+            print("to create: \n", toCreate, "\n")
+            given_ids[item['id']] = self.env[item['model']].create(item['record']).id
+        # for item in toWrite:
+        #     self.env[item['model']].browse(item['id']).write({
+        #         item['field']: item['value']
+        #     })
+        return given_ids
+
+
     @api.depends('payment_method_ids')
     def _compute_cash_control(self):
         for config in self:
