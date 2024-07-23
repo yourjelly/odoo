@@ -75,4 +75,4 @@ class DigestController(Controller):
             'id': digest.id,
             'active_id': digest.id,
         }
-        return request.redirect('/web?#%s' % url_encode(url_params))
+        return request.redirect('/odoo/%s' % url_encode(url_params))

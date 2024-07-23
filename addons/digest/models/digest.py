@@ -356,7 +356,7 @@ class Digest(models.Model):
         if user.has_group('base.group_erp_manager'):
             preferences.append(Markup('<p>%s<br /><a href="%s" target="_blank" style="color:#017e84; font-weight: bold;">%s</a></p>') % (
                 _('Want to customize this email?'),
-                f'/web#view_type=form&model={self._name}&id={self.id:d}',
+                f'/odoo/{self._name}/{self.id:d}',
                 _('Choose the metrics you care about')
             ))
 
