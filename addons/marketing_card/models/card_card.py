@@ -30,8 +30,8 @@ class MarketingCard(models.Model):
 
     @api.autovacuum
     def _gc_card_url_images(self):
-        """Remove stored image after a while."""
-        timedelta_days = self.env['ir.config_parameter'].get_param('marketing_card.card_image_cleanup_interval_days', 30)
+        """Remove images after a day. Social networks are expected to cache the images on their side."""
+        timedelta_days = self.env['ir.config_parameter'].get_param('marketing_card.card_image_cleanup_interval_days', 1)
         if not timedelta_days:
             return
         self.search([('write_date', '<=', datetime.now() - timedelta(days=timedelta_days))]).image = False

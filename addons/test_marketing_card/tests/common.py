@@ -20,14 +20,7 @@ def neuter_image_render(func):
 class MockImageRender(BaseCase):
     @contextmanager
     def mock_image_renderer(self, collect_params=True):
-        original_ir_qweb_render = IrQWeb._render
-        self._ir_qweb_values = []
         self._wkhtmltoimage_bodies = []
-
-        def _ir_qweb_render(model, template, values=None, **options):
-            if collect_params:
-                self._ir_qweb_values.append(values)
-            return original_ir_qweb_render(model, template, values=values, **options)
 
         def _ir_actions_report_build_run_wkhtmltoimage(model, bodies, width, height, image_format="jpg"):
             if collect_params:
@@ -35,8 +28,7 @@ class MockImageRender(BaseCase):
             return [VALID_JPEG] * len(bodies)
 
         with patch.object(IrActionsReport, '_run_wkhtmltoimage', _ir_actions_report_build_run_wkhtmltoimage):
-            with patch.object(IrQWeb, '_render', _ir_qweb_render):
-                yield
+            yield
 
 
 class MarketingCardCommon(TransactionCase, MockImageRender):
@@ -103,25 +95,24 @@ class MarketingCardCommon(TransactionCase, MockImageRender):
 
         cls.card_template = cls.env['card.template'].create({
             'name': 'Test Template',
+            'style': """
+<style>
+    p { margin: 1px };
+    body { width: 100%; height: 100%; };
+</style>
+            """,
             'body': """
-<t t-set="role_values" t-value="card_campaign._get_card_element_values(object, preview_values)"/>
-<t t-set="elements" t-value="card_campaign.card_element_ids.grouped('card_element_role')"/>
-    <style>
-        p { margin: 1px };
-        body { width: 100%; height: 100%; };
-    </style>
-    <div id="body" t-attf-style="background-image: url('data:image/png;base64,{{role_values['background']}}');">
-        <p id="header" t-out="role_values['header']" t-att-style="'color: %s;' % elements['header'].text_color"></p>
-        <p id="subheader" t-out="role_values['subheader']" t-att-style="'color: %s;' % elements['subheader'].text_color"></p>
-        <p id="section_1" t-out="role_values['section_1']" t-att-style="'color: %s;' % elements['section_1'].text_color"></p>
-        <p id="subsection_1" t-out="role_values['subsection_1']" t-att-style="'color: %s;' % elements['subsection_1'].text_color"></p>
-        <p id="subsection_2" t-out="role_values['subsection_2']" t-att-style="'color: %s;' % elements['subsection_2'].text_color"></p>
-        <p id="subsection_3" t-out="role_values['button']" t-att-style="'color: %s;' % elements['button'].text_color"></p>
-        <p id="button" t-out="role_values['button']" t-att-style="'color: %s;' % elements['button'].text_color"></p>
-        <img id="image_1" t-att-src="role_values['image_1']"></p>
-        <img id="image_2" t-att-src="role_values['image_2']"></p>
-    </div>
-</html>
+<dev>
+    <p id="header" odoo-set-text="header" odoo-set-text-color="header"></p>
+    <p id="subheader" odoo-set-text="subheader" odoo-set-text-color="subheader"></p>
+    <p id="section_1" odoo-set-text="section_1" odoo-set-text-color="section_1"></p>
+    <p id="subsection_1" odoo-set-text="subsection_1" odoo-set-text-color="subsection_1"></p>
+    <p id="subsection_2" odoo-set-text="subsection_2" odoo-set-text-color="subsection_2"></p>
+    <p id="subsection_3" odoo-set-text="button" odoo-set-text-color="button"></p>
+    <p id="button" odoo-set-text="button" odoo-set-text-color="button"></p>
+    <img id="image_1" odoo-set-src="image_1"></p>
+    <img id="image_2" odoo-set-src="image_2"></p>
+</dev>
             """,
         })
 
@@ -151,7 +142,7 @@ class MarketingCardCommon(TransactionCase, MockImageRender):
     @staticmethod
     def _extract_values_from_document(rendered_document):
         return {
-            'body': rendered_document.find('.//div[@id="body"]'),
+            'body': rendered_document.find('.//body'),
             'header': rendered_document.find('.//p[@id="header"]'),
             'subheader': rendered_document.find('.//p[@id="subheader"]'),
             'section_1': rendered_document.find('.//p[@id="section_1"]'),

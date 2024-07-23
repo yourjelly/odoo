@@ -11,7 +11,7 @@ from .card_template import TEMPLATE_DIMENSIONS
 class CardCampaign(models.Model):
     _name = 'card.campaign'
     _description = 'Marketing Card Campaign'
-    _inherit = ['mail.activity.mixin', 'mail.render.mixin', 'mail.thread']
+    _inherit = ['mail.activity.mixin', 'mail.thread']
     _order = 'id DESC'
 
     def _default_card_template_id(self):
@@ -35,7 +35,6 @@ class CardCampaign(models.Model):
 
     name = fields.Char(required=True)
     active = fields.Boolean(default=True)
-    body_html = fields.Html(related='card_template_id.body', render_engine="qweb")
 
     card_count = fields.Integer(compute='_compute_card_stats')
     card_click_count = fields.Integer(compute='_compute_card_stats')
@@ -84,27 +83,17 @@ class CardCampaign(models.Model):
 
     def _get_generic_image_b64(self):
         """Render a single preview image with no record."""
-        # fragment_fromstring to match mail render mixin
-        # sanitation will remove the base document structure, leaving <style> in the div
-        # but webkit will fix it and interpret it properly
-        rendered_body = self.env['ir.qweb']._render(
-            html.fragment_fromstring(self.body_html, create_parent='div'),
-            self._render_eval_context() | {
-                'card_campaign': self,
-                'preview_values': {
-                    'header': _('Title'),
-                    'subheader': _('Subtitle'),
-                }
-            },
-            raise_on_code=False,
-        )
+        card_values = self._get_card_element_values(self.env[self.res_model], {
+            'header': _('Title'),
+            'subheader': _('Subtitle'),
+        })
         image_bytes = self.env['ir.actions.report']._run_wkhtmltoimage(
-            [rendered_body],
+            [self.card_template_id._render_document(card_values, {element.card_element_role: element.text_color for element in self.card_element_ids})],
             *TEMPLATE_DIMENSIONS
         )[0]
         return image_bytes and base64.b64encode(image_bytes)
 
-    @api.depends('body_html', 'card_element_ids', 'preview_record_ref', 'res_model', 'card_element_ids.card_element_role',
+    @api.depends('card_template_id.body', 'card_template_id.style', 'card_element_ids', 'preview_record_ref', 'res_model', 'card_element_ids.card_element_role',
                  'card_element_ids.card_element_image', 'card_element_ids.card_element_text', 'card_element_ids.field_path',
                  'card_element_ids.text_color', 'card_element_ids.render_type', 'card_element_ids.value_type',)
     def _compute_image_preview(self):
@@ -132,7 +121,6 @@ class CardCampaign(models.Model):
             if campaign.preview_record_ref:
                 campaign.res_model = campaign.preview_record_ref._name
             elif not campaign.res_model:
-                print(campaign.res_model)
                 campaign.res_model = 'res.partner'
 
     @api.model_create_multi
@@ -227,7 +215,7 @@ class CardCampaign(models.Model):
         if not self.card_template_id.body:
             return ''
         image_bytes = self.env['ir.actions.report']._run_wkhtmltoimage(
-            [self._render_field('body_html', record.ids, add_context={'card_campaign': self})[record.id]],
+            [self.card_template_id._render_document(self._get_card_element_values(record, {}), {element.card_element_role: element.text_color for element in self.card_element_ids})],
             *TEMPLATE_DIMENSIONS
         )[0]
         return image_bytes and base64.b64encode(image_bytes)
@@ -265,7 +253,7 @@ class CardCampaign(models.Model):
         self.ensure_one()
         value_from_role = {}
         default_values = {
-            'background': self.card_template_id.default_background
+            'background': self.card_template_id.default_background.decode() if self.card_template_id.default_background else False
         }
         for element in self.card_element_ids:
             value = element._get_render_value(record)

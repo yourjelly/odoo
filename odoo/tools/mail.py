@@ -39,6 +39,8 @@ safe_attrs = defs.safe_attrs | frozenset(
      'data-shape', 'data-shape-colors', 'data-file-name', 'data-original-mimetype',
      'data-behavior-props', 'data-prop-name',  # knowledge commands
      'data-mimetype-before-conversion',
+     'odoo-render-if-any', 'odoo-render-if-all',  # marketing cards
+     'odoo-set-text', 'odoo-set-text-color', 'odoo-set-src',
      ])
 SANITIZE_TAGS = {
     # allow new semantic HTML5 tags

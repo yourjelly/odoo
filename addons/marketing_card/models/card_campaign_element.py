@@ -94,9 +94,10 @@ class CardCampaignElement(models.Model):
             # this will be called with sudo from the controller anyway
             if self.render_type == 'text':
                 return record.sudo()._mail_map_and_format(self.field_path) or ''
-            return record.sudo().mapped(self.field_path)[0] or ''
+            image_data = record.sudo().mapped(self.field_path)[0]
+            return image_data.decode() if image_data else ''
         if self.render_type == 'image':
-            return self.card_element_image or ''
+            return self.card_element_image.decode() if self.card_element_image else ''
         if self.render_type == 'text':
             return self.card_element_text or ''
         return None
@@ -106,7 +107,7 @@ class CardCampaignElement(models.Model):
         self.ensure_one()
         if self.value_type == 'field':
             if self.render_type == 'image':
-                return base64.b64encode(self.env['ir.binary']._placeholder())
+                return base64.b64encode(self.env['ir.binary']._placeholder()).decode()
             if self.render_type == 'text':
                 return f'[{self.field_path}]'
         return ''

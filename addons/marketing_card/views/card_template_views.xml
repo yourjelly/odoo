@@ -10,6 +10,7 @@
                         <group>
                             <field name="name"/>
                             <field name="default_background"/>
+                            <field name="style" widget="code" options="{'mode': 'xml'}"/>
                             <field name="body" widget="code" options="{'mode': 'xml'}"/>
                         </group>
                     </group>

@@ -31,10 +31,8 @@ class TestMarketingCardRender(MarketingCardCommon):
             })
             self.assertTrue(self.campaign.image_preview)
 
-        self.assertEqual(self._ir_qweb_values[0]['card_campaign'], self.campaign)
-        self.assertDictEqual(self._ir_qweb_values[0]['preview_values'], {'header': 'Title', 'subheader': 'Subtitle'})
         role_values = self._extract_values_from_document(html.fromstring(self._wkhtmltoimage_bodies[0]))
-        self.assertEqual(role_values['body'].attrib['style'], "background-image: url('data:image/png;base64,');")
+        self.assertNotIn('style', role_values['body'].attrib)
         self.assertEqual(role_values['header'].text, 'Come and See')
         self.assertEqual(role_values['header'].attrib['style'], 'color: #CC8888;')
         self.assertEqual(role_values['subheader'].text, '[name]')
@@ -42,18 +40,17 @@ class TestMarketingCardRender(MarketingCardCommon):
         self.assertEqual(role_values['subsection_1'].text, '[event_id.location_id]')
         self.assertEqual(role_values['subsection_2'].text, '[event_id.location_id.tag_ids]')
         self.assertFalse(role_values['button'].text)
+        print(role_values['image_1'].attrib)
         self.assertTrue(role_values['image_1'].attrib['src'], 'Placeholder image should be displayed')
-        self.assertFalse(role_values['image_2'].attrib['src'])
+        self.assertNotIn('src', role_values['image_2'].attrib)
 
         # first record
 
         with self.mock_image_renderer():
             self.campaign.preview_record_ref = self.concert_performances[0]
             self.assertTrue(self.campaign.image_preview)
-        self.assertEqual(self._ir_qweb_values[0]['card_campaign'], self.campaign)
-        self.assertNotIn('preview_values', self._ir_qweb_values[0])
         role_values = self._extract_values_from_document(html.fromstring(self._wkhtmltoimage_bodies[0]))
-        self.assertEqual(role_values['body'].attrib['style'], "background-image: url('data:image/png;base64,');")
+        self.assertNotIn('style', role_values['body'].attrib)
         self.assertEqual(role_values['header'].text, 'Come and See')
         self.assertEqual(role_values['header'].attrib['style'], 'color: #CC8888;')
         self.assertEqual(role_values['subheader'].text, "John's Holiday")
@@ -63,8 +60,8 @@ class TestMarketingCardRender(MarketingCardCommon):
         self.assertFalse(role_values['button'].text)
         # don't use placeholder when rendering for a record
         self.assertFalse(self.campaign.preview_record_ref.mapped(element_by_role['image_1'].field_path)[0])
-        self.assertFalse(role_values['image_1'].attrib['src'], 'Placeholder image should not be displayed')
-        self.assertFalse(role_values['image_2'].attrib['src'])
+        self.assertNotIn('src', role_values['image_1'].attrib, 'Placeholder image should not be displayed')
+        self.assertNotIn('src', role_values['image_2'].attrib)
 
         campaign_url_john = self.campaign.preview_record_url
         self.assertTrue(campaign_url_john)
@@ -75,10 +72,8 @@ class TestMarketingCardRender(MarketingCardCommon):
             self.concert_performances[1].event_id.location_id.tag_ids = self.tag_open
             self.campaign.preview_record_ref = self.concert_performances[1]
             self.assertTrue(self.campaign.image_preview)
-        self.assertEqual(self._ir_qweb_values[0]['card_campaign'], self.campaign)
-        self.assertNotIn('preview_values', self._ir_qweb_values[0])
         role_values = self._extract_values_from_document(html.fromstring(self._wkhtmltoimage_bodies[0]))
-        self.assertEqual(role_values['body'].attrib['style'], "background-image: url('data:image/png;base64,');")
+        self.assertNotIn('style', role_values['body'].attrib)
         self.assertEqual(role_values['header'].text, 'Come and See')
         self.assertEqual(role_values['header'].attrib['style'], 'color: #CC8888;')
         self.assertEqual(role_values['subheader'].text, "Bob's (grand) slam")
@@ -87,8 +82,8 @@ class TestMarketingCardRender(MarketingCardCommon):
         self.assertEqual(role_values['subsection_2'].text, 'Open Space')
         self.assertFalse(role_values['button'].text)
         self.assertFalse(self.campaign.preview_record_ref.mapped(element_by_role['image_1'].field_path)[0])
-        self.assertFalse(role_values['image_1'].attrib['src'], 'Placeholder image should not be displayed')
-        self.assertFalse(role_values['image_2'].attrib['src'])
+        self.assertNotIn('src', role_values['image_1'], 'Placeholder image should not be displayed')
+        self.assertNotIn('src', role_values['image_2'])
 
         self.assertNotEqual(campaign_url_john, self.campaign.preview_record_url)
 
@@ -97,7 +92,7 @@ class TestMarketingCardRender(MarketingCardCommon):
         with self.mock_image_renderer():
             self.campaign.preview_record_ref.name = 'An updated name'
             self.assertTrue(self.campaign.image_preview)
-        self.assertFalse(self._ir_qweb_values, 'Updating the preview record does not refresh the preview.')
+        self.assertFalse(self._wkhtmltoimage_bodies, 'Updating the preview record does not refresh the preview.')
 
         # url remains consistent
 
