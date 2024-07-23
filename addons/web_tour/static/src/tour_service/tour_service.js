@@ -13,6 +13,7 @@ import { createPointerState } from "./tour_pointer_state";
 import { tourState } from "./tour_state";
 import { callWithUnloadCheck } from "./tour_utils";
 import { TourInteractive } from "./tour_interactive";
+import * as hoot from "@odoo/hoot-dom";
 
 /**
  * @typedef {string} HootSelector
@@ -302,6 +303,7 @@ export const tourService = {
             tourState.set(tourName, "mode", options.mode);
             tourState.set(tourName, "sequence", tour.sequence);
             if (tourState.get(tourName, "debug") !== false) {
+                window.hoot = hoot;
                 // Starts the tour with a debugger to allow you to choose devtools configuration.
                 // eslint-disable-next-line no-debugger
                 debugger;

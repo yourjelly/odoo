@@ -135,8 +135,15 @@ function canContinue(el, step) {
     state.isElement = el instanceof el.ownerDocument.defaultView.Element || el instanceof Element;
     const isBlocked =
         document.body.classList.contains("o_ui_blocked") || document.querySelector(".o_blockUI");
+    const isLoading = hoot.queryFirst(".o_loading_indicator:contains(/^Loading/)");
     state.isBlocked = !!isBlocked;
-    state.canContinue = !!(state.isInDoc && state.isElement && !state.isBlocked);
+    state.isLoading = !!isLoading;
+    state.canContinue = !!(
+        state.isInDoc &&
+        state.isElement &&
+        !state.isBlocked &&
+        !state.isLoading
+    );
     return state.canContinue;
 }
 
@@ -286,12 +293,10 @@ export function compileStepAuto(stepIndex, step, options) {
                         styles[1],
                         styles[0]
                     );
-                    window.hoot = hoot;
                     await new Promise((resolve) => {
                         window.play = () => {
                             resolve();
                             delete window.play;
-                            delete window.hoot;
                         };
                     });
                 }
