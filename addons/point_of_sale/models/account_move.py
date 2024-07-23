@@ -12,6 +12,7 @@ class AccountMove(models.Model):
     pos_refunded_invoice_ids = fields.Many2many('account.move', 'refunded_invoices', 'refund_account_move', 'original_account_move')
     reversed_pos_order_id = fields.Many2one('pos.order', string="Reversed POS Order",
         help="The pos order that was reverted after closing the session to create an invoice for it.")
+    pos_session_ids = fields.One2many("pos.session", "move_id", "POS Sessions")
 
     def _stock_account_get_last_step_stock_moves(self):
         stock_moves = super(AccountMove, self)._stock_account_get_last_step_stock_moves()
@@ -66,6 +67,14 @@ class AccountMove(models.Model):
         for move in self:
             if move.move_type == 'entry' and move.reversed_pos_order_id:
                 move.amount_total_signed = move.amount_total_signed * -1
+
+    def _inverse_payment_reference(self):
+        if self.pos_session_ids:
+            self.line_ids._conditional_add_to_compute('name', lambda l: (
+                l.display_type == 'payment_term' and not l.name
+            ))
+        else:
+            super()._inverse_payment_reference()
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
