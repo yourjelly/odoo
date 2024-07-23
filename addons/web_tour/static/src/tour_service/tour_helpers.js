@@ -162,7 +162,7 @@ export class TourHelpers {
     }
 
     /**
-     * Fills the **{@link Selector}** with the given `value`.
+     * Fills the **{@link Selector}** with the given `value` and (change event).
      * @description This helper is intended for `<input>` and `<textarea>` elements,
      * with the exception of `"checkbox"` and `"radio"` types, which should be
      * selected using the {@link check} helper.
@@ -174,6 +174,21 @@ export class TourHelpers {
         const element = this._get_action_element(selector);
         hoot.click(element);
         hoot.fill(value);
+    }
+
+    /**
+     * Fills the **{@link Selector}** with the given `value` (change and blur events).
+     * @description This helper is intended for `<input>` and `<textarea>` elements,
+     * with the exception of `"checkbox"` and `"radio"` types, which should be
+     * selected using the {@link check} helper.
+     * In tour, it's mainly usefull for autocomplete components.
+     * @param {string} value
+     * @param {Selector} selector
+     */
+    fill_blur(value, selector) {
+        const element = this._get_action_element(selector);
+        hoot.click(element);
+        hoot.fill(value, { confirm: "blur" });
     }
 
     /**
