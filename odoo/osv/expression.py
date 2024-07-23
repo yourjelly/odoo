@@ -743,6 +743,19 @@ def check_leaf(element):
 # SQL utils
 # --------------------------------------------------
 
+def unapply_ir_rules(records, query):
+    """Unapply ir_rules on a query.
+
+    Where we use to call ``_where_calc`` to get the query as if it were ran by
+    the user, but without ir.rule applied. This function will remove the
+    added WHERE clause by ``_search``.
+    """
+    if not records.env.su:
+        security_domain = records.env['ir.rule']._compute_domain(records._name, 'read')
+        if security_domain:
+            query._where_clauses.pop()
+
+
 def get_unaccent_wrapper(cr):
     warnings.warn(
         "Since 18.0, deprecated method, use env.registry.unaccent instead",
@@ -1132,7 +1145,8 @@ class expression(object):
             elif operator in ('any', 'not any') and field.store and field.type == 'one2many' and field.auto_join:
                 # use a subquery bypassing access rules and business logic
                 domain = right + field.get_domain_list(model)
-                query = comodel._where_calc(domain)
+                query = comodel._search(domain)
+                unapply_ir_rules(comodel, query)
                 sql = query.subselect(
                     comodel._field_to_sql(comodel._table, field.inverse_name, query),
                 )
@@ -1241,7 +1255,8 @@ class expression(object):
                         # rewrite condition to match records with/without lines
                         sub_op = 'in' if operator in NEGATIVE_TERM_OPERATORS else 'not in'
                         comodel_domain = [(inverse_field.name, '!=', False)]
-                        query = comodel._where_calc(comodel_domain)
+                        query = comodel._search(comodel_domain)
+                        unapply_ir_rules(comodel, query)
                         sql_inverse = comodel._field_to_sql(query.table, inverse_field.name, query)
                         sql = query.subselect(sql_inverse)
                         push(('id', sub_op, sql), model, alias)

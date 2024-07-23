@@ -705,22 +705,25 @@ class AccountJournal(models.Model):
             dashboard_data[journal.id]['onboarding'] = onboarding_data[journal.company_id].get(journal_onboarding_map.get(journal.type))
 
     def _get_draft_sales_purchases_query(self):
-        return self.env['account.move']._where_calc([
+        query = self.env['account.move']._search([
             *self.env['account.move']._check_company_domain(self.env.companies),
             ('journal_id', 'in', self.ids),
             ('state', '=', 'draft'),
             ('move_type', 'in', self.env['account.move'].get_invoice_types(include_receipts=True)),
         ])
+        expression.unapply_ir_rules(self.env['account.move'], query)
+        return query
 
     def _get_open_sale_purchase_query(self, journal_type):
         assert journal_type in ('sale', 'purchase')
-        query = self.env['account.move']._where_calc([
+        query = self.env['account.move']._search([
             *self.env['account.move']._check_company_domain(self.env.companies),
             ('journal_id', 'in', self.ids),
             ('payment_state', 'in', ('not_paid', 'partial')),
             ('move_type', '=', 'out_invoice' if journal_type == 'sale' else 'in_invoice'),
             ('state', '=', 'posted'),
         ])
+        expression.unapply_ir_rules(self.env['account.move'], query)
         selects = [
             SQL("journal_id"),
             SQL("company_id"),

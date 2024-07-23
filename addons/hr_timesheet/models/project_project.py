@@ -63,8 +63,8 @@ class ProjectProject(models.Model):
             raise ValueError(_('Invalid operator: %s', operator))
 
         Company = self.env['res.company']
-        sql = Company._where_calc(
-            [('internal_project_id', '!=', False)], active_test=False
+        sql = Company.sudo().with_context(active_test=False)._search(
+            [('internal_project_id', '!=', False)]
         ).subselect("internal_project_id")
         if (operator == '=' and value is True) or (operator == '!=' and value is False):
             operator_new = 'in'

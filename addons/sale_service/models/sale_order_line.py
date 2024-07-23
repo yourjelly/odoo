@@ -4,7 +4,6 @@
 from itertools import groupby
 
 from odoo import api, fields, models
-from odoo.osv import expression
 from odoo.tools import format_amount
 from odoo.tools.sql import column_exists, create_column, create_index
 
@@ -53,10 +52,9 @@ class SaleOrderLine(models.Model):
 
     def init(self):
         res = super().init()
-        query_domain_sale_line = expression.expression([('is_service', '=', True)], self).query
         create_index(self._cr, 'sale_order_line_name_search_services_index',
                      self._table, ('order_id DESC', 'sequence', 'id'),
-                     where=query_domain_sale_line.where_clause)
+                     where="is_service IS TRUE")
         return res
 
     def _additional_name_per_id(self):

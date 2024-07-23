@@ -59,7 +59,7 @@ class ProductTemplate(models.Model):
         config = self.env['pos.config'].browse(data['pos.config']['data'][0]['id'])
         limit_count = config.get_limited_product_count()
         if limit_count:
-            query = self._where_calc(self._load_pos_data_domain(data))
+            query = self.sudo()._search(self._load_pos_data_domain(data))
             sql = SQL(
                 """
                     WITH pm AS (
