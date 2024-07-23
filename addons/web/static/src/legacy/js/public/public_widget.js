@@ -9,6 +9,7 @@ import ServicesMixin from "@web/legacy/js/core/service_mixins";
 import { loadBundle, loadCSS, loadJS } from '@web/core/assets';
 import { renderToElement } from "@web/core/utils/render";
 import { makeAsyncHandler, makeButtonHandler } from "@web/legacy/js/core/minimal_dom";
+import EventUtils from '../../../core/utils/utils';
 
 /**
  * Base class for all visual components. Provides a lot of functions helpful
@@ -375,9 +376,15 @@ export const PublicWidget = Class.extend(mixins.PropertiesMixin, ServicesMixin, 
 
             event += '.widget_events';
             if (!selector) {
-                self.$el.on(event, method);
+                // To hanle pop-up snippet
+                // TODO: to remove jquery Event delegation
+                if(key.includes(".bs.")) {
+                    self.$el.on(event, method);
+                } else {
+                    EventUtils.on(self.$el[0], event, method)
+                }
             } else {
-                self.$el.on(event, selector, method);
+                EventUtils.on(self.$el[0], event, selector, method);
             }
         };
         Object.entries(this.events || {}).forEach(([event, method]) => {
@@ -480,7 +487,7 @@ export const PublicWidget = Class.extend(mixins.PropertiesMixin, ServicesMixin, 
      * @private
      */
     _undelegateEvents: function () {
-        this.$el.off('.widget_events');
+        EventUtils.off(this.el, '.widget_events');
     },
     /**
      * Render the widget.  This is a private method, and should really never be

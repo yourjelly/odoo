@@ -149,8 +149,9 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
                    && letter.match(/[a-z]/i)) {
             var $choiceInput = this.$(`input[data-selection-key=${letter}]`);
             if ($choiceInput.length === 1) {
-                $choiceInput.prop("checked", !$choiceInput.prop("checked")).trigger('change');
-
+                $choiceInput.prop("checked", !$choiceInput.prop("checked"))
+                const event = new Event('change', { bubbles: true });
+                $choiceInput[0].dispatchEvent(event)
                 // Avoid selection key to be typed into the textbox if 'other' is selected by key
                 event.preventDefault();
             }
@@ -169,7 +170,6 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
     _onChangeChoiceItem: function (event) {
         const $target = $(event.currentTarget);
         const $choiceItemGroup = $target.closest('.o_survey_form_choice');
-
         this._applyCommentAreaVisibility($choiceItemGroup);
         const isQuestionComplete = this._checkConditionalQuestionsConfiguration($target, $choiceItemGroup);
         if (isQuestionComplete && this.options.usersCanGoBack) {
@@ -219,7 +219,9 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
 
         var $target = $(event.currentTarget);
         var $input = $target.find('input');
-        $input.prop("checked", !$input.prop("checked")).trigger('change');
+        $input.prop("checked", !$input.prop("checked"))
+        const changeEvent = new Event('change', { bubbles: true });
+        $input[0].dispatchEvent(changeEvent)
     },
 
     /**
@@ -244,7 +246,8 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
         var $target = $(event.currentTarget);
         if ($target.hasClass("o_survey_form_choice_item_selected")) {
             $target.prop("checked", false).removeClass("o_survey_form_choice_item_selected");
-            $target.trigger('change');
+            const event = new Event('change', { bubbles: true });
+            $target[0].dispatchEvent(event)
         } else {
             this.$(`input:radio[name="${$target.prop("name")}"].o_survey_form_choice_item_selected`)
                 .removeClass("o_survey_form_choice_item_selected");
@@ -1130,7 +1133,9 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
                     if ($(this).attr('type') === 'text' || $(this).attr('type') === 'number') {
                         $(this).val('');
                     } else if ($(this).prop('checked')) {
-                        $(this).prop('checked', false).change();
+                        $(this).prop('checked', false)
+                        const event = new Event('change', { bubbles: true });
+                        this.dispatchEvent(event)
                     }
                 });
                 $(dependingQuestion).find('textarea').val('');

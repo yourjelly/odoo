@@ -177,7 +177,9 @@ const PopupWidget = publicWidget.Widget.extend(ObservingCookieWidgetMixin, {
         if (this._popupAlreadyShown || !this._canShowPopup()) {
             return;
         }
-        this.$el.find('.modal').modal('show');
+        const event  = new Event('show', {bubbles: true});
+        this.$el.find('.modal')[0].dispatchEvent(event);
+        // this.$el.find('.modal').modal('show');
     },
     /**
      * @private

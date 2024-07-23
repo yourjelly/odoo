@@ -76,6 +76,8 @@ options.registry.SnippetPopup = options.Class.extend({
      */
     onTargetShow: async function () {
         this.$bsTarget.modal('show');
+        const event = new Event('show', {bubbles: true});
+        this.$bsTarget[0].dispatchEvent(event);
         $(this.$target[0].ownerDocument.body).children('.modal-backdrop:last').addClass('d-none');
     },
     /**
