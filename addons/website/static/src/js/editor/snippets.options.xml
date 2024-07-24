@@ -627,6 +627,13 @@
         </WeRow>
     </t>
 </t>
+<t t-name="website.grid_image_option">
+    <!-- Image position in grid -->
+    <WeSelect title.translate="Position">
+        <WeButton changeGridImageMode="'cover'">Cover</WeButton>
+        <WeButton changeGridImageMode="'contain'">Contain</WeButton>
+    </WeSelect>
+</t>
 <t t-name="website.header_option">
     <WeRow title.translate="Template">
         <WeSelect variable="'header-template'"

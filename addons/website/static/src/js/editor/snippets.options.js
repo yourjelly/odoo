@@ -4264,7 +4264,8 @@ registerWebsiteOption("SwitchableViews", {
     group: "website.group_website_designer",
 });
 
-options.registry.GridImage = options.Class.extend({
+
+export class GridImage extends SnippetOption {
 
     //--------------------------------------------------------------------------
     // Options
@@ -4278,7 +4279,7 @@ options.registry.GridImage = options.Class.extend({
         if (imageGridItemEl) {
             imageGridItemEl.classList.toggle('o_grid_item_image_contain', widgetValue === 'contain');
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -4292,7 +4293,7 @@ options.registry.GridImage = options.Class.extend({
      */
     _getImageGridItem() {
         return this.$target[0].closest(".o_grid_item_image");
-    },
+    }
     /**
      * @override
      */
@@ -4302,11 +4303,11 @@ options.registry.GridImage = options.Class.extend({
         const effectAllowsOption = !["dolly_zoom", "outline", "image_mirror_blur"]
             .includes(this.$target[0].dataset.hoverEffect);
 
-        return this._super(...arguments)
+        return super._computeVisibility(...arguments)
             && !!this._getImageGridItem()
             && (!('shape' in this.$target[0].dataset)
                 || hasSquareShape && effectAllowsOption);
-    },
+    }
     /**
      * @override
      */
@@ -4317,8 +4318,14 @@ options.registry.GridImage = options.Class.extend({
                 ? 'contain'
                 : 'cover';
         }
-        return this._super(...arguments);
-    },
+        return super._computeWidgetState(...arguments);
+    }
+}
+
+registerWebsiteOption("GridImage", {
+    Class: GridImage,
+    template: "website.grid_image_option",
+    selector: "img",
 });
 
 
