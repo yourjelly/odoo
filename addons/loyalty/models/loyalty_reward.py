@@ -50,7 +50,9 @@ class LoyaltyReward(models.Model):
     company_id = fields.Many2one(related='program_id.company_id', store=True)
     currency_id = fields.Many2one(related='program_id.currency_id')
 
-    description = fields.Char(compute='_compute_description', readonly=False, store=True, translate=True)
+    description = fields.Char(
+        compute='_compute_description',
+        readonly=False, store=True, translate=True, required=True, precompute=True)
 
     reward_type = fields.Selection([
         ('product', 'Free Product'),
