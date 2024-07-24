@@ -490,6 +490,18 @@ export class PosStore extends Reactive {
         order.select_orderline(line);
         this.numpadMode = "quantity";
     }
+    sortBySequenceAndCategory(a, b) {
+        const seqA = a.product_id?.pos_categ_ids[0]?.sequence ?? 0;
+        const seqB = b.product_id?.pos_categ_ids[0]?.sequence ?? 0;
+        const pos_categ_id_A = a.product_id?.pos_categ_ids[0]?.id ?? 0;
+        const pos_categ_id_B = b.product_id?.pos_categ_ids[0]?.id ?? 0;
+
+        if (seqA !== seqB) {
+            return seqA - seqB;
+        }
+        return pos_categ_id_A - pos_categ_id_B;
+    }
+
     // This method should be called every time a product is added to an order.
     // The configure parameter is available if the orderline already contains all
     // the information without having to be calculated. For example, importing a SO.
@@ -761,6 +773,28 @@ export class PosStore extends Reactive {
         this.productReminderTimeout = setTimeout(() => {
             this.hasJustAddedProduct = false;
         }, 3000);
+
+        // orderlines will be sorted on the basis of pos product category and sequence for group the orderlines in order cart
+        if (this.config.orderlines_sequence_in_cart_by_category && order.lines.length) {
+            order.lines.sort(this.sortBySequenceAndCategory);
+
+            const resultLines = [];
+
+            order.lines.forEach((line) => {
+                if (line.combo_line_ids?.length > 0) {
+                    resultLines.push(line);
+                    const childLines = order.lines.filter(
+                        (childLine) => childLine.combo_parent_id?.id === line.id
+                    );
+                    childLines
+                        .sort(this.sortBySequenceAndCategory)
+                        .forEach((childLine) => resultLines.push(childLine));
+                } else if (!line.combo_parent_id) {
+                    resultLines.push(line);
+                }
+            });
+            order.lines = resultLines;
+        }
 
         // FIXME: If merged with another line, this returned object is useless.
         return line;
