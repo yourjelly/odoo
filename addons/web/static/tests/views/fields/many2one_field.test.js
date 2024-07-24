@@ -3668,6 +3668,7 @@ test("click on many2one link in list view", async () => {
     expect(".o_breadcrumb").toHaveCount(1);
 
     await contains("a.o_form_uri").click();
+    await animationFrame();
     expect.verifySteps(["get_formview_action"]);
     expect(".breadcrumb-item").toHaveCount(1);
     expect(".o_breadcrumb").toHaveCount(1);
@@ -3712,6 +3713,7 @@ test("external_button performs a doAction by default", async () => {
     await selectFieldDropdownItem("trululu", "first record");
     expect(".o_field_widget .o_external_button.oi-arrow-right").toHaveCount(1);
     await contains(".o_field_widget .o_external_button", { visible: false }).click();
+    await animationFrame();
 
     expect.verifySteps(["get_formview_action"]);
     expect(".breadcrumb").toHaveText("first record");

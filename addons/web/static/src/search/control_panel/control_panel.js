@@ -62,7 +62,6 @@ export class ControlPanel extends Component {
             ? useState(this.env.config.pagerProps)
             : undefined;
         this.notificationService = useService("notification");
-        this.breadcrumbs = useState(this.env.config.breadcrumbs);
         this.orm = useService("orm");
         this.dialogService = useService("dialog");
 

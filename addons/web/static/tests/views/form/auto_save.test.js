@@ -135,6 +135,7 @@ test.tags("desktop")(`save when page changed`, async () => {
     await mountWithCleanup(WebClient);
     await getService("action").doAction(1);
     await contains(`.o_data_row td.o_data_cell`).click();
+    await animationFrame();
     expect(`.o_breadcrumb`).toHaveText("Partner\nXavier Lancer");
 
     await contains(`.o_field_widget[name='name'] input`).edit("aaa");
@@ -190,15 +191,18 @@ test.tags("desktop")(`save when breadcrumb clicked`, async () => {
     expect(`.o_field_cell:eq(0)`).toHaveText("Xavier Lancer");
 
     await contains(`.o_data_row td.o_data_cell`).click();
+    await animationFrame();
     expect(`.o_breadcrumb`).toHaveText("Partner\nXavier Lancer");
 
     await contains(`.o_field_widget[name='name'] input`).edit("aaa");
     await contains(`.breadcrumb-item.o_back_button`).click();
+    await animationFrame();
     expect.verifySteps(["web_save"]);
     expect(`.o_breadcrumb`).toHaveText("Partner");
     expect(`.o_field_cell:eq(0)`).toHaveText("aaa");
 
     await contains(`.o_data_row td.o_data_cell`).click();
+    await animationFrame();
     expect(`.o_form_editable`).toHaveCount(1);
     expect(`.o_breadcrumb`).toHaveText("Partner\naaa");
     expect('.o_field_widget[name="name"] input').toHaveValue("aaa");
@@ -297,16 +301,19 @@ test.tags("desktop")(`save when action changed`, async () => {
     await getService("action").doAction(1);
 
     await contains(`.o_data_row td.o_data_cell`).click();
+    await animationFrame();
     expect(`.o_breadcrumb`).toHaveText("Partner\nXavier Lancer");
 
     await contains(`.o_field_widget[name='name'] input`).edit("aaa");
     await getService("action").doAction(2, { clearBreadcrumbs: true });
+    await animationFrame();
     expect.verifySteps(["web_save"]);
 
     expect(`.o_breadcrumb`).toHaveText("Other action");
     await getService("action").doAction(1, { clearBreadcrumbs: true });
 
     await contains(`.o_data_row td.o_data_cell`).click();
+    await animationFrame();
     expect(`.o_form_editable`).toHaveCount(1);
     expect(`.o_breadcrumb`).toHaveText("Partner\naaa");
     expect('.o_field_widget[name="name"] input').toHaveValue("aaa");
@@ -506,9 +513,11 @@ test.tags("desktop")(`save on closing tab/browser (detached form)`, async () => 
     await getService("action").doAction(1);
 
     await contains(`.o_data_row td.o_data_cell`).click();
+    await animationFrame();
     expect(`.o_breadcrumb`).toHaveText("Partner\nXavier Lancer");
 
     await contains(`.o_back_button`).click();
+    await animationFrame();
     expect(`.o_breadcrumb`).toHaveText("Partner");
 
     unload();

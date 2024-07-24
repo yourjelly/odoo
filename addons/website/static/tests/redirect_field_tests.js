@@ -79,6 +79,10 @@ QUnit.module("redirect_field", (hooks) => {
             {
                 start() {
                     return {
+                        state: {},
+                        getBreadcrumbs() {
+                            return [];
+                        },
                         doActionButton(data) {
                             assert.step(data.type);
                             assert.step(data.name);

@@ -34,6 +34,10 @@ QUnit.test("edit target with several o_kanban_primary_bottom divs", async (asser
 
     const fakeActionService = {
         start: () => ({
+            state: {},
+            getBreadcrumbs() {
+                return [];
+            },
             async doAction(action) {
                 assert.deepEqual(
                     action,

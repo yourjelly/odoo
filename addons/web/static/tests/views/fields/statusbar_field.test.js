@@ -560,6 +560,7 @@ test("For the same record, a single rpc is done to recover the specialData", asy
     click(".o_data_row .o_data_cell");
     await animationFrame();
     expect.verifySteps(["search_read"]);
+    await animationFrame();
 
     click(".o_back_button");
     await animationFrame();
@@ -602,6 +603,7 @@ test("open form with statusbar, leave and come back to another one with other do
     click(".o_data_row .o_data_cell");
     await animationFrame();
     expect.verifySteps(["search_read"]);
+    await animationFrame();
 
     // go back and open second record
     click(".o_back_button");

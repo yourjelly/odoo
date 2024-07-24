@@ -39,6 +39,10 @@ QUnit.module("Base Import Tests", (hooks) => {
         const actionService = {
             start() {
                 return {
+                    state: {},
+                    getBreadcrumbs() {
+                        return [];
+                    },
                     doAction: (action, options) => {
                         assert.strictEqual(action.tag, "import");
                     },
@@ -119,6 +123,10 @@ QUnit.module("Base Import Tests", (hooks) => {
         const actionService = {
             start() {
                 return {
+                    state: {},
+                    getBreadcrumbs() {
+                        return [];
+                    },
                     doAction: (action, options) => {
                         assert.strictEqual(action.tag, "import");
                     },

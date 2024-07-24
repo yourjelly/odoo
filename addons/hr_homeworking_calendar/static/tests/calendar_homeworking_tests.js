@@ -290,6 +290,10 @@ QUnit.module("Homeworking Calendar", ({ beforeEach }) => {
         const actionService = {
             start() {
                 return {
+                    state: {},
+                    getBreadcrumbs() {
+                        return [];
+                    },
                     doAction: (action, options) => {
                         assert.step(action);
                         assert.step(options.additionalContext.default_date);
@@ -353,6 +357,10 @@ QUnit.module("Homeworking Calendar", ({ beforeEach }) => {
         const actionService = {
             start() {
                 return {
+                    state: {},
+                    getBreadcrumbs() {
+                        return [];
+                    },
                     doAction: (action, options) => {
                         assert.step(action);
                         assert.step(options.additionalContext.default_date);
@@ -384,6 +392,10 @@ QUnit.module("Homeworking Calendar", ({ beforeEach }) => {
         const actionService = {
             start() {
                 return {
+                    state: {},
+                    getBreadcrumbs() {
+                        return [];
+                    },
                     doAction: (action, options) => {
                         assert.step(action);
                         assert.step(options.additionalContext.default_date);

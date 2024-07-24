@@ -14,6 +14,8 @@ import {
     useRef,
     onWillUnmount,
 } from "@odoo/owl";
+import { Breadcrumbs } from "@web/webclient/breadcrumbs/breadcrumbs";
+
 const systrayRegistry = registry.category("systray");
 
 const getBoundingClientRect = Element.prototype.getBoundingClientRect;
@@ -22,7 +24,14 @@ export class MenuDropdown extends Dropdown {}
 
 export class NavBar extends Component {
     static template = "web.NavBar";
-    static components = { Dropdown, DropdownItem, DropdownGroup, MenuDropdown, ErrorHandler };
+    static components = {
+        Dropdown,
+        DropdownItem,
+        DropdownGroup,
+        MenuDropdown,
+        ErrorHandler,
+        Breadcrumbs,
+    };
     static props = {};
 
     setup() {

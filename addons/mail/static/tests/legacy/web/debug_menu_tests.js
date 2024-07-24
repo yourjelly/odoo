@@ -4,7 +4,7 @@ const test = QUnit.test; // QUnit.test()
 import { manageMessages } from "@mail/js/tools/debug_manager";
 
 import { registry } from "@web/core/registry";
-import { click, getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { click, getFixture, patchWithCleanup, nextTick } from "@web/../tests/helpers/utils";
 import { assertSteps, step } from "@web/../tests/utils";
 import {
     createWebClient,
@@ -49,6 +49,7 @@ test("Manage Messages", async (assert) => {
     assert.strictEqual(dropdownItems[0].innerText.trim(), "Manage Messages");
 
     await click(dropdownItems[0]);
+    await nextTick();
     await assertSteps(["message_read"]);
     assert.strictEqual(
         target.querySelector(".o_breadcrumb .active > span").innerText.trim(),

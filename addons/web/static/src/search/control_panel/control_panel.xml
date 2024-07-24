@@ -45,15 +45,13 @@
                         </section>
                     </t>
                     <t t-elif="env.isSmall">
-                        <div class="o_fallback_breadcrumbs d-contents"/> <!-- Here be dragons... -->
-                        <Breadcrumbs breadcrumbs="breadcrumbs" t-portal="'.o_navbar_breadcrumbs, .o_fallback_breadcrumbs'"/>
                         <section class="o_control_panel_breadcrumbs_actions d-contents">
                             <t t-slot="control-panel-additional-actions"/>
                             <t t-slot="control-panel-status-indicator" />
                         </section>
                     </t>
                     <t t-else="">
-                        <Breadcrumbs breadcrumbs="breadcrumbs">
+                        <Breadcrumbs>
                             <t t-set-slot="breadcrumb-status-indicator">
                                 <t t-slot="control-panel-status-indicator" />
                             </t>

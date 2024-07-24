@@ -36,6 +36,14 @@ function parseString(str) {
     return result;
 }
 /**
+ * Serialize a state before being used by the History API to avoid complex types
+ * @param {Object} state History State
+ * @returns Object
+ */
+function serializeState(state) {
+    return JSON.parse(JSON.stringify(state));
+}
+/**
  * @param {object} values An object with the values of the new state
  * @param {boolean} replace whether the values should replace the state or be
  *  layered on top of the current state
@@ -261,7 +269,11 @@ browser.addEventListener("popstate", (ev) => {
     if (!ev.state) {
         // We are coming from a click on an anchor.
         // Add the current state to the history entry so that a future loadstate behaves as expected.
-        browser.history.replaceState({ nextState: state }, "", browser.location.href);
+        browser.history.replaceState(
+            { nextState: serializeState(state) },
+            "",
+            browser.location.href
+        );
         return;
     }
     state = ev.state?.nextState || router.urlToState(new URL(browser.location));
@@ -320,14 +332,18 @@ function makeDebouncedPush(mode) {
                 // then restore the title to what it's supposed to be
                 const originalTitle = document.title;
                 document.title = pushArgs.title;
-                browser.history.pushState({ nextState }, "", url);
+                browser.history.pushState({ nextState: serializeState(nextState) }, "", url);
                 document.title = originalTitle;
             } else {
-                browser.history.replaceState({ nextState }, "", url);
+                browser.history.replaceState({ nextState: serializeState(nextState) }, "", url);
             }
         } else {
             // URL didn't change but state might have, update it in place
-            browser.history.replaceState({ nextState }, "", browser.location.href);
+            browser.history.replaceState(
+                { nextState: serializeState(nextState) },
+                "",
+                browser.location.href
+            );
         }
         state = nextState;
         if (pushArgs.reload) {

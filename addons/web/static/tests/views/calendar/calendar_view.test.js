@@ -2886,6 +2886,7 @@ test(`initial_date given in the context`, async () => {
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction(1);
+    await animationFrame();
     expect(`.o_breadcrumb`).toHaveText("context initial date");
     expect(`.o_calendar_renderer .fc-col-header-cell .o_cw_day_name`).toHaveText("Saturday");
     expect(`.o_calendar_renderer .fc-col-header-cell .o_cw_day_number`).toHaveText("30");

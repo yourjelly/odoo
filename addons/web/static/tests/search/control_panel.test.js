@@ -35,29 +35,6 @@ test("simple rendering", async () => {
     expect(`.o_breadcrumb`).toHaveCount(1);
 });
 
-test.tags`desktop`("breadcrumbs", async () => {
-    await mountWithSearch(
-        ControlPanel,
-        { resModel: "foo" },
-        {
-            breadcrumbs: [
-                { jsId: "controller_7", name: "Previous" },
-                { jsId: "controller_9", name: "Current" },
-            ],
-        }
-    );
-
-    const breadcrumbItems = queryAll(`.o_breadcrumb li.breadcrumb-item, .o_breadcrumb .active`);
-    expect(breadcrumbItems).toHaveCount(2);
-    expect(breadcrumbItems[0]).toHaveText("Previous");
-    expect(breadcrumbItems[1]).toHaveText("Current");
-    expect(breadcrumbItems[1]).toHaveClass("active");
-
-    getService("action").restore = (jsId) => expect.step(jsId);
-    click(breadcrumbItems[0]);
-    expect.verifySteps(["controller_7"]);
-});
-
 test.tags`desktop`("view switcher", async () => {
     await mountWithSearch(
         ControlPanel,

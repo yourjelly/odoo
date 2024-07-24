@@ -2,9 +2,11 @@
 <templates xml:space="preserve">
 
     <t t-name="web.Breadcrumbs">
-        <t t-set="currentBreadcrumbs" t-value="props.breadcrumbs.slice(-1)"/>
-        <t t-set="visiblePathBreadcrumbs" t-value="props.breadcrumbs.slice(-3, -1)"/>
-        <t t-set="collapsedBreadcrumbs" t-value="props.breadcrumbs.slice(0, -3).reverse()"/>
+        <t t-set="currentController" t-value="actionServiceState.controllerStack.slice(-1)[0]"/>
+        <t t-set="breadcrumbs" t-value="currentController?.config?.breadcrumbs ?? []"/>
+        <t t-set="currentBreadcrumbs" t-value="breadcrumbs.slice(-1)"/>
+        <t t-set="visiblePathBreadcrumbs" t-value="breadcrumbs.slice(-3, -1)"/>
+        <t t-set="collapsedBreadcrumbs" t-value="breadcrumbs.slice(0, -3).reverse()"/>
         <t t-set="breadcrumb" t-value="currentBreadcrumbs[0] || {}"/>
 
         <div t-if="collapsedBreadcrumbs.length || visiblePathBreadcrumbs.length" class="o_breadcrumb d-flex flex-row flex-md-column align-self-stretch justify-content-between min-w-0">

@@ -307,12 +307,14 @@ describe.tags("desktop")("DebugMenu", () => {
         });
         await contains(".o_debug_manager button").click();
         await contains(".dropdown-menu .dropdown-item:contains('Edit View: Pivot')").click();
+        await animationFrame();
 
         expect(".breadcrumb-item").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveText("Edit View");
         expect(".o_field_widget[name=id]").toHaveText("18");
         click(".breadcrumb .o_back_button");
+        await animationFrame();
         await animationFrame();
         expect(".o_breadcrumb .active").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveText("Partners");
@@ -338,6 +340,7 @@ describe.tags("desktop")("DebugMenu", () => {
         });
         await contains(".o_debug_manager button").click();
         await contains(".dropdown-menu .dropdown-item:contains('Edit SearchView')").click();
+        await animationFrame();
         expect(".breadcrumb-item").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveText("Edit View");
@@ -364,6 +367,7 @@ describe.tags("desktop")("DebugMenu", () => {
         });
         await contains(".o_debug_manager button").click();
         await contains(".dropdown-menu .dropdown-item:contains('Edit SearchView')").click();
+        await animationFrame();
         expect(".breadcrumb-item").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveText("Edit View");
@@ -689,6 +693,7 @@ describe.tags("desktop")("DebugMenu", () => {
         await contains(".o_debug_manager button").click();
         expect(queryAll(".dropdown-menu .dropdown-item")[0]).toHaveText("View Model: res.partner");
         await contains(".dropdown-menu .dropdown-item:contains('View Model:')").click();
+        await animationFrame();
 
         expect(".breadcrumb-item").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveCount(1);
