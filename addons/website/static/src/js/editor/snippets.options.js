@@ -4359,16 +4359,17 @@ registerWebsiteOption("GalleryElement", {
     selector: ".s_image_gallery img, .s_carousel .carousel-item",
 }, { sequence: 10 });
 
-options.registry.Button = options.Class.extend({
+
+export class Button extends SnippetOption {
     /**
      * @override
      */
-    init() {
-        this._super(...arguments);
+    constructor() {
+        super(...arguments);
         const isUnremovableButton = this.$target[0].classList.contains("oe_unremovable");
         this.forceDuplicateButton = !isUnremovableButton;
         this.forceNoDeleteButton = isUnremovableButton;
-    },
+    }
     /**
      * @override
      */
@@ -4379,7 +4380,7 @@ options.registry.Button = options.Class.extend({
         if (options.isCurrent) {
             this._adaptButtons();
         }
-    },
+    }
     /**
      * @override
      */
@@ -4389,7 +4390,7 @@ options.registry.Button = options.Class.extend({
         if (options.isCurrent) {
             this._adaptButtons(false);
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -4455,7 +4456,13 @@ options.registry.Button = options.Class.extend({
             }
             this.$target[0].classList.remove("s_custom_button");
         }
-    },
+    }
+}
+
+registerWebsiteOption("Button", {
+    Class: Button,
+    selector: "a.btn",
+    exclude: "so_submit_button_selector",
 });
 
 class WebsiteLayoutColumn extends LayoutColumn {

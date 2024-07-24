@@ -500,11 +500,6 @@
         .s_donation_donate_btn, .s_website_form_send
     </t>
 
-    <!-- Button -->
-    <div data-js="Button"
-        data-selector="a.btn"
-        t-att-data-exclude="so_submit_button_selector"/>
-
     <!-- Columns only -->
     <div data-js="layout_column"
         data-selector="section.s_features_grid, section.s_process_steps"
