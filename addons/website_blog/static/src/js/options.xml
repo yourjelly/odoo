@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+<t t-name="website_blog.cover_properties_option" t-inherit="website.cover_properties_option" t-inherit-mode="extension">
+    <xpath expr="//WeSelect[@name=&quot;'size_opt'&quot;]" position="replace">
+	    <WeSelect t-if="renderContext.isBlogCover and renderContext.isRegularCover" name="'size_opt'" coverOptName="'size'" title.translate="Size">
+	        <WeButton selectClass="'o_full_screen_height'">Large</WeButton>
+	        <WeButton name="'record_cover_default_size_opt'" selectClass="'o_half_screen_height'">Medium</WeButton>
+	        <WeButton selectClass="'cover_auto'">Tiny</WeButton>
+	    </WeSelect>
+	    <t t-else="">$0</t>
+    </xpath>
+</t>
+</templates>

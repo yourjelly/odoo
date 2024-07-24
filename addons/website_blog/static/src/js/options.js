@@ -3,8 +3,11 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import options from "@web_editor/js/editor/snippets.options.legacy";
-import "@website/js/editor/snippets.options";
+import {
+    CoverProperties,
+} from "@website/js/editor/snippets.options";
 import { uniqueId } from "@web/core/utils/functions";
+import { patch } from "@web/core/utils/patch";
 
 const NEW_TAG_PREFIX = 'new-blog-tag-';
 
@@ -35,27 +38,16 @@ options.registry.many2one.include({
     }
 });
 
-options.registry.CoverProperties.include({
+patch(CoverProperties.prototype, {
     /**
      * @override
      */
-    updateUI: async function () {
-        const isBlogCover = this.$target[0].classList.contains('o_wblog_post_page_cover');
-        if (!isBlogCover) {
-            return this._super(...arguments);
-        }
-        var isRegularCover = this.$target.is('.o_wblog_post_page_cover_regular');
-        var $coverFull = this.$el.find('[data-select-class*="o_full_screen_height"]');
-        var $coverMid = this.$el.find('[data-select-class*="o_half_screen_height"]');
-        var $coverAuto = this.$el.find('[data-select-class*="cover_auto"]');
-        this._coverFullOriginalLabel = this._coverFullOriginalLabel || $coverFull.text();
-        this._coverMidOriginalLabel = this._coverMidOriginalLabel || $coverMid.text();
-        this._coverAutoOriginalLabel = this._coverAutoOriginalLabel || $coverAuto.text();
-        $coverFull.children('div').text(isRegularCover ? _t("Large") : this._coverFullOriginalLabel);
-        $coverMid.children('div').text(isRegularCover ? _t("Medium") : this._coverMidOriginalLabel);
-        $coverAuto.children('div').text(isRegularCover ? _t("Tiny") : this._coverAutoOriginalLabel);
-        return this._super(...arguments);
-    },
+    async _getRenderContext() {
+        const context = await super._getRenderContext();
+        context.isBlogCover = this.$target[0].classList.contains('o_wblog_post_page_cover');
+        context.isRegularCover = this.$target.is('.o_wblog_post_page_cover_regular');
+        return context;
+    }
 });
 
 options.registry.BlogPostTagSelection = options.Class.extend({
