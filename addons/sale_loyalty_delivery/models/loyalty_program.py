@@ -15,6 +15,7 @@ class LoyaltyProgram(models.Model):
             res['loyalty']['reward_ids'].append((0, 0, {
                 'reward_type': 'shipping',
                 'required_points': 100,
+                'description': "Free Shipping"
             }))
         return res
 
