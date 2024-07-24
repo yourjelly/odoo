@@ -160,7 +160,9 @@ export class EmbeddedComponentPlugin extends Plugin {
         host,
         { Component, getEditableDescendants, getProps, name, getStateChangeManager }
     ) {
-        const props = getProps?.(host) || {};
+        const props = Object.assign({
+            getRecordInfo: this.config.getRecordInfo,
+        }, getProps?.(host) || {});
         const { dev, translateFn, getRawTemplate } = this.app;
         const env = Object.create(this.env);
         if (getStateChangeManager) {
