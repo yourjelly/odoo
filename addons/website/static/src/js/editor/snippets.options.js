@@ -1002,7 +1002,7 @@ patch(SnippetOption.prototype, {
         // Some public widgets may depend on the variables that were
         // customized, so we have to restart them *all*.
         await new Promise((resolve, reject) => {
-            this.trigger_up('widgets_start_request', {
+            this.env.services.website.websiteRootInstance.trigger_up("widgets_start_request", {
                 editableMode: true,
                 onSuccess: () => resolve(),
                 onFailure: () => reject(),
@@ -1127,7 +1127,7 @@ patch(SnippetOption.prototype, {
      */
     _refreshPublicWidgets: async function ($el) {
         return new Promise((resolve, reject) => {
-            this.env.services.website.websiteRootInstance.trigger_up('widgets_start_request', {
+            this.env.services.website.websiteRootInstance?.trigger_up('widgets_start_request', {
                 editableMode: true,
                 $target: $el || this.$target,
                 onSuccess: resolve,
@@ -1140,10 +1140,16 @@ patch(SnippetOption.prototype, {
      */
     _reloadBundles: async function() {
         return new Promise((resolve, reject) => {
-            this.trigger_up('reload_bundles', {
-                onSuccess: () => resolve(),
-                onFailure: () => reject(),
-            });
+            const event = {
+                target: this,
+                name: "reload_bundles",
+                data: {
+                    onSuccess: () => resolve(),
+                    onFailure: () => reject(),
+                },
+                stopped: false,
+            };
+            this.options.wysiwyg._trigger_up(event);
         });
     },
     /**
