@@ -1,4 +1,5 @@
 from lxml import html
+from itertools import count
 import base64
 import hashlib
 import secrets
@@ -93,11 +94,11 @@ class CardCampaign(models.Model):
         )[0]
         return image_bytes and base64.b64encode(image_bytes)
 
-    @api.depends('card_template_id.body', 'card_template_id.style', 'card_element_ids', 'preview_record_ref', 'res_model', 'card_element_ids.card_element_role',
+    @api.depends('card_template_id.template_variant', 'card_element_ids', 'preview_record_ref', 'res_model', 'card_element_ids.card_element_role',
                  'card_element_ids.card_element_image', 'card_element_ids.card_element_text', 'card_element_ids.field_path',
                  'card_element_ids.text_color', 'card_element_ids.render_type', 'card_element_ids.value_type',)
     def _compute_image_preview(self):
-        rendered_campaigns = self.filtered('card_template_id.body').filtered('card_element_ids')
+        rendered_campaigns = self.filtered('card_element_ids')
         (self - rendered_campaigns).image_preview = False
 
         for campaign in rendered_campaigns:
@@ -212,8 +213,6 @@ class CardCampaign(models.Model):
         }
 
     def _get_image_b64(self, record=None):
-        if not self.card_template_id.body:
-            return ''
         image_bytes = self.env['ir.actions.report']._run_wkhtmltoimage(
             [self.card_template_id._render_document(self._get_card_element_values(record, {}), {element.card_element_role: element.text_color for element in self.card_element_ids})],
             *TEMPLATE_DIMENSIONS

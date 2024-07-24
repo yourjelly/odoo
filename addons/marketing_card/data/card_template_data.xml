@@ -6,11 +6,8 @@
         <field name="secondary_color">#000000</field>
         <field name="primary_text_color">#000000</field>
         <field name="secondary_text_color">#ffffff</field>
+        <field name="template_variant">5</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_light')]"/>
-        <value eval="ref('marketing_card.template_5')"/>
-    </function>
 
     <record id="card_template_dark" model="card.template">
         <field name="name">Dark</field>
@@ -18,11 +15,8 @@
         <field name="secondary_color">#dedede</field>
         <field name="primary_text_color">#ffffff</field>
         <field name="secondary_text_color">#161315</field>
+        <field name="template_variant">5</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_dark')]"/>
-        <value eval="ref('marketing_card.template_5')"/>
-    </function>
 
     <record id="card_template_user_image" model="card.template">
         <field name="name">User's Image</field>
@@ -31,11 +25,8 @@
         <field name="primary_text_color">#ffffff</field>
         <field name="secondary_text_color">#161315</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Image.png"/>
+        <field name="template_variant">1</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_user_image')]"/>
-        <value eval="ref('marketing_card.template_1')"/>
-    </function>
 
     <record id="card_template_world_map" model="card.template">
         <field name="name">World Map</field>
@@ -44,11 +35,8 @@
         <field name="primary_text_color">#ffffff</field>
         <field name="secondary_text_color">#161315</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/WorldMap.png"/>
+        <field name="template_variant">2</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_world_map')]"/>
-        <value eval="ref('marketing_card.template_2')"/>
-    </function>
 
     <record id="card_template_lila" model="card.template">
         <field name="name">Lila</field>
@@ -57,11 +45,8 @@
         <field name="primary_text_color">#000000</field>
         <field name="secondary_text_color">#ffffff</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Lila.png"/>
+        <field name="template_variant">3</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_lila')]"/>
-        <value eval="ref('marketing_card.template_3')"/>
-    </function>
 
     <record id="card_template_safari" model="card.template">
         <field name="name">Safari</field>
@@ -70,11 +55,8 @@
         <field name="primary_text_color">#ffffff</field>
         <field name="secondary_text_color">#161315</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Desert.png"/>
+        <field name="template_variant">4</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_safari')]"/>
-        <value eval="ref('marketing_card.template_4')"/>
-    </function>
 
     <record id="card_template_waves" model="card.template">
         <field name="name">Waves</field>
@@ -83,11 +65,8 @@
         <field name="primary_text_color">#000000</field>
         <field name="secondary_text_color">#ffffff</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Waves.png"/>
+        <field name="template_variant">5</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_waves')]"/>
-        <value eval="ref('marketing_card.template_5')"/>
-    </function>
 
     <record id="card_template_lines" model="card.template">
         <field name="name">Lines</field>
@@ -96,11 +75,8 @@
         <field name="primary_text_color">#ffffff</field>
         <field name="secondary_text_color">#161315</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Lines.png"/>
+        <field name="template_variant">2</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_lines')]"/>
-        <value eval="ref('marketing_card.template_2')"/>
-    </function>
 
     <record id="card_template_organic" model="card.template">
         <field name="name">Organic</field>
@@ -109,11 +85,8 @@
         <field name="primary_text_color">#000000</field>
         <field name="secondary_text_color">#ffffff</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Organic.png"/>
+        <field name="template_variant">4</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_organic')]"/>
-        <value eval="ref('marketing_card.template_4')"/>
-    </function>
 
     <record id="card_template_blur" model="card.template">
         <field name="name">Blur</field>
@@ -122,11 +95,8 @@
         <field name="primary_text_color">#000000</field>
         <field name="secondary_text_color">#ffffff</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Blur.png"/>
+        <field name="template_variant">1</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_blur')]"/>
-        <value eval="ref('marketing_card.template_1')"/>
-    </function>
 
     <record id="card_template_geometric" model="card.template">
         <field name="name">Geometric</field>
@@ -135,11 +105,8 @@
         <field name="primary_text_color">#000000</field>
         <field name="secondary_text_color">#ffffff</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Geometric.png"/>
+        <field name="template_variant">4</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_geometric')]"/>
-        <value eval="ref('marketing_card.template_4')"/>
-    </function>
 
     <record id="card_template_circles" model="card.template">
         <field name="name">Circles</field>
@@ -148,11 +115,8 @@
         <field name="primary_text_color">#000000</field>
         <field name="secondary_text_color">#ffffff</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Circles.png"/>
+        <field name="template_variant">5</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_circles')]"/>
-        <value eval="ref('marketing_card.template_5')"/>
-    </function>
 
     <record id="card_template_avatar_highlight" model="card.template">
         <field name="name">Avatar Highlight</field>
@@ -161,11 +125,8 @@
         <field name="primary_text_color">#000000</field>
         <field name="secondary_text_color">#ffffff</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Highlight.png"/>
+        <field name="template_variant">3</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_avatar_highlight')]"/>
-        <value eval="ref('marketing_card.template_3')"/>
-    </function>
 
     <record id="card_template_drawings" model="card.template">
         <field name="name">Drawings</field>
@@ -174,10 +135,7 @@
         <field name="primary_text_color">#000000</field>
         <field name="secondary_text_color">#ffffff</field>
         <field name="default_background" type="base64" file="marketing_card/static/card_backgrounds/Drawings.png"/>
+        <field name="template_variant">5</field>
     </record>
-    <function model="card.template" name="_update_from_view">
-        <value eval="[ref('card_template_drawings')]"/>
-        <value eval="ref('marketing_card.template_5')"/>
-    </function>
 
 </odoo>
