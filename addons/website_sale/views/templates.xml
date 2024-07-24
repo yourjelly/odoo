@@ -2018,6 +2018,16 @@
                                                         t-att-readonly="'1' if vat_warning else None"
                                                         class="form-control"
                                                     />
+                                                    <div t-if="website_company_country == 'IN'">
+                                                        <div id="sez_user_option" class="mt-2 form-check form-switch">
+                                                            <input
+                                                                    type="checkbox"
+                                                                    id="is_l10n_in_sez"
+                                                                    class="form-check-input mr8"
+                                                                    name="is_l10n_in_sez"
+                                                                    t-att-checked="partner_sudo.is_l10n_in_sez"/>Is the GSTIN under SEZ
+                                                        </div>
+                                                    </div>
                                                     <small t-if="vat_warning" class="form-text text-muted d-block d-lg-none">
                                                         Changing VAT number is not allowed once document(s) have been issued for your account. Please contact us directly for this operation.
                                                     </small>

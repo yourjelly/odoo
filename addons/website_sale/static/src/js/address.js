@@ -75,6 +75,15 @@ publicWidget.registry.websiteSaleAddress = publicWidget.Widget.extend({
             this.addressForm.phone.placeholder = '';
         }
 
+        console.log(data)
+        console.log(this.addressForm.country_id.value)
+        if (countryId == 104) {
+            $("#sez_user_option").show()
+        } else {
+            $("#sez_user_option").hide()
+            $("#is_l10n_in_sez").val(false)
+        }
+
         // populate states and display
         var selectStates = this.addressForm.state_id;
         if (!init || selectStates.options.length === 1) {

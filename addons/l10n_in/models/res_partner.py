@@ -17,7 +17,11 @@ class ResPartner(models.Model):
             ('special_economic_zone', 'Special Economic Zone'),
             ('deemed_export', 'Deemed Export'),
             ('uin_holders', 'UIN Holders'),
-        ], string="GST Treatment")
+        ],
+        store=True,
+        compute='_compute_l10n_in_gst_treatment',
+        string="GST Treatment"
+    )
 
     l10n_in_pan = fields.Char(
         string="PAN",
@@ -28,6 +32,7 @@ class ResPartner(models.Model):
     )
 
     display_pan_warning = fields.Boolean(string="Display pan warning", compute="_compute_display_pan_warning")
+    is_l10n_in_sez = fields.Boolean('Is your GSTIN under SEZ')
 
     @api.depends('l10n_in_pan')
     def _compute_display_pan_warning(self):
@@ -72,3 +77,28 @@ class ResPartner(models.Model):
         if vat == TEST_GST_NUMBER:
             return True
         return super().check_vat_in(vat)
+
+    @api.depends('is_l10n_in_sez')
+    def _compute_l10n_in_gst_treatment(self):
+        for partner in self:
+            if partner.company_id.country_code == 'IN' and partner.is_l10n_in_sez:
+                partner.l10n_in_gst_treatment = 'special_economic_zone'
+            else:
+                partner.l10n_in_gst_treatment = 'regular'
+
+    def _update_user_sez_status(self, vat, l10n_in_sez_status):
+        self.ensure_one()
+        if self.env.company.country_code == "IN" and (not self.company_id or self.company_id.country_code == "IN"):
+            values = {}
+            if self.vat != vat:
+                values['vat'] = vat
+            fiscal_position = self.with_company(self.env.company.id).env['account.chart.template']\
+                                .ref('fiscal_position_in_export_sez_in')
+            if l10n_in_sez_status and fiscal_position:
+                values['property_account_position_id'] = fiscal_position.id
+            else:
+                values['property_account_position_id'] = False
+
+            if self.is_l10n_in_sez != l10n_in_sez_status:
+                values['is_l10n_in_sez'] = l10n_in_sez_status
+            self.sudo().write(values)

@@ -1062,7 +1062,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         partner_sudo, address_type = self._prepare_address_update(
             order_sudo, partner_id=partner_id, address_type=address_type
         )
-
         # Render the address form.
         address_form_values = self._prepare_address_form_values(
             order_sudo,
@@ -1122,6 +1121,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'use_same': use_same,
             'discard_url': is_anonymous_cart and '/shop/cart' or '/shop/checkout',
             'country': country_sudo,
+            'website_company_country': request.env.company.country_code,
             'countries': ResCountrySudo.search([]),
             'state_id': state_id,
             'country_states': country_sudo.state_ids,
@@ -1138,6 +1138,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
             ),
             'vat_label': _lt("VAT"),
         }
+
+    def _update_user_sez_status(self, partner, vat, l10n_in_sez_status):
+        return
 
     @route(
         '/shop/address/submit', type='http', methods=['POST'], auth='public', website=True,
@@ -1179,6 +1182,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
         # Parse form data into address values, and extract incompatible data as extra form data.
         address_values, extra_form_data = self._parse_form_data(form_data)
+
+        is_l10n_in_sez_user = bool(form_data.get('is_l10n_in_sez'))
+        if is_l10n_in_sez_user:
+            self._update_user_sez_status(partner_sudo, form_data.get('vat'), is_l10n_in_sez_user)
 
         # Validate the address values and highlights the problems in the form, if any.
         invalid_fields, missing_fields, error_messages = self._validate_address_values(
