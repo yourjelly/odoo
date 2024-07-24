@@ -2498,19 +2498,17 @@ options.registry.HeaderElements = options.Class.extend({
     },
 });
 
-options.registry.HeaderNavbar = options.Class.extend({
+export class HeaderNavbar extends SnippetOption {
     /**
      * Particular case: we want the option to be associated on the header navbar
      * in XML so that the related options only appear on navbar click (not
      * header), in a different section, etc... but we still want the target to
      * be the header itself.
-     *
-     * @constructor
      */
-    init() {
-        this._super(...arguments);
+    constructor() {
+        super(...arguments);
         this.setTarget(this.$target.closest('#wrapwrap > header'));
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -2529,7 +2527,17 @@ options.registry.HeaderNavbar = options.Class.extend({
                 return !!this.$('.navbar-brand').length;
             }
         }
-        return this._super(...arguments);
+        return super._computeWidgetVisibility(...arguments);
+    }
+}
+
+registerWebsiteOption("HeaderNavbar", {
+    Class: HeaderNavbar,
+    template: "website.HeaderNavbar",
+    selector: "#wrapwrap > header nav.navbar",
+    noCheck: true,
+    data: {
+        groups: ["website.group_website_designer"],
     },
 });
 

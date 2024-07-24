@@ -261,6 +261,87 @@
                    pageOptionName="'header_text_color'"/>
 </t>
 
+<!-- Header > Navbar Options -->
+<t t-name="website.HeaderNavbar">
+    <WeSelect title.translate="Mobile Alignment"
+              name="'header_mobile_alignment_opt'"
+              variable="'hamburger-position-mobile'"
+              reload="'/'">
+        <WeButton customizeWebsiteViews="''" customizeWebsiteVariable="`'left'`">Left</WeButton>
+        <WeButton customizeWebsiteViews="'website.template_header_mobile_align_center, website.template_header_hamburger_mobile_align_center'"
+                  customizeWebsiteVariable="`'center'`">Center</WeButton>
+        <WeButton customizeWebsiteViews="'website.template_header_mobile_align_right, website.template_header_hamburger_mobile_align_right'"
+                  customizeWebsiteVariable="`'right'`">Right</WeButton>
+    </WeSelect>
+
+    <WeRow title.translate="Font">
+        <WeFontFamilyPicker variable="'navbar-font'"/>
+    </WeRow>
+
+    <WeRow title.translate="Format" class="'o_we_header_font_row'">
+        <WeInput customizeWebsiteVariable="'null'" variable="'header-font-size'" unit="'px'" saveUnit="'rem'"/>
+        <WeColorpicker variable="'header-text-color'" customizeWebsiteVariable="''"/>
+        <!-- Generic alignment option controlling all the template at once. -->
+        <!-- Currently needed to be this way as the SCSS variable controls -->
+        <!-- the mobile alignment which is the same for all templates. -->
+        <WeSelect class="'o_we_icon_select'"
+                  name="'header_alignment_opt'"
+                  variable="'hamburger-position'"
+                  reload="'/'"
+                  tooltip.translate="Alignment"
+                  dependencies="'header_default_opt, header_hamburger_opt, header_boxed_opt, header_stretch_opt, header_search_opt, header_sales_one_opt, header_sales_two_opt, header_sales_four_opt, header_sidebar_opt'">
+            <WeButton customizeWebsiteViews="''"
+                      customizeWebsiteVariable="`'left'`"
+                      icon="'fa-align-left'"/>
+            <WeButton customizeWebsiteViews="'website.template_header_default_align_center, website.template_header_boxed_align_center, website.template_header_stretch_align_center, website.template_header_search_align_center, website.template_header_sales_one_align_center, website.template_header_sales_two_align_center, website.template_header_sales_four_align_center, website.template_header_sidebar_align_center'"
+                      customizeWebsiteVariable="`'center'`"
+                      icon="'fa-align-center'"
+                      dependencies="'!header_hamburger_opt'"/>
+            <WeButton customizeWebsiteViews="'website.template_header_default_align_right, website.template_header_hamburger_align_right, website.template_header_boxed_align_right, website.template_header_stretch_align_right, website.template_header_search_align_right, website.template_header_sales_one_align_right, website.template_header_sales_two_align_right, website.template_header_sales_four_align_right, website.template_header_sidebar_align_right'"
+                      customizeWebsiteVariable="`'right'`"
+                      icon="'fa-align-right'"/>
+        </WeSelect>
+    </WeRow>
+
+    <WeSelect title.translate="Links Style"
+              variable="'header-links-style'"
+              reload="'/'"
+              dependencies="'!header_stretch_opt'">
+        <WeButton name="'option_header_navbar_links_default'"
+                  customizeWebsiteViews="''"
+                  customizeWebsiteVariable="`'default'`">Default</WeButton>
+        <WeButton name="'option_header_navbar_links_fill'"
+                  customizeWebsiteViews="'website.header_navbar_pills_style'"
+                  customizeWebsiteVariable="`'fill'`">Fill</WeButton>
+        <WeButton name="'option_header_navbar_links_outline'"
+                  customizeWebsiteViews="''"
+                  customizeWebsiteVariable="`'outline'`">Outline</WeButton>
+        <WeButton name="'option_header_navbar_links_pills'"
+                  customizeWebsiteViews="'website.header_navbar_pills_style'"
+                  customizeWebsiteVariable="`'pills'`">Pills</WeButton>
+        <WeButton name="'option_header_navbar_block'"
+                  customizeWebsiteViews="'website.header_navbar_pills_style'"
+                  customizeWebsiteVariable="`'block'`">Block</WeButton>
+        <WeButton name="'option_header_navbar_border_bottom'"
+                  customizeWebsiteViews="''"
+                  customizeWebsiteVariable="`'border-bottom'`">Border Bottom</WeButton>
+    </WeSelect>
+
+    <WeSelect title.translate="Sub Menus"
+              id="'option_header_dropdown'"
+              dependencies="'!header_hamburger_opt'"
+              noPreview="'true'">
+        <WeButton selectClass="'o_hoverable_dropdown'"
+                  customizeWebsiteViews="'website.header_hoverable_dropdown'">
+            On Hover
+        </WeButton>
+        <WeButton selectClass="''"
+                  name="'header_dropdown_on_click_opt'">
+            On Click
+        </WeButton>
+    </WeSelect>
+</t>
+
 <!-- Footer - Borders & Shadows -->
 <t t-name="website.HideFooter">
     <WeCheckbox title.translate="Page Visibility" visibility="'hidden|shown'" noPreview="'true'"/>
