@@ -7,6 +7,11 @@
     'data': [
         'security/ir.model.access.csv',
     ],
+    'assets': {
+        'web.assets_tests': [
+            'test_marketing_card/static/tests/tours/**/*',
+        ],
+    },
     'application': False,
     'installable': True,
     'license': 'LGPL-3',

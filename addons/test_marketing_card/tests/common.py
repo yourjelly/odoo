@@ -125,6 +125,29 @@ class MarketingCardCommon(TransactionCase, MockImageRender):
             """,
         })
 
+        card_element_commands = [
+            (0, 0, {'card_element_role': 'subheader', 'value_type': 'field', 'field_path': 'name'}),
+            (0, 0, {'card_element_role': 'section_1', 'value_type': 'field', 'field_path': 'event_id'}),
+            (0, 0, {'card_element_role': 'subsection_1', 'value_type': 'field', 'field_path': 'event_id.location_id'}),
+            (0, 0, {'card_element_role': 'subsection_2', 'value_type': 'field', 'field_path': 'event_id.location_id.tag_ids'}),
+            (0, 0, {'card_element_role': 'image_1', 'value_type': 'field', 'field_path': 'event_id.image'}),
+        ]
+        card_element_commands.extend([
+            command
+            for command in cls.env['card.campaign'].default_get(['card_element_ids'])['card_element_ids']
+            if command[2]['card_element_role'] not in set(command[2]['card_element_role'] for command in card_element_commands)
+        ])
+        cls.campaign = cls.env['card.campaign'].create({
+            'name': 'Test Campaign',
+            'card_element_ids': card_element_commands,
+            'card_template_id': cls.card_template.id,
+            'res_model': cls.concert_performances._name,
+            'post_suggestion': 'Come see my show!',
+            'reward_message': """<p>Thanks for sharing!</p>""",
+            'reward_target_url': f"{cls.env['card.campaign'].get_base_url()}/share-rewards/2039-sharer-badge/",
+            'target_url': cls.env['card.campaign'].get_base_url(),
+        })
+
     @staticmethod
     def _extract_values_from_document(rendered_document):
         return {

@@ -33,8 +33,18 @@ class MarketingCardEventLocation(models.Model):
     _name = 'card.test.event.location'
 
     name = fields.Char()
+    manager_email = fields.Char()
     tag_ids = fields.Many2many('card.test.event.location.tag')
     secret = fields.Char()
+
+    def _message_get_default_recipients(self):
+        return {
+            location: {
+                'partner_ids': [],
+                'email_to': location.manager_email,
+                'email_cc': False,
+            } for location in self
+        }
 
     def _marketing_card_allowed_field_paths(self):
         """We allow access to 'secret' but the model isn't selectable as a render target.
