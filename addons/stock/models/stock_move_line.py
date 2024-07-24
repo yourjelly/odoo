@@ -48,8 +48,8 @@ class StockMoveLine(models.Model):
         domain="[('product_id', '=', product_id)]", check_company=True)
     lot_name = fields.Char('Lot/Serial Number Name')
     result_package_id = fields.Many2one(
-        'stock.quant.package', 'Destination Package',
-        ondelete='restrict', required=False, check_company=True,
+        'stock.quant.package', 'Destination Package', compute='_compute_result_package_id', store=True,
+        ondelete='restrict', required=False, check_company=True, readonly=False,
         domain="['|', '|', ('location_id', '=', False), ('location_id', '=', location_dest_id), ('id', '=', package_id)]",
         help="If set, the operations are packed into this package")
     date = fields.Datetime('Date', default=fields.Datetime.now, required=True)
@@ -86,6 +86,15 @@ class StockMoveLine(models.Model):
     product_packaging_qty = fields.Float(string="Reserved Packaging Quantity", compute='_compute_product_packaging_qty')
     picking_location_id = fields.Many2one(related='picking_id.location_id')
     picking_location_dest_id = fields.Many2one(related='picking_id.location_dest_id')
+    packages_to_remove = fields.Many2many('stock.quant.package')
+
+    @api.depends('picked')
+    def _compute_result_package_id(self):
+        for ml in self:
+            ml.result_package_id = ml.result_package_id  # Keep the existing value
+            if ml.picked:
+                if ml.result_package_id in ml.packages_to_remove and ml.move_id.quantity != ml.move_id.product_uom_qty:
+                    ml['result_package_id'] = False
 
     @api.depends('product_uom_id.category_id', 'product_id.uom_id.category_id', 'move_id.product_uom', 'product_id.uom_id')
     def _compute_product_uom_id(self):
@@ -427,6 +436,9 @@ class StockMoveLine(models.Model):
                     # Make sure `reserved_uom_qty` is not negative.
                     if float_compare(new_reserved_qty, 0, precision_rounding=ml.product_id.uom_id.rounding) < 0:
                         raise UserError(_('Reserving a negative quantity is not allowed.'))
+                    # Remove destination package if when quantity is changed than original
+                    if vals.get('quantity', 0) != ml.quantity and ml.result_package_id:
+                        ml.packages_to_remove |= ml.result_package_id
                 else:
                     new_reserved_qty = ml.quantity_product_uom
 
@@ -498,6 +510,11 @@ class StockMoveLine(models.Model):
             # Unlinking a move line should unreserve.
             if not float_is_zero(ml.quantity_product_uom, precision_digits=precision) and ml.move_id and not ml.move_id._should_bypass_reservation(ml.location_id):
                 self.env['stock.quant']._update_reserved_quantity(ml.product_id, ml.location_id, -ml.quantity_product_uom, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
+            # Remove the result package id from other move lines
+            if ml.move_id and ml.picking_id:
+                ml.picking_id.move_ids.move_line_ids.filtered(lambda mvl: mvl.result_package_id == ml.result_package_id).update({
+                    'result_package_id': False
+                })
         moves = self.mapped('move_id')
         package_levels = self.package_level_id
         res = super().unlink()
