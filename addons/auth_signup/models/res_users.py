@@ -344,9 +344,10 @@ class ResUsers(models.Model):
                     users_with_email.partner_id.with_context(create_user=True).signup_cancel()
         return users
 
-    def copy(self, default=None):
-        self.ensure_one()
+    def copy_data(self, default=None):
+        vals_list = super().copy_data(default=default)
         if not default or not default.get('email'):
-            # avoid sending email to the user we are duplicating
             self = self.with_context(no_reset_password=True)
-        return super().copy(default=default)
+            for user, vals in zip(self, vals_list):
+                vals['name'] = _("%s (Copy)", user.name)
+        return vals_list
