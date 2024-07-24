@@ -6448,7 +6448,7 @@ class BaseModel(metaclass=MetaModel):
             if field.translate:
                 return field._convert_from_cache_to_column(value)
             return field.convert_to_column(
-                field.convert_to_write(value, record),
+                value,
                 record,
             )
 
