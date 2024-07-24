@@ -169,7 +169,15 @@
         <WeTitle t-if="props.slots?.title || props.title"
                title="props.title" slots="{title: props.slots?.title}"/>
         <div>
-            <we-toggler t-out="state.toggler.textContent" t-att-class="{ 'active': state.opened }"/>
+            <we-toggler t-att-class="{ 'active': state.opened }">
+                <t t-if="state.toggler.textContent" t-out="state.toggler.textContent"/>
+                <t t-if="state.toggler.faIcon">
+                    <i t-att-class="`fa ${state.toggler.faIcon}`"/>
+                </t>
+                <t t-if="state.toggler.imgSrc">
+                    <img t-att-src="state.toggler.imgSrc"/>
+                </t>
+            </we-toggler>
             <we-selection-items t-ref="menu">
                 <t t-slot="default"/>
             </we-selection-items>
