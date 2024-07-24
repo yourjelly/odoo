@@ -488,11 +488,6 @@
         <t t-set="with_gradients" t-value="True"/>
     </t>
 
-    <!-- Accordion -->
-    <div data-js="collapse"
-         data-selector='.accordion > .card'
-         data-drop-in='.accordion:has(> .card)'/>
-
     <div data-js="MultipleItems" data-selector=".s_faq_collapse">
         <we-row string="Item">
             <we-button data-add-item="" data-item=".accordion > .card:last" data-select-item="" data-no-preview="true" class="o_we_bg_brand_primary">

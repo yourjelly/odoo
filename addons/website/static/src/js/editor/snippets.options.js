@@ -2384,34 +2384,34 @@ class Parallax extends SnippetOption {
     }
 }
 
-options.registry.collapse = options.Class.extend({
+export class BSCollapse extends SnippetOption {
     /**
      * @override
      */
-    start: function () {
+    async willStart() {
         var self = this;
         this.$bsTarget.on('shown.bs.collapse hidden.bs.collapse', '[role="tabpanel"]', function () {
-            self.trigger_up('cover_update');
+            self.callbacks.coverUpdate();
             self.$target.trigger('content_changed');
         });
-        return this._super.apply(this, arguments);
-    },
+        return super.willStart(...arguments);
+    }
     /**
      * @override
      */
-    onBuilt: function () {
+    onBuilt() {
         this._createIDs();
-    },
+    }
     /**
      * @override
      */
-    onClone: function () {
+    onClone() {
         this._createIDs();
-    },
+    }
     /**
      * @override
      */
-    onMove: function () {
+    onMove() {
         this._createIDs();
         var $panel = this.$bsTarget.find('.collapse').removeData('bs.collapse');
         if ($panel.attr('aria-expanded') === 'true') {
@@ -2422,7 +2422,7 @@ options.registry.collapse = options.Class.extend({
                     $panel.trigger('shown.bs.collapse');
                 });
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -2433,7 +2433,7 @@ options.registry.collapse = options.Class.extend({
      *
      * @private
      */
-    _createIDs: function () {
+    _createIDs() {
         let time = new Date().getTime();
         const $tablist = this.$target.closest('[role="tablist"]');
         const $tab = this.$target.find('[role="tab"]');
@@ -2461,7 +2461,13 @@ options.registry.collapse = options.Class.extend({
         $tab.data('bs-target', '#' + panelId);
 
         $tab[0].setAttribute("aria-controls", panelId);
-    },
+    }
+}
+
+registerWebsiteOption("Accordion", {
+    Class: BSCollapse,
+    selector: ".accordion > .card",
+    dropIn: ".accordion:has(> .card)",
 });
 
 options.registry.HeaderElements = options.Class.extend({
