@@ -91,6 +91,15 @@ options.registry.NavTabs = options.registry.MultipleItems.extend({
 });
 options.registry.NavTabsStyle = options.Class.extend({
 
+    // async updateUI() {
+    //     if (this.rerender) {
+    //         this.rerender = false;
+    //         await this._rerenderXML();
+    //         return;
+    //     }
+    //     return this._super.apply(this, arguments);
+    // },
+
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
@@ -114,6 +123,7 @@ options.registry.NavTabsStyle = options.Class.extend({
      */
     setDirection: function (previewMode, widgetValue, params) {
         const isVertical = widgetValue === 'vertical';
+        this.$target[0].dataset.direction = widgetValue;
         this.$target.toggleClass('row s_col_no_resize s_col_no_bgcolor', isVertical);
         this.$target.find('.s_tabs_nav:first .nav').toggleClass('flex-column', isVertical);
         this.$target.find('.s_tabs_nav:first > .nav-link').toggleClass('py-2', isVertical);
@@ -135,17 +145,13 @@ options.registry.NavTabsStyle = options.Class.extend({
         }
         return this._super(...arguments);
     },
-    _computeWidgetVisibility(widgetName, params) {
-        const isFill = !!this.$target[0].querySelector(".nav-fill");
-        const isJustified = this.$target[0].querySelector(".nav-justified");
-        const isVertical = !!this.$target[0].querySelector(".flex-column");
 
-        console.log(isJustified);
-
-        if (widgetName === "alignment_opt") {
-            console.log(!(isFill || isJustified || isVertical));
-            console.log(isFill, isJustified, isVertical);
-            return !(isFill || isJustified || isVertical);
+    _computeWidgetVisibility(widgetName, widgetValue) {
+        const directionVertical = this.$target[0].dataset.direction === 'vertical';
+        console.log('testmano', directionVertical)
+        if(widgetName === 'alignment_opt') {
+            console.log('testmano', directionVertical)
+            return !directionVertical;
         }
 
         return this._super(...arguments);

@@ -103,7 +103,7 @@
                 data-color-prefix="bg-"/>
             <we-select string="Direction" data-dependencies="pills_opt, underline_opt">
                 <we-button data-set-direction="horizontal" data-name="horizontal_opt">Horizontal</we-button>
-                <we-button data-set-direction="vertical" data-trigger="left_alignment_opt,regular_width_opt">Vertical</we-button>
+                <we-button data-set-direction="vertical" data-trigger="left_alignment_opt,regular_width_opt" data-name="vertical_opt">Vertical</we-button>
             </we-select>
             <we-select string="Fill and Justify" data-apply-to=".s_tabs_nav:first .nav" data-dependencies="horizontal_opt">
                 <we-button data-select-class="" data-name="regular_width_opt">Regular</we-button>
