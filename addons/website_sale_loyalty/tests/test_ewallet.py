@@ -38,6 +38,7 @@ class TestEwallet(HttpCase, WebsiteSaleCommon):
                 'discount_mode': 'per_point',
                 'discount': 1,
                 'discount_applicability': 'order',
+                'description': 'eWallet Reward',
             })],
         }])
         installed_modules = set(cls.env['ir.module.module'].search([

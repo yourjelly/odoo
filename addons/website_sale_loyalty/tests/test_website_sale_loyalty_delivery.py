@@ -119,6 +119,7 @@ class TestWebsiteSaleDelivery(HttpCase):
             })],
             'reward_ids': [(0, 0, {
                 'reward_type': 'shipping',
+                'description': 'Free Shipping',
                 'discount_max_amount': 75.0
             })],
         })

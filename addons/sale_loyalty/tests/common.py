@@ -114,6 +114,7 @@ class TestSaleCouponCommon(TestSaleProductAttributeValueCommon):
                 'discount': 1,
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
+                'description': '$1 per point on your order',
             })]
         })
         cls.immediate_promotion_program = cls.env['loyalty.program'].create({
@@ -133,6 +134,7 @@ class TestSaleCouponCommon(TestSaleProductAttributeValueCommon):
                 'reward_product_id': cls.product_B.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         cls.code_promotion_program = cls.env['loyalty.program'].create({
@@ -152,6 +154,7 @@ class TestSaleCouponCommon(TestSaleProductAttributeValueCommon):
                 'reward_product_id': cls.product_A.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         cls.code_promotion_program_with_discount = cls.env['loyalty.program'].create({
@@ -174,6 +177,7 @@ class TestSaleCouponCommon(TestSaleProductAttributeValueCommon):
                 'discount': 10,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '10% discount on your order',
             })],
         })
 
@@ -273,6 +277,7 @@ class TestSaleCouponNumbersCommon(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '10% discount on your order',
             })],
         })
         cls.p2 = cls.env['loyalty.program'].create({
@@ -290,6 +295,7 @@ class TestSaleCouponNumbersCommon(TestSaleCouponCommon):
                 'reward_product_id': cls.largeCabinet.id,
                 'reward_product_qty': 1,
                 'required_points': 3,
+                'description': 'Free Product',
             })],
         })
         cls.p3 = cls.env['loyalty.program'].create({
@@ -307,6 +313,7 @@ class TestSaleCouponNumbersCommon(TestSaleCouponCommon):
                 'reward_product_id': cls.largeMeetingTable.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         cls.discount_coupon_program = cls.env['loyalty.program'].create({
@@ -323,6 +330,7 @@ class TestSaleCouponNumbersCommon(TestSaleCouponCommon):
                 'discount': 100,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$100 discount per point on your order',
             })],
         })
         cls.all_programs = cls.env['loyalty.program'].search([])

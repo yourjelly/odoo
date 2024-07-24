@@ -96,6 +96,7 @@ class TestProgramRules(TestSaleCouponCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'specific',
                 'discount_product_ids': [Command.set(self.product_A.ids)],
+                'description': '10% discount',
             })],
         })
         self.env['sale.order.line'].create([{
@@ -138,6 +139,7 @@ class TestProgramRules(TestSaleCouponCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'specific',
                 'discount_product_ids': [Command.set(self.product_A.ids)],
+                'description': '10% discount',
             })],
         })
         self.env['sale.order.line'].create([{
@@ -182,6 +184,7 @@ class TestProgramRules(TestSaleCouponCommon):
                 'discount_mode': 'percent',
                 'discount': 10,
                 'discount_applicability': 'order',
+                'description': '10% discount',
             })],
         })
 
@@ -246,6 +249,7 @@ class TestProgramRules(TestSaleCouponCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '5% on your order',
             })],
         })
         p2 = self.env['loyalty.program'].create({
@@ -263,6 +267,7 @@ class TestProgramRules(TestSaleCouponCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '10% on your order',
             })],
         })
         sol = self.env['sale.order.line'].create({

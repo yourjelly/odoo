@@ -34,6 +34,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount': 50,
                 'discount_mode': 'percent',
                 'discount_applicability': 'specific',
+                'description': '50% on specific products',
                 'discount_product_ids': cls.whiteboard_pen | cls.magnetic_board | cls.desk_organizer,
             })],
         })
@@ -51,6 +52,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount': 90,
                 'discount_mode': 'percent',
                 'discount_applicability': 'cheapest',
+                'description': '90% on the cheapest product',
             })]
         })
         cls.promo_programs |= cls.auto_promo_program_current
@@ -68,6 +70,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% on your order',
             })]
         })
         cls.promo_programs |= cls.auto_promo_program_next
@@ -91,6 +94,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_id': cls.desk_organizer.id,
                 'reward_product_qty': 1,
                 'required_points': 1.5,
+                'description': 'Free Product - Desk Organizer',
             })],
             'pos_config_ids': [Command.link(cls.main_pos_config.id)],
         })
@@ -230,6 +234,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_id': self.desk_organizer.id,
                 'reward_product_qty': 1,
                 'required_points': 2,
+                'description': 'Free Product - Desk Organizer',
             })],
         })
         free_other_product = self.env['loyalty.program'].create({
@@ -247,6 +252,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_id': self.whiteboard_pen.id,
                 'reward_product_qty': 1,
                 'required_points': 3,
+                'description': 'Free Product - Whiteboard Pen',
             })],
         })
         free_multi_product = self.env['loyalty.program'].create({
@@ -267,6 +273,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 }).id,
                 'reward_product_qty': 1,
                 'required_points': 2,
+                'description': 'Free Product - [Desk Pad, Monitor Stand]',
             })],
         })
 
@@ -317,6 +324,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_id': self.whiteboard_pen.id,
                 'reward_product_qty': 1,
                 'required_points': 4,
+                'description': 'Free Product - Whiteboard Pen',
             })],
         })
 
@@ -375,6 +383,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_id': self.whiteboard_pen.id,
                 'reward_product_qty': 1,
                 'required_points': 5,
+                'description': 'Free Product - Whiteboard Pen',
             })],
         })
 
@@ -450,6 +459,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'specific',
                 'discount_max_amount': 40,
+                'description': '100% on specific products',
             })],
             'pos_config_ids': [Command.link(self.main_pos_config.id)],
         })
@@ -690,6 +700,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount': 100,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '100% discount on your order',
             })],
         })
 
@@ -782,6 +793,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount on your order',
             })],
         })
 
@@ -830,6 +842,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'required_points': 30,
                 'reward_product_id': self.product_a.id,
                 'reward_product_qty': 1,
+                'description': 'Free Product - Test Product A',
             })],
         })
 
@@ -894,6 +907,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount': 10,
                 'discount_applicability': 'specific',
                 'discount_product_ids': (self.product_a | self.product_b).ids,
+                'description': '$ 10 on specific products',
             })],
         })
         self.main_pos_config.open_ui()
@@ -940,6 +954,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'specific',
+                'description': '10% discount',
             })],
             'pos_config_ids': [Command.link(self.main_pos_config.id)],
         })
@@ -959,6 +974,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_id': self.product_b.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
             'pos_config_ids': [Command.link(self.main_pos_config.id)],
         })
@@ -988,6 +1004,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'required_points': 100,
                 'discount': 1,
                 'discount_mode': 'per_point',
+                'description': '$ 1 per point on your order',
             })],
         })
 
@@ -1035,6 +1052,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount on your order',
             })],
         })
 
@@ -1094,6 +1112,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'specific',
                 'discount_product_domain': '["&", ("categ_id", "ilike", "office"), ("name", "ilike", "Product B")]',
+                'description': '50% discount',
             })],
             'pos_config_ids': [Command.link(self.main_pos_config.id)],
         })
@@ -1122,6 +1141,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount on your order',
             })],
         })
 
@@ -1161,6 +1181,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                     "reward_type": "discount",
                     "discount": "10",
                     "discount_mode": "per_order",
+                    "description": "10% discount per order on your order",
                 })],
             }
         )
@@ -1214,6 +1235,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_id': self.product_a.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         self.env['loyalty.program'].create({
@@ -1230,6 +1252,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'required_points': 1,
                 'discount': 50,
                 'discount_mode': 'percent',
+                'description': '50% discount',
             })],
         })
         self.main_pos_config.open_ui()
@@ -1282,6 +1305,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'specific',
                 'discount_product_category_id': product_category_1.id,
+                'description': '50% discount',
             })],
             'pos_config_ids': [Command.link(self.main_pos_config.id)],
         })
@@ -1327,6 +1351,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'required_points': 5,
                 'discount_mode': 'per_order',
                 'discount': 5,
+                'description': '$ 5',
             })],
         })
         self.env['res.partner'].create({'name': 'AAA Partner'})
@@ -1399,6 +1424,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_tag_id': free_product_tag.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product B',
             })],
         })
 
@@ -1440,6 +1466,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_id': free_product.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
 
@@ -1499,6 +1526,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_product_tag_id': free_product_tag.id,
                 'reward_product_qty': 1,
                 'required_points': 2,
+                'description': 'Free Product',
             })],
         })
 
@@ -1543,6 +1571,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'specific',
                 'discount_product_ids': [Command.set(self.product_a.ids)],
+                'description': '10% discount',
             })],
             'pos_config_ids': [Command.link(self.main_pos_config.id)],
         })
@@ -1614,6 +1643,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'cheapest',
                 'required_points': 2,
+                'description': '100% on the cheapest product',
             })],
         })
 
@@ -1878,6 +1908,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_type': 'discount',
                 'discount_mode': 'per_point',
                 'discount': 1,
+                'description': '$1 discount per point',
             })],
             'rule_ids': [Command.create({
                 'reward_point_amount': '1',
@@ -1977,6 +2008,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'discount_mode': 'per_order',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$ 2 on your order',
             })],
         })
 

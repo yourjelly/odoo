@@ -95,6 +95,7 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
                 'reward_type': 'product',
                 'reward_product_id': large_cabinet.id,
                 'discount_line_product_id': free_large_cabinet.id,
+                'description': 'Free Product - Small Cabinet',
             })]
         })
 
@@ -111,6 +112,7 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
                 'discount_line_product_id': ten_percent.id,
+                'description': '10.0% discount on total amount',
             })],
         })
 
@@ -129,6 +131,7 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
                 'required_points': 50,
+                'description': '21% discount on your order',
             })],
         })
 
@@ -202,6 +205,7 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount on your order',
             })],
         })
         # Create a gift card to be used
@@ -239,6 +243,7 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
                 'reward_type': 'discount',
                 'discount_mode': 'per_point',
                 'discount': 1,
+                'description': 'eWallet Reward',
             })],
         })
         ewallet_program.currency_id = self.env.ref('base.USD')
@@ -267,6 +272,7 @@ class TestWebsiteSaleCoupon(HttpCase):
                 'reward_type': 'discount',
                 'discount': 10,
                 'discount_mode': 'percent',
+                'description': '10% discount',
             })],
         })
 
@@ -368,12 +374,14 @@ class TestWebsiteSaleCoupon(HttpCase):
                     'discount_applicability': 'specific',
                     'required_points': 1,
                     'discount_product_ids': chair,
+                    'description': '10% on Super Chair',
                 }),
                 (0, 0, {
                     'reward_type': 'discount',
                     'discount': 50,
                     'discount_applicability': 'order',
                     'required_points': 1,
+                    'description': '50% discount on your order',
                 }),
             ],
         })

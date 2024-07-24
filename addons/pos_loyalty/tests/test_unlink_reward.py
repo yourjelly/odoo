@@ -30,6 +30,7 @@ class TestUnlinkReward(TestPointOfSaleCommon):
             'reward_product_id': cls.whiteboard_pen.id,
             'reward_product_qty': 1,
             'required_points': 4,
+            'description': 'Free Product - Whiteboard Pen',
         })
 
     def test_pos_unlink_reward(self):

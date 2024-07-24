@@ -35,6 +35,7 @@ class TestLoyalty(TestSaleCouponCommon):
                 'reward_type': 'discount',
                 'discount_mode': 'per_point',
                 'discount': 1,
+                'description': 'eWallet',
             })],
             'rule_ids': [Command.create({
                 'reward_point_amount': '1',
@@ -68,6 +69,7 @@ class TestLoyalty(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '10% discount on your order',
             })],
         })
 
@@ -88,6 +90,7 @@ class TestLoyalty(TestSaleCouponCommon):
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
                 'required_points': 3,
+                'description': '$1.5 per point on your order',
             })],
         })
 
@@ -141,6 +144,7 @@ class TestLoyalty(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount on your order',
             })]
         })
 
@@ -198,6 +202,7 @@ class TestLoyalty(TestSaleCouponCommon):
                         'discount': 100.0,
                         'discount_applicability': 'specific',
                         'discount_product_domain': '[("name", "=", "Product A")]',
+                        'description': '100% discount',
                 })],
             },
             {
@@ -212,6 +217,7 @@ class TestLoyalty(TestSaleCouponCommon):
                     'discount_mode': 'per_point',
                     'discount': 1,
                     'discount_applicability': 'order',
+                    'description': '$1 per point on order',
                 })],
             }
         ])
@@ -281,6 +287,7 @@ class TestLoyalty(TestSaleCouponCommon):
                 'discount_max_amount': 9,
                 'discount_applicability': 'specific',
                 'discount_product_ids': [product_a.id],
+                'description': '10% discount',
             })],
         })
 
@@ -370,6 +377,7 @@ class TestLoyalty(TestSaleCouponCommon):
                     'discount': 10.0,
                     'discount_applicability': 'order',
                     'required_points': 1,
+                    'description': '10% discount',
                 })],
         }])
 
@@ -556,6 +564,7 @@ class TestLoyalty(TestSaleCouponCommon):
                 'discount': 1,
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
+                'description': '$1 discount per point',
             })]
         })
 
@@ -607,6 +616,7 @@ class TestLoyalty(TestSaleCouponCommon):
                     'discount': 10.0,
                     'discount_applicability': 'specific',
                     'required_points': 1,
+                    'description': '10% discount',
                 })],
         }])
 
@@ -786,6 +796,7 @@ class TestLoyalty(TestSaleCouponCommon):
                 'discount_applicability': 'specific',
                 'discount_product_ids': [product_A.id],
                 'required_points': 1,
+                'description': '10% discount',
             })],
         }])
 
@@ -882,6 +893,7 @@ class TestLoyalty(TestSaleCouponCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '100% discount on order',
             })],
         }])
         self.env['loyalty.card'].create({

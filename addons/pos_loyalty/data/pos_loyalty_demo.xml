@@ -21,6 +21,7 @@
             <field name="discount_mode">percent</field>
             <field name="discount">15</field>
             <field name="discount_applicability">order</field>
+            <field name="description">15% discount on your order</field>
             <field name="program_id" ref="pos_loyalty.15_pc_on_next_order"/>
         </record>
 
@@ -86,6 +87,7 @@
     <record id="loyalty_program_reward" model="loyalty.reward">
         <field name="reward_type">product</field>
         <field name="required_points">5</field>
+        <field name="description">Free Product</field>
         <field name="reward_product_id" ref="pos_loyalty.simple_pen"/>
         <field name="program_id" ref="pos_loyalty.loyalty_program"/>
     </record>

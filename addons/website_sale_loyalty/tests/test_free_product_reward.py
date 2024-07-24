@@ -47,6 +47,7 @@ class TestFreeProductReward(HttpCase):
                 'reward_product_id': self.carpet.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
 

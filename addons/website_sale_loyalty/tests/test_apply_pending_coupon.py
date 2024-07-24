@@ -27,6 +27,7 @@ class TestSaleCouponApplyPending(HttpCase, TestSaleCouponNumbersCommon):
             'reward_ids': [(0, 0, {
                 'reward_type': 'product',
                 'reward_product_id': self.largeCabinet.id,
+                'description': 'Free Product',
             })]
         })
         self.env['loyalty.generate.wizard'].with_context(active_id=self.coupon_program.id).create({

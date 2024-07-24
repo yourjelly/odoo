@@ -112,6 +112,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_applicability': 'specific',
                 'discount_product_ids': self.largeCabinet,
                 'required_points': 1,
+                'description': '20% discount on Large Cabinet',
             })],
         })
         self.all_programs |= p_specific_product
@@ -281,6 +282,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'reward_product_id': self.largeCabinet.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         self.p_conference_chair = self.env['loyalty.program'].create({
@@ -299,6 +301,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'reward_product_id': self.conferenceChair.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         self.p_pedal_bin = self.env['loyalty.program'].create({
@@ -316,6 +319,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'reward_product_id': self.pedalBin.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         self.all_programs |= (self.p_large_cabinet | self.p_conference_chair | self.p_pedal_bin)
@@ -401,6 +405,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_product_ids': self.largeCabinet,
                 'required_points': 1,
                 'clear_wallet': 1,
+                'description': '20% discount on Large Cabinet',
             })],
         })
         self._auto_rewards(order, self.all_programs)
@@ -519,6 +524,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$249 discount per point on your order',
             })],
         })
         self.all_programs |= fixed_amount_program
@@ -561,6 +567,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'reward_product_id': self.pedalBin.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         sol1 = self.env['sale.order.line'].create({
@@ -642,6 +649,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount': 100,
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
+                'description': '$100 per point',
             })],
         })
 
@@ -687,6 +695,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount': 288.5,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$288.5 per point',
             })],
         })
 
@@ -774,6 +783,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount': 290,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$290 per point',
             })],
         })
 
@@ -859,6 +869,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_applicability': 'specific',
                 'discount_product_ids': [(6, 0, [self.conferenceChair.id, self.drawerBlack.id])],
                 'required_points': 1,
+                'description': '25% discount',
             })],
         })
         self.all_programs |= p_specific_products
@@ -949,6 +960,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'reward_product_id': self.conferenceChair.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
+                'description': 'Free Product',
             })],
         })
         sol1 = self.env['sale.order.line'].create({
@@ -1001,6 +1013,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '10% discount on your order',
             })],
         })
         self.all_programs |= self.env['loyalty.program'].create({
@@ -1019,6 +1032,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '15% discount on your order',
             })],
         })
         self.all_programs |= self.env['loyalty.program'].create({
@@ -1037,6 +1051,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '20% discount on your order',
             })],
         })
         self.all_programs |= self.env['loyalty.program'].create({
@@ -1055,6 +1070,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '25% discount on your order',
             })],
         })
 
@@ -1115,6 +1131,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_product_ids': self.conferenceChair,
                 'discount_max_amount': 200,
                 'required_points': 1,
+                'description': '100% discount',
             })],
         })
         # set large cabinet and conference chair prices
@@ -1208,6 +1225,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_applicability': 'specific',
                 'discount_product_ids': self.largeMeetingTable,
                 'required_points': 1,
+                'description': '100% discount',
             })],
         })
 
@@ -1257,6 +1275,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount': 5,
                 'discount_mode': 'per_point',
                 'required_points': 1,
+                'description': '$5 discount per point',
             })],
         })
 
@@ -1321,6 +1340,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                     'discount_applicability': 'specific',
                     'discount_product_ids': product_a | product_b,
                     'required_points': 1,
+                    'description': '$5 discount per point',
                 })],
             },
             {
@@ -1337,6 +1357,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                     'discount_applicability': 'specific',
                     'discount_product_ids': product_a,
                     'required_points': 1,
+                    'description': '$10 discount per point',
                 })],
             },
         ])
@@ -1411,6 +1432,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                     'discount_applicability': 'specific',
                     'discount_product_ids': product_a,
                     'required_points': 1,
+                    'description': '100% discount',
                 })],
             },
             {
@@ -1427,6 +1449,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                     'discount_applicability': 'specific',
                     'discount_product_ids': product_a | product_b,
                     'required_points': 1,
+                    'description': '$5 discount per point',
                 })],
             },
         ])
@@ -1473,6 +1496,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$5 discount per point',
             })],
         })
 
@@ -1529,6 +1553,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$5 discount per point',
             })],
         })
 
@@ -1605,6 +1630,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$10 discount per point',
             })],
         })
 
@@ -1650,6 +1676,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$10 discount per point',
             })],
         })
 
@@ -1687,6 +1714,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount': 50,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '50% discount',
             })],
         })
 
@@ -1735,6 +1763,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount': 50,
                 'discount_applicability': 'order',
                 'required_points': 1,
+                'description': '$50 discount per order',
             })],
         })
 
@@ -1784,6 +1813,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
                 'discount': 1,
                 'discount_applicability': 'cheapest',
                 'required_points': 1,
+                'description': '$1 discount per point',
             })],
         })
         order = self.empty_order

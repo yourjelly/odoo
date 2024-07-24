@@ -240,6 +240,7 @@ class LoyaltyProgram(models.Model):
                 'reward_ids': [(5, 0, 0), (0, 0, {
                     'required_points': 1,
                     'discount': 10,
+                    'description': _('10% disount'),
                 })],
                 'communication_plan_ids': [(5, 0, 0), (0, 0, {
                     'trigger': 'create',
@@ -260,6 +261,7 @@ class LoyaltyProgram(models.Model):
                 'reward_ids': [(5, 0, 0), (0, 0, {
                     'required_points': 1,
                     'discount': 10,
+                    'description': _('10% discount on your order'),
                 })],
                 'communication_plan_ids': [(5, 0, 0)],
             },
@@ -299,6 +301,7 @@ class LoyaltyProgram(models.Model):
                 'reward_ids': [(5, 0, 0), (0, 0, {
                     'discount': 5,
                     'required_points': 200,
+                    'description': '5% disount',
                 })],
                 'communication_plan_ids': [(5, 0, 0)],
             },
@@ -338,6 +341,7 @@ class LoyaltyProgram(models.Model):
                     'discount_product_ids': first_sale_product,
                     'discount_mode': 'percent',
                     'discount': 10,
+                    'description': _('10% on specific products'),
                 })],
                 'communication_plan_ids': [(5, 0, 0)],
             },
@@ -355,6 +359,7 @@ class LoyaltyProgram(models.Model):
                     'reward_type': 'product',
                     'reward_product_id': first_sale_product.id,
                     'required_points': 2,
+                    'description': _('Free Product'),
                 })],
                 'communication_plan_ids': [(5, 0, 0)],
             },
@@ -372,6 +377,7 @@ class LoyaltyProgram(models.Model):
                     'discount_mode': 'percent',
                     'discount': 15,
                     'discount_applicability': 'order',
+                    'description': _('15% discount on your order'),
                 })],
                 'communication_plan_ids': [(5, 0, 0), (0, 0, {
                     'trigger': 'create',
@@ -608,6 +614,7 @@ class LoyaltyProgram(models.Model):
                     'discount_applicability': 'specific',
                     'discount_product_ids': product,
                     'discount': 10,
+                    'description': _('Free Product'),
                 })]
             },
         }

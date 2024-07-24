@@ -186,6 +186,7 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount',
             })],
         })
         # 3.
@@ -302,6 +303,7 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount',
             })],
         })
         order = self.empty_order.copy()
@@ -338,6 +340,7 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_mode': 'per_point',
                 'discount_applicability': 'order',
+                'description': '$10 discount per point',
             })]
         })
         # 2.

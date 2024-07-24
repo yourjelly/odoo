@@ -21,6 +21,7 @@ class TestSaleInvoicing(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount on your order',
             })]
         })
 
@@ -81,6 +82,7 @@ class TestSaleInvoicing(TestSaleCouponCommon):
                 'discount': 10,
                 'discount_mode': 'percent',
                 'discount_applicability': 'order',
+                'description': '10% discount on your order',
             })]
         })
 
