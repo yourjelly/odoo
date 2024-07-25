@@ -51,6 +51,7 @@ import { CollaborationSelectionAvatarPlugin } from "./others/collaboration/colla
 import { CollaborationSelectionPlugin } from "./others/collaboration/collaboration_selection_plugin";
 import { EmbeddedComponentPlugin } from "./others/embedded_component_plugin";
 import { ExcalidrawPlugin } from "./others/embedded_components/excalidraw/excalidraw_plugin";
+import { FilePlugin } from "./others/embedded_components/file/file_plugin";
 import { TableOfContentPlugin } from "./others/embedded_components/table_of_content/table_of_content_plugin";
 import { VideoPlugin } from "./others/embedded_components/video/video_plugin";
 import { QWebPlugin } from "./others/qweb_plugin";
@@ -118,6 +119,7 @@ export const COLLABORATION_PLUGINS = [
 export const EMBEDDED_COMPONENT_PLUGINS = [
     EmbeddedComponentPlugin,
     ExcalidrawPlugin,
+    FilePlugin,
     TableOfContentPlugin,
     VideoPlugin,
 ];
