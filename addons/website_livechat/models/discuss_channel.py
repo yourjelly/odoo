@@ -22,13 +22,13 @@ class DiscussChannel(models.Model):
         if self.livechat_active and not self.message_ids:
             self.sudo().unlink()
 
-    def _to_store(self, store: Store, /, *, fields=None):
+    def _to_store(self, store: Store, /, **kwargs):
         """
         Override to add visitor information on the mail channel infos.
         This will be used to display a banner with visitor informations
         at the top of the livechat channel discussion view in discuss module.
         """
-        super()._to_store(store, fields=fields)
+        super()._to_store(store, **kwargs)
         for channel in self.filtered('livechat_visitor_id'):
             channel_info = {
                 "requested_by_operator": channel.create_uid in channel.livechat_operator_id.user_ids

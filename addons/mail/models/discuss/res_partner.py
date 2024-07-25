@@ -82,4 +82,10 @@ class ResPartner(models.Model):
                 ("partner_id", "in", partners.ids),
             ]
         )
-        return Store(members, fields={"channel": [], "persona": []}).add(partners).get_result()
+        return (
+            Store(
+                members, fields=[Store.one("channel", fields=[]), Store.one("persona", fields=[])]
+            )
+            .add(partners)
+            .get_result()
+        )

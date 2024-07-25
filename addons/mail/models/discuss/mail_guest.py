@@ -121,10 +121,10 @@ class MailGuest(models.Model):
         """
         self.env.cr.execute(query, (timezone, self.id))
 
-    def _to_store(self, store: Store, /, *, fields=None):
+    def _to_store(self, store: Store, /, *, fields=None, **kwargs):
         if fields is None:
             fields = ["im_status", "name", "write_date"]
-        store.add("mail.guest", self._read_format(fields, load=False))
+        super()._to_store(store, fields=fields, **kwargs)
 
     def _set_auth_cookie(self):
         """Add a cookie to the response to identify the guest. Every route

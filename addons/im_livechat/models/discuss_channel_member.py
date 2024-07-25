@@ -23,8 +23,8 @@ class ChannelMember(models.Model):
         for member in sessions_to_be_unpinned:
             member._bus_send("discuss.channel/unpin", {"id": member.channel_id.id})
 
-    def _to_store(self, store: Store, /, *, fields=None, **kwargs):
-        super()._to_store(store, fields=fields, **kwargs)
+    def _to_store(self, store: Store, /, **kwargs):
+        super()._to_store(store, **kwargs)
         for member in self.filtered(lambda m: m.channel_id.channel_type == "livechat"):
             # sudo: mail.channel - reading livechat channel to check whether current member is a bot is allowed
             store.add(

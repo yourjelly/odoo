@@ -580,7 +580,8 @@ class MailActivity(models.Model):
     def activity_format(self):
         return Store(self).get_result()
 
-    def _to_store(self, store: Store, /, *, fields=None):
+    def _to_store(self, store: Store, /, **kwargs):
+        super()._to_store(store, **kwargs)
         for activity in self:
             data = activity.read()[0]
             data["mail_template_ids"] = [

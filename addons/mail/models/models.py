@@ -8,6 +8,7 @@ from markupsafe import Markup
 
 from odoo import api, exceptions, models, tools, _
 from odoo.addons.mail.tools.alias_error import AliasError
+from odoo.addons.mail.tools.discuss import Store
 
 import logging
 
@@ -383,6 +384,20 @@ class BaseModel(models.AbstractModel):
         return self.env['mail.message.subtype'].search([
             '&', ('hidden', '=', False),
             '|', ('res_model', '=', self._name), ('res_model', '=', False)])
+
+    def _to_store(self, store: Store, /, *, fields=None, default_fields=None, extra_fields=None, rename_fields=None):
+        if fields is None:
+            fields = default_fields or []
+        fields.extend(extra_fields or [])
+        rename_fields = rename_fields or {}
+        for field in fields:
+            assert field in self._fields, f"Field {field} not found on {self._name}"
+        for record in self:
+            res = {}
+            values = record._read_format(fields, load=False)[0]
+            for field_name, val in values:
+                res[rename_fields.get(field_name, field_name)] = val
+            store.add(self._name, res)
 
     # ------------------------------------------------------------
     # GATEWAY: NOTIFICATION

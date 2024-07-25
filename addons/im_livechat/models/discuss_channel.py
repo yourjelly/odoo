@@ -36,9 +36,9 @@ class DiscussChannel(models.Model):
             end = record.message_ids[0].date if record.message_ids else fields.Datetime.now()
             record.duration = (end - start).total_seconds() / 3600
 
-    def _to_store(self, store: Store, /, *, fields=None):
+    def _to_store(self, store: Store, **kwargs):
         """Extends the channel header by adding the livechat operator and the 'anonymous' profile"""
-        super()._to_store(store, fields=fields)
+        super()._to_store(store, **kwargs)
         chatbot_lang = self.env["chatbot.script"]._get_chatbot_language()
         for channel in self:
             channel_info = {}

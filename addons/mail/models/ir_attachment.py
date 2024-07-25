@@ -77,40 +77,35 @@ class IrAttachment(models.Model):
             )
         self.unlink()
 
-    def _to_store(self, store: Store, /, *, fields=None, access_token=False):
-        if fields is None:
-            fields = [
+    def _to_store(self, store: Store, /, **kwargs):
+        add_filename = Store.get_field(kwargs, "filename")
+        add_mimetype = Store.get_field(kwargs, "mimetype", consume=False)
+        add_thread = Store.get_field(kwargs, "thread")
+        Store.set_default_fields(
+            kwargs,
+            [
                 "checksum",
                 "create_date",
-                "filename",
+                "file_size",
                 "mimetype",
                 "name",
                 "res_name",
-                "size",
-                "thread",
-            ]
+            ],
+        )
+        Store.set_rename_fields(kwargs, access_token="accessToken", file_size="size")
+        super()._to_store(store, **kwargs)
         safari = (
             request
             and request.httprequest.user_agent
             and request.httprequest.user_agent.browser == "safari"
         )
         for attachment in self:
-            data = attachment._read_format(
-                [field for field in fields if field not in ["filename", "size", "thread"]],
-                load=False,
-            )[0]
-            if "filename" in fields:
+            data = {}
+            if add_filename:
                 data["filename"] = attachment.name
-            if (
-                "mimetype" in fields
-                and safari
-                and attachment.mimetype
-                and "video" in attachment.mimetype
-            ):
+            if add_mimetype and safari and attachment.mimetype and "video" in attachment.mimetype:
                 data["mimetype"] = "application/octet-stream"
-            if "size" in fields:
-                data["size"] = attachment.file_size
-            if "thread" in fields:
+            if add_thread:
                 data["thread"] = (
                     Store.one(
                         self.env[attachment.res_model].browse(attachment.res_id),
@@ -120,6 +115,4 @@ class IrAttachment(models.Model):
                     if attachment.res_model != "mail.compose.message" and attachment.res_id
                     else False
                 )
-            if access_token:
-                data["accessToken"] = attachment.access_token
             store.add(attachment, data)

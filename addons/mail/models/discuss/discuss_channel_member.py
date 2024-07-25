@@ -216,7 +216,7 @@ class ChannelMember(models.Model):
         members.write({"mute_until_dt": False})
         members._notify_mute()
 
-    def _to_store(self, store: Store, /, *, fields=None, extra_fields=None):
+    def _to_store(self, store: Store, /, *, fields=None, extra_fields=None, **kwargs):
         if fields is None:
             fields = {
                 "channel": [],
@@ -228,19 +228,21 @@ class ChannelMember(models.Model):
             }
         if extra_fields:
             fields.update(extra_fields)
+        super()._to_store(
+            store,
+            fields=[
+                field
+                for field in fields
+                if field not in ["channel", "fetched_message_id", "seen_message_id", "persona"]
+            ],
+            **kwargs,
+        )
         bus_last_id = fields.pop("message_unread_counter_bus_id", None)
         if "message_unread_counter" in fields and bus_last_id is None:
             # sudo: bus.bus: reading non-sensitive last id
             bus_last_id = self.env["bus.bus"].sudo()._bus_last_id()
         for member in self:
-            data = member._read_format(
-                [
-                    field
-                    for field in fields
-                    if field not in ["channel", "fetched_message_id", "seen_message_id", "persona"]
-                ],
-                load=False,
-            )[0]
+            data = {"id": member.id}
             if "channel" in fields:
                 data["thread"] = Store.one(member.channel_id, as_thread=True, only_id=True)
             if "persona" in fields:
@@ -415,7 +417,12 @@ class ChannelMember(models.Model):
                 self.channel_id,
                 {
                     "invitedMembers": Store.many(
-                        members, "ADD", fields={"channel": [], "persona": ["name", "im_status"]}
+                        members,
+                        "ADD",
+                        fields=[
+                            Store.one("channel", fields=[]),
+                            Store.one("persona", fields=["name", "im_status"]),
+                        ],
                     ),
                 },
             )
@@ -462,7 +469,12 @@ class ChannelMember(models.Model):
         if self.channel_id.channel_type in self.channel_id._types_allowing_seen_infos():
             target = self.channel_id
         target._bus_send_store(
-            self, fields={"channel": [], "persona": ["name"], "seen_message_id": True}
+            self,
+            fields=[
+                Store.one("channel", fields=[]),
+                Store.one("persona", fields=["name"]),
+                "seen_message_id",
+            ],
         )
 
     def _set_new_message_separator(self, message_id, sync=False):
@@ -480,12 +492,12 @@ class ChannelMember(models.Model):
         self._bus_send_store(
             Store(
                 self,
-                fields={
-                    "channel": [],
-                    "message_unread_counter": True,
-                    "new_message_separator": True,
-                    "persona": ["name"],
-                },
+                fields=[
+                    Store.one("channel", fields=[]),
+                    "message_unread_counter",
+                    "new_message_separator",
+                    Store.one("persona", fields=["name"]),
+                ],
             ).add(self, {"syncUnread": sync})
         )
 

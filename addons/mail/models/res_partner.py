@@ -212,21 +212,22 @@ class Partner(models.Model):
     # DISCUSS
     # ------------------------------------------------------------
 
-    def _to_store(self, store: Store, /, *, fields=None, main_user_by_partner=None):
+    def _to_store(self, store: Store, /, *, fields=None, main_user_by_partner=None, **kwargs):
         if fields is None:
             fields = ["active", "email", "im_status", "is_company", "name", "user", "write_date"]
         if not self.env.user._is_internal() and "email" in fields:
             fields.remove("email")
+        super()._to_store(
+            store,
+            fields=[
+                field
+                for field in fields
+                if field not in ["country", "display_name", "isAdmin", "notification_type", "user"]
+            ],
+            **kwargs
+        )
         for partner in self:
-            data = partner._read_format(
-                [
-                    field
-                    for field in fields
-                    if field
-                    not in ["country", "display_name", "isAdmin", "notification_type", "user"]
-                ],
-                load=False,
-            )[0]
+            data = {"id": partner.id}
             if "country" in fields:
                 c = partner.country_id
                 data["country"] = {"code": c.code, "id": c.id, "name": c.name} if c else False

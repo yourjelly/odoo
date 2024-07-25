@@ -440,7 +440,10 @@ class Channel(models.Model):
                     "invitedMembers": Store.many(
                         members,
                         "DELETE",
-                        fields={"channel": [], "persona": ["name", "im_status"]},
+                        fields=[
+                            Store.one("channel", fields=[]),
+                            Store.one("persona", fields=["name", "im_status"]),
+                        ],
                     ),
                 },
             )
@@ -785,7 +788,7 @@ class Channel(models.Model):
         channels += self.env["discuss.channel"].search(pinned_member_domain)
         return channels
 
-    def _channel_basic_info(self, /, *, fields=None):
+    def _channel_basic_info(self, /, *, fields=None, **kwargs):
         self.ensure_one()
         if fields is None:
             fields = [
@@ -805,7 +808,7 @@ class Channel(models.Model):
         data["memberCount"] = self.member_count
         return data
 
-    def _to_store(self, store: Store, /, *, fields=None):
+    def _to_store(self, store: Store, /, *, fields=None, **kwargs):
         """Adds channel data to the given store."""
         if not self:
             return []
@@ -879,7 +882,12 @@ class Channel(models.Model):
             # add RTC sessions info
             invited_members = invited_members_by_channel[channel]
             info["invitedMembers"] = Store.many(
-                invited_members, "ADD", fields={"channel": [], "persona": ["name", "im_status"]}
+                invited_members,
+                "ADD",
+                fields=[
+                    Store.one("channel", fields=[]),
+                    Store.one("persona", fields=["name", "im_status"]),
+                ],
             )
             # sudo: discuss.channel.rtc.session - reading sessions of accessible channel is acceptable
             info["rtcSessions"] = Store.many(channel.sudo().rtc_session_ids, "ADD", extra=True)

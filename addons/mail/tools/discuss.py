@@ -167,15 +167,15 @@ class Store:
         return res
 
     @staticmethod
-    def many(records, mode="REPLACE", /, *, as_thread=False, only_id=False, **kwargs):
+    def many(recordsOrFieldName, mode="REPLACE", /, *, as_thread=False, only_id=False, **kwargs):
         """Flags records to be added to the store in a Many relation.
         - mode: "REPLACE" (default), "ADD", or "DELETE"."""
-        return (MANY, records, mode, as_thread, only_id, kwargs)
+        return (MANY, recordsOrFieldName, mode, as_thread, only_id, kwargs)
 
     @staticmethod
-    def one(record, /, *, as_thread=False, only_id=False, **kwargs):
+    def one(recordOrFieldName, /, *, as_thread=False, only_id=False, **kwargs):
         """Flags a record to be added to the store in a One relation."""
-        return (ONE, record, as_thread, only_id, kwargs)
+        return (ONE, recordOrFieldName, as_thread, only_id, kwargs)
 
     @staticmethod
     def many_ids(records, mode="REPLACE", /, *, as_thread=False):
@@ -212,3 +212,32 @@ class Store:
         if record._name == "res.partner":
             return {"id": record.id, "type": "partner"}
         return {"id": record.id}
+
+    @staticmethod
+    def get_field(kwargs, field_name, /, *, consume=True, default=True):
+        """Consumes a field from kwargs and returns whether it was present or not."""
+        field_names = kwargs.get("fields", None)
+        if field_names is None:
+            return default
+        for name in field_names:
+            if name == field_name:
+                if consume:
+                    field_names.remove(name)
+                return True
+            if isinstance(name, tuple) and name[1] == field_name:
+                if consume:
+                    field_names.remove(name)
+                return name
+        return False
+
+    @staticmethod
+    def set_default_fields(kwargs, extra_default_fields, /):
+        """Registers the given default fields in kwargs."""
+        kwargs["default_fields"] = kwargs.get("default_fields", []) + extra_default_fields
+
+    @staticmethod
+    def set_rename_fields(kwargs, /, **renames):
+        """Registers the given renames in kwargs."""
+        rename_fields = kwargs.get("rename_fields", {})
+        rename_fields.update(renames.items())
+        kwargs["rename_fields"] = rename_fields

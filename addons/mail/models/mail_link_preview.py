@@ -100,10 +100,12 @@ class LinkPreview(models.Model):
             preview = self.env['mail.link.preview'].create(preview_values)
         return preview
 
-    def _to_store(self, store: Store, /, *, fields=None):
-        if fields is None:
-            fields = [
+    def _to_store(self, store: Store, /, **kwargs):
+        Store.set_default_fields(
+            kwargs,
+            [
                 "image_mimetype",
+                Store.one("message_id", only_id=True),
                 "og_description",
                 "og_image",
                 "og_mimetype",
@@ -111,11 +113,10 @@ class LinkPreview(models.Model):
                 "og_title",
                 "og_type",
                 "source_url",
-            ]
-        for preview in self:
-            data = preview._read_format(fields, load=False)[0]
-            data["message"] = Store.one(preview.message_id, only_id=True)
-            store.add(preview, data)
+            ],
+        )
+        Store.set_rename_fields(kwargs, message_id="message")
+        super()._to_store(store, **kwargs)
 
     @api.autovacuum
     def _gc_mail_link_preview(self):

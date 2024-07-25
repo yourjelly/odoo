@@ -898,6 +898,7 @@ class Message(models.Model):
         for_current_user=False,
         add_followers=False,
         followers=None,
+        **kwargs,
     ):
         """Add the messages to the given store.
 
@@ -931,6 +932,7 @@ class Message(models.Model):
                 "subject",
                 "write_date",
             ]
+        super()._to_store(store, fields=fields, **kwargs)
         com_id = self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_comment")
         note_id = self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_note")
         # fetch scheduled notifications once, only if msg_vals is not given to
@@ -979,12 +981,12 @@ class Message(models.Model):
             if for_current_user and add_followers:
                 thread_data["selfFollower"] = Store.one(
                     follower_by_record_and_partner.get((record, self.env.user.partner_id)),
-                    fields={"is_active": True, "partner": []},
+                    fields=["is_active", Store.one("partner", fields=[])],
                 )
             store.add(record, thread_data, as_thread=True)
         for message in self:
             # model, res_id, record_name need to be kept for mobile app as iOS app cannot be updated
-            data = message._read_format(fields, load=False)[0]
+            data = {"id": message.id}
             record = record_by_message.get(message)
             if record:
                 # sudo: if mentionned in a non accessible thread, user should be able to see the name

@@ -23,13 +23,12 @@ class ResPartner(models.Model):
     def _get_on_leave_ids(self):
         return self.env['res.users']._get_on_leave_ids(partner=True)
 
-    def _to_store(self, store: Store, /, *, fields=None, **kwargs):
+    def _to_store(self, store: Store, /, **kwargs):
         """Override to add the current leave status."""
-        super()._to_store(store, fields=fields, **kwargs)
-        if fields is None:
-            fields = ["out_of_office_date_end"]
-        for partner in self:
-            if "out_of_office_date_end" in fields:
+        add_out_of_office_date_end = Store.get_field(kwargs, "out_of_office_date_end")
+        super()._to_store(store, **kwargs)
+        if add_out_of_office_date_end:
+            for partner in self:
                 # in the rare case of multi-user partner, return the earliest possible return date
                 dates = partner.mapped("user_ids.leave_date_to")
                 states = partner.mapped("user_ids.current_leave_state")

@@ -127,13 +127,14 @@ class MailNotification(models.Model):
 
         return self.filtered(_filter_unimportant_notifications)
 
-    def _to_store(self, store: Store, /, *, fields=None):
+    def _to_store(self, store: Store, /, *, fields=None, **kwargs):
         """Returns the current notifications in the format expected by the web
         client."""
         if fields is None:
             fields = ["failure_type", "notification_status", "notification_type"]
+        super()._to_store(store, fields=fields, **kwargs)
         for notif in self:
-            data = notif._read_format(fields, load=False)[0]
+            data = {"id": notif.id}
             data["message"] = Store.one(notif.mail_message_id, only_id=True)
             data["persona"] = Store.one(notif.res_partner_id, fields=["display_name"])
             store.add(notif, data)
