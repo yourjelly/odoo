@@ -378,20 +378,6 @@
     </we-multi>
 </template>
 
-<template id="snippet_options_header_box">
-    <t t-call="website.snippet_options_border_widgets">
-        <t t-set="so_rounded_no_dependencies" t-value="True"/>
-        <t t-set="width_variable" t-value="'menu-border-width'"/>
-        <t t-set="style_variable" t-value="'menu-border-style'"/>
-        <t t-set="color_variable" t-value="'menu-border-color'"/>
-        <t t-set="radius_variable" t-value="'menu-border-radius'"/>
-        <t t-set="no_border_radius" t-value="_no_border_radius"/>
-    </t>
-    <t t-call="website.snippet_options_shadow_widgets">
-        <t t-set="shadow_variable" t-value="'menu-box-shadow'"/>
-    </t>
-</template>
-
 <template id="column_count_option">
     <we-select t-att-string="not with_grid and 'Columns'" t-att-class="with_grid and 'o_grid'" data-no-preview="true" data-name="column_count_opt" t-att-data-dependencies="with_grid and 'normal_mode'">
         <we-button data-select-count="0" data-name="zero_cols_opt">None</we-button>
@@ -723,27 +709,6 @@
                             data-with-combinations="customizeWebsiteColor"
                             data-with-gradients="true"/>
         </we-row>
-    </div>
-
-    <!-- Header - Borders & Shadows -->
-    <div data-js="HeaderBox"
-         id="option_header_shadow"
-         data-selector="#wrapwrap > header:not(:has(.o_header_force_no_radius))"
-         data-target="nav"
-         data-no-check="true"
-         groups="website.group_website_designer">
-        <t t-call="website.snippet_options_header_box"/>
-    </div>
-
-    <div data-js="HeaderBox"
-         id="option_header_shadow"
-         data-selector="#wrapwrap > header:has(.o_header_force_no_radius)"
-         data-target="nav"
-         data-no-check="true"
-         groups="website.group_website_designer">
-        <t t-call="website.snippet_options_header_box">
-            <t t-set="_no_border_radius" t-value="True"/>
-        </t>
     </div>
 
     <!-- Footer - Colors & Layouts -->

@@ -2504,7 +2504,7 @@ registerWebsiteOption("HeaderElements", {
         groups: ["website.group_website_designer"],
     },
 }, {
-    sequence: 60,
+    sequence: 80,
 });
 
 registerWebsiteOption("HeaderScrollEffect", {
@@ -2514,6 +2514,8 @@ registerWebsiteOption("HeaderScrollEffect", {
     data: {
         groups: ["website.group_website_designer"],
     },
+}, {
+    sequence: 50,
 });
 
 registerWebsiteOption("HeaderLanguageSelector", {
@@ -2711,7 +2713,7 @@ registerWebsiteOption("TopMenuVisibility", {
     selector: "[data-main-object^='website.page('] #wrapwrap > header",
     noCheck: true,
 }, {
-    sequence: 50,
+    sequence: 60,
 });
 
 export class TopMenuColor extends SnippetOption {
@@ -2757,6 +2759,8 @@ registerWebsiteOption("TopMenuColor", {
     template: "website.TopMenuColor",
     selector: "[data-main-object^='website.page('] #wrapwrap > header",
     noCheck: true,
+}, {
+    sequence: 70,
 });
 
 /**
@@ -3062,7 +3066,7 @@ registerWebsiteOption("AnchorModal", {
     target: ".modal",
 });
 
-options.registry.HeaderBox = options.registry.Box.extend({
+export class HeaderBox extends Box {
 
     //--------------------------------------------------------------------------
     // Options
@@ -3082,8 +3086,8 @@ options.registry.HeaderBox = options.registry.Box.extend({
             }
             return this.customizeWebsiteVariable(previewMode, widgetValue, params);
         }
-        return this._super(...arguments);
-    },
+        return super.selectStyle(...arguments);
+    }
     /**
      * @override
      */
@@ -3095,8 +3099,8 @@ options.registry.HeaderBox = options.registry.Box.extend({
             const defaultShadow = this._getDefaultShadow(widgetValue, params.shadowClass);
             return this.customizeWebsiteVariable(previewMode, defaultShadow, params);
         }
-        return this._super(...arguments);
-    },
+        return super.setShadow(...arguments);
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -3105,8 +3109,18 @@ options.registry.HeaderBox = options.registry.Box.extend({
     /**
      * @override
      */
+    async _getRenderContext() {
+        return {
+            ...(await super._getRenderContext(...arguments)),
+            noBorderRadius: this.$target[0].classList.contains("o_header_force_no_radius"),
+        };
+    }
+
+    /**
+     * @override
+     */
     async _computeWidgetState(methodName, params) {
-        const value = await this._super(...arguments);
+        const value = await super._computeWidgetState(...arguments);
         if (methodName === "selectStyle" && params.cssProperty === "border-width") {
             // One-sided borders return "0px 0px 3px 0px", which prevents the
             // option from being displayed properly. We only keep the affected
@@ -3114,7 +3128,19 @@ options.registry.HeaderBox = options.registry.Box.extend({
             return value.replace(/(^|\s)0px/gi, "").trim() || value;
         }
         return value;
+    }
+}
+registerWebsiteOption("HeaderBox", {
+    Class: HeaderBox,
+    template: "website.HeaderBox",
+    selector: "#wrapwrap > header",
+    target: "nav",
+    noCheck: true,
+    data: {
+        groups: ["website.group_website_designer"],
     },
+}, {
+    sequence: 40,
 });
 
 export class CookiesBar extends SnippetPopup {

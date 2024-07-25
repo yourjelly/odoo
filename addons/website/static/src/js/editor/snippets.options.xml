@@ -235,6 +235,19 @@
 </t>
 
 <!-- Header - Borders & Shadows -->
+<t t-name="website.HeaderBox">
+    <t t-call="website.snippet_options_border_widgets">
+        <t t-set="so_rounded_no_dependencies" t-value="True"/>
+        <t t-set="width_variable" t-value="'menu-border-width'"/>
+        <t t-set="style_variable" t-value="'menu-border-style'"/>
+        <t t-set="color_variable" t-value="'menu-border-color'"/>
+        <t t-set="radius_variable" t-value="'menu-border-radius'"/>
+        <t t-set="no_border_radius" t-value="this.renderContext.noBorderRadius"/>
+    </t>
+    <t t-call="website.snippet_options_shadow_widgets">
+        <t t-set="shadow_variable" t-value="'menu-box-shadow'"/>
+    </t>
+</t>
 <t t-name="website.TopMenuVisibility">
     <WeSelect title.translate="Header Position" noPreview="'true'" dependencies="'!header_sidebar_opt'">
         <WeButton visibility="'transparent'">Over The Content</WeButton>
