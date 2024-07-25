@@ -2876,6 +2876,15 @@ registerWebsiteOption("HideFooter", {
     },
 });
 
+registerWebsiteOption("FooterScrolltop", {
+    template: "website.FooterScrolltop",
+    selector: "#wrapwrap > footer",
+    noCheck: true,
+    data: {
+        groups: ["website.group_website_designer"],
+    },
+});
+
 /**
  * Handles the edition of snippet's anchor name.
  */

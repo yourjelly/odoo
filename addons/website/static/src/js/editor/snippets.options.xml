@@ -488,6 +488,22 @@
     <WeCheckbox title.translate="Page Visibility" visibility="'hidden|shown'" noPreview="'true'"/>
 </t>
 
+<!-- Scroll to Top -->
+<t t-name="website.FooterScrolltop">
+    <WeRow title.translate="Scroll Top Button">
+        <WeCheckbox name="'footer_scrolltop_opt'"
+                    customizeWebsiteViews="'website.option_footer_scrolltop'"
+                    customizeWebsiteVariable="'false|true'"
+                    variable="'footer-scrolltop'"
+                    reload="'/'"/>
+        <WeSelect dependencies="'footer_scrolltop_opt'" applyTo="'#o_footer_scrolltop_wrapper'">
+            <WeButton selectClass="'justify-content-start'">Left</WeButton>
+            <WeButton selectClass="'justify-content-center'">Center</WeButton>
+            <WeButton selectClass="'justify-content-end'">Right</WeButton>
+        </WeSelect>
+    </WeRow>
+</t>
+
 <t t-name="website.share_social_media_option">
     <WeSelect title.translate="Title Position" applyTo="'.s_share_title, .s_social_media_title'">
         <WeButton selectClass="'d-block'">Top</WeButton>
