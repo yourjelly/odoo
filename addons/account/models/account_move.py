@@ -3484,6 +3484,7 @@ class AccountMove(models.Model):
 
     @contextmanager
     def _get_edi_creation(self):
+        # 
         """Get an environment to import documents from other sources.
 
         Allow to edit the current move or create a new one.
