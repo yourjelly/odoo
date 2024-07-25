@@ -1,6 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { PaymentInterface } from "@point_of_sale/app/utils/payment/payment_interface";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { serializeDateTime } from "@web/core/l10n/dates";
 
 const REQUEST_TIMEOUT = 10000;
@@ -85,11 +85,51 @@ export class PaymentRazorpay extends PaymentInterface {
         });
     }
 
-    _process_razorpay(cid) {
+    _razorpayHandleRefundResponse(response) {
+        const paymentLine = this.pending_razorpay_line();
+        if (response?.error) {
+            paymentLine.set_payment_status("retry");
+            this._showError(response.error);
+            this._removePaymentHandler(["referenceId"]);
+            return Promise.resolve(false);
+        }
+        const resultCode = response?.status;
+        if (
+            resultCode === "REFUNDED" &&
+            response?.externalRefNumber !== localStorage.getItem("referenceId")
+        ) {
+            return this._razorpayHandleRefundResponse({
+                error: _t("Reference number mismatched"),
+            });
+        } else if (resultCode === "REFUNDED" || resultCode === "VOIDED") {
+            this._updatePaymentLine(paymentLine, response);
+            paymentLine.payment_date = this._getPaymentDate(response?.postingDate - 19800000);
+            paymentLine.set_payment_status("done");
+            this._removePaymentHandler(["referenceId"]);
+        }
+        return Promise.resolve(true);
+    }
+
+    _updatePaymentLine(paymentLine, response) {
+        paymentLine.update({
+            payment_method_authcode: response?.authCode,
+            card_no: response?.cardLastFourDigit || "",
+            payment_method_issuer_bank: response?.acquirerCode,
+            payment_method_payment_mode: response?.paymentMode,
+            card_type: response?.paymentCardType,
+            card_brand: response?.paymentCardBrand || "",
+            cardholder_name: response?.nameOnCard.replace("/", ""),
+            razorpay_reverse_ref_no: response?.reverseReferenceNumber,
+            transaction_id: response?.txnId,
+            payment_ref_no: response?.externalRefNumber,
+        });
+    }
+
+    async _process_razorpay(cid) {
         const order = this.pos.get_order();
         const line = order.get_selected_paymentline();
 
-        if (line.amount < 0) {
+        if (line.amount < 0 && !order._isRefundOrder()) {
             this._showError(_t("Cannot process transactions with negative amount."));
             return Promise.resolve();
         }
@@ -100,13 +140,59 @@ export class PaymentRazorpay extends PaymentInterface {
             "referenceId",
             referencePrefix + "/" + orderId + "/" + crypto.randomUUID().replaceAll("-", "")
         );
-        const data = {
-            amount: line.amount,
-            referenceId: localStorage.getItem("referenceId"),
-        };
-        return this._call_razorpay(data, "razorpay_make_payment_request").then((data) => {
-            return this._razorpay_handle_response(data);
-        });
+        if (order._isRefundOrder()) {
+            line.set_payment_status("waitingCard");
+            const data = {
+                amount: Math.abs(line.amount),
+                externalRefNumber: localStorage.getItem("referenceId"),
+                transaction_id: line?.transaction_id,
+            };
+            const response = await this._checkPaymentStatus(line);
+            if (response?.settlementStatus === "SETTLED") {
+                data.refund_type = "refund";
+            } else {
+                const refundedOrder = order.lines[0].refunded_orderline_id.order_id;
+                const refundedPaymentLine = refundedOrder.payment_ids.find(
+                    (pi) => pi.transaction_id === line.transaction_id
+                );
+                if (Math.abs(line.amount) < refundedPaymentLine.amount) {
+                    try {
+                        const userConfirmed = await this._confirmVoidPayment();
+                        if (!userConfirmed) {
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        return false;
+                    }
+                }
+                data.refund_type = "void";
+            }
+            response?.settlementStatus === "SETTLED"
+                ? (data.refund_type = "refund")
+                : (data.refund_type = "void");
+            return this._call_razorpay(data, "razorpay_make_refund_request").then((data) => {
+                return this._razorpayHandleRefundResponse(data);
+            });
+        } else {
+            const data = {
+                amount: line.amount,
+                referenceId: localStorage.getItem("referenceId"),
+            };
+            return this._call_razorpay(data, "razorpay_make_payment_request").then((data) => {
+                return this._razorpay_handle_response(data);
+            });
+        }
+    }
+
+    /**
+     * This method verifies the card payment before processing.
+     * If the payment is settled, we will proceed with the refund; otherwise, we will void it.
+     */
+    async _checkPaymentStatus(line) {
+        const data = { p2pRequestId: line?.razorpay_p2p_request_id };
+        const response = await this._call_razorpay(data, "razorpay_fetch_payment_status");
+        return response;
     }
 
     /**
@@ -156,16 +242,8 @@ export class PaymentRazorpay extends PaymentInterface {
             ) {
                 return this._razorpay_handle_response({ error: _t("Reference number mismatched") });
             } else if (resultCode === "AUTHORIZED") {
-                paymentLine.payment_method_authcode = response?.authCode;
-                paymentLine.card_no = response?.cardLastFourDigit || "";
-                paymentLine.payment_method_issuer_bank = response?.acquirerCode;
-                paymentLine.payment_method_payment_mode = response?.paymentMode;
-                paymentLine.card_type = response?.paymentCardType;
-                paymentLine.card_brand = response?.paymentCardBrand || "";
-                paymentLine.cardholder_name = response?.nameOnCard;
-                paymentLine.payment_ref_no = response?.externalRefNumber;
-                paymentLine.razorpay_reverse_ref_no = response?.reverseReferenceNumber;
-                paymentLine.transaction_id = response?.txnId;
+                this._updatePaymentLine(paymentLine, response);
+                paymentLine.razorpay_p2p_request_id = response?.p2pRequestId;
                 // `createdTime` is provided in milliseconds in local GMT+5.5 timezone.
                 // Thus, we need to subtract 19800000 to get the correct time in milliseconds.
                 paymentLine.payment_date = this._getPaymentDate(response?.createdTime - 19800000);
@@ -207,6 +285,26 @@ export class PaymentRazorpay extends PaymentInterface {
         this.env.services.dialog.add(AlertDialog, {
             title: title || _t("Razorpay Error"),
             body: error_msg,
+        });
+    }
+
+    async _confirmVoidPayment() {
+        return new Promise((resolve, reject) => {
+            this.env.services.dialog.add(ConfirmationDialog, {
+                title: _t("Void Payment Confirmation"),
+                body: _t(
+                    "Your transaction isn't settled yet, and the refund is less than the amount paid.\n" +
+                        "Do you want to cancel the entire transaction?"
+                ),
+                confirmLabel: _t("Void Transaction"),
+                cancelLabel: _t("Cancel"),
+                confirm: () => {
+                    resolve(true);
+                },
+                cancel: async () => {
+                    reject(false);
+                },
+            });
         });
     }
 }
