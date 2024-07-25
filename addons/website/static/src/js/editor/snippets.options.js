@@ -2506,6 +2506,15 @@ registerWebsiteOption("HeaderElements", {
     sequence: 60,
 });
 
+registerWebsiteOption("HeaderScrollEffect", {
+    template: "website.HeaderScrollEffect",
+    selector: "#wrapwrap > header",
+    noCheck: true,
+    data: {
+        groups: ["website.group_website_designer"],
+    },
+});
+
 export class HeaderNavbar extends SnippetOption {
     /**
      * Particular case: we want the option to be associated on the header navbar

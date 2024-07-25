@@ -301,6 +301,58 @@
     </WeRow>
 </t>
 
+<t t-name="website.HeaderScrollEffect">
+    <WeSelect title.translate="Scroll Effect" dependencies="'!header_sidebar_opt'"
+              class="'o_scroll_effects_selector'"
+              variable="'header-scroll-effect'">
+        <WeButton id="'option_header_visibility_standard'"
+                  customizeWebsiteVariable="`'standard'`"
+                  name="'header_visibility_standard_opt'"
+                  selectClass="'o_header_standard'"
+                  customizeWebsiteViews="'website.header_visibility_standard'"
+                  img="'/website/static/src/img/snippets_options/header_effect_standard.png'"
+                  animateImg="'true'">
+            Standard
+        </WeButton>
+        <WeButton id="'option_header_effect_scroll'"
+                  customizeWebsiteVariable="`'scroll'`"
+                  name="'header_effect_scroll_opt'"
+                  selectClass="''"
+                  customizeWebsiteViews="''"
+                  img="'/website/static/src/img/snippets_options/header_effect_scroll.png'"
+                  animateImg="'true'">
+            Scroll
+        </WeButton>
+        <WeButton id="'option_header_effect_fixed'"
+                  customizeWebsiteVariable="`'fixed'`"
+                  name="'header_effect_fixed_opt'"
+                  selectClass="'o_header_fixed'"
+                  customizeWebsiteViews="'website.header_visibility_fixed'"
+                  img="'/website/static/src/img/snippets_options/header_effect_fixed.png'"
+                  animateImg="'true'">
+            Fixed
+        </WeButton>
+        <WeButton id="'option_header_effect_disappears'"
+                  customizeWebsiteVariable="`'disappears'`"
+                  name="'header_effect_disappears_opt'"
+                  selectClass="'o_header_disappears'"
+                  customizeWebsiteViews="'website.header_visibility_disappears'"
+                  img="'/website/static/src/img/snippets_options/header_effect_disappears.png'"
+                  animateImg="'true'">
+            Disappears
+        </WeButton>
+        <WeButton id="'option_header_effect_fade_out'"
+                  customizeWebsiteVariable="`'fade-out'`"
+                  name="'header_effect_fade_out_opt'"
+                  selectClass="'o_header_fade_out'"
+                  customizeWebsiteViews="'website.header_visibility_fade_out'"
+                  img="'/website/static/src/img/snippets_options/header_effect_fade_out.png'"
+                  animateImg="'true'">
+           Fade Out
+        </WeButton>
+    </WeSelect>
+</t>
+
 <!-- Header > Navbar Options -->
 <t t-name="website.HeaderNavbar">
     <WeSelect title.translate="Mobile Alignment"
