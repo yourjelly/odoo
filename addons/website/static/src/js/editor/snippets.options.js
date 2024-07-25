@@ -1909,12 +1909,13 @@ options.registry.ThemeColors = options.registry.OptionsTab.extend({
     },
 });
 
-options.registry.menu_data = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-        this.notification = this.bindService("notification");
-    },
+export class MenuElementOverlay extends SnippetOption {
+    constructor() {
+        super(...arguments);
+        this.notification = this.env.services.notification;
+        this.orm = this.env.services.orm;
+        this.website = this.env.services.website;
+    }
 
     /**
      * When the users selects a menu, a popover is shown with 4 possible
@@ -1925,25 +1926,21 @@ options.registry.menu_data = options.Class.extend({
      *
      * @override
      */
-    start: function () {
-        const wysiwyg = $(this.ownerDocument.getElementById('wrapwrap')).data('wysiwyg');
+    async willStart() {
         const popoverContainer = this.ownerDocument.getElementById('oe_manipulators');
         NavbarLinkPopoverWidget.createFor({
             target: this.$target[0],
-            wysiwyg,
+            wysiwyg: this.options.wysiwyg,
             container: popoverContainer,
             notify: this.notification.add,
             checkIsWebsiteDesigner: () => user.hasGroup("website.group_website_designer"),
             onEditLinkClick: (widget) => {
                 var $menu = widget.$target.find('[data-oe-id]');
-                this.trigger_up('menu_dialog', {
-                    name: $menu.text(),
-                    url: $menu.parent().attr('href'),
-                    save: (name, url) => {
-                        let websiteId;
-                        this.trigger_up('context_get', {
-                            callback: ctx => websiteId = ctx['website_id'],
-                        });
+                this.options.wysiwyg.openMenuDialog(
+                    $menu.text(),
+                    $menu.parent().attr('href'),
+                    (name, url) => {
+                        const websiteId = this.website.currentWebsite.id;
                         const data = {
                             id: $menu.data('oe-id'),
                             name,
@@ -1953,36 +1950,40 @@ options.registry.menu_data = options.Class.extend({
                             "website.menu",
                             "save",
                             [websiteId, {'data': [data]}]
-                        ).then(function () {
-                            widget.wysiwyg.odooEditor.observerUnactive();
+                        ).then(() => {
+                            this.options.wysiwyg.odooEditor.observerUnactive();
                             widget.$target.attr('href', url);
                             $menu.text(name);
-                            widget.wysiwyg.odooEditor.observerActive();
+                            this.options.wysiwyg.odooEditor.observerActive();
                         });
                     },
-                });
+                );
                 widget.popover.hide();
             },
             onEditMenuClick: (widget) => {
                 const contentMenu = widget.target.closest('[data-content_menu_id]');
                 const rootID = contentMenu ? parseInt(contentMenu.dataset.content_menu_id, 10) : undefined;
-                this.trigger_up('action_demand', {
-                    actionName: 'edit_menu',
-                    params: [rootID],
-                });
+                this.options.wysiwyg.openEditMenuDialog(rootID);
             },
         });
-        return this._super(...arguments);
-    },
+        return super.willStart(...arguments);
+    }
     /**
       * When the users selects another element on the page, makes sure the
       * popover is closed.
       *
       * @override
       */
-    onBlur: function () {
+    async onBlur() {
         this.$target.popover('hide');
-    },
+    }
+}
+
+registerWebsiteOption("MenuElementOverlay", {
+    Class: MenuElementOverlay,
+    selector: ".top_menu li > a, [data-content_menu_id] li > a",
+    exclude: ".dropdown-toggle, li.o_header_menu_button a, [data-toggle], .o_offcanvas_logo",
+    noCheck: true,
 });
 
 class Carousel extends CarouselHandler {
