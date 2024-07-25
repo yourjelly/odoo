@@ -751,22 +751,6 @@
         </t>
     </div>
 
-    <div data-selector="#wrapwrap > header nav.navbar .o_header_language_selector"
-         data-no-check="true"
-         groups="website.group_website_designer">
-        <we-select string="Style" data-reload="/">
-            <we-button data-customize-website-views="website.header_language_selector">Dropdown</we-button>
-            <we-button data-customize-website-views="website.header_language_selector, website.header_language_selector_inline">Inline</we-button>
-        </we-select>
-        <we-select string="Label" class="o_we_sublevel_1" data-reload="/" data-no-preview="true">
-            <we-button data-customize-website-views="">Text</we-button>
-            <we-button data-customize-website-views="website.header_language_selector_flag, website.header_language_selector_no_text">Flag</we-button>
-            <we-button data-customize-website-views="website.header_language_selector_flag">Flag and Text</we-button>
-            <we-button data-customize-website-views="website.header_language_selector_code, website.header_language_selector_no_text">Code</we-button>
-            <we-button data-customize-website-views="website.header_language_selector_flag, website.header_language_selector_code, website.header_language_selector_no_text">Flag and Code</we-button>
-        </we-select>
-    </div>
-
     <div data-selector="#wrapwrap > header nav.navbar .navbar-brand"
          data-no-check="true"
          groups="website.group_website_designer">

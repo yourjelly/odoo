@@ -353,6 +353,34 @@
     </WeSelect>
 </t>
 
+<t t-name="website.HeaderLanguageSelector">
+    <WeSelect title.translate="Style" reload="'/'">
+        <WeButton customizeWebsiteViews="'website.header_language_selector'">
+            Dropdown
+        </WeButton>
+        <WeButton customizeWebsiteViews="'website.header_language_selector, website.header_language_selector_inline'">
+            Inline
+        </WeButton>
+    </WeSelect>
+    <WeSelect title.translate="Label" class="'o_we_sublevel_1'" reload="'/'" noPreview="'true'">
+        <WeButton customizeWebsiteViews="''">
+            Text
+        </WeButton>
+        <WeButton customizeWebsiteViews="'website.header_language_selector_flag, website.header_language_selector_no_text'">
+            Flag
+        </WeButton>
+        <WeButton customizeWebsiteViews="'website.header_language_selector_flag'">
+            Flag and Text
+        </WeButton>
+        <WeButton customizeWebsiteViews="'website.header_language_selector_code, website.header_language_selector_no_text'">
+            Code
+        </WeButton>
+        <WeButton customizeWebsiteViews="'website.header_language_selector_flag, website.header_language_selector_code, website.header_language_selector_no_text'">
+            Flag and Code
+        </WeButton>
+    </WeSelect>
+</t>
+
 <!-- Header > Navbar Options -->
 <t t-name="website.HeaderNavbar">
     <WeSelect title.translate="Mobile Alignment"
