@@ -2468,14 +2468,11 @@ options.registry.collapse = options.Class.extend({
     },
 });
 
-options.registry.HeaderElements = options.Class.extend({
-    /**
-     * @constructor
-     */
-    init() {
-        this._super(...arguments);
+export class HeaderElements extends SnippetOption {
+    constructor() {
+        super(...arguments);
         this._rpc = options.serviceCached(rpc);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -2485,7 +2482,6 @@ options.registry.HeaderElements = options.Class.extend({
      * @override
      */
     async _computeWidgetVisibility(widgetName, params) {
-        const _super = this._super.bind(this);
         switch (widgetName) {
             case "header_language_selector_opt":
                 this._languages = await this._rpc.call("/website/get_languages");
@@ -2494,8 +2490,20 @@ options.registry.HeaderElements = options.Class.extend({
                 }
                 break;
         }
-        return _super(...arguments);
+        return super._computeWidgetVisibility(...arguments);
+    }
+}
+
+registerWebsiteOption("HeaderElements", {
+    Class: HeaderElements,
+    template: "website.HeaderElements",
+    selector: "#wrapwrap > header",
+    noCheck: true,
+    data: {
+        groups: ["website.group_website_designer"],
     },
+}, {
+    sequence: 60,
 });
 
 export class HeaderNavbar extends SnippetOption {
@@ -2674,6 +2682,8 @@ registerWebsiteOption("TopMenuVisibility", {
     template: "website.TopMenuVisibility",
     selector: "[data-main-object^='website.page('] #wrapwrap > header",
     noCheck: true,
+}, {
+    sequence: 50,
 });
 
 export class TopMenuColor extends SnippetOption {
