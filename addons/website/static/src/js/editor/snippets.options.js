@@ -4271,6 +4271,16 @@ options.registry.sizing.include({
     },
 });
 
+registerWebsiteOption("InfoPage", {
+    template: "website.InfoPage",
+    selector: "main:has(.o_website_info)",
+    noCheck: true,
+    data: {
+        groups: ["website.group_website_designer"],
+        pageOptions: true,
+    },
+});
+
 options.registry.SwitchableViews = options.Class.extend({
     /**
      * @override

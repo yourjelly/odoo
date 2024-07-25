@@ -865,4 +865,12 @@
 </WeRow>
 </t>
 
+<!-- Info page ('/website/info') -->
+<t t-name="website.InfoPage">
+    <WeCheckbox title.translate="Odoo Information"
+                customizeWebsiteViews="'website.show_website_info'"
+                noPreview="'true'"
+                reload="'/'"/>
+</t>
+
 </templates>
