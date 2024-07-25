@@ -381,6 +381,27 @@
     </WeSelect>
 </t>
 
+<t t-name="website.HeaderBrand">
+    <WeSelect title.translate="Logo" reload="'/'">
+        <WeButton customizeWebsiteViews="''" name="'option_header_brand_none'">None</WeButton>
+        <WeButton customizeWebsiteViews="'website.option_header_brand_name'">Text</WeButton>
+        <WeButton customizeWebsiteViews="'website.option_header_brand_logo'">Image</WeButton>
+    </WeSelect>
+    <WeInput title.translate="Height" class="'o_we_sublevel_1'"
+             dependencies="'!option_header_brand_none'"
+             customizeWebsiteVariable="'null'"
+             variable="'logo-height'"
+             unit="'px'"
+             saveUnit="'rem'"/>
+    <WeInput title.translate="Height (Scrolled)" class="'o_we_sublevel_1'"
+             name="'option_logo_height_scrolled'"
+             customizeWebsiteVariable="'null'"
+             variable="'fixed-logo-height'"
+             unit="'px'"
+             saveUnit="'rem'"
+             dependencies="'!header_effect_scroll_opt'"/> <!-- TODO: @owl-options - dependency doesn't work -->
+</t>
+
 <!-- Header > Navbar Options -->
 <t t-name="website.HeaderNavbar">
     <WeSelect title.translate="Mobile Alignment"

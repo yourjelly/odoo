@@ -2524,6 +2524,15 @@ registerWebsiteOption("HeaderLanguageSelector", {
     },
 });
 
+registerWebsiteOption("HeaderBrand", {
+    template: "website.HeaderBrand",
+    selector: "#wrapwrap > header nav.navbar .navbar-brand",
+    noCheck: true,
+    data: {
+        groups: ["website.group_website_designer"],
+    },
+});
+
 export class HeaderNavbar extends SnippetOption {
     /**
      * Particular case: we want the option to be associated on the header navbar

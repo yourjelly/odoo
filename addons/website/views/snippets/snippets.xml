@@ -751,31 +751,6 @@
         </t>
     </div>
 
-    <div data-selector="#wrapwrap > header nav.navbar .navbar-brand"
-         data-no-check="true"
-         groups="website.group_website_designer">
-        <we-select string="Logo" data-reload="/">
-            <we-button data-customize-website-views="" data-name="option_header_brand_none">None</we-button>
-            <we-button data-customize-website-views="website.option_header_brand_name">Text</we-button>
-            <we-button data-customize-website-views="website.option_header_brand_logo">Image</we-button>
-        </we-select>
-        <we-input string="Height"
-                  class="o_we_sublevel_1"
-                  data-dependencies="!option_header_brand_none"
-                  data-customize-website-variable="null"
-                  data-variable="logo-height"
-                  data-unit="px"
-                  data-save-unit="rem"/>
-        <we-input string="Height (Scrolled)"
-                  class="o_we_sublevel_1"
-                  data-name="option_logo_height_scrolled"
-                  data-customize-website-variable="null"
-                  data-variable="fixed-logo-height"
-                  data-unit="px"
-                  data-save-unit="rem"
-                  data-dependencies="!header_effect_scroll_opt"/>
-    </div>
-
     <!-- Footer - Colors & Layouts -->
     <div data-js="WebsiteLevelColor"
          data-selector="#wrapwrap > footer"
