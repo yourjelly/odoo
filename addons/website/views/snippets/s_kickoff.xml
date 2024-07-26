@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_kickoff" name="Kickoff">
+    <section class="s_kickoff o_cc5" style="background-color: rgb(255, 255, 255);">
+        <div class="container-fluid">
+            <div class="row o_grid_mode" data-row-count="11">
+                <div class="justify-content-center o_grid_item g-height-8 g-col-lg-6 col-lg-6" style="z-index: 2; grid-area: 2 / 1 / 10 / 7; --grid-item-padding-x: 64px; --grid-item-padding-y: 64px;">
+                    <h1 class="display-3">Unleash your <strong>potential.</strong></h1>
+                    <p class="lead"><br/>This is a simple hero unit.</p>
+                </div>
+                <div class="o_grid_item o_grid_item_image g-col-lg-12 g-height-10 col-lg-12" style="z-index: 1; grid-area: 1 / 1 / 12 / 13; --grid-item-padding-x: 40px; --grid-item-padding-y: 40px;">
+                    <div class="position-relative d-inline">
+                        <div class="o_we_bg_filter bg-black-50"/>
+                        <img class="img img-fluid mx-auto rounded-4" src="/web/image/website.s_banner_default_image_2" alt=""/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+</odoo>

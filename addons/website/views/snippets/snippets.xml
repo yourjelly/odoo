@@ -95,6 +95,7 @@
                 <t t-snippet="website.s_tabs" string="Tabs" group="content"/>
                 <t t-snippet="website.s_timeline" string="Timeline" group="content"/>
                 <t t-snippet="website.s_process_steps" string="Steps" t-forbid-sanitize="true" group="content"/>
+                <t t-snippet="website.s_kickoff" string="Kickoff" group="content"/>
 
                 <!-- Images group -->
                 <t t-snippet="website.s_picture" string="Title - Image" group="images">
