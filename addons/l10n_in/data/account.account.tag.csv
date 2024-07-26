@@ -88,3 +88,4 @@
 "account_tag_deferred_tax","Deferred tax","accounts","base.in"
 "account_tag_XII_profit/(loss)_from_discontinuing_operations","XII Profit/(loss) from discontinuing operations","accounts","base.in"
 "account_tag_XIII_tax_expense_of_discontinuing_operations","XIII Tax expense of discontinuing operations","accounts","base.in"
+"account_tag_closing_stock","Closing Stock","accounts","base.in"
