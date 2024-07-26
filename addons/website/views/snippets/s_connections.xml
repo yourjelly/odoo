@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_connections" name="Connections">
+    <section class="s_connections">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-6 pt160 pb160 px-5 o_cc o_cc1">
+                    <h1 class="display-3">Revolutionize your business operations</h1>
+                    <p class="lead"><br/>Step into the future with our innovative solutions tailored to meet the unique needs of your business. From improving efficiency to driving growth, our tools provide the foundation for sustainable success. Don’t let outdated processes hold you back any longer.<br/><br/></p>
+                    <a t-att-href="cta_btn_href" class="btn btn-lg btn-primary"><t t-esc="cta_btn_text">Discover more</t></a>
+                </div>
+                <div class="o_not_editable o_colored_level o_cc o_cc4 pt160 pb160 oe_img_bg col-lg-6 d-none d-md-block" style="background-image: url('/web/image/website.s_connections_default_image'); background-position: 100% 0;"/>
+            </div>
+        </div>
+    </section>
+</template>
+
+</odoo>

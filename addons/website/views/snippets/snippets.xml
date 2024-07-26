@@ -52,6 +52,8 @@
                 <t t-snippet="website.s_carousel" string="Carousel" group="intro">
                     <keywords>gallery, carousel</keywords>
                 </t>
+                <t t-snippet="website.s_connections" string="Connections" group="intro"/>
+                <!-- <keywords>gallery, carousel</keywords> -->
 
                 <!-- Content group -->
                 <t t-snippet="website.s_text_image" string="Text - Image" group="content">
