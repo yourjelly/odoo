@@ -107,6 +107,14 @@ class Registry(Mapping):
                 # odoo.http.root
                 threading.current_thread().dbname = db_name
 
+    def check_company_dependent(self):
+        for model_name, model in self.items():
+            for field in model._fields.values():
+                if field.type == 'one2many' and field.inverse_name:
+                    field_ = self[field.comodel_name]._fields[field.inverse_name]
+                    if field_.company_dependent:
+                        _logger.warning(f'one2many {field} for company dependent many2one {field_}')
+
     @classmethod
     @locked
     def new(cls, db_name, force_demo=False, status=None, update_module=False):
@@ -144,6 +152,7 @@ class Registry(Mapping):
         registry.registry_invalidated = bool(update_module)
         registry.new = registry.init = registry.registries = None
         registry.signal_changes()
+        registry.check_company_dependent()
 
         _logger.info("Registry loaded in %.3fs", time.time() - t0)
         return registry
