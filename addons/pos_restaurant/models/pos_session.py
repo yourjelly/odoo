@@ -26,7 +26,7 @@ class PosSession(models.Model):
                 last_order_preparation_change['lines'][orderline.uuid + " - "] = {
                     "uuid": orderline.uuid,
                     "name": orderline.full_product_name,
-                    "note": "",
+                    "note_ids": [],
                     "product_id": orderline.product_id.id,
                     "quantity": orderline.qty,
                     "attribute_value_ids": orderline.attribute_value_ids.ids,

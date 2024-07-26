@@ -4,20 +4,13 @@ import { patch } from "@web/core/utils/patch";
 patch(PosOrderline.prototype, {
     setup() {
         super.setup(...arguments);
-        this.note = this.note || "";
+        this.note_ids = this.note_ids || [];
     },
     //@override
     clone() {
         const orderline = super.clone(...arguments);
-        orderline.note = this.note;
+        orderline.note_ids = this.note_ids;
         return orderline;
-    },
-    get_line_diff_hash() {
-        if (this.getNote()) {
-            return this.id + "|" + this.getNote();
-        } else {
-            return "" + this.id;
-        }
     },
     toggleSkipChange() {
         if (this.uiState.hasChange || this.skip_change) {

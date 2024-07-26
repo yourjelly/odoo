@@ -25,15 +25,8 @@ export class OrderlineNoteButton extends Component {
         this.pos = usePos();
         this.dialog = useService("dialog");
     }
-    onClick() {
-        return this.props.label == _t("General Note") ? this.addGeneralNote() : this.addLineNotes();
-    }
-    async addLineNotes() {
-        const selectedOrderline = this.pos.get_order().get_selected_orderline();
-        const selectedNote = this.props.getter(selectedOrderline);
-        const oldNote = selectedOrderline.getNote();
-        const payload = await this.openTextInput(selectedNote);
 
+    async lineChanges(selectedOrderline, payload, newNotes = []) {
         var quantity_with_note = 0;
         const changes = this.pos.getOrderChanges();
         for (const key in changes.orderlines) {
@@ -47,29 +40,36 @@ export class OrderlineNoteButton extends Component {
             await this.pos.addLineToCurrentOrder({
                 product_id: selectedOrderline.product_id,
                 qty: quantity_with_note,
-                note: payload,
+                note_ids: [["link", ...newNotes]],
             });
             selectedOrderline.qty = saved_quantity;
         } else {
             this.props.setter(selectedOrderline, payload);
         }
-
-        return { confirmed: typeof payload === "string", inputNote: payload, oldNote };
+        return { quantity_with_note, saved_quantity };
     }
-    async addGeneralNote() {
-        const selectedOrder = this.pos.get_order();
-        const selectedNote = selectedOrder.general_note || "";
-        const payload = await this.openTextInput(selectedNote);
-        selectedOrder.general_note = payload;
+
+    async onClick() {
+        const selectedOrderline = this.pos.get_order().get_selected_orderline();
+        const selectedNote = this.props.getter(selectedOrderline);
+        const payload = await this.openTextInput(selectedNote, false);
+        this.lineChanges(selectedOrderline, payload, []);
         return { confirmed: typeof payload === "string", inputNote: payload };
     }
-    async openTextInput(selectedNote) {
+
+    async openTextInput(selectedNote, displayNotes) {
         let buttons = [];
-        if (this._isInternalNote() || this.props.label == _t("General Note")) {
+        if (displayNotes) {
             buttons = this.pos.models["pos.note"].getAll().map((note) => ({
+                id: note.id,
                 label: note.name,
-                isSelected: selectedNote.split("\n").includes(note.name), // Check if the note is already selected
+                isSelected: selectedNote.includes(note.name), // Check if the note is already selected
+                class: note.color ? `o_colorlist_item_color_${note.color}` : "",
             }));
+            const allowed_notes = this.pos.config.note_ids.map((n) => n.id);
+            if (allowed_notes.length) {
+                buttons = buttons.filter((x) => allowed_notes.includes(x.id) || x.isSelected);
+            }
         }
         return await makeAwaitable(this.dialog, TextInputPopup, {
             title: _t("Add %s", this.props.label),
@@ -78,10 +78,23 @@ export class OrderlineNoteButton extends Component {
             startingValue: selectedNote,
         });
     }
-    _isInternalNote() {
-        if (this.pos.config.module_pos_restaurant) {
-            return this.props.label == _t("Kitchen Note");
-        }
-        return this.props.label == _t("Internal Note");
+}
+
+export class InternalNoteButton extends OrderlineNoteButton {
+    static template = "point_of_sale.OrderlineNoteButton";
+    static props = {
+        ...OrderlineNoteButton.props,
+    };
+    async onClick() {
+        const selectedOrderline = this.pos.get_order().get_selected_orderline();
+        const selectedNote = Array.from(selectedOrderline.note_ids);
+        const payload = await this.openTextInput(selectedNote.map((n) => n.name).join("\n"), true);
+        const newNotes = await this.props.setter(selectedOrderline, payload, true);
+        super.lineChanges(selectedOrderline, payload, newNotes);
+        return {
+            confirmed: typeof payload === "string",
+            inputNote: newNotes.map((n) => n.id),
+            oldNote: selectedNote.map((n) => n.id),
+        };
     }
 }

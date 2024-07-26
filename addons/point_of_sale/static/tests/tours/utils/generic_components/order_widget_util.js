@@ -47,7 +47,7 @@ export function hasLine({
         trigger += `:has(.info-list .customer-note:contains("${customerNote}"))`;
     }
     if (internalNote) {
-        trigger += `:has(.info-list .internal-note:contains("${internalNote}"))`;
+        trigger += `:has(.info-list .o_tag_badge_text:contains("${internalNote}"))`;
     }
     if (comboParent) {
         trigger += `:has(.info-list .combo-parent-name:contains("${comboParent}"))`;
@@ -96,5 +96,11 @@ export function hasTax(amount) {
     return {
         content: `order total tax is '${amount}'`,
         trigger: `.order-summary .tax:contains("${amount}")`,
+    };
+}
+export function hasGeneralNote(note) {
+    return {
+        content: `General note is '${note}'`,
+        trigger: `.pos .order-container .mt-1:contains("${note}")`,
     };
 }

@@ -1,4 +1,3 @@
-import * as TextInputPopup from "@point_of_sale/../tests/tours/utils/text_input_popup_util";
 import * as Dialog from "@point_of_sale/../tests/tours/utils/dialog_util";
 import * as NumberPopup from "@point_of_sale/../tests/tours/utils/number_popup_util";
 import * as FloorScreen from "@pos_restaurant/../tests/tours/utils/floor_screen_util";
@@ -42,14 +41,13 @@ registry.category("web_tour.tours").add("ControlButtonsTour", {
             ProductScreen.clickControlButton("Split"),
             SplitBillScreen.clickBack(),
 
-            ProductScreen.clickInternalNoteButton(),
-            TextInputPopup.inputText("test note"),
-            Dialog.confirm(),
+            ProductScreen.addInternalNote("test note"),
+            // internal notes are capitalized before creation saved
             Order.hasLine({
                 productName: "Water",
                 quantity: "5",
                 price: "10.0",
-                internalNote: "test note",
+                internalNote: "Test note",
                 withClass: ".selected",
             }),
             // Check that note is imported if come back to the table
@@ -59,7 +57,7 @@ registry.category("web_tour.tours").add("ControlButtonsTour", {
                 productName: "Water",
                 quantity: "5",
                 price: "10.0",
-                internalNote: "test note",
+                internalNote: "Test note",
                 withClass: ".selected",
             }),
 

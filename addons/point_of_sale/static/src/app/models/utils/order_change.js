@@ -42,8 +42,8 @@ export const getOrderChanges = (order, skipped = false, orderPreparationCategori
     // When one of them has changed, we add the change.
     for (const orderline of order.get_orderlines()) {
         const product = orderline.get_product();
-        const note = orderline.getNote();
-        const lineKey = `${orderline.uuid} - ${note}`;
+        const notes = orderline.note_ids;
+        const lineKey = `${orderline.uuid} - ${notes.map((note) => note.name).join(" ")}`;
         const productCategoryIds = product.parentPosCategIds.filter((id) =>
             prepaCategoryIds.has(id)
         );
@@ -61,7 +61,7 @@ export const getOrderChanges = (order, skipped = false, orderPreparationCategori
                     product_id: product.id,
                     attribute_value_ids: orderline.attribute_value_ids,
                     quantity: quantityDiff,
-                    note: note,
+                    note_ids: notes,
                     pos_categ_id: product.pos_categ_ids[0]?.id ?? 0,
                     pos_categ_sequence: product.pos_categ_ids[0]?.sequence ?? 0,
                 };
@@ -91,7 +91,7 @@ export const getOrderChanges = (order, skipped = false, orderPreparationCategori
                     uuid: lineResume["uuid"],
                     product_id: lineResume["product_id"],
                     name: lineResume["name"],
-                    note: lineResume["note"],
+                    note_ids: lineResume["note_ids"],
                     attribute_value_ids: lineResume["attribute_value_ids"],
                     quantity: -lineResume["quantity"],
                 };
