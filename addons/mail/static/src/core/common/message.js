@@ -377,7 +377,7 @@ export class Message extends Component {
             {
                 message,
                 messageComponent: Message,
-                prompt: _t("Are you sure you want to delete this message?"),
+                prompt: _t("Are you sure you want to bid farewell to this message forever?"),
                 onConfirm: () => message.remove(),
             },
             { context: this }

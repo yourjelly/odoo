@@ -654,7 +654,7 @@ export class Composer extends Component {
                 message: composer.message,
                 messageComponent: this.props.messageComponent,
                 onConfirm: () => this.message.remove(),
-                prompt: _t("Are you sure you want to delete this message?"),
+                prompt: _t("Are you sure you want to bid farewell to this message forever?"),
             });
         }
         this.suggestion?.clearRawMentions();
