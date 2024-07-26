@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="partner_track_channel_action" model="ir.actions.act_window">
+        <field name="name">track</field>
+        <field name="res_model">partner.track.channel</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+
+    <record id="partner_track_channel_view_tree" model="ir.ui.view">
+        <field name="name">partner.track.channel.tree</field>
+        <field name="model">partner.track.channel</field>
+        <field name="arch" type="xml">
+            <tree string="tree_view">
+                <field name="name" string="Name"/>
+                <field name="partner_ids" string="Partner" widget="many2many_tags"/>
+                <field name="user_id" string="User"/>
+                <field name="state" string="Status"/>
+                <field name="radius" string="Radius"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="partner_track_channel_view_form" model="ir.ui.view">
+        <field name="name">partner.track.channel.form</field>
+        <field name="model">partner.track.channel</field>
+        <field name="arch" type="xml">
+            <form string="form_view">
+                <sheet>
+                    <group>
+                        <field name="name" string="Name"/>
+                        <field name="partner_ids" string="Partner" widget="many2many_tags"/>
+                        <field name="user_id" string="User"/>
+                        <field name="state" string="Status"/>
+                        <field name="radius" string="Radius"/>
+                    </group>
+                 </sheet>   
+            </form>
+        </field>
+    </record>
+
+    <record id="partner_track_channel_view_kanban" model="ir.ui.view">
+        <field name="name">partner.track.channel.kanban</field>
+        <field name="model">partner.track.channel</field>
+        <field name="arch" type="xml">
+            <!-- <kanban string="Kanban_view" type='object' action="partner_track_detail_action"> -->
+            <kanban string="Kanban_view" type='action' action="%(partner_track_detail_action)d">
+                <field name="name" string="Name"/>
+                <field name="user_id" string="User"/>
+                <field name="state" string="Status"/>
+                <field name="radius" string="Radius"/>
+                <template>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+
+                            <div class="o_dropdown_kanban dropdown float-end">
+                                <a class="dropdown-toggle o-no-caret btn" role="button" data-bs-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
+                                    <span class="fa fa-ellipsis-v"/>
+                                </a>
+                                <div class="dropdown-menu" role="menu">
+                                    <a role="menuitem" type="open" class="dropdown-item">Configuration</a>
+                                </div>
+                            </div>
+
+                            <div class="oe_kanban_details">
+                                <h4 class="oe_kanban_title">
+                                    <field name="name"/>
+                                </h4>
+                            </div>
+
+                            <div class="col-10">
+                                <i class="fa fa-user me-2" title="user"/>
+                                <field name="partner_ids" widget="many2many_avatar_partner"/>
+                            </div>
+                            <div class="oe_kanban_content">
+                                <h4>
+                                    <field name="radius"/>
+                                </h4>
+                            </div>
+                            
+                            <div class="oe_kanban_bottom_right float-end">
+                                <field name="state" widget="state_selection" class="me-2"/>
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                            </div> 
+                        </div>
+                    </t>
+                </template> 
+            </kanban>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <div t-name="base_partner_tracker.PartnerTracker" class="o_action" owl="1">
+        <div id="o_Partner_tracker_map" class="o_Partner_tracker_map"/>
+    </div>
+
+    <div t-name="base_partner_tracker.MarkerPopup" class="o_marker_popup" owl="1">
+        <a href="#" class="o_open_chat" title="Open Chat" role="button" tabIndex="0">
+            <t t-out="partnerName"/>
+        </a>
+    </div>
+
+</templates>

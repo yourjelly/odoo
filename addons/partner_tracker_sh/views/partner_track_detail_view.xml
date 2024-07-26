@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="partner_track_detail_action" model="ir.actions.act_window">
+        <field name="name">track detail</field>
+        <field name="res_model">partner.track.detail</field>
+        <field name="view_mode">tree,kanban,form,map</field>
+        <field name="domain">[('channel_id', '=', active_id)]</field>
+    </record>
+
+    <record id="partner_track_detail_view_tree" model="ir.ui.view">
+        <field name="name">partner.track.detail.tree</field>
+        <field name="model">partner.track.detail</field>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <field name="longitude" string="Longitude"/>
+                <field name="latitude" string="Latitude"/>
+                <field name="partner_id" string="Partner"/>
+                <field name="channel_id" string="Channel"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="partner_track_detail_view_map" model="ir.ui.view">
+        <field name="name">partner.track.detail.view.map</field>
+        <field name="model">partner.track.detail</field>
+        <field name="arch" type="xml">
+            <map res_partner="partner_id" js_class="partner_map">
+                <field name="partner_id" string="Customer"/>
+                <field name="longitude" string="Longitude"/>
+                <field name="latitude" string="Latitude"/>
+                <field name="place" string="Place"/>
+                <field name="time" string="Date"/>
+                <field name="create_date" string="Time"/>
+            </map>
+        </field>
+    </record>
+
+    <record id="view_partner_track_detail_kanban" model="ir.ui.view">
+        <field name="name">partner.track.detail.kanban</field>
+        <field name="model">partner.track.detail</field>
+        <field name="arch" type="xml">
+            <kanban string="Kanban_view" name="action_view_tasks" create="false">
+                <field name="longitude" string="Name"/>
+                <field name="latitude" string="User"/>
+                <field name="partner_id" string="Status"/>
+                <field name="channel_id" string="Radius"/>
+                <template>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="oe_kanban_details">
+                                <h4 class="oe_kanban_content">
+                                    <field name="latitude"/>
+                                </h4>
+                                <h4 class="oe_kanban_title">
+                                    <field name="longitude"/>
+                                </h4><h4 class="oe_kanban_content">
+                                    <field name="partner_id"/>
+                                </h4><h4 class="oe_kanban_content">
+                                    <field name="channel_id"/>
+                                </h4>
+                            </div>
+                        </div>
+                    </t>
+                </template> 
+            </kanban>
+        </field>
+    </record>
+    
+</odoo>

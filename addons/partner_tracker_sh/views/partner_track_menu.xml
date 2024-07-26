@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem id="partner_track_channel_menu_root" name="Partner Track">
+        <menuitem id="partner_track_first_level_menu" name="Track Channels">
+            <menuitem id="partner_track_channel_menu_action" action="partner_track_channel_action"/>
+        </menuitem>
+        
+        <menuitem id="partner_track_second_level_menu" name="Track Detail">
+            <menuitem id="track_detail_menu_action" action="partner_track_detail_action"/>
+        </menuitem>
+
+    </menuitem>
+
+</odoo>

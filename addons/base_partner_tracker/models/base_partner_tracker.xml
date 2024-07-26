@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <record id="field_x_mail_message_x_partner_longitude" model="ir.model.fields">
+        <field name="name">x_partner_longitude</field>
+        <field name="field_description">Partner Longitude</field>
+        <field name="model_id" ref="mail.model_mail_message"/>
+        <field name="copied" eval="True"/>
+        <field name="readonly" eval="False"/>
+        <field name="selectable" eval="True"/>
+        <field name="state">manual</field>
+        <field name="ttype">float</field>
+    </record>
+
+    <record id="field_x_mail_message_x_partner_latitude" model="ir.model.fields">
+        <field name="name">x_partner_latitude</field>
+        <field name="field_description">Partner Latitude</field>
+        <field name="model_id" ref="mail.model_mail_message"/>
+        <field name="copied" eval="True"/>
+        <field name="readonly" eval="False"/>
+        <field name="selectable" eval="True"/>
+        <field name="state">manual</field>
+        <field name="ttype">float</field>
+    </record>
+
+     <!-- <record id="model_mail_message_partner_tracker" model="base.automation">
+        <field name="name">partner_location</field>
+        <field name="model_id" ref="mail.model_mail_message"/>
+        <field name="active">True</field>
+        <field name="trigger">on_create</field>
+        <field name="state">code</field>
+        <field name="code">
+coords = env.context.get('coords',False)
+if coords:
+    lat = coords.get('latitude')
+    lon = coords.get('longitude')   
+    record['x_partner_longitude'] = lon
+    record['x_partner_latitude'] = lat
+        </field>
+    </record> -->
+    <record id="model_mail_message_partner_tracker" model="ir.actions.server">
+        <field name="name">partner_location</field>
+        <field name="model_id" ref="mail.model_mail_message"/>
+        <field name="state">code</field>
+        <field name="code">
+if env.context:
+    coords = env.context.get('coords',False)
+    if coords:
+        lat = coords.get('latitude')
+        lon = coords.get('longitude')   
+        record['x_partner_longitude'] = lon
+        record['x_partner_latitude'] = lat
+        </field>
+    </record>
+</odoo>
