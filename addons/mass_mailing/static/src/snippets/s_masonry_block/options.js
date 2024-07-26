@@ -1,5 +1,5 @@
-import { registry } from "@web/core/registry";
 import { SelectTemplate } from "@web_editor/js/editor/snippets.options";
+import { registerMassMailingOption } from "@mass_mailing/js/snippets.registry";
 
 export class MasonryLayout extends SelectTemplate {
     constructor() {
@@ -9,8 +9,7 @@ export class MasonryLayout extends SelectTemplate {
     }
 }
 
-registry.category("snippet_options").add("MassMailingMasonryLayout", {
-    module: "mass_mailing",
+registerMassMailingOption("MassMailingMasonryLayout", {
     Class: MasonryLayout,
     template: "mass_mailing.s_masonry_block_options",
     selector: ".s_masonry_block",
