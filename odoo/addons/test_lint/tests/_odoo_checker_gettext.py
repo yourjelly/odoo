@@ -49,9 +49,14 @@ class OdooBaseChecker(BaseChecker):
             'gettext-repr',
             'Don\'t use %r to automatically insert quotes in translation strings. Quotes can be different depending on the language: they must be part of the translated string.',
         ),
+        'E8507': (
+            'Call to gettext in Markup',
+            'markup-gettext',
+            'TODO',
+        ),
     }
 
-    @only_required_for_messages('gettext-variable', 'gettext-placeholders', 'gettext-repr')
+    @only_required_for_messages('gettext-variable', 'gettext-placeholders', 'gettext-repr', 'markup-gettext')
     def visit_call(self, node):
         if isinstance(node.func, astroid.Name) and node.func.name in ('_', '_lt'):
             first_arg = node.args[0]
@@ -62,6 +67,10 @@ class OdooBaseChecker(BaseChecker):
                     self.add_message('gettext-placeholders', node=node)
                 elif re.search(REPR_REGEXP, first_arg.value):
                     self.add_message('gettext-repr', node=node)
+        if isinstance(node.func, astroid.Name) and node.func.name == 'Markup' and node.args:
+            first_arg = node.args[0]
+            if isinstance(first_arg, astroid.Call) and isinstance(first_arg.func, astroid.Name) and first_arg.func.name in ('_', '_lt'):
+                self.add_message('markup-gettext', node=node)
 
 
 def register(linter):
