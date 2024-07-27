@@ -63,6 +63,7 @@
                 data-select-color-combination=""
                 data-with-combinations="selectColorCombination"
                 data-with-gradients="true"
+                data-prevent-important="true"
             />
         </div>
     </xpath>
