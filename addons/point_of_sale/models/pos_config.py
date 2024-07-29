@@ -154,6 +154,7 @@ class PosConfig(models.Model):
     module_pos_restaurant = fields.Boolean("Is a Bar/Restaurant")
     module_pos_discount = fields.Boolean("Global Discounts")
     module_pos_mercury = fields.Boolean(string="Integrated Card Payments")
+    module_pos_urban_piper = fields.Boolean(string='Is an Urbanpiper')
     is_posbox = fields.Boolean("PosBox")
     is_header_or_footer = fields.Boolean("Custom Header & Footer")
     module_pos_hr = fields.Boolean(help="Show employee login screen")

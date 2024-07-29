@@ -83,19 +83,25 @@ export class PosStore extends Reactive {
         "barcode_reader",
         "hardware_proxy",
         "ui",
+        "sound",
+        "notification",
+        "bus_service",
     ];
     constructor() {
         super();
         this.ready = this.setup(...arguments).then(() => this);
     }
     // use setup instead of constructor because setup can be patched.
-    async setup(env, { popup, orm, number_buffer, hardware_proxy, barcode_reader, ui }) {
+    async setup(env, { popup, orm, number_buffer, hardware_proxy, barcode_reader, ui, sound, notification, bus_service }) {
         this.env = env;
         this.orm = orm;
         this.popup = popup;
         this.numberBuffer = number_buffer;
         this.barcodeReader = barcode_reader;
         this.ui = ui;
+        this.sound = sound;
+        this.notification = notification;
+        this.bus = bus_service;
 
         this.db = new PosDB(); // a local database used to search trough products and categories & store pending orders
         this.unwatched = markRaw({});
