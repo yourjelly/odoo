@@ -333,11 +333,12 @@ class Slide(models.Model):
     def _compute_slides_statistics(self):
         # Do not use dict.fromkeys(self.ids, dict()) otherwise it will use the same dictionnary for all keys.
         # Therefore, when updating the dict of one key, it updates the dict of all keys.
-        keys = ['nbr_%s' % slide_type for slide_type in self.env['slide.slide']._fields['slide_type'].get_values(self.env)]
+        slide_type_values = self.env['slide.slide']._fields['slide_type'].get_values(self.env)
+        keys = ['nbr_%s' % slide_type for slide_type in slide_type_values]
         default_vals = dict((key, 0) for key in keys + ['total_slides'])
 
         res = self.env['slide.slide'].read_group(
-            [('is_published', '=', True), ('category_id', 'in', self.ids), ('is_category', '=', False)],
+            [('is_published', '=', True), ('category_id', 'in', self.ids), ('is_category', '=', False), ('slide_type', 'in', slide_type_values)],
             ['category_id', 'slide_type'], ['category_id', 'slide_type'],
             lazy=False)
 

@@ -310,12 +310,13 @@ class Channel(models.Model):
                  'slide_ids.likes', 'slide_ids.dislikes', 'slide_ids.total_views', 'slide_ids.is_category', 'slide_ids.active')
     def _compute_slides_statistics(self):
         default_vals = dict(total_views=0, total_votes=0, total_time=0, total_slides=0)
-        keys = ['nbr_%s' % slide_type for slide_type in self.env['slide.slide']._fields['slide_type'].get_values(self.env)]
+        slide_type_values = self.env['slide.slide']._fields['slide_type'].get_values(self.env)
+        keys = ['nbr_%s' % slide_type for slide_type in slide_type_values]
         default_vals.update(dict((key, 0) for key in keys))
 
         result = dict((cid, dict(default_vals)) for cid in self.ids)
         read_group_res = self.env['slide.slide'].read_group(
-            [('active', '=', True), ('is_published', '=', True), ('channel_id', 'in', self.ids), ('is_category', '=', False)],
+            [('active', '=', True), ('is_published', '=', True), ('channel_id', 'in', self.ids), ('is_category', '=', False), ('slide_type', 'in', slide_type_values)],
             ['channel_id', 'slide_type', 'likes', 'dislikes', 'total_views', 'completion_time'],
             groupby=['channel_id', 'slide_type'],
             lazy=False)
