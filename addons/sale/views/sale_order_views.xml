@@ -516,7 +516,6 @@
                                         'uom':product_uom,
                                         'company_id': parent.company_id,
                                         'default_lst_price': price_unit,
-                                        'default_description_sale': name
                                     }"
                                     options="{
                                         'no_open': True,
@@ -535,7 +534,6 @@
                                         'uom':product_uom,
                                         'company_id': parent.company_id,
                                         'default_list_price': price_unit,
-                                        'default_description_sale': name
                                     }"
                                     options="{
                                         'no_open': True,
