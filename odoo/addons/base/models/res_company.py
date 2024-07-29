@@ -78,9 +78,7 @@ class Company(models.Model):
     layout_background = fields.Selection([('Blank', 'Blank'), ('Demo logo', 'Demo logo'), ('Custom', 'Custom')], default="Blank", required=True)
     layout_background_image = fields.Binary("Background Image")
     uninstalled_l10n_module_ids = fields.Many2many('ir.module.module', compute='_compute_uninstalled_l10n_module_ids')
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', 'The company name must be unique!')
-    ]
+    branch_code = fields.Char(string='Branch Code')
 
     def init(self):
         for company in self.search([('paperformat_id', '=', False)]):
@@ -123,6 +121,11 @@ class Company(models.Model):
             if address_data['contact']:
                 partner = company.partner_id.browse(address_data['contact']).sudo()
                 company.update(company._get_company_address_update(partner))
+
+    @api.depends('branch_code')
+    def _compute_display_name(self):
+        for company in self:
+            company.display_name = f"{company.name} [{company.branch_code}]" if company.branch_code else company.name
 
     def _inverse_street(self):
         for company in self:
@@ -409,6 +412,25 @@ class Company(models.Model):
                     if company[fname] != company.parent_id[fname]:
                         description = self.env['ir.model.fields']._get("res.company", fname).field_description
                         raise ValidationError(_("The %s of a subsidiary must be the same as it's root company.", description))
+
+    @api.constrains('name', 'branch_code')
+    def _check_name_branch_code_unique(self):
+        for record in self:
+            domain = [
+                ('name', '=', record.name),
+                ('branch_code', '=', record.branch_code),
+                ('id', '!=', record.id),
+            ]
+            if self.search_count(domain):
+                branch_code = record.branch_code or 'N/A'
+                raise ValidationError(_('The company name "%(name)s" with branch code "%(code)s" is already in use.', name=record.name, code=branch_code))
+
+    @api.model
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        domain = domain or []
+        _logger.info("name_search domain: %s", domain)
+        domain = domain + ['|', ('name', operator, name), ('branch_code', operator, name)]
+        return self._search(domain, limit=limit, order=order)
 
     @api.model
     def _get_main_company(self):

@@ -49,6 +49,7 @@ class TestSessionInfo(common.HttpCase):
                 'id': company.id,
                 'name': company.name,
                 'sequence': company.sequence,
+                'branch_code': company.branch_code,
                 'child_ids': company.child_ids.ids,
                 'parent_id': company.parent_id.id,
             } for company in self.allowed_companies
@@ -59,6 +60,7 @@ class TestSessionInfo(common.HttpCase):
                 'id': company.id,
                 'name': company.name,
                 'sequence': company.sequence,
+                'branch_code': company.branch_code,
                 'child_ids': company.child_ids.ids,
                 'parent_id': company.parent_id.id,
             } for company in self.disallowed_ancestor_companies
@@ -69,6 +71,7 @@ class TestSessionInfo(common.HttpCase):
             'allowed_companies': expected_allowed_companies,
             'disallowed_ancestor_companies': expected_disallowed_ancestor_companies,
         }
+
         self.assertEqual(
             result['user_companies'],
             expected_user_companies,

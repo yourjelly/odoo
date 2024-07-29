@@ -148,6 +148,7 @@ class Http(models.AbstractModel):
                             'id': comp.id,
                             'name': comp.name,
                             'sequence': comp.sequence,
+                            'branch_code': comp.branch_code,
                             'child_ids': (comp.child_ids & user.company_ids).ids,
                             'parent_id': comp.parent_id.id,
                         } for comp in user.company_ids
@@ -157,6 +158,7 @@ class Http(models.AbstractModel):
                             'id': comp.id,
                             'name': comp.name,
                             'sequence': comp.sequence,
+                            'branch_code': comp.branch_code,
                             'child_ids': (comp.child_ids & all_companies_in_hierarchy_sudo).ids,
                             'parent_id': comp.parent_id.id,
                         } for comp in disallowed_ancestor_companies_sudo

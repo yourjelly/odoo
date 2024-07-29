@@ -37,6 +37,7 @@
                                         <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
                                     </div>
                                     <field name="vat"/>
+                                    <field name="branch_code"/>
                                     <field name="company_registry"/>
                                     <field name="currency_id" options="{'no_create': True, 'no_open': True}" id="company_currency" context="{'active_test': False}"/>
                                 </group>
@@ -67,6 +68,7 @@
                     <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="partner_id" required="0"/>
+                    <field name="branch_code"/>
                     <field name="child_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                 </tree>
             </field>

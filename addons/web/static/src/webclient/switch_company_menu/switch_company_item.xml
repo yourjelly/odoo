@@ -40,6 +40,7 @@
                 class="company_label text-700 text-truncate"
                 t-attf-style="padding-left:{{props.level * 20}}px;">
                 <t t-out="props.company.name"/>
+                <t t-if="props.company.branch_code"> [ <t t-out="props.company.branch_code"/> ] </t>
             </span>
         </div>
     </span>

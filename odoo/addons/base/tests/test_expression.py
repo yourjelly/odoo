@@ -1777,7 +1777,7 @@ class TestMany2one(TransactionCase):
             WHERE ("res_partner"."company_id" IN (
                 SELECT "res_company"."id"
                 FROM "res_company"
-                WHERE ("res_company"."name" LIKE %s)
+                WHERE (("res_company"."name" LIKE %s) OR ("res_company"."branch_code" LIKE %s))
             ))
             ORDER BY "res_partner"."complete_name"asc,"res_partner"."id"desc
         ''']):
@@ -1789,7 +1789,7 @@ class TestMany2one(TransactionCase):
             WHERE (("res_partner"."company_id" NOT IN (
                 SELECT "res_company"."id"
                 FROM "res_company"
-                WHERE ("res_company"."name" LIKE %s)
+                WHERE (("res_company"."name" LIKE %s) OR ("res_company"."branch_code" LIKE %s))
             )) OR "res_partner"."company_id" IS NULL)
             ORDER BY "res_partner"."complete_name"asc,"res_partner"."id"desc
         ''']):
@@ -2117,7 +2117,7 @@ class TestMany2many(TransactionCase):
                 AND "res_users__company_ids"."cid" IN (
                     SELECT "res_company"."id"
                     FROM "res_company"
-                    WHERE ("res_company"."name" LIKE %s)
+                    WHERE (("res_company"."name" LIKE %s) OR ("res_company"."branch_code" LIKE %s))
                 )
             )
             ORDER BY "res_users"."id"
