@@ -917,7 +917,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                     'id': line.id,
                     'image_url': order.website_id.image_url(line.product_id, 'image_128'),
                     'quantity': line._get_displayed_quantity(),
-                    'name': line._get_short_description(),
+                    'name': line.with_context(display_default_code=False)._get_short_description(),
                     'description': line._get_sale_order_line_multiline_description_variants(),
                     'line_price_total': line.price_total if show_tax else line.price_subtotal,
                 } for line in lines

@@ -97,8 +97,8 @@
                         <tr t-att-class="'fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
                             <t t-if="not line.display_type">
                                 <td name="td_name">
-                                    <span t-if="line.product_id.name and line.product_id.default_code">[<t t-out="line.product_id.default_code"/>] </span>
-                                    <span t-if="line.product_id.name" t-field="line.product_id.name" t-options="{'widget': 'text'}"/>
+                                    <span t-if="line.product_id" t-field="line.product_id.display_name" t-options="{'widget': 'text'}"/>
+                                    <br t-if="line.product_id and line.name"/>
                                     <span t-if="line.name" t-field="line.name" t-options="{'widget': 'text'}"/>
                                 </td>
                                 <td name="td_quantity" class="text-end text-nowrap">

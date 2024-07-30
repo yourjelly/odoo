@@ -5,12 +5,12 @@
         <xpath expr="//section[@id='details']//div[hasclass('table-responsive')]" position="attributes">
             <attribute name="class" remove="table-responsive" separator=" "/>
         </xpath>
-        <xpath expr="//section[@id='details']//span[@name='product_name']" position="replace">
+        <xpath expr="//section[@id='details']//td[@id='product_name']//t[@t-call='sale.sol_product_description']" position="replace">
             <a t-if="line.product_id.website_published" t-att-href="line.product_id.website_url" class="d-block text-wrap" style="max-width: 35vw">
-                $0
+                <t t-call="sale.sol_product_description"/>
             </a>
             <t t-else="">
-                $0
+                <t t-call="sale.sol_product_description"/>
             </t>
         </xpath>
     </template>

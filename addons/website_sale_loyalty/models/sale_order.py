@@ -123,6 +123,11 @@ class SaleOrder(models.Model):
             for lines in grouped_order_lines.values():
                 if lines.reward_id.reward_type != 'discount':
                     continue
+                description = (
+                    lines[0].with_context(display_default_code=False)._get_short_description()
+                    if lines.reward_id.reward_type != 'product'
+                    else lines[0].name
+                )
                 new_lines += self.env['sale.order.line'].new({
                     'product_id': lines[0].product_id.id,
                     'tax_id': False,
@@ -130,7 +135,7 @@ class SaleOrder(models.Model):
                     'price_subtotal': sum(lines.mapped('price_subtotal')),
                     'price_total': sum(lines.mapped('price_total')),
                     'discount': 0.0,
-                    'name': lines[0]._get_short_description() if lines.reward_id.reward_type != 'product' else lines[0].name,
+                    'name': description,
                     'product_uom_qty': 1,
                     'product_uom': lines[0].product_uom.id,
                     'order_id': order.id,

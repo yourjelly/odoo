@@ -41,8 +41,8 @@ class CustomerPortal(sale_portal.CustomerPortal):
                     } for pcav in line.product_custom_attribute_value_ids
                 ],
                 'type': line.product_id.type,
-                'name': line._get_short_description(),
-                'description_sale': line.product_id.description_sale or '' + line._get_sale_order_line_multiline_description_variants(),
+                'name': line.with_context(display_default_code=False)._get_short_description(),
+                'description_sale': line.name,
                 'qty': line.product_uom_qty,
                 'add_to_cart_allowed': line.with_user(request.env.user).sudo()._is_reorder_allowed(),
                 'has_image': bool(line.product_id.image_128),

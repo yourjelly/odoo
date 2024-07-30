@@ -548,14 +548,8 @@
 
                                 <tr t-att-class="'fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
                                     <t t-if="not line.display_type">
-                                        <td name="sol_name">
-                                            <span t-if="line.product_id.name and line.product_id.default_code">[<t t-out="line.product_id.default_code"/>] </span>
-                                            <span
-                                                t-if="line.product_id.name"
-                                                t-field="line.product_id.name"
-                                                t-options="{'widget': 'text'}"
-                                                name="product_name"/>
-                                            <span t-if="line.name" t-field="line.name" t-options="{'widget': 'text'}"/>
+                                        <td id="product_name">
+                                            <t t-call="sale.sol_product_description"/>
                                         </td>
                                         <td class="text-end" id="quote_qty_td">
                                             <div id="quote_qty">
@@ -649,6 +643,16 @@
                 <span t-field="sale_order.payment_term_id.note"/>
             </section>
         </div>
+    </template>
+
+    <template id="sale.sol_product_description">
+        <span
+            t-if="line.product_id"
+            t-field="line.product_id.display_name"
+            t-options="{'widget': 'text'}"
+            name="product_name"/>
+        <br t-if="line.product_id and line.name"/>
+        <span t-if="line.name" t-field="line.name" t-options="{'widget': 'text'}"/>
     </template>
 
     <template id="sale_order_portal_content_totals_table">
