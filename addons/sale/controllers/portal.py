@@ -106,6 +106,9 @@ class CustomerPortal(payment_portal.PaymentPortal):
         request.session['my_orders_history'] = values['orders'].ids[:100]
         return request.render("sale.portal_my_orders", values)
 
+    def _get_portal_loyalty_values(self, order):
+        return {}
+
     @http.route(['/my/orders/<int:order_id>'], type='http', auth="public", website=True)
     def portal_order_page(
         self,
@@ -169,6 +172,9 @@ class CustomerPortal(payment_portal.PaymentPortal):
                     downpayment=downpayment == 'true' if downpayment is not None else order_sudo.prepayment_percent < 1.0
                 )
             )
+        loyaty_values = self._get_portal_loyalty_values(order_sudo)
+        if loyaty_values:
+            values.update(loyaty_values)
 
         if order_sudo.state in ('draft', 'sent', 'cancel'):
             history_session_key = 'my_quotations_history'

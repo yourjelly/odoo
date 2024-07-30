@@ -1,0 +1,43 @@
+<templates>
+    <t t-name="sale_loyalty.sale_order_loyalty_table">
+        <t t-set="loyalty_card" t-value="props.loyalty_card"/>
+        <table class="table" t-if="loyalty_card">
+            <tr class="border-bottom">
+                <td>Loyalty Card :</td>
+                <td class="text-end">
+                    <strong class="p-0">
+                        <span t-out="loyalty_card.old_balance"/>
+                        <span class="ms-1 d-none d-md-inline" t-out="props.point_name"/>
+                    </strong>
+                </td>
+            </tr>
+            <tr class="border-none">
+                <td>Issued :</td>
+                <td class="text-end">
+                    <div class="p-0 m-0">
+                        <span t-out="loyalty_card.issued"/>
+                        <span class="ms-1 d-none d-md-inline" t-out="props.point_name"/>
+                    </div>
+                </td>
+            </tr>
+            <tr class="border-bottom">
+                <td>Used :</td>
+                <td class="text-end">
+                    <div class="p-0 m-0">
+                        <span t-out="loyalty_card.cost"/>
+                        <span class="ms-1 d-none d-md-inline" t-out="props.point_name"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>New Balance :</td>
+                <td class="text-end">
+                    <strong class="p-0">
+                        <span t-out="loyalty_card.new_balance"/>
+                        <span class="ms-1 d-none d-md-inline" t-out="props.point_name"/>
+                    </strong>
+                </td>
+            </tr>
+        </table>
+    </t>
+</templates>

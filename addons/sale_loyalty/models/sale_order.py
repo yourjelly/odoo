@@ -28,6 +28,75 @@ class SaleOrder(models.Model):
     coupon_point_ids = fields.One2many(
         comodel_name='sale.order.coupon.points', inverse_name='order_id', copy=False)
     reward_amount = fields.Float(compute='_compute_reward_total')
+    loyalty_total = fields.Binary(compute='_compute_loyalty_total')
+
+    def _get_history_line_description(self):
+        return _('Order %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+    def _add_loyalty_history_lines(self):
+        for record in self:
+            if record.state != 'sale':
+                continue
+
+            points_per_coupon = record._get_loyalty_card_point_details()
+
+            for coupon, values in points_per_coupon.items():
+                cost = values.get('cost', 0.0)
+                issued = values.get('issued', 0.0)
+                if not issued and not cost:
+                    continue
+                existing_line = coupon.history_ids.filtered(
+                    lambda h: h.order_id and h.order_id.id == record.id
+                )
+                if existing_line:
+                    old_balance = existing_line.new_balance + existing_line.used - existing_line.issued
+                    new_balance = old_balance - cost + issued
+                    existing_line.update({
+                        'used': cost,
+                        'issued': issued,
+                        'new_balance': new_balance
+                    })
+                else:
+                    record.env['loyalty.history'].create({
+                        'card_id': coupon.id,
+                        'order_id': '%s,%i' % (record._name, record.id),
+                        'description': self._get_history_line_description(),
+                        'used': cost,
+                        'issued': issued,
+                        "new_balance": coupon.points
+                    })
+
+    @api.depends('order_line', 'state')
+    def _compute_loyalty_total(self):
+        for record in self:
+            loyalty_total = {}
+            if record.state != 'sale':
+                record.loyalty_total = loyalty_total
+                continue
+            points_per_coupon = record._get_loyalty_card_point_details()
+            total_cost = 0
+            total_issued = 0
+            total_new_balance = 0
+            point_name = ''
+            for coupon in points_per_coupon:
+                history_line = coupon.history_ids.filtered(lambda h: h.order_id and h.order_id.id == record.id)
+                total_cost += points_per_coupon[coupon].get('cost', 0.0)
+                total_issued += points_per_coupon[coupon].get('issued', 0.0)
+                total_new_balance += history_line.new_balance
+                point_name = coupon.point_name
+
+            loyalty_total.setdefault('loyalty_card', {})
+            old_balance = total_new_balance + total_cost - total_issued
+            loyalty_total = {
+                'loyalty_card': {
+                    'new_balance': total_new_balance,
+                    'issued': total_issued,
+                    'cost': total_cost,
+                    'old_balance': old_balance,
+                },
+                'point_name': point_name,
+            }
+            record.loyalty_total = loyalty_total
 
     @api.depends('order_line')
     def _compute_reward_total(self):
@@ -55,6 +124,18 @@ class SaleOrder(models.Model):
             reward_lines.unlink()
         return new_orders
 
+    def _get_loyalty_card_point_details(self):
+        points_per_coupon = defaultdict(dict)
+        for coupon_point in self.coupon_point_ids:
+            points_per_coupon[coupon_point.coupon_id].setdefault('issued', 0)
+            points_per_coupon[coupon_point.coupon_id]['issued'] += coupon_point.points
+        for line in self.order_line:
+            if not line.reward_id or not line.coupon_id:
+                continue
+            points_per_coupon[line.coupon_id].setdefault('cost', 0)
+            points_per_coupon[line.coupon_id]['cost'] += line.points_cost
+        return points_per_coupon
+
     def action_confirm(self):
         for order in self:
             all_coupons = order.applied_coupon_ids | order.coupon_point_ids.coupon_id | order.order_line.coupon_id
@@ -73,12 +154,22 @@ class SaleOrder(models.Model):
         for coupon, change in self.filtered(lambda s: s.state != 'sale')._get_point_changes().items():
             coupon.points += change
         res = super().action_confirm()
+        self._add_loyalty_history_lines()
         self._send_reward_coupon_mail()
         return res
 
     def _action_cancel(self):
         previously_confirmed = self.filtered(lambda s: s.state == 'sale')
         res = super()._action_cancel()
+
+        points_per_coupon = self._get_loyalty_card_point_details()
+        for coupon in points_per_coupon:
+            existing_line = coupon.history_ids.filtered(
+                lambda h: h.order_id and h.order_id.id == self.id
+                )
+            if existing_line:
+                existing_line.unlink()
+
         # Add/remove the points to our coupons
         for coupon, changes in previously_confirmed.filtered(
             lambda s: s.state != 'sale'

@@ -41,6 +41,7 @@ class LoyaltyCard(models.Model):
 
     use_count = fields.Integer(compute='_compute_use_count')
     active = fields.Boolean(default=True)
+    history_ids = fields.One2many(comodel_name='loyalty.history', inverse_name='card_id')
 
     _sql_constraints = [
         ('card_code_unique', 'UNIQUE(code)', 'A coupon/loyalty card must have a unique code.')
@@ -173,3 +174,16 @@ class LoyaltyCard(models.Model):
             points_changes = {coupon: {'old': points_before[coupon], 'new': coupon.points} for coupon in self}
             self._send_points_reach_communication(points_changes)
         return res
+
+    def loyalty_update_balance_wizard_action(self):
+        return {
+            'name': _('Change Points'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'loyalty.card.points.change.wizard',
+            'target': 'new',
+            'context': {
+                'card_id': self.id,
+                'old_balance': self.points,
+            },
+        }

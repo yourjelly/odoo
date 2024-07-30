@@ -3,7 +3,7 @@
 from collections import defaultdict
 from datetime import timedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.osv import expression
@@ -244,3 +244,10 @@ class SaleOrder(models.Model):
         lines = super()._cart_find_product_line(product_id, line_id, **kwargs)
         lines = lines.filtered(lambda l: not l.is_reward_line) if not line_id else lines
         return lines
+
+    def _get_history_line_description(self):
+        des = super()._get_history_line_description()
+        if self.website_id:
+            return _('Online purchase %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        else:
+            return des
