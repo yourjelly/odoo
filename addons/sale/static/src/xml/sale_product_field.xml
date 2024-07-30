@@ -16,7 +16,7 @@
             <t t-if="hasConfigurationButton">
                 <button
                     type="button"
-                    t-att-class="btn btn-secondary fa fa-pencil"
+                    class="btn btn-secondary fa fa-pencil"
                     tabindex="-1"
                     draggable="false"
                     t-att-aria-label="configurationButtonHelp"
