@@ -3,9 +3,10 @@ import { Deferred } from "@web/core/utils/concurrency";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
 import { isIosApp } from "@web/core/browser/feature_detection";
-import { WORKER_VERSION } from "@bus/workers/websocket_worker";
 import { EventBus } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 
+const OUTGOING_EVENTS = ["connect", "disconnect", "reconnect", "reconnecting"];
 /**
  * Communicate with a SharedWorker in order to provide a single websocket
  * connection shared across multiple tabs.
@@ -16,9 +17,9 @@ import { EventBus } from "@odoo/owl";
  *  @emits reconnecting
  */
 export const busService = {
-    dependencies: ["bus.parameters", "localization", "multi_tab"],
+    dependencies: ["bus.parameters", "localization", "multi_tab", "notification"],
 
-    start(env, { multi_tab: multiTab, "bus.parameters": params }) {
+    start(env, { multi_tab: multiTab, notification, "bus.parameters": params }) {
         const bus = new EventBus();
         const notificationBus = new EventBus();
         const subscribeFnToWrapper = new Map();
@@ -28,7 +29,6 @@ export const busService = {
         let isUsingSharedWorker = browser.SharedWorker && !isIosApp();
         const startedAt = luxon.DateTime.now().set({ milliseconds: 0 });
         const connectionInitializedDeferred = new Deferred();
-
         /**
          * Send a message to the worker.
          *
@@ -59,21 +59,43 @@ export const busService = {
         function handleMessage(messageEv) {
             const { type } = messageEv.data;
             let { data } = messageEv.data;
-            if (type === "notification") {
-                data.forEach((d) => (d.message.id = d.id)); // put notification id in notif message
-                multiTab.setSharedValue("last_notification_id", data[data.length - 1].id);
-                data = data.map((notification) => notification.message);
-                for (const { id, type, payload } of data) {
-                    notificationBus.trigger(type, { id, payload });
-                    busService._onMessage(id, type, payload);
+
+            switch (type) {
+                case "notification": {
+                    data.forEach((d) => (d.message.id = d.id)); // put notification id in notif message
+                    multiTab.setSharedValue("last_notification_id", data[data.length - 1].id);
+                    data = data.map((notification) => notification.message);
+                    for (const { id, type, payload } of data) {
+                        notificationBus.trigger(type, { id, payload });
+                        busService._onMessage(id, type, payload);
+                    }
+                    break;
                 }
-            } else if (type === "initialized") {
-                isInitialized = true;
-                connectionInitializedDeferred.resolve();
-                return;
+                case "initialized": {
+                    isInitialized = true;
+                    connectionInitializedDeferred.resolve();
+                    break;
+                }
+                case "outdated": {
+                    notification.add(_t("The page appears to be out of date."), {
+                        title: _t("Refresh"),
+                        type: "warning",
+                        sticky: true,
+                        buttons: [
+                            {
+                                name: _t("Refresh"),
+                                primary: true,
+                                onClick: () => {
+                                    browser.location.reload();
+                                },
+                            },
+                        ],
+                    });
+                    break;
+                }
             }
-            if (type !== "notification") {
-                bus.trigger(type, data);
+            if (type in OUTGOING_EVENTS) {
+                this.bus.trigger(type, data);
             }
         }
 
@@ -96,7 +118,9 @@ export const busService = {
                 uid = false;
             }
             send("initialize_connection", {
-                websocketURL: `${params.serverURL.replace("http", "ws")}/websocket`,
+                websocketURL: `${params.serverURL.replace("http", "ws")}/websocket?version=${
+                    session.websocket_worker_version
+                }`,
                 db: session.db,
                 debug: odoo.debug,
                 lastNotificationId: multiTab.getSharedValue("last_notification_id", 0),
@@ -109,7 +133,7 @@ export const busService = {
          * Start the "bus_service" worker.
          */
         function startWorker() {
-            let workerURL = `${params.serverURL}/bus/websocket_worker_bundle?v=${WORKER_VERSION}`;
+            let workerURL = `${params.serverURL}/bus/websocket_worker_bundle?v=${session.websocket_worker_version}`;
             if (params.serverURL !== window.origin) {
                 // Bus service is loaded from a different origin than the bundle
                 // URL. The Worker expects an URL from this origin, give it a base64
