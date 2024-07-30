@@ -1471,7 +1471,9 @@ registerWebsiteOption("Header", {
     template: "website.header_option",
     selector: "#wrapwrap > header",
     noCheck: true,
-    groups: "website.group_website_designer",
+    data: {
+        groups: ["website.group_website_designer"],
+    },
 });
 
 registerWebsiteOption("Footer", {
@@ -1479,7 +1481,9 @@ registerWebsiteOption("Footer", {
     template: "website.footer_option",
     selector: "#wrapwrap > footer",
     noCheck: true,
-    groups: "website.group_website_designer",
+    data: {
+        groups: ["website.group_website_designer"],
+    },
 });
 
 registerWebsiteOption("Footer Copyright", {
@@ -1487,7 +1491,9 @@ registerWebsiteOption("Footer Copyright", {
     template: "website.footer_copyright_option",
     selector: ".o_footer_copyright",
     noCheck: true,
-    groups: "website.group_website_designer",
+    data: {
+        groups: ["website.group_website_designer"],
+    },
 });
 
 export class OptionsTab extends WebsiteLevelColor {
