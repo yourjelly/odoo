@@ -6,9 +6,9 @@ import collections.abc
 import copy
 import functools
 import importlib
+import importlib.metadata
 import logging
 import os
-import pkg_resources
 import re
 import sys
 import traceback
@@ -454,22 +454,44 @@ current_test = False
 
 
 def check_python_external_dependency(pydep):
-    try:
-        pkg_resources.get_distribution(pydep)
-    except pkg_resources.DistributionNotFound as e:
+    if re.fullmatch(r'\w+', pydep):  # determine if we have no version or marker define in the requirement
+        # 1. Check if we can find the package name (ex: Pillow)
         try:
-            importlib.import_module(pydep)
+            importlib.metadata.distribution(pydep)
             _logger.info("python external dependency on '%s' does not appear to be a valid PyPI package. Using a PyPI package name is recommended.", pydep)
+        except importlib.metadata.PackageNotFoundError as e:
+            # 2. check if importable name (ex: PIL)
+            try:
+                importlib.import_module(pydep)
+                _logger.warning("DistributionNotFound: %s", e)
+            except ModuleNotFoundError:
+                raise Exception('Python library not installed: %s' % (pydep,))
+
+    else:
+        # this part uses packaging and is mostly useful for modules outside the scope of odoo, if a version is specified
+        try:
+            from packaging.requirements import InvalidRequirement, Requirement
         except ImportError:
-            # backward compatibility attempt failed
-            _logger.warning("DistributionNotFound: %s", e)
-            raise Exception('Python library not installed: %s' % (pydep,))
-    except pkg_resources.VersionConflict as e:
-        _logger.warning("VersionConflict: %s", e)
-        raise Exception('Python library version conflict: %s' % (pydep,))
-    except Exception as e:
-        _logger.warning("get_distribution(%s) failed: %s", pydep, e)
-        raise Exception('Error finding python library %s' % (pydep,))
+            msg = f"Packaging required to parse exxternal dependency and not installed: {e}"
+            raise Exception(msg)
+        try:
+            requirement = Requirement(pydep)
+        except InvalidRequirement as e:
+            msg = f"{pydep} is an invalid external dependency specification: {e}"
+            raise Exception(msg) from e
+        if requirement.marker and not requirement.marker.evaluate():
+            _logger.debug(
+                "Ignored external dependency %s because environment markers do not match",
+                pydep
+            )
+        try:
+            version = importlib.metadata.version(requirement.name)
+        except importlib.metadata.PackageNotFoundError as e:
+            msg = f"External dependency {pydep} not installed: {e}"
+            raise Exception(msg) from e
+        if requirement.specifier and not requirement.specifier.contains(version):
+            msg = f"External dependency version mismatch: {pydep} (installed: {version})"
+            raise Exception(msg)
 
 
 def check_manifest_dependencies(manifest):
