@@ -1729,7 +1729,7 @@ registerWebsiteOption("WebsiteFieldEditor", {
     template: "website.s_website_form_field_option",
     selector: ".s_website_form_field",
     exclude: ".s_website_form_dnone",
-    "drop-near": ".s_website_form_field",
+    dropNear: ".s_website_form_field",
     dropLockWithin: "form",
 }, { sequence: 14 });
 
