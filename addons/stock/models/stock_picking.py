@@ -150,6 +150,10 @@ class PickingType(models.Model):
         compute_sudo=True, string='Show Operation in Overview'
     )
     kanban_dashboard_graph = fields.Text(compute='_compute_kanban_dashboard_graph')
+    shipping_policy = fields.Selection([
+        ('direct', 'As soon as possible'), ('one', 'When all products are ready')],
+        'Shipping Policy', default='direct', required=True,
+        help="It specifies goods to be transferred partially or all at once")
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -564,7 +568,7 @@ class Picking(models.Model):
 
     move_type = fields.Selection([
         ('direct', 'As soon as possible'), ('one', 'When all products are ready')], 'Shipping Policy',
-        default='direct', required=True,
+        required=True,
         help="It specifies goods to be deliver partially or all at once")
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -1013,6 +1017,8 @@ class Picking(models.Model):
 
     @api.onchange('picking_type_id', 'partner_id')
     def _onchange_picking_type(self):
+        if self.picking_type_id and not self.move_type:
+            self.move_type = self.picking_type_id.shipping_policy
         if self.picking_type_id and self.state == 'draft':
             self = self.with_company(self.company_id)
             (self.move_ids | self.move_ids_without_package).update({
@@ -1057,6 +1063,8 @@ class Picking(models.Model):
     def create(self, vals_list):
         scheduled_dates = []
         for vals in vals_list:
+            if 'move_type' not in vals:
+                vals['move_type'] = 'direct'
             defaults = self.default_get(['name', 'picking_type_id'])
             picking_type = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id')))
             if vals.get('name', '/') == '/' and defaults.get('name', '/') == '/' and vals.get('picking_type_id', defaults.get('picking_type_id')):
