@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="loyalty_update_balance_wizard_view_form" model="ir.ui.view">
+        <field name="name">sale.loyalty.history.wizard.view.form</field>
+        <field name="model">sale.loyalty.history.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Update Balance">
+                <sheet>
+                    <h3>You are about to change the balance of the card</h3>
+                    <group>
+                        <field name="old_balance"/>
+                        <field name="new_balance"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button special="cancel" data-hotkey="x">
+                        Cancel
+                    </button>
+                    <button
+                        name="history_coupons"
+                        type="object"
+                        class="btn-primary"
+                    >
+                        Confirm
+                    </button>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="loyalty_update_balance_wizard_action" model="ir.actions.act_window">
+        <field name="name">Update Balance</field>
+        <field name="res_model">sale.loyalty.history.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

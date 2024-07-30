@@ -1,0 +1,11 @@
+<odoo>
+    <template id="webiste_sale_loyalty_button" inherit_id="loyalty.loyalty_buttons">
+        <xpath expr="//p[@id='card_points']" position="after">
+            <t t-if="program=='Loyalty Card'" >
+                <t t-if="any(reward.required_points &lt;= card.points for reward in card.program_id.reward_ids)">
+                    <p class="m-0 text-info">There is a reward waiting for you</p>
+                </t>
+            </t>
+        </xpath>
+    </template>
+</odoo>

@@ -2,3 +2,4 @@
 
 from . import base_partner_merge
 from . import loyalty_generate_wizard
+from . import loyalty_history_wizard

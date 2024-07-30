@@ -5,7 +5,7 @@
     'summary': "Use discounts, gift card, eWallets and loyalty programs in different sales channels",
     'category': 'Sales',
     'version': '1.0',
-    'depends': ['product'],
+    'depends': ['product', 'portal'],
     'data': [
         'security/ir.model.access.csv',
         'security/loyalty_security.xml',
@@ -14,12 +14,14 @@
         'data/mail_template_data.xml',
         'data/loyalty_data.xml',
         'wizard/loyalty_generate_wizard_views.xml',
+        'wizard/loyalty_history_wizard_view.xml',
         'views/loyalty_card_views.xml',
         'views/loyalty_mail_views.xml',
         'views/loyalty_program_views.xml',
         'views/loyalty_reward_views.xml',
         'views/loyalty_rule_views.xml',
         'views/res_partner_views.xml',
+        'views/loyalty_portal_template.xml',
     ],
     'demo': [
         'data/loyalty_demo.xml',
@@ -31,7 +33,15 @@
             'loyalty/static/src/js/loyalty_list_view.js',
             'loyalty/static/src/scss/loyalty.scss',
             'loyalty/static/src/xml/loyalty_templates.xml',
+
         ],
+        'web.assets_tests': [
+            'loyalty/static/tests/tours/*'
+        ],
+        'web.assets_frontend': [
+            'loyalty/static/src/js/loyalty_card_modal_template.xml',
+            'loyalty/static/src/js/loyalty_card_modal.js',
+        ]
     },
     'installable': True,
     'license': 'LGPL-3',

@@ -3,3 +3,8 @@
 
 from . import models
 from . import tests
+
+
+def uninstall_hook(env):
+    """Delete loyalty history record accessing order on uninstall"""
+    env['loyalty.history'].search([(('order_id', 'like', 'pos.order,%'))]).unlink()

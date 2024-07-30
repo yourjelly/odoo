@@ -9,3 +9,4 @@ from . import loyalty_program
 from . import product_product
 from . import product_template
 from . import res_partner
+from . import loyalty_history

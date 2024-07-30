@@ -25,8 +25,12 @@
     'installable': True,
     'auto_install': True,
     'assets': {
+        'web.assets_frontend': [
+            'pos_loyalty/static/src/js/*',
+        ],
         'point_of_sale._assets_pos': [
-            'pos_loyalty/static/src/**/*',
+            'pos_loyalty/static/src/css/*',
+            'pos_loyalty/static/src/overrides/**/*',
         ],
         'web.assets_tests': [
             'pos_loyalty/static/tests/tours/**/*',
@@ -35,5 +39,6 @@
             'pos_loyalty/static/tests/unit/**/*',
         ],
     },
+    'uninstall_hook': 'uninstall_hook',
     'license': 'LGPL-3',
 }
