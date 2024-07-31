@@ -165,6 +165,18 @@ class TestAccountPaymentDuplicateMoves(AccountTestInvoicingCommon):
             'duplicate_move_ids': [misc_entry_in.move_id.id],  # not misc_entry_out, as the account is for outbound payments
         }])
 
+    def test_inbound_payment_dup_no_outstanding_account(self):
+        """ Test that duplicate payments query still works in case there are no
+        outstanding accounts in the journal nor the company
+        """
+        payment_1 = self.payment_in
+        payment_1.journal_id.outbound_payment_method_line_ids = None
+        self.company.account_journal_payment_debit_account_id = None
+        payment_in_2 = payment_1.copy(default={'date': payment_1.date})
+        self.assertRecordValues(payment_in_2, [{
+            'duplicate_move_ids': [payment_1.move_id.id],
+        }])
+
     def test_in_payment_multiple_duplicate_inbound_batch(self):
         """ Ensure duplicated payments are computed correctly when updated in batch,
         where payments are all of a single payment type
@@ -227,3 +239,14 @@ class TestAccountPaymentDuplicateMoves(AccountTestInvoicingCommon):
         self.assertRecordValues(payment_2, [{'duplicate_move_ids': []}])  # different amount, not a duplicate
         # Combined payments does not show payment_1 as duplicate because payment_1 is reconciled
         self.assertRecordValues(combined_payments, [{'duplicate_move_ids': [existing_payment.move_id.id]}])
+
+    def test_register_payment_dup_no_outstanding_account(self):
+        """ Test that duplicate payments query for the account payment register still
+        works in case there are no outstanding accounts in the journal nor in the company
+        """
+        payment_1 = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=self.out_invoice_1.ids).create({})
+        existing_payment_in = self.payment_in
+        payment_1.journal_id.outbound_payment_method_line_ids = None
+        self.company.account_journal_payment_debit_account_id = None
+
+        self.assertRecordValues(payment_1, [{'duplicate_move_ids': [existing_payment_in.move_id.id]}])

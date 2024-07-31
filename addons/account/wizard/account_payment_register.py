@@ -698,10 +698,17 @@ class AccountPaymentRegister(models.TransientModel):
         """
         # Update tables involved in the query
         self.env['account.move.line'].flush_model(('move_id', 'payment_id', 'balance', 'account_id', 'company_id', 'date', 'partner_id'))
-        outstanding_account_ids = tuple(
-            (self.journal_id._get_journal_inbound_outstanding_payment_accounts() if self.payment_type == 'inbound'
-             else self.journal_id._get_journal_outbound_outstanding_payment_accounts()).ids
-        )
+        outstanding_account_ids = []
+        if self.journal_id:
+            outstanding_account_ids = (
+                self.journal_id._get_journal_inbound_outstanding_payment_accounts().ids if self.payment_type == 'inbound'
+                else self.journal_id._get_journal_outbound_outstanding_payment_accounts().ids
+            )
+        if not outstanding_account_ids:
+            outstanding_account_ids = (
+                self.company_id.account_journal_payment_debit_account_id.ids if self.payment_type == 'inbound'
+                else self.company_id.account_journal_payment_credit_account_id.ids
+            )
 
         place_holders = {
             'move_id': 0,
@@ -728,10 +735,10 @@ class AccountPaymentRegister(models.TransientModel):
                AND move_line.partner_id = dup_move_line.partner_id
                AND move_line.company_id = dup_move_line.company_id
                AND move_line.date = dup_move_line.date
-               AND dup_move_line.parent_state IN %(matching_states)s
+               AND dup_move_line.parent_state = ANY(%(matching_states)s)
                AND (
                    move_line.account_id = dup_move_line.account_id
-                   OR dup_move_line.account_id IN %(outstanding_account_ids)s
+                   OR dup_move_line.account_id = ANY(%(outstanding_account_ids)s)
                    OR dup_move_line.account_id = %(suspense_account_id)s
                )
                AND NOT dup_move_line.reconciled
@@ -742,7 +749,7 @@ class AccountPaymentRegister(models.TransientModel):
                )
         """,
             move_table_and_alias=move_table_and_alias,
-            matching_states=tuple(matching_states),
+            matching_states=list(matching_states),
             suspense_account_id=self.company_id.account_journal_suspense_account_id.id,
             outstanding_account_ids=outstanding_account_ids,
         )
