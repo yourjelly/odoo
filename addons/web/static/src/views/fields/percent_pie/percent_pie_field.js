@@ -12,7 +12,9 @@ export class PercentPieField extends Component {
     static props = {
         ...standardFieldProps,
         string: { type: String, optional: true },
+        showlabel: { type: Boolean, optional: true },
     };
+    static defaultProps = { showlabel: true };
 
     /**
      * Format to 2 decimals without trailing zeros.
@@ -22,6 +24,10 @@ export class PercentPieField extends Component {
             trailingZeros: false,
         });
     }
+
+    get showLable() {
+        return this.props.showlabel;
+    }
 }
 
 export const percentPieField = {
@@ -29,7 +35,16 @@ export const percentPieField = {
     displayName: _t("PercentPie"),
     supportedTypes: ["float", "integer"],
     additionalClasses: ["o_field_percent_pie"],
-    extractProps: ({ string }) => ({ string }),
+    supportedOptions: [
+        {
+            label: _t("showLabel"),
+            name: "show_label",
+            type: "boolean",
+            help: _t("showLabel"),
+            default: true,
+        },
+    ],
+    extractProps: ({ string, options }) => ({ string ,showlabel: options.show_label }),
 };
 
 registry.category("fields").add("percentpie", percentPieField);
