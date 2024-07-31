@@ -136,33 +136,24 @@ class TestAccountPaymentDuplicateMoves(AccountTestInvoicingCommon):
             'duplicate_move_ids': (statement_line_out.move_id + refund + misc_entry_out.move_id).ids,
         }])
 
-    def test_payment_dup_outstanding_account(self):
-        """ Ensure that moves in other outstanding accounts are also considered as potential duplicates """
+    def test_payment_dup_reconciled(self):
+        """ Ensure that reconciled moves are not shown as duplicate payments """
         payment_1 = self.payment_in
-        # In the same journal, a new method line for inbound and a new method for outbound payments will be added
-        journal = payment_1.journal_id
-        outstanding_payment_in = self.company.account_journal_payment_debit_account_id.copy()
-        outstanding_payment_out = self.company.account_journal_payment_credit_account_id.copy()
-        self.env['account.payment.method.line'].create({
-            'name': 'new inbound payment method line',
-            'payment_method_id': journal.available_payment_method_ids[0].id,
-            'payment_type': 'inbound',
-            'journal_id': journal.id,
-            'payment_account_id': outstanding_payment_in.id,
+        st_line = self.env['account.bank.statement.line'].create({
+            'date': payment_1.date,
+            'partner_id': self.partner_a.id,
+            'amount': 50.0,
         })
-        self.env['account.payment.method.line'].create({
-            'name': 'new outbound payment method line',
-            'payment_method_id': journal.available_payment_method_ids[0].id,
-            'payment_type': 'outbound',
-            'journal_id': journal.id,
-            'payment_account_id': outstanding_payment_out.id,
-        })
-        # Create new journal entries using the new outstanding accounts
-        misc_entry_in = self.create_line_for_reconciliation(-50.0, -50.0, self.comp_curr, payment_1.date, outstanding_payment_in, self.partner_a)
-        self.create_line_for_reconciliation(50.0, 50.0, self.comp_curr, payment_1.date, outstanding_payment_out, self.partner_a)
+        payment_in_2 = payment_1.copy(default={'date': payment_1.date})
+        payment_in_2.action_post()
+        payment_line = payment_in_2.move_id.line_ids \
+            .filtered(lambda l: l.account_id.account_type in ('asset_receivable', 'liability_payable'))
+        wizard = self.env['bank.rec.widget'].with_context(default_st_line_id=st_line.id).new({})
+        wizard._action_add_new_amls(payment_line)
+        wizard._action_validate()
 
         self.assertRecordValues(payment_1, [{
-            'duplicate_move_ids': [misc_entry_in.move_id.id],  # not misc_entry_out, as the account is for outbound payments
+            'duplicate_move_ids': [],
         }])
 
     def test_in_payment_multiple_duplicate_inbound_batch(self):
@@ -225,5 +216,5 @@ class TestAccountPaymentDuplicateMoves(AccountTestInvoicingCommon):
 
         self.assertRecordValues(payment_1, [{'duplicate_move_ids': [existing_payment.move_id.id]}])
         self.assertRecordValues(payment_2, [{'duplicate_move_ids': []}])  # different amount, not a duplicate
-        # Combined payments does not show payment_1 as duplicate because payment_1 is reconciled
+        # Combined payments does not show payment_1 as duplicate because payment_1 is reconciled with the invoice
         self.assertRecordValues(combined_payments, [{'duplicate_move_ids': [existing_payment.move_id.id]}])
