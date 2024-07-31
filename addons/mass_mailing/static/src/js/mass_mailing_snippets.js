@@ -2,6 +2,7 @@
 
 import options from "@web_editor/js/editor/snippets.options.legacy";
 import { loadImage } from "@web_editor/js/editor/image_processing";
+import { ImageTools } from "@web_editor/js/editor/snippets.options";
 const SelectUserValueWidget = options.userValueWidgetsRegistry['we-select'];
 import weUtils from "@web_editor/js/common/utils";
 import {
@@ -11,6 +12,7 @@ import {
     transformFontFamilySelector,
 } from "@mass_mailing/js/mass_mailing_design_constants";
 import { isCSSColor, normalizeCSSColor } from "@web/core/utils/colors";
+import { registerMassMailingOption } from "./snippets.registry";
 
 
 //--------------------------------------------------------------------------
@@ -29,7 +31,7 @@ options.registry.MassMailingBackgroundImage = options.registry.BackgroundImage.e
     }
 });
 
-options.registry.MassMailingImageTools = options.registry.ImageTools.extend({
+class MassMailingImageTools extends ImageTools {
 
     //--------------------------------------------------------------------------
     // Private
@@ -48,13 +50,12 @@ options.registry.MassMailingImageTools = options.registry.ImageTools.extend({
         const colorValue = window.getComputedStyle(tempEl).getPropertyValue("background-color").trim();
         tempEl.parentNode.removeChild(tempEl);
         return normalizeCSSColor(colorValue).replace(/"/g, "'");
-    },
-
+    }
     /**
      * @override
      */
     async computeShape(svgText, img) {
-        const dataURL = await this._super(...arguments);
+        const dataURL = await super.computeShape(...arguments);
         const image = await loadImage(dataURL);
         const canvas = document.createElement("canvas");
         const imgFilename = (img.dataset.originalSrc.split("/").pop()).split(".")[0];
@@ -65,7 +66,16 @@ options.registry.MassMailingImageTools = options.registry.ImageTools.extend({
         canvas.getContext("2d").drawImage(image, 0, 0, image.width, image.height);
         return canvas.toDataURL(`image/png`, 1.0);
     }
-});
+    /**
+     * @override
+     */
+    _relocateWeightEl() {}
+}
+registerMassMailingOption("MassMailingImageTools", {
+    Class: MassMailingImageTools,
+    template: "mass_mailing.ImageTools",
+    selector: "img",
+}, { sequence: 49 });
 
 options.userValueWidgetsRegistry['we-fontfamilypicker'] = SelectUserValueWidget.extend({
     /**
