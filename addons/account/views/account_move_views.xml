@@ -732,7 +732,7 @@
                         <button name="button_draft" string="Reset to Draft" type="object" groups="account.group_account_invoice"
                                 invisible="not show_reset_to_draft_button" data-hotkey="r" />
                         <button name="button_hash" string="Lock" type="object" groups="account.group_account_invoice"
-                                invisible="not restrict_mode_hash_table or inalterable_hash or state != 'posted'"/>
+                                invisible="restrict_mode_hash_table != 'on_demand' or inalterable_hash or state != 'posted'"/>
                         <button string="Request Cancel"
                                 name="button_request_cancel"
                                 type="object"

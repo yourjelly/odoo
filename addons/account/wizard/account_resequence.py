@@ -153,7 +153,7 @@ class ReSequenceWizard(models.TransientModel):
 
     def resequence(self):
         new_values = json.loads(self.new_values)
-        if self.move_ids.journal_id and self.move_ids.journal_id.restrict_mode_hash_table:
+        if self.move_ids.journal_id and self.move_ids.journal_id.restrict_mode_hash_table in ('on_demand', 'on_post'):
             if self.ordering == 'date':
                 raise UserError(_('You can not reorder sequence by date when the journal is locked with a hash.'))
         moves_to_rename = self.env['account.move'].browse(int(k) for k in new_values.keys())

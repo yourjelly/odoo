@@ -156,7 +156,7 @@ class account_journal(models.Model):
         :return:
         """
         return self.env['account.move'].search([
-            ('restrict_mode_hash_table', '=', True),
+            ('restrict_mode_hash_table', 'in', ('on_demand', 'on_post')),
             ('inalterable_hash', '=', False),
             ('journal_id', '=', self.id),
             ('date', '>', self.company_id._get_user_fiscal_lock_date()),
@@ -169,7 +169,7 @@ class account_journal(models.Model):
 
     def _compute_has_unhashed_entries(self):
         for journal in self:
-            if journal.restrict_mode_hash_table:
+            if journal.restrict_mode_hash_table != 'no':
                 journal.has_unhashed_entries = journal._get_moves_to_hash(include_pre_last_hash=False, early_stop=True)
             else:
                 journal.has_unhashed_entries = False

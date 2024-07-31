@@ -260,7 +260,7 @@ class AccountMove(models.Model):
     attachment_ids = fields.One2many('ir.attachment', 'res_id', domain=[('res_model', '=', 'account.move')], string='Attachments')
 
     # === Hash Fields === #
-    restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
+    restrict_mode_hash_table = fields.Selection(related='journal_id.restrict_mode_hash_table')
     secure_sequence_number = fields.Integer(string="Inalterability No Gap Sequence #", readonly=True, copy=False, index=True)
     inalterable_hash = fields.Char(string="Inalterability Hash", readonly=True, copy=False, index='btree_not_null')
 
@@ -3318,13 +3318,13 @@ class AccountMove(models.Model):
     def _get_move_hash_domain(self, common_domain=False, force_hash=False):
         common_domain = expression.AND([
             common_domain or [],
-            [('restrict_mode_hash_table', '=', True)]
+            [('restrict_mode_hash_table', 'in', ('on_demand', 'on_post'))]
         ])
         if force_hash:
             return expression.AND([common_domain, [('state', '=', 'posted')]])
         return expression.AND([
             common_domain,
-            [('move_type', 'in', self.get_sale_types(include_receipts=True)), ('is_move_sent', '=', True)]
+            [('move_type', 'in', self.get_sale_types(include_receipts=True))],
         ])
 
     @api.model
@@ -4334,6 +4334,7 @@ class AccountMove(models.Model):
 
         draft_reverse_moves.reversed_entry_id._reconcile_reversed_moves(draft_reverse_moves, self._context.get('move_reverse_cancel', False))
         to_post.line_ids._reconcile_marked()
+        to_post.filtered(lambda move: move.restrict_mode_hash_table == 'on_post').button_hash()
 
         for invoice in to_post:
             invoice.message_subscribe([

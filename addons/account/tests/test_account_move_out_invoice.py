@@ -4014,7 +4014,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         Test that the label of the payment_term line is consistent with the payment reference
         Also tests that it won't affect the hash inalterability report
         """
-        self.company_data['default_journal_sale'].restrict_mode_hash_table = True
+        self.company_data['default_journal_sale'].restrict_mode_hash_table = 'on_demand'
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
         move_form.partner_id = self.partner_b

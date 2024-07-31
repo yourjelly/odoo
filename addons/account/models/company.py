@@ -383,7 +383,7 @@ class ResCompany(models.Model):
             # Only check journals that have at least one hashed entry.
             journals_to_check = self.env['account.journal']
             for journal in self.env['account.journal'].search([
-                ('restrict_mode_hash_table', '=', True),
+                ('restrict_mode_hash_table', 'in', ('on_demand', 'on_post')),
             ]):
                 if self.env['account.move'].search_count([
                     ('inalterable_hash', '!=', False),
@@ -392,7 +392,7 @@ class ResCompany(models.Model):
                     journals_to_check |= journal
 
             chains_to_hash = self.env['account.move'].search([
-                ('restrict_mode_hash_table', '=', True),
+                ('restrict_mode_hash_table', 'in', ('on_demand', 'on_post')),
                 ('inalterable_hash', '=', False),
                 ('journal_id', 'in', journals_to_check.ids),
                 ('date', '<=', values['fiscalyear_lock_date']),
@@ -685,7 +685,7 @@ class ResCompany(models.Model):
         results = []
 
         for journal in journals:
-            if not journal.restrict_mode_hash_table:
+            if journal.restrict_mode_hash_table == 'no':
                 results.append({
                     'journal_name': journal.name,
                     'restricted_by_hash_table': 'X',

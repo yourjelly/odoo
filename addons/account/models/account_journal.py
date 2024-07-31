@@ -112,8 +112,17 @@ class AccountJournal(models.Model):
              "allowing finding the right account.", string='Suspense Account',
         domain="[('deprecated', '=', False), ('account_type', '=', 'asset_current')]",
     )
-    restrict_mode_hash_table = fields.Boolean(string="Lock Sent Invoices with Hash",
-        help="If ticked, when the invoice is sent, the hash chain will be computed from the last move hashed to the new move to be hashed. The hash can also be performed on demand.")
+    restrict_mode_hash_table = fields.Selection(
+        string="Immutable",
+        selection=[
+            ('no', 'No'),
+            ('on_post', 'on Post'),
+            ('on_demand', 'on Demand'),
+        ],
+        default='no',
+        required=True,
+        help="The journal entries will be immutable depending on the selected mode. 'On Demand' will allow modifying Invoices only until they are sent to the client.",
+    )
     sequence = fields.Integer(help='Used to order Journals in the dashboard view', default=10)
 
     invoice_reference_type = fields.Selection(string='Communication Type', required=True, selection=[('none', 'Open'), ('partner', 'Based on Customer'), ('invoice', 'Based on Invoice')], default='invoice', help='You can set here the default communication that will appear on customer invoices, once validated, to help the customer to refer to that particular invoice when making the payment.')
@@ -635,7 +644,10 @@ class AccountJournal(models.Model):
                     bank_account = self.env['res.partner.bank'].browse(vals['bank_account_id'])
                     if bank_account.partner_id != company.partner_id:
                         raise UserError(_("The partners of the journal's company and the related bank account mismatch."))
-            if 'restrict_mode_hash_table' in vals and not vals.get('restrict_mode_hash_table'):
+            if 'restrict_mode_hash_table' in vals and (
+                vals['restrict_mode_hash_table'] == 'no'
+                or vals['restrict_mode_hash_table'] == 'on_demand' and any(journal.restrict_mode_hash_table == 'on_post' for journal in self)
+            ):
                 domain = self.env['account.move']._get_move_hash_domain(
                     common_domain=[('journal_id', '=', journal.id), ('inalterable_hash', '!=', False)]
                 )

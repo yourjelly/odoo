@@ -1963,7 +1963,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         self.product1.categ_id.property_cost_method = 'fifo'
         self.product1.categ_id.property_valuation = 'real_time'
-        self.product1.categ_id.property_stock_journal.restrict_mode_hash_table = True
+        self.product1.categ_id.property_stock_journal.restrict_mode_hash_table = 'on_demand'
 
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner_id
