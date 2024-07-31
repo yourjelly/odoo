@@ -1473,7 +1473,7 @@ class AccountTax(models.Model):
             'tax_repartition_line_id': tax_repartition_line.id,
             'tax_ids': [Command.set(tax_vals['taxes'].ids)],
             'tax_tag_ids': [Command.set(tax_vals['tags'].ids)],
-            'tax_id': tax_vals['group'].id if tax_vals.get('group') else tax.id,
+            'tax_id': tax_vals['group'].id if tax_vals.get('group') else False,
             'analytic_distribution': line_vals['analytic_distribution'] if tax.analytic else {},
         }
 
@@ -1494,7 +1494,7 @@ class AccountTax(models.Model):
             'tax_repartition_line_id': line_vals['tax_repartition_line'].id,
             'tax_ids': [Command.set(line_vals['taxes'].ids)],
             'tax_tag_ids': [Command.set(line_vals['tax_tags'].ids)],
-            'tax_id': (line_vals['group_tax'] or tax).id,
+            'group_tax_id': (line_vals['group_tax'] or tax).id,
             'analytic_distribution': line_vals['analytic_distribution'] if tax.analytic else {},
         }
 
@@ -1777,7 +1777,7 @@ class AccountTax(models.Model):
                 res['tax_lines_to_update'].append((line_vals, tax_data))
             else:
                 # Create a new tax line.
-                res['tax_lines_to_add'].append(tax_data)
+                res['tax_lines_to_add'].append((grouping_key, tax_data))
 
         for line_vals in existing_tax_line_map.values():
             res['tax_lines_to_delete'].append(line_vals)

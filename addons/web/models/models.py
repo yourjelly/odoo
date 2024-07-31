@@ -5,6 +5,8 @@ import babel.dates
 import base64
 import itertools
 import json
+
+import pudb
 import pytz
 
 from odoo import _, _lt, api, fields, models
@@ -818,6 +820,12 @@ class Base(models.AbstractModel):
 
             return { 'values': field_range, }
 
+    def _onchange_pre_hook(self):
+        self.ensure_one()
+
+    def _onchange_after_hook(self):
+        self.ensure_one()
+
     def onchange(self, values: dict, field_names: list[str], fields_spec: dict):
         """
         Perform an onchange on the given fields, and return the result.
@@ -955,6 +963,7 @@ class Base(models.AbstractModel):
 
         # make a snapshot based on the initial values of record
         snapshot0 = RecordSnapshot(record, fields_spec, fetch=(not first_call))
+        record._onchange_pre_hook()
 
         # store changed values in cache; also trigger recomputations based on
         # subfields (e.g., line.a has been modified, line.b is computed stored
@@ -1010,6 +1019,7 @@ class Base(models.AbstractModel):
             ]
 
         # make the snapshot with the final values of record
+        record._onchange_after_hook()
         snapshot1 = RecordSnapshot(record, fields_spec)
 
         # determine values that have changed by comparing snapshots

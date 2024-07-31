@@ -109,9 +109,13 @@ export class Notebook extends Component {
         return this.pages.filter((e) => e[1].isVisible);
     }
 
-    get page() {
-        const page = this.pages.find((e) => e[0] === this.state.currentPage)[1];
+    getPageByIndex(pageIndex) {
+        const page = this.pages.find((e) => e[0] === pageIndex)[1];
         return page.Component && page;
+    }
+
+    get page() {
+        return this.getPageByIndex(this.state.currentPage);
     }
 
     onAnchorClicked(ev) {

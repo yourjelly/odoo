@@ -532,10 +532,10 @@ class ProductProduct(models.Model):
         AccountMove = self.env['account.move'].sudo()
         account_move_lines = svl_to_vacuum.account_move_id.line_ids
         # Find related customer invoice where product is delivered while you don't have units in stock anymore
-        reconciled_line_ids = list(set(account_move_lines._reconciled_lines()) - set(account_move_lines.ids))
-        account_move = AccountMove.search([('line_ids','in', reconciled_line_ids)], limit=1)
+        reconciled_lines = account_move_lines._reconciled_lines() - account_move_lines
+        account_move = reconciled_lines.move_id
         # If delivered quantity is not invoiced then no need to create this entry
-        if not account_move:
+        if len(account_move) != 1:
             return False
         accounts = svl_to_vacuum.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=account_move.fiscal_position_id)
         if not accounts.get('stock_output') or not accounts.get('expense'):

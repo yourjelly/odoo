@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="account.AccountMoveNotebook" t-inherit="web.Notebook" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('tab-pane')]" position="replace">
+            <t t-if="state.currentPage === this.invoiceLineIdsPage[0]">
+                <t t-call="web.NotebookPage">
+                    <t t-set="targetPage" t-value="this.getPageByIndex(this.lineIdsPage[0])"/>
+                    <t t-set="pageIndex" t-value="this.lineIdsPage[0]"/>
+                </t>
+            </t>
+            <t t-else="">$0</t>
+        </xpath>
+    </t>
+
+</templates>
