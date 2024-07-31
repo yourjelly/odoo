@@ -356,12 +356,21 @@ class Product(models.Model):
             raise UserError(_("Invalid domain right operand '%s'. It must be of type Integer/Float", value))
 
         # TODO: Still optimization possible when searching virtual quantities
-        ids = []
+        #ids = []
         # Order the search on `id` to prevent the default order on the product name which slows
         # down the search because of the join on the translation table to get the translated names.
-        for product in self.with_context(prefetch_fields=False).search([], order='id'):
-            if OPERATORS[operator](product[field], value):
-                ids.append(product.id)
+        #for product in self.with_context(prefetch_fields=False).search([ ], order='id'):
+        #    if OPERATORS[operator](product[field], value):
+        #        ids.append(product.id)
+        #return [('id', 'in', ids)]
+        ids = []
+        quants = self.env['stock.quant']._read_group([], ['product_id'])
+
+        for product in quants:
+            product_id = product[0]
+            if OPERATORS[operator](product_id[field], value):
+                ids.append(product_id.id)
+
         return [('id', 'in', ids)]
 
     def _search_qty_available_new(self, operator, value, lot_id=False, owner_id=False, package_id=False):
