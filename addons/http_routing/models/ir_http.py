@@ -549,7 +549,6 @@ class IrHttp(models.AbstractModel):
         for key, val in list(args.items()):
             if isinstance(val, models.BaseModel):
                 args[key] = val.with_context(request.context)
-
         if request.is_frontend_multilang:
             # A product with id 1 and named 'egg' is accessible via a
             # frontend multilang enpoint 'foo' at the URL '/foo/1'.

@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.http import request
+from odoo.tools import get_lang
 from werkzeug.exceptions import NotFound
 
 def downgrade_to_public_user():
@@ -27,3 +28,13 @@ def force_guest_env(guest_token, raise_if_not_found=True):
         request.update_context(guest=guest)
     elif raise_if_not_found:
         raise NotFound()
+
+
+def get_visitor_lang(request):
+    if lang := request.httprequest.cookies.get("frontend_lang"):
+        return lang
+    if request.env.user and not request.env.user._is_public():
+        return request.env.user.lang
+    if request.best_lang:
+        return request.env["ir.http"].get_nearest_lang(request.best_lang)
+    return get_lang(request.env).code

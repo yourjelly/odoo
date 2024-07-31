@@ -2,8 +2,8 @@
 
 from odoo import http
 from odoo.http import request
-from odoo.tools import get_lang, is_html_empty, plaintext2html
-
+from odoo.tools import is_html_empty, plaintext2html
+from ..tools.misc import get_visitor_lang
 
 class LivechatChatbotScriptController(http.Controller):
     @http.route('/chatbot/restart', type="json", auth="public", cors="*")
@@ -106,4 +106,4 @@ class LivechatChatbotScriptController(http.Controller):
         return result
 
     def _get_chatbot_language(self):
-        return request.httprequest.cookies.get('frontend_lang', request.env.user.lang or get_lang(request.env).code)
+        return get_visitor_lang(request)

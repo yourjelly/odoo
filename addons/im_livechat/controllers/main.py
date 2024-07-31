@@ -11,6 +11,7 @@ from odoo.http import request
 from odoo.tools import replace_exceptions
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 from odoo.addons.mail.models.discuss.mail_guest import add_guest_to_context
+from ..tools.misc import get_visitor_lang
 
 
 class LivechatController(http.Controller):
@@ -67,7 +68,7 @@ class LivechatController(http.Controller):
     def loader(self, channel_id, **kwargs):
         username = kwargs.get("username", _("Visitor"))
         channel = request.env['im_livechat.channel'].sudo().browse(channel_id)
-        info = channel.get_livechat_info(username=username)
+        info = channel.with_context(lang=get_visitor_lang(request)).get_livechat_info(username=username)
         return request.render('im_livechat.loader', {'info': info}, headers=[('Content-Type', 'application/javascript')])
 
     @http.route('/im_livechat/init', type='json', auth="public", cors="*")
@@ -83,7 +84,7 @@ class LivechatController(http.Controller):
         # find the first matching rule for the given country and url
         matching_rule = request.env['im_livechat.channel.rule'].sudo().match_rule(channel_id, url, country_id)
         if matching_rule and (not matching_rule.chatbot_script_id or matching_rule.chatbot_script_id.script_step_ids):
-            frontend_lang = request.httprequest.cookies.get('frontend_lang', request.env.user.lang or 'en_US')
+            frontend_lang = get_visitor_lang(request)
             matching_rule = matching_rule.with_context(lang=frontend_lang)
             rule = {
                 'action': matching_rule.action,
@@ -158,7 +159,7 @@ class LivechatController(http.Controller):
 
         chatbot_script = False
         if chatbot_script_id:
-            frontend_lang = request.httprequest.cookies.get('frontend_lang', request.env.user.lang or 'en_US')
+            frontend_lang = get_visitor_lang(request)
             chatbot_script = request.env['chatbot.script'].sudo().with_context(lang=frontend_lang).browse(chatbot_script_id)
         channel_vals = request.env["im_livechat.channel"].with_context(lang=False).sudo().browse(channel_id)._get_livechat_discuss_channel_vals(
             anonymous_name,

@@ -294,7 +294,6 @@ class ImLivechatChannel(models.Model):
 
     def _get_channel_infos(self):
         self.ensure_one()
-
         return {
             'header_background_color': self.header_background_color,
             'button_background_color': self.button_background_color,
