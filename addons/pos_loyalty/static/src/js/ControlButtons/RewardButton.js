@@ -76,10 +76,12 @@ export class RewardButton extends PosComponent {
             (reward.program_id.applies_on == 'both' && potentialQty)
         ) {
             // Delegate the addition of product and reward update to the `click-product` event.
-            this.trigger(
-                'click-product',
-                this.env.pos.db.get_product_by_id(args['product'] || reward.reward_product_ids[0])
-            );
+            for (var i = 0; i < reward.reward_product_qty; i++) {
+                this.trigger(
+                    'click-product',
+                    this.env.pos.db.get_product_by_id(args['product'] || reward.reward_product_ids[0])
+                );
+            }
             return true;
         } else {
             const result = order._applyReward(reward, coupon_id, args);

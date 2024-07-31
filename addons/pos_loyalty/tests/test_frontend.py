@@ -358,7 +358,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
     def test_loyalty_free_product_zero_sale_price_loyalty_program(self):
         # In this program, each $ spent gives 1 point.
-        # 5 points can be used to get a free whiteboard pen.
+        # 5 points can be used to get 2 free whiteboard pens.
         # and the whiteboard pen sale price is zero
         self.whiteboard_pen.write({'lst_price': 0})
 
@@ -375,7 +375,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'reward_ids': [(0, 0, {
                 'reward_type': 'product',
                 'reward_product_id': self.whiteboard_pen.id,
-                'reward_product_qty': 1,
+                'reward_product_qty': 2,
                 'required_points': 5,
             })],
         })
