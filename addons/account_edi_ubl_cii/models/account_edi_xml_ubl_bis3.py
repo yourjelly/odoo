@@ -304,6 +304,9 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
                 }
             })
 
+        if invoice.company_id.country_code == 'LU':
+            vals['vals']['accounting_supplier_party_vals']['party_vals']['party_legal_entity_vals'][0]['company_id'] = invoice.company_id.company_registry
+
         return vals
 
     def _export_invoice_constraints(self, invoice, vals):
