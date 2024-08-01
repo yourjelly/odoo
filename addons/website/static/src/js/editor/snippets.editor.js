@@ -60,8 +60,8 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
     setup() {
         useSubEnv({
             getSwitchableRelatedViews: (data) => this._onGetSwitchableRelatedViews.call(this, { data }),
-            gmapApiRequest: this._onGMapAPIRequest.bind(this),
-            gmapApiKeyRequest: this._onGMapAPIKeyRequest.bind(this),
+            gmapApiRequest: (data) => this._onGMapAPIRequest.call(this, { data }),
+            gmapApiKeyRequest: (data) => this._onGMapAPIKeyRequest.call(this, { data }),
         });
         super.setup();
         this.notification = useService("notification");
@@ -366,7 +366,6 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
      * @param {string} gmapRequestEventName
      */
     async _handleGMapRequest(ev, gmapRequestEventName) {
-        ev.stopPropagation();
         const reconfigured = await this._configureGMapAPI({
             alwaysReconfigure: ev.data.reconfigure,
             configureIfNecessary: ev.data.configureIfNecessary,

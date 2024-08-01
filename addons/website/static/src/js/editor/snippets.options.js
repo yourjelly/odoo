@@ -640,7 +640,7 @@ class GpsUserValue extends UserValue {
     async start() {
         super.start();
         this._state._gmapLoaded = await new Promise(resolve => {
-            this.env.gmapApiRequest({data: {
+            this.env.gmapApiRequest({
                 editableMode: true,
                 configureIfNecessary: true,
                 onSuccess: key => {
@@ -658,7 +658,7 @@ class GpsUserValue extends UserValue {
                             resolve(!!place);
                         });
                 },
-            }, stopPropagation: () => {}});
+            });
         });
     }
 
