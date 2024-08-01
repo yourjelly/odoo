@@ -6,40 +6,10 @@ from odoo import api, fields, models, tools
 class MaintenanceEquipment(models.Model):
     _inherit = 'maintenance.equipment'
 
-    employee_id = fields.Many2one('hr.employee', compute='_compute_equipment_assign',
-        store=True, readonly=False, string='Assigned Employee', tracking=True)
-    department_id = fields.Many2one('hr.department', compute='_compute_equipment_assign',
-        store=True, readonly=False, string='Assigned Department', tracking=True)
-    equipment_assign_to = fields.Selection(
-        [('department', 'Department'), ('employee', 'Employee'), ('other', 'Other')],
-        string='Used By',
-        required=True,
-        default='employee')
-    owner_user_id = fields.Many2one(compute='_compute_owner', store=True)
-    assign_date = fields.Date(compute='_compute_equipment_assign', store=True, readonly=False, copy=True)
-
-    @api.depends('employee_id', 'department_id', 'equipment_assign_to')
-    def _compute_owner(self):
-        for equipment in self:
-            equipment.owner_user_id = self.env.user.id
-            if equipment.equipment_assign_to == 'employee':
-                equipment.owner_user_id = equipment.employee_id.user_id.id
-            elif equipment.equipment_assign_to == 'department':
-                equipment.owner_user_id = equipment.department_id.manager_id.user_id.id
-
-    @api.depends('equipment_assign_to')
-    def _compute_equipment_assign(self):
-        for equipment in self:
-            if equipment.equipment_assign_to == 'employee':
-                equipment.department_id = False
-                equipment.employee_id = equipment.employee_id
-            elif equipment.equipment_assign_to == 'department':
-                equipment.employee_id = False
-                equipment.department_id = equipment.department_id
-            else:
-                equipment.department_id = equipment.department_id
-                equipment.employee_id = equipment.employee_id
-            equipment.assign_date = fields.Date.context_today(self)
+    employee_id = fields.Many2one('hr.employee', string='Assigned Employee', tracking=True)
+    department_id = fields.Many2one('hr.department', string='Assigned Department', tracking=True)
+    owner_user_id = fields.Many2one(default=lambda self: self.env.user)
+    assign_date = fields.Date()
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -77,8 +47,8 @@ class MaintenanceEquipment(models.Model):
         return super(MaintenanceEquipment, self)._track_subtype(init_values)
 
 
-class MaintenanceRequest(models.Model):
-    _inherit = 'maintenance.request'
+class Task(models.Model):
+    _inherit = 'project.task'
 
     @api.returns('self')
     def _default_employee_get(self):
@@ -88,18 +58,12 @@ class MaintenanceRequest(models.Model):
     owner_user_id = fields.Many2one(compute='_compute_owner', store=True)
     equipment_id = fields.Many2one(domain="['|', ('employee_id', '=', employee_id), ('employee_id', '=', False)]")
 
-    @api.depends('employee_id')
-    def _compute_owner(self):
-        for r in self:
-            if r.equipment_id.equipment_assign_to == 'employee':
-                r.owner_user_id = r.employee_id.user_id.id
-            else:
-                r.owner_user_id = False
-
     @api.model_create_multi
     def create(self, vals_list):
         requests = super().create(vals_list)
         for request in requests:
+            if not request.is_maintenance_task:
+                continue
             if request.employee_id.user_id:
                 request.message_subscribe(partner_ids=[request.employee_id.user_id.partner_id.id])
         return requests
@@ -109,7 +73,7 @@ class MaintenanceRequest(models.Model):
             employee = self.env['hr.employee'].browse(vals['employee_id'])
             if employee and employee.user_id:
                 self.message_subscribe(partner_ids=[employee.user_id.partner_id.id])
-        return super(MaintenanceRequest, self).write(vals)
+        return super().write(vals)
 
     @api.model
     def message_new(self, msg, custom_values=None):
@@ -125,4 +89,4 @@ class MaintenanceRequest(models.Model):
             employee = self.env.user.employee_id
             if employee:
                 custom_values['employee_id'] = employee and employee[0].id
-        return super(MaintenanceRequest, self).message_new(msg, custom_values=custom_values)
+        return super().message_new(msg, custom_values=custom_values)
