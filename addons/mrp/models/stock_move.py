@@ -522,6 +522,7 @@ class StockMove(models.Model):
             'name': self.name,
             'picked': self.picked,
             'bom_line_id': bom_line.id,
+            'move_line_ids': [(0, 0, vals) for vals in self.move_line_ids.copy_data()]
         }
 
     def _generate_move_phantom(self, bom_line, product_qty, quantity_done):
