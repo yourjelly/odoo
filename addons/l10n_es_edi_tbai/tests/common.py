@@ -31,8 +31,6 @@ class TestEsEdiTbaiCommon(AccountTestInvoicingCommon):
             'vat': 'ES09760433S',
             'l10n_es_tbai_test_env': True,
         })
-
-        cls.certificate = None
         cls._set_tax_agency('gipuzkoa')
 
         # ==== Business ====
@@ -48,10 +46,6 @@ class TestEsEdiTbaiCommon(AccountTestInvoicingCommon):
         cls.partner_b.write({
             'vat': 'ESF35999705',
         })
-
-        cls.product_t = cls.env["product.product"].create(
-            {"name": "Test product"})
-        cls.partner_t = cls.env["res.partner"].create({"name": "Test partner", "vat": "ESF35999705"})
 
     @classmethod
     def _set_tax_agency(cls, agency):
