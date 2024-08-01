@@ -413,7 +413,7 @@ class AccountTestInvoicingCommon(ProductCommon):
             move_form.currency_id = currency
 
         for product in (products or []):
-            with move_form.invoice_line_ids.new() as line_form:
+            with move_form.line_ids.new() as line_form:
                 line_form.product_id = product
                 if taxes is not None:
                     line_form.tax_ids.clear()
@@ -421,7 +421,7 @@ class AccountTestInvoicingCommon(ProductCommon):
                         line_form.tax_ids.add(tax)
 
         for amount in (amounts or []):
-            with move_form.invoice_line_ids.new() as line_form:
+            with move_form.line_ids.new() as line_form:
                 line_form.name = "test line"
                 line_form.price_unit = amount
                 if taxes is not None:

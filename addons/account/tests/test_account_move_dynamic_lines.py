@@ -13,12 +13,77 @@ class TestAccountMoveDynamicLines(AccountTestInvoicingCommon):
 
         cls.other_currency = cls.setup_other_currency('HRK', rounding=0.001)
 
-    def test_turlututu(self):
+    def test_invoice_sync_accounting_amounts(self):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
+            'invoice_date': '2016-01-01',
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
         })
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'amount_currency': -1000.0,     'balance': -1000.0, 'debit': 0.0,       'credit': 1000.0},
+            {'display_type': 'tax',             'amount_currency': -150.0,      'balance': -150.0,  'debit': 0.0,       'credit': 150.0},
+            {'display_type': 'payment_term',    'amount_currency': 1150.0,      'balance': 1150.0,  'debit': 1150.0,    'credit': 0.0},
+        ])
+
+        # Manual edition of the tax line.
+        # The balance should be recomputed, same for debit/credit.
+        invoice.line_ids.filtered(lambda line: line.display_type == 'tax').amount_currency = -160
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'amount_currency': -1000.0,     'balance': -1000.0, 'debit': 0.0,       'credit': 1000.0},
+            {'display_type': 'tax',             'amount_currency': -160.0,      'balance': -160.0,  'debit': 0.0,       'credit': 160.0},
+            {'display_type': 'payment_term',    'amount_currency': 1160.0,      'balance': 1160.0,  'debit': 1160.0,    'credit': 0.0},
+        ])
+        invoice.line_ids.filtered(lambda line: line.display_type == 'tax').balance = -170
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'amount_currency': -1000.0,     'balance': -1000.0, 'debit': 0.0,       'credit': 1000.0},
+            {'display_type': 'tax',             'amount_currency': -170.0,      'balance': -170.0,  'debit': 0.0,       'credit': 170.0},
+            {'display_type': 'payment_term',    'amount_currency': 1170.0,      'balance': 1170.0,  'debit': 1170.0,    'credit': 0.0},
+        ])
+        invoice.line_ids.filtered(lambda line: line.display_type == 'tax').debit = 170
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'amount_currency': -1000.0,     'balance': -1000.0, 'debit': 0.0,       'credit': 1000.0},
+            {'display_type': 'tax',             'amount_currency': 170.0,       'balance': 170.0,   'debit': 170.0,     'credit': 0.0},
+            {'display_type': 'payment_term',    'amount_currency': 830.0,       'balance': 830.0,   'debit': 830.0,     'credit': 0.0},
+        ])
+
+        # Change the currency.
+        # The manual tax amount is lost.
+        invoice.currency_id = self.other_currency
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'amount_currency': -1000.0,     'balance': -333.33,     'debit': 0.0,       'credit': 333.33},
+            {'display_type': 'tax',             'amount_currency': -150.0,      'balance': -50.0,       'debit': 0.0,       'credit': 50.0},
+            {'display_type': 'payment_term',    'amount_currency': 1150.0,      'balance': 383.33,      'debit': 383.33,    'credit': 0.0},
+        ])
+
+        # Change the accounting amount of the product line.
+        # We don't expect the price_unit to be recomputed so the taxes remain the same as before.
+        invoice.line_ids.filtered(lambda line: line.display_type == 'product').amount_currency = -1200
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'price_unit': 1000.0,   'amount_currency': -1200.0,     'balance': -400.0,      'debit': 0.0,       'credit': 400.0},
+            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -150.0,      'balance': -50.0,       'debit': 0.0,       'credit': 50.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 1350.0,      'balance': 450.0,       'debit': 450.0,     'credit': 0.0},
+        ])
+
+        # Change the price unit.
+        invoice.line_ids.filtered(lambda line: line.display_type == 'product').price_unit = 3000
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'price_unit': 3000.0,   'amount_currency': -3000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
+            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -450.0,      'balance': -150.0,      'debit': 0.0,       'credit': 150.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 3450.0,      'balance': 1150.0,      'debit': 1150.0,    'credit': 0.0},
+        ])
+
+        # Change a tax line, then the date.
+        tax_line = invoice.line_ids.filtered(lambda line: line.display_type == 'tax')
+        tax_line.amount_currency = -500.0
+        tax_line.name = "turlututu"
+        invoice.invoice_date = '2017-01-01'
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'price_unit': 3000.0,   'amount_currency': -3000.0,     'balance': -1500.0,     'debit': 0.0,       'credit': 1500.0},
+            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -500.0,      'balance': -250.0,      'debit': 0.0,       'credit': 250.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 3500.0,      'balance': 1750.0,      'debit': 1750.0,    'credit': 0.0},
+        ])
+        self.assertRecordValues(tax_line, [{'name': "turlututu"}])
 
     def test_invoice_creation_with_manual_tax_amounts(self):
         tax_groups = self.env['account.tax.group'].create([

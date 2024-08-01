@@ -1,5 +1,6 @@
 import { Domain } from "@web/core/domain";
 import { registry } from "@web/core/registry";
+import { useBus } from "@web/core/utils/hooks";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { getFieldDomain } from "@web/model/relational_model/utils";
 import { onWillUpdateProps } from "@odoo/owl";
@@ -12,18 +13,6 @@ class AccountMoveLineIdsField extends X2ManyField {
         ...X2ManyField,
         ListRenderer: AccountMoveLineIdsListRenderer,
     };
-
-    get isInvoiceLineIdsMode(){
-        return this.env.model.root.data.invoice_line_ids_mode;
-    }
-
-    // Override.
-    get list(){
-        if(this.isInvoiceLineIdsMode){
-            return this.props.record.data.invoice_line_ids;
-        }
-        return super.list;
-    }
 }
 
 export const accountMoveLineIdsField = {

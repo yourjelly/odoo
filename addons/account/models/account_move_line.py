@@ -343,10 +343,12 @@ class AccountMoveLine(models.Model):
     )
     price_subtotal = fields.Monetary(
         string='Subtotal',
+        readonly=True,
         currency_field='currency_id',
     )
     price_total = fields.Monetary(
         string='Total',
+        readonly=True,
         currency_field='currency_id',
     )
     discount = fields.Float(
@@ -358,7 +360,8 @@ class AccountMoveLine(models.Model):
         related='company_id.tax_calculation_rounding_method',
         string='Tax calculation rounding method', readonly=True)
     # === Invoice sync fields === #
-    debit_credit_dirty = fields.Boolean(compute='_compute_debit_credit_dirty')
+    debit_dirty = fields.Boolean(compute='_compute_debit_dirty')
+    credit_dirty = fields.Boolean(compute='_compute_credit_dirty')
     balance_dirty = fields.Boolean(compute='_compute_balance_dirty')
     amount_currency_dirty = fields.Boolean(compute='_compute_amount_currency_dirty')
     tax_ids_dirty = fields.Boolean(compute='_compute_tax_ids_dirty')
@@ -491,17 +494,8 @@ class AccountMoveLine(models.Model):
 
     @api.depends('product_id')
     def _compute_name(self):
-        term_by_move = (self.move_id.line_ids | self).filtered(lambda l: l.display_type == 'payment_term').sorted(lambda l: l.date_maturity if l.date_maturity else date.max).grouped('move_id')
         for line in self.filtered(lambda l: l.move_id.inalterable_hash is False):
-            if line.display_type == 'payment_term':
-                term_lines = term_by_move.get(line.move_id, self.env['account.move.line'])
-                n_terms = len(line.move_id.invoice_payment_term_id.line_ids)
-                name = line.move_id.payment_reference or ''
-                if n_terms > 1:
-                    index = term_lines._ids.index(line.id) if line in term_lines else len(term_lines)
-                    name = _('%(name)s installment #%(number)s', name=name, number=index + 1).lstrip()
-                line.name = name
-            if not line.product_id or line.display_type in ('line_section', 'line_note'):
+            if not line.product_id or line.display_type != 'product':
                 continue
             if line.partner_id.lang:
                 product = line.product_id.with_context(lang=line.partner_id.lang)
@@ -932,10 +926,15 @@ class AccountMoveLine(models.Model):
     #         discount_allocation_needed_vals['amount_currency'] -= discounted_amount_currency
     #         line.discount_allocation_needed = {k: frozendict(v) for k, v in discount_allocation_needed.items()}
 
-    @api.depends('debit', 'credit')
-    def _compute_debit_credit_dirty(self):
+    @api.depends('debit')
+    def _compute_debit_dirty(self):
         for line in self:
-            line.debit_credit_dirty = True
+            line.debit_dirty = True
+
+    @api.depends('credit')
+    def _compute_credit_dirty(self):
+        for line in self:
+            line.credit_dirty = True
 
     @api.depends('balance')
     def _compute_balance_dirty(self):
@@ -1300,13 +1299,6 @@ class AccountMoveLine(models.Model):
         return defaults
 
     def _sanitize_vals(self, vals):
-        if 'debit' in vals or 'credit' in vals:
-            vals = vals.copy()
-            if 'balance' in vals:
-                vals.pop('debit', None)
-                vals.pop('credit', None)
-            else:
-                vals['balance'] = vals.pop('debit', 0) - vals.pop('credit', 0)
         if (
             vals.get('matching_number')
             and not vals['matching_number'].startswith('I')
@@ -1319,31 +1311,26 @@ class AccountMoveLine(models.Model):
     def _prepare_create_values(self, vals_list):
         result_vals_list = super()._prepare_create_values(vals_list)
         for init_vals, res_vals in zip(vals_list, result_vals_list):
-            # Allow computing the balance based on the amount_currency if it wasn't specified in the create vals.
-            if (
-                'amount_currency' in init_vals
-                and 'balance' not in init_vals
-                and 'debit' not in init_vals
-                and 'credit' not in init_vals
-            ):
-                res_vals.pop('balance', 0)
-                res_vals.pop('debit', 0)
-                res_vals.pop('credit', 0)
-
             if res_vals['display_type'] in ('line_section', 'line_note'):
                 res_vals.pop('account_id')
-
         return result_vals_list
 
     @api.model_create_multi
     def create(self, vals_list):
-        vals_list = [self._sanitize_vals(vals) for vals in vals_list]
-        lines = super().create(vals_list)
-        lines.move_id._check_balanced()
-        lines.filtered(lambda line: line.parent_state == 'posted')._check_tax_lock_date()
+        moves = self.env['account.move'].browse({vals['move_id'] for vals in vals_list})
+        container = {'records': self}
+        move_container = {'records': moves}
+        with moves._check_balanced(move_container),\
+             moves._sync_dynamic_lines(move_container):
+            lines = super().create([self._sanitize_vals(vals) for vals in vals_list])
+            container['records'] = lines
 
-        # Log changes to move lines on each move
+        for line in lines:
+            if line.move_id.state == 'posted':
+                line._check_tax_lock_date()
+
         if not self.env.context.get('tracking_disable'):
+            # Log changes to move lines on each move
             tracked_fields = [fname for fname, f in self._fields.items() if hasattr(f, 'tracking') and f.tracking and not (hasattr(f, 'related') and f.related)]
             ref_fields = self.env['account.move.line'].fields_get(tracked_fields)
             empty_values = dict.fromkeys(tracked_fields)
@@ -1364,10 +1351,6 @@ class AccountMoveLine(models.Model):
     def write(self, vals):
         if not vals:
             return True
-
-        if 'move_id' in vals and not self._context.get('check_move_validity', True):
-            raise UserError(_("You cannot move a journal item from a journal entry to another."))
-
         protected_fields = self._get_lock_date_protected_fields()
         account_to_write = self.env['account.account'].browse(vals['account_id']) if 'account_id' in vals else None
 
@@ -1408,33 +1391,34 @@ class AccountMoveLine(models.Model):
             if any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in protected_fields['reconciliation']):
                 line._check_reconciliation()
 
-        self = line_to_write
-        if not self:
-            return True
+        move_container = {'records': self.move_id}
+        with self.move_id._check_balanced(move_container),\
+             self.move_id._sync_dynamic_lines(move_container):
+            self = line_to_write
+            if not self:
+                return True
+            # Tracking stuff can be skipped for perfs using tracking_disable context key
+            if not self.env.context.get('tracking_disable', False):
+                # Get all tracked fields (without related fields because these fields must be manage on their own model)
+                tracking_fields = []
+                for value in vals:
+                    field = self._fields[value]
+                    if hasattr(field, 'related') and field.related:
+                        continue # We don't want to track related field.
+                    if hasattr(field, 'tracking') and field.tracking:
+                        tracking_fields.append(value)
+                ref_fields = self.env['account.move.line'].fields_get(tracking_fields)
 
-        # Tracking stuff can be skipped for perfs using tracking_disable context key
-        if not self.env.context.get('tracking_disable', False):
-            # Get all tracked fields (without related fields because these fields must be manage on their own model)
-            tracking_fields = []
-            for value in vals:
-                field = self._fields[value]
-                if hasattr(field, 'related') and field.related:
-                    continue # We don't want to track related field.
-                if hasattr(field, 'tracking') and field.tracking:
-                    tracking_fields.append(value)
-            ref_fields = self.env['account.move.line'].fields_get(tracking_fields)
-
-            # Get initial values for each line
-            move_initial_values = {}
-            for line in self.filtered(lambda l: l.move_id.posted_before): # Only lines with posted once move.
-                for field in tracking_fields:
-                    # Group initial values by move_id
-                    if line.move_id.id not in move_initial_values:
-                        move_initial_values[line.move_id.id] = {}
-                    move_initial_values[line.move_id.id].update({field: line[field]})
+                # Get initial values for each line
+                move_initial_values = {}
+                for line in self.filtered(lambda l: l.move_id.posted_before): # Only lines with posted once move.
+                    for field in tracking_fields:
+                        # Group initial values by move_id
+                        if line.move_id.id not in move_initial_values:
+                            move_initial_values[line.move_id.id] = {}
+                        move_initial_values[line.move_id.id].update({field: line[field]})
 
             result = super().write(vals)
-            self.move_id._check_balanced()
             self.move_id._synchronize_business_models(['line_ids'])
             if any(field in vals for field in ['account_id', 'currency_id']):
                 self._check_constrains_account_id_journal_id()
@@ -1505,9 +1489,10 @@ class AccountMoveLine(models.Model):
                             tracking_value_ids=tracking_value_ids
                         )
 
-        moves = self.move_id
-        res = super().unlink()
-        moves._check_balanced()
+        move_container = {'records': self.move_id}
+        with self.move_id._check_balanced(move_container),\
+             self.move_id._sync_dynamic_lines(move_container):
+            res = super().unlink()
 
         return res
 

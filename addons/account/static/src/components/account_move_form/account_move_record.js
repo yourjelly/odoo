@@ -1,33 +1,44 @@
 import { Record } from "@web/model/relational_model/record";
 
+import { AccountMoveLineIdsStaticList } from "@account/components/account_move_form/account_move_line_ids_static_list";
+
 export class AccountMoveRecord extends Record {
 
-//    _handlerStaticListRecords(records){
-//        return {
-//            get(target, prop, receiver) {
-//                console.log(prop);
-//                if(prop === "find"){
-//                    debugger;
-//                }
-//                return Reflect.get(...arguments);
-//            },
-//        }
-//    }
+    setup(config, data, options = {}) {
+        super.setup(...arguments);
+        const self = this;
+        this.evalContextWithVirtualIds = new Proxy(this.evalContextWithVirtualIds, {
+            get(target, prop, receiver) {
+                const results = Reflect.get(...arguments);
+                if(prop === "context"){
+                    results.invoice_line_ids_mode = self.model.invoiceLineIdsMode;
+                }
+                return results;
+            },
+        })
+    }
 
     _handlerStaticList(){
-        const self = this;
         return {
             get(target, prop, receiver) {
-//                if(prop === "records"){
-////                    return Reflect.get(...arguments).filter(filterRecord);
-//                    const records = Reflect.get(...arguments);
-//                    return new Proxy(records, self._handlerStaticListRecords(records));
-//                }else if(prop === "currentIds"){
-//                    return Reflect.get(...arguments);
-//                }
                 return Reflect.get(...arguments);
             },
         }
+    }
+
+    /**
+     * Override
+     * Custom instance of 'StaticList' for 'line_ids'.
+     */
+    _createStaticListDatapoint(data, fieldName) {
+        const isLineIds = fieldName === "line_ids";
+        const staticListClass = this.model.constructor.StaticList;
+        if(isLineIds){
+            this.model.constructor.StaticList = AccountMoveLineIdsStaticList;
+        }
+        const results = super._createStaticListDatapoint(...arguments);
+        this.model.constructor.StaticList = staticListClass;
+        return results;
     }
 
     /**
@@ -47,17 +58,4 @@ export class AccountMoveRecord extends Record {
         return parsedValues;
     }
 
-    /**
-     * Override
-     * Track the changed field on lines.
-     */
-    async _update(changes) {
-//        for(const fieldName of Object.keys(changes)){
-//            if(this.resModel === "account.move.line"){
-//                fieldName = `line_ids.${fieldName}`;
-//            }
-//            this.model.lineIdsChangedField = fieldName;
-//        }
-        return super._update(...arguments);
-    }
 }
