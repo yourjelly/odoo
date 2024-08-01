@@ -12,7 +12,7 @@ import selectors
 import threading
 import time
 from collections import defaultdict, deque
-from contextlib import closing, suppress
+from contextlib import contextmanager, suppress
 from enum import IntEnum
 from psycopg2.pool import PoolError
 from urllib.parse import urlparse
@@ -35,16 +35,25 @@ _logger = logging.getLogger(__name__)
 
 
 MAX_TRY_ON_POOL_ERROR = 10
-DELAY_ON_POOL_ERROR = 0.03
+DELAY_ON_POOL_ERROR = 0.3
+JITTER_ON_POOL_ERROR = 0.3
+# Keep 10% of the cursors to handle connection requests, rest can be used to
+# fetch notifications/process incoming messages.
+WS_CURSORS_COUNT = int(int(config.get("db_maxconn_gevent") or config["db_maxconn"]) * 0.90)
+WS_CURSORS_SEM = threading.Semaphore(WS_CURSORS_COUNT)
 
-
+@contextmanager
 def acquire_cursor(db):
     """ Try to acquire a cursor up to `MAX_TRY_ON_POOL_ERROR` """
-    for tryno in range(1, MAX_TRY_ON_POOL_ERROR + 1):
-        with suppress(PoolError):
-            return odoo.registry(db).cursor()
-        time.sleep(random.uniform(DELAY_ON_POOL_ERROR, DELAY_ON_POOL_ERROR * tryno))
-    raise PoolError('Failed to acquire cursor after %s retries' % MAX_TRY_ON_POOL_ERROR)
+    delay = DELAY_ON_POOL_ERROR
+    with WS_CURSORS_SEM:
+        for _ in range(1, MAX_TRY_ON_POOL_ERROR + 1):
+            with suppress(PoolError), odoo.registry(db).cursor() as cursor:
+                yield cursor
+                return
+        time.sleep(delay + random.uniform(0, JITTER_ON_POOL_ERROR))
+        delay *= 1.25
+        raise PoolError('Failed to acquire cursor after %s retries' % MAX_TRY_ON_POOL_ERROR)
 
 
 # ------------------------------------------------------
@@ -613,7 +622,7 @@ class Websocket:
         """
         if not self.__event_callbacks[event_type]:
             return
-        with closing(acquire_cursor(self._db)) as cr:
+        with acquire_cursor(self._db) as cr:
             lang = api.Environment(cr, self._session.uid, {})['res.lang']._get_code(self._session.context.get('lang'))
             env = api.Environment(cr, self._session.uid, dict(self._session.context, lang=lang))
             for callback in self.__event_callbacks[event_type]:
@@ -763,7 +772,7 @@ class WebsocketRequest:
         ) as exc:
             raise InvalidDatabaseException() from exc
 
-        with closing(acquire_cursor(self.db)) as cr:
+        with acquire_cursor(self.db) as cr:
             lang = api.Environment(cr, self.session.uid, {})['res.lang']._get_code(self.session.context.get('lang'))
             self.env = api.Environment(cr, self.session.uid, dict(self.session.context, lang=lang))
             threading.current_thread().uid = self.env.uid
