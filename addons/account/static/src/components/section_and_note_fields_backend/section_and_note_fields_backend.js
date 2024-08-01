@@ -19,7 +19,6 @@ export class SectionAndNoteListRenderer extends ListRenderer {
      */
     setup() {
         super.setup();
-        this.titleField = "name";
         useEffect(
             () => this.focusToName(this.props.list.editedRecord),
             () => [this.props.list.editedRecord]
@@ -28,7 +27,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
 
     focusToName(editRec) {
         if (editRec && editRec.isNew && this.isSectionOrNote(editRec)) {
-            const col = this.columns.find((c) => c.name === this.titleField);
+            const col = this.columns.find((c) => c.name === this.getTitleField(editRec));
             this.focusCell(col, null);
         }
     }
@@ -45,7 +44,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
 
     getCellClass(column, record) {
         const classNames = super.getCellClass(column, record);
-        if (this.isSectionOrNote(record) && column.widget !== "handle" && column.name !== this.titleField) {
+        if (this.isSectionOrNote(record) && column.widget !== "handle" && column.name !== this.getTitleField(record)) {
             return `${classNames} o_hidden`;
         }
         return classNames;
@@ -54,20 +53,30 @@ export class SectionAndNoteListRenderer extends ListRenderer {
     getColumns(record) {
         const columns = super.getColumns(record);
         if (this.isSectionOrNote(record)) {
-            return this.getSectionColumns(columns);
+            return this.getSectionColumns(columns, record);
         }
         return columns;
     }
 
-    getSectionColumns(columns) {
-        const sectionCols = columns.filter((col) => col.widget === "handle" || col.type === "field" && col.name === this.titleField);
+    getSectionColumns(columns, record) {
+        const sectionCols = columns.filter((col) => col.widget === "handle" || col.type === "field" && col.name === this.getTitleField(record));
         return sectionCols.map((col) => {
-            if (col.name === this.titleField) {
+            if (col.name === this.getTitleField(record)) {
                 return { ...col, colspan: columns.length - sectionCols.length + 1 };
             } else {
                 return { ...col };
             }
         });
+    }
+
+    /**
+     * Hook to get the title field for the provided record.
+     *
+     * @param record The record whose title field to get.
+     * @return {String} The title field.
+     */
+    getTitleField(record) {
+        return "name";
     }
 }
 

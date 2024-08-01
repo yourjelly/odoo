@@ -55,7 +55,10 @@
                     </group>
                     <notebook name="main_book">
                         <page string="Lines" name="order_lines">
-                        <field name="sale_order_template_line_ids" widget="section_and_note_one2many">
+                        <field
+                            name="sale_order_template_line_ids"
+                            widget="section_and_note_one2many"
+                        >
                             <form string="Quotation Template Lines">
                                 <!--
                                     We need the sequence field to be here for new lines to be added at the correct position.
