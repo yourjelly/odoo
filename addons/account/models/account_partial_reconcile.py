@@ -175,7 +175,7 @@ class AccountPartialReconcile(models.Model):
         self.env.cr.execute_values("""
             UPDATE account_move_line l
                SET matching_number = CASE
-                       WHEN l.full_reconcile_id IS NOT NULL THEN l.full_reconcile_id::text
+                       WHEN l.full_reconcile_id IS NOT NULL THEN l.matching_number
                        ELSE 'P' || source.number
                    END
               FROM (VALUES %s) AS source(number, ids)

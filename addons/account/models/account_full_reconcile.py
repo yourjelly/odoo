@@ -47,15 +47,19 @@ class AccountFullReconcile(models.Model):
                     raise ValueError("Unexpected command: %s" % command)
         move_line_ids = [list(get_ids(vals.pop('reconciled_line_ids'))) for vals in vals_list]
         partial_ids = [list(get_ids(vals.pop('partial_reconcile_ids'))) for vals in vals_list]
+        partner_matching_numbers = [vals.pop('partner_matching_number') for vals in vals_list]
         fulls = super(AccountFullReconcile, self.with_context(tracking_disable=True)).create(vals_list)
 
         self.env.cr.execute_values("""
             UPDATE account_move_line line
-               SET full_reconcile_id = source.full_id
-              FROM (VALUES %s) AS source(full_id, line_ids)
+               SET full_reconcile_id = source.full_id,
+                   matching_number = source.partner_matching_number
+              FROM (VALUES %s) AS source(full_id, partner_matching_number, line_ids)
              WHERE line.id = ANY(source.line_ids)
-        """, [(full.id, line_ids) for full, line_ids in zip(fulls, move_line_ids)], page_size=1000)
-        fulls.reconciled_line_ids.invalidate_recordset(['full_reconcile_id'], flush=False)
+        """, [
+                (full.id, matching_number or full.id, line_ids) for full, matching_number, line_ids in zip(fulls, partner_matching_numbers, move_line_ids)
+            ], page_size=1000)
+        fulls.reconciled_line_ids.invalidate_recordset(['full_reconcile_id', 'matching_number'], flush=False)
         fulls.invalidate_recordset(['reconciled_line_ids'], flush=False)
 
         self.env.cr.execute_values("""
@@ -67,5 +71,4 @@ class AccountFullReconcile(models.Model):
         fulls.partial_reconcile_ids.invalidate_recordset(['full_reconcile_id'], flush=False)
         fulls.invalidate_recordset(['partial_reconcile_ids'], flush=False)
 
-        self.env['account.partial.reconcile']._update_matching_number(fulls.reconciled_line_ids)
         return fulls

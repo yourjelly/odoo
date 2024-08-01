@@ -338,6 +338,8 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     fiscal_country_codes = fields.Char(compute='_compute_fiscal_country_codes')
+    # Technical field used during reconciliation in order to specify one matching number per partner
+    partner_matching_number = fields.Integer(string="Partner Matching #", default=0)
 
     @api.depends('company_id')
     @api.depends_context('allowed_company_ids')

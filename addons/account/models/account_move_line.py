@@ -1398,8 +1398,6 @@ class AccountMoveLine(models.Model):
                     raise Exception("Should not be partial number")
                 elif line.matching_number.isdecimal() and not line.full_reconcile_id:
                     raise Exception("Should not be full number")
-                elif line.full_reconcile_id and line.matching_number != str(line.full_reconcile_id.id):
-                    raise Exception("Matching number should be the full reconcile")
             elif line.matched_debit_ids or line.matched_credit_ids:
                 raise Exception("Should have number")
 
@@ -2600,12 +2598,21 @@ class AccountMoveLine(models.Model):
         full_reconcile_full_batch_index = []
         for full_batch_index, full_batch in enumerate(full_batches):
             amls = full_batch['amls']
+            partner_matching_number = False
+            # If only one partner involved in the reconciliation, use partner specific matching number instead of
+            # full reconcile id as matching number.
+            partner = amls.partner_id
+            if len(partner) == 1:
+                partner_matching_number = (partner.partner_matching_number or 0) + 1
+                partner.partner_matching_number = partner_matching_number
+
             involved_partials = amls.matched_debit_ids + amls.matched_credit_ids
             if full_batch['is_fully_reconciled']:
                 full_reconcile_values_list.append({
                     'exchange_move_id': full_batch.get('exchange_move') and full_batch['exchange_move'].id,
                     'partial_reconcile_ids': [Command.link(partial.id) for partial in involved_partials],
                     'reconciled_line_ids': [Command.link(aml.id) for aml in amls],
+                    'partner_matching_number': partner_matching_number,
                 })
                 full_reconcile_full_batch_index.append(full_batch_index)
 
@@ -3149,8 +3156,21 @@ class AccountMoveLine(models.Model):
         return self | self.browse([_id for number in matching_numbers for _id in mapping[number].ids])
 
     def _all_reconciled_lines(self):
-        """Get all the the lines matched with the lines in self."""
-        return self._filter_reconciled_by_number(self._reconciled_by_number())
+        """Get all the the lines matched with the lines in self.
+
+        This is a 2 steps process for performance, first search for all records using the full_reconcile_id
+        And add to that (if needed) a search for partial entries based on the matching number.
+        The reason we split to search based on full_reconcile_id is because we can have matching number that
+        are the same for fully reconciled entries but that does not belong to the same reconciliation.
+        """
+        full_reconcile_ids = self.mapped('full_reconcile_id')
+        full_reconciled_records = partial_reconciled_records = self.env['account.move.line']
+        if full_reconcile_ids:
+            full_reconciled_records = self.search([('full_reconcile_id', 'in', full_reconcile_ids.ids)])
+        partial_ids = self - full_reconciled_records
+        if partial_ids:
+            partial_reconciled_records = partial_ids._filter_reconciled_by_number(partial_ids._reconciled_by_number())
+        return full_reconciled_records + partial_reconciled_records
 
     def _get_attachment_domains(self):
         self.ensure_one()
