@@ -238,6 +238,16 @@ async function buildSvgElement(src) {
     return svgMarkup;
 }
 
+class WeTitle extends Component {
+    static template = "web_editor.WeTitle";
+    static props = {
+        title: { type: String, optional: true },
+        class: { type: String, optional: true },
+        style: { type: String, optional: true },
+        "*": { optional: true },
+    };
+}
+
 class WeRow extends Component {
     static template = "web_editor.WeRow";
     static props = {
