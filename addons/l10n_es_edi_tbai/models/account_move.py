@@ -200,8 +200,7 @@ class AccountMove(models.Model):
 
             edi_document = invoice.l10n_es_tbai_cancel_document_id
 
-            xml_values = invoice._l10n_es_tbai_get_values(cancel=True)
-            error = edi_document._post_to_web_service(xml_values)
+            error = edi_document._post_to_web_service(invoice._l10n_es_tbai_get_values(cancel=True))
             if error:
                 raise UserError(error)
 
@@ -234,8 +233,7 @@ class AccountMove(models.Model):
 
         edi_document = self.l10n_es_tbai_post_document_id
 
-        xml_values = self._l10n_es_tbai_get_values()
-        error = edi_document._post_to_web_service(xml_values)
+        error = edi_document._post_to_web_service(self._l10n_es_tbai_get_values())
         if error:
             return error
 

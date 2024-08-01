@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Spain - Point of Sale',
     'category': 'Accounting/Localizations/Point of Sale',
     'summary': """Spanish localization for Point of Sale""",
-    'depends': ['point_of_sale', 'l10n_es'],
+    'depends': ['point_of_sale', 'l10n_es_edi_sii'],
     'auto_install': True,
     'license': 'LGPL-3',
     'data': [
@@ -13,10 +11,10 @@
     ],
     'assets': {
         'point_of_sale._assets_pos': [
-            'l10n_es_pos/static/src/**/*',
+            'l10n_es_edi_sii_pos/static/src/**/*',
         ],
         'web.assets_tests': [
-            'l10n_es_pos/static/tests/**/*',
+            'l10n_es_edi_sii_pos/static/tests/**/*',
         ],
     },
     'post_init_hook': '_l10n_es_pos_post_init_hook',

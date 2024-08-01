@@ -5,11 +5,15 @@
     'category': 'Accounting/Localizations/Point of Sale',
     'depends': [
         'l10n_es_edi_tbai',
-        'l10n_es_pos',
+        'point_of_sale',
+    ],
+    'data': [
+        'views/pos_order_view.xml',
+        'views/res_config_settings_views.xml',
     ],
     'assets': {
         'point_of_sale._assets_pos': [
-            'l10n_es_pos_tbai/static/src/**/*',
+            'l10n_es_edi_tbai_pos/static/src/**/*',
         ],
     },
     'auto_install': True,
