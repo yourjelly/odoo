@@ -289,7 +289,8 @@
         <p t-elif="searches['tags']">No event matching your search criteria could be found.</p>
         <p t-else="">We couldn't find any event scheduled at this moment.</p>
         <div class="o_not_editable my-3" groups="event.group_event_user">
-            <a class="o_wevent_cta btn" target="_blank" href="/web?#model=event.event&amp;view_type=form&amp;action=event.action_event_view">
+            <!-- href="/web?#model=event.event&amp;view_type=form&amp;action=website_event.event_event_action_add" -->
+            <a class="o_wevent_cta o_create_event btn" target="blank" t-attf-href="/web#view_type=form&amp;model=event.event&amp;action=website_event.event_event_action_add">
                 <span class="fa fa-plus me-1"/> Create an Event
             </a>
         </div>
@@ -490,4 +491,13 @@
     <div class="o_wevent_confirmation_end_page_hook"/>
 </template>
 
+<template>
+            <field name="website_url" invisible="1"/>
+            <field name="company_id" invisible="1" on_change="1" can_create="True" can_write="True"/>
+            <field name="name" placeholder="e.g. &quot;Conference for Architects&quot;" string="Event Name" on_change="1"/>
+            <field name="address_id" context="{'show_address': 1}" can_create="True" can_write="True"/>
+            <field name="date_begin" string="Start → End" widget="daterange" options="{'end_date_field': 'date_end'}"/>
+            <field name="date_end" invisible="1"/>
+
+</template>
 </odoo>

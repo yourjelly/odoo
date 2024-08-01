@@ -625,3 +625,13 @@ class Event(models.Model):
                 end = self.env['ir.qweb.field.date'].record_to_html(event, 'date_end', {})
                 data['range'] = '%s🠖%s' % (begin, end) if begin != end else begin
         return results_data
+
+    def action_open_event(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Ram'),
+            'res_model': 'event.event',
+            'views': [False, 'form'],
+            'target': 'new'
+            # 'domain': [('id', 'in', related_taxes_ids)],
+        }

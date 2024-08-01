@@ -293,7 +293,7 @@ class EventMailRegistration(models.Model):
 
             if not template.email_from:
                 email_values['email_from'] = author.email_formatted
-            template.send_mail(reg_mail.registration_id.id, email_values=email_values)
+            template.send_mail(reg_mail.registration_id.id, force_send=True, email_values=email_values)
             done |= reg_mail
         done.write({'mail_sent': True})
 

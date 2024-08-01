@@ -51,7 +51,7 @@ var EventRegistrationForm = publicWidget.Widget.extend({
             var $modal = $(modal);
             $modal.find('.modal-body > div').removeClass('container'); // retrocompatibility - REMOVE ME in master / saas-19
             $modal.appendTo(document.body);
-            const modalBS = new Modal($modal[0], {backdrop: 'static', keyboard: false});
+            const modalBS = new Modal($modal[0], { backdrop: 'static', keyboard: false });
             modalBS.show();
             $modal.appendTo('body').modal('show');
             $modal.on('click', '.js_goto_event', function () {
@@ -87,3 +87,31 @@ publicWidget.registry.EventRegistrationFormInstance = publicWidget.Widget.extend
 });
 
 export default EventRegistrationForm;
+
+publicWidget.registry.EventCreate = publicWidget.Widget.extend({
+    selector: '.o_wevent_events_list',
+    events: {
+        'click .o_create_event': 'createAnEvent',
+    },
+
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
+        // this.eventId = this._getEventObjectId();
+    },
+
+    async createAnEvent() {
+        return await this.orm.call("event.event", "action_open_event", [1]);
+    }
+
+    // createAnEvent(){
+    //     debugger
+    //     this.do_action('website_event.event_event_action_add', {
+    //         type: 'ir.actions.act_window',
+    //         res_model: 'event.event',
+    //         views: [[false, 'form']],
+    //         target: 'new',
+    //     });
+    // }
+
+});
