@@ -132,7 +132,7 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon):
         if not loaded_demo_data(self.env):
             _logger.warning("This test relies on demo data. To be rewritten independently of demo data for accurate and reliable results.")
             return
-        self.env['website'].browse(1).write({'google_analytics_key': 'G-XXXXXXXXXXX'})
+        self.website.write({'google_analytics_key': 'G-XXXXXXXXXXX'})
         self.start_tour("/shop", 'google_analytics_view_item')
         self.start_tour("/shop", 'google_analytics_add_to_cart')
 
