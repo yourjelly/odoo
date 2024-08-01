@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import base64
+import io
 import re
 from operator import itemgetter
+from PIL.WebPImagePlugin import Image
+from PIL import UnidentifiedImageError
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError
@@ -358,14 +362,39 @@ class ProductProduct(models.Model):
                 'message': _("The Reference '%s' already exists.", self.default_code),
             }}
 
+    def convert_to_webp(self, image_base64):
+        image_data = base64.b64decode(image_base64)
+        try:
+            image = Image.open(io.BytesIO(image_data))
+        except UnidentifiedImageError:
+            return image_base64
+        if image.mode in ('RGBA', 'LA') or (image.mode == 'P' and 'transparency' in image.info):
+            # Convert to RGBA to ensure alpha channel is preserved
+            image = image.convert('RGBA')
+        else:
+            # Convert to RGB if no alpha channel is present
+            image = image.convert('RGB')
+        with io.BytesIO() as output:
+            # Save image in WEBP format with transparency support
+            image.save(output, format='WEBP', quality=100, lossless=True)
+            webp_image_data = output.getvalue()
+        return base64.b64encode(webp_image_data)
+
     @api.model_create_multi
     def create(self, vals_list):
+        # Convert image to WebP
+        for vals in vals_list:
+            if vals.get('image_1920'):
+                vals['image_1920'] = self.convert_to_webp(vals['image_1920'])
         products = super(ProductProduct, self.with_context(create_product_product=False)).create(vals_list)
         # `_get_variant_id_for_combination` depends on existing variants
         self.env.registry.clear_cache()
         return products
 
     def write(self, values):
+        # Convert image to WebP
+        if values.get('image_1920'):
+            values['image_1920'] = self.convert_to_webp(values['image_1920'])
         res = super(ProductProduct, self).write(values)
         if 'product_template_attribute_value_ids' in values:
             # `_get_variant_id_for_combination` depends on `product_template_attribute_value_ids`

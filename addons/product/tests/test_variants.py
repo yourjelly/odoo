@@ -810,10 +810,11 @@ class TestVariantsImages(ProductVariantsCommon):
     def test_update_images_with_archived_variants(self):
         """Update images after variants have been archived"""
         self.variants[1:].write({'active': False})
-        self.variants[0].image_1920 = self.images['red']
-        self.assertEqual(self.template.image_1920, self.images['red'])
+        red_image_webp = self.env['product.product'].convert_to_webp(self.images['red'])
+        self.variants[0].image_1920 = red_image_webp
+        self.assertEqual(self.template.image_1920, red_image_webp)
         self.assertEqual(self.variants[0].image_variant_1920, False)
-        self.assertEqual(self.variants[0].image_1920, self.images['red'])
+        self.assertEqual(self.variants[0].image_1920, red_image_webp)
 
 
 @tagged('post_install', '-at_install')

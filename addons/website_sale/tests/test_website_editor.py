@@ -66,7 +66,7 @@ class TestProductPictureController(HttpCase):
             # Check if all names are now in the product
             self.assertIn(image.name, self.attachments.mapped('name'))
             # Check if image datas are the same
-            self.assertEqual(image.image_1920, ATTACHMENT_DATA[i])
+            self.assertEqual(image.image_1920, self.env['product.product'].convert_to_webp(ATTACHMENT_DATA[i]))
         # Check if exactly ATTACHMENT_COUNT images were saved (no dupes/misses?)
         self.assertEqual(ATTACHMENT_COUNT, len(self.product.product_template_image_ids))
 

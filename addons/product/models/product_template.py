@@ -477,6 +477,10 @@ class ProductTemplate(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         ''' Store the initial standard price in order to be able to retrieve the cost of a product template for a given date'''
+        # Convert images to WebP
+        for vals in vals_list:
+            if vals.get('image_1920'):
+                vals['image_1920'] = self.env['product.product'].convert_to_webp(vals['image_1920'])
         templates = super(ProductTemplate, self).create(vals_list)
         if self._context.get("create_product_product", True):
             templates._create_variant_ids()
@@ -493,6 +497,9 @@ class ProductTemplate(models.Model):
         return templates
 
     def write(self, vals):
+        # Convert image to WebP
+        if vals.get('image_1920'):
+            vals['image_1920'] = self.env['product.product'].convert_to_webp(vals['image_1920'])
         if 'uom_id' in vals or 'uom_po_id' in vals:
             uom_id = self.env['uom.uom'].browse(vals.get('uom_id')) or self.uom_id
             uom_po_id = self.env['uom.uom'].browse(vals.get('uom_po_id')) or self.uom_po_id

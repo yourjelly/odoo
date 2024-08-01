@@ -81,9 +81,16 @@ class ProductImage(models.Model):
         variant_vals_list = []
 
         for vals in vals_list:
+            if vals.get('image_1920'):
+                vals['image_1920'] = self.env['product.product'].convert_to_webp(vals['image_1920'])
             if vals.get('product_variant_id') and 'default_product_tmpl_id' in self.env.context:
                 variant_vals_list.append(vals)
             else:
                 normal_vals.append(vals)
 
         return super().create(normal_vals) + super(ProductImage, context_without_template).create(variant_vals_list)
+
+    def write(self, vals):
+        if vals.get('image_1920'):
+            vals['image_1920'] = self.env['product.product'].convert_to_webp(vals['image_1920'])
+        return super().write(vals)
