@@ -26,7 +26,7 @@
 }
 
 .o_we_online_agenda {
-    $-events-spacing: $grid-gutter-width * 0.5;
+    $-events-spacing: map-get($spacers, 1);
 
     border-top: $border-width solid transparent;
     overflow-x: auto;
