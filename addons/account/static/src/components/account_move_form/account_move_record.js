@@ -40,22 +40,4 @@ export class AccountMoveRecord extends Record {
         this.model.constructor.StaticList = staticListClass;
         return results;
     }
-
-    /**
-     * Override
-     * 'invoice_line_ids' is a proxy to act like a subset of 'line_ids'.
-     */
-    _parseServerValues(serverValues, currentValues = {}) {
-        const parsedValues = super._parseServerValues(serverValues, currentValues);
-
-        const filterRecord = (record) => ["product", "line_section", "line_note"].includes(record.data.display_type);
-
-        // Proxy line_ids => invoice_line_ids.
-        if("line_ids" in parsedValues){
-            parsedValues.invoice_line_ids = new Proxy(parsedValues.line_ids, this._handlerStaticList());
-        }
-
-        return parsedValues;
-    }
-
 }
