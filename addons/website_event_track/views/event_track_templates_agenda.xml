@@ -168,6 +168,10 @@
             <span class="o_we_online_agenda_overlay py-5 px-3 pe-none z-1"/>
         </div>
     </section>
+
+    <div class="w-100 overflow-x position-sticky o_we_agenda_horizontal_scroller_container">
+        <div class="o_we_agenda_horizontal_scroller"/>
+    </div>
 </template>
 
 <template id="agenda_main_track" name="Track Agenda: Track">
