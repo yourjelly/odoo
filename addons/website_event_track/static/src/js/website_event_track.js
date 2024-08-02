@@ -83,8 +83,13 @@ publicWidget.registry.websiteEventTrack = publicWidget.Widget.extend({
         });
 
         if (this.visibleAgenda) {
+            // need to account for vertical scrollbar width
+            const mainContainer = document.querySelector('#wrapwrap');
+            const verticalScrollbarWidth = mainContainer.offsetWidth - mainContainer.clientWidth;
+
             this.agendaScroller.classList.remove('d-none');
-            this.agendaScrollerElement.style.width = this.visibleAgenda.scrollWidth + 'px';
+            this.agendaScrollerElement.style.width = (
+                this.visibleAgenda.scrollWidth + verticalScrollbarWidth) + 'px';
         } else {
             this.agendaScroller.classList.add('d-none');
         }
