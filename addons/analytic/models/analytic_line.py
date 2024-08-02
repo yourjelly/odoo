@@ -97,6 +97,11 @@ class AnalyticPlanFields(models.AbstractModel):
                             'name': fname,
                             'domain': f"[('plan_id', 'child_of', {plan.id})]",
                         }))
+                        if view_type == 'tree':
+                            account_node.addnext(E.field(**{
+                                'optional': 'hide',
+                                'name': f'{fname}_subplan',
+                            }))
                     if account_filter_node is not None:
                         account_filter_node.addnext(E.filter(name=fname, context=f"{{'group_by': '{fname}'}}"))
         return arch, view

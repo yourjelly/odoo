@@ -277,6 +277,17 @@ class AccountAnalyticPlan(models.Model):
                     'relation': 'account.analytic.account',
                     'copied': True,
                 })
+                self.env['ir.model.fields'].with_context(update_custom_fields=True).sudo().create({
+                    'name': f"{column}_subplan",
+                    'field_description': f"{plan.name} Sub-plan",
+                    'state': 'manual',
+                    'model': model,
+                    'model_id': self.env['ir.model']._get_id(model),
+                    'ttype': 'many2one',
+                    'relation': 'account.analytic.plan',
+                    'related': f'{column}.plan_id',
+                    'store': False,
+                })
                 Model = self.env[model]
                 if Model._auto:
                     tablename = Model._table
