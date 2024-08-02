@@ -387,7 +387,10 @@
     </we-input>
 </t>
 <t t-name="website.WeFontFamilyPicker">
-    <we-select class="o_we_user_value_widget" t-att-class="getAllClasses()" t-on-click="_onClick">
+    <we-select class="o_we_user_value_widget" t-att-class="getAllClasses()" t-on-click="_onClick"
+                t-att="getAllDataAttributes()">
+        <WeTitle t-if="props.slots?.title || props.title"
+               title="props.title" slots="{title: props.slots?.title}"/>
         <div>
             <we-toggler t-out="state.toggler.textContent" t-att-class="{ 'active': state.opened }"/>
             <we-selection-items t-ref="menu">
@@ -404,7 +407,6 @@
                                     <i role="button"
                                        t-on-click.prevent="() => this._onDeleteFontClick(font)"
                                        class="link-danger fa fa-trash-o o_we_delete_font_btn"
-                                       title="Delete this font"
                                        t-att-aria-label="delete_font_title"
                                        t-att-title="delete_font_title"/>
                                 </t>

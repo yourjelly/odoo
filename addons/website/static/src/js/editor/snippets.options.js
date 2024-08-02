@@ -60,6 +60,7 @@ import {
     WeButton,
     WeInput,
     WeSelect,
+    WeTitle,
 } from '@web_editor/js/editor/snippets.options';
 import { registerWebsiteOption } from "./snippets.registry";
 
@@ -286,7 +287,7 @@ class WeFontFamilyPicker extends WeSelect {
     static isContainer = true;
     static StateModel = FontFamilyUserValue;
     static template = "website.WeFontFamilyPicker";
-    static components = { WeSelect, WeButton };
+    static components = { ...WeSelect.components, WeButton, WeTitle };
     static defaultProps = {
         ...WeSelect.defaultProps,
         selectMethod: "customizeWebsiteVariable",
