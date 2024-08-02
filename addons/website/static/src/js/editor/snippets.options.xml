@@ -333,21 +333,18 @@
 
 <t t-name="website.TestSnippetOption" t-inherit="web_editor.TestSnippetOption" t-inherit-mode="extension">
     <xpath expr="//WeRow" position="before">
-        <WeRow>
-            <t t-set-slot="title">URL</t>
+        <WeRow title.translate="URL">
             <WeUrlPicker selectDataAttribute="''" attributeName="'url'"/>
         </WeRow>
         <!-- Do not annoy devs with GMap key
-        <WeRow>
-            <t t-set-slot="title">Address</t>
+        <WeRow title.translate="Address">
             <WeGpsPicker selectDataAttribute="''" attributeName="'mapGps'"
                 setFormattedAddress="''"
-                placeholder="'e.g. De Brouckere, Brussels, Belgium'"
+                placeholder.translate="e.g. De Brouckere, Brussels, Belgium"
                 noPreview="'true'"/>
         </WeRow>
         -->
-        <WeRow>
-            <t t-set-slot="title">Font</t>
+        <WeRow title.translate="Font">
             <WeFontFamilyPicker selectMethod="'selectDataAttribute'" attributeName="'font'"/>
         </WeRow>
     </xpath>
@@ -367,8 +364,9 @@
                 t-att-value="this.state.value"
             />
         </div>
+        <t t-set="tooltip">Preview this URL in a new tab</t>
         <we-button class="o_we_redirect_to o_we_link ms-1"
-            title="Preview this URL in a new tab"
+            t-att-data-tooltip="tooltip"
             t-on-click="() => { this._onRedirectTo(); }"
         >
             <i class="fa fa-fw fa-external-link"/>
