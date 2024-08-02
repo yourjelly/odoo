@@ -257,7 +257,7 @@ async function buildSvgElement(src) {
     return svgMarkup;
 }
 
-class WeTitle extends Component {
+export class WeTitle extends Component {
     static template = "web_editor.WeTitle";
     static props = {
         title: { type: String, optional: true },
