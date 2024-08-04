@@ -144,6 +144,7 @@ class Registry(Mapping):
         registry.ready = True
         registry.registry_invalidated = bool(update_module)
         registry.signal_changes()
+        registry.check_company_dependent()
 
         _logger.info("Registry loaded in %.3fs", time.time() - t0)
         return registry
@@ -364,6 +365,19 @@ class Registry(Mapping):
             for model in env.values():
                 model._register_hook()
             env.flush_all()
+
+    def check_company_dependent(self):
+        for model_name, model in self.items():
+            for fname, field in model._fields.items():
+                if field.company_dependent:
+                    if field.required:
+                        _logger.warning(f'{field} is company dependent but required')
+                    if field.translate:
+                        _logger.warning(f'{field} is company dependent but translate')
+                    if field.default and field.default != field._default_company_dependent:
+                        _logger.warning(f'{field} is company dependent with customized default')
+                    if field.copy:
+                        _logger.warning(f'{field} is company dependent but copy')
 
     @lazy_property
     def field_computed(self):
