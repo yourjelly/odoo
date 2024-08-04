@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 <t t-name="web_tour_recorder.TourRecorder">
-    <div class="d-flex position-fixed bottom-0 start-0 bg-primary o_tour_recorder" t-attf-style="transform: {{state.collapsed ? 'translateX(-100%)' : 'none'}}; transition: 150ms;">
+    <div class="d-flex position-fixed bottom-0 end-0 o_tour_recorder rounded-pill border bg-light mb-3 me-3">
         <div t-ref="tour_recorder" class="d-flex">
-            <button class="o_button_record btn btn-primary rounded-0" t-on-click.prevent.stop="toggleRecording">
-                <span class="px-2 me-1 rounded-circle" t-att-class="state.recording ? 'bg-danger': 'bg-secondary'" role="status" aria-hidden="true"></span>
-                Record
+            <button class="o_button_record btn btn-lg btn-light rounded-start-pill py-2 smaller" t-att-class="state.collapsed ? 'd-none' : ''" t-on-click.prevent.stop="toggleRecording">
+                <i class="fa fa-fw fa-circle" t-att-class="state.recording ? 'text-danger': 'text-danger icon-anim'" role="status" aria-hidden="true"/>
+                <span>
+                    <t t-if="state.recording">
+                        Stop recording
+                    </t>
+                    <t t-else="">
+                    Start recording
+                    </t>
+                </span>
                 <span class="fst-italic fw-lighter" t-if="state.editedElement"> (recording keyboard)</span>
             </button>
             <Dropdown position="'top-end'">
-                <button class="o_button_steps btn btn-primary rounded-0">
-                    Steps <span class="badge rounded-pill bg-danger"><t t-esc="state.steps.length"/></span>
+                <button class="o_button_steps btn btn-lg btn-light py-2 rounded-0 smaller" t-att-class="state.collapsed ? 'd-none' : ''">
+                    Steps <span class="badge rounded-pill text-bg-danger"><t t-esc="state.steps.length"/></span>
                 </button>
                 <t t-set-slot="content">
                     <div class="o_tour_recorder p-2">
@@ -56,7 +63,17 @@
                 </t>
             </Dropdown>
             <button t-if="state.steps.length" class="btn btn-primary px-1" t-on-click="resetTourRecorderState"><i class="fa fa-undo"></i></button>
-            <button class="btn btn-primary position-absolute bottom-0 start-100 rounded-0 border-1" t-on-click.prevent.stop="() => state.collapsed = !state.collapsed"><i t-att-class="state.collapsed ? 'fa fa-arrow-right' : 'fa fa-arrow-left'"></i></button>
+            <button class="btn btn-lg btn-light py-2 smaller" t-on-click.prevent.stop="() => state.collapsed = !state.collapsed" t-att-class="state.collapsed ? 'rounded-pill' : 'rounded-end-pill'">
+                <span>
+                    <t t-if="state.collapsed">
+                        Show menu
+                    </t>
+                    <t t-else="">
+                        Hide menu
+                    </t>
+                </span>
+                <i class="fa-fw" t-att-class="state.collapsed ? 'fa fa-cog' : 'fa fa-eye-slash'"/>
+            </button>
         </div>
     </div>
 </t>
