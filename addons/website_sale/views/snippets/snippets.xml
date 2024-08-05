@@ -106,6 +106,12 @@
                          data-dependencies="categories_opt"
                          data-no-preview="true"
                          data-reload="/"/>
+            <we-checkbox id="product_category_image" string="Image product category"
+                         class="o_we_sublevel_1"
+                         data-customize-website-views="website_sale.option_products_categories_image"
+                         data-dependencies="categories_opt_top"
+                         data-no-preview="true"
+                         data-reload="/"/>
             <we-row string="Attributes" class="o_we_full_row">
                 <we-button string="Left"
                            data-customize-website-views="website_sale.products_attributes"
