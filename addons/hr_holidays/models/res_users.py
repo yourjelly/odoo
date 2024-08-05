@@ -45,15 +45,40 @@ class User(models.Model):
 
     @api.model
     def _get_on_leave_ids(self, partner=False):
+        # now = fields.Datetime.now()
+        # field = 'partner_id' if partner else 'id'
+        # self.flush_model(['active'])
+        # self.env['hr.leave'].flush_model(['user_id', 'state', 'date_from', 'date_to'])
+        # self.env.cr.execute('''SELECT res_users.%s FROM res_users
+        #                     JOIN hr_leave ON hr_leave.user_id = res_users.id
+        #                     AND state = 'validate'
+        #                     AND res_users.active = 't'
+        #                     AND date_from <= %%s AND date_to >= %%s''' % field, (now, now))
+        # return [r[0] for r in self.env.cr.fetchall()]
         now = fields.Datetime.now()
         field = 'partner_id' if partner else 'id'
         self.flush_model(['active'])
-        self.env['hr.leave'].flush_model(['user_id', 'state', 'date_from', 'date_to'])
-        self.env.cr.execute('''SELECT res_users.%s FROM res_users
-                            JOIN hr_leave ON hr_leave.user_id = res_users.id
-                            AND state = 'validate'
-                            AND res_users.active = 't'
-                            AND date_from <= %%s AND date_to >= %%s''' % field, (now, now))
+        self.env['resource.calendar.leaves'].flush_model(['calendar_id', 'resource_id', 'company_id', 'date_from', 'date_to'])
+        self.env.cr.execute('''SELECT res_users.%s FROM hr_employee
+                                JOIN res_users on res_users.id = hr_employee.user_id
+                                JOIN resource_calendar_leaves RCL on RCL.calendar_id = hr_employee.resource_calendar_id
+                                AND (RCL.resource_id IS NULL OR RCL.resource_id = hr_employee.resource_id)
+                                AND RCL.company_id = res_users.company_id
+                                AND RCL.date_from <= %%s AND RCL.date_to >= %%s''' % field, (now, now))
+        return [r[0] for r in self.env.cr.fetchall()]
+
+    @api.model
+    def _get_on_public_holiday_ids(self, partner=False):
+        now = fields.Datetime.now()
+        field = 'partner_id' if partner else 'id'
+        self.flush_model(['active'])
+        self.env['resource.calendar.leaves'].flush_model(['calendar_id', 'resource_id', 'company_id', 'date_from', 'date_to'])
+        self.env.cr.execute('''SELECT res_users.%s from hr_employee
+                                JOIN res_users on res_users.id = hr_employee.user_id
+                                JOIN resource_calendar_leaves RCL on RCL.calendar_id = hr_employee.resource_calendar_id
+                                AND RCL.resource_id IS NULL
+                                AND RCL.company_id = res_users.company_id
+                                AND RCL.date_from <= %%s AND RCL.date_to >= %%s''' % field, (now, now))
         return [r[0] for r in self.env.cr.fetchall()]
 
     def _clean_leave_responsible_users(self):

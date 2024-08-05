@@ -139,6 +139,15 @@ class HrEmployeeBase(models.AbstractModel):
             ('date_to', '>=', fields.Datetime.now()),
             ('state', '=', 'validate'),
         ])
+        public_holidays = self.env['resource.calendar.leaves'].search([
+            ('company_id', 'in', self.company_id.ids),
+            ('|'),
+            ('calendar_id', 'in', self.resource_calendar_id.ids),
+            ('calendar_id', '=', False),
+            ('resource_id', '=', False),
+            ('date_from', '<=', fields.Datetime.now()),
+            ('date_to', '>=', fields.Datetime.now()),
+        ])
         leave_data = {}
         for holiday in holidays:
             leave_data[holiday.employee_id.id] = {}
@@ -151,6 +160,10 @@ class HrEmployeeBase(models.AbstractModel):
             employee.leave_date_to = leave_data.get(employee.id, {}).get('leave_date_to')
             employee.current_leave_state = leave_data.get(employee.id, {}).get('current_leave_state')
             employee.is_absent = leave_data.get(employee.id) and leave_data.get(employee.id, {}).get('current_leave_state') in ['validate']
+            employee_public_holidays = public_holidays.filtered(lambda holiday: holiday.company_id.id == employee.company_id.id and holiday.calendar_id.id == employee.resource_calendar_id.id)
+            if employee_public_holidays:
+                employee.leave_date_to = employee_public_holidays[0].date_to
+                employee.current_leave_state = 'validate'
 
     @api.depends('parent_id')
     def _compute_leave_manager(self):

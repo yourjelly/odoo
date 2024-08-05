@@ -10,7 +10,9 @@ class ResPartner(models.Model):
     def _compute_im_status(self):
         super(ResPartner, self)._compute_im_status()
         absent_now = self._get_on_leave_ids()
+        # on_holiday_now = self._get_on_public_holiday_ids()
         for partner in self:
+            # if partner.id in absent_now or partner.id in on_holiday_now:
             if partner.id in absent_now:
                 if partner.im_status == 'online':
                     partner.im_status = 'leave_online'
@@ -22,6 +24,10 @@ class ResPartner(models.Model):
     @api.model
     def _get_on_leave_ids(self):
         return self.env['res.users']._get_on_leave_ids(partner=True)
+
+    @api.model
+    def _get_on_public_holiday_ids(self):
+        return self.env['res.users']._get_on_public_holiday_ids(partner=True)
 
     def _to_store(self, store: Store, /, *, fields=None, **kwargs):
         """Override to add the current leave status."""
