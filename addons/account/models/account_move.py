@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from hashlib import sha256
 from json import dumps
 import logging
 from markupsafe import Markup
-import ast
 import math
 import psycopg2
 import re
@@ -1793,10 +1792,10 @@ class AccountMove(models.Model):
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
 
-    @api.onchange('date')
-    def _onchange_date(self):
-        if not self.is_invoice(True):
-            self.line_ids._inverse_amount_currency()
+    # @api.onchange('date')
+    # def _onchange_date(self):
+    #     if not self.is_invoice(True):
+    #         self.line_ids._inverse_amount_currency()
 
     @api.onchange('invoice_vendor_bill_id')
     def _onchange_invoice_vendor_bill(self):
@@ -1922,7 +1921,7 @@ class AccountMove(models.Model):
     def _onchange_tax_totals(self):
         self.ensure_one()
         tax_totals = self.tax_totals
-        if 'changed_tax_group_id' not in tax_totals or 'delta_amount_currency' not in tax_totals:
+        if not tax_totals or 'changed_tax_group_id' not in tax_totals or 'delta_amount_currency' not in tax_totals:
             return
 
         changed_tax_group_id = tax_totals['changed_tax_group_id']
@@ -2253,7 +2252,11 @@ class AccountMove(models.Model):
             to_update = sanitize_update_values(to_update)
             if candidates := candidates_per_grouping_key.get(grouping_key):
                 candidate = candidates[0]
-                line_ids_commands.append(Command.update(candidate.id, to_update))
+                line_ids_commands.append(Command.update(candidate.id, {
+                    k: v
+                    for k, v in to_update.items()
+                    if candidate._fields[k].type == 'monetary'
+                }))
                 if not update_by_id:
                     for trailing_candidate in candidates[1:]:
                         line_ids_commands.append(Command.unlink(trailing_candidate.id))
@@ -2272,6 +2275,7 @@ class AccountMove(models.Model):
         if not values_per_move:
             return
 
+        AccountMoveLine = self.env['account.move.line']
         to_create = []
         to_unlink = set()
         container = {'records': self.env['account.move']}
@@ -2291,16 +2295,16 @@ class AccountMove(models.Model):
 
             for command in line_ids_commands:
                 if command[0] == Command.UPDATE:
-                    self.env['account.move.line'].browse(command[1]).write(command[2])
+                    AccountMoveLine.browse(command[1]).write(command[2])
                 elif command[0] == Command.CREATE:
                     to_create.append(command[2])
                 elif command[0] == Command.UNLINK:
                     to_unlink.add(command[1])
 
         if to_create:
-            self.env['account.move.line'].create(to_create)
+            AccountMoveLine.create(to_create)
         if to_unlink:
-            self.env['account.move.line'].browse(to_unlink).with_context(dynamic_unlink=True).unlink()
+            AccountMoveLine.browse(to_unlink).with_context(dynamic_unlink=True).unlink()
         self._sync_accounting_amounts(container)
 
     @api.model
@@ -2722,50 +2726,6 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # DYNAMIC LINES: ONCHANGE
     # -------------------------------------------------------------------------
-
-    def _onchange_get_changed_values(self, initial_values, field_names):
-        # EXTENDS 'web'
-        changed_values = super()._onchange_get_changed_values(initial_values, field_names)
-        if 'line_ids' not in changed_values:
-            return changed_values
-
-        # line_ids_initial_values = []
-        # line_ids_changed_values = []
-        # for command in changed_values['line_ids']:
-        #     if command[0] == Command.CREATE:
-        #         changed_fields = command[2].get('last_onchange_fields')
-        #         if changed_fields:
-        #             changed_fields = ast.literal_eval(changed_fields)
-        #             new_id = models.NewId(ref=command[1])
-        #             line_ids_initial_values.append((
-        #                 command[0],
-        #                 new_id,
-        #                 {
-        #                     k: v
-        #                     for k, v in command[2].items()
-        #                     if k not in changed_fields
-        #                 },
-        #             ))
-        #             line_ids_changed_values.append(Command.update(
-        #                 new_id,
-        #                 {
-        #                     **{
-        #                         k: v
-        #                         for k, v in command[2].items()
-        #                         if k in changed_fields
-        #                     },
-        #                     'last_onchange_fields': False,
-        #                 },
-        #             ))
-        #         else:
-        #             line_ids_changed_values.append(command)
-        #     else:
-        #         line_ids_changed_values.append(command)
-        #
-        # initial_values['line_ids'] = line_ids_initial_values
-        # changed_values['line_ids'] = line_ids_changed_values
-
-        return changed_values
 
     def _onchange_pre_hook(self):
         # EXTENDS 'web'

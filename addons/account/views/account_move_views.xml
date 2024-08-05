@@ -1289,7 +1289,6 @@
                                                 context="{'default_action': 'change_period'}"/>
 
                                         <!-- Others fields -->
-                                        <field name="last_onchange_fields" column_invisible="True"/>
                                         <field name="balance" column_invisible="True"/>
                                         <field name="product_uom_category_id" column_invisible="True"/>
                                         <field name="tax_repartition_line_id" column_invisible="True"/>
