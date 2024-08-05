@@ -281,7 +281,7 @@
     <template id="products_breadcrumb" name="Products Breadcrumb">
         <ol t-if="category" t-attf-class="breadcrumb #{_classes}">
             <li class="breadcrumb-item">
-                <a href="/shop">Products</a>
+                <a href="/shop">All Products</a>
             </li>
             <t t-foreach="category.parents_and_self" t-as="cat">
                 <li t-if="cat == category" class="breadcrumb-item">
@@ -292,6 +292,9 @@
                 </li>
             </t>
         </ol>
+        <t t-else="">
+            <span>All Products</span>
+        </t>
     </template>
 
     <!-- /shop product listing -->
@@ -326,6 +329,17 @@
             <div id="wrap" class="js_sale o_wsale_products_page">
                 <div class="oe_structure oe_empty oe_structure_not_nearest" id="oe_structure_website_sale_products_1"/>
                 <div class="container oe_website_sale pt-2">
+                    <div class="row justify-content-between align-items-center py-3">
+                        <div class="col-8" t-call="website_sale.products_breadcrumb">
+                            <t t-set="_classes" t-valuef="d-none d-lg-flex w-100 mb-0 p-0 small"/>
+                        </div>
+                        <div class="col-4" t-if="is_view_active('website_sale.search')" t-call="website_sale.search">
+                            <t t-set="search" t-value="original_search or search"/>
+                            <t t-set="_form_classes" t-valuef="d-lg-inline {{'d-inline' if not category else 'd-none'}}"/>
+                        </div>
+                    </div>
+                    <t t-if="opt_wsale_categories_top" t-call="website_sale.filmstrip_categories"/>
+
                     <div class="row o_wsale_products_main_row align-items-start flex-nowrap">
                         <aside t-if="hasLeftColumn" id="products_grid_before" class="d-none d-lg-block position-sticky col-3 px-3 clearfix">
                             <div class="o_wsale_products_grid_before_rail vh-100 ms-n2 mt-n2 pt-2 p-lg-2 pb-lg-5 ps-2 overflow-y-scroll">
@@ -339,14 +353,7 @@
                         </aside>
                         <div id="products_grid"
                              t-attf-class="#{'o_wsale_layout_list' if layout_mode == 'list' else ''} {{'col-lg-9' if hasLeftColumn else 'col-12'}}">
-                            <t t-call="website_sale.products_breadcrumb">
-                                <t t-set="_classes" t-valuef="d-none d-lg-flex w-100 p-0 small"/>
-                            </t>
                             <div class="products_header btn-toolbar flex-nowrap align-items-center justify-content-between gap-3 mb-3">
-                                <t t-if="is_view_active('website_sale.search')" t-call="website_sale.search">
-                                    <t t-set="search" t-value="original_search or search"/>
-                                    <t t-set="_form_classes" t-valuef="d-lg-inline {{'d-inline' if not category else 'd-none'}}"/>
-                                </t>
 
                                 <t t-call="website_sale.pricelist_list">
                                     <t t-set="_classes" t-valuef="d-none d-lg-inline"/>
@@ -378,8 +385,6 @@
                                     <span t-if="isFilteringByPrice or attrib_set or tags" t-attf-class="position-absolute top-0 start-100 translate-middle border border-{{navClass}} rounded-circle bg-danger p-1"><span class="visually-hidden">filters active</span></span>
                                 </button>
                             </div>
-
-                            <t t-if="opt_wsale_categories_top" t-call="website_sale.filmstrip_categories"/>
 
                             <div t-if="original_search and products" class="alert alert-warning mt8">
                                 No results found for '<span t-esc="original_search"/>'. Showing results for '<span t-esc="search"/>'.
