@@ -381,7 +381,9 @@ export class PosData extends Reactive {
             if (!acc[model]) {
                 acc[model] = records;
             } else {
-                acc[model] = acc[model].concat(records);
+                acc[model] = acc[model].concat(
+                    records.filter((record) => !acc[model].find((r) => r.id === record.id))
+                );
             }
 
             if (!this.relations[model]) {

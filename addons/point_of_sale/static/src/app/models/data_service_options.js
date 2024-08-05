@@ -31,8 +31,8 @@ export class DataServiceOptions {
                 name: "product.product",
                 key: "id",
                 condition: (record) => {
-                    return record.models["pos.order.line"].find(
-                        (l) => l.product_id?.id === record.id
+                    return !record.models["pos.order.line"].find(
+                        (l) => l.product_id?.id === record.id && l.order_id.state === "draft"
                     );
                 },
             },
