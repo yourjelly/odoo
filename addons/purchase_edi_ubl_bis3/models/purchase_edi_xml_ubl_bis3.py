@@ -89,18 +89,6 @@ class PurchaseEdiXmlUBLBIS3(models.AbstractModel):
             'tax_scheme_vals': {'id': 'VAT'},
         }
 
-    def _get_order_allowance_charge_vals(self, order, order_lines):
-        amount = sum(line['price']['allowance_charge_vals']['amount'] for line in order_lines if 'allowance_charge_vals' in line['price'])
-
-        return {
-            'charge_indicator': 'false',
-            'allowance_charge_reason_code': '95',
-            'allowance_charge_reason': _("Discount"),
-            'currency_id': order.currency_id.name,
-            'currency_dp': self._get_currency_decimal_places(order.currency_id),
-            'amount': amount,
-        }
-
     def _get_line_allowance_charge_vals(self, line):
         # Price subtotal with discount subtracted:
         net_price_subtotal = line.price_subtotal
@@ -143,9 +131,6 @@ class PurchaseEdiXmlUBLBIS3(models.AbstractModel):
             'base_quantity': 1,
             'base_quantity_unit_code': uom,
         }
-
-        if line.discount:
-            vals['allowance_charge_vals'] = self._get_line_allowance_charge_vals(line)
 
         return vals
 
@@ -227,9 +212,7 @@ class PurchaseEdiXmlUBLBIS3(models.AbstractModel):
                 'supplier_party_vals': self._get_partner_party_vals(supplier, role='supplier'),
                 'customer_party_vals': self._get_partner_party_vals(customer, role='customer'),
                 'payment_terms_vals': self._get_payment_terms_vals(order.payment_term_id),
-                # allowances at the document level, the allowances on order lines (eg. discount) are on line_vals
                 'anticipated_monetary_total_vals': anticipated_monetary_total_vals,
-                'allowance_charge_vals': self._get_order_allowance_charge_vals(order, order_lines),
                 'tax_amount': order.amount_tax,
                 'order_lines': order_lines,
                 'currency_dp': self._get_currency_decimal_places(order.currency_id),  # currency decimal places
