@@ -820,8 +820,16 @@ class Base(models.AbstractModel):
 
             return { 'values': field_range, }
 
+    @api.model
+    def _onchange_get_changed_values(self, initial_values, field_names):
+        return {fname: initial_values.pop(fname) for fname in field_names}
+
     def _onchange_pre_hook(self):
         self.ensure_one()
+
+    def _onchange_update_cache(self, changed_values):
+        self.ensure_one()
+        self._update_cache(changed_values)
 
     def _onchange_after_hook(self):
         self.ensure_one()
@@ -931,7 +939,7 @@ class Base(models.AbstractModel):
         # itself, with old values!
         #
         initial_values = dict(values)
-        changed_values = {fname: initial_values.pop(fname) for fname in field_names}
+        changed_values = self._onchange_get_changed_values(initial_values, field_names)
 
         # do not force delegate fields to False
         for parent_name in self._inherits.values():
@@ -968,7 +976,7 @@ class Base(models.AbstractModel):
         # store changed values in cache; also trigger recomputations based on
         # subfields (e.g., line.a has been modified, line.b is computed stored
         # and depends on line.a, but line.b is not in the form view)
-        record._update_cache(changed_values)
+        record._onchange_update_cache(changed_values)
 
         # update snapshot0 with changed values
         for field_name in field_names:

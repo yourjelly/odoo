@@ -368,6 +368,7 @@ class AccountMoveLine(models.Model):
     invoice_tax_dirty = fields.Boolean(compute='_compute_invoice_tax_dirty')
     misc_tax_dirty = fields.Boolean(compute='_compute_misc_tax_dirty')
     epd_dirty = fields.Boolean(compute='_compute_epd_dirty')
+    last_onchange_fields = fields.Json(store=False)
 
     # === Analytic fields === #
     analytic_line_ids = fields.One2many(
@@ -1251,6 +1252,13 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # CRUD/ORM
     # -------------------------------------------------------------------------
+
+    def onchange(self, values, field_names, fields_spec):
+        # Since the ORM is not able to track changed on a one2many, we need a way to retrieve the fields
+        # that changed during the onchange on 'account.move'.
+        results = super().onchange(values, field_names, fields_spec)
+        results['value']['last_onchange_fields'] = set(field_names).union(set(results['value'].keys()))
+        return results
 
     @api.model
     def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):

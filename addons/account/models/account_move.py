@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-from contextlib import ExitStack, contextmanager
+from contextlib import contextmanager
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from hashlib import sha256
 from json import dumps
 import logging
 from markupsafe import Markup
+import ast
 import math
 import psycopg2
 import re
@@ -2721,6 +2722,50 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # DYNAMIC LINES: ONCHANGE
     # -------------------------------------------------------------------------
+
+    def _onchange_get_changed_values(self, initial_values, field_names):
+        # EXTENDS 'web'
+        changed_values = super()._onchange_get_changed_values(initial_values, field_names)
+        if 'line_ids' not in changed_values:
+            return changed_values
+
+        # line_ids_initial_values = []
+        # line_ids_changed_values = []
+        # for command in changed_values['line_ids']:
+        #     if command[0] == Command.CREATE:
+        #         changed_fields = command[2].get('last_onchange_fields')
+        #         if changed_fields:
+        #             changed_fields = ast.literal_eval(changed_fields)
+        #             new_id = models.NewId(ref=command[1])
+        #             line_ids_initial_values.append((
+        #                 command[0],
+        #                 new_id,
+        #                 {
+        #                     k: v
+        #                     for k, v in command[2].items()
+        #                     if k not in changed_fields
+        #                 },
+        #             ))
+        #             line_ids_changed_values.append(Command.update(
+        #                 new_id,
+        #                 {
+        #                     **{
+        #                         k: v
+        #                         for k, v in command[2].items()
+        #                         if k in changed_fields
+        #                     },
+        #                     'last_onchange_fields': False,
+        #                 },
+        #             ))
+        #         else:
+        #             line_ids_changed_values.append(command)
+        #     else:
+        #         line_ids_changed_values.append(command)
+        #
+        # initial_values['line_ids'] = line_ids_initial_values
+        # changed_values['line_ids'] = line_ids_changed_values
+
+        return changed_values
 
     def _onchange_pre_hook(self):
         # EXTENDS 'web'
