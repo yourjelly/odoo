@@ -121,7 +121,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             'invoice_date': fields.Date.from_string('2019-01-01'),
             'fiscal_position_id': False,
             'payment_reference': '',
-            'invoice_payment_term_id': cls.pay_terms_a.id,
+            'invoice_payment_term_id': cls.term_immediate.id,
             'amount_untaxed': 960.0,
             'amount_tax': 168.0,
             'amount_total': 1128.0,
@@ -289,7 +289,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_b.id,
             'payment_reference': 'turlututu',
             'fiscal_position_id': self.fiscal_pos_a.id,
-            'invoice_payment_term_id': self.pay_terms_b.id,
+            'invoice_payment_term_id': self.term_advance_60days.id,
             'amount_untaxed': 960.0,
             'amount_tax': 168.0,
             'amount_total': 1128.0,
@@ -299,9 +299,9 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
         move_form = Form(self.invoice)
         move_form.invoice_line_ids.remove(0)
         move_form.invoice_line_ids.remove(0)
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_a
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_b
         move_form.save()
 
@@ -346,7 +346,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_b.id,
             'payment_reference': 'turlututu',
             'fiscal_position_id': self.fiscal_pos_a.id,
-            'invoice_payment_term_id': self.pay_terms_b.id,
+            'invoice_payment_term_id': self.term_advance_60days.id,
             'amount_untaxed': 960.0,
             'amount_tax': 144.0,
             'amount_total': 1104.0,
@@ -522,7 +522,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             'invoice_date': '2019-01-01',
             'partner_id': self.partner_a.id,
             'invoice_cash_rounding_id': self.cash_rounding_b.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 (0, 0, {
                     'product_id': self.product_a.id,
@@ -819,7 +819,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_a.id,
             'invoice_date': fields.Date.from_string('2019-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_line_vals_1['product_id'],
@@ -879,7 +879,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_a.id,
             'invoice_date': fields.Date.from_string('2019-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_line_vals_1['product_id'],
@@ -946,7 +946,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_a.id,
             'invoice_date': fields.Date.from_string('2019-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_line_vals_1['product_id'],
@@ -1071,7 +1071,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_refund'))
         move_form.partner_id = self.partner_a
         move_form.invoice_date = fields.Date.from_string('2017-01-01')
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_a
             line_form.tax_ids.clear()
             line_form.tax_ids.add(tax)

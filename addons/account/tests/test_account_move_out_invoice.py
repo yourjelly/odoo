@@ -101,7 +101,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'date_maturity': False,
         }
         cls.term_line_vals_1 = {
-            'name': '',
+            'name': cls.invoice.name,
             'product_id': False,
             'account_id': cls.company_data['default_account_receivable'].id,
             'partner_id': cls.partner_a.id,
@@ -126,7 +126,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'date': fields.Date.from_string('2019-01-01'),
             'fiscal_position_id': False,
             'payment_reference': '',
-            'invoice_payment_term_id': cls.pay_terms_a.id,
+            'invoice_payment_term_id': cls.term_immediate.id,
             'amount_untaxed': 1200.0,
             'amount_tax': 210.0,
             'amount_total': 1410.0,
@@ -241,7 +241,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         move_form.invoice_date = fields.Date.from_string('2019-01-01')
         move_form.currency_id = self.other_currency
         move_form.fiscal_position_id = fiscal_position
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = product
         invoice = move_form.save()
 
@@ -413,7 +413,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         move_form.invoice_date = fields.Date.from_string('2019-01-01')
         move_form.currency_id = self.other_currency
         move_form.fiscal_position_id = fiscal_position
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = product
         invoice = move_form.save()
 
@@ -617,7 +617,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             **self.move_vals,
             'partner_id': self.partner_b.id,
             'fiscal_position_id': self.fiscal_pos_a.id,
-            'invoice_payment_term_id': self.pay_terms_b.id,
+            'invoice_payment_term_id': self.term_advance_60days.id,
             'amount_untaxed': 1200.0,
             'amount_tax': 210.0,
             'amount_total': 1410.0,
@@ -627,9 +627,9 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         move_form = Form(self.invoice)
         move_form.invoice_line_ids.remove(0)
         move_form.invoice_line_ids.remove(0)
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_a
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_b
         move_form.save()
 
@@ -673,7 +673,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             **self.move_vals,
             'partner_id': self.partner_b.id,
             'fiscal_position_id': self.fiscal_pos_a.id,
-            'invoice_payment_term_id': self.pay_terms_b.id,
+            'invoice_payment_term_id': self.term_advance_60days.id,
             'amount_untaxed': 1200.0,
             'amount_tax': 180.0,
             'amount_total': 1380.0,
@@ -903,7 +903,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         move_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
         move_form.invoice_date = fields.Date.from_string('2017-01-01')
         move_form.partner_id = self.partner_a
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.name = 'test line'
             line_form.price_unit = 100.0
             line_form.account_id = self.company_data['default_account_revenue']
@@ -925,7 +925,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         move_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
         move_form.invoice_date = fields.Date.from_string('2017-01-01')
         move_form.partner_id = self.partner_a
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = product
         invoice_onchange = move_form.save()
 
@@ -939,7 +939,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         move_form.invoice_date = fields.Date.from_string('2017-01-01')
         move_form.partner_id = self.partner_a
         move_form.fiscal_position_id = fiscal_position
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = product
         invoice_onchange = move_form.save()
 
@@ -1450,7 +1450,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'invoice_date': '2019-01-01',
             'partner_id': self.partner_a.id,
             'invoice_cash_rounding_id': self.cash_rounding_b.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 (0, 0, {
                     'product_id': self.product_a.id,
@@ -1906,7 +1906,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
         ], {
             **self.move_vals,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'date': move_reversal.date,
             'state': 'draft',
             'ref': False,
@@ -2030,7 +2030,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
         ], {
             **self.move_vals,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'currency_id': self.other_currency.id,
             'date': move_reversal.date,
             'state': 'draft',
@@ -2061,7 +2061,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_a.id,
             'invoice_date': fields.Date.from_string('2019-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 (0, None, {
                     'product_id': self.product_a.id,
@@ -2128,7 +2128,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'partner_id': partner_a_child.id,
             'invoice_date': fields.Date.from_string('2019-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_line_vals_1['product_id'],
@@ -2155,7 +2155,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_a.id,
             'invoice_date': fields.Date.from_string('2019-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_line_vals_1['product_id'],
@@ -2250,7 +2250,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
                 'partner_id': self.partner_a.id,
                 'invoice_date': fields.Date.from_string('2016-01-01'),
                 'currency_id': self.other_currency.id,
-                'invoice_payment_term_id': self.pay_terms_a.id,
+                'invoice_payment_term_id': self.term_immediate.id,
                 'invoice_line_ids': [
                     Command.create({
                         'product_id': self.product_line_vals_1['product_id'],
@@ -2343,7 +2343,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'invoice_date': fields.Date.from_string('2017-01-15'),
             'date': fields.Date.from_string('2015-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 (0, None, {
                     'name': self.product_line_vals_1['name'],
@@ -2440,7 +2440,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_a.id,
             'invoice_date': fields.Date.from_string('2019-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_line_vals_1['product_id'],
@@ -2507,7 +2507,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_a.id,
             'invoice_date': fields.Date.from_string('2019-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_line_vals_1['product_id'],
@@ -2661,7 +2661,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'move_type': 'out_invoice',
             'partner_id': self.partner_a.id,
             'invoice_date': fields.Date.from_string('2019-01-01'),
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 (0, 0, {
                     'product_id': self.product_a.id,
@@ -2701,7 +2701,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'partner_id': self.partner_a.id,
             'invoice_date': fields.Date.from_string('2017-01-01'),
             'currency_id': self.other_currency.id,
-            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_payment_term_id': self.term_immediate.id,
             'invoice_line_ids': [
                 (0, None, {
                     'name': self.product_line_vals_1['name'],
@@ -2841,7 +2841,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
                 'partner_id': self.partner_a.id,
                 'invoice_date': fields.Date.from_string(date),
                 'currency_id': self.other_currency.id,
-                'invoice_payment_term_id': self.pay_terms_a.id,
+                'invoice_payment_term_id': self.term_immediate.id,
                 'invoice_line_ids': [
                     (0, None, {
                         'name': self.product_line_vals_1['name'],
@@ -3068,7 +3068,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # assertNotUnbalancedEntryWhenSaving
         with Form(invoice) as move_form:
-            with move_form.invoice_line_ids.new() as line_form:
+            with move_form.line_ids.new() as line_form:
                 line_form.name = 'line1'
                 line_form.account_id = self.company_data['default_account_revenue']
                 line_form.tax_ids.clear()
@@ -3153,7 +3153,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         move_form.journal_id = journal
         move_form.partner_id = partner
         move_form.invoice_date = fields.Date.from_string('2017-01-01')
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = product
             line_form.tax_ids.clear()
         invoice_onchange = move_form.save()
@@ -3167,8 +3167,8 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         '''
         # assertNotUnbalancedEntryWhenSaving
         with Form(self.invoice) as move_form:
-            move_form.invoice_payment_term_id = self.pay_terms_b    # Switch to 30% in advance payment terms
-            move_form.invoice_payment_term_id = self.pay_terms_a    # Back to immediate payment term
+            move_form.invoice_payment_term_id = self.term_advance_60days    # Switch to 30% in advance payment terms
+            move_form.invoice_payment_term_id = self.term_immediate    # Back to immediate payment term
 
     def test_out_invoice_copy_custom_date(self):
         """ When creating a refund for a given invoice, the invoice is copied first. This test ensures the payment
@@ -3291,7 +3291,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         move_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
         move_form.partner_id = self.partner_a
         move_form.invoice_date = fields.Date.from_string('2017-01-01')
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_a
             line_form.tax_ids.clear()
             line_form.tax_ids.add(tax)
@@ -3579,7 +3579,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # Suggest the new amount such that the total is equal to the quick amount
         with Form(invoice) as move_form:
-            with move_form.invoice_line_ids.new() as line_form:
+            with move_form.line_ids.new() as line_form:
                 self.assertEqual(line_form.price_unit, 32.64)
         self.assertEqual(invoice.amount_total, 100)
         self.assertEqual(invoice.amount_untaxed, 82.64)
@@ -3630,7 +3630,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # Suggest the new amount such that the total is equal to the quick amount
         with Form(invoice) as move_form:
-            with move_form.invoice_line_ids.new() as line_form:
+            with move_form.line_ids.new() as line_form:
                 self.assertEqual(line_form.price_unit, 30)
         self.assertRecordValues(invoice, [{'amount_total': 120.58, 'amount_untaxed': 100, 'amount_tax': 20.58}])
         self.assertEqual(len(invoice.invoice_line_ids), 2)
@@ -3701,7 +3701,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         with Form(self.env['account.move'].with_context(default_move_type='out_invoice')) as move_form:
             move_form.journal_id = self.company_data['default_journal_sale']
-            with move_form.invoice_line_ids.new() as line_form:
+            with move_form.line_ids.new() as line_form:
                 line_form.product_id = self.product_a
                 line_form.tax_ids.clear()
             move_form.currency_id = self.other_currency
@@ -4014,11 +4014,12 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         Test that the label of the payment_term line is consistent with the payment reference
         Also tests that it won't affect the hash inalterability report
         """
+        # TODO: I think this test is stupid...
         self.company_data['default_journal_sale'].restrict_mode_hash_table = True
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
         move_form.partner_id = self.partner_b
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_a
         invoice = move_form.save()
         payment_term_lines = invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term')
@@ -4121,7 +4122,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             self.env['account.move'].with_context(default_move_type='out_invoice')
         )
         move_form.quick_edit_total_amount = 100.0
-        with move_form.invoice_line_ids.new() as invoice_line_form:
+        with move_form.line_ids.new() as invoice_line_form:
             invoice_line_form.display_type = 'line_section'
         move_form.save()
 

@@ -137,7 +137,7 @@ class AccountMoveLine(models.Model):
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         string='Partner',
-        compute='_compute_partner_id', inverse='_inverse_partner_id', store=True, readonly=False, precompute=True,
+        compute='_compute_partner_id', store=True, readonly=False, precompute=True,
         ondelete='restrict',
     )
     is_imported = fields.Boolean()  # Technical field indicating if the line was captured automatically by import/ocr etc
@@ -367,7 +367,9 @@ class AccountMoveLine(models.Model):
     tax_ids_dirty = fields.Boolean(compute='_compute_tax_ids_dirty')
     invoice_tax_dirty = fields.Boolean(compute='_compute_invoice_tax_dirty')
     misc_tax_dirty = fields.Boolean(compute='_compute_misc_tax_dirty')
-    epd_dirty = fields.Boolean(compute='_compute_epd_dirty')
+    cash_rounding_dirty = fields.Boolean(compute='_compute_cash_rounding_dirty')
+    payment_term_dirty = fields.Boolean(compute='_compute_payment_term_dirty')
+    date_maturity_dirty = fields.Boolean(compute='_compute_date_maturity_dirty')
 
     # === Analytic fields === #
     analytic_line_ids = fields.One2many(
@@ -965,6 +967,21 @@ class AccountMoveLine(models.Model):
         for line in self:
             line.misc_tax_dirty = line.tax_ids_dirty or line.tax_ids
 
+    @api.depends('balance', 'amount_currency')
+    def _compute_cash_rounding_dirty(self):
+        for line in self:
+            line.cash_rounding_dirty = True
+
+    @api.depends('balance', 'amount_currency')
+    def _compute_payment_term_dirty(self):
+        for line in self:
+            line.payment_term_dirty = True
+
+    @api.depends('date_maturity')
+    def _compute_date_maturity_dirty(self):
+        for line in self:
+            line.date_maturity_dirty = True
+
     @api.depends('move_id.move_type', 'balance', 'tax_repartition_line_id', 'tax_ids')
     def _compute_is_refund(self):
         for line in self:
@@ -1044,12 +1061,6 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # INVERSE METHODS
     # -------------------------------------------------------------------------
-
-    @api.onchange('partner_id')
-    def _inverse_partner_id(self):
-        self._conditional_add_to_compute('account_id', lambda line: (
-            line.display_type == 'payment_term'  # recompute based on settings
-        ))
 
     @api.onchange('product_id')
     def _inverse_product_id(self):
@@ -1322,7 +1333,26 @@ class AccountMoveLine(models.Model):
         move_container = {'records': moves}
         with moves._check_balanced(move_container),\
              moves._sync_dynamic_lines(move_container):
-            lines = super().create([self._sanitize_vals(vals) for vals in vals_list])
+            vals_list = [self._sanitize_vals(vals) for vals in vals_list]
+            lines = super().create(vals_list)
+
+            # At the creation, all field are marked as dirty so we don't know from which one we need to recompute the others.
+            # To do so, let's mark them manually
+            for line, vals in zip(lines, vals_list):
+                line.debit_dirty = False
+                line.credit_dirty = False
+                line.balance_dirty = False
+                line.amount_currency_dirty = False
+                field_names = set(vals.keys())
+                if 'credit' in field_names:
+                    line.credit_dirty = True
+                if 'debit' in field_names:
+                    line.debit_dirty = True
+                if 'balance' in field_names:
+                    line.balance_dirty = True
+                if 'amount_currency' in field_names:
+                    line.amount_currency_dirty = True
+
             container['records'] = lines
 
         for line in lines:

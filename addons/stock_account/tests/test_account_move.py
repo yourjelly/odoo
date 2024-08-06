@@ -58,7 +58,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
         move_form = Form(self.env["account.move"].with_context(default_move_type="out_invoice"))
         move_form.partner_id = self.partner_a
         move_form.currency_id = self.other_currency
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_A
             line_form.tax_ids.clear()
         invoice = move_form.save()
@@ -82,7 +82,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
         move_form = Form(self.env["account.move"].with_context(default_move_type="out_invoice"))
         move_form.partner_id = self.partner_a
         move_form.currency_id = self.other_currency
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_A
             line_form.tax_ids.clear()
         invoice = move_form.save()
@@ -106,7 +106,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
         move_form = Form(self.env["account.move"].with_context(default_move_type="out_invoice"))
         move_form.partner_id = self.partner_a
         move_form.currency_id = self.other_currency
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_A
             line_form.tax_ids.clear()
         invoice = move_form.save()
@@ -156,7 +156,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
         self.company_data["default_account_revenue"].write({
             'tax_ids': [(6, 0, [self.env.company.account_sale_tax_id.id])]
         })
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_A
         invoice = move_form.save()
 
@@ -226,7 +226,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
             bill_form = Form(self.env['account.move'].with_company(company.id).with_context(default_move_type='in_invoice'))
             bill_form.partner_id = self.partner_a
             bill_form.invoice_date = fields.Date.today()
-            with bill_form.invoice_line_ids.new() as line:
+            with bill_form.line_ids.new() as line:
                 line.product_id = basic_product
                 line.price_unit = 100
             bill = bill_form.save()

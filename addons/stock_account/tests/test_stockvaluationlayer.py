@@ -1212,7 +1212,7 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
 
         invoice_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
         invoice_form.partner_id = self.env['res.partner'].create({'name': 'Super Client'})
-        with invoice_form.invoice_line_ids.new() as invoice_line_form:
+        with invoice_form.line_ids.new() as invoice_line_form:
             invoice_line_form.product_id = self.product1
             invoice_line_form.quantity = 2
             invoice_line_form.price_unit = 25

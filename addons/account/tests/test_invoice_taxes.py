@@ -668,7 +668,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
             (5, self.percent_tax_3_incl),
             (10, self.percent_tax_3_incl),
             (50, self.percent_tax_3_incl),
-        ], currency_id=self.other_currency, invoice_payment_term_id=self.pay_terms_a)
+        ], currency_id=self.other_currency, invoice_payment_term_id=self.term_immediate)
         invoice.action_post()
 
     def test_tax_calculation_multi_currency(self):

@@ -86,7 +86,7 @@ class TestStockLandedCostsBranches(TestStockValuationLCCommon):
         bill = self.env['account.move'].browse(action['res_id'])
         bill_form = Form(bill)
         bill_form.invoice_date = bill_form.date
-        with bill_form.invoice_line_ids.new() as inv_line:
+        with bill_form.line_ids.new() as inv_line:
             inv_line.product_id = self.productlc1
             inv_line.price_unit = 5
         bill = bill_form.save()

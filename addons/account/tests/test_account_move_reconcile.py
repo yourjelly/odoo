@@ -4618,7 +4618,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             default_move_type='in_invoice'))
         move_form.partner_id = self.partner_a
         move_form.invoice_date = fields.Date.from_string('2017-01-01')
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_a
             line_form.tax_ids.clear()
             line_form.tax_ids.add(tax)

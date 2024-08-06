@@ -867,7 +867,7 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
         move_form.partner_id = vendor_eur
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_order
             line_form.quantity = 1
         bill = move_form.save()
@@ -905,7 +905,7 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
         move_form = Form(self.env['account.move'].with_context(ctx))
         move_form.partner_id = vendor_a
         move_form.currency_id = self.env.ref('base.EUR')
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_order
             line_form.quantity = 1
         bill = move_form.save()
@@ -922,7 +922,7 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
         ctx['default_currency_id'] = self.other_currency.id
         move_form_currency_in_context = Form(self.env['account.move'].with_context(ctx))
         move_form_currency_in_context.currency_id = self.env.ref('base.EUR')
-        with move_form_currency_in_context.invoice_line_ids.new() as line_form:
+        with move_form_currency_in_context.line_ids.new() as line_form:
             line_form.product_id = self.product_order
             line_form.quantity = 1
         move_form_currency_in_context.save()

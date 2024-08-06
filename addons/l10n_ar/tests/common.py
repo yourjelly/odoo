@@ -583,7 +583,7 @@ class TestAr(AccountTestInvoicingCommon):
                 if values.get('invoice_incoterm_id'):
                     invoice_form.invoice_incoterm_id = values['invoice_incoterm_id']
                 for line in values['invoice_line_ids']:
-                    with invoice_form.invoice_line_ids.new() as line_form:
+                    with invoice_form.line_ids.new() as line_form:
                         line_form.product_id = line.get('product_id')
                         line_form.price_unit = line.get('price_unit')
                         line_form.quantity = line.get('quantity')
@@ -639,7 +639,7 @@ class TestAr(AccountTestInvoicingCommon):
             if data.get('currency'):
                 invoice_form.currency_id = data.get('currency')
             for line in data.get('lines', [{}]):
-                with invoice_form.invoice_line_ids.new() as invoice_line_form:
+                with invoice_form.line_ids.new() as invoice_line_form:
                     invoice_line_form.display_type = line.get('display_type', 'product')
                     if line.get('display_type') in ('line_note', 'line_section'):
                         invoice_line_form.name = line.get('name', 'not invoice line')

@@ -606,8 +606,11 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
                         diff[field_name] = (record_value, candidate[field_name])
                 elif field_type == 'float' and field.get_digits(record.env):
                     prec = field.get_digits(record.env)[1]
-                    if float_compare(candidate[field_name], record_value, precision_digits=prec) != 0:
-                        diff[field_name] = (record_value, candidate[field_name])
+                    if field_name in candidate:
+                        if float_compare(candidate[field_name], record_value, precision_digits=prec) != 0:
+                            diff[field_name] = (record_value, candidate[field_name])
+                    else:
+                        diff[field_name] = (record_value, None)
                 elif field_type in ('one2many', 'many2many'):
                     # Compare x2many relational fields.
                     # Empty comparison must be an empty list to be True.
@@ -629,6 +632,9 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
                     elif (candidate[field_name] or record_value) and record_value != candidate[field_name]:
                         diff[field_name] = (record_value, candidate[field_name])
             return diff
+
+        if not records and not expected_values:
+            return
 
         # Compare records with candidates.
         different_values = []

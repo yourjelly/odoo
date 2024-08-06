@@ -81,7 +81,7 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
             'move_type': move_type,
             'partner_id': partner.id,
             'partner_bank_id': self.env.company.partner_id.bank_ids[:1].id,
-            'invoice_payment_term_id': self.pay_terms_b.id,
+            'invoice_payment_term_id': self.term_advance_60days.id,
             'invoice_date': '2017-01-01',
             'date': '2017-01-01',
             'narration': 'test narration',

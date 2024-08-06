@@ -452,7 +452,7 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
             invoice.partner_id = self.partner_a
             invoice.invoice_date = fields.Date.from_string('2022-02-21')
             invoice.invoice_payment_term_id = self.early_pay_10_percents_10_days
-            with invoice.invoice_line_ids.new() as line_form:
+            with invoice.line_ids.new() as line_form:
                 line_form.product_id = self.product_a
                 line_form.price_unit = 1000
                 line_form.quantity = 1
@@ -643,7 +643,7 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
             invoice.partner_id = self.partner_a
             invoice.invoice_date = fields.Date.from_string('2022-02-21')
             invoice.invoice_payment_term_id = early_pay_2_percents_10_days
-            with invoice.invoice_line_ids.new() as line_form:
+            with invoice.line_ids.new() as line_form:
                 line_form.product_id = self.product_a
                 line_form.price_unit = 121
                 line_form.quantity = 1
@@ -674,7 +674,7 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
             })
 
     def test_mixed_epd_with_tax_no_duplication(self):
-        (self.pay_terms_a | self.early_pay_10_percents_10_days).write({'early_pay_discount_computation': 'mixed'})
+        (self.term_immediate | self.early_pay_10_percents_10_days).write({'early_pay_discount_computation': 'mixed'})
         inv = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_a.id,
@@ -686,7 +686,7 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
             'invoice_payment_term_id': self.early_pay_10_percents_10_days.id,
         })
         self.assertEqual(len(inv.line_ids), 6) # 1 prod, 1 tax, 2 epd, 1 epd tax discount, 1 payment terms
-        inv.write({'invoice_payment_term_id': self.pay_terms_a.id})
+        inv.write({'invoice_payment_term_id': self.term_immediate.id})
         self.assertEqual(len(inv.line_ids), 3) # 1 prod, 1 tax, 1 payment terms
         inv.write({'invoice_payment_term_id': self.early_pay_10_percents_10_days.id})
         self.assertEqual(len(inv.line_ids), 6)

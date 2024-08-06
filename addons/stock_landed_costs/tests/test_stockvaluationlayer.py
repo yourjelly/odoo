@@ -327,7 +327,7 @@ class TestStockValuationLCAVCO(TestStockValuationLCCommon):
         bill = self.env['account.move'].browse(action['res_id'])
         bill_form = Form(bill)
         bill_form.invoice_date = bill_form.date
-        with bill_form.invoice_line_ids.new() as inv_line:
+        with bill_form.line_ids.new() as inv_line:
             inv_line.product_id = self.productlc1
             inv_line.price_unit = 5
             inv_line.is_landed_costs_line = True
@@ -406,7 +406,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         lcvb = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
         lcvb.invoice_date = lcvb.date
         lcvb.partner_id = self.vendor2
-        with lcvb.invoice_line_ids.new() as inv_line:
+        with lcvb.line_ids.new() as inv_line:
             inv_line.product_id = self.productlc1
             inv_line.price_unit = 50
             inv_line.is_landed_costs_line = True
@@ -481,7 +481,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         vb.partner_id = self.vendor1
         vb.invoice_date = vb.date
         self.productlc1.landed_cost_ok = True
-        with vb.invoice_line_ids.new() as inv_line:
+        with vb.line_ids.new() as inv_line:
             inv_line.product_id = self.productlc1
             inv_line.price_unit = 50
             inv_line.is_landed_costs_line = True
@@ -548,7 +548,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         lcvb = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
         lcvb.partner_id = self.vendor2
         lcvb.invoice_date = lcvb.date
-        with lcvb.invoice_line_ids.new() as inv_line:
+        with lcvb.line_ids.new() as inv_line:
             inv_line.product_id = self.productlc1
             inv_line.price_unit = 50
             inv_line.is_landed_costs_line = True

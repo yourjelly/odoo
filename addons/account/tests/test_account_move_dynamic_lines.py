@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from freezegun import freeze_time
+
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import Form, tagged
 from odoo import fields, Command
@@ -85,89 +87,95 @@ class TestAccountMoveDynamicLines(AccountTestInvoicingCommon):
         ])
         self.assertRecordValues(tax_line, [{'name': "turlututu"}])
 
-    def test_invoice_creation_with_manual_tax_amounts(self):
-        tax_groups = self.env['account.tax.group'].create([
-            {'name': "test_invoice_creation_with_manual_tax_amounts_1"},
-            {'name': "test_invoice_creation_with_manual_tax_amounts_2"},
-        ])
-        taxes = self.env['account.tax'].create([
-            {'name': "10%", 'amount_type': 'percent', 'amount': 10.0, 'tax_group_id': tax_groups[0].id},
-            {'name': "20%", 'amount_type': 'percent', 'amount': 20.0, 'tax_group_id': tax_groups[1].id},
-        ])
-
-        # Create a new invoice.
-        invoice_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
-        invoice_form._view['modifiers']['tax_totals']['readonly'] = 'False'
-        invoice_form.invoice_date = fields.Date.from_string('2020-01-01')
-        invoice_form.partner_id = self.partner_a
-        with invoice_form.invoice_line_ids.new() as line_form:
-            line_form.price_unit = 100
-            line_form.tax_ids.clear()
-            line_form.tax_ids.add(taxes[0])
-        with invoice_form.invoice_line_ids.new() as line_form:
-            line_form.price_unit = 200
-            line_form.tax_ids.clear()
-            line_form.tax_ids.add(taxes[1])
-
-        # Edit the tax amounts.
-        tax_totals = invoice_form.tax_totals
-        tax_totals['changed_tax_group_id'] = tax_groups[0].id
-        tax_totals['delta_amount_currency'] = 10.0
-        invoice_form.tax_totals = tax_totals
-
-        self.assertEqual(invoice_form.tax_totals_manual_amounts, {str(taxes[0].id): 20.0})
-
-        tax_totals = invoice_form.tax_totals
-        tax_totals['changed_tax_group_id'] = tax_groups[1].id
-        tax_totals['delta_amount_currency'] = 10.0
-        invoice_form.tax_totals = tax_totals
-
-        self.assertEqual(invoice_form.tax_totals_manual_amounts, {str(taxes[0].id): 20.0, str(taxes[1].id): 50.0})
-
-        invoice = invoice_form.save()
-
-        self.assertRecordValues(invoice, [{
-            'amount_untaxed': 300.0,
-            'amount_tax': 70.0,
-            'amount_total': 370.0,
-        }])
-
-        # Modify the invoice from 'line_ids'.
-        # Ensure the first manual tax amount has not been lost in the process.
-        tax_line = invoice.line_ids.filtered(lambda line: line.tax_line_id.amount == 20.0)
+        # Changing the name of a payment term line should be allowed as well without recomputing anything else.
         term_line = invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term')
+        term_line.name = "tsoin tsoin"
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'price_unit': 3000.0,   'amount_currency': -3000.0,     'balance': -1500.0,     'debit': 0.0,       'credit': 1500.0},
+            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -500.0,      'balance': -250.0,      'debit': 0.0,       'credit': 250.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 3500.0,      'balance': 1750.0,      'debit': 1750.0,    'credit': 0.0},
+        ])
+        self.assertRecordValues(term_line, [{'name': "tsoin tsoin"}])
+
+        # Add a new invoice line without passing from the move.
+        self.env['account.move.line'].create({'product_id': self.product_a.id, 'move_id': invoice.id})
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'price_unit': 3000.0,   'amount_currency': -3000.0,     'balance': -1500.0,     'debit': 0.0,       'credit': 1500.0},
+            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -750.0,      'balance': -375.0,      'debit': 0.0,       'credit': 375.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 5750.0,      'balance': 2875.0,      'debit': 2875.0,    'credit': 0.0},
+            {'display_type': 'product',         'price_unit': 2000.0,   'amount_currency': -2000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
+        ])
+
+        # Edit the move but keep it balanced.
+        # The 'old' reference to tax_line/term_line should work here because we have only updated them so far.
         invoice.line_ids = [
-            Command.update(tax_line.id, {'amount_currency': -60.0}),
-            Command.update(term_line.id, {'amount_currency': 380.0}),
+            Command.update(tax_line.id, {'balance': -400.0}),
+            Command.update(term_line.id, {'balance': 2900.0}),
         ]
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'price_unit': 3000.0,   'amount_currency': -3000.0,     'balance': -1500.0,     'debit': 0.0,       'credit': 1500.0},
+            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -750.0,      'balance': -400.0,      'debit': 0.0,       'credit': 400.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 5750.0,      'balance': 2900.0,      'debit': 2900.0,    'credit': 0.0},
+            {'display_type': 'product',         'price_unit': 2000.0,   'amount_currency': -2000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
+        ])
+        self.assertRecordValues(tax_line + term_line, [
+            {'name': "turlututu"},
+            {'name': "tsoin tsoin"},
+        ])
 
-        self.assertRecordValues(invoice, [{
-            'amount_untaxed': 300.0,
-            'amount_tax': 80.0,
-            'amount_total': 380.0,
-        }])
+        # Change the payment term to 30% now, 70% later.
+        invoice.invoice_payment_term_id = self.term_advance_60days
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'price_unit': 3000.0,   'amount_currency': -3000.0,     'balance': -1500.0,     'debit': 0.0,       'credit': 1500.0},
+            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -750.0,      'balance': -400.0,      'debit': 0.0,       'credit': 400.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 1725.0,      'balance': 870.0,       'debit': 870.0,     'credit': 0.0},
+            {'display_type': 'product',         'price_unit': 2000.0,   'amount_currency': -2000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 4025.0,      'balance': 2030.0,      'debit': 2030.0,    'credit': 0.0},
+        ])
+        self.assertRecordValues(tax_line, [{'name': "turlututu"}])
 
-        # Change the price_unit of a base line.
-        # The manual tax amounts are lost.
-        base_line = invoice.line_ids.filtered(lambda line: line.tax_ids == taxes[0])
-        base_line.price_unit = 200
+        # Remove the lines.
+        invoice.line_ids.sorted()[0].unlink()
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -300.0,      'balance': -150.0,      'debit': 0.0,       'credit': 150.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 690.0,       'balance': 345.0,       'debit': 345.0,     'credit': 0.0},
+            {'display_type': 'product',         'price_unit': 2000.0,   'amount_currency': -2000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 1610.0,      'balance': 805.0,       'debit': 805.0,     'credit': 0.0},
+        ])
+        invoice.line_ids.sorted()[2].unlink()
+        self.assertRecordValues(invoice.line_ids.sorted(), [])
 
-        self.assertRecordValues(invoice, [{
-            'amount_untaxed': 400.0,
-            'amount_tax': 60.0,
-            'amount_total': 460.0,
-        }])
+    def test_invoice_date_set_at_post(self):
+        with freeze_time('2016-01-01'):
+            invoice = self.env['account.move'].create({
+                'move_type': 'out_invoice',
+                'partner_id': self.partner_a.id,
+                'currency_id': self.other_currency.id,
+                'invoice_payment_term_id': self.term_advance_60days.id,
+                'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+            })
 
-        # Edit the tax amounts on the form again but the invoice is already stored this time.
-        with Form(invoice) as invoice_form:
-            invoice_form._view['modifiers']['tax_totals']['readonly'] = 'False'
-            tax_totals = invoice_form.tax_totals
-            tax_totals['changed_tax_group_id'] = tax_groups[0].id
-            tax_totals['delta_amount_currency'] = -10.0
-            invoice_form.tax_totals = tax_totals
+            # Customize a tax amount using 'tax_totals'.
+            tax_line = invoice.line_ids.filtered(lambda line: line.display_type == 'tax')
+            tax_line.amount_currency = -462.0
+            self.assertRecordValues(invoice.line_ids.sorted(), [
+                {'display_type': 'product',         'price_unit': 3000.0,   'amount_currency': -3000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
+                {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -462.0,      'balance': -154.0,      'debit': 0.0,       'credit': 154.0},
+                {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 1038.6,      'balance': 346.2,       'debit': 346.2,     'credit': 0.0},
+                {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 2423.4,      'balance': 807.8,       'debit': 807.8,     'credit': 0.0},
+            ])
 
-        self.assertRecordValues(invoice, [{
-            'amount_untaxed': 400.0,
-            'amount_tax': 50.0,
-            'amount_total': 450.0,
-        }])
+        with freeze_time('2017-01-01'):
+            invoice.payment_reference = "turlututu"
+            invoice.action_post()
+            self.assertRecordValues(invoice.line_ids.sorted(), [
+                {'display_type': 'product',         'price_unit': 3000.0,   'amount_currency': -3000.0,     'balance': -1500.0,     'debit': 0.0,       'credit': 1500.0},
+                {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -462.0,      'balance': -231.0,      'debit': 0.0,       'credit': 231.0},
+                {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 1038.6,      'balance': 519.3,       'debit': 519.3,     'credit': 0.0},
+                {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 2423.4,      'balance': 1211.7,      'debit': 1211.7,    'credit': 0.0},
+            ])
+            term_lines = invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term')
+            self.assertRecordValues(term_lines, [
+                {'name': "turlututu installment #1",    'date_maturity': fields.Date.from_string('2017-01-01')},
+                {'name': "turlututu installment #2",    'date_maturity': fields.Date.from_string('2017-03-02')},
+            ])

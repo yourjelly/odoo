@@ -51,9 +51,9 @@ class TestAccountMoveDuplicate(AccountTestInvoicingCommon):
         move_form.partner_id = self.partner_a
         move_form.invoice_date = invoice_1.invoice_date
         move_form.ref = invoice_1.ref
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_a
-        with move_form.invoice_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_b
         invoice_2 = move_form.save()
         self.assertRecordValues(invoice_2, [{'duplicated_ref_ids': invoice_1.ids}])

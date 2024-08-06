@@ -100,38 +100,22 @@ class AccountTestInvoicingCommon(ProductCommon):
         })
 
         # ==== Payment terms ====
-        cls.pay_terms_a = cls.env.ref('account.account_payment_term_immediate')
-        cls.pay_terms_b = cls.env['account.payment.term'].create({
-            'name': '30% Advance End of Following Month',
-            'note': 'Payment terms: 30% Advance End of Following Month',
-            'line_ids': [
-                (0, 0, {
-                    'value': 'percent',
-                    'value_amount': 30.0,
-                    'nb_days': 0,
-                }),
-                (0, 0, {
-                    'value': 'percent',
-                    'value_amount': 70.0,
-                    'delay_type': 'days_after_end_of_next_month',
-                    'nb_days': 0,
-                }),
-            ],
-        })
+        cls.term_immediate = cls.env.ref('account.account_payment_term_immediate')
+        cls.term_advance_60days = cls.env.ref('account.account_payment_term_advance_60days')
 
         # ==== Partners ====
         cls.partner_a = cls.env['res.partner'].create({
             'name': 'partner_a',
-            'property_payment_term_id': cls.pay_terms_a.id,
-            'property_supplier_payment_term_id': cls.pay_terms_a.id,
+            'property_payment_term_id': cls.term_immediate.id,
+            'property_supplier_payment_term_id': cls.term_immediate.id,
             'property_account_receivable_id': cls.company_data['default_account_receivable'].id,
             'property_account_payable_id': cls.company_data['default_account_payable'].id,
             'company_id': False,
         })
         cls.partner_b = cls.env['res.partner'].create({
             'name': 'partner_b',
-            'property_payment_term_id': cls.pay_terms_b.id,
-            'property_supplier_payment_term_id': cls.pay_terms_b.id,
+            'property_payment_term_id': cls.term_advance_60days.id,
+            'property_supplier_payment_term_id': cls.term_advance_60days.id,
             'property_account_position_id': cls.fiscal_pos_a.id,
             'property_account_receivable_id': cls.company_data['default_account_receivable'].copy().id,
             'property_account_payable_id': cls.company_data['default_account_payable'].copy().id,
