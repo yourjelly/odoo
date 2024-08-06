@@ -87,22 +87,73 @@ export class SplitBillScreen extends Component {
             line.delete();
         }
 
-        // for the kitchen printer we assume that everything
-        // has already been sent to the kitchen before splitting
-        // the bill. So we save all changes both for the old
-        // order and for the new one. This is not entirely correct
-        // but avoids flooding the kitchen with unnecessary orders.
-        // Not sure what to do in this case.
-        if (this.pos.orderPreparationCategories.size) {
-            originalOrder.updateLastOrderChange();
-            newOrder.updateLastOrderChange();
+        const changes = this.matchCurrentOrderStatus(originalOrder, newOrder);
+        newOrder.last_order_preparation_change = changes[1];
+        // there can be some line whuch are not splitted so can't be updated in the loop
+        for (const orderduuid of Object.keys(originalOrder.last_order_preparation_change)) {
+            if (changes[0][orderduuid]) {
+                originalOrder.last_order_preparation_change[orderduuid].quantity =
+                    changes[0][orderduuid].quantity;
+            }
         }
-
+        this.syncOrdersinKichen(originalOrder);
+        // this.pos.sendOrderInPreparation(originalOrder);
         originalOrder.customerCount -= 1;
         originalOrder.set_screen_data({ name: "ProductScreen" });
         this.pos.selectedOrderUuid = null;
         this.pos.set_order(newOrder);
         this.back();
+    }
+
+    matchCurrentOrderStatus(originalOrder, newOrder) {
+        //                                                 qtyBuffer                   unordered
+        // total  ordered   splitted   neworiginal  neworiginal - alreadyordered   splitted + calculated    splitted > pending
+        //  4         2         3             1                 -1                         2                       3 > 2 (set 2 of splitted to order)
+        //  4         1         2             2                  1                         3                       2 > 3 don't add any qty to last_order... and pending qty reflect in original
+        //  3         1         1             2                  1                         2                          similar to 2nd case
+        const newupdatedchanges = {};
+        const oldupdatedchanges = {};
+        for (const lineuuid of newOrder.lines.map((item) => item.uuid)) {
+            if (
+                Object.keys(originalOrder.last_order_preparation_change).includes(lineuuid + " - ")
+            ) {
+                const orderDetail = originalOrder.last_order_preparation_change[lineuuid + " - "];
+                const filteredLine = originalOrder.lines.filter((line) => line.uuid == lineuuid);
+                const qtyBuffer = filteredLine[0]?.qty || 0 - orderDetail.quantity;
+                if (filteredLine.length > 0) {
+                    // set old one as it is just change quantity as per need
+                    oldupdatedchanges[lineuuid + " - "] = orderDetail;
+                }
+                if (qtyBuffer < 0) {
+                    // some order rest tobe ordered in new one
+                    newupdatedchanges[lineuuid + " - "] = orderDetail;
+                    newupdatedchanges[lineuuid + " - "].quantity = -1 * qtyBuffer; //set how many ordered
+                    // all in original are ordered
+                    if (filteredLine.length > 0) {
+                        oldupdatedchanges[lineuuid + " - "].quantity = filteredLine[0]?.qty;
+                    }
+                } else if (qtyBuffer > 0) {
+                    // some in original order which are unordered
+                    const orderedqty = filteredLine[0].qty - qtyBuffer;
+                    if (orderedqty > 0) {
+                        oldupdatedchanges[lineuuid + " - "].quantity = orderedqty; //set how many ordered
+                    }
+                    orderDetail.qty = filteredLine[0]?.qty - qtyBuffer; // set how much ordered
+                }
+                // In rest cases no qty ordered in new order & all ordered in original one.
+            }
+        }
+        return [oldupdatedchanges, newupdatedchanges];
+    }
+
+    async syncOrdersinKichen(originalOrder) {
+        debugger
+        // this.originalToUpdate = await this.pos.data.call(
+        //     "pos_preparation_display.order",
+        //     "get_preparation_display_order",
+        //     [[], originalOrder.id],
+        //     {}
+        // );
     }
 
     getLineData(line) {
