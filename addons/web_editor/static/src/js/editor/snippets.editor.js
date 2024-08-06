@@ -622,7 +622,7 @@ var SnippetEditor = Widget.extend({
         if (editorUIsToUpdate.length > 0 && !optionsSectionVisible) {
             return null;
         }
-        return this._customize$Elements;
+        return this.getOptions();
     },
     /**
      * Returns the OWL Options templates to mount their widgets.
@@ -860,6 +860,7 @@ var SnippetEditor = Widget.extend({
                     option.isTopOption = true;
                 }
             } else {
+                return;
                 option = new (options.registry[optionName] || options.Class)(
                     this,
                     val.$el.children(),
@@ -1892,6 +1893,59 @@ var SnippetEditor = Widget.extend({
     },
 });
 
+class SnippetOptionsManager extends Component {
+    static props = {
+        editors: { type: Object },
+        enabledEditors: { type: Array },
+        onOptionMounted: { type: Function },
+        activateTab: { type: Function },
+        execWithLoadingEffect: { type: Function },
+    };
+    static template = "web_editor.SnippetOptionsManager";
+
+    setup() {
+        useEffect(
+            () => {
+                this.props.execWithLoadingEffect(async () => {
+                    const editorToEnable = this.props.enabledEditors[0];
+                    let enabledOptions;
+                    if (editorToEnable) {
+                        enabledOptions = await editorToEnable.toggleOptions(true);
+                        if (!enabledOptions) {
+                            // As some options can only be generated using JavaScript
+                            // (e.g. 'SwitchableViews'), it may happen at this point
+                            // that the overlay is activated even though there are no
+                            // options. That's why we disable the overlay if there are
+                            // no options to enable.
+                            editorToEnable.toggleOverlay(false);
+                        }
+                    }
+                    if (enabledOptions) {
+                        this.props.activateTab(SnippetsMenu.tabs.OPTIONS);
+                    }
+                });
+            },
+            () => {
+                // The compute dependencies can never return an empty array or
+                // the effect will not be reapplied, and therefore the tab will
+                // not change to blocks.
+                if (this.props.enabledEditors.length) {
+                    return this.props.enabledEditors;
+                } else {
+                    return [false];
+                }
+            }
+        );
+    }
+
+    getEditors() {
+        return [...this.props.editors].sort((e1, e2) => {
+            return this.props.enabledEditors.indexOf(e1) < this.props.enabledEditors.indexOf(e2);
+        });
+    }
+}
+
+
 /**
  * Management of drag&drop menu and snippet related behaviors in the page.
  */
@@ -1958,7 +2012,7 @@ class SnippetsMenu extends Component {
 
     static template = "web_editor.SnippetsMenu";
 
-    static components = { Toolbar, LinkTools };
+    static components = { Toolbar, LinkTools, SnippetOptionsManager };
 
     setup() {
         super.setup(...arguments);
@@ -3013,17 +3067,11 @@ class SnippetsMenu extends Component {
                         || ifInactiveOptions && this.state.enabledEditorHierarchy.includes(editorToEnable)) {
                     return editorToEnable;
                 }
-                // TODO: @owl-options remove when legacy is completely converted.
-                let hasOwlOptions = false;
 
                 if (!previewMode) {
                     this.state.enabledEditorHierarchy = [];
                     let current = editorToEnable;
                     while (current && current.$target) {
-                        // TODO: @owl-options remove when legacy is completely converted.
-                        hasOwlOptions = current._hasOwlOptions;
-                        // TODO: @owl-options, make sure changes to instances
-                        // of SnippetEditor should not trigger re-renders.
                         this.state.enabledEditorHierarchy.push(markRaw(current));
                         current = current.getParent();
                     }
@@ -3054,33 +3102,21 @@ class SnippetsMenu extends Component {
                             parentEditor.toggleOverlay(true, previewMode);
                         }
                     }
-                    customize$Elements = await editorToEnable.toggleOptions(true);
-                    this.state.options = editorToEnable.getOptions();
+                    // TODO: this code is handled by SnippetOptionsManager now
+                    // customize$Elements = await editorToEnable.toggleOptions(true);
                 } else {
                     for (const editor of this.snippetEditors) {
                         if (editor.isSticky()) {
                             editor.toggleOverlay(true, false);
-                            customize$Elements = await editor.toggleOptions(true);
+                            // customize$Elements = await editor.toggleOptions(true);
+                            this.state.enabledEditorHierarchy.push(editor);
                         }
                     }
                 }
-
-                if (!previewMode) {
-                    // As some options can only be generated using JavaScript
-                    // (e.g. 'SwitchableViews'), it may happen at this point
-                    // that the overlay is activated even though there are no
-                    // options. That's why we disable the overlay if there are
-                    // no options to enable.
-                    if (editorToEnable && !customize$Elements) {
-                        editorToEnable.toggleOverlay(false);
-                    }
+                if (!editorToEnable || this.state.enabledEditorHierarchy.lenght === 0) {
                     this._updateRightPanelContent({
-                        content: customize$Elements || [],
-                        // TODO: @owl-options, disable the change of tab,
-                        // here, instead let the onOptionMounted do it. To review
-                        // tab: customize$Elements ? this.tabs.OPTIONS : this.tabs.BLOCKS,
-                        tab: !hasOwlOptions && customize$Elements ? this.tabs.OPTIONS : this.tabs.BLOCKS,
-                    });
+                        tab: this.tabs.BLOCKS
+                    })
                 }
 
                 return editorToEnable;
@@ -4027,7 +4063,7 @@ class SnippetsMenu extends Component {
      * the new content of the customizePanel
      * @param {this.tabs.VALUE} [tab='blocks'] - the tab to select
      */
-    _updateRightPanelContent({content, tab, ...options}) {
+    _updateRightPanelContent({tab, ...options}) {
         this._hideTooltips();
         this._closeWidgets();
 
@@ -4036,30 +4072,15 @@ class SnippetsMenu extends Component {
             tab = SnippetsMenu.tabs.OPTIONS;
         }
 
-        this.state.currentTab = tab || SnippetsMenu.tabs.BLOCKS;
-
-        if (this._$toolbarContainer) {
-            this._$toolbarContainer[0].remove();
-        }
         this.state.showToolbar = false;
         this._$toolbarContainer = null;
-        if (content) {
-            // The toolbar component will be hidden or shown by state.showToolbar
-            // as it is an OWL Component, OWL is in charge of the HTML for that
-            // component. So we do not want to remove it.
-            // TODO: This should be improved when SnippetEditor / SnippetOptions
-            // are converted to OWL.
-            while (this.customizePanel.firstChild?.id !== "legacyOptionsLimiter") {
-                this.customizePanel.removeChild(this.customizePanel.firstChild);
-            }
-            $(this.customizePanel).prepend(content);
-            if (this.state.currentTab === this.tabs.OPTIONS && !options.forceEmptyTab) {
-                this._addToolbar();
-            }
+        if (this.state.currentTab === this.tabs.OPTIONS && !options.forceEmptyTab) {
+            this._addToolbar();
         }
         if (options.forceEmptyTab) {
             this.state.showToolbar = false;
         }
+        this.state.currentTab = tab;
     }
     /**
      * Scrolls to given snippet.
@@ -5157,7 +5178,6 @@ class SnippetsMenu extends Component {
         this.execWithLoadingEffect(async () => {
             await Promise.all(this.state.enabledEditorHierarchy.map(editor => editor.updateOptionsUI()));
             await Promise.all(this.state.enabledEditorHierarchy.map(editor => editor.updateOptionsUIVisibility()));
-            this.state.currentTab = this.tabs.OPTIONS;
         });
     }
 
@@ -5426,6 +5446,9 @@ class SnippetsMenu extends Component {
             await this._loadSnippetsTemplates(withMutex);
         }
         snippet.renaming = false;
+    }
+    activateTab(tab) {
+        this._updateRightPanelContent({tab});
     }
 }
 
