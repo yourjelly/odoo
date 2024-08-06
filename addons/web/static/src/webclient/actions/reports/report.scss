@@ -132,22 +132,13 @@ div[name=comment] p, div[name=address] p {
 
 .o_snail_mail {
     // Moving anything under the address (eg Tax ID) further down to
-    // avoid breaking Pingen validation. !important because field template
-    // comes with mb-0 utility class.
-    .address {
-        padding-top: $o-snailmail-address-padding-top;
-
-        div[name="address"] > address {
-            margin-bottom: $spacer !important;
-        }
+    // avoid breaking Pingen validation.
+    div[itemtype="http://schema.org/PostalAddress"] {
+        margin-bottom: $spacer;
     }
 
-    // Same as above for followup, because it doesn't use the same structure.
+    // Adaptation for followup, the address doesn't use the same structure.
     .o_followup_address {
         padding-top: $o-snailmail-address-padding-top;
-
-        div[itemscope="itemscope"] > div:first-child {
-            margin-bottom: $spacer;
-        }
     }
 }
