@@ -97,6 +97,6 @@ class IrEmbeddedActions(models.Model):
         """ return the list of fields that are safe to read
         """
         return {
-            "name", "parent_action_id", "parent_res_id", "parent_res_model", "action_id", "python_method", "user_id",
+            "id", "name", "parent_action_id", "parent_res_id", "parent_res_model", "action_id", "python_method", "user_id",
             "is_deletable", "default_view_mode", "filter_ids", "domain", "context", "groups_ids"
         }

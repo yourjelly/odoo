@@ -229,16 +229,24 @@ class IrActions(models.Model):
         """
         self.ensure_one()
         readable_fields = self._get_readable_fields()
-        if (self.sudo().type == "ir.actions.act_window"):
-            result = self.sudo().read()[0]
-            embedded_actions = self.env["ir.embedded.actions"].browse(result["embedded_action_ids"]).read()
-            result.update({"embedded_action_ids": embedded_actions})
-            return result
-        return {
+        result = {
             field: value
             for field, value in self.sudo().read()[0].items()
             if field in readable_fields
         }
+        if self.sudo().type == "ir.actions.act_window" and result.get("embedded_action_ids"):
+            EmbeddedActions = self.env["ir.embedded.actions"]
+            filter_field = EmbeddedActions._get_readable_fields()
+            records = EmbeddedActions.browse(result["embedded_action_ids"]).read()
+            embedded_actions = [
+                {
+                    field: record[field]
+                    for field in record
+                    if field in filter_field
+                } for record in records
+            ]
+            result["embedded_action_ids"] = embedded_actions
+        return result
 
     def _get_readable_fields(self):
         """ return the list of fields that are safe to read
