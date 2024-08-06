@@ -132,6 +132,13 @@ patch(Navbar.prototype, {
         this.pos.selectedTable = null;
         this.pos.searchProductWord = "";
         if (table) {
+            if (table.parent_id) {
+                this.notification.add(
+                    _t(`Table ${table.name} is already merged with Table ${table.parent_id.name}`)
+                );
+                await this.pos.setTableFromUi(table.parent_id);
+                return;
+            }
             await this.pos.setTableFromUi(table);
         } else {
             this.selectFloatingOrder(floating_order);
