@@ -17,9 +17,10 @@ export class EmployeeListController extends ListController {
         const menuItems = super.getStaticActionMenuItems();
         const selectedRecords = this.model.root.selection;
 
-        // Only override the Archive action when only 1 record is selected.
-        if (selectedRecords.length === 1 && selectedRecords[0].data.active) {
-            menuItems.archive.callback = this.archiveEmployee.bind(this, selectedRecords[0].resId);
+        const activeEmployees = selectedRecords
+            .filter(record => record.data.active).map(record => record.resId);
+        if (activeEmployees.length > 0) {
+            menuItems.archive.callback = this.archiveEmployee.bind(this, activeEmployees);
         }
         return menuItems;
     }

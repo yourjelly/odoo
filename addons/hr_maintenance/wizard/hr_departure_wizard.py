@@ -11,4 +11,5 @@ class HrDepartureWizard(models.TransientModel):
     def action_register_departure(self):
         super().action_register_departure()
         if self.unassign_equipment:
-            self.employee_id.update({'equipment_ids': [Command.unlink(equipment.id) for equipment in self.employee_id.equipment_ids]})
+            for employee in self.employee_ids:
+                employee.update({'equipment_ids': [Command.unlink(equipment.id) for equipment in employee.equipment_ids]})
