@@ -262,8 +262,11 @@ class IoTboxHomepage(Home):
         else:
             url = helpers.get_odoo_server_url()
             token = helpers.get_token()
-        if iotname and platform.system() == 'Linux':
-            subprocess.check_call([file_path('point_of_sale/tools/posbox/configuration/rename_iot.sh'), iotname])
+        if iotname and platform.system() == 'Linux' and iotname != socket.gethostname():
+            try:
+                subprocess.run([file_path('point_of_sale/tools/posbox/configuration/rename_iot.sh'), iotname], check=True)
+            except subprocess.CalledProcessError:
+                _logger.exception("Rename iot script failed")
         helpers.odoo_restart(5)
         return 'http://' + helpers.get_ip() + ':8069'
 
