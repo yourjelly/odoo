@@ -53,7 +53,7 @@
                             t-on-paste="onPaste"
                             t-model="props.composer.text"
                             t-att-placeholder="placeholder"
-                            t-att-readOnly="!state.active"
+                            t-att-readOnly="!state.active || thread?.isReadOnly"
                         />
                         <!--
                              This is an invisible textarea used to compute the composer
@@ -68,10 +68,12 @@
                             disabled="1"
                         />
                     </div>
-                    <t t-if="!extended and !props.composer.message" t-call="mail.Composer.actions"/>
-                    <t t-else="" t-call="mail.Composer.quickActions"/>
+                    <t t-if="!thread?.isReadOnly">
+                      <t t-if="!extended and !props.composer.message" t-call="mail.Composer.actions"/>
+                      <t t-else="" t-call="mail.Composer.quickActions"/>
+                    </t>
                 </div>
-                <div t-if="extended and !props.composer.message" class="d-flex align-items-center mt-2 gap-1 w-100 px-2">
+                <div t-if="extended and !props.composer.message and (!thread?.isReadOnly)" class="d-flex align-items-center mt-2 gap-1 w-100 px-2">
                     <t t-call="mail.Composer.sendButton"/>
                     <span t-if="!isSendButtonDisabled and !props.composer.message" class="text-muted small ms-1" t-out="OR_PRESS_SEND_KEYBIND"/>
                     <span class="flex-grow-1"/>
@@ -87,7 +89,7 @@
                 <Picker t-props="picker"/>
             </div>
         </div>
-        <div t-if="props.composer.message" class="d-flex align-items-center gap-1 w-100">
+        <div t-if="props.composer.message and (!thread?.isReadOnly)" class="d-flex align-items-center gap-1 w-100">
             <span t-if="props.composer.message" class="text-muted px-1 small" t-out="CANCEL_OR_SAVE_EDIT_TEXT" t-on-click="onClickCancelOrSaveEditText"/>
             <span class="flex-grow-1"/>
             <t t-call="mail.Composer.extraActions"/>

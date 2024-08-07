@@ -46,6 +46,7 @@ export class DiscussChannel extends models.ServerModel {
         default: () => uniqueId("discuss.channel_uuid-"),
     });
     last_interest_dt = fields.Datetime({ string: "Last Interest" });
+    read_only = fields.Boolean({ default: false });
 
     /** @param {number[]} ids */
     action_unfollow(ids) {
@@ -242,6 +243,7 @@ export class DiscussChannel extends models.ServerModel {
                 "description",
                 "last_interest_dt",
                 "name",
+                "read_only",
                 "uuid",
             ],
             makeKwArgs({ load: false })

@@ -212,6 +212,9 @@ export class Composer extends Component {
     }
 
     get placeholder() {
+        if (this.thread?.read_only) {
+            return _t("This channel is read only");
+        }
         if (this.props.placeholder) {
             return this.props.placeholder;
         }
