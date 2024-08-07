@@ -623,12 +623,6 @@ class AccountMove(models.Model):
     taxes_legal_notes = fields.Html(string='Taxes Legal Notes', compute='_compute_taxes_legal_notes')
 
     invoice_line_ids_mode = fields.Boolean(store=False)
-    invoice_date_dirty = fields.Boolean(compute='_compute_invoice_date_dirty')
-    date_dirty = fields.Boolean(compute='_compute_date_dirty')
-    tax_dirty = fields.Boolean(compute='_compute_tax_dirty')
-    epd_dirty = fields.Boolean(compute='_compute_epd_dirty')
-    cash_rounding_dirty = fields.Boolean(compute='_compute_cash_rounding_dirty')
-    payment_term_dirty = fields.Boolean(compute='_compute_payment_term_dirty')
 
     _sql_constraints = [(
         'unique_name', "", "Another entry with the same name already exists.",
@@ -1100,36 +1094,6 @@ class AccountMove(models.Model):
                         new_pmt_state = 'partial'
 
             invoice.payment_state = new_pmt_state
-
-    @api.depends('move_type', 'invoice_date')
-    def _compute_invoice_date_dirty(self):
-        for move in self:
-            move.invoice_date_dirty = True
-
-    @api.depends('move_type', 'date')
-    def _compute_date_dirty(self):
-        for move in self:
-            move.date_dirty = True
-
-    @api.depends('move_type')
-    def _compute_tax_dirty(self):
-        for move in self:
-            move.tax_dirty = True
-
-    @api.depends('move_type', 'invoice_payment_term_id')
-    def _compute_epd_dirty(self):
-        for move in self:
-            move.epd_dirty = True
-
-    @api.depends('move_type', 'invoice_cash_rounding_id')
-    def _compute_cash_rounding_dirty(self):
-        for move in self:
-            move.cash_rounding_dirty = True
-
-    @api.depends('move_type', 'invoice_payment_term_id', 'invoice_date_due')
-    def _compute_payment_term_dirty(self):
-        for move in self:
-            move.payment_term_dirty = True
 
     def _compute_payments_widget_to_reconcile_info(self):
         for move in self:
@@ -2173,54 +2137,138 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
 
     @contextmanager
-    def _tracked_fields(self, container, field_names):
+    def _tracked_fields(self, container, field_names, diff_results):
         def track(record, field_name):
             return record._fields[field_name].convert_to_write(record[field_name], record)
 
-        container['diff'] = {
-            record: {}
-            for record in container['records']
-        }
+        diff_field_names = diff_results.setdefault('changed_field_names', set())
+        diff_records = diff_results.setdefault('diff', {})
+        for record in container['records']:
+            diff_records.setdefault(record, {})
         data_before = {
             record: {
-                field_name: track(record, field_name)
+                field_name: (
+                    diff_records[record][field_name]
+                    if field_name in diff_records[record]
+                    else track(record, field_name)
+                )
                 for field_name in field_names
             }
             for record in container['records']
         }
         yield
         for record in container['records']:
-            if record not in container['diff']:
-                container[record] = {}
+            diff_records.setdefault(record, {})
         data_after = {
             record: {
                 field_name: track(record, field_name)
                 for field_name in field_names
             }
-            for record in container['records']
+            for record in container['records'].exists()
         }
 
         # Diff.
-        for record, diff in container['diff'].items():
+        for record, diff in diff_records.items():
+            record_diff_before = data_before.get(record)
+            record_diff_after = data_after.get(record)
             for field_name in field_names:
-                field_diff = [None, None]
-                if record_diff_before := data_before.get(record):
+                field_diff = diff.get(field_name, [None, None])
+                if record_diff_before:
                     field_diff[0] = record_diff_before[field_name]
-                if record_diff_after := data_after.get(record):
+                if record_diff_after:
                     field_diff[1] = record_diff_after[field_name]
                 if field_diff[0] != field_diff[1]:
                     diff[field_name] = field_diff
+                    diff_field_names.add(field_name)
+
+    @api.model
+    def _field_has_changed(self, diff_values, field_names, records=None):
+        if records:
+            for record in records:
+                if any(field_name in diff_values['diff'][record] for field_name in field_names):
+                    return True
+            return False
+        else:
+            return diff_values['changed_field_names'].intersection(field_names)
 
     @contextmanager
-    def _sync_dynamic_lines(self, container):
-        with self._disable_recursion(container, 'skip_invoice_sync') as disabled:
+    def _sync_dynamic_lines(self, move_container, lines_container=None):
+        with self._disable_recursion(move_container, 'skip_invoice_sync') as disabled:
             if disabled:
                 yield
                 return
 
-            self._sync_dynamic_lines_pre_hook(container)
-            yield
-            self._sync_dynamic_lines_after_hook(container)
+            move_tracked_fields = set().union(
+                self._get_move_invoice_fields_sync_taxes(),
+                self._get_invoice_fields_sync_epd(),
+                self._get_invoice_fields_sync_cash_rounding(),
+                self._get_invoice_fields_sync_payment_term(),
+            )
+            lines_tracked_fields = set().union(
+                self._get_move_line_invoice_fields_sync_taxes(),
+                self._get_move_line_misc_fields_sync_taxes(),
+                self._get_invoice_line_fields_sync_cash_rounding(),
+                self._get_invoice_line_fields_sync_payment_term(),
+                self._get_invoice_line_fields_sync_date_maturity(),
+            )
+            move_diff_results = {}
+            lines_diff_results = {}
+            lines_container = lines_container or {'records': move_container['records'].line_ids}
+            with self._tracked_fields(move_container, move_tracked_fields, move_diff_results):
+                with self._tracked_fields(lines_container, lines_tracked_fields, lines_diff_results):
+                    yield
+
+            move_container = {**move_container, **move_diff_results}
+            lines_container = {**lines_container, **lines_diff_results}
+
+            # Compute the invoicing/accounting amounts for base lines.
+            product_tax_details_per_move = self._prepare_product_tax_details_per_move(move_container, lines_container)
+            values_per_move = self._sync_product_lines(move_container, lines_container, product_tax_details_per_move)
+            sub_lines_container = {'records': self.env['account.move.line']}
+            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+
+            # Early payment discount.
+            values_per_move = self._sync_epd_lines(move_container, lines_container, product_tax_details_per_move)
+            sub_lines_container = {'records': self.env['account.move.line']}
+            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+            epd_tax_details_per_move = self._prepare_epd_tax_details_per_move(move_container)
+
+            # Compute the tax lines.
+            values_per_move = self._sync_tax_lines(move_container, lines_container, product_tax_details_per_move, epd_tax_details_per_move)
+            sub_lines_container = {'records': self.env['account.move.line']}
+            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+
+            # Cash rounding.
+            values_per_move = self._sync_cash_rounding_lines(move_container, lines_container)
+            sub_lines_container = {'records': self.env['account.move.line']}
+            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+
+            # Payment terms.
+            values_per_move = self._sync_payment_term_lines(move_container, lines_container)
+            sub_lines_container = {'records': self.env['account.move.line']}
+            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+
+            # Sync date_maturity / payment_reference.
+            values_per_move = self._sync_date_maturity(move_container, lines_container)
+            sub_move_container = {'records': self.env['account.move.line']}
+            with self._tracked_fields(sub_move_container, move_tracked_fields, move_diff_results):
+                for move, sync_values in values_per_move.items():
+                    (move.write if move.id else move.update)(sync_values)
+
+            # Auto balancing of misc lines.
+            values_per_move = self._sync_unbalanced_lines(move_container, lines_container, product_tax_details_per_move)
+            sub_lines_container = {'records': self.env['account.move.line']}
+            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+
+            # self._sync_dynamic_lines_pre_hook(container)
+            # yield
+            # self._sync_dynamic_lines_after_hook(container)
 
     @api.model
     def _build_line_grouping_key(self, line, field_names):
@@ -2272,6 +2320,7 @@ class AccountMove(models.Model):
             to_update = sanitize_update_values(to_update)
             if candidates := candidates_per_grouping_key.get(grouping_key):
                 candidate = candidates[0]
+                to_update = self.env['account.move.line']._sanitize_values_write(candidate, to_update)
                 line_ids_commands.append(Command.update(candidate.id, {
                     k: v
                     for k, v in to_update.items()
@@ -2282,6 +2331,7 @@ class AccountMove(models.Model):
                         line_ids_commands.append(Command.unlink(trailing_candidate.id))
                 del candidates_per_grouping_key[grouping_key]
             elif not update_by_id:
+                to_update = self.env['account.move.line']._sanitize_values_create(self, to_update)
                 line_ids_commands.append(Command.create({**grouping_key, **to_update}))
 
         if not update_by_id:
@@ -2292,11 +2342,10 @@ class AccountMove(models.Model):
 
     @api.model
     def _update_moves_per_batch(self, values_per_move):
+        impacted_lines = self.env['account.move.line']
         if not values_per_move:
-            return
+            return impacted_lines
 
-        AccountMoveLine = self.env['account.move.line']
-        lines_needing_accounting_amounts_update = self.env['account.move.line']
         to_create = []
         to_unlink = set()
         for move, values in values_per_move.items():
@@ -2315,59 +2364,19 @@ class AccountMove(models.Model):
 
             for command in line_ids_commands:
                 if command[0] == Command.UPDATE:
-                    line = AccountMoveLine.browse(command[1])
+                    line = impacted_lines.browse(command[1])
                     line.write(command[2])
-                    lines_needing_accounting_amounts_update |= line
+                    impacted_lines |= line
                 elif command[0] == Command.CREATE:
                     to_create.append(command[2])
                 elif command[0] == Command.UNLINK:
                     to_unlink.add(command[1])
 
         if to_create:
-            lines_needing_accounting_amounts_update |= AccountMoveLine.create(to_create)
+            impacted_lines |= impacted_lines.create(to_create)
         if to_unlink:
-            AccountMoveLine.browse(to_unlink).with_context(dynamic_unlink=True).unlink()
-
-        self._sync_accounting_amounts(lines_needing_accounting_amounts_update)
-
-    @api.model
-    def _sync_accounting_amounts(self, lines):
-        to_write_per_move = defaultdict(list)
-        for line in lines:
-            to_write = {}
-            if line.amount_currency_dirty and not line.balance_dirty and not line.debit_dirty and not line.credit_dirty:
-                if line.currency_id == line.company_currency_id:
-                    to_write['balance'] = line.amount_currency
-                else:
-                    to_write['balance'] = line.company_currency_id.round(line.amount_currency / line.currency_rate) if line.currency_rate else 0.0
-                debit, credit = line.move_id._get_debit_credit_from_balance(to_write['balance'])
-                to_write['debit'] = debit
-                to_write['credit'] = credit
-            elif line.balance_dirty:
-                if line.currency_id == line.company_currency_id:
-                    to_write['amount_currency'] = line.balance
-                debit, credit = line.move_id._get_debit_credit_from_balance(line.balance)
-                to_write['debit'] = debit
-                to_write['credit'] = credit
-            elif line.debit_dirty:
-                to_write['balance'] = line.debit
-                to_write['credit'] = 0.0
-                if line.currency_id == line.company_currency_id:
-                    to_write['amount_currency'] = line.balance
-            elif line.credit_dirty:
-                to_write['balance'] = -line.credit
-                to_write['debit'] = 0.0
-                if line.currency_id == line.company_currency_id:
-                    to_write['amount_currency'] = to_write['balance']
-
-            to_write_per_move[line.move_id].append(Command.update(line.id, to_write))
-            line.debit_dirty = False
-            line.credit_dirty = False
-            line.balance_dirty = False
-            line.amount_currency_dirty = False
-
-        for move, line_ids_commands in to_write_per_move.items():
-            move.line_ids = line_ids_commands
+            impacted_lines.browse(to_unlink).with_context(dynamic_unlink=True).unlink()
+        return impacted_lines
 
     # -------------------------------------------------------------------------
     # DYNAMIC LINES: BUSINESS FLOW
@@ -2394,22 +2403,45 @@ class AccountMove(models.Model):
         return base_lines
 
     @api.model
-    def _prepare_product_tax_details_per_move(self, container):
+    def _get_move_common_fields_sync_taxes(self):
+        return {'move_type', 'date'}
+
+    @api.model
+    def _get_move_invoice_fields_sync_taxes(self):
+        return self._get_move_common_fields_sync_taxes().union({'invoice_date'})
+
+    @api.model
+    def _get_move_line_common_fields_sync_taxes(self):
+        return {'tax_ids', 'partner_id', 'currency_id', 'analytic_distribution'}
+
+    @api.model
+    def _get_move_line_invoice_fields_sync_taxes(self):
+        return self._get_move_line_common_fields_sync_taxes().union({'price_unit', 'quantity', 'discount'})
+
+    @api.model
+    def _get_move_line_misc_fields_sync_taxes(self):
+        return self._get_move_line_common_fields_sync_taxes().union({'amount_currency', 'balance'})
+
+    @api.model
+    def _prepare_product_tax_details_per_move(self, move_container, lines_container):
         product_tax_details_per_move = {}
-        for move in container['records']:
+        for move in move_container['records']:
+            if move.state != 'draft':
+                continue
+
             base_lines = move._get_base_lines_for_taxes_computation()
             is_invoice = move.is_invoice(include_receipts=True)
-            sync_field_name = 'invoice_tax_dirty' if is_invoice else 'misc_tax_dirty'
-            is_dirty = (
-                move.tax_dirty
-                or not base_lines
-                or any(base_line['record'][sync_field_name] for base_line in base_lines)
-            )
+            if is_invoice:
+                dirty_field_names = self._get_move_line_invoice_fields_sync_taxes()
+                preserve_field_names = self._get_move_invoice_fields_sync_taxes()
+            else:
+                dirty_field_names = self._get_move_line_misc_fields_sync_taxes()
+                preserve_field_names = self._get_move_common_fields_sync_taxes()
+            is_dirty = not base_lines or self._field_has_changed(lines_container, dirty_field_names)
             preserve_tax_amounts = False
             if not is_dirty:
-                sync_date_field_name = 'invoice_date_dirty' if is_invoice else 'date_dirty'
-                if move[sync_date_field_name]:
-                    preserve_tax_amounts = True
+                preserve_tax_amounts = self._field_has_changed(move_container, preserve_field_names)
+                if preserve_tax_amounts:
                     is_dirty = True
 
             if not is_dirty:
@@ -2424,9 +2456,9 @@ class AccountMove(models.Model):
         return product_tax_details_per_move
 
     @api.model
-    def _sync_product_lines(self, container, product_tax_details_per_move):
+    def _sync_product_lines(self, move_container, lines_container, product_tax_details_per_move):
         sync_product_lines = {}
-        for move in container['records']:
+        for move in move_container['records']:
             if move not in product_tax_details_per_move:
                 continue
 
@@ -2450,18 +2482,29 @@ class AccountMove(models.Model):
                 move_sync_values[frozendict({'id': line.id})] = to_sync
         return sync_product_lines
 
-    def _sync_epd_lines(self, container, product_tax_details_per_move):
+    @api.model
+    def _get_invoice_fields_sync_epd(self):
+        return {'move_type', 'invoice_payment_term_id'}
+
+    def _sync_epd_lines(self, move_container, lines_container, product_tax_details_per_move):
         sync_epd_lines = {}
-        for move in container['records']:
+        for move in move_container['records']:
             is_invoice = move.is_invoice(include_receipts=True)
-            is_dirty = move.epd_dirty or move in product_tax_details_per_move
-            if not is_invoice or not is_dirty:
+            if not is_invoice or move.state != 'draft':
+                continue
+
+            is_dirty = (
+                self._field_has_changed(move_container, self._get_invoice_fields_sync_epd())
+                or move in product_tax_details_per_move
+            )
+            if not is_dirty:
                 continue
 
             move_sync_values = sync_epd_lines.setdefault(move, {'line_ids': {}, 'display_type': 'epd'})['line_ids']
             has_epd = move.invoice_payment_term_id.early_discount
             discount_percentage = move.invoice_payment_term_id.discount_percentage
-            if not has_epd or not discount_percentage:
+            early_pay_discount_computation = move.invoice_payment_term_id.early_pay_discount_computation
+            if not has_epd or not discount_percentage or early_pay_discount_computation != 'mixed':
                 continue
 
             discount_percentage_name = f"{discount_percentage}%"
@@ -2513,6 +2556,9 @@ class AccountMove(models.Model):
     def _prepare_epd_tax_details_per_move(self, container):
         epd_tax_details_per_move = {}
         for move in container['records']:
+            if move.state != 'draft':
+                continue
+
             base_lines = move._get_base_lines_for_taxes_computation(epd=True, product=False)
             if not base_lines:
                 continue
@@ -2525,9 +2571,9 @@ class AccountMove(models.Model):
         return epd_tax_details_per_move
 
     @api.model
-    def _sync_tax_lines(self, container, product_tax_details_per_move, epd_tax_details_per_move):
+    def _sync_tax_lines(self, move_container, lines_container, product_tax_details_per_move, epd_tax_details_per_move):
         sync_tax_lines = {}
-        for move in container['records']:
+        for move in move_container['records']:
             if move not in product_tax_details_per_move:
                 continue
 
@@ -2574,39 +2620,43 @@ class AccountMove(models.Model):
         return sync_tax_lines
 
     @api.model
-    def _sync_cash_rounding_lines(self, container):
+    def _get_invoice_fields_sync_cash_rounding(self):
+        return {'move_type', 'invoice_cash_rounding_id'}
+
+    @api.model
+    def _get_invoice_line_fields_sync_cash_rounding(self):
+        return {'amount_currency'}
+
+    @api.model
+    def _sync_cash_rounding_lines(self, move_container, lines_container):
         sync_cash_rounding_lines = {}
-        for move in container['records']:
+        for move in move_container['records']:
             is_invoice = move.is_invoice(include_receipts=True)
-            if not is_invoice:
+            if not is_invoice or move.state != 'draft':
                 continue
 
             base_lines = move.line_ids.filtered(lambda line: line.display_type in ('product', 'epd'))
             tax_lines = move.line_ids.filtered('tax_repartition_line_id')
             all_lines = base_lines + tax_lines
-            is_dirty = move.cash_rounding_dirty or any(all_lines.mapped('cash_rounding_dirty'))
+            is_dirty = (
+                self._field_has_changed(move_container, self._get_invoice_fields_sync_cash_rounding())
+                or self._field_has_changed(lines_container, self._get_invoice_line_fields_sync_cash_rounding(), records=all_lines)
+            )
             if not is_dirty:
                 continue
 
             cash_rounding = move.invoice_cash_rounding_id
             if not cash_rounding:
-                sync_cash_rounding_lines[move] = {'line_ids': {}}
+                sync_cash_rounding_lines[move] = {'line_ids': {}, 'display_type': 'rounding'}
                 continue
 
-            base_lines = move._get_base_lines_for_taxes_computation(epd=True)
             base_amount_currency = 0.0
-            base_amount = 0.0
             tax_amount_currency = 0.0
-            tax_amount = 0.0
             sign = move.direction_sign
-            for base_line in base_lines:
-                line = base_line['record']
+            for line in base_lines:
                 base_amount_currency += sign * line.amount_currency
-                base_amount += sign * line.balance
-            tax_lines = move.line_ids.filtered('tax_repartition_line_id')
             for line in tax_lines:
                 tax_amount_currency += sign * line.amount_currency
-                tax_amount += sign * line.balance
 
             expected_total = float_round(
                 base_amount_currency + tax_amount_currency,
@@ -2652,24 +2702,54 @@ class AccountMove(models.Model):
         return sync_cash_rounding_lines
 
     @api.model
-    def _sync_payment_term_lines(self, container):
+    def _get_invoice_fields_sync_payment_term(self):
+        return {'move_type', 'invoice_payment_term_id', 'invoice_date_due', 'state'}
+
+    @api.model
+    def _get_invoice_line_fields_sync_payment_term(self):
+        return {'amount_currency', 'balance'}
+
+    @api.model
+    def _sync_payment_term_lines(self, move_container, lines_container):
         sync_payment_term_lines = {}
-        for move in container['records']:
+        for move in move_container['records']:
             is_invoice = move.is_invoice(include_receipts=True)
             if not is_invoice:
+                continue
+
+            # For posted moves, don't recompute anything except the name.
+            term_line_name = move.payment_reference or move.name or ''
+            if move.state == 'posted':
+                move_sync_values = sync_payment_term_lines.setdefault(move, {'line_ids': {}, 'force_update_fields': {'name'}})['line_ids']
+                term_lines = move.line_ids \
+                    .filtered(lambda line: line.display_type == 'payment_term') \
+                    .sorted('date_maturity')
+                need_installment = len(term_lines) > 1
+                for index, term_line in enumerate(term_lines, start=1):
+                    if need_installment:
+                        name = _('%(name)s installment #%(number)s', name=term_line_name, number=index).lstrip()
+                    elif not term_line.name:
+                        name = term_line_name
+                    else:
+                        continue
+                    move_sync_values[frozendict({'id': term_line.id})] = {'name': name}
                 continue
 
             base_lines = move.line_ids.filtered(lambda line: line.display_type in ('product', 'epd', 'rounding'))
             tax_lines = move.line_ids.filtered('tax_repartition_line_id')
             all_lines = base_lines + tax_lines
-            is_dirty = move.payment_term_dirty or any(all_lines.mapped('payment_term_dirty'))
+            has_invoice_fields_changed = self._field_has_changed(move_container, self._get_invoice_fields_sync_payment_term())
+            is_dirty = (
+                has_invoice_fields_changed
+                or self._field_has_changed(lines_container, self._get_invoice_line_fields_sync_payment_term(), records=all_lines)
+            )
             if not is_dirty:
                 continue
 
             move_sync_values = sync_payment_term_lines.setdefault(move, {
                 'line_ids': {},
                 'display_type': 'payment_term',
-                'force_update_fields': {'name'} if move.payment_term_dirty else set(),
+                'force_update_fields': {'name'} if has_invoice_fields_changed else set(),
             })['line_ids']
             base_amount_currency = 0.0
             base_amount = 0.0
@@ -2683,7 +2763,6 @@ class AccountMove(models.Model):
                 tax_amount_currency += sign * line.amount_currency
                 tax_amount += sign * line.balance
 
-            term_line_name = move.payment_reference or move.name or ''
             if base_lines and move.invoice_payment_term_id:
                 invoice_payment_terms = move.invoice_payment_term_id._compute_terms(
                     date_ref=move.invoice_date or move.date or fields.Date.context_today(move),
@@ -2732,30 +2811,41 @@ class AccountMove(models.Model):
         return sync_payment_term_lines
 
     @api.model
-    def _sync_date_maturity(self, container):
-        for move in container['records']:
+    def _get_invoice_line_fields_sync_date_maturity(self):
+        return {'date_maturity'}
+
+    @api.model
+    def _sync_date_maturity(self, move_container, lines_container):
+        sync_date_maturity = {}
+        for move in move_container['records']:
             term_lines = move.line_ids\
                 .filtered(lambda line: line.display_type == 'payment_term')\
-                .sorted(key=lambda line: line.date_maturity, reverse=True)
+                .sorted('date_maturity')
+            is_dirty = self._field_has_changed(lines_container, self._get_invoice_line_fields_sync_date_maturity(), records=term_lines)
+            if not is_dirty:
+                continue
+
             to_write = {}
             if any(term_lines.mapped('date_maturity_dirty')):
                 to_write['invoice_date_due'] = term_lines[0].date_maturity
             if to_write:
-                (move.write if move.id else move.update)(to_write)
+                sync_date_maturity[move] = to_write
+        return sync_date_maturity
 
     @api.model
-    def _sync_unbalanced_lines(self, container):
+    def _sync_unbalanced_lines(self, move_container, lines_container, product_tax_details_per_move):
         sync_unbalanced_lines = {}
-        for move in container['records']:
-            if (
-                move.state != 'draft'
-                or not move.is_entry()
-                or not any(line.misc_tax_dirty or line.tax_ids or line.tax_line_id for line in move.line_ids)
-            ):
-                continue  # only manage automatically unbalanced when taxes are involved
+        for move in move_container['records']:
+            if move.state != 'draft' or not move.is_entry():
+                continue
+
+            sync_move_values = sync_unbalanced_lines.setdefault(move, {'line_ids': {}, 'display_type': 'misc_auto_balance'})['line_ids']
+
+            # Only manage automatically unbalanced when taxes are involved.
+            if move not in product_tax_details_per_move:
+                continue
 
             total_balance = sum(move.line_ids.filtered(lambda line: line.display_type != 'misc_auto_balance').mapped('balance'))
-
             if (
                 move.company_id.account_journal_suspense_account_id
                 and not move.company_currency_id.is_zero(total_balance)
@@ -2766,7 +2856,7 @@ class AccountMove(models.Model):
                     company=move.company_id,
                     date=move.date or move.context_today(move),
                 )
-                sync_unbalanced_lines.setdefault(move, {'line_ids': {}, 'display_type': 'misc_auto_balance'})['line_ids'][
+                sync_move_values[
                     frozendict({
                         'currency_id': move.currency_id.id,
                         'account_id': move.company_id.account_journal_suspense_account_id.id,
@@ -2799,67 +2889,6 @@ class AccountMove(models.Model):
         results['value'].pop('invoice_line_ids', None)
 
         return results
-
-    # -------------------------------------------------------------------------
-    # DYNAMIC LINES: OTHERS
-    # -------------------------------------------------------------------------
-
-    def _sync_dynamic_lines_pre_hook(self, container):
-        container['records'].line_ids.debit_dirty = False
-        container['records'].line_ids.credit_dirty = False
-        container['records'].line_ids.balance_dirty = False
-        container['records'].line_ids.amount_currency_dirty = False
-        container['records'].line_ids.tax_ids_dirty = False
-        container['records'].line_ids.invoice_tax_dirty = False
-        container['records'].line_ids.misc_tax_dirty = False
-        container['records'].line_ids.cash_rounding_dirty = False
-        container['records'].line_ids.payment_term_dirty = False
-        container['records'].line_ids.date_maturity_dirty = False
-        container['records'].invoice_date_dirty = False
-        container['records'].date_dirty = False
-        container['records'].epd_dirty = False
-        container['records'].tax_dirty = False
-        container['records'].cash_rounding_dirty = False
-        container['records'].payment_term_dirty = False
-
-    def _sync_dynamic_lines_after_hook(self, container):
-        # First, synchronize debit/credit/balance/amount_currency.
-        self._sync_accounting_amounts(container['records'].line_ids)
-
-        # Compute the invoicing/accounting amounts for base lines.
-        product_tax_details_per_move = self._prepare_product_tax_details_per_move(container)
-        container['records'].tax_dirty = False
-        container['records'].line_ids.invoice_tax_dirty = False
-        container['records'].line_ids.misc_tax_dirty = False
-        self._update_moves_per_batch(self._sync_product_lines(container, product_tax_details_per_move))
-        container['records'].invoice_date_dirty = False
-        container['records'].date_dirty = False
-
-        # Early payment discount.
-        self._update_moves_per_batch(self._sync_epd_lines(container, product_tax_details_per_move))
-        container['records'].epd_dirty = False
-        epd_tax_details_per_move = self._prepare_epd_tax_details_per_move(container)
-
-        # Compute the tax lines.
-        self._update_moves_per_batch(self._sync_tax_lines(container, product_tax_details_per_move, epd_tax_details_per_move))
-        container['records'].tax_dirty = False
-
-        # Cash rounding.
-        self._update_moves_per_batch(self._sync_cash_rounding_lines(container))
-        container['records'].cash_rounding_dirty = False
-        container['records'].line_ids.cash_rounding_dirty = False
-
-        # Payment terms.
-        self._update_moves_per_batch(self._sync_payment_term_lines(container))
-        container['records'].payment_term_dirty = False
-        container['records'].line_ids.payment_term_dirty = False
-
-        # Sync date_maturity / payment_reference.
-        self._sync_date_maturity(container)
-        container['records'].line_ids.date_maturity_dirty = False
-
-        # Auto balancing of misc lines.
-        self._update_moves_per_batch(self._sync_unbalanced_lines(container))
 
     # --------------------------------------------------------------------------------------
     # LOW-LEVEL METHODS
@@ -2927,13 +2956,6 @@ class AccountMove(models.Model):
             del vals['invoice_line_ids']
         return vals
 
-    def _stolen_move(self, vals):
-        for command in vals.get('line_ids', ()):
-            if command[0] == Command.LINK:
-                yield self.env['account.move.line'].browse(command[1]).move_id.id
-            if command[0] == Command.SET:
-                yield from self.env['account.move.line'].browse(command[2]).move_id.ids
-
     def _get_protected_vals(self, vals, records):
         protected = set()
         for fname in vals:
@@ -2947,19 +2969,18 @@ class AccountMove(models.Model):
         if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
 
-        container = {'records': self}
+        container = {'records': self.env['account.move']}
         with self._check_balanced(container):
             with self._sync_dynamic_lines(container):
                 for vals in vals_list:
                     self._sanitize_vals(vals)
-                stolen_moves = self.browse(set(move for vals in vals_list for move in self._stolen_move(vals)))
-                moves = super().create(vals_list)
-                container['records'] = moves | stolen_moves
-        return moves
+                container['records'] = super().create(vals_list)
+        return container['records']
 
     def write(self, vals):
         if not vals:
             return True
+
         self._sanitize_vals(vals)
         for move in self:
             violated_fields = set(vals).intersection(move._get_integrity_hash_fields() + ['inalterable_hash'])
@@ -3014,8 +3035,7 @@ class AccountMove(models.Model):
         if {'sequence_prefix', 'sequence_number', 'journal_id', 'name'} & vals.keys():
             self._set_next_made_sequence_gap(True)
 
-        stolen_moves = self.browse(set(move for move in self._stolen_move(vals)))
-        container = {'records': self | stolen_moves}
+        container = {'records': self}
         with self.env.protecting(self._get_protected_vals(vals, self)), self._check_balanced(container):
             with self._sync_dynamic_lines(container):
                 res = super(AccountMove, self.with_context(

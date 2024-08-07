@@ -359,17 +359,6 @@ class AccountMoveLine(models.Model):
     tax_calculation_rounding_method = fields.Selection(
         related='company_id.tax_calculation_rounding_method',
         string='Tax calculation rounding method', readonly=True)
-    # === Invoice sync fields === #
-    debit_dirty = fields.Boolean(compute='_compute_debit_dirty')
-    credit_dirty = fields.Boolean(compute='_compute_credit_dirty')
-    balance_dirty = fields.Boolean(compute='_compute_balance_dirty')
-    amount_currency_dirty = fields.Boolean(compute='_compute_amount_currency_dirty')
-    tax_ids_dirty = fields.Boolean(compute='_compute_tax_ids_dirty')
-    invoice_tax_dirty = fields.Boolean(compute='_compute_invoice_tax_dirty')
-    misc_tax_dirty = fields.Boolean(compute='_compute_misc_tax_dirty')
-    cash_rounding_dirty = fields.Boolean(compute='_compute_cash_rounding_dirty')
-    payment_term_dirty = fields.Boolean(compute='_compute_payment_term_dirty')
-    date_maturity_dirty = fields.Boolean(compute='_compute_date_maturity_dirty')
 
     # === Analytic fields === #
     analytic_line_ids = fields.One2many(
@@ -928,60 +917,6 @@ class AccountMoveLine(models.Model):
     #         discount_allocation_needed_vals['amount_currency'] -= discounted_amount_currency
     #         line.discount_allocation_needed = {k: frozendict(v) for k, v in discount_allocation_needed.items()}
 
-    @api.depends('debit')
-    def _compute_debit_dirty(self):
-        for line in self:
-            line.debit_dirty = True
-
-    @api.depends('credit')
-    def _compute_credit_dirty(self):
-        for line in self:
-            line.credit_dirty = True
-
-    @api.depends('balance')
-    def _compute_balance_dirty(self):
-        for line in self:
-            line.balance_dirty = True
-
-    @api.depends('amount_currency', 'currency_id')
-    def _compute_amount_currency_dirty(self):
-        for line in self:
-            line.amount_currency_dirty = True
-
-    @api.depends('tax_ids')
-    def _compute_tax_ids_dirty(self):
-        """ Detect the special case when we remove the last tax of a line.
-        In that case, nothing indicates the taxes need to be recomputed since we no longer know
-        if the line was originator of tax line(s) or not.
-        """
-        for line in self:
-            line.tax_ids_dirty = True
-
-    @api.depends('tax_ids_dirty', 'company_id', 'partner_id', 'currency_id', 'price_unit', 'quantity', 'discount')
-    def _compute_invoice_tax_dirty(self):
-        for line in self:
-            line.invoice_tax_dirty = line.tax_ids_dirty or line.tax_ids
-
-    @api.depends('tax_ids_dirty', 'company_id', 'partner_id', 'currency_id', 'amount_currency', 'balance')
-    def _compute_misc_tax_dirty(self):
-        for line in self:
-            line.misc_tax_dirty = line.tax_ids_dirty or line.tax_ids
-
-    @api.depends('balance', 'amount_currency')
-    def _compute_cash_rounding_dirty(self):
-        for line in self:
-            line.cash_rounding_dirty = True
-
-    @api.depends('balance', 'amount_currency')
-    def _compute_payment_term_dirty(self):
-        for line in self:
-            line.payment_term_dirty = True
-
-    @api.depends('date_maturity')
-    def _compute_date_maturity_dirty(self):
-        for line in self:
-            line.date_maturity_dirty = True
-
     @api.depends('move_id.move_type', 'balance', 'tax_repartition_line_id', 'tax_ids')
     def _compute_is_refund(self):
         for line in self:
@@ -1348,6 +1283,10 @@ class AccountMoveLine(models.Model):
                 values['balance'] = values['amount_currency']
 
         self._sanitize_values_common(move, values)
+
+        if 'balance' in values and move.company_currency_id.id == currency_id:
+            values['amount_currency'] = values['balance']
+
         return values
 
     def _sanitize_values_write(self, line, values):
@@ -1364,38 +1303,25 @@ class AccountMoveLine(models.Model):
             elif 'balance' not in values:
                 rate = abs(line.amount_currency / line.balance) if line.balance else 0.0
                 values['balance'] = move.company_currency_id.round(values['amount_currency'] / rate) if rate else 0.0
+
         self._sanitize_values_common(move, values)
+
+        if 'balance' in values and move.company_currency_id.id == currency_id:
+            values['amount_currency'] = values['balance']
+
         return values
 
     @api.model_create_multi
     def create(self, vals_list):
         moves = self.env['account.move'].browse({vals['move_id'] for vals in vals_list})
         moves_mapping = {move.id: move for move in moves}
-        container = {'records': self}
+        lines_container = {'records': self.env['account.move.line']}
         move_container = {'records': moves}
         with moves._check_balanced(move_container),\
-             moves._sync_dynamic_lines(move_container):
+             moves._sync_dynamic_lines(move_container, lines_container=lines_container):
             vals_list = [self._sanitize_values_create(moves_mapping[vals['move_id']], vals) for vals in vals_list]
             lines = super().create(vals_list)
-
-            # At the creation, all field are marked as dirty so we don't know from which one we need to recompute the others.
-            # To do so, let's mark them manually
-            for line, vals in zip(lines, vals_list):
-                line.debit_dirty = False
-                line.credit_dirty = False
-                line.balance_dirty = False
-                line.amount_currency_dirty = False
-                field_names = set(vals.keys())
-                if 'credit' in field_names:
-                    line.credit_dirty = True
-                if 'debit' in field_names:
-                    line.debit_dirty = True
-                if 'balance' in field_names:
-                    line.balance_dirty = True
-                if 'amount_currency' in field_names:
-                    line.amount_currency_dirty = True
-
-            container['records'] = lines
+            lines_container['records'] = lines
 
         for line in lines:
             if line.move_id.state == 'posted':

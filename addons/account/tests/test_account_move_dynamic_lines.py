@@ -123,27 +123,15 @@ class TestAccountMoveDynamicLines(AccountTestInvoicingCommon):
             {'name': "tsoin tsoin"},
         ])
 
-        # Change the payment term to 30% now, 70% later.
-        invoice.invoice_payment_term_id = self.term_advance_60days
-        self.assertRecordValues(invoice.line_ids.sorted(), [
-            {'display_type': 'product',         'price_unit': 3000.0,   'amount_currency': -3000.0,     'balance': -1500.0,     'debit': 0.0,       'credit': 1500.0},
-            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -750.0,      'balance': -400.0,      'debit': 0.0,       'credit': 400.0},
-            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 1725.0,      'balance': 870.0,       'debit': 870.0,     'credit': 0.0},
-            {'display_type': 'product',         'price_unit': 2000.0,   'amount_currency': -2000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
-            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 4025.0,      'balance': 2030.0,      'debit': 2030.0,    'credit': 0.0},
-        ])
-        self.assertRecordValues(tax_line, [{'name': "turlututu"}])
-
         # Remove the lines.
         invoice.line_ids.sorted()[0].unlink()
         self.assertRecordValues(invoice.line_ids.sorted(), [
             {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -300.0,      'balance': -150.0,      'debit': 0.0,       'credit': 150.0},
-            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 690.0,       'balance': 345.0,       'debit': 345.0,     'credit': 0.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 2300.0,      'balance': 1150.0,      'debit': 1150.0,    'credit': 0.0},
             {'display_type': 'product',         'price_unit': 2000.0,   'amount_currency': -2000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
-            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 1610.0,      'balance': 805.0,       'debit': 805.0,     'credit': 0.0},
         ])
         invoice.line_ids.sorted()[2].unlink()
-        self.assertRecordValues(invoice.line_ids.sorted(), [])
+        self.assertRecordValues(invoice.line_ids, [])
 
     def test_invoice_date_set_at_post(self):
         with freeze_time('2016-01-01'):
@@ -179,3 +167,45 @@ class TestAccountMoveDynamicLines(AccountTestInvoicingCommon):
                 {'name': "turlututu installment #1",    'date_maturity': fields.Date.from_string('2017-01-01')},
                 {'name': "turlututu installment #2",    'date_maturity': fields.Date.from_string('2017-03-02')},
             ])
+
+    def test_invoice_sync_payment_terms(self):
+        invoice = self.env['account.move'].create({
+            'name': "",
+            'move_type': 'out_invoice',
+            'invoice_date': '2017-01-01',
+            'partner_id': self.partner_a.id,
+            'currency_id': self.other_currency.id,
+            'invoice_payment_term_id': self.term_immediate.id,
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+        })
+
+        # Change the payment term to 30% now, 70% later.
+        # The tax lines remains untouched if a manual edition has been made.
+        tax_line = invoice.line_ids.filtered(lambda line: line.display_type == 'tax')
+        tax_line.balance = -160.0
+        invoice.invoice_payment_term_id = self.term_advance_60days
+        self.assertRecordValues(invoice.line_ids.sorted(), [
+            {'display_type': 'product',         'price_unit': 2000.0,   'amount_currency': -2000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
+            {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -300.0,      'balance': -160.0,      'debit': 0.0,       'credit': 160.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 690.0,       'balance': 348.0,       'debit': 348.0,     'credit': 0.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 1610.0,      'balance': 812.0,       'debit': 812.0,    'credit': 0.0},
+        ])
+
+        # Customize the term lines.
+        term_lines = invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term')
+        self.assertRecordValues(term_lines, [
+            {'name': "installment #1",      'date_maturity': fields.Date.from_string('2017-01-01')},
+            {'name': "installment #2",      'date_maturity': fields.Date.from_string('2017-03-02')},
+        ])
+        term_lines[0].name = "pay me asap plz!"
+        self.assertRecordValues(term_lines, [
+            {'name': "pay me asap plz!",    'date_maturity': fields.Date.from_string('2017-01-01')},
+            {'name': "installment #2",      'date_maturity': fields.Date.from_string('2017-03-02')},
+        ])
+
+        # Post: you lost everything.
+        invoice.action_post()
+        self.assertRecordValues(term_lines, [
+            {'name': f"{invoice.name} installment #1",      'date_maturity': fields.Date.from_string('2017-01-01')},
+            {'name': f"{invoice.name} installment #2",      'date_maturity': fields.Date.from_string('2017-03-02')},
+        ])
