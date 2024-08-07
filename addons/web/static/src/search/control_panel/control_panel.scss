@@ -130,6 +130,12 @@
         max-height: 0;
     }
 
+    &.o-fade-skip {
+        transition: none !important; /* Override any transitions */
+        opacity: 1 !important; /* Ensure default opacity */
+        max-height: 500px !important; /* Ensure default max-height */
+    }
+
     &::before, &::after {
         flex: 1 1 0;
         height: 1px;

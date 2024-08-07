@@ -16,7 +16,15 @@ import { makeContext } from "@web/core/context";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Transition } from "@web/core/transition";
 
-import { Component, useState, onMounted, useExternalListener, useRef, useEffect } from "@odoo/owl";
+import {
+    Component,
+    useState,
+    onMounted,
+    useExternalListener,
+    useRef,
+    useEffect,
+    onWillRender,
+} from "@odoo/owl";
 
 const STICKY_CLASS = "o_mobile_sticky";
 
@@ -231,6 +239,13 @@ export class ControlPanel extends Component {
             onWillStartDrag: (params) => this._sortEmbeddedActionStart(params),
             onDrop: (params) => this._sortEmbeddedActionDrop(params),
         });
+
+        onWillRender(() => {
+            if (this.state.embeddedInfos.showEmbedded) {
+                this.state.isEmbededOpen =
+                JSON.parse(browser.localStorage.getItem("isEmbededOpen") || false);
+            }
+        });
     }
 
     getDropdownClass(action) {
@@ -303,8 +318,10 @@ export class ControlPanel extends Component {
     onClickShowEmbedded() {
         if (this.state.embeddedInfos.showEmbedded) {
             browser.localStorage.removeItem(this.embeddedVisibilityKey);
+            browser.localStorage.removeItem("isEmbededOpen");
         } else {
             browser.localStorage.setItem(this.embeddedVisibilityKey, true);
+            browser.localStorage.setItem("isEmbededOpen", true);
         }
         this.state.embeddedInfos.showEmbedded = !this.state.embeddedInfos.showEmbedded;
     }

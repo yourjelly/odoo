@@ -30,6 +30,7 @@ export function useTransition({
     initialVisibility = true,
     leaveDuration = 500,
     onLeave = () => {},
+    skipTransition = false,
 }) {
     const component = useComponent();
     const state = useState({
@@ -79,7 +80,7 @@ export function useTransition({
             // when true - transition from enter to enter-active
             // when false - transition from enter-active to leave, unmount after leaveDuration
             if (newState) {
-                state.stage = "enter";
+                state.stage = state.shouldMount && skipTransition ? "skip" : "enter";
                 state.shouldMount = true;
                 // force a render here so that we get a patch even if the state didn't change
                 component.render();
@@ -120,15 +121,17 @@ export class Transition extends Component {
         leaveDuration: { type: Number, optional: true },
         onLeave: { type: Function, optional: true },
         slots: Object,
+        skipTransition: { type: Boolean, optional: true },
     };
 
     setup() {
-        const { visible, leaveDuration, name, onLeave } = this.props;
+        const { visible, leaveDuration, name, onLeave, skipTransition } = this.props;
         this.transition = useTransition({
             initialVisibility: visible,
             leaveDuration,
             name,
             onLeave,
+            skipTransition,
         });
         onWillUpdateProps(({ visible = true }) => {
             this.transition.shouldMount = visible;
