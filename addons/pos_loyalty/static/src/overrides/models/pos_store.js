@@ -540,8 +540,8 @@ patch(PosStore.prototype, {
     },
 
     //@override
-    async processServerData(loadedData) {
-        await super.processServerData(loadedData);
+    async processServerData() {
+        await super.processServerData();
 
         this.partnerId2CouponIds = {};
 
