@@ -75,7 +75,7 @@ class ResPartner(models.Model):
                 [("channel_ids", "in", channel.id)],
             ]
         )
-        partners = self._search_mention_suggestions(domain, limit)
+        partners = self._search_mention_suggestions(domain, limit, channel)
         members = self.env["discuss.channel.member"].search(
             [
                 ("channel_id", "=", channel.id),
@@ -91,4 +91,13 @@ class ResPartner(models.Model):
             },
         )
         store.add(partners)
+        store.add("Thread", {
+            "id": channel.id,
+            "model": "discuss.channel",
+            "partnersWithAccess": [
+                ("ADD", [
+                    {"id": p.id, "type": "partner"}
+                    for p in partners.filtered(lambda partner: not partner.partner_share)
+                ])
+            ]})
         return store.get_result()

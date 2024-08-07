@@ -84,6 +84,7 @@ export class Thread extends Record {
          */
         sort: (a1, a2) => (a1.id < a2.id ? 1 : -1),
     });
+    partnersWithAccess = Record.many("Persona");
     get canLeave() {
         return (
             ["channel", "group"].includes(this.channel_type) &&

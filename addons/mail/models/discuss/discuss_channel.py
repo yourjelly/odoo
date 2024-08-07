@@ -549,7 +549,8 @@ class Channel(models.Model):
                        partner.lang,
                        partner.partner_share,
                        COALESCE(users.notification_type, 'email') as notif,
-                       COALESCE(users.share, FALSE) as ushare
+                       COALESCE(users.share, FALSE) as ushare,
+                       users.id as uid
                   FROM res_partner partner
              LEFT JOIN res_users users on partner.id = users.partner_id
                  WHERE partner.active IS TRUE
@@ -559,7 +560,7 @@ class Channel(models.Model):
                 sql_query,
                 (email_from or '', list(pids), [author_id] if author_id else [], )
             )
-            for partner_id, lang, partner_share, notif, ushare in self._cr.fetchall():
+            for partner_id, lang, partner_share, notif, ushare, uid in self._cr.fetchall():
                 # ocn_client: will add partners to recipient recipient_data. more ocn notifications. We neeed to filter them maybe
                 recipients_data.append({
                     'active': True,
@@ -570,7 +571,7 @@ class Channel(models.Model):
                     'notif': notif,
                     'share': partner_share,
                     'type': 'user' if not partner_share and notif else 'customer',
-                    'uid': False,
+                    'uid': uid,
                     'ushare': ushare,
                 })
 
