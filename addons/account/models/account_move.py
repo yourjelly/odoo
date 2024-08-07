@@ -2173,6 +2173,45 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
 
     @contextmanager
+    def _tracked_fields(self, container, field_names):
+        def track(record, field_name):
+            return record._fields[field_name].convert_to_write(record[field_name], record)
+
+        container['diff'] = {
+            record: {}
+            for record in container['records']
+        }
+        data_before = {
+            record: {
+                field_name: track(record, field_name)
+                for field_name in field_names
+            }
+            for record in container['records']
+        }
+        yield
+        for record in container['records']:
+            if record not in container['diff']:
+                container[record] = {}
+        data_after = {
+            record: {
+                field_name: track(record, field_name)
+                for field_name in field_names
+            }
+            for record in container['records']
+        }
+
+        # Diff.
+        for record, diff in container['diff'].items():
+            for field_name in field_names:
+                field_diff = [None, None]
+                if record_diff_before := data_before.get(record):
+                    field_diff[0] = record_diff_before[field_name]
+                if record_diff_after := data_after.get(record):
+                    field_diff[1] = record_diff_after[field_name]
+                if field_diff[0] != field_diff[1]:
+                    diff[field_name] = field_diff
+
+    @contextmanager
     def _sync_dynamic_lines(self, container):
         with self._disable_recursion(container, 'skip_invoice_sync') as disabled:
             if disabled:
@@ -2907,6 +2946,7 @@ class AccountMove(models.Model):
     def create(self, vals_list):
         if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
+
         container = {'records': self}
         with self._check_balanced(container):
             with self._sync_dynamic_lines(container):

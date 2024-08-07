@@ -1309,31 +1309,73 @@ class AccountMoveLine(models.Model):
             defaults['tax_ids'] = [Command.set(quick_encode_suggestion['tax_ids'])]
         return defaults
 
-    def _sanitize_vals(self, vals):
+    def _sanitize_values_common(self, move, values):
+        # Sync balance <-> debit/credit
+        if 'balance' in values:
+            debit, credit = move._get_debit_credit_from_balance(values['balance'])
+            values['debit'] = debit
+            values['credit'] = credit
+        elif 'debit' in values and 'credit' not in values:
+            values['credit'] = 0.0
+            values['balance'] = values['debit']
+        elif 'debit' not in values and 'credit' in values:
+            values['debit'] = 0.0
+            values['balance'] = -values['credit']
+
+        # Custom matching number.
         if (
-            vals.get('matching_number')
-            and not vals['matching_number'].startswith('I')
+            values.get('matching_number')
+            and not values['matching_number'].startswith('I')
             and not self.env.context.get('skip_matching_number_check')
         ):
-            vals['matching_number'] = f"I{vals['matching_number']}"
+            values['matching_number'] = f"I{values['matching_number']}"
 
-        return vals
+        # line_section/line_note
+        if values.get('display_type') in ('line_section', 'line_note'):
+            values.pop('account_id', None)
 
-    def _prepare_create_values(self, vals_list):
-        result_vals_list = super()._prepare_create_values(vals_list)
-        for init_vals, res_vals in zip(vals_list, result_vals_list):
-            if res_vals['display_type'] in ('line_section', 'line_note'):
-                res_vals.pop('account_id')
-        return result_vals_list
+    def _sanitize_values_create(self, move, values):
+        # Fill the missing 'currency_id'.
+        if 'currency_id' not in values:
+            if move.is_invoice(include_receipts=True):
+                values['currency_id'] = move.currency_id.id
+            else:
+                values['currency_id'] = move.company_currency_id.id
+
+        currency_id = values['currency_id']
+        if 'amount_currency' in values:
+            if move.company_currency_id.id == currency_id:
+                values['balance'] = values['amount_currency']
+
+        self._sanitize_values_common(move, values)
+        return values
+
+    def _sanitize_values_write(self, line, values):
+        # Importing a csv file moving some account.move.line to another account.move is usually a mistake
+        # and may bypass some constraint.
+        move = line.move_id
+        if 'move_id' in values and move.id != values['move_id']:
+            raise UserError(_("You can't move a journal item from one journal entry to another."))
+
+        currency_id = values.get('currency_id') or line.currency_id.id
+        if 'amount_currency' in values:
+            if move.company_currency_id.id == currency_id:
+                values['balance'] = values['amount_currency']
+            elif 'balance' not in values:
+                rate = abs(line.amount_currency / line.balance) if line.balance else 0.0
+                values['balance'] = move.company_currency_id.round(values['amount_currency'] / rate) if rate else 0.0
+        self._sanitize_values_common(move, values)
+        return values
 
     @api.model_create_multi
     def create(self, vals_list):
         moves = self.env['account.move'].browse({vals['move_id'] for vals in vals_list})
+        moves_mapping = {move.id: move for move in moves}
         container = {'records': self}
         move_container = {'records': moves}
         with moves._check_balanced(move_container),\
              moves._sync_dynamic_lines(move_container):
-            vals_list = [self._sanitize_vals(vals) for vals in vals_list]
+            vals_list = [self._sanitize_values_create(moves_mapping[vals['move_id']], vals) for vals in vals_list]
             lines = super().create(vals_list)
 
             # At the creation, all field are marked as dirty so we don't know from which one we need to recompute the others.
@@ -1399,22 +1441,24 @@ class AccountMoveLine(models.Model):
                 entries='\n'.join(hashed_moves.mapped('name')),
             ))
 
-        line_to_write = self
-        vals = self._sanitize_vals(vals)
+        to_write_batch = defaultdict(lambda: self.env['account.move.line'])
         for line in self:
-            if not any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in vals):
-                line_to_write -= line
+            values = self._sanitize_values_write(line, dict(vals))
+
+            if not any(self.env['account.move']._field_will_change(line, values, field_name) for field_name in values):
                 continue
 
-            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in ('tax_ids', 'tax_line_id')):
+            to_write_batch[frozendict(values)] |= line
+
+            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, values, field_name) for field_name in ('tax_ids', 'tax_line_id')):
                 raise UserError(_('You cannot modify the taxes related to a posted journal item, you should reset the journal entry to draft to do so.'))
 
             # Check the lock date.
-            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in protected_fields['fiscal']):
+            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, values, field_name) for field_name in protected_fields['fiscal']):
                 line.move_id._check_fiscalyear_lock_date()
 
             # Check the tax lock date.
-            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in protected_fields['tax']):
+            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, values, field_name) for field_name in protected_fields['tax']):
                 line._check_tax_lock_date()
 
             # Check the reconciliation.
@@ -1424,9 +1468,9 @@ class AccountMoveLine(models.Model):
         move_container = {'records': self.move_id}
         with self.move_id._check_balanced(move_container),\
              self.move_id._sync_dynamic_lines(move_container):
-            self = line_to_write
             if not self:
                 return True
+
             # Tracking stuff can be skipped for perfs using tracking_disable context key
             if not self.env.context.get('tracking_disable', False):
                 # Get all tracked fields (without related fields because these fields must be manage on their own model)
@@ -1448,7 +1492,10 @@ class AccountMoveLine(models.Model):
                             move_initial_values[line.move_id.id] = {}
                         move_initial_values[line.move_id.id].update({field: line[field]})
 
-            result = super().write(vals)
+            result = True
+            for values, lines in to_write_batch.items():
+                result = result and super(AccountMoveLine, lines).write(values)
+
             self.move_id._synchronize_business_models(['line_ids'])
             if any(field in vals for field in ['account_id', 'currency_id']):
                 self._check_constrains_account_id_journal_id()
