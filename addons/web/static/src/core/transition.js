@@ -79,7 +79,7 @@ export function useTransition({
             // when true - transition from enter to enter-active
             // when false - transition from enter-active to leave, unmount after leaveDuration
             if (newState) {
-                state.stage = "enter";
+                state.stage = state.shouldMount ? "skip" : "enter";
                 state.shouldMount = true;
                 // force a render here so that we get a patch even if the state didn't change
                 component.render();

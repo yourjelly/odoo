@@ -25,7 +25,7 @@ test("useTransition hook", async () => {
     const parent = await mountWithCleanup(Parent, { noMainContainer: true });
 
     // Mounted with -enter but not -enter-active
-    expect(".test.test-enter:not(.test-enter-active)").toHaveCount(1);
+    expect(".test.test-skip:not(.test-enter-active)").toHaveCount(1);
     await animationFrame();
     // No longer has -enter class but now has -enter-active
     expect(".test.test-enter-active:not(.test-enter)").toHaveCount(1);
@@ -66,7 +66,7 @@ test("Transition HOC", async () => {
     const parent = await mountWithCleanup(Parent, { noMainContainer: true });
 
     // Mounted with -enter but not -enter-active
-    expect(".test.test-enter:not(.test-enter-active)").toHaveCount(1);
+    expect(".test.test-skip:not(.test-enter-active)").toHaveCount(1);
     await animationFrame();
     // No longer has -enter class but now has -enter-active
     expect(".test.test-enter-active:not(.test-enter)").toHaveCount(1);
