@@ -351,7 +351,7 @@ class SaleOrder(models.Model):
 
     @api.model
     def _get_note_url(self):
-        return self.env.company.get_base_url()
+        return self.get_base_url()
 
     @api.depends('partner_id')
     def _compute_partner_invoice_id(self):
