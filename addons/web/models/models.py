@@ -820,10 +820,10 @@ class Base(models.AbstractModel):
 
             return { 'values': field_range, }
 
-    def _onchange_pre_hook(self):
+    def _onchange_after_update_cache_hook(self, changed_values):
         self.ensure_one()
 
-    def _onchange_after_hook(self):
+    def _onchange_before_snapshot1_hook(self, pre_data):
         self.ensure_one()
 
     def onchange(self, values: dict, field_names: list[str], fields_spec: dict):
@@ -963,12 +963,12 @@ class Base(models.AbstractModel):
 
         # make a snapshot based on the initial values of record
         snapshot0 = RecordSnapshot(record, fields_spec, fetch=(not first_call))
-        record._onchange_pre_hook()
 
         # store changed values in cache; also trigger recomputations based on
         # subfields (e.g., line.a has been modified, line.b is computed stored
         # and depends on line.a, but line.b is not in the form view)
         record._update_cache(changed_values)
+        pre_data = record._onchange_after_update_cache_hook(changed_values)
 
         # update snapshot0 with changed values
         for field_name in field_names:
@@ -1019,7 +1019,7 @@ class Base(models.AbstractModel):
             ]
 
         # make the snapshot with the final values of record
-        record._onchange_after_hook()
+        record._onchange_before_snapshot1_hook(pre_data)
         snapshot1 = RecordSnapshot(record, fields_spec)
 
         # determine values that have changed by comparing snapshots

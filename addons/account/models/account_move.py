@@ -2,6 +2,7 @@
 from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from datetime import date, timedelta
+
 from dateutil.relativedelta import relativedelta
 from hashlib import sha256
 from json import dumps
@@ -2136,32 +2137,37 @@ class AccountMove(models.Model):
     # DYNAMIC LINES: HELPERS
     # -------------------------------------------------------------------------
 
-    @contextmanager
-    def _tracked_fields(self, container, field_names, diff_results):
-        def track(record, field_name):
-            return record._fields[field_name].convert_to_write(record[field_name], record)
+    @api.model
+    def _track_record_field(self, record, field_name):
+        return record._fields[field_name].convert_to_write(record[field_name], record)
 
-        diff_field_names = diff_results.setdefault('changed_field_names', set())
+    @api.model
+    def _tracked_fields_before(self, container, field_names, diff_results):
+        diff_results.setdefault('changed_field_names', set())
         diff_records = diff_results.setdefault('diff', {})
         for record in container['records']:
             diff_records.setdefault(record, {})
-        data_before = {
+        return {
             record: {
                 field_name: (
                     diff_records[record][field_name]
                     if field_name in diff_records[record]
-                    else track(record, field_name)
+                    else self._track_record_field(record, field_name)
                 )
                 for field_name in field_names
             }
             for record in container['records']
         }
-        yield
+
+    @api.model
+    def _tracked_fields_after(self, container, field_names, diff_results, data_before):
+        diff_records = diff_results['diff']
+        diff_field_names = diff_results['changed_field_names']
         for record in container['records']:
             diff_records.setdefault(record, {})
         data_after = {
             record: {
-                field_name: track(record, field_name)
+                field_name: self._track_record_field(record, field_name)
                 for field_name in field_names
             }
             for record in container['records'].exists()
@@ -2181,6 +2187,12 @@ class AccountMove(models.Model):
                     diff[field_name] = field_diff
                     diff_field_names.add(field_name)
 
+    @contextmanager
+    def _tracked_fields(self, container, field_names, diff_results):
+        data_before = self._tracked_fields_before(container, field_names, diff_results)
+        yield
+        self._tracked_fields_after(container, field_names, diff_results, data_before)
+
     @api.model
     def _field_has_changed(self, diff_values, field_names, records=None):
         if records:
@@ -2189,7 +2201,100 @@ class AccountMove(models.Model):
                     return True
             return False
         else:
-            return diff_values['changed_field_names'].intersection(field_names)
+            return bool(diff_values['changed_field_names'].intersection(field_names))
+
+    @api.model
+    def _sync_dynamic_lines_pre_yield(self, move_container, lines_container=None):
+        move_tracked_fields = set().union(
+            self._get_move_invoice_fields_sync_taxes(),
+            self._get_invoice_fields_sync_epd(),
+            self._get_invoice_fields_sync_cash_rounding(),
+            self._get_invoice_fields_sync_payment_term(),
+            {'partner_id'},
+        )
+        lines_tracked_fields = set().union(
+            self._get_move_line_invoice_fields_sync_taxes(),
+            self._get_move_line_misc_fields_sync_taxes(),
+            self._get_invoice_line_fields_sync_cash_rounding(),
+            self._get_invoice_line_fields_sync_payment_term(),
+            self._get_invoice_line_fields_sync_date_maturity(),
+        )
+        move_diff_results = {}
+        lines_diff_results = {}
+        lines_container = lines_container or {'records': move_container['records'].line_ids}
+        move_data_before = self._tracked_fields_before(move_container, move_tracked_fields, move_diff_results)
+        lines_data_before = self._tracked_fields_before(lines_container, lines_tracked_fields, lines_diff_results)
+        return {
+            'move_container': move_container,
+            'lines_container': lines_container,
+            'move_tracked_fields': move_tracked_fields,
+            'lines_tracked_fields': lines_tracked_fields,
+            'move_diff_results': move_diff_results,
+            'lines_diff_results': lines_diff_results,
+            'move_data_before': move_data_before,
+            'lines_data_before': lines_data_before,
+        }
+
+    @api.model
+    def _sync_dynamic_lines_after_yield(self, data_pre_yield):
+        move_container = data_pre_yield['move_container']
+        lines_container = data_pre_yield['lines_container']
+        move_tracked_fields = data_pre_yield['move_tracked_fields']
+        lines_tracked_fields = data_pre_yield['lines_tracked_fields']
+        move_diff_results = data_pre_yield['move_diff_results']
+        lines_diff_results = data_pre_yield['lines_diff_results']
+        move_data_before = data_pre_yield['move_data_before']
+        lines_data_before = data_pre_yield['lines_data_before']
+        self._tracked_fields_after(move_container, move_tracked_fields, move_diff_results, move_data_before)
+        self._tracked_fields_after(lines_container, lines_tracked_fields, lines_diff_results, lines_data_before)
+
+        move_container = {**move_container, **move_diff_results}
+        lines_container = {**lines_container, **lines_diff_results}
+
+        # Compute the invoicing/accounting amounts for base lines.
+        product_tax_details_per_move = self._prepare_product_tax_details_per_move(move_container, lines_container)
+        values_per_move = self._sync_product_lines(move_container, lines_container, product_tax_details_per_move)
+        sub_lines_container = {'records': self.env['account.move.line']}
+        with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+            sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+
+        # Early payment discount.
+        values_per_move = self._sync_epd_lines(move_container, lines_container, product_tax_details_per_move)
+        sub_lines_container = {'records': self.env['account.move.line']}
+        with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+            sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+        epd_tax_details_per_move = self._prepare_epd_tax_details_per_move(move_container)
+
+        # Compute the tax lines.
+        values_per_move = self._sync_tax_lines(move_container, lines_container, product_tax_details_per_move, epd_tax_details_per_move)
+        sub_lines_container = {'records': self.env['account.move.line']}
+        with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+            sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+
+        # Cash rounding.
+        values_per_move = self._sync_cash_rounding_lines(move_container, lines_container)
+        sub_lines_container = {'records': self.env['account.move.line']}
+        with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+            sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+
+        # Payment terms.
+        values_per_move = self._sync_payment_term_lines(move_container, lines_container)
+        sub_lines_container = {'records': self.env['account.move.line']}
+        with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+            sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+
+        # Sync date_maturity / payment_reference.
+        values_per_move = self._sync_date_maturity(move_container, lines_container)
+        sub_move_container = {'records': self.env['account.move.line']}
+        with self._tracked_fields(sub_move_container, move_tracked_fields, move_diff_results):
+            for move, sync_values in values_per_move.items():
+                (move.write if move.id else move.update)(sync_values)
+
+        # Auto balancing of misc lines.
+        values_per_move = self._sync_unbalanced_lines(move_container, lines_container, product_tax_details_per_move)
+        sub_lines_container = {'records': self.env['account.move.line']}
+        with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
+            sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
 
     @contextmanager
     def _sync_dynamic_lines(self, move_container, lines_container=None):
@@ -2198,77 +2303,9 @@ class AccountMove(models.Model):
                 yield
                 return
 
-            move_tracked_fields = set().union(
-                self._get_move_invoice_fields_sync_taxes(),
-                self._get_invoice_fields_sync_epd(),
-                self._get_invoice_fields_sync_cash_rounding(),
-                self._get_invoice_fields_sync_payment_term(),
-            )
-            lines_tracked_fields = set().union(
-                self._get_move_line_invoice_fields_sync_taxes(),
-                self._get_move_line_misc_fields_sync_taxes(),
-                self._get_invoice_line_fields_sync_cash_rounding(),
-                self._get_invoice_line_fields_sync_payment_term(),
-                self._get_invoice_line_fields_sync_date_maturity(),
-            )
-            move_diff_results = {}
-            lines_diff_results = {}
-            lines_container = lines_container or {'records': move_container['records'].line_ids}
-            with self._tracked_fields(move_container, move_tracked_fields, move_diff_results):
-                with self._tracked_fields(lines_container, lines_tracked_fields, lines_diff_results):
-                    yield
-
-            move_container = {**move_container, **move_diff_results}
-            lines_container = {**lines_container, **lines_diff_results}
-
-            # Compute the invoicing/accounting amounts for base lines.
-            product_tax_details_per_move = self._prepare_product_tax_details_per_move(move_container, lines_container)
-            values_per_move = self._sync_product_lines(move_container, lines_container, product_tax_details_per_move)
-            sub_lines_container = {'records': self.env['account.move.line']}
-            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
-                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
-
-            # Early payment discount.
-            values_per_move = self._sync_epd_lines(move_container, lines_container, product_tax_details_per_move)
-            sub_lines_container = {'records': self.env['account.move.line']}
-            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
-                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
-            epd_tax_details_per_move = self._prepare_epd_tax_details_per_move(move_container)
-
-            # Compute the tax lines.
-            values_per_move = self._sync_tax_lines(move_container, lines_container, product_tax_details_per_move, epd_tax_details_per_move)
-            sub_lines_container = {'records': self.env['account.move.line']}
-            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
-                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
-
-            # Cash rounding.
-            values_per_move = self._sync_cash_rounding_lines(move_container, lines_container)
-            sub_lines_container = {'records': self.env['account.move.line']}
-            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
-                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
-
-            # Payment terms.
-            values_per_move = self._sync_payment_term_lines(move_container, lines_container)
-            sub_lines_container = {'records': self.env['account.move.line']}
-            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
-                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
-
-            # Sync date_maturity / payment_reference.
-            values_per_move = self._sync_date_maturity(move_container, lines_container)
-            sub_move_container = {'records': self.env['account.move.line']}
-            with self._tracked_fields(sub_move_container, move_tracked_fields, move_diff_results):
-                for move, sync_values in values_per_move.items():
-                    (move.write if move.id else move.update)(sync_values)
-
-            # Auto balancing of misc lines.
-            values_per_move = self._sync_unbalanced_lines(move_container, lines_container, product_tax_details_per_move)
-            sub_lines_container = {'records': self.env['account.move.line']}
-            with self._tracked_fields(sub_lines_container, lines_tracked_fields, lines_diff_results):
-                sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
-
-            # self._sync_dynamic_lines_pre_hook(container)
-            # yield
-            # self._sync_dynamic_lines_after_hook(container)
+            data_pre_yield = self._sync_dynamic_lines_pre_yield(move_container, lines_container=lines_container)
+            yield
+            self._sync_dynamic_lines_after_yield(data_pre_yield)
 
     @api.model
     def _build_line_grouping_key(self, line, field_names):
@@ -2360,6 +2397,7 @@ class AccountMove(models.Model):
             # so let's apply the changes directly.
             if not move.id:
                 move.line_ids = line_ids_commands
+                impacted_lines |= move.line_ids
                 continue
 
             for command in line_ids_commands:
@@ -2437,10 +2475,11 @@ class AccountMove(models.Model):
             else:
                 dirty_field_names = self._get_move_line_misc_fields_sync_taxes()
                 preserve_field_names = self._get_move_common_fields_sync_taxes()
-            is_dirty = not base_lines or self._field_has_changed(lines_container, dirty_field_names)
+            records = [x['record'] for x in base_lines]
+            is_dirty = not base_lines or self._field_has_changed(lines_container, dirty_field_names, records=records)
             preserve_tax_amounts = False
             if not is_dirty:
-                preserve_tax_amounts = self._field_has_changed(move_container, preserve_field_names)
+                preserve_tax_amounts = self._field_has_changed(move_container, preserve_field_names, records=move)
                 if preserve_tax_amounts:
                     is_dirty = True
 
@@ -2494,7 +2533,7 @@ class AccountMove(models.Model):
                 continue
 
             is_dirty = (
-                self._field_has_changed(move_container, self._get_invoice_fields_sync_epd())
+                self._field_has_changed(move_container, self._get_invoice_fields_sync_epd(), records=move)
                 or move in product_tax_details_per_move
             )
             if not is_dirty:
@@ -2639,7 +2678,7 @@ class AccountMove(models.Model):
             tax_lines = move.line_ids.filtered('tax_repartition_line_id')
             all_lines = base_lines + tax_lines
             is_dirty = (
-                self._field_has_changed(move_container, self._get_invoice_fields_sync_cash_rounding())
+                self._field_has_changed(move_container, self._get_invoice_fields_sync_cash_rounding(), records=move)
                 or self._field_has_changed(lines_container, self._get_invoice_line_fields_sync_cash_rounding(), records=all_lines)
             )
             if not is_dirty:
@@ -2709,21 +2748,103 @@ class AccountMove(models.Model):
     def _get_invoice_line_fields_sync_payment_term(self):
         return {'amount_currency', 'balance'}
 
+    def _fetch_invoice_term_line_most_frequent_account(self):
+        invoices = self.filtered(lambda move: move.is_invoice(include_receipts=True))
+        if not invoices:
+            return
+
+        self.env.cr.execute("""
+            WITH properties AS(
+                SELECT DISTINCT ON (property.company_id, property.name, property.res_id)
+                       'res.partner' AS model,
+                       SPLIT_PART(property.res_id, ',', 2)::integer AS id,
+                       CASE
+                           WHEN property.name = 'property_account_receivable_id' THEN 'asset_receivable'
+                           ELSE 'liability_payable'
+                       END AS account_type,
+                       SPLIT_PART(property.value_reference, ',', 2)::integer AS account_id
+                  FROM ir_property property
+                  JOIN res_company company ON property.company_id = company.id
+                 WHERE property.name IN ('property_account_receivable_id', 'property_account_payable_id')
+                   AND property.company_id = ANY(%(company_ids)s)
+                   AND property.res_id = ANY(%(partners)s)
+              ORDER BY property.company_id, property.name, property.res_id, account_id
+            ),
+            default_properties AS(
+                SELECT DISTINCT ON (property.company_id, property.name)
+                       'res.partner' AS model,
+                       company.partner_id AS id,
+                       CASE
+                           WHEN property.name = 'property_account_receivable_id' THEN 'asset_receivable'
+                           ELSE 'liability_payable'
+                       END AS account_type,
+                       SPLIT_PART(property.value_reference, ',', 2)::integer AS account_id
+                  FROM ir_property property
+                  JOIN res_company company ON property.company_id = company.id
+                 WHERE property.name IN ('property_account_receivable_id', 'property_account_payable_id')
+                   AND property.company_id = ANY(%(company_ids)s)
+                   AND property.res_id IS NULL
+              ORDER BY property.company_id, property.name, account_id
+            ),
+            fallback AS (
+                SELECT DISTINCT ON (account.company_id, account.account_type)
+                       'res.company' AS model,
+                       account.company_id AS id,
+                       account.account_type AS account_type,
+                       account.id AS account_id
+                  FROM account_account account
+                 WHERE account.company_id = ANY(%(company_ids)s)
+                   AND account.account_type IN ('asset_receivable', 'liability_payable')
+                   AND account.deprecated = 'f'
+            )
+            SELECT * FROM default_properties
+            UNION ALL
+            SELECT * FROM properties
+            UNION ALL
+            SELECT * FROM fallback
+        """, {
+            'company_ids': invoices.company_id.ids,
+            'partners': [f'res.partner,{pid}' for pid in invoices.commercial_partner_id.ids],
+        })
+        accounts = {
+            (model, id, account_type): account_id
+            for model, id, account_type, account_id in self.env.cr.fetchall()
+        }
+        results = {}
+        for invoice in invoices:
+            account_type = 'asset_receivable' if invoice.is_sale_document(include_receipts=True) else 'liability_payable'
+            account_id = (
+                accounts.get(('res.partner', invoice.commercial_partner_id.id, account_type))
+                or accounts.get(('res.partner', invoice.company_id.partner_id.id, account_type))
+                or accounts.get(('res.company', invoice.company_id.id, account_type))
+            )
+            if not account_id:
+                continue
+
+            if invoice.fiscal_position_id:
+                account_id = invoice.fiscal_position_id.map_account(self.env['account.account'].browse(account_id)).id
+
+            results[invoice] = account_id
+        return results
+
     @api.model
     def _sync_payment_term_lines(self, move_container, lines_container):
+        most_frequent_accounts = None
+
         sync_payment_term_lines = {}
         for move in move_container['records']:
             is_invoice = move.is_invoice(include_receipts=True)
             if not is_invoice:
                 continue
 
+            term_lines = move.line_ids \
+                .filtered(lambda line: line.display_type == 'payment_term') \
+                .sorted('date_maturity')
+
             # For posted moves, don't recompute anything except the name.
-            term_line_name = move.payment_reference or move.name or ''
             if move.state == 'posted':
+                term_line_name = move.payment_reference or move.name or ''
                 move_sync_values = sync_payment_term_lines.setdefault(move, {'line_ids': {}, 'force_update_fields': {'name'}})['line_ids']
-                term_lines = move.line_ids \
-                    .filtered(lambda line: line.display_type == 'payment_term') \
-                    .sorted('date_maturity')
                 need_installment = len(term_lines) > 1
                 for index, term_line in enumerate(term_lines, start=1):
                     if need_installment:
@@ -2738,7 +2859,7 @@ class AccountMove(models.Model):
             base_lines = move.line_ids.filtered(lambda line: line.display_type in ('product', 'epd', 'rounding'))
             tax_lines = move.line_ids.filtered('tax_repartition_line_id')
             all_lines = base_lines + tax_lines
-            has_invoice_fields_changed = self._field_has_changed(move_container, self._get_invoice_fields_sync_payment_term())
+            has_invoice_fields_changed = self._field_has_changed(move_container, self._get_invoice_fields_sync_payment_term(), records=move)
             is_dirty = (
                 has_invoice_fields_changed
                 or self._field_has_changed(lines_container, self._get_invoice_line_fields_sync_payment_term(), records=all_lines)
@@ -2774,6 +2895,16 @@ class AccountMove(models.Model):
                     company=move.company_id,
                     sign=1,
                 )
+                term_line_name = move.payment_reference or ''
+
+                account_id = None
+                if term_lines and not self._field_has_changed(move_container, {'partner_id'}, records=move):
+                    account_id = term_lines[0].account_id.id
+                elif most_frequent_accounts is None:
+                    most_frequent_accounts = move_container['records']._fetch_invoice_term_line_most_frequent_account() or {}
+                if not account_id:
+                    account_id = most_frequent_accounts.get(move)
+
                 need_installment = len(invoice_payment_terms['line_ids']) > 1
                 for index, term_line in enumerate(invoice_payment_terms['line_ids'], start=1):
                     if need_installment:
@@ -2785,6 +2916,7 @@ class AccountMove(models.Model):
                         frozendict({
                             'date_maturity': fields.Date.to_date(term_line.get('date')),
                             'currency_id': move.currency_id.id,
+                            'account_id': account_id,
                             'discount_date': invoice_payment_terms.get('discount_date'),
                         })
                     ] = {
@@ -2820,16 +2952,12 @@ class AccountMove(models.Model):
         for move in move_container['records']:
             term_lines = move.line_ids\
                 .filtered(lambda line: line.display_type == 'payment_term')\
-                .sorted('date_maturity')
+                .sorted('date_maturity', reverse=True)
             is_dirty = self._field_has_changed(lines_container, self._get_invoice_line_fields_sync_date_maturity(), records=term_lines)
-            if not is_dirty:
+            if not is_dirty or not term_lines:
                 continue
 
-            to_write = {}
-            if any(term_lines.mapped('date_maturity_dirty')):
-                to_write['invoice_date_due'] = term_lines[0].date_maturity
-            if to_write:
-                sync_date_maturity[move] = to_write
+            sync_date_maturity[move] = {'invoice_date_due': term_lines[0].date_maturity}
         return sync_date_maturity
 
     @api.model
@@ -2872,15 +3000,21 @@ class AccountMove(models.Model):
     # DYNAMIC LINES: ONCHANGE
     # -------------------------------------------------------------------------
 
-    def _onchange_pre_hook(self):
+    def _onchange_after_update_cache_hook(self, changed_values):
         # EXTENDS 'web'
-        super()._onchange_pre_hook()
-        self._sync_dynamic_lines_pre_hook({'records': self})
+        super()._onchange_after_update_cache_hook(changed_values)
 
-    def _onchange_after_hook(self):
+        data_pre_yield = self._sync_dynamic_lines_pre_yield({'records': self})
+        for field_name in changed_values:
+            import pudb; pudb.set_trace()
+
+        return data_pre_yield
+
+    def _onchange_before_snapshot1_hook(self, pre_data):
         # EXTENDS 'web'
-        super()._onchange_pre_hook()
-        self._sync_dynamic_lines_after_hook({'records': self})
+        super()._onchange_before_snapshot1_hook(pre_data)
+        pre_data['lines_container']['records'] |= pre_data['move_container']['records'].line_ids
+        self._sync_dynamic_lines_after_yield(pre_data)
 
     def onchange(self, values, field_names, fields_spec):
         # EXTENDS 'web'
@@ -2969,13 +3103,15 @@ class AccountMove(models.Model):
         if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
 
-        container = {'records': self.env['account.move']}
-        with self._check_balanced(container):
-            with self._sync_dynamic_lines(container):
+        move_container = {'records': self.env['account.move']}
+        lines_container = {'records': self.env['account.move.line']}
+        with self._check_balanced(move_container):
+            with self._sync_dynamic_lines(move_container, lines_container=lines_container):
                 for vals in vals_list:
                     self._sanitize_vals(vals)
-                container['records'] = super().create(vals_list)
-        return container['records']
+                move_container['records'] = super().create(vals_list)
+                lines_container['records'] = move_container['records'].line_ids
+        return move_container['records']
 
     def write(self, vals):
         if not vals:
@@ -3035,13 +3171,14 @@ class AccountMove(models.Model):
         if {'sequence_prefix', 'sequence_number', 'journal_id', 'name'} & vals.keys():
             self._set_next_made_sequence_gap(True)
 
-        container = {'records': self}
-        with self.env.protecting(self._get_protected_vals(vals, self)), self._check_balanced(container):
-            with self._sync_dynamic_lines(container):
+        move_container = {'records': self}
+        lines_container = {'records': self.line_ids}
+        with self.env.protecting(self._get_protected_vals(vals, self)), self._check_balanced(move_container):
+            with self._sync_dynamic_lines(move_container, lines_container=lines_container):
                 res = super(AccountMove, self.with_context(
                     skip_account_move_synchronization=True,
                 )).write(vals)
-
+                lines_container['records'] |= self.line_ids
 
                 # Reset the name of draft moves when changing the journal.
                 # Protected against holes in the pre-validation checks.

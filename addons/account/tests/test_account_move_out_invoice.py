@@ -101,7 +101,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'date_maturity': False,
         }
         cls.term_line_vals_1 = {
-            'name': cls.invoice.name,
+            'name': '',
             'product_id': False,
             'account_id': cls.company_data['default_account_receivable'].id,
             'partner_id': cls.partner_a.id,
@@ -611,7 +611,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
                 'partner_id': self.partner_b.id,
                 'amount_currency': 987.0,
                 'debit': 987.0,
-                'date_maturity': fields.Date.from_string('2019-02-28'),
+                'date_maturity': fields.Date.from_string('2019-03-02'),
             },
         ], {
             **self.move_vals,
@@ -625,8 +625,8 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # Remove lines and recreate them to apply the fiscal position.
         move_form = Form(self.invoice)
-        move_form.invoice_line_ids.remove(0)
-        move_form.invoice_line_ids.remove(0)
+        move_form.line_ids.remove(0)
+        move_form.line_ids.remove(0)
         with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_a
         with move_form.line_ids.new() as line_form:
@@ -667,7 +667,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
                 'partner_id': self.partner_b.id,
                 'amount_currency': 966.0,
                 'debit': 966.0,
-                'date_maturity': fields.Date.from_string('2019-02-28'),
+                'date_maturity': fields.Date.from_string('2019-03-02'),
             },
         ], {
             **self.move_vals,
@@ -3531,10 +3531,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
                 }),
             ],
         })
-
-        with Form(invoice) as form:
-            with form.invoice_line_ids.edit(0) as line_form:
-                line_form.tax_ids.clear()
+        invoice.line_ids.filtered('product_id').tax_ids = [Command.clear()]
 
         # Tags should be empty since the tax has been removed from the invoice line
         self.assertRecordValues(invoice.line_ids, [{'tax_tag_ids': []}, {'tax_tag_ids': []}])
