@@ -139,7 +139,7 @@ export class Composer extends Component {
         useChildSubEnv({
             inComposer: true,
         });
-        this.picker = usePicker(this.pickerSettings);
+        this.picker = usePicker({ ...this.pickerSettings, emojiButton: this.emojiButton });
         useEffect(
             (focus) => {
                 if (focus && this.ref.el) {

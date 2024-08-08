@@ -5,8 +5,11 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 import { PickerContent } from "@mail/core/common/picker_content";
 import { useLazyExternalListener } from "@mail/utils/common/hooks";
+import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
 
 export function usePicker(setting) {
+    console.log(setting);
+    useEmojiPicker(setting.emojiButton, { onSelect: setting.pickers.emoji, resetOnSelect: false });
     const storeScroll = {
         scrollValue: 0,
         set: (value) => (storeScroll.scrollValue = value),
@@ -46,6 +49,7 @@ export class Picker extends Component {
     };
     static props = [
         "PICKERS",
+        "emojiButton",
         "anchor?",
         "buttons",
         "close?",

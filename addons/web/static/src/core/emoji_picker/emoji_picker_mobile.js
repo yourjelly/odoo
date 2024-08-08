@@ -14,12 +14,31 @@ export class EmojiPickerMobile extends EmojiPicker {
             this.store.emoji_picker_mobile.isVisible = false;
             console.log("made it false");
         });
-        useEffect(() => {
-            console.log(this.store.emoji_picker_mobile.isVisible);
-            if (this.store.emoji_picker_mobile?.props) {
-                this.props = this.store.emoji_picker_mobile.props;
-            }
-        });
+
+        useEffect(
+            () => {
+                if (this.store.emoji_picker_mobile?.props) {
+                    this.props = this.store.emoji_picker_mobile.props;
+                }
+                if (this.store.emoji_picker_mobile.isVisible) {
+                    setTimeout(() => {
+                        this.bgElement = document.getElementsByClassName("o_form_view")[0];
+                        if (this.bgElement) {
+                            if (this.bgElement.scrollHeight > this.bgElement.clientHeight) {
+                                console.log("it has scrollable height");
+                                this.setScrollTopInVh(this.bgElement, 55);
+                            }
+                        }
+                    }, 0);
+                }
+            },
+            () => [this.store.emoji_picker_mobile.isVisible]
+        );
+    }
+    setScrollTopInVh(element, vhUnits) {
+        const vh = window.innerHeight; // Get the viewport height in pixels
+        const scrollValue = vh * (vhUnits / 100); // Convert vh units to pixels
+        element.scrollTop += scrollValue; // Adjust scrollTop
     }
 }
 

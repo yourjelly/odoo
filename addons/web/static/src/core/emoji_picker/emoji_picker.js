@@ -30,14 +30,19 @@ import { useAutofocus, useService } from "@web/core/utils/hooks";
  */
 export function useEmojiPicker(ref, props, options = {}) {
     const targets = [];
-    const popover = usePopover(EmojiPicker, { ...options, animation: false });
-    const storeService = useService("mail.store");
+    const store = useService("mail.store");
+    let popover;
     const ui = useService("ui");
     const originalOnSelect = props.onSelect;
+    if (!ui.isSmall) {
+        popover = usePopover(EmojiPicker, { ...options, animation: false });
+    }
 
     function onSelectExtension(...args) {
         originalOnSelect(...args);
-        storeService.emoji_picker_mobile.isVisible = !storeService.emoji_picker_mobile.isVisible;
+        if (props?.resetOnSelect) {
+            store.emoji_picker_mobile.isVisible = !store.emoji_picker_mobile.isVisible;
+        }
     }
 
     props.onSelect = onSelectExtension;
@@ -50,8 +55,8 @@ export function useEmojiPicker(ref, props, options = {}) {
             return props.storeScroll.scrollValue;
         },
     };
-    storeService.emoji_picker_mobile = {
-        isVisible: storeService.emoji_picker_mobile.isVisible,
+    store.emoji_picker_mobile = {
+        isVisible: store.emoji_picker_mobile.isVisible,
         props: { ...props },
     };
 
@@ -73,8 +78,7 @@ export function useEmojiPicker(ref, props, options = {}) {
 
     function toggle(ref, onSelect = props.onSelect) {
         if (ui.isSmall) {
-            storeService.emoji_picker_mobile.isVisible =
-                !storeService.emoji_picker_mobile.isVisible;
+            store.emoji_picker_mobile.isVisible = !store.emoji_picker_mobile.isVisible;
         } else {
             if (popover.isOpen) {
                 popover.close();
