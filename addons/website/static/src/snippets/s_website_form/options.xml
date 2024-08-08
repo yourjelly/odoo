@@ -91,7 +91,7 @@
 <t t-name="website.s_website_form_field_required_option">
     <!-- Disable the delete option of model required fields and show
     alert and tooltip on delete buttons -->
-    <we-alert class="mt-2"></we-alert>
+    <we-alert class="mt-2"><span t-out="env.renderContext.alertText"/></we-alert>
 </t>
 
 <t t-name="website.s_website_form_field_option">

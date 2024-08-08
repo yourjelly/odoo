@@ -1637,12 +1637,12 @@ export class WebsiteFormFieldModel extends DisableOverlayButtonOption {
 
 // Disable delete button for model required fields
 export class WebsiteFormFieldRequired extends DisableOverlayButtonOption {
-    start() {
+    async willStart() {
         this.disableButton("remove", _t(
             "This field is mandatory for this action. You cannot remove it. Try hiding it with the"
             + " 'Visibility' option instead and add it a default value."
         ));
-        return super.start(...arguments);
+        await super.willStart(...arguments);
     }
 
     //--------------------------------------------------------------------------
@@ -1652,19 +1652,17 @@ export class WebsiteFormFieldRequired extends DisableOverlayButtonOption {
     /**
      * @override
      */
-    async _renderCustomXML(uiFragment) {
-        if (!currentActionName) {
-            return;
+    async _getRenderContext() {
+        const renderContext = await super._getRenderContext();
+        if (currentActionName) {
+            const fieldName = this.$target[0]
+                .querySelector("input.s_website_form_input").getAttribute("name");
+            renderContext.alertText = _t("The field “%(field)s” is mandatory for the action “%(action)s”.", {
+                field: fieldName,
+                action: currentActionName,
+            });
         }
-
-        const fieldName = this.$target[0]
-            .querySelector("input.s_website_form_input").getAttribute("name");
-        const spanEl = document.createElement("span");
-        spanEl.innerText = _t("The field “%(field)s” is mandatory for the action “%(action)s”.", {
-            field: fieldName,
-            action: currentActionName,
-        });
-        uiFragment.querySelector("we-alert").appendChild(spanEl);
+        return renderContext;
     }
 }
 
