@@ -6276,22 +6276,15 @@ export class vAlignment extends SnippetOption {
 /**
  * Portal component that target the overlay
  */
-export class Overlay extends Component {
+export class WeOverlay extends Component {
     static template = "__portal__";
-    /*
-    static props = {
-        targetEl: {
-            type: HTMLElement,
-        },
-        slots: true,
-    };
-    */
 
     setup() {
         const node = this.__owl__;
         onMounted(() => {
+            const targetEl = this.env.snippetOption.$overlay[0].querySelector(this.props.target);
             const portal = node.bdom;
-            portal.content.moveBeforeDOMNode(this.props.targetEl.firstChild, this.props.targetEl);
+            portal.content.moveBeforeDOMNode(targetEl.firstChild, targetEl);
         });
         onWillUnmount(() => {
             const portal = node.bdom;
@@ -6299,7 +6292,7 @@ export class Overlay extends Component {
         });
     }
 }
-registry.category("snippet_widgets").add("Overlay", Overlay);
+registry.category("snippet_widgets").add("WeOverlay", WeOverlay);
 
 
 
