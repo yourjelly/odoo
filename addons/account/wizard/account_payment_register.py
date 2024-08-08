@@ -519,64 +519,62 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.show_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_using_bank_account()
             wizard.require_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_needing_bank_account()
 
-    def _get_total_amount_using_same_currency(self, batch_result, early_payment_discount=True):
+    def _convert_to_wizard_currency(self, amount_per_line):
         self.ensure_one()
-        amount = 0.0
-        mode = False
-        moves = batch_result['lines'].mapped('move_id')
-        for move in moves:
-            if early_payment_discount and move._is_eligible_for_early_payment_discount(move.currency_id, self.payment_date):
-                amount -= move.direction_sign * move.invoice_payment_term_id._get_amount_due_after_discount(move.amount_total, move.amount_tax)
-                mode = 'early_payment'
-            else:
-                for aml in batch_result['lines'].filtered(lambda l: l.move_id.id == move.id):
-                    amount += aml.amount_residual_currency
-        return abs(amount), mode
-
-    def _get_total_amount_in_wizard_currency_to_full_reconcile(self, batch_result, early_payment_discount=True):
-        """ Compute the total amount needed in the currency of the wizard to fully reconcile the batch of journal
-        items passed as parameter.
-
-        :param batch_result:    A batch returned by '_get_batches'.
-        :return:                An amount in the currency of the wizard.
-        """
-        self.ensure_one()
-
-        comp_curr = self.company_id.currency_id
-        if self.source_currency_id == self.currency_id:
-            # Same currency (manage the early payment discount).
-            return self._get_total_amount_using_same_currency(batch_result, early_payment_discount=early_payment_discount)
-        elif self.source_currency_id != comp_curr and self.currency_id == comp_curr:
-            # Foreign currency on source line but the company currency one on the opposite line.
-            return self.source_currency_id._convert(
-                self.source_amount_currency,
-                comp_curr,
-                self.company_id,
-                self.payment_date,
-            ), False
-        elif self.source_currency_id == comp_curr and self.currency_id != comp_curr:
-            # Company currency on source line but a foreign currency one on the opposite line.
-            residual_amount = 0.0
-            for aml in batch_result['lines']:
-                if not aml.move_id.payment_id and not aml.move_id.statement_line_id:
+        total_amount = 0.0
+        wizard_curr = self.currency_id
+        comp_curr = self.company_currency_id
+        for line, amount_residual_currency_field, amount_residual_field in amount_per_line:
+            line_curr = line.currency_id
+            amount_residual = line[amount_residual_field]
+            amount_residual_currency = line[amount_residual_currency_field]
+            if line_curr == wizard_curr:
+                # Same currency
+                total_amount += amount_residual_currency
+            elif line_curr != comp_curr and wizard_curr == comp_curr:
+                # Foreign currency on source line but the company currency one on the opposite line.
+                total_amount += line_curr._convert(amount_residual_currency, comp_curr, self.company_id, self.payment_date)
+            elif line_curr == comp_curr and wizard_curr != comp_curr:
+                # Company currency on source line but a foreign currency one on the opposite line.
+                if not line.move_id.payment_id and not line.move_id.statement_line_id:
                     conversion_date = self.payment_date
                 else:
-                    conversion_date = aml.date
-                residual_amount += comp_curr._convert(
-                    aml.amount_residual,
-                    self.currency_id,
-                    self.company_id,
-                    conversion_date,
-                )
-            return abs(residual_amount), False
-        else:
-            # Foreign currency on payment different than the one set on the journal entries.
-            return comp_curr._convert(
-                self.source_amount,
-                self.currency_id,
-                self.company_id,
-                self.payment_date,
-            ), False
+                    conversion_date = line.date
+                total_amount += comp_curr._convert(amount_residual, wizard_curr, self.company_id, conversion_date)
+            else:
+                # Foreign currency on payment different than the one set on the journal entries.
+                total_amount += comp_curr._convert(amount_residual, wizard_curr, self.company_id, self.payment_date)
+        return abs(total_amount)
+
+    def _get_total_amount_to_pay(self, batch_result):
+        self.ensure_one()
+        amount_per_line = []
+        for line in batch_result['lines']:
+            amount_per_line.append((line, 'amount_residual_currency', 'amount_residual'))
+        return self._convert_to_wizard_currency(amount_per_line)
+
+    def _get_total_amount_to_suggest_by_default(self, batch_result):
+        self.ensure_one()
+        amount_per_line = []
+        epd_applied = False
+        for line in batch_result['lines']:
+            move = line.move_id
+
+            # Early payment discount.
+            if (
+                line.currency_id == self.currency_id
+                and move._is_eligible_for_early_payment_discount(move.currency_id, self.payment_date)
+            ):
+                epd_applied = True
+                amount_per_line.append((line, 'discount_amount_currency', 'discount_balance'))
+                continue
+
+            amount_per_line.append((line, 'amount_residual_currency', 'amount_residual'))
+
+        return {
+            'amount': self._convert_to_wizard_currency(amount_per_line),
+            'epd_applied': epd_applied,
+        }
 
     @api.onchange('amount')
     def _onchange_amount(self):
@@ -597,7 +595,7 @@ class AccountPaymentRegister(models.TransientModel):
                     wizard.amount = wizard.amount
                 elif wizard.source_currency_id and wizard.can_edit_wizard:
                     batch_result = wizard._get_batches()[0]
-                    wizard.amount = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result)[0]
+                    wizard.amount = wizard._get_total_amount_to_suggest_by_default(batch_result)['amount']
                 else:
                     # The wizard is not editable so no partial payment allowed and then, 'amount' is not used.
                     wizard.amount = None
@@ -610,10 +608,11 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.early_payment_discount_mode = wizard.early_payment_discount_mode
             elif wizard.can_edit_wizard:
                 batch_result = wizard._get_batches()[0]
-                total_amount_residual_in_wizard_currency, mode = wizard._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result)
-                wizard.early_payment_discount_mode = \
-                    wizard.currency_id.compare_amounts(wizard.amount, total_amount_residual_in_wizard_currency) == 0 \
-                    and mode == 'early_payment'
+                total_amount_values = wizard._get_total_amount_to_suggest_by_default(batch_result)
+                wizard.early_payment_discount_mode = (
+                    wizard.currency_id.compare_amounts(wizard.amount, total_amount_values['amount']) == 0
+                    and total_amount_values['epd_applied']
+                )
             else:
                 wizard.early_payment_discount_mode = False
 
@@ -622,8 +621,7 @@ class AccountPaymentRegister(models.TransientModel):
         for wizard in self:
             if wizard.can_edit_wizard and wizard.payment_date:
                 batch_result = wizard._get_batches()[0]
-                total_amount_residual_in_wizard_currency = wizard\
-                    ._get_total_amount_in_wizard_currency_to_full_reconcile(batch_result, early_payment_discount=False)[0]
+                total_amount_residual_in_wizard_currency = wizard._get_total_amount_to_pay(batch_result)
                 wizard.payment_difference = total_amount_residual_in_wizard_currency - wizard.amount
             else:
                 wizard.payment_difference = 0.0
@@ -905,9 +903,10 @@ class AccountPaymentRegister(models.TransientModel):
         if partner_bank_id:
             payment_vals['partner_bank_id'] = partner_bank_id
 
-        total_amount, mode = self._get_total_amount_using_same_currency(batch_result)
+        total_amount_values = self._get_total_amount_to_suggest_by_default(batch_result)
+        total_amount = total_amount_values['amount']
         currency = self.env['res.currency'].browse(batch_values['source_currency_id'])
-        if mode == 'early_payment':
+        if total_amount_values['epd_applied']:
             payment_vals['amount'] = total_amount
 
             epd_aml_values_list = []
