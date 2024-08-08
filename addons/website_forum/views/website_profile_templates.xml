@@ -21,7 +21,7 @@
     </template>
 
     <template id="user_profile_content" inherit_id="website_profile.user_profile_content">
-        <xpath expr="//table[@id='o_wprofile_sidebar_table']//tr[last()]" position="after">
+        <!-- <xpath expr="//table[@id='o_wprofile_sidebar_table']//tr[last()]" position="after">
             <t t-if="forum and (up_votes or down_votes)">
                 <tr id="profile_abstract_info_company">
                     <th><small class="fw-bold">Votes</small></th>
@@ -35,7 +35,7 @@
                     </td>
                 </tr>
             </t>
-        </xpath>
+        </xpath> -->
         <xpath expr="//ul[@id='profile_extra_info_tablist']" position="inside">
             <t t-if="forum">
                 <li class="nav-item">
