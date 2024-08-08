@@ -7,6 +7,7 @@ import { callWithUnloadCheck } from "./tour_utils";
 import { TourHelpers } from "./tour_helpers";
 import { TourStep } from "./tour_step";
 import { pick } from "@web/core/utils/objects";
+import { tourDebuggerPlayer } from "@web_tour/tour_debugger/tour_debugger_player";
 
 export class TourStepAutomatic extends TourStep {
     triggerFound = false;
@@ -36,12 +37,19 @@ export class TourStepAutomatic extends TourStep {
 
         return [
             {
-                action: () => {
+                action: async () => {
                     this.running = true;
                     setupEventActions(document.createElement("div"));
-                    if (this.break && debugMode !== false) {
-                        // eslint-disable-next-line no-debugger
-                        debugger;
+                    if (debugMode !== false) {
+                        tourDebuggerPlayer.render();
+                        if (debugMode !== false && this.pause) {
+                            tourDebuggerPlayer.setStatus("PAUSED");
+                        }
+                        await tourDebuggerPlayer.waitFor("PLAY");
+                        if (this.break) {
+                            // eslint-disable-next-line no-debugger
+                            debugger;
+                        }
                     }
                 },
             },
@@ -152,27 +160,7 @@ export class TourStepAutomatic extends TourStep {
         const end = Math.min(this.index + offset, this.tour.steps.length - 1);
         const result = [];
         for (let i = start; i <= end; i++) {
-            const stepString =
-                JSON.stringify(
-                    pick(
-                        this.tour.steps[i],
-                        "isActive",
-                        "content",
-                        "trigger",
-                        "run",
-                        "tooltipPosition",
-                        "timeout"
-                    ),
-                    (_key, value) => {
-                        if (typeof value === "function") {
-                            return "[function]";
-                        } else {
-                            return value;
-                        }
-                    },
-                    2
-                ) + ",";
-            const text = [stepString];
+            const text = [this.getJsonString(this.tour.steps[i])];
             if (i === this.index) {
                 const line = "-".repeat(10);
                 const failing_step = `${line} FAILED: ${this.describeMe} ${line}`;
@@ -201,6 +189,26 @@ export class TourStepAutomatic extends TourStep {
         return triggerEl;
     }
 
+    getJsonString(step) {
+        return (
+            JSON.stringify(
+                pick(step, "isActive", "content", "trigger", "run", "tooltipPosition", "timeout"),
+                (_key, value) => {
+                    if (typeof value === "function") {
+                        return "[function]";
+                    } else {
+                        return value;
+                    }
+                },
+                2
+            ) + ","
+        );
+    }
+
+    get jsonString() {
+        return this.getJsonString(this);
+    }
+
     /**
      * @param {Array<string>} [errors]
      */
@@ -218,6 +226,14 @@ export class TourStepAutomatic extends TourStep {
         if (debugMode !== false) {
             // eslint-disable-next-line no-debugger
             debugger;
+        }
+    }
+
+    togglePause() {
+        const debugMode = tourState.get(this.tour.name, "debug");
+        if (debugMode !== false) {
+            this.pause = !this.pause;
+            tourDebuggerPlayer.render();
         }
     }
 

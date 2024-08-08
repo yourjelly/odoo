@@ -232,11 +232,6 @@ export const tourService = {
             tourState.set(tourName, "showPointerDuration", options.showPointerDuration);
             tourState.set(tourName, "mode", options.mode);
             tourState.set(tourName, "sequence", tour.sequence);
-            if (tourState.get(tourName, "debug") !== false) {
-                // Starts the tour with a debugger to allow you to choose devtools configuration.
-                // eslint-disable-next-line no-debugger
-                debugger;
-            }
             const pointer = createPointer(tourName, {
                 bounce: !(options.mode === "auto" && options.keepWatchBrowser),
             });
@@ -249,7 +244,7 @@ export const tourService = {
 
             if (!willUnload) {
                 if (options.mode === "auto") {
-                    new TourAutomatic(tour, macroEngine).start(pointer, () => {
+                    new TourAutomatic(tour, macroEngine, overlay).start(pointer, () => {
                         pointer.stop();
                         endTour(tour);
                     });
@@ -276,7 +271,7 @@ export const tourService = {
                 bounce: !(mode === "auto" && keepWatchBrowser),
             });
             if (mode === "auto") {
-                new TourAutomatic(tour, macroEngine).start(pointer, () => {
+                new TourAutomatic(tour, macroEngine, overlay).start(pointer, () => {
                     pointer.stop();
                     endTour(tour);
                 });
