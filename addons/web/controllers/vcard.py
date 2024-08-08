@@ -13,9 +13,8 @@ from odoo.http import request, content_disposition
 
 class Partner(http.Controller):
 
-    @http.route(['/web_enterprise/partner/<model("res.partner"):partner>/vcard',
-                 '/web/partner/vcard'], type='http', auth="user")
-    def download_vcard(self, partner_ids=None, partner=None, **kwargs):
+    @http.route(['/web/partner/vcard'], type='http', auth="user")
+    def download_vcard(self, partner_ids=None, **kwargs):
         if importlib.util.find_spec('vobject') is None:
             raise UserError('vobject library is not installed')
 
@@ -36,13 +35,12 @@ class Partner(http.Controller):
                         ('Content-Disposition', content_disposition('Contacts.zip'))
                     ])
 
-        if partner or partners:
-            partner = partner or partners
-            content = partner._get_vcard_file()
-            return request.make_response(content, [
-                ('Content-Type', 'text/vcard'),
-                ('Content-Length', len(content)),
-                ('Content-Disposition', content_disposition(f"{partner.name or partner.email}.vcf")),
-            ])
+            else:
+                content = partners._get_vcard_file()
+                return request.make_response(content, [
+                    ('Content-Type', 'text/vcard'),
+                    ('Content-Length', len(content)),
+                    ('Content-Disposition', content_disposition(f"{partners.name or partners.email}.vcf")),
+                ])
 
         return request.not_found()
