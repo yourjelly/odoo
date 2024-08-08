@@ -1,0 +1,4 @@
+// This code forces the generated image to fit it's parent size and allow an overlap effect
+.o_grid_item_image img[data-shape='web_editor/devices/galaxy_front_portrait_half'] {
+    object-fit: fill !important;
+}
