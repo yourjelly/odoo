@@ -144,6 +144,7 @@ class Registry(Mapping):
         registry.ready = True
         registry.registry_invalidated = bool(update_module)
         registry.signal_changes()
+        registry.check_company_dependent()
 
         _logger.info("Registry loaded in %.3fs", time.time() - t0)
         return registry
@@ -981,6 +982,19 @@ class Registry(Mapping):
             connection = self._db_readonly
         return connection.cursor()
 
+    def check_company_dependent(self):
+        for model_name, model in self.items():
+            if model._table != model_name.replace('.', '_'):
+                _logger.warning(f"{model._name}'s table is customized as {model._table}")
+
+        for model_name, model in self.items():
+            has_company_dependent = False
+            for fname, field in model._fields.items():
+                if field.company_dependent or field.name == 'property_product_pricelist':
+                    _logger.warning(f"{field} is company dependent")
+                    has_company_dependent = True
+            if has_company_dependent and model._table != model_name.replace('.', '_'):
+                _logger.warning(f"{model._name}'s table is customized as {model._table} and has company dependent")
 
 class DummyRLock(object):
     """ Dummy reentrant lock, to be used while running rpc and js tests """
