@@ -5,6 +5,7 @@ from odoo.tests import tagged
 from odoo import fields, Command
 
 from dateutil.relativedelta import relativedelta
+from freezegun import freeze_time
 
 
 @tagged('post_install', '-at_install')
@@ -37,6 +38,7 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
                 }),
             ],
         })
+        cls.term_advance_60days = cls.env.ref('account.account_payment_term_advance_60days')
 
         cls.partner_bank_account1 = cls.env['res.partner.bank'].create({
             'acc_number': "0123456789",
@@ -1506,3 +1508,109 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         })
 
         self.assertEqual(wizard.amount, 39.50)
+
+    def test_keep_user_amount(self):
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2016-01-01',
+            'currency_id': self.other_currency.id,
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+        })
+        invoice.action_post()
+
+        wizard = self.env['account.payment.register']\
+            .with_context(active_model='account.move', active_ids=invoice.ids)\
+            .create({'payment_date': '2016-01-01'})
+        self.assertRecordValues(wizard, [{'amount': 3450.0}])
+        wizard.amount = 3000.0
+        self.assertRecordValues(wizard, [{'amount': 3000.0}])
+        wizard.payment_date = '2017-01-01'
+        self.assertRecordValues(wizard, [{'amount': 3000.0}])
+
+    def test_installment_mode_single_batch(self):
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2016-01-01',
+            'invoice_payment_term_id': self.term_advance_60days.id,
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+        })
+        invoice.action_post()
+        self.assertRecordValues(invoice.line_ids.sorted().filtered('date_maturity'), [
+            {'date_maturity': fields.Date.from_string('2016-01-01'), 'amount_currency': 345},
+            {'date_maturity': fields.Date.from_string('2016-03-01'), 'amount_currency': 805},
+        ])
+
+        term_lines = invoice.line_ids.filtered('date_maturity').sorted('date_maturity')
+
+        wizard = self.env['account.payment.register']\
+            .with_context(active_model='account.move', active_ids=invoice.ids)\
+            .create({'payment_date': '2016-01-01'})
+        self.assertRecordValues(wizard, [{
+            'amount': 345.0,
+            'payment_difference': 0.0,
+            'installments_mode': 'next',
+            'installments_switch_amount': 1150.0,
+            'communication': wizard._get_communication(term_lines[0]),
+        }])
+        wizard.amount = 300.0
+        self.assertRecordValues(wizard, [{
+            'amount': 300.0,
+            'payment_difference': 0.0,
+            'installments_mode': 'next',
+            'installments_switch_amount': 1150.0,
+        }])
+        wizard.amount = 400.0
+        self.assertRecordValues(wizard, [{
+            'amount': 400.0,
+            'payment_difference': 750.0,
+            'installments_mode': 'next',
+            'installments_switch_amount': 1150.0,
+        }])
+        wizard.amount = 1150.0
+        self.assertRecordValues(wizard, [{
+            'amount': 1150.0,
+            'payment_difference': 0.0,
+            'installments_mode': 'full',
+            'installments_switch_amount': 345.0,
+        }])
+
+        wizard.payment_date = '2016-01-02'
+        self.assertRecordValues(wizard, [{
+            'amount': 345.0,
+            'payment_difference': 0.0,
+            'installments_mode': 'overdue',
+            'installments_switch_amount': 1150.0,
+            'communication': wizard._get_communication(term_lines[0]),
+        }])
+        wizard.amount = 300.0
+        self.assertRecordValues(wizard, [{
+            'amount': 300.0,
+            'payment_difference': 0.0,
+            'installments_mode': 'overdue',
+            'installments_switch_amount': 1150.0,
+        }])
+        wizard.amount = 400.0
+        self.assertRecordValues(wizard, [{
+            'amount': 400.0,
+            'payment_difference': 0.0,  # TODO: check with Laura
+            'installments_mode': 'overdue',
+            'installments_switch_amount': 1150.0,
+        }])
+        wizard.amount = 1150.0
+        self.assertRecordValues(wizard, [{
+            'amount': 1150.0,
+            'payment_difference': 0.0,
+            'installments_mode': 'full',
+            'installments_switch_amount': 345.0,
+        }])
+
+        wizard.payment_date = '2016-03-02'
+        self.assertRecordValues(wizard, [{
+            'amount': 1150.0,
+            'payment_difference': 0.0,
+            'installments_mode': 'full',
+            'installments_switch_amount': 0.0,
+            'communication': wizard._get_communication(term_lines),
+        }])

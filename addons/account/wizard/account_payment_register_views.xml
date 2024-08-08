@@ -13,6 +13,8 @@
                     <field name="can_group_payments" invisible="1" force_save="1"/>
                     <field name="early_payment_discount_mode" invisible="1" force_save="1"/>
                     <field name="installments_mode" invisible="1"/>
+                    <field name="installments_switch_amount" invisible="1"/>
+                    <field name="installments_switch_html" invisible="1"/>
                     <field name="payment_type" invisible="1" force_save="1"/>
                     <field name="partner_type" invisible="1" force_save="1"/>
                     <field name="source_amount" invisible="1" force_save="1"/>
@@ -33,7 +35,6 @@
                     <field name="writeoff_is_exchange_account" invisible="1"/>
                     <field name="untrusted_bank_ids" invisible="1"/>
                     <field name="missing_account_partners" invisible="1"/>
-                    <field name="is_amount_forced_by_user" invisible="1"/>
 
                     <div role="alert" class="alert alert-info" invisible="not hide_writeoff_section">
                         <p><b>Early Payment Discount of <field name="payment_difference"/> has been applied.</b></p>
@@ -107,19 +108,7 @@
                                        options="{'no_create': True, 'no_open': True}"
                                        groups="base.group_multi_currency"/>
                             </div>
-                            <div invisible="is_amount_forced_by_user or not installments_mode or currency_id != source_currency_id or not can_edit_wizard or can_group_payments and not group_payment"/>
-                            <div invisible="is_amount_forced_by_user or installments_mode != 'overdue' or not can_edit_wizard or can_group_payments and not group_payment">
-                                This is the overdue amount.<br/>
-                                Consider paying the <button name="action_switch_installments" type="object" class="btn btn-link p-0 align-baseline">full amount</button>.
-                            </div>
-                            <div invisible="is_amount_forced_by_user or installments_mode != 'next' or currency_id != source_currency_id or not can_edit_wizard or can_group_payments and not group_payment">
-                                This is the next unreconciled installment.<br/>
-                                Consider paying the <button name="action_switch_installments" type="object" class="btn btn-link p-0 align-baseline">full amount</button>.
-                            </div>
-                            <div invisible="is_amount_forced_by_user or installments_mode != 'full' or currency_id != source_currency_id or not can_edit_wizard or can_group_payments and not group_payment">
-                                This is the full amount.<br/>
-                                Consider paying in <button name="action_switch_installments" type="object" class="btn btn-link p-0 align-baseline">installments</button> instead.
-                            </div>
+                            <field name="installments_switch_html" string="" widget="account_payment_register_html"/>
                             <field name="payment_date"/>
                             <field name="communication"
                                    invisible="not can_edit_wizard or (can_group_payments and not group_payment)"/>
