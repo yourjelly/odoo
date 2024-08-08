@@ -78,6 +78,8 @@ const checkAnswerAppearance = (answerLabel, shownAnswer, expectedAnswerType) => 
     }
 };
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const checkAnswerValue = (answerLabel, shownAnswerValue, expectedAnswerValue) => {
     if (shownAnswerValue !== expectedAnswerValue) {
         console.error(expectedAnswerValue === 0 ?
@@ -307,30 +309,55 @@ registry.category("web_tour.tours").add('test_survey_session_manage_tour', {
         const chartData = getChartData();
         checkAnswersCount(chartData, 3);
         checkAnswersAllZeros(chartData);
-
-        // after 1 second, results are displayed automatically because question timer runs out
-        // we add 1 extra second because of the way the timer works:
-        // it only triggers the time_up event 1 second AFTER the delay is passed
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                checkAnswers(getChartData(), [
-                    {value: 2, type: "regular"},
-                    {value: 2, type: "regular"},
-                    {value: 1, type: "regular"},
-                ]);
-
-                nextScreen();
-                checkAnswers(getChartData(), [
-                    {value: 2, type: "correct"},
-                    {value: 2, type: "correct"},
-                    {value: 1, type: "incorrect"},
-                ]);
-
-                nextScreen();
-                resolve();
-            }, 2100);
-        });
+    
+        // Introduce a delay of 2100ms before proceeding
+        await delay(2100);
+    
+        // Perform actions after the delay
+        checkAnswers(getChartData(), [
+            {value: 2, type: "regular"},
+            {value: 2, type: "regular"},
+            {value: 1, type: "regular"},
+        ]);
+    
+        nextScreen();
+    
+        checkAnswers(getChartData(), [
+            {value: 2, type: "correct"},
+            {value: 2, type: "correct"},
+            {value: 1, type: "incorrect"},
+        ]);
+    
+        nextScreen();
     }
+    // async run() {
+    //     const chartData = getChartData();
+    //     checkAnswersCount(chartData, 3);
+    //     checkAnswersAllZeros(chartData);
+
+    //     // after 1 second, results are displayed automatically because question timer runs out
+    //     // we add 1 extra second because of the way the timer works:
+    //     // it only triggers the time_up event 1 second AFTER the delay is passed
+    //     await new Promise((resolve) => {
+    //         setTimeout(() => {
+    //             checkAnswers(getChartData(), [
+    //                 {value: 2, type: "regular"},
+    //                 {value: 2, type: "regular"},
+    //                 {value: 1, type: "regular"},
+    //             ]);
+
+    //             nextScreen();
+    //             checkAnswers(getChartData(), [
+    //                 {value: 2, type: "correct"},
+    //                 {value: 2, type: "correct"},
+    //                 {value: 1, type: "incorrect"},
+    //             ]);
+
+    //             nextScreen();
+    //             resolve();
+    //         }, 2100);
+    //     });
+    // }
 }, {
     // Final Leaderboard is displayed
     trigger: 'h1:contains("Final Leaderboard")',
