@@ -1178,7 +1178,7 @@ class AccountMoveLine(models.Model):
             ]
 
     def action_payment_items_register_payment(self):
-        return self.action_register_payment({'force_group_payment': True})
+        return self.action_register_payment(ctx={'default_group_payment': True})
 
     def action_register_payment(self, ctx=None):
         ''' Open the account.payment.register wizard to pay the selected journal items.
