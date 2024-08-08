@@ -32,7 +32,7 @@ class MailPluginController(mail_plugin.MailPluginController):
             contact_values['tasks'] = []
         else:
             partner_tasks = request.env['project.task'].search(
-                [('partner_id', '=', partner.id)], offset=0, limit=5)
+                [('partner_id', '=', partner.id)], offset=0, limit=30)
 
             accessible_projects = partner_tasks.project_id._filter_access_rules('read').mapped("id")
 
