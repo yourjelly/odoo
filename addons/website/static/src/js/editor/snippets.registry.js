@@ -15,3 +15,8 @@ registerWebsiteOption("WebsiteIconTools", {
     selector: "span.fa, i.fa",
     exclude: "[data-oe-xpath]",
 });
+
+registerWebsiteOption("BadgeOptions", {
+    template: "website.s_badge_options",
+    selector: ".s_badge",
+});
