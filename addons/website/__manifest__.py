@@ -243,6 +243,7 @@
             'website/static/src/js/editor/snippets.options.xml',
             'website/static/src/js/editor/snippets.options.legacy.js',
             'website/static/src/js/editor/snippets.registry.js',
+            'website/static/src/js/editor/options/common/*',
             'website/static/src/snippets/s_facebook_page/options.js',
             'website/static/src/snippets/s_facebook_page/options.xml',
             'website/static/src/snippets/s_image/options.js',
