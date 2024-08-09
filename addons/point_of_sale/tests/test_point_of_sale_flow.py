@@ -1957,3 +1957,62 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
 
         moves = self.env['account.move'].search([('ref', '=', f'pos_order_{order.id}')])
         self.assertEqual(len(moves), 2)
+
+    def test_change_from_cash(self):
+        """
+        Test that all the payments are correctly taken into account when the order contains multiple payments and money refund.
+        In this example, we create an order with two payments for a product of 120$:
+            - one payment of $100 with bank
+            - one payment of $50 with cash
+        Then, the change $30, should be deducted from the cash payment in the invoice.
+        """
+
+        product5 = self.env['product.product'].create({
+            'name': 'product5',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_all').id,
+        })
+
+        # sell product thru pos
+        self.pos_config.open_session_cb()
+        pos_session = self.pos_config.current_session_id
+        product5_order = {'data':
+          {'amount_paid': 120,
+           'amount_return': 30,
+           'amount_tax': 0,
+           'amount_total': 120,
+           'creation_date': fields.Datetime.to_string(fields.Datetime.now()),
+           'fiscal_position_id': False,
+           'pricelist_id': self.pos_config.available_pricelist_ids[0].id,
+           'lines': [[0, 0, {
+                'discount': 0,
+                'id': 42,
+                'pack_lot_ids': [],
+                'price_unit': 120.0,
+                'product_id': product5.id,
+                'price_subtotal': 120.0,
+                'price_subtotal_incl': 120.0,
+                'tax_ids': [[6, False, []]],
+                'qty': 1,
+            }]],
+           'name': 'Order 12345-123-1234',
+           'partner_id': self.partner1.id,
+           'pos_session_id': pos_session.id,
+           'sequence_number': 2,
+           'statement_ids': [[0, 0, {
+                'amount': 460,
+                'name': fields.Datetime.now(),
+                'payment_method_id': self.cash_payment_method.id
+            }], [0, 0, {
+                'amount': 300,
+                'name': fields.Datetime.now(),
+                'payment_method_id': self.credit_payment_method.id
+            }]],
+           'uid': '12345-123-1234',
+           'user_id': self.env.uid,
+           'to_invoice': True, }
+        }
+        pos_order_id = self.PosOrder.create_from_ui([product5_order])[0]['id']
+        pos_order = self.PosOrder.search([('id', '=', pos_order_id)])
+        #assert account_move amount_residual is 300
+        self.assertEqual(pos_order.account_move.amount_residual, 300)

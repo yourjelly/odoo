@@ -65,7 +65,11 @@ class PosPayment(models.Model):
 
     def _create_payment_moves(self, is_reverse=False):
         result = self.env['account.move']
-        for payment in self:
+        cash_payment = self.filtered(lambda p: p.payment_method_id.type == 'cash')
+        change_payment = self.filtered(lambda p: p.is_change and p.payment_method_id.type == 'cash')
+        if cash_payment and change_payment:
+            cash_payment[0].amount += change_payment.amount
+        for payment in self.filtered(lambda p: not p.is_change):
             payment_method = payment.payment_method_id
             if payment_method.type == 'pay_later' or float_is_zero(payment.amount, precision_rounding=payment.pos_order_id.currency_id.rounding):
                 continue
