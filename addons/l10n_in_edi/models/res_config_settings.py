@@ -3,7 +3,6 @@
 
 from odoo import models, fields, _
 from odoo.exceptions import UserError, RedirectWarning
-from odoo.addons.l10n_in.const import IAP_SERVICE_NAME
 
 
 class ResConfigSettings(models.TransientModel):
@@ -37,12 +36,3 @@ class ResConfigSettings(models.TransientModel):
                   'message': _("API credentials validated successfully"),
               }
           }
-
-    def l10n_in_edi_buy_iap(self):
-        if not self.l10n_in_edi_production_env:
-            raise UserError(_("You must enable production environment to buy credits"))
-        return {
-            'type': 'ir.actions.act_url',
-            'url': self.env["iap.account"].get_credits_url(service_name=IAP_SERVICE_NAME),
-            'target': '_new'
-        }

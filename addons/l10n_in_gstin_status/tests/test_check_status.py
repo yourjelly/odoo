@@ -49,7 +49,7 @@ class TestGSTStatusFeature(TransactionCase):
     @freeze_time('2024-05-20')
     @mute_logger('odoo.addons.l10n_in_gstin_status.models.res_partner')
     def check_gstin_status(self, partner, expected_status, mock_response, raises_exception=False):
-        with patch("odoo.addons.l10n_in_gstin_status.models.res_partner.jsonrpc") as mock_jsonrpc:
+        with patch("odoo.addons.l10n_in.models.iap_account.jsonrpc") as mock_jsonrpc:
             mock_jsonrpc.return_value = mock_response
             if raises_exception:
                 with self.assertRaises(UserError):

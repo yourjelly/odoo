@@ -5,7 +5,6 @@
     "category": "Accounting/Localizations",
     "depends": [
         "l10n_in",
-        "iap",
     ],
     "data": [
         "views/account_move_views.xml",

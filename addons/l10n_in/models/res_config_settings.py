@@ -3,6 +3,7 @@
 
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
+from odoo.addons.l10n_in.const import IAP_SERVICE_NAME
 
 
 class ResConfigSettings(models.TransientModel):
@@ -20,6 +21,13 @@ class ResConfigSettings(models.TransientModel):
     l10n_in_hsn_code_digit = fields.Selection(related='company_id.l10n_in_hsn_code_digit', readonly=False)
 
     def l10n_in_edi_buy_iap(self):
-        raise ValidationError(_(
-            "Please enable at least one Indian service and save the configuration to purchase credits."
-        ))
+        if not self.l10n_in_edi_production_env or not (self.module_l10n_in_edi or self.module_l10n_in_gstin_status):
+            raise ValidationError(_(
+                "Please ensure that at least one Indian service and production environment is enabled,"
+                " and save the configuration to proceed with purchasing credits."
+            ))
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.env["iap.account"].get_credits_url(service_name=IAP_SERVICE_NAME),
+            'target': '_new'
+        }

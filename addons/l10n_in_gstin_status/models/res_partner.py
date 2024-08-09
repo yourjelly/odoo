@@ -4,9 +4,8 @@ import logging
 import re
 
 from odoo import api, fields, models, _
-from odoo.addons.iap import jsonrpc
 from odoo.exceptions import UserError, AccessError, ValidationError
-from odoo.addons.l10n_in.const import DEFAULT_IAP_ENDPOINT, DEFAULT_IAP_TEST_ENDPOINT, IAP_SERVICE_NAME
+from odoo.addons.l10n_in.const import IAP_SERVICE_NAME
 
 _logger = logging.getLogger(__name__)
 
@@ -33,28 +32,21 @@ class ResPartner(models.Model):
                 partner.l10n_in_gstin_verified_status = False
                 partner.l10n_in_gstin_verified_date = False
 
-    def _l10n_in_gstin_status_get_url(self, is_production):
-        if is_production:
-            default_endpoint = DEFAULT_IAP_ENDPOINT
-        else:
-            default_endpoint = DEFAULT_IAP_TEST_ENDPOINT
-        endpoint = self.env["ir.config_parameter"].sudo().get_param("l10n_in_gstin_status.endpoint", default_endpoint)
-        url = "%s%s" % (endpoint, '/iap/l10n_in_reports/1/public/search')
-        return url
-
     def action_l10n_in_verify_gstin_status(self):
         self.ensure_one()
         if not self.vat:
             raise ValidationError(_("Please enter the GSTIN"))
         is_production = self.env.company.sudo().l10n_in_edi_production_env
-        url = self._l10n_in_gstin_status_get_url(is_production)
         params = {
-            "account_token": self.env["iap.account"].get(IAP_SERVICE_NAME).account_token,
-            "dbuuid": self.env["ir.config_parameter"].sudo().get_param("database.uuid"),
             "gstin_to_search": self.vat,
         }
         try:
-            response = jsonrpc(url, params=params, timeout=25)
+            response = self.env['iap.account']._l10n_in_connect_to_server(
+                is_production,
+                params,
+                '/iap/l10n_in_reports/1/public/search',
+                "l10n_in_gstin_status.endpoint"
+            )
         except AccessError:
             raise UserError(_("Unable to connect with GST network"))
         if response.get('error') and any(e.get('code') == 'no-credit' for e in response['error']):
