@@ -113,7 +113,7 @@ class AccountMove(models.Model):
                 account = random.choice(accounts)
                 currency = account.currency_id != account.company_id.currency_id and account.currency_id or random.choice(currencies)
                 if balance is None:
-                    balance = round(random.uniform(-10000, 10000))
+                    balance = round(random.uniform(-100, 100))
                 return Command.create({
                     'name': 'label_%s' % label,
                     'balance': balance,
@@ -127,8 +127,8 @@ class AccountMove(models.Model):
                 return Command.create({
                     'product_id': random.choice(products).id,
                     'account_id': random.choice(accounts).id,
-                    'price_unit': round(random.uniform(0, 10000)),
-                    'quantity': round(random.uniform(0, 100)),
+                    'price_unit': round(random.uniform(0, 100)),
+                    'quantity': round(random.uniform(0, 10)),
                 })
 
             move_type = values['move_type']
@@ -150,7 +150,7 @@ class AccountMove(models.Model):
                 # Add a random number of lines (between 1 and 20)
                 lines = [get_entry_line(
                     label=i,
-                ) for i in range(random.randint(1, 20))]
+                ) for i in range(random.randint(1, 8))]
 
                 # Add a last line containing the balance.
                 # For invoices, etc., it will be on the receivable/payable account.
@@ -159,7 +159,7 @@ class AccountMove(models.Model):
                     label='balance',
                 )]
             else:
-                lines = [get_invoice_line() for _i in range(random.randint(1, 20))]
+                lines = [get_invoice_line() for _i in range(random.randint(1, 8))]
 
             return lines
 

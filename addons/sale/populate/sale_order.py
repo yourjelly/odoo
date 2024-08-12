@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
-    _populate_sizes = {"small": 100, "medium": 2_000, "large": 20_000}
+    _populate_sizes = {"small": 1000, "medium": 2_000, "large": 20_000}
     _populate_dependencies = ["res.partner", "res.company", "res.users", "product.pricelist"]
 
     def _populate_factories(self):

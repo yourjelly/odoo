@@ -11,7 +11,7 @@ class Partner(models.Model):
     _inherit = "res.company"
 
     _populate_sizes = {
-        'small': 5,
+        'small': 2,
         'medium': 10,
         'large': 50,
     }
