@@ -46,14 +46,15 @@ class PosMercadoPagoWebhook(http.Controller):
 
         # If and only if this webhook is related with a payment intend (see payment_mercado_pago.js)
         # then the field data['additional_info']['external_reference'] contains a string
-        # formated like "XXX_YYY" where "XXX" is the session_id and "YYY" is the payment_method_id
+        # formated like "XXX_YYY_ZZZ" where "XXX" is the session_id, "YYY" is the payment_id,
+        # and ZZZ is the order_id for customers to identify them.
         external_reference = data.get('additional_info', {}).get('external_reference')
 
-        if not external_reference or not re.fullmatch(r'\d+_\d+', external_reference):
+        if not external_reference or not re.fullmatch(r'\d+_\d+_\d+', external_reference):
             _logger.debug('POST message received with no or malformed "external_reference" key')
             return http.Response(status=400)
 
-        session_id, payment_method_id = external_reference.split('_')
+        session_id, payment_id, order_id = external_reference.split('_')
 
         pos_session_sudo = request.env['pos.session'].sudo().browse(int(session_id))
         if not pos_session_sudo or pos_session_sudo.state != 'opened':
@@ -61,9 +62,21 @@ class PosMercadoPagoWebhook(http.Controller):
             # This error is not related with Mercado Pago, simply acknowledge Mercado Pago message
             return http.Response('OK', status=200)
 
-        payment_method_sudo = pos_session_sudo.config_id.payment_method_ids.filtered(lambda p: p.id == int(payment_method_id))
+        pos_order_sudo = pos_session_sudo.order_ids.filtered(lambda o: o.id == int(order_id))
+        if not pos_order_sudo:
+            _logger.error("Invalid order id: %s", order_id)
+            # This error is not related with Mercado Pago, simply acknowledge Mercado Pago message
+            return http.Response('OK', status=200)
+
+        payment_line_sudo = pos_order_sudo.payment_ids.filtered(lambda p: p.id == int(payment_id))
+        if not payment_line_sudo:
+            _logger.error("Invalid pos payment id: %s", payment_id)
+            # This error is not related with Mercado Pago, simply acknowledge Mercado Pago message
+            return http.Response('OK', status=200)
+
+        payment_method_sudo = payment_line_sudo.payment_method_id
         if not payment_method_sudo or payment_method_sudo.use_payment_terminal != 'mercado_pago':
-            _logger.error("Invalid payment method id: %s", payment_method_id)
+            _logger.error("Invalid payment method from payment: %s", payment_id)
             # This error is not related with Mercado Pago, simply acknowledge Mercado Pago message
             return http.Response('OK', status=200)
 

@@ -6,12 +6,13 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 export class PaymentMercadoPago extends PaymentInterface {
     async create_payment_intent() {
         const line = this.pos.get_order().selected_paymentline;
+        const order_id = this.pos.get_order().id;
         // Build informations for creating a payment intend on Mercado Pago.
         // Data in "external_reference" are send back with the webhook notification
         const infos = {
             amount: parseInt(line.amount * 100, 10),
             additional_info: {
-                external_reference: `${this.pos.config.current_session_id.id}_${line.payment_method.id}`,
+                external_reference: `${this.pos.config.current_session_id.id}_${line.id}_${order_id}`,
                 print_on_terminal: true,
             },
         };

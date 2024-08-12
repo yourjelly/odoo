@@ -9,8 +9,9 @@ MERCADO_PAGO_API_ENDPOINT = 'https://api.mercadopago.com'
 
 
 class MercadoPagoPosRequest:
-    def __init__(self, mp_bearer_token):
+    def __init__(self, mp_bearer_token, platform_id=False):
         self.mercado_pago_bearer_token = mp_bearer_token
+        self.platform_id = platform_id
 
     def call_mercado_pago(self, method, endpoint, payload):
         """ Make a request to Mercado Pago POS API.
@@ -22,6 +23,8 @@ class MercadoPagoPosRequest:
         """
         endpoint = MERCADO_PAGO_API_ENDPOINT + endpoint
         header = {'Authorization': f"Bearer {self.mercado_pago_bearer_token}"}
+        if self.platform_id:
+            header['X-platform-id'] = self.platform_id
         try:
             response = requests.request(method, endpoint, headers=header, json=payload, timeout=REQUEST_TIMEOUT)
             return response.json()

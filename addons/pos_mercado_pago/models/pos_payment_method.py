@@ -35,7 +35,8 @@ class PosPaymentMethod(models.Model):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Mercado Pago"))
 
-        mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token)
+        platform_id = self.env['ir.config_parameter'].sudo().get_param('pos_mercado_pago.platform_id')
+        mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token, platform_id=platform_id)
         _logger.info('Calling Mercado Pago to force the terminal mode to "PDV"')
 
         mode = {"operating_mode": "PDV"}
@@ -52,7 +53,8 @@ class PosPaymentMethod(models.Model):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Mercado Pago"))
 
-        mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token)
+        platform_id = self.env['ir.config_parameter'].sudo().get_param('pos_mercado_pago.platform_id')
+        mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token, platform_id=platform_id)
         # Call Mercado Pago for payment intend creation
         resp = mercado_pago.call_mercado_pago("post", f"/point/integration-api/devices/{self.mp_id_point_smart_complet}/payment-intents", infos)
         _logger.debug("mp_payment_intent_create(), response from Mercado Pago: %s", resp)
@@ -65,7 +67,8 @@ class PosPaymentMethod(models.Model):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Mercado Pago"))
 
-        mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token)
+        platform_id = self.env['ir.config_parameter'].sudo().get_param('pos_mercado_pago.platform_id')
+        mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token, platform_id=platform_id)
         # Call Mercado Pago for payment intend status
         resp = mercado_pago.call_mercado_pago("get", f"/point/integration-api/payment-intents/{payment_intent_id}", {})
         _logger.debug("mp_payment_intent_get(), response from Mercado Pago: %s", resp)
@@ -78,14 +81,16 @@ class PosPaymentMethod(models.Model):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Mercado Pago"))
 
-        mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token)
+        platform_id = self.env['ir.config_parameter'].sudo().get_param('pos_mercado_pago.platform_id')
+        mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token, platform_id=platform_id)
         # Call Mercado Pago for payment intend cancelation
         resp = mercado_pago.call_mercado_pago("delete", f"/point/integration-api/devices/{self.mp_id_point_smart_complet}/payment-intents/{payment_intent_id}", {})
         _logger.debug("mp_payment_intent_cancel(), response from Mercado Pago: %s", resp)
         return resp
 
     def _find_terminal(self, token, point_smart):
-        mercado_pago = MercadoPagoPosRequest(token)
+        platform_id = self.env['ir.config_parameter'].sudo().get_param('pos_mercado_pago.platform_id')
+        mercado_pago = MercadoPagoPosRequest(token, platform_id=platform_id)
         data = mercado_pago.call_mercado_pago("get", "/point/integration-api/devices", {})
         if 'devices' in data:
             # Search for a device id that contains the serial number entered by the user

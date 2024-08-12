@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+
+    <record id="enable_portal_payment" model="ir.config_parameter" forcecreate="0">
+        <field name="key">pos_mercado_pago.platform_id</field>
+        <field name="value">dev_cdf1cfac242111ef9fdebe8d845d0987</field>
+    </record>
+
+</odoo>
+
