@@ -537,15 +537,16 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.show_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_using_bank_account()
             wizard.require_partner_bank_account = wizard.payment_method_line_id.code in self.env['account.payment']._get_method_codes_needing_bank_account()
 
-    def _convert_to_wizard_currency(self, amount_per_line):
+    def _convert_to_wizard_currency(self, installments):
         self.ensure_one()
         total_amount = 0.0
         wizard_curr = self.currency_id
         comp_curr = self.company_currency_id
-        for line, amount_residual_currency_field, amount_residual_field in amount_per_line:
+        for installment in installments:
+            line = installment['line']
             line_curr = line.currency_id
-            amount_residual = line[amount_residual_field]
-            amount_residual_currency = line[amount_residual_currency_field]
+            amount_residual = installment['amount_residual']
+            amount_residual_currency = installment['amount_residual_currency']
             if line_curr == wizard_curr:
                 # Same currency
                 total_amount += amount_residual_currency
@@ -572,44 +573,41 @@ class AccountPaymentRegister(models.TransientModel):
         amount_per_line_for_difference = []
         epd_applied = False
         first_installment_mode = False
-        current_installment_mode = False
+        last_installment_mode = False
         moves = batch_result['lines'].move_id
-        for line in batch_result['lines'].sorted(key=lambda line: (line.move_id, line.date_maturity)):
-            move = line.move_id
+        all_lines = batch_result['lines'].sorted(key=lambda line: (line.move_id, line.date_maturity))
+        for move, lines in all_lines.grouped('move_id').items():
+            installments = lines._get_installments_data(payment_currency=self.currency_id, payment_date=self.payment_date)['installments']
+            for installment in installments:
+                line = installment['line']
+                if installment['type'] == 'early_payment':
+                    epd_applied = True
+                    amount_per_line_by_default.append(installment)
+                    amount_per_line_for_difference.append(installment)
+                    continue
 
-            # Early payment discount.
-            # In that case, we want to report the difference of the epd and display it on the UI.
-            if (
-                line.currency_id == self.currency_id
-                and move._is_eligible_for_early_payment_discount(move.currency_id, self.payment_date)
-            ):
-                epd_applied = True
-                amount_per_line_by_default.append((line, 'discount_amount_currency', 'discount_balance'))
-                amount_per_line_for_difference.append((line, 'amount_residual_currency', 'amount_residual'))
-                continue
+                # Installments.
+                # In case of overdue, all of them are sum as a default amount to be paid.
+                # The next installment is added for the difference.
+                if (
+                    len(moves) == 1
+                    and line.display_type == 'payment_term'
+                    and installment['type'] in ('overdue', 'next')
+                ):
+                    if installment['type'] == 'overdue':
+                        amount_per_line_common.append(installment)
+                    elif installment['type'] == 'next':
+                        if last_installment_mode == 'overdue':
+                            amount_per_line_for_difference.append(installment)
+                        elif last_installment_mode == 'next':
+                            amount_per_line_full_amount.append(installment)
+                        else:
+                            amount_per_line_common.append(installment)
+                    last_installment_mode = installment['type']
+                    first_installment_mode = first_installment_mode or last_installment_mode
+                    continue
 
-            # Installments.
-            # In case of overdue, all of them are sum as a default amount to be paid.
-            # The next installment is added for the difference.
-            if len(moves) == 1 and line.display_type == 'payment_term':
-                if line.date_maturity < self.payment_date:
-                    # Collect all overdue installments.
-                    first_installment_mode = current_installment_mode = 'overdue'
-                    amount_per_line_common.append((line, 'amount_residual_currency', 'amount_residual'))
-                elif not first_installment_mode:
-                    # Suggest the next installment in case of no overdue.
-                    first_installment_mode = 'next'
-                    current_installment_mode = 'next'
-                    amount_per_line_common.append((line, 'amount_residual_currency', 'amount_residual'))
-                elif current_installment_mode == 'overdue':
-                    # After an overdue, just add the next installment for the difference.
-                    current_installment_mode = 'next'
-                    amount_per_line_for_difference.append((line, 'amount_residual_currency', 'amount_residual'))
-                else:
-                    amount_per_line_full_amount.append((line, 'amount_residual_currency', 'amount_residual'))
-                continue
-
-            amount_per_line_common.append((line, 'amount_residual_currency', 'amount_residual'))
+                amount_per_line_common.append(installment)
 
         common = self._convert_to_wizard_currency(amount_per_line_common)
         by_default = self._convert_to_wizard_currency(amount_per_line_by_default)
@@ -618,7 +616,7 @@ class AccountPaymentRegister(models.TransientModel):
 
         lines = self.env['account.move.line']
         for value in amount_per_line_common + amount_per_line_by_default:
-            lines |= value[0]
+            lines |= value['line']
 
         return {
             'amount_by_default': common + by_default,
