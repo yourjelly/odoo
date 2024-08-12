@@ -331,15 +331,6 @@
         <we-button class="fa fa-fw fa-angle-right" data-move-snippet="next" data-no-preview="true" data-name="move_right_opt"/>
     </div>
 
-    <div id="so_width" data-selector=".s_mail_alert .s_alert, .s_mail_blockquote, .s_mail_text_highlight">
-        <we-select string="Width">
-            <we-button data-select-class="w-25">25%</we-button>
-            <we-button data-select-class="w-50">50%</we-button>
-            <we-button data-select-class="w-75">75%</we-button>
-            <we-button data-select-class="w-100" data-name="so_width_100">100%</we-button>
-        </we-select>
-    </div>
-
     <div data-selector=".o_mail_snippet_general" data-exclude=".o_mail_snippet_general .row > div *">
         <we-button-group string="Height">
             <we-button data-name="minheight_auto_opt" data-select-class="" title="Fit content">Auto</we-button>

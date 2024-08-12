@@ -1,5 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<templates id="template" xml:space="preserve">
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="mass_mailing.block_width_option">
+    <WeSelect title.translate="Width">
+        <WeButton selectClass="'w-25'">25%</WeButton>
+        <WeButton selectClass="'w-50'">50%</WeButton>
+        <WeButton selectClass="'w-75'">75%</WeButton>
+        <WeButton selectClass="'w-100'" name="'so_width_100'">100%</WeButton>
+    </WeSelect>
+</t>
 
 <t t-name="mass_mailing.block_align_option">
     <WeButtonGroup title.translate="Alignment" dependencies="'!so_width_100'">
