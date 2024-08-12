@@ -449,6 +449,16 @@ class StockMove(models.Model):
     def _action_confirm(self, merge=True, merge_into=False):
         moves = self.action_explode()
         merge_into = merge_into and merge_into.action_explode()
+        # Filtered loop: Process only specific moves
+        filtered_moves = moves.filtered(
+            lambda m: m.warehouse_id and
+                    m.warehouse_id.manufacture_steps == 'pbm_sam' and
+                    m.production_id and
+                    m.move_dest_ids and
+                    m.move_dest_ids.raw_material_production_id
+        )
+        for move in filtered_moves:
+            move.production_id = False
         # we go further with the list of ids potentially changed by action_explode
         return super(StockMove, moves)._action_confirm(merge=merge, merge_into=merge_into)
 
@@ -709,4 +719,20 @@ class StockMove(models.Model):
                         or (float_compare(move.quantity, move.product_uom_qty, precision_rounding=move.product_uom.rounding) >= 0 or (move.manual_consumption and move.picked))
                         for move in self):
             res = 'assigned'
+        return res
+
+    def _search_picking_for_assignation(self):
+        self.ensure_one()
+
+        if self.warehouse_id.manufacture_steps == 'pbm_sam' and \
+        self.env['mrp.production'].browse(self.env.context.get('active_id')).mrp_production_backorder_count > 1:
+            return False
+
+        return super()._search_picking_for_assignation()
+
+    def _assign_picking(self):
+        res = super()._assign_picking()
+        for move in self:
+            if move.move_dest_ids.raw_material_production_id:
+                move.picking_id.origin = move[0].move_dest_ids.origin
         return res

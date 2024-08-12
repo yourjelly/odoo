@@ -162,7 +162,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
         self.assertEqual(sum(sam_move.mapped("product_qty")), 1)
 
         mo_backorder = production.procurement_group_id.mrp_production_ids[-1]
-        self.assertEqual(mo_backorder.delivery_count, 2)
+        self.assertEqual(mo_backorder.delivery_count, 1)
 
         pbm_move |= mo_backorder.move_raw_ids.move_orig_ids
         self.assertEqual(sum(pbm_move.filtered(lambda m: m.product_id.id == product_to_use_1.id).mapped("product_qty")), 16)

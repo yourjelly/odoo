@@ -1327,7 +1327,6 @@ Please change the quantity done or the rounding precision of your unit of measur
                     continue
                 new_picking = True
                 picking = Picking.create(moves._get_new_picking_values())
-
             moves.write({'picking_id': picking.id})
             moves._assign_picking_post_process(new=new_picking)
         return True
