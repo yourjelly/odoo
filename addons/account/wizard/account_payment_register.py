@@ -77,9 +77,8 @@ class AccountPaymentRegister(models.TransientModel):
         compute='_compute_installments_switch_values',
         currency_field='currency_id',
     )
-    is_custom_user_amount = fields.Boolean(
-        compute='_compute_is_custom_user_amount',
-    )
+    custom_user_amount = fields.Monetary(currency_field='currency_id')
+    custom_user_currency_id = fields.Many2one(comodel_name='res.currency')
 
     # == Fields given through the context ==
     line_ids = fields.Many2many('account.move.line', 'account_payment_register_move_line_rel', 'wizard_id', 'line_id',
@@ -630,28 +629,51 @@ class AccountPaymentRegister(models.TransientModel):
             'lines': lines,
         }
 
-    @api.depends('amount')
-    def _compute_is_custom_user_amount(self):
-        for wizard in self:
-            if not wizard.amount:
-                wizard.is_custom_user_amount = False
-            elif wizard.currency_id.id == wizard.batches[0]['payment_values']['currency_id']:
-                total_amount_values = wizard._get_total_amounts_to_pay(wizard.batches[0])
-                wizard.is_custom_user_amount = all(
-                    not wizard.currency_id.is_zero(wizard.amount - total_amount_values[amount_field])
-                    for amount_field in ('amount_by_default', 'amount_for_difference', 'full_amount')
-                )
+    @api.onchange('amount')
+    def _onchange_amount(self):
+        if not self.can_edit_wizard or not self.currency_id:
+            return
+
+        total_amount_values = self._get_total_amounts_to_pay(self.batches[0])
+        is_custom_user_amount = all(
+            not self.currency_id.is_zero(self.amount - total_amount_values[amount_field])
+            for amount_field in ('amount_by_default', 'amount_for_difference', 'full_amount')
+        )
+        if is_custom_user_amount:
+            self.custom_user_amount = self.amount
+            self.custom_user_currency_id = self.currency_id
+        else:
+            self.custom_user_amount = None
+            self.custom_user_currency_id = None
+
+    @api.onchange('currency_id')
+    def _onchange_currency_id(self):
+        if not self.can_edit_wizard or not self.currency_id or not self.payment_date or not self.custom_user_amount:
+            return
+
+        if self.custom_user_amount:
+            self.custom_user_amount = self.amount = self.custom_user_currency_id._convert(
+                from_amount=self.custom_user_amount,
+                to_currency=self.currency_id,
+                date=self.payment_date,
+                company=self.company_id,
+            )
+
+    @api.onchange('payment_date')
+    def _onchange_payment_date(self):
+        if not self.can_edit_wizard or not self.currency_id or not self.payment_date or not self.custom_user_amount:
+            return
+
+        self.amount = self.custom_user_amount
 
     @api.depends('can_edit_wizard', 'source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date', 'installments_mode')
     def _compute_amount(self):
         for wizard in self:
-            if not wizard.journal_id or not wizard.currency_id or not wizard.payment_date:
+            if (not wizard.journal_id or not wizard.currency_id or not wizard.payment_date) or wizard.custom_user_amount:
                 wizard.amount = wizard.amount
             elif wizard.source_currency_id and wizard.can_edit_wizard:
-                if wizard.is_custom_user_amount:
-                    wizard.amount = wizard.amount
-                else:
-                    wizard.amount = wizard._get_total_amounts_to_pay(wizard.batches[0])['amount_by_default']
+                total_amount_values = wizard._get_total_amounts_to_pay(wizard.batches[0])
+                wizard.amount = total_amount_values['amount_by_default']
             else:
                 # The wizard is not editable so no partial payment allowed and then, 'amount' is not used.
                 wizard.amount = None

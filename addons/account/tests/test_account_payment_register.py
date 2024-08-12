@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.exceptions import UserError
-from odoo.tests import tagged
+from odoo.tests import tagged, Form
 from odoo import fields, Command
 
 from dateutil.relativedelta import relativedelta
-from freezegun import freeze_time
 
 
 @tagged('post_install', '-at_install')
@@ -1510,10 +1509,13 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         self.assertEqual(wizard.amount, 39.50)
 
     def test_keep_user_amount(self):
+        comp_curr = self.env.company.currency_id
+        foreign_curr = self.other_currency
+
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'invoice_date': '2016-01-01',
-            'currency_id': self.other_currency.id,
+            'invoice_payment_term_id': self.term_advance_60days.id,
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
         })
@@ -1522,11 +1524,80 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         wizard = self.env['account.payment.register']\
             .with_context(active_model='account.move', active_ids=invoice.ids)\
             .create({'payment_date': '2016-01-01'})
-        self.assertRecordValues(wizard, [{'amount': 3450.0}])
-        wizard.amount = 3000.0
-        self.assertRecordValues(wizard, [{'amount': 3000.0}])
-        wizard.payment_date = '2017-01-01'
-        self.assertRecordValues(wizard, [{'amount': 3000.0}])
+        self.assertRecordValues(wizard, [{
+            'amount': 345.0,
+            'currency_id': comp_curr.id,
+            'custom_user_amount': 0.0,
+            'custom_user_currency_id': False,
+            'payment_difference': 0.0,
+            'installments_mode': 'next',
+            'installments_switch_amount': 1150.0,
+        }])
+
+        # Custom amount.
+        with Form(wizard) as wizard_form:
+            wizard_form.amount = 300.0
+        self.assertRecordValues(wizard, [{
+            'amount': 300.0,
+            'currency_id': comp_curr.id,
+            'custom_user_amount': 300.0,
+            'custom_user_currency_id': comp_curr.id,
+            'payment_difference': 0.0,
+            'installments_mode': 'next',
+            'installments_switch_amount': 1150.0,
+        }])
+
+        # Custom currency.
+        with Form(wizard) as wizard_form:
+            wizard_form.currency_id = foreign_curr
+        self.assertRecordValues(wizard, [{
+            'amount': 900.0,
+            'currency_id': foreign_curr.id,
+            'custom_user_amount': 900.0,
+            'custom_user_currency_id': foreign_curr.id,
+            'payment_difference': 0.0,
+            'installments_mode': 'next',
+            'installments_switch_amount': 3450.0,
+        }])
+
+        # Switch to full installment amount.
+        with Form(wizard) as wizard_form:
+            wizard_form.amount = wizard.installments_switch_amount
+        self.assertRecordValues(wizard, [{
+            'amount': 3450.0,
+            'currency_id': foreign_curr.id,
+            'custom_user_amount': 0.0,
+            'custom_user_currency_id': False,
+            'payment_difference': 0.0,
+            'installments_mode': 'full',
+            'installments_switch_amount': 1035.0,
+        }])
+
+        # Custom amount.
+        with Form(wizard) as wizard_form:
+            wizard_form.amount = 3000.0
+        self.assertRecordValues(wizard, [{
+            'amount': 3000.0,
+            'currency_id': foreign_curr.id,
+            'custom_user_amount': 3000.0,
+            'custom_user_currency_id': foreign_curr.id,
+            'payment_difference': 450.0,
+            'installments_mode': 'next',
+            'installments_switch_amount': 3450.0,
+        }])
+
+        # Change the date (rate changed from 1:3 to 1:2).
+        with Form(wizard) as wizard_form:
+            wizard_form.payment_date = fields.Date.from_string('2017-01-01')
+        self.assertRecordValues(wizard, [{
+            'amount': 3000.0,
+            'currency_id': foreign_curr.id,
+            'custom_user_amount': 3000.0,
+            'custom_user_currency_id': foreign_curr.id,
+            'payment_difference': -700.0,
+            'installments_mode': 'overdue',
+            'installments_switch_amount': 2300.0,
+        }])
 
     def test_installment_mode_single_batch(self):
         invoice = self.env['account.move'].create({
