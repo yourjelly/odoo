@@ -580,10 +580,14 @@ class AccountPaymentRegister(models.TransientModel):
             installments = lines._get_installments_data(payment_currency=self.currency_id, payment_date=self.payment_date)['installments']
             for installment in installments:
                 line = installment['line']
-                if installment['type'] == 'early_payment':
+                if installment['type'] == 'early_payment_discount':
                     epd_applied = True
                     amount_per_line_by_default.append(installment)
-                    amount_per_line_for_difference.append(installment)
+                    amount_per_line_for_difference.append({
+                        **installment,
+                        'amount_residual_currency': line.amount_residual_currency,
+                        'amount_residual': line.amount_residual,
+                    })
                     continue
 
                 # Installments.
