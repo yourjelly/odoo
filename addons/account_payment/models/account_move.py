@@ -101,15 +101,25 @@ class AccountMove(models.Model):
 
     def _get_default_payment_link_values(self):
         self.ensure_one()
-        open_installments = []
-        for installment in self._get_installments_payment_data():
-            if installment['amount_residual'] > 0:
-                open_installments.append(installment)
+        installments = [
+            {
+                **x,
+                'line_id': x['line'].id,
+                'line': None,
+            }
+            for x in self._get_installments_payment_data()
+            if not x['reconciled']
+        ]
+        max_amount = sum(x['sign_amount_residual_currency'] for x in installments)
+        if installments:
+            next_amount = installments[0]['sign_amount_residual_currency']
+        else:
+            next_amount = 0.0
 
         return {
-            'amount': open_installments[0]['amount_residual'] if open_installments else self.amount_residual,
+            'amount': next_amount,
             'currency_id': self.currency_id.id,
             'partner_id': self.partner_id.id,
-            'open_installments': open_installments,
-            'amount_max': self.amount_residual,
+            'open_installments': installments,
+            'amount_max': max_amount,
         }
