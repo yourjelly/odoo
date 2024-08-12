@@ -12,6 +12,7 @@ import {
     transformFontFamilySelector,
 } from "@mass_mailing/js/mass_mailing_design_constants";
 import { isCSSColor, normalizeCSSColor } from "@web/core/utils/colors";
+import { registerMassMailingOption } from "./snippets.registry";
 
 
 //--------------------------------------------------------------------------
@@ -324,4 +325,9 @@ options.registry.DesignTab = options.Class.extend({
     _getRule(selectorText) {
         return [...(this.styleSheet.cssRules || this.styleSheet.rules)].find(rule => rule.selectorText === selectorText);
     },
+});
+
+registerMassMailingOption("mass_mailing_block_align", {
+    template: "mass_mailing.block_align_option",
+    selector: ".s_mail_alert .s_alert, .s_mail_blockquote, .s_mail_text_highlight",
 });

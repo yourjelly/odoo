@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
 
+<t t-name="mass_mailing.block_align_option">
+    <WeButtonGroup title.translate="Alignment" dependencies="'!so_width_100'">
+        <WeButton class="'fa fa-fw fa-align-left'" tooltip.translate="Left" selectClass="'me-auto'"/>
+        <WeButton class="'fa fa-fw fa-align-center'" tooltip.translate="Center" selectClass="'mx-auto'"/>
+        <WeButton class="'fa fa-fw fa-align-right'" tooltip.translate="Right" selectClass="'ms-auto'"/>
+    </WeButtonGroup>
+</t>
+
 <!-- Border -->
 <t t-name="mass_mailing.snippet_options_border_line_widgets">
     <WeRow title="label">

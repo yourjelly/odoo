@@ -340,14 +340,6 @@
         </we-select>
     </div>
 
-    <div id="so_block_align" data-selector=".s_mail_alert .s_alert, .s_mail_blockquote, .s_mail_text_highlight">
-        <we-button-group string="Alignment" data-dependencies="!so_width_100">
-            <we-button class="fa fa-fw fa-align-left" title="Left" data-select-class="me-auto"/>
-            <we-button class="fa fa-fw fa-align-center" title="Center" data-select-class="mx-auto"/>
-            <we-button class="fa fa-fw fa-align-right" title="Right" data-select-class="ms-auto"/>
-        </we-button-group>
-    </div>
-
     <div data-selector=".o_mail_snippet_general" data-exclude=".o_mail_snippet_general .row > div *">
         <we-button-group string="Height">
             <we-button data-name="minheight_auto_opt" data-select-class="" title="Fit content">Auto</we-button>
