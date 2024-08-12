@@ -458,7 +458,14 @@ class MrpProduction(models.Model):
                 ('group_id', '=', order.procurement_group_id.id), ('group_id', '!=', False),
             ])
             order.picking_ids |= order.move_raw_ids.move_orig_ids.picking_id
-            order.delivery_count = len(order.picking_ids)
+            related_picking_ids = self.picking_ids.filtered(
+                lambda picking: any(
+                    self in move.move_orig_ids.mapped('production_id') or
+                    move.location_dest_id == self.location_src_id
+                    for move in picking.move_ids
+                )
+            )
+            order.delivery_count = len(related_picking_ids)
 
     @api.depends('product_uom_id', 'product_qty', 'product_id.uom_id')
     def _compute_product_uom_qty(self):
@@ -989,7 +996,15 @@ class MrpProduction(models.Model):
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("stock.action_picking_tree_all")
         if len(self.picking_ids) > 1:
-            action['domain'] = [('id', 'in', self.picking_ids.ids)]
+            # show only those pickings which are related to current MO (include pre-production picking).
+            related_picking_ids = self.picking_ids.filtered(
+                lambda picking: any(
+                    self in move.move_orig_ids.mapped('production_id') or
+                    move.location_dest_id == self.location_src_id
+                    for move in picking.move_ids
+                )
+            )
+            action['domain'] = [('id', 'in', related_picking_ids.ids)]
         elif self.picking_ids:
             action['res_id'] = self.picking_ids.id
             action['views'] = [(self.env.ref('stock.view_picking_form').id, 'form')]
@@ -1631,8 +1646,18 @@ class MrpProduction(models.Model):
         finish_moves = self.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
         raw_moves = self.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
         (finish_moves | raw_moves)._action_cancel()
-        picking_ids = self.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
-        picking_ids.action_cancel()
+        # Cancel only those pickings which are related to current MO.
+        related_picking_ids = self.picking_ids.filtered(
+            lambda picking: (
+                picking.state not in ('done', 'cancel') and
+                any(
+                    (not move.move_orig_ids) or
+                    (self in move.move_orig_ids.mapped('production_id'))
+                    for move in picking.move_ids
+                )
+            )
+        )
+        related_picking_ids.action_cancel()
 
         for production, documents in documents_by_production.items():
             filtered_documents = {}
