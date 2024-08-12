@@ -46,13 +46,13 @@
                             <record id="tax_report_vat_purchase_base_sixteen_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">2a. Purchase Tax 16% (Base)</field>
+                                <field name="formula">2a (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_tax_sixteen_tag"
                                     model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">2a. Purchase Tax 16% (Tax)</field>
+                                <field name="formula">2a (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -63,12 +63,12 @@
                             <record id="tax_report_vat_purchase_base_ten_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">2b. Purchase Tax 10% (Base)</field>
+                                <field name="formula">2b (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_tax_ten_tag" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">2b. Purchase Tax 10% (Tax)</field>
+                                <field name="formula">2b (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -79,12 +79,12 @@
                             <record id="tax_report_vat_purchase_base_four_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">2c. Purchase Tax 4% (Base)</field>
+                                <field name="formula">2c (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_tax_four_tag" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">2c. Purchase Tax 4% (Tax)</field>
+                                <field name="formula">2c (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -95,12 +95,12 @@
                             <record id="tax_report_vat_purchase_base_other_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">2d. Purchase Other Tax (Base)</field>
+                                <field name="formula">2d (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_tax_other_tag" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">2d. Purchase Other Tax (Tax)</field>
+                                <field name="formula">2d (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -111,13 +111,13 @@
                             <record id="tax_report_vat_purchase_import_sixteen_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">3a. Import Tax 16% (Base)</field>
+                                <field name="formula">3a (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_import_tax_sixteen_tag"
                                     model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">3a. Import Tax 16% (Tax)</field>
+                                <field name="formula">3a (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -128,13 +128,13 @@
                             <record id="tax_report_vat_purchase_import_ten_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">3b. Import Tax 10% (Base)</field>
+                                <field name="formula">3b (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_import_tax_ten_tag"
                                     model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">3b. Import Tax 10% (Tax)</field>
+                                <field name="formula">3b (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -145,13 +145,13 @@
                             <record id="tax_report_vat_purchase_import_four_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">3c. Import Tax 4% (Base)</field>
+                                <field name="formula">3c (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_import_tax_four_tag"
                                     model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">3c. Import Tax 4% (Tax)</field>
+                                <field name="formula">3c (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -162,13 +162,13 @@
                             <record id="tax_report_vat_purchase_import_other_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">3d. Import Other Tax (Base)</field>
+                                <field name="formula">3d (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_import_tax_other_tag"
                                     model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">3d. Import Other Tax (Tax)</field>
+                                <field name="formula">3d (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -179,13 +179,13 @@
                             <record id="tax_report_vat_purchase_deferred_supply_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">4. Imports Deferred Supply Tax (Base)</field>
+                                <field name="formula">4 (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_deferred_supply_tax_tag"
                                     model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">4. Imports Deferred Supply Tax (Tax)</field>
+                                <field name="formula">4 (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -196,12 +196,12 @@
                             <record id="tax_report_vat_purchase_exempt_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">5. Exempted Purchases and Imports (Base)</field>
+                                <field name="formula">5 (Base)</field>
                             </record>
                             <record id="tax_report_vat_purchase_exempt_tax_tag" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">5. Exempted Purchases and Imports (Tax)</field>
+                                <field name="formula">5 (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -237,12 +237,12 @@
                             <record id="tax_report_vat_sales_base_sixteen_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">6a. Sales Tax 16% (Base)</field>
+                                <field name="formula">6a (Base)</field>
                             </record>
                             <record id="tax_report_vat_sales_tax_sixteen_tag" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">6a. Sales Tax 16% (Tax)</field>
+                                <field name="formula">6a (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -253,12 +253,12 @@
                             <record id="tax_report_vat_sales_base_ten_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">6b. Sales Tax 10% (Base)</field>
+                                <field name="formula">6b (Base)</field>
                             </record>
                              <record id="tax_report_vat_sales_tax_ten_tag" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">6b. Sales Tax 10% (Tax)</field>
+                                <field name="formula">6b (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -269,12 +269,12 @@
                             <record id="tax_report_vat_sales_base_four_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">6c. Sales Tax 4% (Base)</field>
+                                <field name="formula">6c (Base)</field>
                             </record>
                             <record id="tax_report_vat_sales_tax_four_tag" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">6c. Sales Tax 4% (Tax)</field>
+                                <field name="formula">6c (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -285,12 +285,12 @@
                             <record id="tax_report_vat_sale_base_other_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">6d. Sales Other Tax (Base)</field>
+                                <field name="formula">6d (Base)</field>
                             </record>
                             <record id="tax_report_vat_sale_tax_other_tag" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">6d. Sales Other Tax (Tax)</field>
+                                <field name="formula">6d (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -301,12 +301,12 @@
                             <record id="tax_report_vat_sale_zero_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">7. Sales Tax 0% (Base)</field>
+                                <field name="formula">7 (Base)</field>
                             </record>
                             <record id="tax_report_vat_sale_zero_tag_tax" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">7. Sales Tax 0% (Tax)</field>
+                                <field name="formula">7 (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -317,12 +317,12 @@
                             <record id="tax_report_vat_sale_export_zero_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">8. Exported Sales (Base)</field>
+                                <field name="formula">8 (Base)</field>
                             </record>
                             <record id="tax_report_vat_sale_export_zero_tag_tax" model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">8. Exported Sales (Tax)</field>
+                                <field name="formula">8 (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -333,13 +333,13 @@
                             <record id="tax_report_vat_sale_export_no_tax_zero_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">9. Sales that are not subject to tax (Base)</field>
+                                <field name="formula">9 (Base)</field>
                             </record>
                             <record id="tax_report_vat_sale_export_no_tax_zero_tag_tax"
                                     model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">9. Sales that are not subject to tax (Tax)</field>
+                                <field name="formula">9 (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -351,13 +351,13 @@
                                     model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">10. Exempted Local Sales (Base)</field>
+                                <field name="formula">10 (Base)</field>
                             </record>
                             <record id="tax_report_vat_sale_export_exempt_local_zero_tag_tax"
                                     model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">10. Exempted Local Sales (Tax)</field>
+                                <field name="formula">10 (Tax)</field>
                             </record>
                         </field>
                     </record>
@@ -369,13 +369,13 @@
                                     model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">11. Non-deductible tax (Base)</field>
+                                <field name="formula">11 (Base)</field>
                             </record>
                             <record id="tax_report_vat_sale_export_no_deductible_zero_tag_tax"
                                     model="account.report.expression">
                                 <field name="label">taxbalance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">11. Non-deductible tax (Tax)</field>
+                                <field name="formula">11 (Tax)</field>
                             </record>
                         </field>
                     </record>
