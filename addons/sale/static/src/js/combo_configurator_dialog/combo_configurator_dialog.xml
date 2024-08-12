@@ -3,7 +3,7 @@
     <t t-name="sale.ComboConfiguratorDialog">
         <Dialog
             title.translate="props.display_name"
-            contentClass="'sale_combo_configurator_dialog'"
+            contentClass="'sale-combo-configurator-dialog'"
         >
             <div t-foreach="props.combos" t-as="combo" t-key="combo.id">
                 <span

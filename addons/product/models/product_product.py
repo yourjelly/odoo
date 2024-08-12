@@ -697,14 +697,14 @@ class ProductProduct(models.Model):
     def _get_no_variant_attributes_price_extra(self, combination):
         # It is possible that a no_variant attribute is still in a variant if
         # the type of the attribute has been changed after creation.
-        return sum([
+        return sum(
             ptav.price_extra for ptav in combination.filtered(
                 lambda ptav:
                     ptav.price_extra
                     and ptav.product_tmpl_id == self.product_tmpl_id
                     and ptav not in self.product_template_attribute_value_ids
             )
-        ])
+        )
 
     def _get_attributes_extra_price(self):
         self.ensure_one()

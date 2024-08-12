@@ -1,10 +1,9 @@
-import { Component } from "@odoo/owl";
-import { BadgeExtraPrice } from "../badge_extra_price/badge_extra_price";
-import { ProductProduct } from "../models/product_product";
-import { ProductTemplateAttributeLine } from "../models/product_template_attribute_line";
+import { Component } from '@odoo/owl';
+import { BadgeExtraPrice } from '../badge_extra_price/badge_extra_price';
+import { ProductProduct } from '../models/product_product';
 
 export class ProductCard extends Component {
-    static template = "sale.ProductCard";
+    static template = 'sale.ProductCard';
     static components = { BadgeExtraPrice };
     static props = {
         product: ProductProduct,

@@ -49,7 +49,6 @@ class ProductTemplate(models.Model):
 
     def _create_variant_ids(self):
         res = super()._create_variant_ids()
-        # TODO(loti): this doesn't seem entirely correct. Fix and move to product module.
         for template in self:
             archived_product = self.env['product.product'].search([('product_tmpl_id', '=', template.id), ('active', '=', False)], limit=1)
             if archived_product:

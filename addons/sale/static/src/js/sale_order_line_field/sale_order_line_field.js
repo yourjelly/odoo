@@ -1,27 +1,31 @@
 /** @odoo-module **/
 
-import { registry } from "@web/core/registry";
-import { CharField } from "@web/views/fields/char/char_field";
+import { registry } from '@web/core/registry';
+import { CharField } from '@web/views/fields/char/char_field';
 import {
     listSectionAndNoteText,
     sectionAndNoteFieldOne2Many,
     sectionAndNoteText,
     ListSectionAndNoteText,
     SectionAndNoteText,
-} from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
-import { getLinkedSaleOrderLines } from "../sale_utils";
+} from '@account/components/section_and_note_fields_backend/section_and_note_fields_backend';
+import { getLinkedSaleOrderLines } from '../sale_utils';
 import {
     productLabelSectionAndNoteOne2Many,
     ProductLabelSectionAndNoteOne2Many,
     ProductLabelSectionAndNoteListRender,
-} from "@account/components/product_label_section_and_note_field/product_label_section_and_note_field";
-export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRender {
-    static template = "account.sectionAndNoteListRenderer";
-    static recordRowTemplate = "sale.ListRenderer.RecordRow";
+} from '@account/components/product_label_section_and_note_field/product_label_section_and_note_field';
 
+export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRender {
+    static recordRowTemplate = 'sale.ListRenderer.RecordRow';
+
+    /**
+     * Product description widget logic
+     */
     getCellTitle(column, record) {
-        // When using this list renderer, we don't want the product_id cell to have a tooltip with its label.
-        if (column.name === "product_id" || column.name === "product_template_id") {
+        // When using this list renderer, we don't want the product_id cell to have a tooltip with
+        // its label.
+        if (column.name === 'product_id' || column.name === 'product_template_id') {
             return;
         }
         super.getCellTitle(column, record);
@@ -29,17 +33,22 @@ export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRen
 
     getActiveColumns(list) {
         let activeColumns = super.getActiveColumns(list);
-        let productTmplCol = activeColumns.find((col) => col.name === "product_template_id");
-        let productCol = activeColumns.find((col) => col.name === "product_id");
+        let productTmplCol = activeColumns.find((col) => col.name === 'product_template_id');
+        let productCol = activeColumns.find((col) => col.name === 'product_id');
 
         if (productCol && productTmplCol) {
-            // hide the template column if the variant one is enabled
-            activeColumns = activeColumns.filter((col) => col.name != "product_template_id")
+            // Hide the template column if the variant one is enabled.
+            activeColumns = activeColumns.filter((col) => col.name != 'product_template_id')
         }
 
         return activeColumns;
     }
 
+    /**
+     * Combo logic
+     */
+    // TODO(loti): somehow forbid product change on a combo line, or delete linked lines on product
+    // change.
     // TODO(loti): this method name is not ideal but I'd have to override 3 other methods otherwise.
     isSectionOrNote(record=null) {
         return super.isSectionOrNote(record) || this.isCombo(record);
@@ -71,7 +80,7 @@ export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRen
     }
 
     getTitleField(record) {
-        return this.isCombo(record) ? "product_template_id" : super.getTitleField(record);
+        return this.isCombo(record) ? 'product_template_id' : super.getTitleField(record);
     }
 
     isCombo(record) {
@@ -96,38 +105,34 @@ export const saleOrderLineOne2Many = {
 };
 
 registry
-    .category("fields")
-    .add("sol_o2m", saleOrderLineOne2Many);
+    .category('fields')
+    .add('sol_o2m', saleOrderLineOne2Many);
 
-export class SectionNoteAndComboText extends SectionAndNoteText {
-    // TODO VFE see if can be removed
-    static template = "account.SectionAndNoteText";
-    static props = { ...SectionAndNoteText.props };
-
+export class SaleOrderLineText extends SectionAndNoteText {
     get componentToUse() {
         return this.props.record.data.product_type === 'combo' ? CharField : super.componentToUse;
     }
 }
 
-export class ListSectionNoteAndComboText extends ListSectionAndNoteText {
+export class ListSaleOrderLineText extends ListSectionAndNoteText {
     get componentToUse() {
         return this.props.record.data.product_type === 'combo' ? CharField : super.componentToUse;
     }
 }
 
-export const sectionNoteAndComboText = {
+export const saleOrderLineText = {
     ...sectionAndNoteText,
-    component: SectionNoteAndComboText,
+    component: SaleOrderLineText,
 };
 
-export const listSectionNoteAndComboText = {
+export const listSaleOrderLineText = {
     ...listSectionAndNoteText,
-    component: ListSectionNoteAndComboText,
+    component: ListSaleOrderLineText,
 };
 
-registry.category("fields").add(
-    "section_note_and_combo_text", sectionNoteAndComboText
+registry.category('fields').add(
+    'sol_text', saleOrderLineText
 );
-registry.category("fields").add(
-    "list.section_note_and_combo_text", listSectionNoteAndComboText
+registry.category('fields').add(
+    'list.sol_text', listSaleOrderLineText
 );

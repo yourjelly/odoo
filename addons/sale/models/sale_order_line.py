@@ -551,12 +551,18 @@ class SaleOrderLine(models.Model):
         self.ensure_one()
 
         if self.product_type == 'combo':
-            return 0
+            return 0  # The display price of a combo line should always be 0.
         if self.combo_item_id:
             return self._get_combo_item_display_price()
         return self._get_display_price_ignore_combo()
 
     def _get_display_price_ignore_combo(self):
+        """ This helper method allows to compute the display price of a SOL, while ignoring combo
+        logic.
+
+        I.e. this method returns the display price of a SOL as if it were neither a combo line nor a
+        combo item line.
+        """
         self.ensure_one()
 
         pricelist_price = self._get_pricelist_price()
@@ -1063,7 +1069,7 @@ class SaleOrderLine(models.Model):
         """
         for line in self:
             linked_line = line._get_linked_line()
-            allowed_combo_items = linked_line.product_template_id.mapped('combo_ids.combo_item_ids')
+            allowed_combo_items = linked_line.product_template_id.combo_ids.combo_item_ids
             if line.combo_item_id and line.combo_item_id not in allowed_combo_items:
                 raise ValidationError(_(
                     "A sale order line's combo item must be among its linked line's available"
@@ -1124,7 +1130,6 @@ class SaleOrderLine(models.Model):
             linked_line = line._get_linked_line()
             if linked_line:
                 line.linked_line_id = linked_line
-        # TODO(loti): clear virtual_id and linked_virtual_id?
         if self.env.context.get('sale_no_log_for_new_lines'):
             return lines
 

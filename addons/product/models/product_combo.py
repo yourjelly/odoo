@@ -55,8 +55,8 @@ class ProductCombo(models.Model):
             combo.base_price = min(combo.combo_item_ids.mapped(
                 lambda item: item.currency_id._convert(
                     from_amount=item.lst_price,
-                    to_currency=self.currency_id,
-                    company=self.company_id or self.env.company,
+                    to_currency=combo.currency_id,
+                    company=combo.company_id or self.env.company,
                     date=self.env.cr.now(),
                 )
             )) if combo.combo_item_ids else 0

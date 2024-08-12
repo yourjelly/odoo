@@ -52,7 +52,7 @@ class WebsiteSaleComboConfiguratorController(SaleComboConfiguratorController, We
         methods=['POST'],
         website=True,
     )
-    def website_sale_product_configurator_update_cart(
+    def website_sale_combo_configurator_update_cart(
         self, combo_product_id, quantity, selected_combo_items,
     ):
         order_sudo = request.website.sale_get_order(force_create=True)

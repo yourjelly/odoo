@@ -1596,11 +1596,7 @@
                             </button>
                         </div>
                         <t t-if="line.product_type == 'combo'">
-                            <t
-                                t-foreach="line.linked_line_ids"
-                                t-as="combo_item_line"
-                                t-key="combo_item_line.id"
-                            >
+                            <t t-foreach="line.linked_line_ids" t-as="combo_item_line">
                                 <t t-call="website_sale.cart_combo_item_line"/>
                             </t>
                         </t>

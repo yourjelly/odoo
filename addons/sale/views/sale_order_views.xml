@@ -557,7 +557,7 @@
                                 <field name="combo_item_id" column_invisible="1"/>
                                 <field
                                     name="name"
-                                    widget="section_note_and_combo_text"
+                                    widget="sol_text"
                                     optional="show"
                                 />
                                 <field name="analytic_distribution" widget="analytic_distribution"

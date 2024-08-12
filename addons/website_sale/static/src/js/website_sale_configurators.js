@@ -2,15 +2,15 @@
 
 import { rpc } from '@web/core/network/rpc';
 import { serializeDateTime } from '@web/core/l10n/dates';
-import {
-    ProductConfiguratorDialog
-} from '@sale/js/product_configurator_dialog/product_configurator_dialog';
 import { WebsiteSale } from '@website_sale/js/website_sale';
 import wSaleUtils from '@website_sale/js/website_sale_utils';
 import {
     ComboConfiguratorDialog
-} from "../../../../sale/static/src/js/combo_configurator_dialog/combo_configurator_dialog";
-import {ProductCombo} from "../../../../sale/static/src/js/models/product_combo";
+} from '@sale/js/combo_configurator_dialog/combo_configurator_dialog';
+import { ProductCombo } from "@sale/js/models/product_combo";
+import {
+    ProductConfiguratorDialog
+} from '@sale/js/product_configurator_dialog/product_configurator_dialog';
 
 const { DateTime } = luxon;
 

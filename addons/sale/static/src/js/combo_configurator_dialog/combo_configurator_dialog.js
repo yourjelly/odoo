@@ -5,7 +5,6 @@ import { useService } from '@web/core/utils/hooks';
 import { Component, useState, useSubEnv } from '@odoo/owl';
 import { ProductCard } from '../product_card/product_card';
 import { ProductCombo } from '../models/product_combo';
-import { ProductComboItem } from '../models/product_combo_item';
 import { ProductTemplateAttributeLine } from '../models/product_template_attribute_line';
 import {
     ProductConfiguratorDialog
@@ -160,7 +159,7 @@ export class ComboConfiguratorDialog extends Component {
      */
     _initSelectedComboItems() {
         for (const combo of this.props.combos) {
-            const comboItem = combo.selectedComoItem;
+            const comboItem = combo.selectedComboItem;
             if (comboItem) {
                 this.state.selectedComboItems.set(combo.id, comboItem.deepCopy());
             }

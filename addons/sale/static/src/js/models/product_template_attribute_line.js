@@ -1,4 +1,4 @@
-import { ProductTemplateAttributeValue } from "./product_template_attribute_value";
+import { ProductTemplateAttributeValue } from './product_template_attribute_value';
 
 export class ProductTemplateAttributeLine {
     /**

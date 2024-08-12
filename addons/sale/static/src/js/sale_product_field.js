@@ -296,7 +296,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
                         });
                     }
                     await comboItemLineRecord.update({
-                        product_id: [selectedComboItem.product.id, "unused"],
+                        product_id: [selectedComboItem.product.id, selectedComboItem.product.display_name],
                         product_uom_qty: comboProductData.quantity,
                         combo_item_id: [selectedComboItem.id, "unused"],
                         product_no_variant_attribute_value_ids: [

@@ -6,18 +6,19 @@
         t-inherit-mode="primary"
     >
         <!-- Show the product quantity next to the title for combo lines. -->
-        <Field position="after">
+        <!-- TODO LOTI fix display or remove for now -->
+        <!-- <Field position="after">
             <span t-if="isCombo(record) &amp;&amp; column.name === getTitleField(record)">
                 x <t t-out="record.data.product_uom_qty"/>
             </span>
-        </Field>
+        </Field> -->
         <!-- Remove the drag-and-drop handle for combo lines and combo item lines. -->
         <Field position="attributes">
             <attribute name="t-if">
                 !((isCombo(record) || isComboItem(record)) &amp;&amp; column.widget === 'handle')
             </attribute>
         </Field>
-         Remove the "delete" button for combo item lines.
+         <!-- Remove the "delete" button for combo item lines. -->
         <xpath expr="//td[hasclass('o_list_record_remove')]" position="attributes">
             <attribute name="t-att-class">{'d-none': isComboItem(record)}</attribute>
         </xpath>
