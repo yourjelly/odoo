@@ -204,7 +204,10 @@ class SendSMS(models.TransientModel):
             return self._action_send_sms_mass(records)
 
     def _action_send_sms_numbers(self):
-        sms_values = [{'body': self.body, 'number': number} for number in self.sanitized_numbers.split(',')]
+        numbers = self.sanitized_numbers or self.recipient_single_number_itf
+        if not numbers:
+            return False
+        sms_values = [{'body': self.body, 'number': number} for number in numbers.split(',')]
         self.env['sms.sms'].sudo().create(sms_values).send()
         return True
 
