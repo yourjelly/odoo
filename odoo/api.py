@@ -950,7 +950,7 @@ class Cache:
     the values that should be in the database must be in a context where all
     the field's context keys are ``None``.
     """
-    __slots__ = ('_data', '_dirty', '_patches')
+    __slots__ = ('_data', '_data_get', '_dirty', '_patches')
 
     def __init__(self):
         # {field: {record_id: value}, field: {context_key: {record_id: value}}}
