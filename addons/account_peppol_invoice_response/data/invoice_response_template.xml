@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="ubl_Party">
+        <t xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+           xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+           xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+
+            <cbc:EndpointID t-att="party['endpoint_id_attrs']"
+                            t-out="party['endpoint_id']"/>
+            <cac:PartyIdentification t-if="party.get('party_identification') and party.get('party_identification_attrs', {}).get('schemeID')">
+                <cbc:ID t-att="party['party_identification_attrs']"
+                        t-out="party['party_identification']"/>
+            </cac:PartyIdentification>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName t-out="party['registration_name']"/>
+            </cac:PartyLegalEntity>
+            <cac:Contact t-if="party.get('contact')">
+                <cbc:Name t-out="party['contact'].get('name')"/>
+                <cbc:Telephone t-out="party['contact'].get('telephone')"/>
+                <cbc:ElectronicMail t-out="party['contact'].get('email)"/>
+            </cac:Contact>
+        </t>
+    </template>
+
+    <template id="ubl_DocumentResponse">
+        <t xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+           xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+           xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+            <cac:Response>
+                <t t-set="response" t-as="document_response['response']"/>
+                <cbc:ResponseCode t-out="response['code']"/>
+                <cbc:EffectiveDate t-if="response.get('effective_date')" t-out="response['effective_date']"/>
+                <t t-foreach="response.get('statuses', [])" t-as="status">
+                    <cac:Status>
+                        <cbc:StatusReasonCode t-if="status.get('reason_code')"
+                                              t-att-listID="status['reason_list_id']"
+                                              t-out="status['reason_code']"/>
+                        <cbc:StatusReason t-if="status.get('reason')" t-out="status['reason']"/>
+                        <t t-foreach="status.get('conditions', [])" t-as="condition">
+                            <cac:Condition>
+                                <cbc:AttributeID t-out="condition['attribute_id']"/>
+                                <cbc:Description t-if="condition['description']"/>
+                            </cac:Condition>
+                        </t>
+                    </cac:Status>
+                </t>
+            </cac:Response>
+            <cac:DocumentReference>
+                <t t-set="docref" t-as="document_response['document_reference']"/>
+                <cbc:ID t-out="docref['invoice_identifier']"/>
+                <cbc:IssueDate t-if="docref.get('invoice_issue_date')"
+                               t-out="docref['invoice_issue_date']"/>
+                <cbc:DocumentTypeCode t-out="docref['document_type_code']"/>
+            </cac:DocumentReference>
+            <cac:IssuerParty>
+                <cac:PartyIdentification t-if="document_response.get('issuer_party_identification')"
+                                         t-out="document_response['issuer_party_identification']"/>
+                <cac:PartyName t-out="document_response['issuer_party_name']"/>
+            </cac:IssuerParty>
+            <cac:RecipientParty>
+                <cac:PartyIdentification t-if="document_response.get('recipient_party_identification')"
+                                         t-out="document_response['recipient_party_identification']"/>
+                <cac:PartyName t-out="document_reponse['recipient_party_name']"/>
+            </cac:RecipientParty>
+
+        </t>
+    </template>
+
+    <template id="ubl_ApplicationResponse">
+        <ApplicationResponse xmlns="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2"
+                             xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                             xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+            <cbc:CustomizationID>urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2::ApplicationResponse##urn:fdc:peppol.eu:poacc:trns:invoice_response:3::2.1</cbc:CustomizationID>
+            <cbc:ProfileID>urn:fdc:peppol.eu:poacc:bis:invoice_response:3</cbc:ProfileID>
+            <cbc:ID t-out="vals.get('response_identifier')"/>
+            <cbc:IssueDate t-out="vals.get('issue_date')"/>
+            <cac:SenderParty>
+                <t t-call="ubl_Party">
+                    <t t-set="party" t-value="vals['sender_party']"/>
+                </t>
+            </cac:SenderParty>
+            <cac:ReceiverParty>
+                <t t-call="ubl_Party">
+                    <t t-set="party" t-value="vals['receiver_party']"/>
+                </t>
+            </cac:ReceiverParty>
+
+            <cac:DocumentResponse>
+                <t t-call="ubl_DocumentResponse">
+                    <t t-set="document_response" t-value="vals['document_response']"/>
+                </t>
+            </cac:DocumentResponse>
+
+        </ApplicationResponse>
+    </template>
+
+</odoo>
