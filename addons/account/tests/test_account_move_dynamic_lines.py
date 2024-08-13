@@ -187,8 +187,8 @@ class TestAccountMoveDynamicLines(AccountTestInvoicingCommon):
         invoice.invoice_payment_term_id = self.term_advance_60days
         expected_values = [
             {'display_type': 'product',         'price_unit': 2000.0,   'amount_currency': -2000.0,     'balance': -1000.0,     'debit': 0.0,       'credit': 1000.0},
-            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 690.0,       'balance': 348.0,       'debit': 348.0,     'credit': 0.0},
             {'display_type': 'tax',             'price_unit': 0.0,      'amount_currency': -300.0,      'balance': -160.0,      'debit': 0.0,       'credit': 160.0},
+            {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 690.0,       'balance': 348.0,       'debit': 348.0,     'credit': 0.0},
             {'display_type': 'payment_term',    'price_unit': 0.0,      'amount_currency': 1610.0,      'balance': 812.0,       'debit': 812.0,     'credit': 0.0},
         ]
         self.assertRecordValues(invoice.line_ids.sorted(), expected_values)

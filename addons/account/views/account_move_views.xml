@@ -1185,6 +1185,7 @@
                                                domain="[('company_id', 'parent_of', parent.company_id), ('deprecated', '=', False)]"/>
                                         <field name="partner_id"
                                                optional="show"
+                                               force_save="1"
                                                domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"
                                                column_invisible="parent.move_type != 'entry'"/>
                                         <field name="analytic_distribution"
@@ -1211,6 +1212,7 @@
                                                string="Disc.%"/>
                                         <field name="date_maturity"
                                                column_invisible="context.get('invoice_line_ids_mode') or context.get('view_no_maturity')"
+                                               force_save="1"
                                                optional="hide"
                                                invisible="display_type in ('line_section', 'line_note')"/>
                                         <field name="amount_currency"
@@ -1219,6 +1221,7 @@
                                         <field name="currency_id"
                                                optional="hide"
                                                column_invisible="parent.move_type != 'entry' or not parent.is_multi_currency"
+                                               force_save="1"
                                                options="{'no_create': True}"/>
                                         <field name="tax_ids"
                                                optional="hide"
@@ -1237,31 +1240,38 @@
                                                readonly="display_type in ('line_section', 'line_note') or tax_line_id or (parent.move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') and account_type in ('asset_receivable', 'liability_payable'))"/>
                                         <field name="price_subtotal"
                                                column_invisible="not context.get('invoice_line_ids_mode')"
+                                               force_save="1"
                                                string="Tax excl."/>
                                         <field name="price_total"
                                                column_invisible="not context.get('invoice_line_ids_mode') or parent.tax_calculation_rounding_method == 'round_globally'"
+                                               force_save="1"
                                                string="Tax incl."
                                                optional="hide"/>
                                         <field name="debit"
                                                column_invisible="context.get('invoice_line_ids_mode')"
+                                               force_save="1"
                                                sum="Total Debit"
                                                invisible="display_type in ('line_section', 'line_note')"
                                                readonly="parent.move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') and display_type in ('line_section', 'line_note', 'product')"/>
                                         <field name="credit"
                                                column_invisible="context.get('invoice_line_ids_mode')"
+                                               force_save="1"
                                                sum="Total Credit"
                                                invisible="display_type in ('line_section', 'line_note')"
                                                readonly="parent.move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') and display_type in ('line_section', 'line_note', 'product')"/>
                                         <field name="discount_date"
                                                column_invisible="context.get('invoice_line_ids_mode')"
+                                               force_save="1"
                                                string="Discount Date"
                                                optional="hide"/>
                                         <field name="discount_amount_currency"
                                                column_invisible="context.get('invoice_line_ids_mode')"
+                                               force_save="1"
                                                string="Discount Amount"
                                                optional="hide"/>
                                         <field name="tax_tag_ids"
                                                column_invisible="context.get('invoice_line_ids_mode')"
+                                               force_save="1"
                                                widget="many2many_tags"
                                                string="Tax Grids"
                                                optional="show"
@@ -1273,6 +1283,7 @@
                                                 ]"/>
                                         <field name="tax_tag_invert"
                                                column_invisible="context.get('invoice_line_ids_mode')"
+                                               force_save="1"
                                                readonly="1"
                                                optional="hide"
                                                groups="base.group_no_one"/>
@@ -1289,10 +1300,13 @@
                                                 context="{'default_action': 'change_period'}"/>
 
                                         <!-- Others fields -->
+                                        <field name="last_onchange_fields" column_invisible="True"/>
+                                        <field name="stupid_field" column_invisible="True"/>
                                         <field name="balance" column_invisible="True"/>
                                         <field name="product_uom_category_id" column_invisible="True"/>
-                                        <field name="tax_repartition_line_id" column_invisible="True"/>
-                                        <field name="group_tax_id" column_invisible="True"/>
+                                        <field name="tax_base_amount" force_save="1" column_invisible="True"/>
+                                        <field name="tax_repartition_line_id" force_save="1" column_invisible="True"/>
+                                        <field name="group_tax_id" force_save="1" column_invisible="True"/>
                                         <field name="company_currency_id" column_invisible="True"/>
                                         <field name="display_type" force_save="1" column_invisible="True"/>
                                         <field name="company_id" column_invisible="True"/>

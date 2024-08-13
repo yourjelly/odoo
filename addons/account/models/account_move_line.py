@@ -405,6 +405,8 @@ class AccountMoveLine(models.Model):
              "associated partner",
     )
     is_refund = fields.Boolean(compute='_compute_is_refund')
+    last_onchange_fields = fields.Json(store=False)
+    stupid_field = fields.Boolean(compute='_compute_stupid_field')
 
     _sql_constraints = [
         (
@@ -468,10 +470,13 @@ class AccountMoveLine(models.Model):
                 'product'
             ) if line.move_id.is_invoice() else 'product'
 
-    # Do not depend on `move_id.partner_id`, the inverse is taking care of that
+    @api.depends('move_id.commercial_partner_id')
     def _compute_partner_id(self):
         for line in self:
-            line.partner_id = line.move_id.partner_id.commercial_partner_id
+            if line.move_id.is_invoice(include_receipts=True):
+                line.partner_id = line.move_id.commercial_partner_id
+            else:
+                line.partner_id = line.partner_id
 
     @api.depends('move_id.currency_id')
     def _compute_currency_id(self):
@@ -777,58 +782,6 @@ class AccountMoveLine(models.Model):
 
         return tax_ids
 
-    # @api.depends('account_id', 'company_id')
-    # def _compute_discount_allocation_key(self):
-    #     for line in self:
-    #         if line.display_type == 'discount':
-    #             line.discount_allocation_key = frozendict({
-    #                 'account_id': line.account_id.id,
-    #                 'move_id': line.move_id.id,
-    #                 'currency_rate': line.currency_rate,
-    #             })
-    #         else:
-    #             line.discount_allocation_key = False
-    #
-    # @api.depends('account_id', 'company_id', 'discount', 'price_unit', 'quantity', 'currency_rate')
-    # def _compute_discount_allocation_needed(self):
-    #     for line in self:
-    #         line.discount_allocation_dirty = True
-    #         discount_allocation_account = line.move_id._get_discount_allocation_account()
-    #
-    #         if not discount_allocation_account or line.display_type != 'product' or line.currency_id.is_zero(line.discount):
-    #             line.discount_allocation_needed = False
-    #             continue
-    #
-    #         discounted_amount_currency = line.currency_id.round(line.move_id.direction_sign * line.quantity * line.price_unit * line.discount/100)
-    #         discount_allocation_needed = {}
-    #         discount_allocation_needed_vals = discount_allocation_needed.setdefault(
-    #             frozendict({
-    #                 'account_id': line.account_id.id,
-    #                 'move_id': line.move_id.id,
-    #                 'currency_rate': line.currency_rate,
-    #             }),
-    #             {
-    #                 'display_type': 'discount',
-    #                 'name': _("Discount"),
-    #                 'amount_currency': 0.0,
-    #             },
-    #         )
-    #         discount_allocation_needed_vals['amount_currency'] += discounted_amount_currency
-    #         discount_allocation_needed_vals = discount_allocation_needed.setdefault(
-    #             frozendict({
-    #                 'move_id': line.move_id.id,
-    #                 'account_id': discount_allocation_account.id,
-    #                 'currency_rate': line.currency_rate,
-    #             }),
-    #             {
-    #                 'display_type': 'discount',
-    #                 'name': _("Discount"),
-    #                 'amount_currency': 0.0,
-    #             },
-    #         )
-    #         discount_allocation_needed_vals['amount_currency'] -= discounted_amount_currency
-    #         line.discount_allocation_needed = {k: frozendict(v) for k, v in discount_allocation_needed.items()}
-
     @api.depends('move_id.move_type', 'balance', 'tax_repartition_line_id', 'tax_ids')
     def _compute_is_refund(self):
         for line in self:
@@ -882,28 +835,21 @@ class AccountMoveLine(models.Model):
                 '&', ('discount_date', '=', False), ('date_maturity', operator, value),
             ]
 
-    def action_payment_items_register_payment(self):
-        return self.action_register_payment({'force_group_payment': True})
+    @api.depends('move_id', 'ref', 'product_id')
+    def _compute_display_name(self):
+        for line in self:
+            line.display_name = " ".join(
+                element for element in (
+                    line.move_id.name,
+                    line.ref and f"({line.ref})",
+                    line.name or line.product_id.display_name,
+                ) if element
+            )
 
-    def action_register_payment(self, ctx=None):
-        ''' Open the account.payment.register wizard to pay the selected journal items.
-        :return: An action opening the account.payment.register wizard.
-        '''
-        context = {
-            'active_model': 'account.move.line',
-            'active_ids': self.ids,
-        }
-        if ctx:
-            context.update(ctx)
-        return {
-            'name': _('Register Payment'),
-            'res_model': 'account.payment.register',
-            'view_mode': 'form',
-            'views': [[False, 'form']],
-            'context': context,
-            'target': 'new',
-            'type': 'ir.actions.act_window',
-        }
+    @api.depends(lambda self: self._sync_dynamic_lines_tracked_fields())
+    def _compute_stupid_field(self):
+        for line in self:
+            line.stupid_field = False
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS
@@ -1107,8 +1053,58 @@ class AccountMoveLine(models.Model):
                 raise Exception("Should have number")
 
     # -------------------------------------------------------------------------
+    # SYNC DYNAMIC LINES
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _get_common_line_fields_sync_taxes(self):
+        return {'tax_ids', 'partner_id', 'currency_id', 'account_id', 'analytic_distribution'}
+
+    @api.model
+    def _get_invoice_line_fields_sync_taxes(self):
+        return self._get_common_line_fields_sync_taxes().union({'price_unit', 'quantity', 'discount'})
+
+    @api.model
+    def _get_misc_line_fields_sync_taxes(self):
+        return self._get_common_line_fields_sync_taxes().union({'amount_currency', 'balance'})
+
+    @api.model
+    def _get_invoice_line_fields_sync_discount(self):
+        return {'account_id', 'discount'}
+
+    @api.model
+    def _get_invoice_line_fields_sync_cash_rounding(self):
+        return {'amount_currency'}
+
+    @api.model
+    def _get_invoice_line_fields_sync_payment_term(self):
+        return {'amount_currency', 'balance'}
+
+    @api.model
+    def _get_invoice_line_fields_sync_date_maturity(self):
+        return {'date_maturity'}
+
+    @api.model
+    def _sync_dynamic_lines_tracked_fields(self):
+        return {'display_type', 'move_id'}.union(
+            self._get_invoice_line_fields_sync_taxes(),
+            self._get_misc_line_fields_sync_taxes(),
+            self._get_invoice_line_fields_sync_discount(),
+            self._get_invoice_line_fields_sync_cash_rounding(),
+            self._get_invoice_line_fields_sync_payment_term(),
+            self._get_invoice_line_fields_sync_date_maturity(),
+        )
+
+    # -------------------------------------------------------------------------
     # CRUD/ORM
     # -------------------------------------------------------------------------
+
+    def onchange(self, values, field_names, fields_spec):
+        # Since the ORM is not able to track changed on a one2many, we need a way to retrieve the fields
+        # that changed during the onchange on 'account.move'.
+        results = super().onchange(values, field_names, fields_spec)
+        results['value']['last_onchange_fields'] = str(set(field_names).union(set(results['value'].keys()) - {'last_onchange_fields'}))
+        return results
 
     @api.model
     def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
@@ -1157,6 +1153,12 @@ class AccountMoveLine(models.Model):
         return defaults
 
     def _sanitize_values_common(self, move, values):
+        # line_section/line_note
+        if values.get('display_type') in ('line_section', 'line_note'):
+            values.pop('account_id', None)
+            values['amount_currency'] = 0.0
+            values['balance'] = 0.0
+
         # Sync balance <-> debit/credit
         if 'balance' in values:
             debit, credit = move._get_debit_credit_from_balance(values['balance'])
@@ -1168,6 +1170,8 @@ class AccountMoveLine(models.Model):
         elif 'debit' not in values and 'credit' in values:
             values['debit'] = 0.0
             values['balance'] = -values['credit']
+        elif 'debit' in values and 'credit' in values and 'balance' not in values:
+            values['balance'] = values['debit'] - values['credit']
 
         # Custom matching number.
         if (
@@ -1177,11 +1181,8 @@ class AccountMoveLine(models.Model):
         ):
             values['matching_number'] = f"I{values['matching_number']}"
 
-        # line_section/line_note
-        if values.get('display_type') in ('line_section', 'line_note'):
-            values.pop('account_id', None)
-
     def _sanitize_values_create(self, move, values):
+        o = dict(values)
         # Fill the missing 'currency_id'.
         if 'currency_id' not in values:
             if move.is_invoice(include_receipts=True):
@@ -1229,13 +1230,13 @@ class AccountMoveLine(models.Model):
     def create(self, vals_list):
         moves = self.env['account.move'].browse({vals['move_id'] for vals in vals_list})
         moves_mapping = {move.id: move for move in moves}
-        lines_container = {'records': self.env['account.move.line']}
         move_container = {'records': moves}
+        lines_container = {'records': moves.line_ids}
         with moves._check_balanced(move_container),\
              moves._sync_dynamic_lines(move_container, lines_container=lines_container):
             vals_list = [self._sanitize_values_create(moves_mapping[vals['move_id']], vals) for vals in vals_list]
             lines = super().create(vals_list)
-            lines_container['records'] = lines
+            lines_container['records'] |= lines
 
         for line in lines:
             if line.move_id.state == 'posted':
@@ -1334,7 +1335,7 @@ class AccountMoveLine(models.Model):
 
             result = True
             for values, lines in to_write_batch.items():
-                result = result and super(AccountMoveLine, lines).write(values)
+                result = result and super(AccountMoveLine, lines).write(dict(values))
 
             self.move_id._synchronize_business_models(['line_ids'])
             if any(field in vals for field in ['account_id', 'currency_id']):
@@ -1415,31 +1416,20 @@ class AccountMoveLine(models.Model):
 
         return res
 
-    @api.depends('move_id', 'ref', 'product_id')
-    def _compute_display_name(self):
-        for line in self:
-            line.display_name = " ".join(
-                element for element in (
-                    line.move_id.name,
-                    line.ref and f"({line.ref})",
-                    line.name or line.product_id.display_name,
-                ) if element
-            )
-
     def copy_data(self, default=None):
         vals_list = super().copy_data(default=default)
 
         for line, vals in zip(self, vals_list):
             # Don't copy the name of a payment term line.
-            if line.display_type == 'payment_term' and line.move_id.is_invoice(True):
-                del vals['name']
+            # if line.display_type == 'payment_term' and line.move_id.is_invoice(True):
+            #     del vals['name']
             # Don't copy restricted fields of notes
-            if line.display_type in ('line_section', 'line_note'):
-                del vals['balance']
-                del vals['account_id']
+            # if line.display_type in ('line_section', 'line_note'):
+                # del vals['balance']
+                # del vals['account_id']
             # Will be recomputed from the price_unit
-            if line.display_type == 'product' and line.move_id.is_invoice(True):
-                del vals['balance']
+            # if line.display_type == 'product' and line.move_id.is_invoice(True):
+            #     del vals['balance']
             if self._context.get('include_business_fields'):
                 line._copy_data_extend_business_fields(vals)
         return vals_list
@@ -2958,6 +2948,29 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # PUBLIC ACTIONS
     # -------------------------------------------------------------------------
+
+    def action_payment_items_register_payment(self):
+        return self.action_register_payment({'force_group_payment': True})
+
+    def action_register_payment(self, ctx=None):
+        ''' Open the account.payment.register wizard to pay the selected journal items.
+        :return: An action opening the account.payment.register wizard.
+        '''
+        context = {
+            'active_model': 'account.move.line',
+            'active_ids': self.ids,
+        }
+        if ctx:
+            context.update(ctx)
+        return {
+            'name': _('Register Payment'),
+            'res_model': 'account.payment.register',
+            'view_mode': 'form',
+            'views': [[False, 'form']],
+            'context': context,
+            'target': 'new',
+            'type': 'ir.actions.act_window',
+        }
 
     def open_reconcile_view(self):
         action = self.env['ir.actions.act_window']._for_xml_id('account.action_account_moves_all_grouped_matching')

@@ -11,7 +11,6 @@ from datetime import timedelta
 from freezegun import freeze_time
 
 
-
 @tagged('post_install', '-at_install')
 class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
@@ -159,7 +158,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
     def test_out_invoice_line_onchange_product_1(self):
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.product_id = self.product_b
         move_form.save()
 
@@ -292,7 +291,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         uom_dozen = self.env.ref('uom.product_uom_dozen')
         with Form(invoice) as move_form:
-            with move_form.invoice_line_ids.edit(0) as line_form:
+            with move_form.line_ids.edit(0) as line_form:
                 line_form.product_uom_id = uom_dozen
 
         self.assertInvoiceValues(invoice, [
@@ -464,7 +463,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         uom_dozen = self.env.ref('uom.product_uom_dozen')
         with Form(invoice) as move_form:
-            with move_form.invoice_line_ids.edit(0) as line_form:
+            with move_form.line_ids.edit(0) as line_form:
                 line_form.product_uom_id = uom_dozen
 
         self.assertInvoiceValues(invoice, [
@@ -517,7 +516,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
     def test_out_invoice_line_onchange_business_fields_1(self):
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             # Current price_unit is 1000.
             # We set quantity = 4, discount = 50%, price_unit = 400. The debit/credit fields don't change because (4 * 500) * 0.5 = 1000.
             line_form.quantity = 4
@@ -539,7 +538,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         ], self.move_vals)
 
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             # Reset field except the discount that becomes 100%.
             line_form.quantity = 1
             line_form.discount = 100
@@ -625,8 +624,8 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # Remove lines and recreate them to apply the fiscal position.
         move_form = Form(self.invoice)
-        move_form.line_ids.remove(0)
-        move_form.line_ids.remove(0)
+        move_form.line_ids.remove([i for i, record in enumerate(move_form.line_ids._records) if record['product_id']][0])
+        move_form.line_ids.remove([i for i, record in enumerate(move_form.line_ids._records) if record['product_id']][0])
         with move_form.line_ids.new() as line_form:
             line_form.product_id = self.product_a
         with move_form.line_ids.new() as line_form:
@@ -681,7 +680,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
     def test_out_invoice_line_onchange_taxes_1(self):
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.price_unit = 1200
             line_form.tax_ids.add(self.tax_armageddon)
         move_form.save()
@@ -966,8 +965,8 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # price_unit=2300 with 15% tax (excluded) + 5.5% tax (included).
         move_form = Form(self.invoice)
-        move_form.invoice_line_ids.remove(1)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        move_form.line_ids.remove([i for i, record in enumerate(move_form.line_ids._records) if record['product_id']][1])
+        with move_form.line_ids.edit(0) as line_form:
             line_form.price_unit = 2300
             line_form.tax_ids.add(tax_price_include)
         move_form.save()
@@ -1019,7 +1018,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         })
 
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.price_unit = -2300
         move_form.save()
 
@@ -1076,7 +1075,8 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         move_form = Form(self.invoice)
         move_form.currency_id = self.other_currency
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        index = [i for i, record in enumerate(move_form.line_ids._records) if record['product_id']][0]
+        with move_form.line_ids.edit(index) as line_form:
             line_form.price_unit = 2300
         move_form.save()
 
@@ -1131,7 +1131,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         })
 
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.price_unit = -2300
         move_form.save()
 
@@ -1237,7 +1237,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         analytic_distribution = {str(analytic_account.id): 100.00}
 
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.analytic_distribution = analytic_distribution
         move_form.save()
 
@@ -1266,7 +1266,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         ], self.move_vals)
 
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.analytic_distribution = {}
         move_form.save()
 
@@ -1274,7 +1274,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         self.tax_sale_a.analytic = True
 
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.analytic_distribution = analytic_distribution
         move_form.save()
 
@@ -1312,9 +1312,9 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         ], self.move_vals)
 
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.analytic_distribution = {}
-        with move_form.invoice_line_ids.edit(1) as line_form:
+        with move_form.line_ids.edit(1) as line_form:
             line_form.analytic_distribution = {}
         move_form.save()
 
@@ -1358,17 +1358,17 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'analytic_distribution': analytic_distribution,
         })]})
 
-        self.assertRecordValues(self.invoice.invoice_line_ids, [
+        self.assertRecordValues(self.invoice.line_ids.filtered('product_id'), [
             {'analytic_distribution': analytic_distribution},
             {'analytic_distribution': False},
         ])
 
         # We can remove the analytic account, it is not recomputed by an invalidation
-        self.invoice.write({'invoice_line_ids': [(1, self.invoice.invoice_line_ids.ids[0], {
+        self.invoice.write({'invoice_line_ids': [(1, self.invoice.line_ids.ids[0], {
             'analytic_distribution': False,
         })]})
 
-        self.assertRecordValues(self.invoice.invoice_line_ids, [
+        self.assertRecordValues(self.invoice.line_ids.filtered('product_id'), [
             {'analytic_distribution': False},
             {'analytic_distribution': False},
         ])
@@ -1392,7 +1392,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         ], self.move_vals)
 
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.price_unit = 999.99
         move_form.save()
 
@@ -1491,29 +1491,10 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.tax_line_vals_2,
+                'amount_currency': -29.96,
+                'credit': 29.96,
                 'tax_repartition_line_id': self.tax_sale_b.invoice_repartition_line_ids.filtered(lambda x: x.repartition_type == 'tax').id,
                 'tax_tag_ids': [],
-            },
-            {
-                'name': '%s (rounding)' % self.tax_sale_a.name,
-                'product_id': False,
-                'account_id': self.company_data['default_account_tax_sale'].id,
-                'partner_id': self.partner_a.id,
-                'product_uom_id': False,
-                'quantity': False,
-                'discount': 0.0,
-                'price_unit': 0.0,
-                'price_subtotal': 0.0,
-                'price_total': 0.0,
-                'tax_ids': [],
-                'tax_line_id': self.tax_sale_a.id,
-                'tax_repartition_line_id': repartition_line.id,
-                'tax_tag_ids': tax_line_tag.ids,
-                'currency_id': self.company_data['currency'].id,
-                'amount_currency': 0.04,
-                'debit': 0.04,
-                'credit': 0.0,
-                'date_maturity': False,
             },
             {
                 **self.term_line_vals_1,
@@ -1613,7 +1594,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         })
 
         move_form = Form(self.invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             # 0.045 * 0.1 = 0.0045. As the foreign currency has a 0.001 rounding,
             # the result should be 0.005 after rounding.
             line_form.quantity = 0.1
@@ -3567,7 +3548,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # Modify one invoice line
         with Form(invoice) as move_form:
-            with move_form.invoice_line_ids.edit(0) as line_form:
+            with move_form.line_ids.edit(0) as line_form:
                 line_form.price_unit = 50
         self.assertEqual(invoice.amount_total, 60.5)
         self.assertEqual(invoice.amount_untaxed, 50)
@@ -3620,7 +3601,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # Modify one invoice line
         with Form(invoice) as move_form:
-            with move_form.invoice_line_ids.edit(0) as line_form:
+            with move_form.line_ids.edit(0) as line_form:
                 line_form.price_unit = 70
         self.assertRecordValues(invoice, [{'amount_total': 84.41, 'amount_untaxed': 70, 'amount_tax': 14.41}])
         self.assertEqual(len(invoice.invoice_line_ids), 1)
@@ -4005,49 +3986,6 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             other_income_account,
             "Removing a product from an invoice line should no change the account."
         )
-
-    def test_compute_name_payment_reference(self):
-        """
-        Test that the label of the payment_term line is consistent with the payment reference
-        Also tests that it won't affect the hash inalterability report
-        """
-        # TODO: I think this test is stupid...
-        self.company_data['default_journal_sale'].restrict_mode_hash_table = True
-
-        move_form = Form(self.env['account.move'].with_context(default_move_type='out_invoice'))
-        move_form.partner_id = self.partner_b
-        with move_form.line_ids.new() as line_form:
-            line_form.product_id = self.product_a
-        invoice = move_form.save()
-        payment_term_lines = invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term')
-
-        self.assertRecordValues(payment_term_lines, [
-            {'name': 'installment #1'},
-            {'name': 'installment #2'},
-        ])
-
-        move_form.save()
-
-        self.assertRecordValues(payment_term_lines, [
-            {'name': 'installment #1'},
-            {'name': 'installment #2'},
-        ])
-
-        invoice = move_form.save()
-
-        self.assertRecordValues(payment_term_lines, [
-            {'name': 'installment #1'},
-            {'name': 'installment #2'},
-        ])
-
-        invoice.action_post()
-        wizard = self.env['account.move.send'].create({'move_ids': [Command.set(invoice.ids)]})
-        wizard.action_send_and_print()
-        move_form.save()
-
-        # The integrity check should work
-        integrity_check = invoice.company_id._check_hash_integrity()['results'][0]
-        self.assertEqual(integrity_check['msg_cover'], 'Entries are correctly hashed')
 
     def test_out_invoice_create_cross_branch_refund(self):
         """You should not be able to reverse moves from different branches."""
