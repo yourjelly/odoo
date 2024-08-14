@@ -164,6 +164,11 @@ class PosController(PortalAccount):
 
         # Get the optional extra fields that could be required for a localisation.
         pos_order_country = pos_order.company_id.account_fiscal_country_id
+        print("++++++++++++++++++++++++++", flush=True)
+        print(pos_order_country.code, flush=True)
+        print(pos_order.company_id.name, flush=True)
+        print(pos_order.company_id.country_code, flush=True)
+        print("++++++++++++++++++++++++++", flush=True)
         additional_partner_fields = request.env['res.partner'].get_partner_localisation_fields_required_to_invoice(pos_order_country)
         additional_invoice_fields = request.env['account.move'].get_invoice_localisation_fields_required_to_invoice(pos_order_country)
 
@@ -180,6 +185,10 @@ class PosController(PortalAccount):
             invoice_values, prefixed_invoice_values = _parse_additional_values(additional_invoice_fields, 'invoice_', kwargs)
             form_values['extra_field_values'].update(prefixed_invoice_values)
             # Check the basic form fields if the user is not connected as we will need these information to create the new user.
+            print("@@@@@@@@@@@", flush=True)
+            print(request.env.user.login, flush=True)
+            print(user_is_connected, flush=True)
+            print("@@@@@@@@@@@", flush=True)
             if not user_is_connected:
                 error, error_message = self.details_form_validate(kwargs, partner_creation=True)
             else:
@@ -192,7 +201,11 @@ class PosController(PortalAccount):
                         error_message.append(_('The %s must be filled in your details.', request.env['ir.model.fields']._get('res.partner', field).field_description))
             # Check that the "optional" additional fields are filled.
             error, error_message = self.extra_details_form_validate(partner_values, additional_partner_fields, error, error_message)
-            error, error_message = self.extra_details_form_validate(invoice_values, additional_invoice_fields, error, error_message)
+            error, error_message, = self.extra_details_form_validate(invoice_values, additional_invoice_fields, error, error_message)
+            print("******************", flush=True)
+            print(error, flush=True)
+            print(error_message, flush=True)
+            print("******************", flush=True)
             if not error:
                 return self._get_invoice(partner_values, invoice_values, pos_order, additional_invoice_fields, kwargs)
             else:
