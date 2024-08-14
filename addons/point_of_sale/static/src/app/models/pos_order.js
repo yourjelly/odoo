@@ -95,7 +95,9 @@ export class PosOrder extends Base {
             .filter((p) => !p.is_change)
             .map((p) => p.export_for_printing());
         return {
-            orderlines: this.lines.map((l) => omit(l.getDisplayData(), "internalNote")),
+            orderlines: this.config.orderlines_sequence_in_cart_by_category
+                ? this.getSortedOrderlines().map((l) => omit(l.getDisplayData(), "internalNote"))
+                : this.lines.map((l) => omit(l.getDisplayData(), "internalNote")),
             paymentlines,
             amount_total: this.get_total_with_tax(),
             total_without_tax: this.get_total_without_tax(),
@@ -1043,11 +1045,17 @@ export class PosOrder extends Base {
     }
     getCustomerDisplayData() {
         return {
-            lines: this.lines.map((l) => ({
-                ...l.getDisplayData(),
-                isSelected: l.isSelected(),
-                imageSrc: `/web/image/product.product/${l.product_id.id}/image_128`,
-            })),
+            lines: this.config.orderlines_sequence_in_cart_by_category
+                ? this.getSortedOrderlines().map((l) => ({
+                      ...l.getDisplayData(),
+                      isSelected: l.isSelected(),
+                      imageSrc: `/web/image/product.product/${l.product_id.id}/image_128`,
+                  }))
+                : this.lines.map((l) => ({
+                      ...l.getDisplayData(),
+                      isSelected: l.isSelected(),
+                      imageSrc: `/web/image/product.product/${l.product_id.id}/image_128`,
+                  })),
             finalized: this.finalized,
             amount: formatCurrency(this.get_total_with_tax() || 0),
             paymentLines: this.payment_ids.map((pl) => ({
@@ -1059,6 +1067,42 @@ export class PosOrder extends Base {
     }
     getFloatingOrderName() {
         return this.note || this.tracking_number;
+    }
+
+    sortBySequenceAndCategory(a, b) {
+        const seqA = a.product_id?.pos_categ_ids[0]?.sequence ?? 0;
+        const seqB = b.product_id?.pos_categ_ids[0]?.sequence ?? 0;
+        const pos_categ_id_A = a.product_id?.pos_categ_ids[0]?.id ?? 0;
+        const pos_categ_id_B = b.product_id?.pos_categ_ids[0]?.id ?? 0;
+
+        if (seqA !== seqB) {
+            return seqA - seqB;
+        }
+        return pos_categ_id_A - pos_categ_id_B;
+    }
+
+    // orderlines will be sorted on the basis of pos product category and sequence for group the orderlines in order cart
+    getSortedOrderlines() {
+        if (this.config.orderlines_sequence_in_cart_by_category && this.lines.length) {
+            this.lines.sort(this.sortBySequenceAndCategory);
+            const resultLines = [];
+            this.lines.forEach((line) => {
+                if (line.combo_line_ids?.length > 0) {
+                    resultLines.push(line);
+                    const childLines = this.lines.filter(
+                        (childLine) => childLine.combo_parent_id?.id === line.id
+                    );
+                    childLines
+                        .sort(this.sortBySequenceAndCategory)
+                        .forEach((childLine) => resultLines.push(childLine));
+                } else if (!line.combo_parent_id && line.order_id) {
+                    resultLines.push(line);
+                }
+            });
+            return resultLines;
+        } else {
+            return this.get_orderlines();
+        }
     }
 }
 

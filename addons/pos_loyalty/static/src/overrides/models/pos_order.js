@@ -1338,4 +1338,39 @@ patch(PosOrder.prototype, {
             return super.removeOrderline(lineToRemove);
         }
     },
+    getSortedOrderlines() {
+        const lines = super.getSortedOrderlines();
+        if (this.config.orderlines_sequence_in_cart_by_category && this.lines.length) {
+            const discountRewardLines = [];
+            const productRewardInsertions = [];
+
+            lines.forEach((line) => {
+                if (line.is_reward_line) {
+                    if (line.reward_id.reward_type === "discount") {
+                        discountRewardLines.push(line);
+                    } else if (line.reward_id.reward_type === "product") {
+                        const parentLineIndex = lines.findIndex(
+                            (parentLine) =>
+                                line.reward_id?.reward_product_id?.id === parentLine.product_id.id
+                        );
+                        if (parentLineIndex > -1) {
+                            productRewardInsertions.push({
+                                line,
+                                insertAfterIndex: parentLineIndex,
+                            });
+                        }
+                    }
+                }
+            });
+
+            const filteredLines = lines.filter((line) => !line.is_reward_line);
+            productRewardInsertions.forEach(({ line, insertAfterIndex }) => {
+                filteredLines.splice(insertAfterIndex + 1, 0, line);
+            });
+            const resultLines = [...filteredLines, ...discountRewardLines];
+
+            return resultLines;
+        }
+        return lines;
+    },
 });
