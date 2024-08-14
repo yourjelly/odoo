@@ -175,7 +175,8 @@ class SaleOrderLine(models.Model):
     price_subtotal = fields.Monetary(
         string="Subtotal",
         compute='_compute_amount',
-        store=True, precompute=True)
+        # store=True, precompute=True)
+        store=True, precompute=True, copy=True)
     price_tax = fields.Float(
         string="Total Tax",
         compute='_compute_amount',

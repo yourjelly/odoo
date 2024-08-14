@@ -434,11 +434,13 @@ class AccountMove(models.Model):
     amount_residual = fields.Monetary(
         string='Amount Due',
         compute='_compute_amount', store=True,
+        copy=True,
     )
     amount_untaxed_signed = fields.Monetary(
         string='Untaxed Amount Signed',
         compute='_compute_amount', store=True, readonly=True,
         currency_field='company_currency_id',
+        copy=True,
     )
     amount_tax_signed = fields.Monetary(
         string='Tax Signed',
@@ -449,11 +451,13 @@ class AccountMove(models.Model):
         string='Total Signed',
         compute='_compute_amount', store=True, readonly=True,
         currency_field='company_currency_id',
+        copy=True,
     )
     amount_total_in_currency_signed = fields.Monetary(
         string='Total in Currency Signed',
         compute='_compute_amount', store=True, readonly=True,
         currency_field='currency_id',
+        copy=True,
     )
     amount_residual_signed = fields.Monetary(
         string='Amount Due Signed',

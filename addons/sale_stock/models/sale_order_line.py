@@ -15,7 +15,8 @@ class SaleOrderLine(models.Model):
 
     qty_delivered_method = fields.Selection(selection_add=[('stock_move', 'Stock Moves')])
     route_id = fields.Many2one('stock.route', string='Route', domain=[('sale_selectable', '=', True)], ondelete='restrict', check_company=True)
-    move_ids = fields.One2many('stock.move', 'sale_line_id', string='Stock Moves')
+    # move_ids = fields.One2many('stock.move', 'sale_line_id', string='Stock Moves')
+    move_ids = fields.One2many('stock.move', 'sale_line_id', string='Stock Moves', copy=True)
     virtual_available_at_date = fields.Float(compute='_compute_qty_at_date', digits='Product Unit of Measure')
     scheduled_date = fields.Datetime(compute='_compute_qty_at_date')
     forecast_expected_date = fields.Datetime(compute='_compute_qty_at_date')
@@ -84,7 +85,8 @@ class SaleOrderLine(models.Model):
             if move.product_id == line.product_id
         }
         all_moves = self.env['stock.move'].browse(all_move_ids)
-        forecast_expected_date_per_move = dict(all_moves.mapped(lambda m: (m.id, m.forecast_expected_date)))
+        # forecast_expected_date_per_move = dict(all_moves.mapped(lambda m: (m.id, m.forecast_expected_date)))
+        forecast_expected_date_per_move = dict(all_moves.mapped(lambda m: (m.id, False)))
         # If the state is already in sale the picking is created and a simple forecasted quantity isn't enough
         # Then used the forecasted data of the related stock.move
         for line in self.filtered(lambda l: l.state == 'sale'):

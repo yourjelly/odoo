@@ -348,6 +348,7 @@ class AccountMoveLine(models.Model):
         string='Subtotal',
         compute='_compute_totals', store=True,
         currency_field='currency_id',
+        copy=True,
     )
     price_total = fields.Monetary(
         string='Total',

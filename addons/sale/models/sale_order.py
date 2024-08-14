@@ -215,7 +215,8 @@ class SaleOrder(models.Model):
 
     amount_untaxed = fields.Monetary(string="Untaxed Amount", store=True, compute='_compute_amounts', tracking=5)
     amount_tax = fields.Monetary(string="Taxes", store=True, compute='_compute_amounts')
-    amount_total = fields.Monetary(string="Total", store=True, compute='_compute_amounts', tracking=4)
+    # amount_total = fields.Monetary(string="Total", store=True, compute='_compute_amounts', tracking=4)
+    amount_total = fields.Monetary(string="Total", store=True, compute='_compute_amounts', tracking=4, copy=True)
     amount_to_invoice = fields.Monetary(string="Amount to invoice", store=True, compute='_compute_amount_to_invoice')
     amount_invoiced = fields.Monetary(string="Already invoiced", compute='_compute_amount_invoiced')
 
