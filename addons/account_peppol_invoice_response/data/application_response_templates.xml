@@ -1,41 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="ubl_Party">
+    <template id="ubl_invoice_response_PartyType">
         <t xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
            xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
            xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-
-            <cbc:EndpointID t-att="party['endpoint_id_attrs']"
-                            t-out="party['endpoint_id']"/>
-            <cac:PartyIdentification t-if="party.get('party_identification') and party.get('party_identification_attrs', {}).get('schemeID')">
-                <cbc:ID t-att="party['party_identification_attrs']"
-                        t-out="party['party_identification']"/>
+            <cbc:EndpointID t-att="vals['endpoint_id_attrs']"
+                            t-out="vals['endpoint_id']"/>
+            <cac:PartyIdentification t-foreach="vals.get('party_identification_vals', [])[:1]" t-as="party_vals">
+                <cbc:ID t-att="party_vals.get('id_attrs', {})"
+                        t-out="party_vals.get('id')"/>
             </cac:PartyIdentification>
             <cac:PartyLegalEntity>
                 <cbc:RegistrationName t-out="party['registration_name']"/>
             </cac:PartyLegalEntity>
-            <cac:Contact t-if="party.get('contact')">
-                <cbc:Name t-out="party['contact'].get('name')"/>
-                <cbc:Telephone t-out="party['contact'].get('telephone')"/>
-                <cbc:ElectronicMail t-out="party['contact'].get('email)"/>
+            <cac:Contact>
+                <t t-set="contact_vals" t-value="vals.get('contact_vals', {})"/>
+                <cbc:Name t-out="contact_vals.get('name')"/>
+                <cbc:Telephone t-out="contact_vals.get('telephone')"/>
+                <cbc:ElectronicMail t-out="contact_vals.get('electronic_mail')"/>
             </cac:Contact>
         </t>
     </template>
 
-    <template id="ubl_DocumentResponse">
+    <template id="ubl_invoice_response_DocumentResponse">
         <t xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
            xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
            xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
             <cac:Response>
-                <t t-set="response" t-as="document_response['response']"/>
+                <t t-set="response" t-as="vals['response']"/>
                 <cbc:ResponseCode t-out="response['code']"/>
                 <cbc:EffectiveDate t-if="response.get('effective_date')" t-out="response['effective_date']"/>
                 <t t-foreach="response.get('statuses', [])" t-as="status">
                     <cac:Status>
-                        <cbc:StatusReasonCode t-if="status.get('reason_code')"
-                                              t-att-listID="status['reason_list_id']"
-                                              t-out="status['reason_code']"/>
+                        <cbc:StatusReasonCode t-att="status['attrs']" t-out="status['status_code']"/>
                         <cbc:StatusReason t-if="status.get('reason')" t-out="status['reason']"/>
                         <t t-foreach="status.get('conditions', [])" t-as="condition">
                             <cac:Condition>
@@ -47,27 +45,25 @@
                 </t>
             </cac:Response>
             <cac:DocumentReference>
-                <t t-set="docref" t-as="document_response['document_reference']"/>
+                <t t-set="docref" t-as="vals['document_reference']"/>
                 <cbc:ID t-out="docref['invoice_identifier']"/>
-                <cbc:IssueDate t-if="docref.get('invoice_issue_date')"
-                               t-out="docref['invoice_issue_date']"/>
+                <cbc:IssueDate t-out="docref['invoice_issue_date']"/>
                 <cbc:DocumentTypeCode t-out="docref['document_type_code']"/>
             </cac:DocumentReference>
             <cac:IssuerParty>
-                <cac:PartyIdentification t-if="document_response.get('issuer_party_identification')"
-                                         t-out="document_response['issuer_party_identification']"/>
-                <cac:PartyName t-out="document_response['issuer_party_name']"/>
+                <cac:PartyIdentification t-if="vals.get('issuer_party_identification')"
+                                         t-out="vals['issuer_party_identification']"/>
+                <cac:PartyName t-out="vals['issuer_party_name']"/>
             </cac:IssuerParty>
             <cac:RecipientParty>
-                <cac:PartyIdentification t-if="document_response.get('recipient_party_identification')"
-                                         t-out="document_response['recipient_party_identification']"/>
-                <cac:PartyName t-out="document_reponse['recipient_party_name']"/>
+                <cac:PartyIdentification t-if="vals.get('recipient_party_identification')"
+                                         t-out="vals['recipient_party_identification']"/>
+                <cac:PartyName t-out="vals['recipient_party_name']"/>
             </cac:RecipientParty>
-
         </t>
     </template>
 
-    <template id="ubl_ApplicationResponse">
+    <template id="ubl_invoice_response_ApplicationResponse">
         <ApplicationResponse xmlns="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2"
                              xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                              xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
@@ -76,22 +72,20 @@
             <cbc:ID t-out="vals.get('response_identifier')"/>
             <cbc:IssueDate t-out="vals.get('issue_date')"/>
             <cac:SenderParty>
-                <t t-call="ubl_Party">
-                    <t t-set="party" t-value="vals['sender_party']"/>
+                <t t-call="{{ PartyType_template }}">
+                    <t t-set="vals" t-value="vals['sender_party_vals']"/>
                 </t>
             </cac:SenderParty>
             <cac:ReceiverParty>
-                <t t-call="ubl_Party">
-                    <t t-set="party" t-value="vals['receiver_party']"/>
+                <t t-call="{{ PartyType_template }}">
+                    <t t-set="vals" t-value="vals['receiver_party_vals']"/>
                 </t>
             </cac:ReceiverParty>
-
             <cac:DocumentResponse>
-                <t t-call="ubl_DocumentResponse">
-                    <t t-set="document_response" t-value="vals['document_response']"/>
+                <t t-call="{{ DocumentResponse_template }}">
+                    <t t-set="vals" t-value="vals['document_response']"/>
                 </t>
             </cac:DocumentResponse>
-
         </ApplicationResponse>
     </template>
 
