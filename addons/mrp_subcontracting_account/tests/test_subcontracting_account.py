@@ -477,10 +477,22 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         product_category_all = self.env.ref('product.product_category_all')
         product_category_all.property_cost_method = 'fifo'
         product_category_all.property_valuation = 'real_time'
+
+
         # set the production account to False
         product_category_all.property_stock_account_production_cost_id = False
         product_category_all.invalidate_recordset()
+        self.assertEqual(
+            product_category_all.property_stock_account_production_cost_id,
+            self.env['ir.property']._get('property_stock_account_production_cost_id', 'product.category')
+        )
+
+        field_id = self.env['ir.model.fields']._get('product.category', 'property_stock_account_production_cost_id').id
+        self.env['ir.property'].search([('fields_id', '=', field_id)]).unlink()
+        product_category_all.property_stock_account_production_cost_id = False
+        product_category_all.invalidate_recordset()
         self.assertFalse(product_category_all.property_stock_account_production_cost_id)
+
         self.assertEqual(self.bom.type, 'subcontract')
         self.comp1.standard_price = 1.0
         picking_form = Form(self.env['stock.picking'])
