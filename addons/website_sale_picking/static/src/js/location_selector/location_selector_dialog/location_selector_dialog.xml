@@ -4,7 +4,7 @@
         <button id="submit_location_small" position="attributes">
             <attribute
 				name="t-att-disabled"
-				add="!selectedLocation.additional_data.is_cart_in_stock"
+				add="!selectedLocation.additional_data.in_stock"
 				separator=" or "
 			/>
         </button>

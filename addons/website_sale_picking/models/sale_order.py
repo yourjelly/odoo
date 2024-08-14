@@ -20,12 +20,10 @@ class SaleOrder(models.Model):
         if self.carrier_id.delivery_type != 'onsite':
             return super()._set_pickup_location(pickup_location_data)
 
-        pickup_location = json.loads(pickup_location_data)
-        self.pickup_location_data = pickup_location
+        self.pickup_location_data = json.loads(pickup_location_data)
 
     def _get_pickup_locations(self, zip_code=None, country=None):
-        """ Override of delivery `delivery._get_pickup_locations`
-        """
+        """ Override of delivery `delivery._get_pickup_locations` """
         self.ensure_one()
         if self.carrier_id.delivery_type != 'onsite':
             return super()._get_pickup_locations(zip_code, country)
@@ -43,3 +41,12 @@ class SaleOrder(models.Model):
             ):
                 return False
         return True
+
+    def _recompute_delivery_method_rate(self):
+        super()._recompute_delivery_method_rate()
+        if (
+            self.carrier_id.delivery_type == 'onsite'
+            and self.pickup_location_data.get('warehouse_id')
+            and not self._is_cart_in_stock(self.pickup_location_data['warehouse_id'])
+        ):  # Reset pickup location if not all products are available for the chosen location.
+            self.pickup_location_data = {}

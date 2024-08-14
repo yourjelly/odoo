@@ -27,35 +27,43 @@ class DeliveryCarrier(models.Model):
                 )
 
     def _onsite_get_close_locations(self, order):
-        close_locations = []
+        store_locations = []
 
         for wh in self.warehouse_ids:
-            location = wh.partner_id
-            res = dict(
-                id=location['id'],
-                name=location['name'].title(),
-                street=f"{location['street'].title()}",
-                city=location.city.title(),
-                zip_code=location.zip,
-                country_code=location.country_code,
-                latitude=location.partner_latitude,
-                longitude=location.partner_longitude,
-                warehouse_id=wh.id,
-                additional_data={'is_cart_in_stock': order._is_cart_in_stock(wh.id)}
-            )
-            if wh.opening_hours:  # Format opening hours dict for location selector.
-                opening_hours_dict = {str(i): [] for i in range(7)}
-                for att in wh.opening_hours.attendance_ids:
-                    if att.day_period != 'lunch':
-                        opening_hours_dict[att.dayofweek].append(
-                            f'{format_duration(att.hour_from)} - {format_duration(att.hour_to)}'
-                        )
-                res['opening_hours'] = opening_hours_dict
-            else:
-                res['opening_hours'] = {}
-            close_locations.append(res)
+            store_locations.append(DeliveryCarrier.format_warehouse_location(
+                wh,
+                additional_data={'in_stock': order._is_cart_in_stock(wh.id)},
+            ))
 
-        return close_locations
+        return store_locations
+
+    @staticmethod
+    def format_warehouse_location(wh, additional_data=None):
+        """ Return a formatted warehouse values for location selector. """
+        location = wh.partner_id
+        res = dict(
+            id=location['id'],
+            name=location['name'].title(),
+            street=f"{location['street'].title()}",
+            city=location.city.title(),
+            zip_code=location.zip,
+            country_code=location.country_code,
+            latitude=location.partner_latitude,
+            longitude=location.partner_longitude,
+            warehouse_id=wh.id,
+            additional_data=additional_data,
+        )
+        if wh.opening_hours:  # Format opening hours dict for location selector.
+            opening_hours_dict = {str(i): [] for i in range(7)}
+            for att in wh.opening_hours.attendance_ids:
+                if att.day_period != 'lunch':
+                    opening_hours_dict[att.dayofweek].append(
+                        f'{format_duration(att.hour_from)} - {format_duration(att.hour_to)}'
+                    )
+            res['opening_hours'] = opening_hours_dict
+        else:
+            res['opening_hours'] = {}
+        return res
 
     def onsite_rate_shipment(self, order):
         """

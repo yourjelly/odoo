@@ -725,12 +725,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
             return request.redirect('/web/login')
 
         order = request.website.sale_get_order()
-        if order and order.carrier_id:
-            # Express checkout is based on the amout of the sale order. If there is already a
-            # delivery line, Express Checkout form will display and compute the price of the
-            # delivery two times (One already computed in the total amount of the SO and one added
-            # in the form while selecting the delivery carrier)
-            order._remove_delivery_line()
         if order and order.state != 'draft':
             request.session['sale_order_id'] = None
             order = request.website.sale_get_order()
@@ -1750,6 +1744,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'landing_route': '/shop/payment/validate',
             'payment_method_unknown_id': request.env.ref('payment.payment_method_unknown').id,
             'shipping_info_required': order._has_deliverable_products(),
+            'delivery_amount': payment_utils.to_minor_currency_units(
+                order.order_line.filtered(lambda l: l.is_delivery).price_total, order.currency_id
+            ),
             'shipping_address_update_route': self._express_checkout_delivery_route,
         })
         if request.website.is_public_user():

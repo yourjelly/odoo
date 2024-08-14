@@ -320,7 +320,7 @@ class SaleOrder(models.Model):
             # the requested quantity update.
             warning = ''
 
-        self._remove_delivery_line()
+
 
         order_line = self._cart_update_order_line(product_id, quantity, order_line, **kwargs)
 
@@ -334,6 +334,10 @@ class SaleOrder(models.Model):
             raise UserError(_(
                 "The given product does not have a price therefore it cannot be added to cart.",
             ))
+        if not self._has_deliverable_products():
+            self._remove_delivery_line()
+        elif self.carrier_id:  # Recompute delivery rate
+            self._recompute_delivery_method_rate()
 
         return {
             'line_id': order_line.id,
@@ -343,6 +347,13 @@ class SaleOrder(models.Model):
             ),
             'warning': warning,
         }
+
+    def _recompute_delivery_method_rate(self):
+        rate = self.carrier_id.rate_shipment(self)
+        if rate['success']:
+            self.order_line.filtered(lambda line: line.is_delivery).price_unit = rate['price']
+        else:
+            self._remove_delivery_line()
 
     def _cart_find_product_line(
         self,

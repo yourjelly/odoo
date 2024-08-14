@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+   <t t-name="website_sale_picking.ClickAndCollect">
+	   <t t-if="this.state.selected_wh_location.id">
+		   <div name="o_pickup_location_details">
+			   <span>
+					<b name="o_pickup_location_name" t-out="this.state.selected_wh_location.name"/>
+					<br/>
+					<i
+						name="o_pickup_location_address"
+						t-out="this.getAddress()"
+					/>
+				</span>
+			   <span
+					name="o_pickup_location_selector"
+					class="btn btn-primary fa fa-pencil ms-2 p-1"
+					title="Change location"
+					aria-label="Change location"
+					t-on-click="openLocationSelector"
+				/>
+		   </div>
+	   </t>
+	   <a
+		   t-else=""
+		   role="button"
+		   type="button"
+		   class="mb-2"
+		   t-on-click="openLocationSelector"
+	   >
+	   <i class="fa fa-building"/>
+		   Check in-store stock
+	   </a>
+   </t>
+</templates>

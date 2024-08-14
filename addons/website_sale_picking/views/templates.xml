@@ -25,4 +25,17 @@
         </xpath>
     </template>
 
+   <template id="website_sale_product_onsite" inherit_id="website_sale.product">
+       <xpath expr="//div[@id='o_wsale_cta_wrapper']" position="before">
+           <owl-component
+               name="website_sale_picking.ClickAndCollect"
+               t-att-props="json.dumps({
+                'product_id': product_variant.id,
+                'zipCode': zip_code or 3000,
+                'selected_wh_location': selected_wh_location or {},
+               })"
+           />
+       </xpath>
+   </template>
+
 </odoo>

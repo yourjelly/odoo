@@ -6,10 +6,14 @@ from odoo import fields, models
 class Website(models.Model):
     _inherit = 'website'
 
-    picking_site_ids = fields.Many2many('delivery.carrier', string='Picking sites',
-                                        compute='_compute_picking_sites')
+    available_onsite_dm_id = fields.One2many(
+        'delivery.carrier',
+        inverse_name='website_id',
+        string='Default onsite delivery method',
+        compute='_compute_onsite_dm',
+    )
 
-    def _compute_picking_sites(self):
+    def _compute_onsite_dm(self):
         delivery_carriers = self.env['delivery.carrier'].search([('delivery_type', '=', 'onsite')])
         for website in self:
-            website.picking_site_ids = delivery_carriers.filtered_domain([('website_id', '=', website.id)])
+            website.available_onsite_dm_id = delivery_carriers.filtered_domain([('website_id', '=', website.id)])
