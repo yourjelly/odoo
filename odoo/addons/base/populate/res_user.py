@@ -12,7 +12,7 @@ class Users(models.Model):
     _inherit = "res.users"
 
     _populate_sizes = {
-        'small': 10,
+        'small': 15000,
         'medium': 1000,
         'large': 10000,
     }
