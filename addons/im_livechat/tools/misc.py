@@ -2,6 +2,9 @@
 
 from odoo.http import request
 from werkzeug.exceptions import NotFound
+from odoo.addons.mail.tools.discuss import ids_by_model
+
+ids_by_model["ChatbotStep"] = ()
 
 def downgrade_to_public_user():
     """Replace the request user by the public one. All the cookies are removed

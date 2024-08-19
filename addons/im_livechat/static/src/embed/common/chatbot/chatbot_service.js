@@ -105,17 +105,7 @@ export class ChatBotService {
         if (this.chatbot.completed) {
             return;
         }
-        
-        console.log("\n\nfonction _triggerNextStep")
-        console.log("this.chatbot?.currentStep", this.chatbot?.currentStep)
-        console.log("this.chatbot?.currentStep?.scriptStep?.id", this.chatbot?.currentStep?.scriptStep?.id)
-        
-        debugger
-        //await this.chatbot.triggerNextStep.apply(this.chatbot);
         await this.chatbot.triggerNextStep();
-        console.log("\n\n\n\nEn théorie celui là est niqué : ")
-        console.log("this.chatbot?.currentStep", this.chatbot?.currentStep)
-        console.log("this.chatbot?.currentStep?.scriptStep?.id", this.chatbot?.currentStep?.scriptStep?.id)
         if (!this.chatbot?.currentStep) {
             return;
         }

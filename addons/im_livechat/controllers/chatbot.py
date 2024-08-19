@@ -63,22 +63,16 @@ class LivechatChatbotScriptController(http.Controller):
             return None
 
         posted_message = next_step._process_step(discuss_channel)
-        return {
-            "data": Store(posted_message, for_current_user=True).get_result(),
-            'scriptStep': {
-                'id': next_step.id,
-                'answers': [{
-                    'id': answer.id,
-                    'label': answer.name,
-                    'redirectLink': answer.redirect_link,
-                } for answer in next_step.answer_ids],
-                'isLast': next_step._is_last_step(discuss_channel),
-                'message': plaintext2html(next_step.message) if not is_html_empty(next_step.message) else False,
-                'type': next_step.step_type,
+        store = Store()
+        store.add(
+            "ChatbotStep",
+            {
+                "isLast": next_step._is_last_step(discuss_channel),
+                "message": store.one(posted_message, for_current_user=True),
+                "scriptStep": store.one(next_step),
             },
-            'operatorFound': next_step.step_type == 'forward_operator' and len(
-                discuss_channel.channel_member_ids) > 2,
-        }
+        )
+        return store.get_result()
 
     @http.route("/chatbot/step/validate_email", type="json", auth="public")
     @add_guest_to_context

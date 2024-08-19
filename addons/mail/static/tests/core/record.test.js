@@ -9,7 +9,7 @@ import { reactive, toRaw } from "@odoo/owl";
 import { mockService } from "@web/../tests/web_test_helpers";
 
 import { Record, Store, makeStore } from "@mail/core/common/record";
-import { Markup } from "@mail/model/misc";
+import { AND, Markup } from "@mail/model/misc";
 import { registry } from "@web/core/registry";
 
 describe.current.tags("desktop");
@@ -883,4 +883,41 @@ test("setup() has precedence over instance class field definition", async () => 
     const store = await start();
     const test = store.Test2.insert();
     expect(test.x).toBe(true);
+});
+
+test.only("test", async () => {
+    class User extends Record {
+        static id = "id";
+        id;
+    }
+    User.register(localRegistry);
+    class Thread extends Record {
+        static id = "id";
+        id;
+        members = Record.many("ChannelMember");
+    }
+    Thread.register(localRegistry);
+    class ChannelMember extends Record {
+        static id = AND("channel", "user");
+        channel = Record.one("Thread");
+        user = Record.one("User");
+    }
+    ChannelMember.register(localRegistry);
+
+    const store = await start();
+    const user = store.User.insert({ id: 1 });
+    const thread = store.Thread.insert({ id: 1 });
+    const memberData = {
+        channel: { id: thread.id },
+        user: { id: user.id },
+    };
+    const channelMember = store.ChannelMember.insert(memberData);
+    const memberFromStore = store.ChannelMember.get({ channel: thread, user: user });
+    expect(channelMember.channel.eq(thread)).toBe(true);
+    expect(channelMember.user.eq(user)).toBe(true);
+    expect(channelMember.eq(memberFromStore)).toBe(true);
+
+    thread.members.push(channelMember);
+    const memberFromThread = thread.members.at(-1);
+    expect(channelMember.eq(memberFromThread)).toBe(true);
 });

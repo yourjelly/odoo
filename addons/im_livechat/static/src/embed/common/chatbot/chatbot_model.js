@@ -5,7 +5,7 @@ import { debounce } from "@web/core/utils/timing";
 
 export class Chatbot extends Record {
     static id = AND("script", "thread");
-    static MESSAGE_DELAY = 1500;
+    static MESSAGE_DELAY = 0;
     // Time to wait without user input before considering a multi line step as
     // completed.
     static MULTILINE_STEP_DEBOUNCE_DELAY = 10000;
@@ -14,6 +14,7 @@ export class Chatbot extends Record {
     script = Record.one("ChatbotScript");
     currentStep = Record.one("ChatbotStep");
     steps = Record.many("ChatbotStep");
+    tsteps = [];
     thread = Record.one("Thread", { inverse: "chatbot" });
     typingMessage = Record.one("Message", {
         compute() {
@@ -52,20 +53,17 @@ export class Chatbot extends Record {
     }
 
     async triggerNextStep() {
-        console.log("\n\n fonction triggerNextStep")
         if (this.currentStep) {
             await this._simulateTyping();
         }
-        console.log("(début)  this.currentStep", this.currentStep)
         await this._goToNextStep();
         if (!this.currentStep || this.currentStep.completed || !this.thread) {
             return;
         }
-        console.log("(milieu)  this.currentStep", this.currentStep)
-        const { Message: messages = [] } = this.store.insert(this.currentStep.data, { html: true });
-        this.currentStep.message =
-            messages[0] ??
-            this.store.Message.insert(
+        if (!this.currentStep.message) {
+            // Thread is not persisted thus messages do not exist on the server,
+            // create them now on the client side.
+            this.currentStep.message = this.store.Message.insert(
                 {
                     id: this.store.getNextTemporaryId(),
                     author: this.script.partner,
@@ -74,10 +72,8 @@ export class Chatbot extends Record {
                 },
                 { html: true }
             );
+        }
         this.thread.messages.add(this.currentStep.message);
-        console.log("\n\n\n\nEn théorie celui là fonctionne bien : \n\n\n\n")
-        console.log("(fin) this.currentStep", this.currentStep)
-        console.log("this.currentStep?.scriptStep?.id", this.currentStep?.scriptStep?.id)
     }
 
     get completed() {
@@ -96,15 +92,21 @@ export class Chatbot extends Record {
             return;
         }
         if (this.steps.at(-1)?.eq(this.currentStep)) {
-            const nextStep = await rpc("/chatbot/step/trigger", {
+            const storeData = await rpc("/chatbot/step/trigger", {
                 channel_id: this.thread.id,
                 chatbot_script_id: this.script.id,
             });
-            if (!nextStep) {
+            if (!storeData) {
                 this.currentStep.isLast = true;
                 return;
             }
-            this.steps.push(nextStep);
+            // delete storeData["mail.message"][0]["chatbotStep"];
+            const { ChatbotStep: step } = this.store.insert(storeData, { html: true });
+            this.steps.push(step);
+            const arrStep = this.steps.at(-1);
+            console.warn("same local id?", step.localId === arrStep.localId);
+            console.warn("is equal to array value?", step.eq(arrStep));
+            return;
         }
         const nextStepIndex = this.steps.lastIndexOf(this.currentStep) + 1;
         this.currentStep = this.steps[nextStepIndex];
@@ -143,56 +145,26 @@ export class Chatbot extends Record {
         if (this.currentStep.selectedAnswer) {
             return true;
         }
-        const answer = this.currentStep.answers.find(({ label }) => message.body.includes(label));
-        
-        if (answer == undefined){
-            console.log("\n\n\n\n\n\n\n BUG DETECTE : answer == undefined")
-            console.log("D'après mes observations, je crois que message.body est à jour mais que currentStep est en retard d'une question")
-            console.log("En effet, currentStep est passé à la bonne étape après le click sur la réponse précédente, puis est revenu")
-            console.log("à la question d'avant en soum soum avant d'arriver à la réponse actuelle")
-
-            console.log("affichage des données utiles :")
-            console.log("this.currentStep", this.currentStep)
-            console.log("this.currentStep.answers.forEach((x) => console.log(x));")
-            this.currentStep.answers.forEach((x) => console.log(x)); // x correspond à label
-
-            console.log("\n\n\n\n12345678 J'appelle le debugger :")
-            debugger
-        }
-        if (this.currentStep.message == undefined){
-            console.log("\n\n\n\n\n\n\nBUG DETECTE : this.currentStep.message == undefined")
-            
-            console.log("affichage des données utiles :")
-            console.log('answer', answer)
-            console.log("this.currentStep", this.currentStep)
-            console.log("this.currentStep?.message", this.currentStep?.message)
-            console.log("this.currentStep.answers.forEach((x) => console.log(x));")
-            this.currentStep.answers.forEach((x) => console.log(x)); // x correspond à label
-
-            console.log("\n\n\n\n12345678 J'appelle le debugger :")
-            debugger
-        }
-
+        const answer = this.currentStep.answers.find(({ name }) => message.body.includes(name));
         this.currentStep.selectedAnswer = answer;
         await rpc("/chatbot/answer/save", {
             channel_id: this.thread.id,
             message_id: this.currentStep.message.id,
             selected_answer_id: answer.id,
         });
-        console.log("En cas de bug, ce label n'apparaîtra jamais")
-        if (!answer.redirectLink) {
+        if (!answer.redirect_link) {
             return true;
         }
         let isRedirecting = false;
-        if (answer.redirectLink && URL.canParse(answer.redirectLink, window.location.href)) {
+        if (answer.redirect_link && URL.canParse(answer.redirect_link, window.location.href)) {
             const url = new URL(window.location.href);
-            const nextURL = new URL(answer.redirectLink, window.location.href);
+            const nextURL = new URL(answer.redirect_link, window.location.href);
             isRedirecting = url.pathname !== nextURL.pathname || url.origin !== nextURL.origin;
         }
-        const targetURL = new URL(answer.redirectLink, window.location.origin);
+        const targetURL = new URL(answer.redirect_link, window.location.origin);
         const redirectionAlreadyDone = targetURL.href === location.href;
         if (!redirectionAlreadyDone) {
-            browser.location.assign(answer.redirectLink);
+            browser.location.assign(answer.redirect_link);
         }
         return redirectionAlreadyDone || !isRedirecting;
     }
