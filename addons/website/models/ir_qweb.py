@@ -208,6 +208,10 @@ class IrQWeb(models.AbstractModel):
         return (js_assets | assets, css_assets | assets)
 
     def _pregenerate_assets_bundles(self):
+        _logger.info("_pregenerate_assets_bundles called")
+        _logger.info("config['test_enable']: %s" % str(config['test_enable']))
+        _logger.info("config['test_file']: %s" % str(config['test_file']))
+        _logger.info("config['test_tags']: %s" % str(config['test_tags']))
         if config['test_enable'] or config['test_file'] or config['test_tags']:
             # Expose templates in templates.js
             _fetch_content = JavascriptAsset._fetch_content
