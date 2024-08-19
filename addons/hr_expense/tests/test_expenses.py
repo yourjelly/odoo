@@ -1425,7 +1425,7 @@ class TestExpenses(TestExpenseCommon):
         expense_sheet.with_context(validate_analytic=True).approve_expense_sheets()
 
     def test_expense_by_company_with_caba_tax(self):
-        """When using cash basis tax in an expense paid by the company, the transition account should not be used."""
+        """When using cash basis tax in an expense paid by the company, a caba entry should be created."""
 
         caba_transition_account = self.env['account.account'].create({
             'name': 'Cash Basis Tax Transition Account',
@@ -1454,6 +1454,10 @@ class TestExpenses(TestExpenseCommon):
             })]
         })
 
-        moves = expense_sheet.action_sheet_move_create()
-        tax_lines = moves.line_ids.filtered(lambda line: line.tax_line_id == caba_tax)
-        self.assertNotEqual(tax_lines.account_id, caba_transition_account, "The tax should not be on the transition account")
+        expense_move = expense_sheet.action_sheet_move_create()
+
+        # Might be able to replace with: expense_move.tax_cash_basis_created_move_ids
+        caba_entry = self.env['account.move'].filtered(lambda move: move.ref == expense_move.name)
+
+        tax_lines = (expense_move + caba_entry).line_ids.filtered(lambda line: line.account_id == caba_transition_account)
+        self.assertEqual(sum(tax_lines.mapped('balance')), 0)
