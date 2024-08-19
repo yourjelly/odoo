@@ -813,3 +813,9 @@ a.no-decoration {
 .wsale_products_categories_list .accordion-button:not(.collapsed).bg-transparent::after {
     background-image: escape-svg($accordion-button-icon);
 }
+
+.wsale_accordion_collapsible {
+    .products_attributes_filters & div.accordion-item:first-of-type {
+        border-top: none;
+    }
+}
