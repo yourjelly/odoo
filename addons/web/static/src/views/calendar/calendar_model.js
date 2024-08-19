@@ -500,25 +500,27 @@ export class CalendarModel extends Model {
         const { fields, fieldMapping, isTimeHidden } = this.meta;
 
         const startType = fields[fieldMapping.date_start].type;
-        const isAllDay =
-            startType === "date" ||
-            (fieldMapping.all_day && rawRecord[fieldMapping.all_day]) ||
-            false;
-        let start = isAllDay
-            ? deserializeDate(rawRecord[fieldMapping.date_start])
-            : deserializeDateTime(rawRecord[fieldMapping.date_start]);
+        let start =
+            startType === "date"
+                ? deserializeDate(rawRecord[fieldMapping.date_start])
+                : deserializeDateTime(rawRecord[fieldMapping.date_start]);
 
         let end = start;
         let endType = startType;
         if (fieldMapping.date_stop) {
             endType = fields[fieldMapping.date_stop].type;
-            end = isAllDay
-                ? deserializeDate(rawRecord[fieldMapping.date_stop])
-                : deserializeDateTime(rawRecord[fieldMapping.date_stop]);
+            end =
+                endType === "date"
+                    ? deserializeDate(rawRecord[fieldMapping.date_stop])
+                    : deserializeDateTime(rawRecord[fieldMapping.date_stop]);
         }
 
         const duration = rawRecord[fieldMapping.date_delay] || 1;
 
+        const isAllDay =
+            startType === "date" ||
+            (fieldMapping.all_day && rawRecord[fieldMapping.all_day]) ||
+            false;
         if (isAllDay) {
             start = start.startOf("day");
             end = end.startOf("day");
@@ -839,7 +841,9 @@ export class CalendarModel extends Model {
             recordId: null,
             value: "all",
             label: isUserOrPartner ? _t("Everybody's calendars") : _t("Everything"),
-            active: previousAllFilter ? previousAllFilter.active : this.meta.allFilter[sectionLabel] || false,
+            active: previousAllFilter
+                ? previousAllFilter.active
+                : this.meta.allFilter[sectionLabel] || false,
             canRemove: false,
             colorIndex: null,
             hasAvatar: false,
