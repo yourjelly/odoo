@@ -23,7 +23,6 @@ patch(PosStore.prototype, {
     async setup() {
         this.orderToTransferUuid = null; // table transfer feature
         this.isEditMode = false;
-        this.tableSyncing = false;
         await super.setup(...arguments);
         this.floorPlanStyle =
             localStorage.getItem("floorPlanStyle") || (this.ui.isSmall ? "kanban" : "default");
@@ -195,24 +194,6 @@ patch(PosStore.prototype, {
         }
         return context;
     },
-    getPendingOrder() {
-        const context = this.getSyncAllOrdersContext();
-        const { orderToCreate, orderToUpdate, paidOrdersNotSent } = super.getPendingOrder();
-
-        if (!this.config.module_pos_restaurant || !context.table_ids || !context.table_ids.length) {
-            return { orderToCreate, orderToUpdate, paidOrdersNotSent };
-        }
-
-        return {
-            paidOrdersNotSent,
-            orderToCreate: orderToCreate.filter(
-                (o) => context.table_ids.includes(o.table_id?.id) && !this.tableSyncing
-            ),
-            orderToUpdate: orderToUpdate.filter(
-                (o) => context.table_ids.includes(o.table_id?.id) && !this.tableSyncing
-            ),
-        };
-    },
     async addLineToCurrentOrder(vals, opts = {}, configure = true) {
         if (this.config.module_pos_restaurant && !this.get_order().uiState.booked) {
             this.get_order().setBooked(true);
@@ -270,7 +251,6 @@ patch(PosStore.prototype, {
     },
     async setTableFromUi(table, orderUuid = null) {
         try {
-            this.tableSyncing = true;
             await this.setTable(table, orderUuid);
         } catch (e) {
             if (!(e instanceof ConnectionLostError)) {
@@ -279,7 +259,6 @@ patch(PosStore.prototype, {
             // Reject error in a separate stack to display the offline popup, but continue the flow
             Promise.reject(e);
         } finally {
-            this.tableSyncing = false;
             const orders = this.getTableOrders(table.id);
             if (orders.length > 0) {
                 this.set_order(orders[0]);
