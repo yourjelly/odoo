@@ -733,7 +733,7 @@ class PurchaseOrder(models.Model):
                     if existing_line:
                         existing_line._merge_po_line(rfq_line)
                     else:
-                        rfq_line.order_id = oldest_rfq
+                        oldest_rfq.order_line += rfq_line.copy()
 
                 # Merge source documents and vendor references
                 all_origin = rfqs.mapped('origin')
