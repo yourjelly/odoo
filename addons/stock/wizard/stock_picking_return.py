@@ -196,8 +196,32 @@ class ReturnPicking(models.TransientModel):
         """ Create a return for the active picking, then create a return of
         the return for the exchange picking and open it."""
         action = self.action_create_returns()
-        new_picking_id = action['res_id']
-        exchange_picking_wizard = self.env['stock.return.picking'].with_context(create_exchange=True).create({'picking_id': new_picking_id})
-        exchange_picking = exchange_picking_wizard._create_return()
+        if self.picking_id.picking_type_code == 'internal':
+            new_picking_id = action['res_id']
+            exchange_picking_wizard = self.env['stock.return.picking'].with_context(create_exchange=True).create({'picking_id': new_picking_id})
+            exchange_picking = exchange_picking_wizard._create_return()
+        else:
+            exchange_picking = self.picking_id.copy({'move_ids': []})
+            new_moves = []
+
+            if hasattr(self.picking_id, 'sale_id') and self.picking_id.sale_id:
+                location = self.picking_id.sale_id.picking_ids[0].location_id.id
+            elif hasattr(self.picking_id, 'purchase_id') and self.picking_id.purchase_id:
+                location = self.picking_id.purchase_id.picking_ids[0].location_id.id
+            else:
+                location = self.picking_id.location_id.id
+
+            for return_line in self.product_return_moves:
+                vals = {
+                    'product_id': return_line.product_id.id,
+                    'product_uom_qty': return_line.quantity,
+                    'product_uom': return_line.product_id.uom_id.id,
+                    'date': fields.Datetime.now(),
+                    'location_id': location,
+                }
+                new_moves.append(return_line.move_id.copy(vals))
+            exchange_picking.write({'move_ids': [Command.link(move.id) for move in new_moves]})
+            exchange_picking.action_confirm()
+            exchange_picking.action_assign()
         action['res_id'] = exchange_picking.id
         return action
