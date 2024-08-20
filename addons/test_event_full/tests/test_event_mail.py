@@ -11,7 +11,7 @@ from odoo.tests import tagged
 from odoo.tools import formataddr
 
 
-@tagged('event_mail')
+@tagged('event_mail', 'post_install', '-at_install')
 class TestTemplateRefModel(TestWEventCommon):
 
     def test_template_ref_delete_lines(self):
@@ -54,6 +54,7 @@ class TestTemplateRefModel(TestWEventCommon):
         self.assertEqual(len(event.event_mail_ids.exists()), 0)
 
 
+@tagged('event_mail', 'post_install', '-at_install')
 class TestEventSmsMailSchedule(TestWEventCommon, MockEmail, SMSCase):
 
     @freeze_time('2020-07-06 12:00:00')
@@ -153,7 +154,7 @@ class TestEventSmsMailSchedule(TestWEventCommon, MockEmail, SMSCase):
             'Wrong SMS Sent Count! Probably SMS sent to unconfirmed attendees were not included into the Sent Count')
 
 
-@tagged('event_mail')
+@tagged('event_mail', 'post_install', '-at_install')
 class TestEventSaleMailSchedule(TestEventFullCommon):
 
     def test_event_mail_on_sale_confirmation(self):
