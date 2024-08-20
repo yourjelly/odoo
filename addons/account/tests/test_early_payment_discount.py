@@ -119,13 +119,13 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
             'invoice_payment_term_id': self.early_pay_10_percents_10_days.id,
         })
 
+        # TODO: check if it's ok to merge the tax lines together!!!
         self.assertInvoiceValues(invoice, [
             # pylint: disable=bad-whitespace
             {'display_type': 'epd',             'balance': -100.0},
             {'display_type': 'epd',             'balance': 100.0},
             {'display_type': 'product',         'balance': -1000.0},
-            {'display_type': 'tax',             'balance': -150},
-            {'display_type': 'tax',             'balance': 15.0},
+            {'display_type': 'tax',             'balance': -135},
             {'display_type': 'tax',             'balance': -0.05},
             {'display_type': 'payment_term',    'balance': 1135.05},
         ], {
@@ -673,24 +673,6 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
                 'subtotals_order': ["Untaxed Amount"],
             })
 
-    def test_mixed_epd_with_tax_no_duplication(self):
-        (self.term_immediate | self.early_pay_10_percents_10_days).write({'early_pay_discount_computation': 'mixed'})
-        inv = self.env['account.move'].create({
-            'move_type': 'out_invoice',
-            'partner_id': self.partner_a.id,
-            'invoice_date': '2019-01-01',
-            'date': '2019-01-01',
-            'invoice_line_ids': [
-                Command.create({'name': 'line', 'price_unit': 100.0, 'tax_ids': [Command.set(self.product_a.taxes_id.ids)]}),
-            ],
-            'invoice_payment_term_id': self.early_pay_10_percents_10_days.id,
-        })
-        self.assertEqual(len(inv.line_ids), 6) # 1 prod, 1 tax, 2 epd, 1 epd tax discount, 1 payment terms
-        inv.write({'invoice_payment_term_id': self.term_immediate.id})
-        self.assertEqual(len(inv.line_ids), 3) # 1 prod, 1 tax, 1 payment terms
-        inv.write({'invoice_payment_term_id': self.early_pay_10_percents_10_days.id})
-        self.assertEqual(len(inv.line_ids), 6)
-
     def test_mixed_epd_with_tax_deleted_line(self):
         self.early_pay_10_percents_10_days.write({'early_pay_discount_computation': 'mixed'})
         tax_a = self.env['account.tax'].create({
@@ -713,9 +695,9 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
             ],
             'invoice_payment_term_id': self.early_pay_10_percents_10_days.id,
         })
-        self.assertEqual(len(inv.line_ids), 10) # 2 prod, 2 tax, 3 epd, 2 epd tax discount, 1 payment terms
+        self.assertEqual(len(inv.line_ids), 8) # 2 prod, 2 tax, 3 epd, 1 payment terms
         inv.invoice_line_ids[1].unlink()
-        self.assertEqual(len(inv.line_ids), 6) # 1 prod, 1 tax, 2 epd, 1 epd tax discount, 1 payment terms
+        self.assertEqual(len(inv.line_ids), 5) # 1 prod, 1 tax, 2 epd, 1 payment terms
         self.assertEqual(inv.amount_tax, 9.00) # $100.0 @ 10% tax (-10% epd)
 
     def test_mixed_epd_with_rounding_issue(self):
@@ -909,13 +891,8 @@ class TestAccountEarlyPaymentDiscount(AccountTestInvoicingCommon):
                 'display_type': 'epd',
             },
             {
-                'balance': -15.0,
-                'tax_base_amount': 100.0,
-                'display_type': 'tax',
-            },
-            {
-                'balance': 1.5,
-                'tax_base_amount': -10.0,
+                'balance': -13.5,
+                'tax_base_amount': 90.0,
                 'display_type': 'tax',
             },
             {

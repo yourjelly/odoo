@@ -2855,7 +2855,7 @@ class AccountMoveLine(models.Model):
             currency=self.currency_id,
             product=self.product_id,
             taxes=self.tax_ids,
-            price_unit=self.price_unit if is_invoice and not is_epd else self.amount_currency,
+            price_unit=self.price_unit if is_invoice and not is_epd else sign * self.amount_currency,
             quantity=self.quantity if is_invoice and not is_epd else 1.0,
             discount=self.discount if is_invoice and not is_epd else 0.0,
             account=self.account_id,
