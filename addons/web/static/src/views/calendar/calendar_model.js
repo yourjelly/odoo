@@ -256,17 +256,13 @@ export class CalendarModel extends Model {
         }
 
         data[this.meta.fieldMapping.date_start] =
-            (partialRecord.isAllDay && this.hasAllDaySlot
-                ? "date"
-                : this.fields[this.meta.fieldMapping.date_start].type) === "date"
+            this.fields[this.meta.fieldMapping.date_start].type === "date"
                 ? serializeDate(start)
                 : serializeDateTime(start);
 
         if (this.meta.fieldMapping.date_stop) {
             data[this.meta.fieldMapping.date_stop] =
-                (partialRecord.isAllDay && this.hasAllDaySlot
-                    ? "date"
-                    : this.fields[this.meta.fieldMapping.date_start].type) === "date"
+                this.fields[this.meta.fieldMapping.date_start].type === "date"
                     ? serializeDate(end)
                     : serializeDateTime(end);
         }
@@ -518,21 +514,18 @@ export class CalendarModel extends Model {
         const duration = rawRecord[fieldMapping.date_delay] || 1;
 
         const isAllDay =
-            startType === "date" ||
-            (fieldMapping.all_day && rawRecord[fieldMapping.all_day]) ||
-            false;
-        if (isAllDay) {
-            start = start.startOf("day");
-            end = end.startOf("day");
+            (fieldMapping.all_day && rawRecord[fieldMapping.all_day]) || startType === "date";
+        if (isAllDay && startType !== "date") {
+            start = deserializeDate(serializeDate(start));
+        }
+        if (isAllDay && endType !== "date") {
+            end = deserializeDate(serializeDate(end));
         }
         if (!fieldMapping.date_stop && duration) {
             end = start.plus({ hours: duration });
         }
 
-        const showTime =
-            !(fieldMapping.all_day && rawRecord[fieldMapping.all_day]) &&
-            startType !== "date" &&
-            start.day === end.day;
+        const showTime = !isAllDay && startType !== "date" && start.day === end.day;
 
         const colorValue = rawRecord[fieldMapping.color];
         const colorIndex = Array.isArray(colorValue) ? colorValue[0] : colorValue;

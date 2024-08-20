@@ -1879,8 +1879,8 @@ QUnit.module("Views", ({ beforeEach }) => {
                     assert.deepEqual(args[0], [
                         {
                             name: "new event",
-                            start: "2016-12-14",
-                            stop: "2016-12-14",
+                            start: "2016-12-14 11:00:00",
+                            stop: "2016-12-14 11:00:00",
                             allday: true,
                         },
                     ]);
