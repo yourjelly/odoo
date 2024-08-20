@@ -7,7 +7,7 @@
     'website': 'https://www.odoo.com/app/project',
     'category': 'Services/Project',
     'sequence': 45,
-    'summary': 'Organize and plan your projects',
+    'summary': 'Organize and plan disha`s projects',
     'depends': [
         'analytic',
         'base_setup',
