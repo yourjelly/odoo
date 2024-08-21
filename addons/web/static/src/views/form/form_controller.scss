@@ -634,7 +634,7 @@
 
     div {
         div:focus-within > span.o_field_translate, div:hover > span.o_field_translate {
-            visibility: visible !important;
+            visibility: visible;
         }
     }
 
