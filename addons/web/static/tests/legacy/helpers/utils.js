@@ -755,6 +755,7 @@ export function mockAnimationFrame() {
             callbacks.clear();
         },
         async advanceFrame(count = 1) {
+            debugger;
             // wait here so all microtasktick scheduled in this frame can be
             // executed and possibly register their own timeout
             await nextTick();

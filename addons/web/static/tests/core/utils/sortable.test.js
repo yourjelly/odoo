@@ -5,6 +5,7 @@ import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
 
 import { Component, reactive, useRef, useState, xml } from "@odoo/owl";
 import { useSortable } from "@web/core/utils/sortable_owl";
+import {advanceFrame, runAllTimers} from "../../../lib/hoot/hoot-mock";
 
 test("Parameters error handling", async () => {
     const mountListAndAssert = async (setupList) => {
@@ -186,7 +187,7 @@ test.debug("Sorting in groups with distinct per-axis scrolling", async () => {
     class List extends Component {
         static props = ["*"];
         static template = xml`
-            <div style="left:0;top:0; position: fixed; width: 100%; height: 100%;">
+            <div class="w-100 h-100 start-0 top-0 position-fixed">
                 <div class="scroll_parent_y overflow-x-hidden overflow-y-scroll" style="max-width: 150px; max-height: 200px;">
                     <div class="spacer_before" style="min-height: 50px;"></div>
                     <div class="spacer_horizontal" style="min-height: 50px;"></div>
@@ -216,6 +217,7 @@ test.debug("Sorting in groups with distinct per-axis scrolling", async () => {
 
     await mountOnFixture(List);
     await animationFrame();
+    debugger;
     expect(".list").toHaveCount(3);
     expect(".item").toHaveCount(9);
 
@@ -239,6 +241,10 @@ test.debug("Sorting in groups with distinct per-axis scrolling", async () => {
     });
     let dragHelpers = await contains(".item12").drag();
     await dragHelpers.moveTo(".item11", { position: "left" });
+    await animationFrame();
+    await advanceFrame(33);
+    await runAllTimers();
+    await animationFrame();
     expect(".scroll_parent_y").toHaveProperty("scrollTop", 50, {
         message: "Negative horizontal scrolling left - scrollTop",
     });
@@ -249,6 +255,7 @@ test.debug("Sorting in groups with distinct per-axis scrolling", async () => {
 
     // Positive horizontal scrolling.
     queryFirst(".spacer_horizontal").scrollIntoView();
+    await animationFrame();
     expect(".scroll_parent_y").toHaveProperty("scrollTop", 50, {
         message: "Positive horizontal scrolling - scrollTop",
     });

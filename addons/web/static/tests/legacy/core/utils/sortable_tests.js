@@ -17,7 +17,7 @@ QUnit.module("Draggable", ({ beforeEach }) => {
 
     QUnit.module("Sortable hook");
 
-    QUnit.test("Sorting in groups with distinct per-axis scrolling", async (assert) => {
+    QUnit.debug("Sorting in groups with distinct per-axis scrolling", async (assert) => {
         const { advanceFrame } = mockAnimationFrame();
         class List extends Component {
             static props = ["*"];
@@ -49,7 +49,8 @@ QUnit.module("Draggable", ({ beforeEach }) => {
         }
 
         await mount(List, target);
-
+        await nextTick();
+        debugger;
         assert.containsN(target, ".list", 3);
         assert.containsN(target, ".item", 9);
 
