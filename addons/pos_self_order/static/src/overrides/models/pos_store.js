@@ -2,6 +2,9 @@ import { PosStore } from "@point_of_sale/app/store/pos_store";
 import { patch } from "@web/core/utils/patch";
 
 patch(PosStore.prototype, {
+    async processServerData(loadedData) {
+        await super.processServerData(...arguments);
+    },
     async getServerOrders() {
         if (this.session._self_ordering) {
             await this.loadServerOrders([
