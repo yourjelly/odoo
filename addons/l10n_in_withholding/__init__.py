@@ -17,7 +17,7 @@ def _l10n_in_withholding_post_init(env):
             'account.tax',
         ]
     }
-    for company in env['res.company'].search([('chart_template', '=', 'in')]):
+    for company in env['res.company'].search([('chart_template', '=', 'in'), ('parent_id', '=', False)]):
         _logger.info("Company %s already has the Indian localization installed, updating...", company.name)
         ChartTemplate = env['account.chart.template'].with_company(company)
         try:
