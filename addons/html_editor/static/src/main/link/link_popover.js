@@ -6,6 +6,9 @@ import { cleanZWChars, deduceURLfromText } from "./utils";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { rpc } from "@web/core/network/rpc";
 
+const cacheMetadata = {};
+const internalLinkCache = {};
+
 export class LinkPopover extends Component {
     static template = "html_editor.linkPopover";
     static props = {
@@ -197,16 +200,16 @@ export class LinkPopover extends Component {
             )}`;
             this.state.previewIcon = true;
 
-            let metadata = {};
             // Fetch the metadata
             try {
-                metadata = await rpc("/html_editor/link_preview_external", {
+                cacheMetadata[url] ||= await rpc("/html_editor/link_preview_external", {
                     preview_url: url,
                 });
             } catch {
                 // when it's not possible to fetch the metadata we don't want to block the ui
                 return;
             }
+            const metadata = cacheMetadata[url];
 
             this.state.urlTitle = metadata?.og_title || this.state.url;
             this.state.urlDescription = metadata?.og_description || "";
@@ -227,9 +230,13 @@ export class LinkPopover extends Component {
                     const ogTitle = doc.querySelector("[property='og:title']");
                     const title = doc.querySelector("title");
                     // Get the metadata internally
-                    const internalUrlData = await rpc("/html_editor/link_preview_internal", {
-                        preview_url: url.pathname,
-                    });
+                    internalLinkCache[url.pathname] ||= await rpc(
+                        "/html_editor/link_preview_internal",
+                        {
+                            preview_url: url.pathname,
+                        }
+                    );
+                    const internalUrlData = internalLinkCache[url.pathname];
 
                     // Set
                     // for record missing errors, we push a warning that the url is likely invalid
