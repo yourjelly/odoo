@@ -218,6 +218,18 @@ class IrModule(models.Model):
                 _logger.info('module %s: no translation for language %s', module, lang)
         translation_importer.save(overwrite=True)
 
+        article = f"{module}.welcome_article_body"
+        article_body = self.env.ref(article, raise_if_not_found=False)
+        article_record = self.env.ref(f"{module}.welcome_article", raise_if_not_found=False)
+        if article_body and article_record:
+            user = self.env.user
+            render_ctx = {'object': user}
+            body = self.env['ir.qweb']._render(article, render_ctx,
+                                            raise_if_not_found=False,
+                                            lang=self.env.user.lang)
+            if body:
+                article_record.sudo().write({'body': body})
+
         mod._update_from_terp(terp)
         _logger.info("Successfully imported module '%s'", module)
 
