@@ -330,6 +330,14 @@
                          data-reload="/"/>
         </div>
     </xpath>
+    <xpath expr="//div[@data-js='MegaMenuLayout']/we-select/we-button[@data-name='multi_menus']" position="attributes">
+        <attribute name="class" add="ecommerce_mega_menu_button" separator=" "/>
+    </xpath>
+    <xpath expr="//div[@data-js='MegaMenuLayout']/we-select" position="before">
+        <div class="custom_button d-none">
+            <button class="btn btn-link text-white fa fa-sitemap float-end px-2"/>
+        </div>
+    </xpath>
 </template>
 
 <template id="snippets_options_web_editor" inherit_id="web_editor.snippet_options" name="e-commerce base snippet options">
