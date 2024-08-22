@@ -8,11 +8,12 @@ class StockPickingType(models.Model):
         domain = []
         if self._context.get('open_view') == 'tree,form':
             domain = [('state', '=', 'done')]
+
         action = {
             'type': 'ir.actions.act_window',
             'name': 'Batch Transfers',
             'res_model': 'stock.picking.batch',
-            'view_mode': self._context.get('open_view'),
+            'view_mode': self._context.get('open_view') or 'tree',
             'target': 'current',
         }
 
