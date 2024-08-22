@@ -6,7 +6,7 @@ from odoo.exceptions import UserError
 class AccountPeppolInvoiceResponseStatus(models.Model):
     _name = 'account_peppol.invoice_response_status'
 
-    invoice_response = fields.Many2one('account_peppol.invoice_response')
+    invoice_response_id = fields.Many2one('account_peppol.invoice_response')
     # Either
     status_type = fields.Selection(
         selection=[
@@ -59,7 +59,7 @@ class AccountPeppolInvoiceResponse(models.Model):
     date = fields.Date()
     move_id = fields.Many2one('account.move')
     company_id = fields.Many2one(related='move_id.company_id')
-    partner_id = fields.Many2one('move_id.partner_id')
+    partner_id = fields.Many2one(related='move_id.partner_id')
 
     code = fields.Selection(
         string="Response Code",
@@ -74,4 +74,4 @@ class AccountPeppolInvoiceResponse(models.Model):
         ],
         required=True,
     )
-    status_ids = fields.One2Many('account_peppol.invoice_response_status')
+    status_ids = fields.One2many('account_peppol.invoice_response_status', 'invoice_response_id')

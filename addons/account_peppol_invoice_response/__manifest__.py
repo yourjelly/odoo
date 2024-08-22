@@ -12,7 +12,8 @@
         'account_peppol',
     ],
     'data': [
-        'data/invoice_response_template.xml',
+        'security/ir.model.access.csv',
+        'data/application_response_templates.xml',
     ],
     'license': 'LGPL-3',
 }

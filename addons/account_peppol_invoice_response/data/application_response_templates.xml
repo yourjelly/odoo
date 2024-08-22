@@ -12,7 +12,7 @@
                         t-out="party_vals.get('id')"/>
             </cac:PartyIdentification>
             <cac:PartyLegalEntity>
-                <cbc:RegistrationName t-out="party['registration_name']"/>
+                <cbc:RegistrationName t-out="vals['party_legal_entity_vals'][0]['registration_name']"/>
             </cac:PartyLegalEntity>
             <cac:Contact>
                 <t t-set="contact_vals" t-value="vals.get('contact_vals', {})"/>
@@ -69,21 +69,21 @@
                              xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
             <cbc:CustomizationID>urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2::ApplicationResponse##urn:fdc:peppol.eu:poacc:trns:invoice_response:3::2.1</cbc:CustomizationID>
             <cbc:ProfileID>urn:fdc:peppol.eu:poacc:bis:invoice_response:3</cbc:ProfileID>
-            <cbc:ID t-out="vals.get('response_identifier')"/>
-            <cbc:IssueDate t-out="vals.get('issue_date')"/>
+            <cbc:ID t-out="response_identifier"/>
+            <cbc:IssueDate t-out="issue_date"/>
             <cac:SenderParty>
                 <t t-call="{{ PartyType_template }}">
-                    <t t-set="vals" t-value="vals['sender_party_vals']"/>
+                    <t t-set="vals" t-value="sender_party_vals"/>
                 </t>
             </cac:SenderParty>
             <cac:ReceiverParty>
                 <t t-call="{{ PartyType_template }}">
-                    <t t-set="vals" t-value="vals['receiver_party_vals']"/>
+                    <t t-set="vals" t-value="receiver_party_vals"/>
                 </t>
             </cac:ReceiverParty>
             <cac:DocumentResponse>
                 <t t-call="{{ DocumentResponse_template }}">
-                    <t t-set="vals" t-value="vals['document_response']"/>
+                    <t t-set="vals" t-value="document_response"/>
                 </t>
             </cac:DocumentResponse>
         </ApplicationResponse>
