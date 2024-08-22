@@ -36,7 +36,7 @@ registry.category("web_tour.tours").add("im_livechat_history_back_and_forth_tour
             run: "click",
         },
         {
-            trigger: ".o-mail-DiscussSidebar-item:contains(Visitor).o-active",
+            trigger: ".text-truncate:contains(Visitor)",
             run() {
                 history.back();
             },
@@ -48,11 +48,7 @@ registry.category("web_tour.tours").add("im_livechat_history_back_and_forth_tour
             },
         },
         {
-            trigger: ".o-mail-DiscussSidebar-item:contains(Visitor).o-active",
-            run: "click",
-        },
-        {
-            trigger: ".o-mail-DiscussSidebar-item:contains(Visitor).o-active",
+            trigger: ".text-truncate:contains(Visitor)",
             run() {
                 history.back();
             },
