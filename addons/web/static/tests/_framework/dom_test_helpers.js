@@ -20,7 +20,6 @@ import {
     waitFor,
 } from "@odoo/hoot-dom";
 import { advanceFrame, advanceTime, animationFrame } from "@odoo/hoot-mock";
-import { getTag } from "@web/core/utils/xml";
 
 /**
  * @typedef {import("@odoo/hoot-dom").DragHelpers} DragHelpers
@@ -38,12 +37,6 @@ import { getTag } from "@web/core/utils/xml";
  *  metaKey?: boolean;
  *  shiftKey?: boolean;
  * }} KeyModifierOptions
- *
- * @typedef {{
- *  cancel: () => Promise<void>;
- *  drop: () => Promise<AsyncDragHelpers>;
- *  moveTo: (...args: Parameters<DragHelpers["moveTo"]>) => Promise<void>;
- * }} AsyncDragHelpers
  */
 
 /**
@@ -59,11 +52,6 @@ import { getTag } from "@web/core/utils/xml";
 //-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
-
-/**
- * @param {Node} node
- */
-const getConfirmAction = (node) => (getTag(node, true) === "input" ? "enter" : "blur");
 
 /**
  * These params are used to move the pointer from an arbitrary distance in the
@@ -93,28 +81,28 @@ export function contains(target, options) {
     }
 
     const focusCurrent = async () => {
-        const node = await nodePromise;
-        if (node !== getActiveElement()) {
-            pointerDown(node);
+        const actualNode = await node;
+        if (actualNode !== getActiveElement()) {
+            await pointerDown(actualNode);
         }
-        return node;
+        return actualNode;
     };
 
-    const nodePromise = waitFor(target, { visible: true, ...options });
+    const node = waitFor(target, { visible: true, ...options });
     return {
         /**
          * @param {PointerOptions} [options]
          */
         check: async (options) => {
-            check(await nodePromise, options);
+            await check(node, options);
             await animationFrame();
         },
         /**
          * @param {FillOptions} [options]
          */
         clear: async (options) => {
-            const node = await focusCurrent();
-            clear({ confirm: getConfirmAction(node), ...options });
+            await focusCurrent();
+            await clear({ confirm: "auto", ...options });
             await animationFrame();
         },
         /**
@@ -139,40 +127,38 @@ export function contains(target, options) {
                 actions.push(() => keyUp("Shift"));
             }
 
-            const node = await nodePromise;
             for (const action of actions) {
-                action();
+                await action();
             }
             await animationFrame();
         },
         /**
          * @param {PointerOptions} [options]
-         * @returns {Promise<AsyncDragHelpers>}
+         * @returns {Promise<DragHelpers>}
          */
         drag: async (options) => {
-            /** @type {AsyncDragHelpers["cancel"]} */
+            /** @type {DragHelpers["cancel"]} */
             const asyncCancel = async () => {
-                cancel();
+                await cancel();
                 await advanceFrame();
             };
 
-            /** @type {AsyncDragHelpers["drop"]} */
+            /** @type {DragHelpers["drop"]} */
             const asyncDrop = async () => {
-                drop();
+                await drop();
                 await advanceFrame();
             };
 
-            /** @type {AsyncDragHelpers["moveTo"]} */
+            /** @type {DragHelpers["moveTo"]} */
             const asyncMoveTo = async (to, options) => {
-                moveTo(to, options);
+                await moveTo(to, options);
                 await advanceFrame();
             };
 
-            const node = await nodePromise;
-            const { cancel, drop, moveTo } = drag(node, options);
+            const { cancel, drop, moveTo } = await drag(node, options);
             await advanceTime(500); // Go past the touch delay
 
-            hover(node, DRAG_TOLERANCE_PARAMS);
+            await hover(node, DRAG_TOLERANCE_PARAMS);
             await advanceFrame();
 
             return {
@@ -186,17 +172,18 @@ export function contains(target, options) {
          * @param {PointerOptions} [options]
          */
         dragAndDrop: async (target, options) => {
-            const [from, to] = await Promise.all([nodePromise, waitFor(target)]);
-            const { drop, moveTo } = drag(from);
+            const [from, to] = await Promise.all([node, waitFor(target)]);
+
+            const { drop, moveTo } = await drag(from);
             await advanceTime(500); // Go past the touch delay
 
-            hover(from, DRAG_TOLERANCE_PARAMS);
+            await hover(from, DRAG_TOLERANCE_PARAMS);
             await advanceFrame();
 
-            moveTo(to, options);
+            await moveTo(to, options);
             await advanceFrame();
 
-            drop();
+            await drop();
             await advanceFrame();
         },
         /**
@@ -204,8 +191,8 @@ export function contains(target, options) {
          * @param {FillOptions} [options]
          */
         edit: async (value, options) => {
-            const node = await focusCurrent();
-            edit(value, { confirm: getConfirmAction(node), ...options });
+            await focusCurrent();
+            await edit(value, { confirm: "auto", ...options });
             await animationFrame();
         },
         /**
@@ -213,8 +200,8 @@ export function contains(target, options) {
          * @param {FillOptions} [options]
          */
         fill: async (value, options) => {
-            const node = await focusCurrent();
-            fill(value, { confirm: getConfirmAction(node), ...options });
+            await focusCurrent();
+            await fill(value, { confirm: "auto", ...options });
             await animationFrame();
         },
         focus: async () => {
@@ -222,7 +209,7 @@ export function contains(target, options) {
             await animationFrame();
         },
         hover: async () => {
-            hover(await nodePromise);
+            await hover(node);
             await animationFrame();
         },
         /**
@@ -231,28 +218,28 @@ export function contains(target, options) {
          */
         press: async (keyStrokes, options) => {
             await focusCurrent();
-            press(keyStrokes, options);
+            await press(keyStrokes, options);
             await animationFrame();
         },
         /**
          * @param {Position} position
          */
         scroll: async (position) => {
-            scroll(await nodePromise, position);
+            await scroll(node, position);
             await animationFrame();
         },
         /**
          * @param {InputValue} value
          */
         select: async (value) => {
-            select(value, { target: await nodePromise });
+            await select(value, { target: node });
             await animationFrame();
         },
         /**
          * @param {PointerOptions} [options]
          */
         uncheck: async (options) => {
-            uncheck(await nodePromise, options);
+            await uncheck(node, options);
             await animationFrame();
         },
     };
