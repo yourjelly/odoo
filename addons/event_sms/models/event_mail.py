@@ -35,6 +35,11 @@ class EventMailScheduler(models.Model):
             )
         return super()._execute_event_based_for_registrations(registrations)
 
+    def _template_model_by_notification_type(self):
+        info = super()._template_model_by_notification_type()
+        info["sms"] = "sms.template"
+        return info
+
 
 class EventMailRegistration(models.Model):
     _inherit = 'event.mail.registration'
