@@ -2305,13 +2305,19 @@ class AccountMove(models.Model):
             if not is_dirty:
                 continue
 
-            results = {'update': {}, 'create': [], 'unlink': set(), 'dirty': dirty_values}
+            results = {'update': {}, 'create': [], 'unlink': set(), 'move': {}, 'dirty': dirty_values}
             populate_function(move, results)
             sync_lines_diff[move]['update'].update(results['update'])
             for create_values in results['create']:
                 create_values['move_id'] = move.id
                 sync_lines_diff[move]['create'].append(create_values)
             sync_lines_diff[move]['unlink'].update(results['unlink'])
+
+            move_values = results['move']
+            if move_values:
+                sub_move_container = {**move_container, 'records': move}
+                with self._tracked_fields(sub_move_container):
+                    (move.write if move.id else move.update)(move_values)
 
         sub_lines_container = {**lines_container, 'records': self.env['account.move.line']}
         with self._tracked_fields(sub_lines_container):
@@ -2351,28 +2357,10 @@ class AccountMove(models.Model):
         self._sync_tax_lines(move_container, lines_container, product_tax_details_per_move, epd_tax_details_per_move)
         self._sync_quick_encoding_lines_fix_total_amount(move_container, lines_container)
         self._sync_discount_lines(move_container, lines_container)
-
-        # Cash rounding.
-        values_per_move = self._sync_cash_rounding_lines(move_container, lines_container)
-        sub_lines_container = {**lines_container, 'records': self.env['account.move.line']}
-        with self._tracked_fields(sub_lines_container):
-            sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
-
-        # Payment terms.
+        self._sync_cash_rounding_lines(move_container, lines_container)
         self._sync_payment_term_lines(move_container, lines_container)
-
-        # Sync date_maturity / payment_reference.
-        values_per_move = self._sync_date_maturity(move_container, lines_container)
-        sub_move_container = {**move_container, 'records': self.env['account.move.line']}
-        with self._tracked_fields(sub_move_container):
-            for move, sync_values in values_per_move.items():
-                (move.write if move.id else move.update)(sync_values)
-
-        # Auto balancing of misc lines.
-        values_per_move = self._sync_unbalanced_lines(move_container, lines_container, product_tax_details_per_move)
-        sub_lines_container = {**lines_container, 'records': self.env['account.move.line']}
-        with self._tracked_fields(sub_lines_container):
-            sub_lines_container['records'] |= self._update_moves_per_batch(values_per_move)
+        self._sync_date_maturity(move_container, lines_container)
+        self._sync_unbalanced_lines(move_container, lines_container, product_tax_details_per_move)
 
         # Cleanup the hacky field to track the fields of lines during the onchange.
         for line in lines_container['records'].exists():
@@ -2395,69 +2383,6 @@ class AccountMove(models.Model):
             field_name: line._fields[field_name].convert_to_write(line[field_name], line)
             for field_name in field_names
         }
-
-    def _convert_sync_values_to_line_ids_commands(self, values):
-        self.ensure_one()
-
-        def sanitize_grouping_key(grouping_key):
-            return frozendict({
-                k: v if k == 'id' else v or False  # NewId are Falsy
-                for k, v in grouping_key.items()
-            })
-
-        def sanitize_update_values(update_values):
-            update_values['move_id'] = self.id
-            if display_type:
-                update_values['display_type'] = display_type
-            return update_values
-
-        display_type = values.get('display_type')
-        sync = values['sync_display_type']
-        force_update_fields = values.get('force_update_fields', set())
-
-        if display_type:
-            candidates = self.line_ids.filtered(lambda line: line.display_type == display_type)
-            update_by_id = False
-        else:
-            ids = {x['id'] for x in sync.keys()}
-            candidates = self.line_ids.filtered(lambda line: line.id in ids)
-            update_by_id = True
-
-        if not sync:
-            return [Command.unlink(line.id) for line in candidates]
-
-        field_names = next(iter(sync.keys())).keys()
-        candidates_per_grouping_key = {}
-        for candidate in candidates:
-            candidates_per_grouping_key\
-                .setdefault(sanitize_grouping_key(self._build_line_grouping_key(candidate, field_names)), [])\
-                .append(candidate)
-
-        line_ids_commands = []
-        for grouping_key, to_update in sync.items():
-            grouping_key = sanitize_grouping_key(grouping_key)
-            to_update = sanitize_update_values(to_update)
-            if candidates := candidates_per_grouping_key.get(grouping_key):
-                candidate = candidates[0]
-                to_update = self.env['account.move.line']._sanitize_values_write(candidate, to_update)
-                line_ids_commands.append(Command.update(candidate.id, {
-                    k: v
-                    for k, v in to_update.items()
-                    if candidate._fields[k].type == 'monetary' or k in force_update_fields
-                }))
-                if not update_by_id:
-                    for trailing_candidate in candidates[1:]:
-                        line_ids_commands.append(Command.unlink(trailing_candidate.id))
-                del candidates_per_grouping_key[grouping_key]
-            elif not update_by_id:
-                to_update = self.env['account.move.line']._sanitize_values_create(self, to_update)
-                line_ids_commands.append(Command.create({**grouping_key, **to_update}))
-
-        if not update_by_id:
-            for _grouping_key, candidates in candidates_per_grouping_key.items():
-                for candidate in candidates:
-                    line_ids_commands.append(Command.unlink(candidate.id))
-        return line_ids_commands
 
     @api.model
     def _apply_sync_lines_diff(self, sync_lines_diff):
@@ -2492,45 +2417,6 @@ class AccountMove(models.Model):
             if onchange_commands:
                 move.line_ids = onchange_commands
                 impacted_lines |= move.line_ids
-
-        if to_create:
-            impacted_lines |= impacted_lines.create(to_create)
-        if to_unlink:
-            impacted_lines.browse(to_unlink).with_context(dynamic_unlink=True).unlink()
-        return impacted_lines
-
-    @api.model
-    def _update_moves_per_batch(self, values_per_move):
-        impacted_lines = self.env['account.move.line']
-        if not values_per_move:
-            return impacted_lines
-
-        to_create = []
-        to_unlink = set()
-        for move, values in values_per_move.items():
-            line_ids_commands = move._convert_sync_values_to_line_ids_commands(values)
-
-            # print("-------------------------------------------------------------------------------")
-            # for c in line_ids_commands:
-            #     import pprint
-            #     print(pprint.pformat(c))
-
-            # In an onchange, there is only one record and we can't use the 'create'
-            # so let's apply the changes directly.
-            if not move.id:
-                move.line_ids = line_ids_commands
-                impacted_lines |= move.line_ids
-                continue
-
-            for command in line_ids_commands:
-                if command[0] == Command.UPDATE:
-                    line = impacted_lines.browse(command[1])
-                    line.write(command[2])
-                    impacted_lines |= line
-                elif command[0] == Command.CREATE:
-                    to_create.append(command[2])
-                elif command[0] == Command.UNLINK:
-                    to_unlink.add(command[1])
 
         if to_create:
             impacted_lines |= impacted_lines.create(to_create)
@@ -3000,80 +2886,117 @@ class AccountMove(models.Model):
     def _get_invoice_fields_sync_cash_rounding(self):
         return {'move_type', 'invoice_cash_rounding_id'}
 
+    def _cash_rounding_lines_dirty_common(self, move_container, lines_container):
+        self.ensure_one()
+        display_types = {'product', 'epd', 'rounding', 'tax'}
+        lines = self.line_ids.filtered(lambda line: line.display_type in display_types)
+        return (
+            self.state == 'draft'
+            and self.is_invoice(include_receipts=True)
+            and (
+                self._field_has_changed(
+                    container=move_container,
+                    field_names=self._get_invoice_fields_sync_cash_rounding(),
+                    records=self,
+                )
+                or self._field_has_changed(
+                    container=lines_container,
+                    field_names=self.env['account.move.line']._get_invoice_line_fields_sync_cash_rounding(),
+                    records=lines,
+                )
+                or self._record_has_been_removed(lines_container, self, display_types=display_types)
+            )
+        )
+
+    def _cash_rounding_lines_dirty_add_invoice_line(self, move_container, lines_container):
+        self.ensure_one()
+        return self._cash_rounding_lines_dirty_common(move_container, lines_container), {}
+
+    def _cash_rounding_lines_dirty_biggest_tax(self, move_container, lines_container):
+        self.ensure_one()
+        return (
+            self._cash_rounding_lines_dirty_common(move_container, lines_container)
+            and self.invoice_cash_rounding_id.strategy == 'biggest_tax'
+        ), {}
+
+    def _prepare_cash_rounding_lines_add_invoice_line(self, sync_values):
+        self.ensure_one()
+        cash_rounding = self.invoice_cash_rounding_id
+        if cash_rounding.strategy != 'add_invoice_line':
+            return
+
+        sign = self.direction_sign
+        lines = self.line_ids.filtered(lambda line: line.display_type in {'product', 'epd', 'tax'})
+        total_amount_currency = sign * sum(lines.mapped('amount_currency'))
+        expected_total = float_round(
+            total_amount_currency,
+            precision_rounding=cash_rounding.rounding,
+            rounding_method=cash_rounding.rounding_method,
+        )
+
+        currency = self.currency_id
+        difference = currency.round(expected_total - total_amount_currency)
+        if currency.is_zero(difference):
+            return
+
+        rate = self.invoice_currency_rate
+        account = cash_rounding.loss_account_id if difference < 0.0 else cash_rounding.profit_account_id
+        sync_values['grouping_keys'][frozendict({
+            'partner_id': self.commercial_partner_id.id,
+            'currency_id': currency.id,
+            'account_id': account.id,
+            'tax_ids': [Command.set([])],
+        })] = {
+            'name': cash_rounding.name,
+            'amount_currency': sign * difference,
+            'balance': sign * self.company_currency_id.round(difference / rate) if rate else 0.0,
+        }
+
+    def _prepare_cash_rounding_lines_biggest_tax(self, sync_values):
+        self.ensure_one()
+        cash_rounding = self.invoice_cash_rounding_id
+        sign = self.direction_sign
+        lines = self.line_ids.filtered(lambda line: line.display_type in {'product', 'epd', 'tax'})
+        total_amount_currency = sign * sum(lines.mapped('amount_currency'))
+        expected_total = float_round(
+            total_amount_currency,
+            precision_rounding=cash_rounding.rounding,
+            rounding_method=cash_rounding.rounding_method,
+        )
+
+        currency = self.currency_id
+        difference = currency.round(expected_total - total_amount_currency)
+        if currency.is_zero(difference):
+            return
+
+        rate = self.invoice_currency_rate
+        tax_line = self.line_ids \
+            .filtered(lambda line: line.display_type == 'tax') \
+            .sorted(key=lambda line: sign * line.amount_currency)[:1]
+        if not tax_line:
+            return
+
+        difference_balance = self.company_currency_id.round(difference / rate) if rate else 0.0
+        sync_values['update'][tax_line.id] = {
+            'amount_currency': tax_line.amount_currency + (sign * difference),
+            'balance': tax_line.balance + (sign * difference_balance),
+        }
+
     @api.model
     def _sync_cash_rounding_lines(self, move_container, lines_container):
-        sync_cash_rounding_lines = {}
-        for move in move_container['records']:
-            is_invoice = move.is_invoice(include_receipts=True)
-            if not is_invoice or move.state != 'draft':
-                continue
-
-            base_lines = move.line_ids.filtered(lambda line: line.display_type in ('product', 'epd'))
-            tax_lines = move.line_ids.filtered('tax_repartition_line_id')
-            all_lines = base_lines + tax_lines
-            is_dirty = (
-                self._field_has_changed(move_container, self._get_invoice_fields_sync_cash_rounding(), records=move)
-                or self._record_has_been_removed(lines_container, move)
-                or self._field_has_changed(lines_container, move.line_ids._get_invoice_line_fields_sync_cash_rounding(), records=all_lines)
-            )
-            if not is_dirty:
-                continue
-
-            cash_rounding = move.invoice_cash_rounding_id
-            if not cash_rounding:
-                sync_cash_rounding_lines[move] = {'sync_display_type': {}, 'display_type': 'rounding'}
-                continue
-
-            base_amount_currency = 0.0
-            tax_amount_currency = 0.0
-            sign = move.direction_sign
-            for line in base_lines:
-                base_amount_currency += sign * line.amount_currency
-            for line in tax_lines:
-                tax_amount_currency += sign * line.amount_currency
-
-            expected_total = float_round(
-                base_amount_currency + tax_amount_currency,
-                precision_rounding=cash_rounding.rounding,
-                rounding_method=cash_rounding.rounding_method,
-            )
-            currency = move.currency_id
-            difference = currency.round(expected_total - base_amount_currency - tax_amount_currency)
-            sync_cash_rounding_lines = {}
-            if not currency.is_zero(difference):
-                strategy = cash_rounding.strategy
-                rate = move.invoice_currency_rate
-                if strategy == 'add_invoice_line':
-                    account = cash_rounding.loss_account_id if difference < 0.0 else cash_rounding.profit_account_id
-                    sync_cash_rounding_lines[move] = {
-                        'sync_display_type': {
-                            frozendict({
-                                'partner_id': move.commercial_partner_id.id,
-                                'currency_id': move.currency_id.id,
-                                'account_id': account.id,
-                                'tax_ids': [Command.set([])],
-                            }): {
-                                'name': move.invoice_cash_rounding_id.name,
-                                'amount_currency': sign * difference,
-                                'balance': sign * move.company_currency_id.round(difference / rate) if rate else 0.0,
-                            },
-                        },
-                        'display_type': 'rounding',
-                    }
-                elif strategy == 'biggest_tax':
-                    tax_line = move.line_ids\
-                        .filtered(lambda line: line.display_type == 'tax')\
-                        .sorted(key=lambda line: move.direction_sign * line.amount_currency)[:1]
-                    difference_balance = move.company_currency_id.round(difference / rate) if rate else 0.0
-                    sync_cash_rounding_lines[move] = {
-                        'sync_display_type': {
-                            frozendict({'id': tax_line.id}): {
-                                'amount_currency': tax_line.amount_currency + (sign * difference),
-                                'balance': tax_line.balance + (sign * difference_balance),
-                            },
-                        },
-                    }
-        return sync_cash_rounding_lines
+        self._sync_lines_from_display_type(
+            move_container,
+            lines_container,
+            'rounding',
+            lambda move: move._cash_rounding_lines_dirty_add_invoice_line(move_container, lines_container),
+            lambda move, sync_values: move._prepare_cash_rounding_lines_add_invoice_line(sync_values),
+        )
+        self._sync_lines(
+            move_container,
+            lines_container,
+            lambda move: move._cash_rounding_lines_dirty_biggest_tax(move_container, lines_container),
+            lambda move, sync_values: move._prepare_cash_rounding_lines_biggest_tax(sync_values),
+        )
 
     # -------------------------------------------------------------------------
     # DYNAMIC LINES: payment terms
@@ -3169,6 +3092,7 @@ class AccountMove(models.Model):
             ),
             'has_invoice_just_been_created': self._record_has_been_created(move_container, self),
         }
+        lines = self.line_ids.filtered(lambda line: line.display_type in display_types)
         return (
             self.state == 'draft'
             and self.is_invoice(include_receipts=True)
@@ -3181,7 +3105,7 @@ class AccountMove(models.Model):
                 or self._field_has_changed(
                     container=lines_container,
                     field_names=self.env['account.move.line']._get_invoice_line_fields_sync_payment_term(),
-                    records=self.line_ids.filtered(lambda line: line.display_type in display_types),
+                    records=lines,
                 )
                 or self._record_has_been_removed(lines_container, self, display_types=display_types)
             )
@@ -3339,59 +3263,78 @@ class AccountMove(models.Model):
     # DYNAMIC LINES: update date_maturity based on term lines
     # -------------------------------------------------------------------------
 
+    def _date_maturity_dirty(self, move_container, lines_container):
+        self.ensure_one()
+        term_lines = self.line_ids \
+            .filtered(lambda line: line.display_type == 'payment_term') \
+            .sorted('date_maturity', reverse=True)
+        return (
+            self.state == 'draft'
+            and self.is_invoice(include_receipts=True)
+            and term_lines
+            and self._field_has_changed(
+                container=lines_container,
+                field_names=self.env['account.move.line']._get_invoice_line_fields_sync_date_maturity(),
+                records=term_lines,
+            )
+        ), {'term_lines': term_lines}
+
+    def _sync_date_maturity_from_invoice_term_lines(self, sync_values):
+        self.ensure_one()
+        sync_values['move']['invoice_date_due'] = sync_values['dirty']['term_lines'][0].date_maturity
+
     @api.model
     def _sync_date_maturity(self, move_container, lines_container):
-        sync_date_maturity = {}
-        for move in move_container['records']:
-            term_lines = move.line_ids\
-                .filtered(lambda line: line.display_type == 'payment_term')\
-                .sorted('date_maturity', reverse=True)
-            is_dirty = self._field_has_changed(lines_container, term_lines._get_invoice_line_fields_sync_date_maturity(), records=term_lines)
-            if not is_dirty or not term_lines:
-                continue
-
-            sync_date_maturity[move] = {'invoice_date_due': term_lines[0].date_maturity}
-        return sync_date_maturity
+        self._sync_lines(
+            move_container,
+            lines_container,
+            lambda move: move._date_maturity_dirty(move_container, lines_container),
+            lambda move, sync_values: move._sync_date_maturity_from_invoice_term_lines(sync_values),
+        )
 
     # -------------------------------------------------------------------------
     # DYNAMIC LINES: auto balancing of misc. journal entries.
     # -------------------------------------------------------------------------
 
+    def _misc_auto_balance_dirty(self, move_container, lines_container, product_tax_details):
+        self.ensure_one()
+        return (
+            self.state == 'draft'
+            and self.is_entry()
+            and product_tax_details
+            and self.company_id.account_journal_suspense_account_id
+        ), {}
+
+    def _prepare_misc_auto_balance_lines(self, sync_values):
+        self.ensure_one()
+        total_balance = sum(self.line_ids.filtered(lambda line: line.display_type != 'misc_auto_balance').mapped('balance'))
+        if self.company_currency_id.is_zero(total_balance):
+            return
+
+        rate = self.env['res.currency']._get_conversion_rate(
+            from_currency=self.company_currency_id,
+            to_currency=self.currency_id,
+            company=self.company_id,
+            date=self.date or self.context_today(self),
+        )
+        sync_values['grouping_keys'][frozendict({
+            'currency_id': self.currency_id.id,
+            'account_id': self.company_id.account_journal_suspense_account_id.id,
+        })] = {
+            'name': _("Automatic Balancing Line"),
+            'balance': total_balance,
+            'amount_currency': self.currency_id.round(total_balance * rate),
+        }
+
     @api.model
     def _sync_unbalanced_lines(self, move_container, lines_container, product_tax_details_per_move):
-        sync_unbalanced_lines = {}
-        for move in move_container['records']:
-            if move.state != 'draft' or not move.is_entry():
-                continue
-
-            sync_move_values = sync_unbalanced_lines.setdefault(move, {'sync_display_type': {}, 'display_type': 'misc_auto_balance'})['sync_display_type']
-
-            # Only manage automatically unbalanced when taxes are involved.
-            if move not in product_tax_details_per_move:
-                continue
-
-            total_balance = sum(move.line_ids.filtered(lambda line: line.display_type != 'misc_auto_balance').mapped('balance'))
-            if (
-                move.company_id.account_journal_suspense_account_id
-                and not move.company_currency_id.is_zero(total_balance)
-            ):
-                rate = self.env['res.currency']._get_conversion_rate(
-                    from_currency=move.company_currency_id,
-                    to_currency=move.currency_id,
-                    company=move.company_id,
-                    date=move.date or move.context_today(move),
-                )
-                sync_move_values[
-                    frozendict({
-                        'currency_id': move.currency_id.id,
-                        'account_id': move.company_id.account_journal_suspense_account_id.id,
-                    })
-                ] = {
-                    'name': _("Automatic Balancing Line"),
-                    'balance': total_balance,
-                    'amount_currency': move.currency_id.round(total_balance * rate),
-                }
-        return sync_unbalanced_lines
+        self._sync_lines_from_display_type(
+            move_container,
+            lines_container,
+            'misc_auto_balance',
+            lambda move: move._misc_auto_balance_dirty(move_container, lines_container, product_tax_details_per_move.get(move)),
+            lambda move, sync_values: move._prepare_misc_auto_balance_lines(sync_values),
+        )
 
     # -------------------------------------------------------------------------
     # DYNAMIC LINES: ONCHANGE
