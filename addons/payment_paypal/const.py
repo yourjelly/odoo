@@ -44,19 +44,25 @@ DEFAULT_PAYMENT_METHOD_CODES = {
 PAYMENT_STATUS_MAPPING = {
     'pending': (
         'PENDING',
-        'CREATED',
-        'APPROVED',  # A buyer approved a checkout order
+        'NOT_STARTED', #  Authorize
+        'APPROVED',
+        'PAYER_ACTION_REQUIRED',
     ),
     'done': (
         'COMPLETED',
-        'CAPTURED',
+        'CREATED', #  Authorize
+        'APPROVED',
     ),
     'cancel': (
         'DECLINED',
-        'DENIED',
+        'CANCELLED', #  Authorize
+        'REVOKED', #  Authorize
         'VOIDED',
     ),
-    'error': ('FAILED',),
+    'error': (
+        'FAILED',
+        'REFUSED', #  Authorize
+    ),
 }
 
 AUTHORIZE = 'AUTHORIZE'
@@ -68,4 +74,12 @@ HANDLED_WEBHOOK_EVENTS = [
     'CHECKOUT.ORDER.COMPLETED',
     'CHECKOUT.ORDER.APPROVED',
     'CHECKOUT.PAYMENT-APPROVAL.REVERSED',
+]
+
+AUTHORIZE_WEBHOOK_EVENTS = [
+    'PAYMENT.AUTHORIZATION.CREATED',
+    'PAYMENT.AUTHORIZATION.VOIDED',
+    'PAYMENT.CAPTURE.DECLINED',
+    'PAYMENT.CAPTURE.COMPLETED',
+    'PAYMENT.CAPTURE.PENDING',
 ]

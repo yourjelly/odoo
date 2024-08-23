@@ -55,12 +55,12 @@ class PaymentProvider(models.Model):
 
     # === COMPUTE METHODS === #
 
-    # def _compute_feature_support_fields(self):
-    #     """ Override of `payment` to enable additional features. """
-    #     super()._compute_feature_support_fields()
-    #     self.filtered(lambda p: p.code == 'paypal').update({
-    #         'support_manual_capture': 'full_only',
-    #     })
+    def _compute_feature_support_fields(self):
+        """ Override of `payment` to enable additional features. """
+        super()._compute_feature_support_fields()
+        self.filtered(lambda p: p.code == 'paypal').update({
+            'support_manual_capture': 'full_only',
+        })
 
     #=== BUSINESS METHODS ===#
 
@@ -139,6 +139,7 @@ class PaymentProvider(models.Model):
         url = self._paypal_get_api_url() + endpoint
         headers = {
             'Content-type': 'application/json',
+            'Prefer': 'return=representation',
         }
         if not get_token:
             if not (access_token := self._get_access_token()):
@@ -192,13 +193,15 @@ class PaymentProvider(models.Model):
     def _create_webhook(self):
         try:
             base_url = self.get_base_url()
-            # # webhook is not created on localhost
-            # if base_url.startswith('http://localhost'):
-            # # insert ngrok url here
-            #     base_url = 'https://c873-94-140-169-33.ngrok-free.app'
+            # webhook is not created on localhost
+            if base_url.startswith('http://localhost'):
+            # insert ngrok url here
+                base_url = 'https://d4f3-94-140-169-33.ngrok-free.app'
             data = {
                 'url': urls.url_join(base_url, PaypalController._webhook_url),
-                'event_types': [{'name': event_type} for event_type in const.HANDLED_WEBHOOK_EVENTS]
+                'event_types': [{
+                    'name': event_type,
+                } for event_type in const.HANDLED_WEBHOOK_EVENTS + const.AUTHORIZE_WEBHOOK_EVENTS]
             }
             webhook = self._paypal_make_request(
                 '/v1/notifications/webhooks',

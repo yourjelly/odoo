@@ -65,17 +65,21 @@ class PaypalController(http.Controller):
         :rtype: str
         """
         data = request.httprequest.json
-        if data.get('event_type') not in const.HANDLED_WEBHOOK_EVENTS:
+        if data.get('event_type') not in const.HANDLED_WEBHOOK_EVENTS + const.AUTHORIZE_WEBHOOK_EVENTS:
             return
+        is_authorize = data.get('event_type') in const.AUTHORIZE_WEBHOOK_EVENTS
         normalized_data = self._normalize_paypal_response(
             data.get('resource'),
             is_webhook_origin=True,
+            is_authorize=is_authorize
         )
         _logger.info("notification received from PayPal with data:\n%s", pprint.pformat(data))
         try:
             # Check the origin and integrity of the notification
             tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
-                'paypal', normalized_data
+                'paypal',
+                normalized_data,
+                is_authorize=is_authorize,
             )
             self._verify_notification_signature(data, tx_sudo)
 
@@ -125,8 +129,17 @@ class PaypalController(http.Controller):
             _logger.warning("received notification with invalid signature")
             raise Forbidden()
 
-    def _normalize_paypal_response(self, data, is_webhook_origin=False):
-        result = {}
+    def _normalize_paypal_response(self, data, is_webhook_origin=False, is_authorize=False):
+        if is_authorize:
+            order_id = data.get('supplementary_data').get('related_ids').get('order_id')
+            return {
+                'payment_source': ['paypal'],
+                'id': order_id,
+                'txn_type': data.get('id'),
+                'status': data.get('status'),
+                'amount': data.get('amount'),
+                'reference_id': data.get('id'),
+            }
         purchase_unit = data.get('purchase_units')[0]
         result = {
             'payment_source': data.get('payment_source').keys(),
@@ -140,8 +153,9 @@ class PaypalController(http.Controller):
                 'status': data.get('status'),
             })
         else:
-            captured = purchase_unit.get('payments').get('captures')
-            authorized = purchase_unit.get('payments').get('authorizes')
+            payment_data = purchase_unit.get('payments')
+            captured = payment_data.get('captures')
+            authorized = payment_data.get('authorizations')
             if captured:
                 result.update({
                     **captured[0],

@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+import pprint
 
 from werkzeug import urls
 
@@ -67,7 +68,9 @@ class PaymentTransaction(models.Model):
         )
         return {'order_id': response_content['id']}
 
-    def _get_tx_from_notification_data(self, provider_code, notification_data):
+    def _get_tx_from_notification_data(
+        self, provider_code, notification_data, is_authorize=False
+    ):
         """ Override of payment to find the transaction based on Paypal data.
 
         :param str provider_code: The code of the provider that handled the transaction
@@ -82,11 +85,37 @@ class PaymentTransaction(models.Model):
 
         reference = notification_data.get('reference_id')
         tx = self.search([('reference', '=', reference), ('provider_code', '=', 'paypal')])
+        if not tx and is_authorize:
+            tx = self.search([
+                ('provider_reference', '=', reference),
+                ('provider_code', '=', 'paypal'),
+            ])
         if not tx:
             raise ValidationError(
                 "PayPal: " + _("No transaction found matching reference %s.", reference)
             )
         return tx
+
+    def _set_status_from_notification(
+            self, payment_status=None, txn_type=None, pending_reason=None,
+    ):
+        if payment_status in PAYMENT_STATUS_MAPPING['pending']:
+            self._set_pending(state_message=notification_data.get('pending_reason'))
+        elif payment_status in PAYMENT_STATUS_MAPPING['done']:
+            if txn_type == AUTHORIZE:
+                self._set_authorized()
+            else:
+                self._set_done()
+        elif payment_status in PAYMENT_STATUS_MAPPING['cancel']:
+            self._set_canceled()
+        else:
+            _logger.info(
+                "received data with invalid payment status (%s) for transaction with reference %s",
+                payment_status, self.reference
+            )
+            self._set_error(
+                "PayPal: " + _("Received data with invalid payment status: %s", payment_status)
+            )
 
     def _process_notification_data(self, notification_data):
         """ Override of payment to process the transaction based on Paypal data.
@@ -134,18 +163,45 @@ class PaymentTransaction(models.Model):
         ) or self.payment_method_id
         assert self.payment_method_id.code in notification_data.get(
             'payment_source'), 'PayPal: mismatching payment methods'
+        self._set_status_from_notification(
+            payment_status=payment_status,
+            txn_type=txn_type,
+            pending_reason=notification_data.get('pending_reason'),
+        )
 
-        if payment_status in PAYMENT_STATUS_MAPPING['pending']:
-            self._set_pending(state_message=notification_data.get('pending_reason'))
-        elif payment_status in PAYMENT_STATUS_MAPPING['done']:
-            self._set_done()
-        elif payment_status in PAYMENT_STATUS_MAPPING['cancel']:
-            self._set_canceled()
-        else:
-            _logger.info(
-                "received data with invalid payment status (%s) for transaction with reference %s",
-                payment_status, self.reference
-            )
-            self._set_error(
-                "PayPal: " + _("Received data with invalid payment status: %s", payment_status)
-            )
+    def _send_capture_request(self, amount_to_capture=None):
+        """ Override of `payment` to send a capture request to Stripe. """
+        child_capture_tx = super()._send_capture_request(amount_to_capture=amount_to_capture)
+        if self.provider_code != 'paypal':
+            return child_capture_tx
+
+        # Make the capture request to Paypal
+        capture_response = self.provider_id._paypal_make_request(
+            endpoint=f'/v2/payments/authorizations/{self.provider_reference}/capture',
+        )
+        _logger.info(
+            "capture request response for transaction with reference %s:\n%s",
+            self.reference, pprint.pformat(capture_response)
+        )
+        self._set_status_from_notification(capture_response.get('status'))
+        return child_capture_tx
+
+    def _send_void_request(self, amount_to_void=None):
+        """ Override of `payment` to send a void request to Stripe. """
+        child_void_tx = super()._send_void_request(amount_to_void=amount_to_void)
+        if self.provider_code != 'paypal':
+            return child_void_tx
+
+        # Make the void request to Stripe
+        void_response = self.provider_id._paypal_make_request(
+            endpoint=f'/v2/payments/authorizations/{self.provider_reference}/void',
+        )
+        _logger.info(
+            "void request response for transaction with reference %s:\n%s",
+            self.reference, pprint.pformat(void_response)
+        )
+
+        # Handle the void request response
+        self._set_status_from_notification(void_response.get('status'))
+
+        return child_void_tx
