@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from contextlib import suppress
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from unittest.mock import patch, DEFAULT
+from unittest.mock import patch
 
 from odoo import exceptions
 from odoo.addons.base.tests.test_ir_cron import CronMixinCase
@@ -425,7 +424,7 @@ class TestMailSchedule(EventCase, MockEmail, CronMixinCase):
         def _patched_send_mail(self, *args, **kwargs):
             raise exceptions.ValidationError('Some error')
 
-        with patch.object(type(self.env["mail.template"]), "send_mail", _patched_send_mail), \
+        with patch.object(type(self.env["mail.compose.message"]), "_action_send_mail_mass_mail", _patched_send_mail), \
              self.mock_datetime_and_now(self.reference_now + relativedelta(days=3)), \
              self.mock_mail_gateway():
             cron.method_direct_trigger()
@@ -446,9 +445,8 @@ class TestMailSchedule(EventCase, MockEmail, CronMixinCase):
     @mute_logger(
         'odoo.addons.event.models.event_mail',
         'odoo.addons.event.models.event_mail_registration',
-        'odoo.addons.event.models.event_registration'
+        'odoo.addons.event.models.event_registration',
     )
-    @users('user_eventmanager')
     def test_event_mail_schedule_fail_registration_composer(self):
         """ Simulate a fail during composer usage e.g. invalid field path, template
         / model change, ... to check defensive behavior """
@@ -458,10 +456,9 @@ class TestMailSchedule(EventCase, MockEmail, CronMixinCase):
         def _patched_send_mail(self, *args, **kwargs):
             raise exceptions.ValidationError('Some error')
 
-        with suppress(exceptions.ValidationError), \
-             patch.object(type(self.env["mail.template"]), "send_mail", _patched_send_mail), \
+        with patch.object(type(self.env["mail.compose.message"]), "_action_send_mail_mass_mail", _patched_send_mail), \
              self.mock_mail_gateway():
-            registration = self.env['event.registration'].create({
+            registration = self.env['event.registration'].with_user(self.user_eventmanager).create({
                 "email": "test@email.com",
                 "event_id": self.test_event.id,
                 "name": "Mitchell Admin",
@@ -532,7 +529,7 @@ class TestMailSchedule(EventCase, MockEmail, CronMixinCase):
             ])
         self.assertEqual(len(self._new_mails), 2,
                          'EventMail: should be limited to new registrations')
-        self.assertEqual(self.mail_mail_create_mocked.call_count, 2,
+        self.assertEqual(self.mail_mail_create_mocked.call_count, 1,
                          'EventMail: should create mails in batch for new registrations')
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')

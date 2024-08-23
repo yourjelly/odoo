@@ -160,6 +160,7 @@ class TestEventSaleMailSchedule(TestEventFullCommon):
     def test_event_mail_on_sale_confirmation(self):
         """Test that a mail is sent to the customer when a sale order is confirmed."""
         ticket = self.test_event.event_ticket_ids[0]
+        self.test_event.env.company.partner_id.email = 'test.email@test.example.com'
         order_line_vals = {
             "event_id": self.test_event.id,
             "event_ticket_id": ticket.id,
@@ -167,6 +168,14 @@ class TestEventSaleMailSchedule(TestEventFullCommon):
             "product_uom_qty": 1,
         }
         self.customer_so.write({"order_line": [(0, 0, order_line_vals)]})
+
+        # check sale mail configuration
+        aftersub = self.test_event.event_mail_ids.filtered(
+            lambda m: m.interval_type == "after_sub"
+        )
+        self.assertTrue(aftersub)
+        self.aftersub.template_ref.email_from = "{{ (object.event_id.organizer_id.email_formatted or object.event_id.user_id.email_formatted or '') }}"
+        self.assertEqual(self.test_event.organizer_id, self.test_event.env.company.partner_id)
 
         registration = self.env["event.registration"].create(
             {
@@ -189,5 +198,8 @@ class TestEventSaleMailSchedule(TestEventFullCommon):
             registration,
             [self.event_customer.id],
             "outgoing",
-            author=self.env.user.company_id.partner_id,
+            author=self.test_event.organizer_id,
+            fields_values={
+                "email_from": self.test_event.organizer_id.email_formatted,
+            },
         )
