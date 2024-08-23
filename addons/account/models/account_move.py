@@ -2134,6 +2134,17 @@ class AccountMove(models.Model):
 
     @api.model
     def _track_record_field(self, record, field_name):
+        # if not self.env.cache.contains(record, record._fields[field_name]):
+        #     record[field_name]
+        # value = record._cache[field_name]
+        # if record._fields[field_name].type == 'many2many':
+        #     value = [Command.set(value)]
+        # if value != record._fields[field_name].convert_to_write(record[field_name], record):
+        #     import pudb; pudb.set_trace()
+        # return value
+        # TODO: fuck this shit!
+        if not self.env.cache.contains(record, record._fields[field_name]):
+            return None
         return record._fields[field_name].convert_to_write(record[field_name], record)
 
     @api.model
@@ -2430,7 +2441,11 @@ class AccountMove(models.Model):
                     to_unlink.add(line_id)
 
             if onchange_commands:
+                import time
+                t0 = time.time()
+                print(onchange_commands)
                 move.line_ids = onchange_commands
+                print(time.time() - t0)
                 impacted_lines |= move.line_ids
 
         if to_create:
