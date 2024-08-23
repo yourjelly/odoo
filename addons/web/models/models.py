@@ -934,7 +934,11 @@ class Base(models.AbstractModel):
         # create a new record with initial values
         if self:
             # fill in the cache of record with the values of self
-            cache_values = {fname: self[fname] for fname in fields_spec}
+            cache_values = {
+                fname: self[fname]
+                for fname in fields_spec
+                if not (not self._fields[fname].store and self._fields[fname].compute)
+            }
             record = self.new(cache_values, origin=self)
             # apply initial values on top of the values of self
             record._update_cache(initial_values)
@@ -955,7 +959,7 @@ class Base(models.AbstractModel):
                     parent._update_cache({field_name: record[field_name]})
 
         # make a snapshot based on the initial values of record
-        snapshot0 = RecordSnapshot(record, fields_spec, fetch=(not first_call))
+        snapshot0 = RecordSnapshot(record, fields_spec, fetch=(not first_call), is_snapshot0=True)
 
         # store changed values in cache; also trigger recomputations based on
         # subfields (e.g., line.a has been modified, line.b is computed stored
@@ -1091,13 +1095,16 @@ class RecordSnapshot(dict):
     """ A dict with the values of a record, following a prefix tree. """
     __slots__ = ['record', 'fields_spec']
 
-    def __init__(self, record: BaseModel, fields_spec: dict, fetch=True):
+    def __init__(self, record: BaseModel, fields_spec: dict, fetch=True, is_snapshot0=False):
         # put record in dict to include it when comparing snapshots
         super().__init__()
         self.record = record
         self.fields_spec = fields_spec
         if fetch:
             for name in fields_spec:
+                field = self.record._fields[name]
+                if is_snapshot0 and not field.store and field.compute:
+                    continue
                 self.fetch(name)
 
     def __eq__(self, other: 'RecordSnapshot'):
