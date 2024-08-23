@@ -134,7 +134,6 @@ export class SettingsFormController extends formView.Controller {
                 },
                 cancel: async () => {
                     await this.model.root.discard();
-                    await this.model.root.save();
                     _continue = true;
                     resolve();
                 },
