@@ -463,6 +463,8 @@ class AccountMove(models.Model):
         compute='_compute_amount', store=True,
         currency_field='company_currency_id',
     )
+    product_tax_details = fields.Binary(exportable=False, store=False)
+    epd_tax_details = fields.Binary(exportable=False, store=False)
     tax_totals = fields.Binary(
         string="Invoice Totals",
         compute='_compute_tax_totals',
@@ -1209,7 +1211,18 @@ class AccountMove(models.Model):
         """
         for move in self:
             if move.is_invoice(include_receipts=True):
-                base_lines = move._get_base_lines_for_taxes_computation(epd=True, cash_rounding=True)
+                if move.product_tax_details:
+                    base_lines = move.product_tax_details['base_lines']
+                    if move.epd_tax_details:
+                        base_lines += move.epd_tax_details['epd']
+                    if move.invoice_cash_rounding_id.strategy == 'add_invoice_line':
+                        cash_rounding_lines = move.line_ids.filtered(lambda line: line.display_type == 'rounding')
+                        base_lines += [line._convert_to_tax_base_line_dict() for line in cash_rounding_lines]
+                elif self._context.get('from_onchange'):
+                    move.tax_totals = None
+                    continue
+                else:
+                    base_lines = move._get_base_lines_for_taxes_computation(epd=True, cash_rounding=True)
                 tax_lines = [
                     line._convert_to_tax_line_dict()
                     for line in move.line_ids.filtered(lambda line: line.display_type == 'tax')
@@ -1221,7 +1234,6 @@ class AccountMove(models.Model):
                     currency=move.currency_id or move.journal_id.currency_id or move.company_id.currency_id,
                 )
             else:
-                # Non-invoice moves don't support that field (because of multicurrency: all lines of the invoice share the same currency)
                 move.tax_totals = None
 
     @api.depends('show_payment_term_details')
@@ -1454,7 +1466,7 @@ class AccountMove(models.Model):
         for move in self:
             move.quick_encoding_vals = move._get_quick_edit_suggestions()
 
-    @api.depends('ref', 'move_type', 'partner_id', 'invoice_date', 'tax_totals')
+    @api.depends('ref', 'move_type', 'partner_id', 'invoice_date', 'amount_total')
     def _compute_duplicated_ref_ids(self):
         move_to_duplicate_move = self._fetch_duplicate_reference()
         for move in self:
@@ -1965,6 +1977,7 @@ class AccountMove(models.Model):
         a different country than the one allowed by the fiscal country or the fiscal position.
         This contrains ensure such account.move cannot be kept, as they could generate inconsistencies in the reports.
         """
+        self._compute_tax_country_id() # We need to ensure this field has been computed, as we use it in our check
         for record in self:
             amls = record.line_ids
             impacted_countries = amls.tax_ids.country_id | amls.tax_line_id.country_id
@@ -2341,18 +2354,18 @@ class AccountMove(models.Model):
         self._tracked_fields_after(lines_container)
 
         self._sync_quick_encoding_lines(move_container, lines_container)
-        product_tax_details_per_move = self._prepare_product_tax_details_per_move(move_container, lines_container)
-        self._sync_product_lines(move_container, lines_container, product_tax_details_per_move)
-        self._sync_epd_lines(move_container, lines_container, product_tax_details_per_move)
-        epd_tax_details_per_move = self._prepare_epd_tax_details_per_move(move_container)
-        self._sync_tax_lines(move_container, lines_container, product_tax_details_per_move, epd_tax_details_per_move)
+        self._prepare_product_tax_details_per_move(move_container, lines_container)
+        self._sync_product_lines(move_container, lines_container)
+        self._sync_epd_lines(move_container, lines_container)
+        self._prepare_epd_tax_details_per_move(move_container)
+        self._sync_tax_lines(move_container, lines_container)
         self._sync_quick_encoding_lines_fix_total_amount(move_container, lines_container)
         self._sync_discount_lines(move_container, lines_container)
         self._sync_cash_rounding_lines(move_container, lines_container)
         self._sync_payment_term_lines(move_container, lines_container)
         self._sync_date_maturity(move_container, lines_container)
-        self._sync_tax_totals(move_container, lines_container, product_tax_details_per_move)
-        self._sync_unbalanced_lines(move_container, lines_container, product_tax_details_per_move)
+        self._sync_tax_totals(move_container, lines_container)
+        self._sync_unbalanced_lines(move_container, lines_container)
 
         # Cleanup the hacky field to track the fields of lines during the onchange.
         for line in lines_container['records'].exists():
@@ -2492,9 +2505,13 @@ class AccountMove(models.Model):
         return self._get_move_common_fields_sync_taxes().union({'invoice_date'})
 
     @api.model
+    def _get_product_tax_details(self):
+        self.ensure_one()
+
+    @api.model
     def _prepare_product_tax_details_per_move(self, move_container, lines_container):
-        product_tax_details_per_move = {}
         for move in move_container['records']:
+            move.product_tax_details = None
             if move.state != 'draft':
                 continue
 
@@ -2532,25 +2549,36 @@ class AccountMove(models.Model):
                 continue
 
             # Compute the taxes.
-            product_tax_details_per_move[move] = self.env['account.tax']._compute_taxes(
-                base_lines=[line._convert_to_tax_base_line_dict() for line in base_lines],
+            base_lines_values_list = []
+            for line in base_lines:
+                base_line_values = line._convert_to_tax_base_line_dict()
+                base_line_values['tax_details'] = self.env['account.tax']._prepare_base_line_tax_details(
+                    base_line=base_line_values,
+                    company=move.company_id,
+                    include_caba_tags=move.always_tax_exigible,
+                )
+                base_lines_values_list.append(base_line_values)
+            product_tax_details = self.env['account.tax']._compute_taxes(
+                base_lines=base_lines_values_list,
                 company=move.company_id,
                 include_caba_tags=move.always_tax_exigible,
             )
-            product_tax_details_per_move[move]['preserve_tax_amounts'] = preserve_tax_amounts
-        return product_tax_details_per_move
+            product_tax_details['preserve_tax_amounts'] = preserve_tax_amounts
+
+            # Can be assigned directly since it's not a stored field.
+            move.product_tax_details = product_tax_details
 
     # -------------------------------------------------------------------------
     # DYNAMIC LINES: update accounting fields for base lines
     # -------------------------------------------------------------------------
 
-    def _product_lines_dirty(self, move_container, lines_container, product_tax_details):
+    def _product_lines_dirty(self, move_container, lines_container):
         self.ensure_one()
-        return bool(product_tax_details), {}
+        return bool(self.product_tax_details), {}
 
-    def _prepare_product_lines(self, sync_values, product_tax_details):
+    def _prepare_product_lines(self, sync_values):
         self.ensure_one()
-        for base_line, to_update in product_tax_details['base_lines_to_update']:
+        for base_line, to_update in self.product_tax_details['base_lines_to_update']:
             line = base_line['record']
             price_subtotal = to_update['price_subtotal']
             if base_line['rate']:
@@ -2568,12 +2596,12 @@ class AccountMove(models.Model):
             sync_values['update'][line] = to_sync
 
     @api.model
-    def _sync_product_lines(self, move_container, lines_container, product_tax_details_per_move):
+    def _sync_product_lines(self, move_container, lines_container):
         self._sync_lines(
             move_container,
             lines_container,
-            lambda move: move._product_lines_dirty(move_container, lines_container, product_tax_details_per_move.get(move)),
-            lambda move, sync_values: move._prepare_product_lines(sync_values, product_tax_details_per_move.get(move)),
+            lambda move: move._product_lines_dirty(move_container, lines_container),
+            lambda move, sync_values: move._prepare_product_lines(sync_values),
         )
 
     # -------------------------------------------------------------------------
@@ -2584,13 +2612,13 @@ class AccountMove(models.Model):
     def _get_invoice_fields_sync_epd(self):
         return {'move_type', 'invoice_payment_term_id'}
 
-    def _epd_lines_dirty(self, move_container, lines_container, product_tax_details):
+    def _epd_lines_dirty(self, move_container, lines_container):
         self.ensure_one()
         return (
             self.state == 'draft'
             and self.is_invoice(include_receipts=True)
             and (
-                product_tax_details
+                self.product_tax_details
                 or self._field_has_changed(
                     container=move_container,
                     field_names=self._get_invoice_fields_sync_epd(),
@@ -2653,48 +2681,58 @@ class AccountMove(models.Model):
             values['balance'] += balance
 
     @api.model
-    def _sync_epd_lines(self, move_container, lines_container, product_tax_details_per_move):
+    def _sync_epd_lines(self, move_container, lines_container):
         self._sync_lines_from_display_type(
             move_container,
             lines_container,
             'epd',
-            lambda move: move._epd_lines_dirty(move_container, lines_container, product_tax_details_per_move.get(move)),
+            lambda move: move._epd_lines_dirty(move_container, lines_container),
             lambda move, sync_values: move._prepare_epd_lines(sync_values),
         )
 
     @api.model
     def _prepare_epd_tax_details_per_move(self, container):
-        epd_tax_details_per_move = {}
         for move in container['records']:
+            move.epd_tax_details = None
             if move.state != 'draft':
                 continue
 
-            base_lines = move._get_base_lines_for_taxes_computation(epd=True, product=False)
-            if not base_lines:
+            epd_lines = move.line_ids.filtered(lambda line: line.display_type == 'epd')
+            if not epd_lines:
                 continue
 
-            epd_tax_details_per_move[move] = self.env['account.tax']._compute_taxes(
-                base_lines,
-                move.company_id,
+            # Can be assigned directly since it's not a stored field.
+            base_lines_values_list = []
+            for line in epd_lines:
+                base_line_values = line._convert_to_tax_base_line_dict()
+                base_line_values['tax_details'] = self.env['account.tax']._prepare_base_line_tax_details(
+                    base_line=base_line_values,
+                    company=move.company_id,
+                    include_caba_tags=move.always_tax_exigible,
+                )
+                base_lines_values_list.append(base_line_values)
+            move.epd_tax_details = self.env['account.tax']._compute_taxes(
+                base_lines=base_lines_values_list,
+                company=move.company_id,
                 include_caba_tags=move.always_tax_exigible,
             )
-        return epd_tax_details_per_move
 
     # -------------------------------------------------------------------------
     # DYNAMIC LINES: tax lines
     # -------------------------------------------------------------------------
 
-    def _tax_lines_dirty(self, move_container, lines_container, product_tax_details, epd_tax_details):
+    def _tax_lines_dirty(self, move_container, lines_container):
         self.ensure_one()
-        return self.state == 'draft' and product_tax_details and not product_tax_details['preserve_tax_amounts'], {}
+        return self.state == 'draft' and self.product_tax_details and not self.product_tax_details['preserve_tax_amounts'], {}
 
-    def _tax_lines_dirty_preserve_tax_amounts(self, move_container, lines_container, product_tax_details, epd_tax_details):
+    def _tax_lines_dirty_preserve_tax_amounts(self, move_container, lines_container):
         self.ensure_one()
-        return self.state == 'draft' and product_tax_details and product_tax_details['preserve_tax_amounts'], {}
+        return self.state == 'draft' and self.product_tax_details and self.product_tax_details['preserve_tax_amounts'], {}
 
-    def _prepare_tax_lines(self, sync_values, product_tax_details, epd_tax_details):
+    def _prepare_tax_lines(self, sync_values):
         self.ensure_one()
-        epd_tax_details = epd_tax_details or {}
+        product_tax_details = self.product_tax_details
+        epd_tax_details = self.epd_tax_details or {}
         for tax_lines_to_add in (product_tax_details['tax_lines_to_add'], epd_tax_details.get('tax_lines_to_add', [])):
             for grouping_key, tax_data in tax_lines_to_add:
                 tax = self.env['account.tax.repartition.line'].browse(grouping_key['tax_repartition_line_id']).tax_id
@@ -2717,32 +2755,18 @@ class AccountMove(models.Model):
             }
 
     @api.model
-    def _sync_tax_lines(self, move_container, lines_container, product_tax_details_per_move, epd_tax_details_per_move):
+    def _sync_tax_lines(self, move_container, lines_container):
         self._sync_lines_from_display_type(
             move_container,
             lines_container,
             'tax',
-            lambda move: move._tax_lines_dirty(
-                move_container,
-                lines_container,
-                product_tax_details_per_move.get(move),
-                epd_tax_details_per_move.get(move),
-            ),
-            lambda move, sync_values: move._prepare_tax_lines(
-                sync_values,
-                product_tax_details_per_move.get(move),
-                epd_tax_details_per_move.get(move),
-            ),
+            lambda move: move._tax_lines_dirty(move_container, lines_container),
+            lambda move, sync_values: move._prepare_tax_lines(sync_values),
         )
         self._sync_lines(
             move_container,
             lines_container,
-            lambda move: move._tax_lines_dirty_preserve_tax_amounts(
-                move_container,
-                lines_container,
-                product_tax_details_per_move.get(move),
-                epd_tax_details_per_move.get(move),
-            ),
+            lambda move: move._tax_lines_dirty_preserve_tax_amounts(move_container, lines_container),
             lambda move, sync_values: move._prepare_tax_lines_preserve_tax_amounts(sync_values),
         )
 
@@ -3288,20 +3312,20 @@ class AccountMove(models.Model):
     # DYNAMIC LINES: Refresh tax totals if necessary.
     # -------------------------------------------------------------------------
 
-    def _tax_totals_dirty(self, move_container, lines_container, product_tax_details):
+    def _tax_totals_dirty(self, move_container, lines_container):
         self.ensure_one()
-        return self.is_invoice(include_receipts=True) and bool(product_tax_details), {}
+        return self.is_invoice(include_receipts=True) and bool(self.product_tax_details), {}
 
     def _invalidate_tax_totals_from_invoice_lines(self, sync_values):
         self.ensure_one()
         self.invalidate_recordset(fnames=['tax_totals'])
 
     @api.model
-    def _sync_tax_totals(self, move_container, lines_container, product_tax_details_per_move):
+    def _sync_tax_totals(self, move_container, lines_container):
         self._sync_lines(
             move_container,
             lines_container,
-            lambda move: move._tax_totals_dirty(move_container, lines_container, product_tax_details_per_move.get(move)),
+            lambda move: move._tax_totals_dirty(move_container, lines_container),
             lambda move, sync_values: move._invalidate_tax_totals_from_invoice_lines(sync_values),
         )
 
@@ -3309,12 +3333,12 @@ class AccountMove(models.Model):
     # DYNAMIC LINES: auto balancing of misc. journal entries.
     # -------------------------------------------------------------------------
 
-    def _misc_auto_balance_dirty(self, move_container, lines_container, product_tax_details):
+    def _misc_auto_balance_dirty(self, move_container, lines_container):
         self.ensure_one()
         return (
             self.state == 'draft'
             and self.is_entry()
-            and product_tax_details
+            and self.product_tax_details
             and self.company_id.account_journal_suspense_account_id
         ), {}
 
@@ -3340,12 +3364,12 @@ class AccountMove(models.Model):
         }
 
     @api.model
-    def _sync_unbalanced_lines(self, move_container, lines_container, product_tax_details_per_move):
+    def _sync_unbalanced_lines(self, move_container, lines_container):
         self._sync_lines_from_display_type(
             move_container,
             lines_container,
             'misc_auto_balance',
-            lambda move: move._misc_auto_balance_dirty(move_container, lines_container, product_tax_details_per_move.get(move)),
+            lambda move: move._misc_auto_balance_dirty(move_container, lines_container),
             lambda move, sync_values: move._prepare_misc_auto_balance_lines(sync_values),
         )
 
@@ -3408,7 +3432,7 @@ class AccountMove(models.Model):
     def onchange(self, values, field_names, fields_spec):
         # EXTENDS 'web'
         # 'invoice_line_ids' is on the view for the 'hack' but that's it.
-        results = super().onchange(values, field_names, fields_spec)
+        results = super(AccountMove, self.with_context(from_onchange=True)).onchange(values, field_names, fields_spec)
         results['value'].pop('invoice_line_ids', None)
 
         return results

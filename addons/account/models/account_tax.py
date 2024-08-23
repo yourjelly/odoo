@@ -1704,6 +1704,7 @@ class AccountTax(models.Model):
                 * amount_tax:           The total tax amount.
         """
         res = {
+            'base_lines': base_lines,
             'tax_lines_to_add': [],
             'tax_lines_to_delete': [],
             'tax_lines_to_update': [],
@@ -1724,11 +1725,14 @@ class AccountTax(models.Model):
         # Prepare the tax details for each line.
         to_process = []
         for base_line in base_lines:
-            tax_details_results = self._prepare_base_line_tax_details(
-                base_line,
-                company,
-                include_caba_tags=include_caba_tags,
-            )
+            if 'tax_details' in base_line:
+                tax_details_results = base_line['tax_details']
+            else:
+                tax_details_results = self._prepare_base_line_tax_details(
+                    base_line,
+                    company,
+                    include_caba_tags=include_caba_tags,
+                )
             to_process.append((base_line, tax_details_results))
 
         # Fill 'base_lines_to_update' and 'totals'.
@@ -1877,7 +1881,10 @@ class AccountTax(models.Model):
         tax_details_by_tax = defaultdict(list)
         to_process = []
         for base_line in base_lines:
-            tax_details_results = self._prepare_base_line_tax_details(base_line, company)
+            if 'tax_details' in base_line:
+                tax_details_results = base_line['tax_details']
+            else:
+                tax_details_results = self._prepare_base_line_tax_details(base_line, company)
             to_process.append((base_line, tax_details_results))
 
             # Add 'display_base'.
