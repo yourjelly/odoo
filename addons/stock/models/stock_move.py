@@ -1019,7 +1019,7 @@ Please change the quantity done or the rounding precision of your unit of measur
                 move = move.with_context(allowed_companies=self.env.user.company_ids.ids)
                 warehouse_id = False
 
-            rule = ProcurementGroup._search_rule(move.route_ids, move.product_packaging_id, move.product_id, warehouse_id, domain)
+            rule = self.env['procurement.group']._get_rule(move.product_id, move.location_dest_id, move._prepare_procurement_values())
 
             excluded_rule_ids = []
             while (rule and rule.push_domain and not move.filtered_domain(literal_eval(rule.push_domain))):
