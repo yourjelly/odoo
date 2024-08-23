@@ -49,10 +49,11 @@ def acquire_cursor(db):
 
 websocket_notifications = []
 websocket_events = []
-
+log_stats_event = threading.Event()
+log_stats_enabled = False
 
 def log_websocket_stats():
-    while True:
+    while not log_stats_event.is_set():
         time.sleep(60)
         if websocket_notifications:
             _logger.info(
@@ -85,7 +86,20 @@ def log_websocket_stats():
             websocket_events.clear()
 
 
-threading.Thread(target=log_websocket_stats, daemon=True).start()
+def toggle_websocket_logging(sig, frame):
+    global log_stats_enabled
+    if log_stats_enabled:
+        log_stats_event.set()
+        _logger.info("[GEVENT.DEBUG] Disabling websocket logging.")
+    else:
+        log_stats_event.clear()
+        _logger.info("[GEVENT.DEBUG] Enabling websocket logging.")
+        threading.Thread(target=log_websocket_stats, daemon=True).start()
+    log_stats_enabled = not log_stats_enabled
+
+
+import signal
+signal.signal(signal.SIGUSR2, toggle_websocket_logging)
 
 # ------------------------------------------------------
 # EXCEPTIONS
