@@ -85,11 +85,11 @@ class PaymentTransaction(models.Model):
 
         reference = notification_data.get('reference_id')
         tx = self.search([('reference', '=', reference), ('provider_code', '=', 'paypal')])
-        if not tx and is_authorize:
-            tx = self.search([
-                ('provider_reference', '=', reference),
-                ('provider_code', '=', 'paypal'),
-            ])
+        # if not tx and is_authorize:
+        #     tx = self.search([
+        #         ('provider_reference', '=', reference),
+        #         ('provider_code', '=', 'paypal'),
+        #     ])
         if not tx:
             raise ValidationError(
                 "PayPal: " + _("No transaction found matching reference %s.", reference)
