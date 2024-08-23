@@ -1,7 +1,8 @@
-import { mailModels } from "@mail/../tests/mail_test_helpers";
-import { fields } from "@web/../tests/web_test_helpers";
+import { fields, models } from "@web/../tests/web_test_helpers";
 
-export class ResPartner extends mailModels.ResPartner {
+export class ResPartner extends models.ServerModel {
+    _name = "res.partner";
+
     out_of_office_date_end = fields.Date();
 
     /**

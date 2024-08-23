@@ -1,6 +1,8 @@
-import { mailModels } from "@mail/../tests/mail_test_helpers";
+import { models } from "@web/../tests/web_test_helpers";
 
-export class MailMessage extends mailModels.MailMessage {
+export class MailMessage extends models.ServerModel {
+    _name = "mail.message";
+
     message_format() {
         const formattedMessages = super.message_format(...arguments);
         for (const message of formattedMessages) {

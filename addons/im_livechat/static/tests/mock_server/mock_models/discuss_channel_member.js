@@ -1,6 +1,8 @@
-import { mailModels } from "@mail/../tests/mail_test_helpers";
+import { models } from "@web/../tests/web_test_helpers";
 
-export class DiscussChannelMember extends mailModels.DiscussChannelMember {
+export class DiscussChannelMember extends models.ServerModel {
+    _name = "discuss.channel.member";
+
     /**
      * @override
      * @type {typeof mailModels.DiscussChannelMember["prototype"]["_get_partner_data"]}

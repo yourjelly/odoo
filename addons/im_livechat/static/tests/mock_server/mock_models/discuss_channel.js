@@ -1,7 +1,8 @@
-import { mailModels } from "@mail/../tests/mail_test_helpers";
-import { fields, makeKwArgs } from "@web/../tests/web_test_helpers";
+import { fields, makeKwArgs, models } from "@web/../tests/web_test_helpers";
 
-export class DiscussChannel extends mailModels.DiscussChannel {
+export class DiscussChannel extends models.ServerModel {
+    _name = "discuss.channel";
+
     livechat_channel_id = fields.Many2one({ relation: "im_livechat.channel", string: "Channel" }); // FIXME: somehow not fetched properly
 
     /**

@@ -1,7 +1,9 @@
-import { mailModels, openView } from "@mail/../tests/mail_test_helpers";
-import { fields } from "@web/../tests/web_test_helpers";
+import { openView } from "@mail/../tests/mail_test_helpers";
+import { fields, models } from "@web/../tests/web_test_helpers";
 
-export class MailActivity extends mailModels.MailActivity {
+export class MailActivity extends models.Model {
+    _name = "mail.activity";
+
     name = fields.Char();
 
     async action_create_calendar_event() {

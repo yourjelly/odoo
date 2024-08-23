@@ -1,8 +1,9 @@
-import { busModels } from "@bus/../tests/bus_test_helpers";
-import { makeKwArgs } from "@web/../tests/web_test_helpers";
+import { makeKwArgs, models } from "@web/../tests/web_test_helpers";
 import { isIterable } from "@web/core/utils/arrays";
 
-export class IrWebSocket extends busModels.IrWebSocket {
+export class IrWebSocket extends models.ServerModel {
+    _name = "ir.websocket";
+
     /**
      * @override
      * @type {typeof busModels.WebSocket["prototype"]["_get_im_status"]}

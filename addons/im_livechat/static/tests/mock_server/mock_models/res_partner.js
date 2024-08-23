@@ -1,7 +1,8 @@
-import { serverState } from "@web/../tests/web_test_helpers";
-import { mailModels } from "@mail/../tests/mail_test_helpers";
+import { models, serverState } from "@web/../tests/web_test_helpers";
 
-export class ResPartner extends mailModels.ResPartner {
+export class ResPartner extends models.ServerModel {
+    _name = "res.partner";
+
     /**
      * @override
      * @type {typeof mailModels.ResPartner["prototype"]["search_for_channel_invite"]}

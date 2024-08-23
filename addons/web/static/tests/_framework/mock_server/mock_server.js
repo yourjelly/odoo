@@ -354,8 +354,8 @@ export class MockServer {
     menus = [];
     /** @type {Record<string, Model>} */
     models = {};
-    /** @type {Record<string, ModelConstructor>} */
-    modelSpecs = {};
+    /** @type {ModelConstructor[]} */
+    modelSpecs = [];
     /** @type {Set<string>} */
     modelNamesToFetch = new Set();
 
@@ -678,9 +678,9 @@ export class MockServer {
     }
 
     async loadModels() {
-        const models = Object.values(this.modelSpecs);
+        const models = this.modelSpecs;
         const serverModelInheritances = new Set();
-        this.modelSpecs = {};
+        this.modelSpecs = [];
         if (this.modelNamesToFetch.size) {
             const modelEntries = await fetchModelDefinitions(this.modelNamesToFetch);
             this.modelNamesToFetch.clear();
@@ -714,6 +714,35 @@ export class MockServer {
             }
         }
 
+        /**
+         * @param {Model} model
+         * @param {Model} parentModel
+         */
+        const applyModelInheritance = (model, parentModel) => {
+            console.log("Set inheritance for model", model._name);
+
+            // Records
+            for (const record of parentModel._records) {
+                if (!model._records.some((rec) => rec.id === record.id)) {
+                    model._records.push(record);
+                }
+            }
+
+            // Array properties
+            const arrayProperties = ["_filters"];
+            for (const property of arrayProperties) {
+                model[property].push(...parentModel[property]);
+            }
+
+            // Object properties
+            const objectProperties = ["_fields", "_onChanges", "_toolbar", "_views"];
+            for (const property of objectProperties) {
+                Object.assign(model[property], parentModel[property]);
+            }
+
+            Object.assign(model, { ...parentModel, ...model });
+        };
+
         // Register models on mock server instance
         for (const model of models) {
             // Validate _rec_name
@@ -729,12 +758,14 @@ export class MockServer {
                 model._rec_name = "x_name";
             }
 
-            if (model._name in this.env) {
+            const parent = this.models[model._name];
+            if (parent) {
+                applyModelInheritance(model, parent);
+            } else if (model._name in this.env) {
                 throw new MockServerError(
-                    `cannot register model "${model._name}": a model or a server environment property with the same name already exists`
+                    `cannot use model name "${model._name}": name is already used in the server environment`
                 );
             }
-
             this.models[model._name] = model;
         }
 
@@ -747,9 +778,7 @@ export class MockServer {
                 }
                 const parentModel = this.models[modelName];
                 if (parentModel) {
-                    for (const fieldName in parentModel._fields) {
-                        model._fields[fieldName] ??= parentModel._fields[fieldName];
-                    }
+                    applyModelInheritance(model, parentModel);
                 } else if (serverModelInheritances.has([model._name, modelName].join(","))) {
                     // Inheritance comes from the server, so we can safely remove it:
                     // it means that the inherited model has not been fetched in this
@@ -913,7 +942,7 @@ export class MockServer {
     registerModels(ModelClasses) {
         for (const ModelClass of ModelClasses) {
             const model = this.getModelDefinition(ModelClass);
-            this.modelSpecs[model._name] = model;
+            this.modelSpecs.push(model);
         }
 
         if (this.started) {

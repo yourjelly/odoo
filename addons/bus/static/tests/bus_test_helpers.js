@@ -12,10 +12,10 @@ import { IrWebSocket } from "./mock_server/mock_models/ir_websocket";
 //-----------------------------------------------------------------------------
 
 export function defineBusModels() {
-    return defineModels({ ...webModels, ...busModels });
+    return defineModels([...webModels, ...busModels]);
 }
 
-export const busModels = { BusBus, IrWebSocket };
+export const busModels = [BusBus, IrWebSocket];
 
 //-----------------------------------------------------------------------------
 // Setup

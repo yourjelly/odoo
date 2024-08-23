@@ -1,6 +1,8 @@
-import { getKwArgs, webModels } from "@web/../tests/web_test_helpers";
+import { getKwArgs, models } from "@web/../tests/web_test_helpers";
 
-export class IrAttachment extends webModels.IrAttachment {
+export class IrAttachment extends models.ServerModel {
+    _name = "ir.attachment";
+
     /**
      * @param {number} ids
      * @param {boolean} [force]

@@ -1,9 +1,10 @@
-import { fields, getKwArgs, webModels } from "@web/../tests/web_test_helpers";
+import { fields, getKwArgs, models } from "@web/../tests/web_test_helpers";
 import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
 
 /** @typedef {import("@web/../tests/web_test_helpers").ModelRecord} ModelRecord */
 
-export class ResPartner extends webModels.ResPartner {
+export class ResPartner extends models.ServerModel {
+    _name = "res.partner";
     _inherit = ["mail.thread"];
 
     description = fields.Char({ string: "Description" });

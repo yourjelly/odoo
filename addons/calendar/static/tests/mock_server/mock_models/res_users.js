@@ -1,9 +1,11 @@
-import { mailModels } from "@mail/../tests/mail_test_helpers";
-import { serverState } from "@web/../tests/web_test_helpers";
+import { models, serverState } from "@web/../tests/web_test_helpers";
 import { serializeDateTime } from "@web/core/l10n/dates";
+
 const { DateTime } = luxon;
 
-export class ResUsers extends mailModels.ResUsers {
+export class ResUsers extends models.ServerModel {
+    _name = "res.users";
+
     /**
      * Simulates `_systray_get_calendar_event_domain` on `res.users`.
      *

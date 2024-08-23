@@ -75,7 +75,7 @@ export function defineMailModels() {
     return defineModels(mailModels);
 }
 
-export const mailModels = {
+export const mailModels = [
     ...webModels,
     ...busModels,
     Base,
@@ -108,7 +108,7 @@ export const mailModels = {
     ResUsers,
     ResUsersSettings,
     ResUsersSettingsVolumes,
-};
+];
 
 /**
  * Register a callback to be executed before an RPC request is processed.

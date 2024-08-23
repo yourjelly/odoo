@@ -125,7 +125,7 @@ export function defineWebModels() {
 export const fields = _fields;
 export const models = _models;
 
-export const webModels = {
+export const webModels = [
     IrAttachment,
     IrModel,
     IrModelAccess,
@@ -138,4 +138,4 @@ export const webModels = {
     ResGroups,
     ResPartner,
     ResUsers,
-};
+];

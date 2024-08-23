@@ -1,7 +1,8 @@
-import { livechatModels } from "@im_livechat/../tests/livechat_test_helpers";
-import { fields } from "@web/../tests/web_test_helpers";
+import { fields, models } from "@web/../tests/web_test_helpers";
 
-export class DiscussChannel extends livechatModels.DiscussChannel {
+export class DiscussChannel extends models.ServerModel {
+    _name = "discuss.channel";
+
     livechat_visitor_id = fields.Many2one({ relation: "website.visitor", string: "Visitor" }); // FIXME: somehow not fetched properly
 
     /**
