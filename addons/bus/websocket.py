@@ -12,7 +12,7 @@ import selectors
 import threading
 import time
 from collections import defaultdict, deque
-from contextlib import closing, suppress
+from contextlib import contextmanager, suppress
 from enum import IntEnum
 from psycopg2.pool import PoolError
 from urllib.parse import urlparse
@@ -35,15 +35,20 @@ _logger = logging.getLogger(__name__)
 
 
 MAX_TRY_ON_POOL_ERROR = 10
-DELAY_ON_POOL_ERROR = 0.03
+DELAY_ON_POOL_ERROR = 0.3
+JITTER_ON_POOL_ERROR = 0.6
 
 
+@contextmanager
 def acquire_cursor(db):
     """ Try to acquire a cursor up to `MAX_TRY_ON_POOL_ERROR` """
-    for tryno in range(1, MAX_TRY_ON_POOL_ERROR + 1):
-        with suppress(PoolError):
-            return odoo.registry(db).cursor()
-        time.sleep(random.uniform(DELAY_ON_POOL_ERROR, DELAY_ON_POOL_ERROR * tryno))
+    delay = DELAY_ON_POOL_ERROR
+    for _ in range(MAX_TRY_ON_POOL_ERROR):
+        with suppress(PoolError), odoo.registry(db).cursor() as cursor:
+            yield cursor
+            return
+        time.sleep(delay + random.uniform(0, JITTER_ON_POOL_ERROR))
+        delay *= 1.5
     raise PoolError('Failed to acquire cursor after %s retries' % MAX_TRY_ON_POOL_ERROR)
 
 
@@ -613,7 +618,7 @@ class Websocket:
         """
         if not self.__event_callbacks[event_type]:
             return
-        with closing(acquire_cursor(self._db)) as cr:
+        with acquire_cursor(self._db) as cr:
             env = api.Environment(cr, self._session.uid, self._session.context)
             for callback in self.__event_callbacks[event_type]:
                 try:
@@ -762,7 +767,7 @@ class WebsocketRequest:
         ) as exc:
             raise InvalidDatabaseException() from exc
 
-        with closing(acquire_cursor(self.db)) as cr:
+        with acquire_cursor(self.db) as cr:
             self.env = api.Environment(cr, self.session.uid, self.session.context)
             threading.current_thread().uid = self.env.uid
             service_model.retrying(
