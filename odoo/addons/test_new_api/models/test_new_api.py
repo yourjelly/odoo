@@ -2184,3 +2184,27 @@ class SharedComputeMethod(models.Model):
                 record.start = 0
             if not record.end:
                 record.end = 10
+
+
+class CyclicComputeValidation(models.Model):
+    _name = _description = 'test_new_api.cyclic.compute_validation'
+
+    name = fields.Char()
+    company_id = fields.Many2one(comodel_name='res.company', compute='_compute_company_id', store=True)
+    country_id = fields.Many2one(comodel_name='res.country', compute='_compute_country_id')
+
+    @api.depends('name')
+    def _compute_company_id(self):
+        for record in self:
+            record.company_id = self.env.company
+
+    @api.depends('company_id')
+    def _compute_country_id(self):
+        for record in self:
+            record.country_id = record.company_id.country_id
+
+    @api.constrains('name', 'company_id')
+    def _validate_country(self):
+        for record in self:
+            if record.country_id != record.company_id.country_id:
+                raise ValidationError("sploutch")
