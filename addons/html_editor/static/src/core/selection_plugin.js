@@ -137,6 +137,12 @@ export class SelectionPlugin extends Plugin {
             this.isPointerDown = false;
             this.preventNextMousedownFix = false;
         });
+
+        this.cache = new SelectionCache(this);
+    }
+
+    destroy() {
+        this.cache.destroy();
     }
 
     handleCommand(command, payload) {
@@ -291,6 +297,11 @@ export class SelectionPlugin extends Plugin {
      * @return { EditorSelection }
      */
     getEditableSelection({ deep = false } = {}) {
+        return this.cache.getValue(deep ? "deepEditableSelection" : "editableSelection", () =>
+            this._getEditableSelection({ deep })
+        );
+    }
+    _getEditableSelection({ deep = false } = {}) {
         const selection = this.document.getSelection();
         const inEditable = selection && this.isSelectionInEditable(selection);
         if (inEditable) {
@@ -461,6 +472,9 @@ export class SelectionPlugin extends Plugin {
      * @returns {Node[]}
      */
     getSelectedNodes() {
+        return this.cache.getValue("selectedNodes", () => this._getSelectedNodes());
+    }
+    _getSelectedNodes() {
         const selection = this.getEditableSelection();
         const range = new Range();
         range.setStart(selection.startContainer, selection.startOffset);
@@ -480,6 +494,9 @@ export class SelectionPlugin extends Plugin {
      * @returns {Node[]}
      */
     getTraversedNodes() {
+        return this.cache.getValue("traversedNodes", () => this._getTraversedNodes());
+    }
+    _getTraversedNodes() {
         const selection = this.getEditableSelection({ deep: true });
         const { commonAncestorContainer: root } = selection;
 
@@ -773,5 +790,71 @@ export class SelectionPlugin extends Plugin {
             this.editable.contains(anchorNode) &&
             (focusNode === anchorNode || this.editable.contains(focusNode))
         );
+    }
+}
+
+// Cache values that are expensive to compute.
+// The cache is invalidated on selection change and DOM mutations.
+class SelectionCache {
+    constructor(selectionPlugin) {
+        this.p = selectionPlugin;
+        this.lastSelection = null;
+        this.observer = new MutationObserver(() => this.invalidate());
+        this.observer.observe(this.p.editable, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+        });
+
+        this.chachedValues = {};
+    }
+
+    destroy() {
+        this.observer.disconnect();
+    }
+
+    invalidate() {
+        this.chachedValues = {};
+        this.recordSelection();
+        console.log("cache invalidated");
+    }
+
+    isValid() {
+        // Check for mutations in the DOM.
+        if (this.observer.takeRecords().length) {
+            return false;
+        }
+        const currentSelection = this.p.document.getSelection();
+        if (!currentSelection || !this.lastSelection) {
+            return false;
+        }
+        // Check for selection change.
+        return ["anchorNode", "anchorOffset", "focusNode", "focusOffset"].every(
+            (property) => currentSelection[property] === this.lastSelection[property]
+        );
+    }
+
+    recordSelection() {
+        const currentSelection = this.p.document.getSelection();
+        if (!currentSelection) {
+            this.lastSelection = null;
+            return;
+        }
+        const { anchorNode, anchorOffset, focusNode, focusOffset } = currentSelection;
+        this.lastSelection = { anchorNode, anchorOffset, focusNode, focusOffset };
+    }
+
+    getValue(name, generateNewValue) {
+        if (!this.isValid()) {
+            this.invalidate();
+        }
+        if (name in this.chachedValues) {
+            console.log("cache hit", name);
+            return this.chachedValues[name];
+        }
+        console.log("cache miss", name);
+        const newValue = generateNewValue();
+        this.chachedValues[name] = newValue;
+        return newValue;
     }
 }
