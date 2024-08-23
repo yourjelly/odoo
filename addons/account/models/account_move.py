@@ -1214,7 +1214,7 @@ class AccountMove(models.Model):
                 if move.product_tax_details:
                     base_lines = move.product_tax_details['base_lines']
                     if move.epd_tax_details:
-                        base_lines += move.epd_tax_details['epd']
+                        base_lines += move.epd_tax_details['base_lines']
                     if move.invoice_cash_rounding_id.strategy == 'add_invoice_line':
                         cash_rounding_lines = move.line_ids.filtered(lambda line: line.display_type == 'rounding')
                         base_lines += [line._convert_to_tax_base_line_dict() for line in cash_rounding_lines]
@@ -1461,10 +1461,10 @@ class AccountMove(models.Model):
             else:
                 move.quick_edit_mode = False
 
-    @api.depends('quick_edit_total_amount', 'invoice_line_ids.price_total', 'tax_totals')
+    @api.depends('quick_edit_total_amount', 'amount_total')
     def _compute_quick_encoding_vals(self):
         for move in self:
-            move.quick_encoding_vals = move._get_quick_edit_suggestions()
+            move.quick_encoding_vals = move._get_quick_edit_suggestions(move.amount_total)
 
     @api.depends('ref', 'move_type', 'partner_id', 'invoice_date', 'amount_total')
     def _compute_duplicated_ref_ids(self):
@@ -2245,7 +2245,7 @@ class AccountMove(models.Model):
                 continue
 
             move_sync_lines_diff = sync_lines_diff[move]
-            results = {'grouping_keys': {}, 'dirty': dirty_values}
+            results = {'grouping_keys': {}, 'dirty': dirty_values, 'move': {}}
             populate_function(move, results)
 
             # Collect the candidates to synchronize.
@@ -2286,6 +2286,12 @@ class AccountMove(models.Model):
             for candidates in candidates_per_grouping_key.values():
                 for candidate in candidates:
                     move_sync_lines_diff['unlink'].add(candidate.id)
+
+            move_values = results['move']
+            if move_values:
+                sub_move_container = {**move_container, 'records': move}
+                with self._tracked_fields(sub_move_container):
+                    (move.write if move.id else move.update)(move_values)
 
         sub_lines_container = {**lines_container, 'records': self.env['account.move.line']}
         with self._tracked_fields(sub_lines_container ):
@@ -2363,6 +2369,7 @@ class AccountMove(models.Model):
         self._sync_discount_lines(move_container, lines_container)
         self._sync_cash_rounding_lines(move_container, lines_container)
         self._sync_payment_term_lines(move_container, lines_container)
+        self._sync_quick_encoding_lines_update_next_values(move_container, lines_container)
         self._sync_date_maturity(move_container, lines_container)
         self._sync_tax_totals(move_container, lines_container)
         self._sync_unbalanced_lines(move_container, lines_container)
@@ -2423,11 +2430,7 @@ class AccountMove(models.Model):
                     to_unlink.add(line_id)
 
             if onchange_commands:
-                import time
-                t0 = time.time()
-                print(onchange_commands)
                 move.line_ids = onchange_commands
-                print(time.time() - t0)
                 impacted_lines |= move.line_ids
 
         if to_create:
@@ -2448,19 +2451,16 @@ class AccountMove(models.Model):
             and not self.line_ids
             and self.quick_edit_total_amount
             and self.quick_edit_mode
-            and self.quick_encoding_vals
         ), {}
 
     def _prepare_quick_encoding_lines(self, sync_values):
         self.ensure_one()
-        suggestions = self.quick_encoding_vals
+        sync_values['move']['quick_encoding_vals'] = quick_encoding_vals = self._get_quick_edit_suggestions(0.0)
         sync_values['create'].append({
             'display_type': 'product',
-            'partner_id': self.partner_id.id,
-            'account_id': suggestions['account_id'],
-            'currency_id': self.currency_id.id,
-            'price_unit': suggestions['price_unit'],
-            'tax_ids': [Command.set(suggestions['tax_ids'])],
+            'account_id': quick_encoding_vals['account_id'],
+            'price_unit': quick_encoding_vals['price_unit'],
+            'tax_ids': [Command.set(quick_encoding_vals['tax_ids'])],
         })
 
     @api.model
@@ -2789,7 +2789,7 @@ class AccountMove(models.Model):
             and self.quick_edit_mode
             and invoice_lines
             and all(set(invoice_line.tax_ids.ids) == set(self.quick_encoding_vals['tax_ids']) for invoice_line in invoice_lines)
-            and 0.0 < abs(delta_amount_currency) <= (self.currency_id.rounding * 2)
+            and 0.0 < delta_amount_currency <= (self.currency_id.rounding * 2)
         ), {'delta_amount_currency': delta_amount_currency}
 
     def _prepare_quick_encoding_fix_total_amount(self, sync_values):
@@ -3132,12 +3132,10 @@ class AccountMove(models.Model):
         return (
             self.state != 'draft'
             and self.is_invoice(include_receipts=True)
-            and (
-                self._field_has_changed(
-                    container=move_container,
-                    field_names={'state'},
-                    records=self,
-                )
+            and self._field_has_changed(
+                container=move_container,
+                field_names={'state'},
+                records=self,
             )
         ), {}
 
@@ -3238,7 +3236,10 @@ class AccountMove(models.Model):
         term_lines = self.line_ids \
             .filtered(lambda line: line.display_type == 'payment_term') \
             .sorted('date_maturity')
-        term_line_name = self.payment_reference or self.name or ''
+
+        is_payment_reference_valid = self.payment_reference not in (False, '', '/')
+        payment_reference = self.payment_reference if is_payment_reference_valid else False
+        term_line_name = payment_reference or self.name or ''
         need_installment = len(term_lines) > 1
         for index, term_line in enumerate(term_lines, start=1):
             if need_installment:
@@ -3248,6 +3249,9 @@ class AccountMove(models.Model):
             else:
                 continue
             sync_values['update'][term_line] = {'name': name}
+
+        if not is_payment_reference_valid:
+            sync_values['move']['payment_reference'] = term_line_name
 
     @api.model
     def _sync_payment_term_lines(self, move_container, lines_container):
@@ -3273,6 +3277,41 @@ class AccountMove(models.Model):
             lines_container,
             lambda move: move._payment_term_lines_dirty_posted(move_container, lines_container),
             lambda move, sync_values: move._prepare_payment_term_lines_posted(sync_values),
+        )
+
+    # -------------------------------------------------------------------------
+    # DYNAMIC LINES: quick encoding (post-fix the tax amounts)
+    # -------------------------------------------------------------------------
+
+    def _quick_encoding_update_next_values(self, move_container, lines_container):
+        self.ensure_one()
+        return (
+            self.state == 'draft'
+            and self.is_invoice(include_receipts=True)
+            and self.quick_edit_total_amount
+            and self.quick_edit_mode
+        ), {}
+
+    def _prepare_quick_encoding_update_next_values(self, sync_values):
+        self.ensure_one()
+        sync_values['move']['quick_encoding_vals'] = False
+
+        invoice_lines = self.line_ids.filtered(lambda line: line.display_type == 'product')
+        delta_amount_currency = self.quick_edit_total_amount - self.amount_total
+        if delta_amount_currency <= 0.0:
+            return
+
+        quick_encoding_vals = self._get_quick_edit_suggestions(self.amount_total)
+        if all(set(invoice_line.tax_ids.ids) == set(quick_encoding_vals['tax_ids']) for invoice_line in invoice_lines):
+            sync_values['move']['quick_encoding_vals'] = quick_encoding_vals
+
+    @api.model
+    def _sync_quick_encoding_lines_update_next_values(self, move_container, lines_container):
+        self._sync_lines(
+            move_container,
+            lines_container,
+            lambda move: move._quick_encoding_update_next_values(move_container, lines_container),
+            lambda move, sync_values: move._prepare_quick_encoding_update_next_values(sync_values),
         )
 
     # -------------------------------------------------------------------------
@@ -3939,7 +3978,7 @@ class AccountMove(models.Model):
         """, query.from_clause, query.where_clause or SQL("TRUE")))
         return rows[0] if rows else (0, False, False)
 
-    def _get_quick_edit_suggestions(self):
+    def _get_quick_edit_suggestions(self, amount_total):
         """
         Returns a dictionnary containing the suggested values when creating a new
         line with the quick_edit_total_amount set. We will compute the price_unit
@@ -3979,7 +4018,7 @@ class AccountMove(models.Model):
         # If we manipulate the equation to get the base from the total, we'll have base = total / ((1 - discount) * tax + 1)
         term = self.invoice_payment_term_id
         discount_percentage = term.discount_percentage if term.early_discount else 0
-        remaining_amount = self.quick_edit_total_amount - self.tax_totals['amount_total']
+        remaining_amount = self.quick_edit_total_amount - amount_total
 
         if (
             discount_percentage
