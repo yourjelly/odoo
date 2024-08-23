@@ -96,11 +96,11 @@ class TestPacking(TestPackingCommon):
             'result_package_id': False,
         })
         second_pack = pick_picking.action_put_in_pack()
-        self.assertEqual(len(pick_picking.move_ids_without_package), 2)
+        self.assertEqual(len(pick_picking.move_ids_without_package), 0)
         self.assertEqual(len(packing_picking.move_ids_without_package), 2)
         pick_picking.move_ids.picked = True
         pick_picking.button_validate()
-        self.assertEqual(len(packing_picking.move_ids_without_package), 2)
+        self.assertEqual(len(packing_picking.move_ids_without_package), 0)
         self.assertEqual(len(first_pack.quant_ids), 2)
         self.assertEqual(len(second_pack.quant_ids), 2)
         packing_picking.action_assign()
