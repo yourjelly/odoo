@@ -1224,7 +1224,12 @@ class AccountMoveLine(models.Model):
         if 'balance' in values and move.company_currency_id.id == currency_id:
             values['amount_currency'] = values['balance']
 
-        return values
+        cleaned_values = {}
+        for field_name, value in values.items():
+            old_value = line.move_id._track_record_field(line, field_name)
+            if value != old_value:
+                cleaned_values[field_name] = value
+        return cleaned_values
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -10,7 +10,7 @@ import { AccountMoveLineIdsListRenderer } from "@account/components/account_move
 
 class AccountMoveLineIdsField extends X2ManyField {
     static components = {
-        ...X2ManyField,
+        ...X2ManyField.components,
         ListRenderer: AccountMoveLineIdsListRenderer,
     };
 }

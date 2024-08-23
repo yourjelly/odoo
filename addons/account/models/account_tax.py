@@ -1499,13 +1499,12 @@ class AccountTax(models.Model):
         }
 
     @api.model
-    def _aggregate_taxes(self, to_process, company, filter_tax_values_to_apply=None, grouping_key_generator=None, distribute_total_on_line=True):
-
-        def default_grouping_key_generator(base_line, tax_values):
+    def _aggregate_taxes(self, to_process, company, filter_tax_values_to_apply=None, grouping_key_generator=None, use_accounting_grouping_key_generator=False, distribute_total_on_line=True, include_caba_tags=False):
+        def tax_grouping_key_generator(base_line, tax_values):
             return {'tax': tax_values['tax_repartition_line'].tax_id}
 
         def accounting_grouping_key_generator(base_line, tax_values):
-            return self._get_generation_dict_from_base_line(base_line, tax_values)
+            return self._get_generation_dict_from_base_line(base_line, tax_data, force_caba_exigibility=include_caba_tags)
 
         results = {
             'base_amount_currency': 0.0,
@@ -1545,7 +1544,10 @@ class AccountTax(models.Model):
         }
 
         if not grouping_key_generator:
-            grouping_key_generator = default_grouping_key_generator
+            if use_accounting_grouping_key_generator:
+                grouping_key_generator = accounting_grouping_key_generator
+            else:
+                grouping_key_generator = tax_grouping_key_generator
 
         comp_currency = company.currency_id
         round_tax = company.tax_calculation_rounding_method != 'round_globally'
@@ -1607,7 +1609,10 @@ class AccountTax(models.Model):
                     continue
 
                 grouping_key = frozendict(grouping_key_generator(base_line, tax_data))
-                accounting_grouping_key = frozendict(accounting_grouping_key_generator(base_line, tax_data))
+                if use_accounting_grouping_key_generator:
+                    accounting_grouping_key = grouping_key
+                else:
+                    accounting_grouping_key = frozendict(accounting_grouping_key_generator(base_line, tax_data))
                 base_amount_currency = tax_data['base_amount_currency']
                 base_amount = tax_data['base_amount']
                 display_base_amount_currency = tax_data['display_base_amount_currency']
@@ -1748,39 +1753,59 @@ class AccountTax(models.Model):
         # =========================================================================================
 
         # Track the existing tax lines using the grouping key.
-        existing_tax_line_map = {}
+        existing_tax_line_map = defaultdict(list)
         for line_vals in tax_lines or []:
             grouping_key = frozendict(self._get_generation_dict_from_tax_line(line_vals))
+            existing_tax_line_map[grouping_key].append(line_vals)
 
-            # After a modification (e.g. changing the analytic account of the tax line), if two tax lines are sharing
-            # the same key, keep only one.
+        # Prepare the new tax lines.
+        new_tax_line_map = defaultdict(lambda: {
+            'tax_amount_currency': 0.0,
+            'tax_amount': 0.0,
+            'base_amount_currency': 0.0,
+            'base_amount': 0.0,
+            'display_base_amount_currency': 0.0,
+            'display_base_amount': 0.0,
+        })
+        for base_line, tax_details_results in to_process:
+            for tax_data in tax_details_results['taxes_data']:
+                grouping_key = frozendict(self._get_generation_dict_from_base_line(base_line, tax_data, force_caba_exigibility=include_caba_tags))
+                new_tax_line_map[grouping_key]['currency'] = base_line['currency']
+                new_tax_line_map[grouping_key]['tax_amount_currency'] += tax_data['tax_amount_currency']
+                new_tax_line_map[grouping_key]['tax_amount'] += tax_data['tax_amount']
+                new_tax_line_map[grouping_key]['base_amount_currency'] += tax_data['base_amount_currency']
+                new_tax_line_map[grouping_key]['base_amount'] += tax_data['base_amount']
+                new_tax_line_map[grouping_key]['display_base_amount_currency'] += tax_data['display_base_amount_currency']
+                new_tax_line_map[grouping_key]['display_base_amount'] += tax_data['display_base_amount']
+
+        # Update/create tax lines.
+        round_globally = company.tax_calculation_rounding_method == 'round_globally'
+        comp_curr = company.currency_id
+        for grouping_key, values in new_tax_line_map.items():
+            currency = values['currency']
+            if round_globally:
+                values['tax_amount_currency'] = currency.round(values['tax_amount_currency'])
+                values['tax_amount'] = comp_curr.round(values['tax_amount'])
+                values['base_amount_currency'] = currency.round(values['base_amount_currency'])
+                values['base_amount'] = comp_curr.round(values['base_amount'])
+                values['display_base_amount_currency'] = currency.round(values['display_base_amount_currency'])
+                values['display_base_amount'] = comp_curr.round(values['display_base_amount'])
+
+            # Don't create tax lines having zero amounts.
+            if currency.is_zero(values['tax_amount_currency']) and comp_curr.is_zero(values['tax_amount']):
+                continue
+
             if grouping_key in existing_tax_line_map:
-                res['tax_lines_to_delete'].append(line_vals)
+                tax_lines = existing_tax_line_map[grouping_key]
+                res['tax_lines_to_update'].append((tax_lines[0], values))
+                for trailing_tax_line in tax_lines[1:]:
+                    res['tax_lines_to_delete'].append(trailing_tax_line)
+                del existing_tax_line_map[grouping_key]
             else:
-                existing_tax_line_map[grouping_key] = line_vals
+                res['tax_lines_to_add'].append((grouping_key, values))
 
-        def grouping_key_generator(base_line, tax_data):
-            return self._get_generation_dict_from_base_line(base_line, tax_data, force_caba_exigibility=include_caba_tags)
-
-        # Update/create the tax lines.
-        global_tax_details = self._aggregate_taxes(to_process, company, grouping_key_generator=grouping_key_generator)
-
-        for grouping_key, tax_data in global_tax_details['tax_details'].items():
-            if tax_data['currency_id']:
-                currency = self.env['res.currency'].browse(tax_data['currency_id'])
-                tax_amount = currency.round(tax_data['tax_amount_currency'])
-                res['totals'][currency]['amount_tax'] += tax_amount
-
-            if grouping_key in existing_tax_line_map:
-                # Update an existing tax line.
-                line_vals = existing_tax_line_map.pop(grouping_key)
-                res['tax_lines_to_update'].append((line_vals, tax_data))
-            else:
-                # Create a new tax line.
-                res['tax_lines_to_add'].append((grouping_key, tax_data))
-
-        for line_vals in existing_tax_line_map.values():
-            res['tax_lines_to_delete'].append(line_vals)
+        for tax_line in existing_tax_line_map:
+            res['tax_lines_to_delete'].append(tax_line)
 
         return res
 

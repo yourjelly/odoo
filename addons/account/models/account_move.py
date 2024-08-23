@@ -16,7 +16,7 @@ from textwrap import shorten
 
 from odoo import api, fields, models, _, Command
 from odoo.addons.account.tools import format_structured_reference_iso
-from odoo.exceptions import UserError, ValidationError, AccessError, RedirectWarning
+from odoo.exceptions import UserError, ValidationError, AccessError, RedirectWarning, MissingError
 from odoo.osv import expression
 from odoo.tools import (
     create_index,
@@ -1203,16 +1203,6 @@ class AccountMove(models.Model):
                 move.invoice_payments_widget = False
 
     @api.depends_context('lang')
-    @api.depends(
-        'invoice_line_ids.currency_rate',
-        'invoice_line_ids.tax_base_amount',
-        'invoice_line_ids.tax_line_id',
-        'invoice_line_ids.price_total',
-        'invoice_line_ids.price_subtotal',
-        'invoice_payment_term_id',
-        'partner_id',
-        'currency_id',
-    )
     def _compute_tax_totals(self):
         """ Computed field used for custom widget's rendering.
             Only set on invoices.
@@ -1492,7 +1482,7 @@ class AccountMove(models.Model):
             values["id"] = moves._origin.id or 0
             # The amount total depends on the field line_ids and is calculated upon saving, we needed a way to get it even when the
             # invoices has not been saved yet.
-            values['amount_total'] = self.tax_totals.get('amount_total', 0)
+            values['amount_total'] = moves.amount_total
             casted_values = SQL(', ').join(
                 SQL("%s::%s", value, SQL.identifier(moves._fields[field_name].column_type[0]))
                 for field_name, value in values.items()
@@ -2204,8 +2194,11 @@ class AccountMove(models.Model):
     @api.model
     def _record_has_been_removed(self, container, move, display_types=None):
         for record, values in container['data_before'].items():
-            if values['move_id'] == move.id and (not display_types or values['display_type'] in display_types) and not record.exists():
-                return True
+            if values['move_id'] == move.id and (not display_types or values['display_type'] in display_types):
+                try:
+                    record.move_id  # Trigger "Record does not exist or has been deleted."
+                except MissingError:
+                    return True
         return False
 
     @api.model
@@ -2266,8 +2259,7 @@ class AccountMove(models.Model):
 
                 if candidates := candidates_per_grouping_key.get(grouping_key):
                     candidate = candidates[0]
-                    to_update = self.env['account.move.line']._sanitize_values_write(candidate, to_update)
-                    move_sync_lines_diff['update'][candidate.id] = {
+                    move_sync_lines_diff['update'][candidate] = {
                         k: v
                         for k, v in to_update.items()
                         if candidate._fields[k].type == 'monetary'
@@ -2276,7 +2268,6 @@ class AccountMove(models.Model):
                         move_sync_lines_diff['unlink'].add(trailing_candidate.id)
                     del candidates_per_grouping_key[grouping_key]
                 else:
-                    to_update = self.env['account.move.line']._sanitize_values_create(move, to_update)
                     move_sync_lines_diff['create'].append({**grouping_key, **to_update, 'move_id': move.id})
 
             for candidates in candidates_per_grouping_key.values():
@@ -2360,6 +2351,7 @@ class AccountMove(models.Model):
         self._sync_cash_rounding_lines(move_container, lines_container)
         self._sync_payment_term_lines(move_container, lines_container)
         self._sync_date_maturity(move_container, lines_container)
+        self._sync_tax_totals(move_container, lines_container, product_tax_details_per_move)
         self._sync_unbalanced_lines(move_container, lines_container, product_tax_details_per_move)
 
         # Cleanup the hacky field to track the fields of lines during the onchange.
@@ -2397,15 +2389,18 @@ class AccountMove(models.Model):
             onchange_commands = []
 
             for create_values in values['create']:
+                create_values = self.env['account.move.line']._sanitize_values_create(move, create_values)
                 if is_onchange_mode:
                     onchange_commands.append(Command.create(create_values))
                 else:
                     to_create.append(create_values)
-            for line_id, update_values in values['update'].items():
+            for line, update_values in values['update'].items():
+                update_values = self.env['account.move.line']._sanitize_values_write(line, update_values)
+                if not update_values:
+                    continue
                 if is_onchange_mode:
-                    onchange_commands.append(Command.update(line_id, update_values))
+                    onchange_commands.append(Command.update(line.id, update_values))
                 else:
-                    line = impacted_lines.browse(line_id)
                     line.write(update_values)
                     impacted_lines |= line
             for line_id in values['unlink']:
@@ -2415,7 +2410,11 @@ class AccountMove(models.Model):
                     to_unlink.add(line_id)
 
             if onchange_commands:
+                import time
+                t0 = time.time()
+                print(onchange_commands)
                 move.line_ids = onchange_commands
+                print(time.time() - t0)
                 impacted_lines |= move.line_ids
 
         if to_create:
@@ -2566,7 +2565,7 @@ class AccountMove(models.Model):
             if self.is_invoice(include_receipts=True):
                 to_sync['price_subtotal'] = to_update['price_subtotal']
                 to_sync['price_total'] = to_update['price_total']
-            sync_values['update'][line.id] = to_sync
+            sync_values['update'][line] = to_sync
 
     @api.model
     def _sync_product_lines(self, move_container, lines_container, product_tax_details_per_move):
@@ -2699,7 +2698,6 @@ class AccountMove(models.Model):
         for tax_lines_to_add in (product_tax_details['tax_lines_to_add'], epd_tax_details.get('tax_lines_to_add', [])):
             for grouping_key, tax_data in tax_lines_to_add:
                 tax = self.env['account.tax.repartition.line'].browse(grouping_key['tax_repartition_line_id']).tax_id
-                grouping_key = frozendict(grouping_key)
                 values = sync_values['grouping_keys'].setdefault(grouping_key, {
                     'name': tax.name,
                     'amount_currency': 0.0,
@@ -2710,17 +2708,11 @@ class AccountMove(models.Model):
                 values['balance'] += tax_data['tax_amount'] * self.direction_sign
                 values['tax_base_amount'] += tax_data['base_amount']
 
-        # Remove tax lines having a total of zero.
-        for grouping_key, values in list(sync_values['grouping_keys'].items()):
-            currency = self.env['res.currency'].browse(grouping_key['currency_id'])
-            if currency.is_zero(values['amount_currency']) and self.company_currency_id.is_zero(values['balance']):
-                del sync_values['grouping_keys'][grouping_key]
-
     def _prepare_tax_lines_preserve_tax_amounts(self, sync_values):
         self.ensure_one()
         for tax_line in self.line_ids.filtered('tax_repartition_line_id'):
             rate = tax_line.currency_rate
-            sync_values['update'][tax_line.id] = {
+            sync_values['update'][tax_line] = {
                 'balance': self.company_currency_id.round(tax_line.amount_currency / rate) if rate else 0.0,
             }
 
@@ -2786,7 +2778,7 @@ class AccountMove(models.Model):
             .sorted(key=lambda line: sign * line.amount_currency)[:1]
         amount_currency = tax_line.amount_currency + (sign * delta_amount_currency)
         balance = self.company_currency_id.round(amount_currency / rate) if rate else 0.0
-        sync_values['update'][tax_line.id] = {
+        sync_values['update'][tax_line] = {
             'amount_currency': amount_currency,
             'balance': balance,
         }
@@ -2977,7 +2969,7 @@ class AccountMove(models.Model):
             return
 
         difference_balance = self.company_currency_id.round(difference / rate) if rate else 0.0
-        sync_values['update'][tax_line.id] = {
+        sync_values['update'][tax_line] = {
             'amount_currency': tax_line.amount_currency + (sign * difference),
             'balance': tax_line.balance + (sign * difference_balance),
         }
@@ -3231,7 +3223,7 @@ class AccountMove(models.Model):
                 name = term_line_name
             else:
                 continue
-            sync_values['update'][term_line.id] = {'name': name}
+            sync_values['update'][term_line] = {'name': name}
 
     @api.model
     def _sync_payment_term_lines(self, move_container, lines_container):
@@ -3279,7 +3271,7 @@ class AccountMove(models.Model):
             )
         ), {'term_lines': term_lines}
 
-    def _sync_date_maturity_from_invoice_term_lines(self, sync_values):
+    def _prepare_date_maturity_from_invoice_term_lines(self, sync_values):
         self.ensure_one()
         sync_values['move']['invoice_date_due'] = sync_values['dirty']['term_lines'][0].date_maturity
 
@@ -3289,7 +3281,28 @@ class AccountMove(models.Model):
             move_container,
             lines_container,
             lambda move: move._date_maturity_dirty(move_container, lines_container),
-            lambda move, sync_values: move._sync_date_maturity_from_invoice_term_lines(sync_values),
+            lambda move, sync_values: move._prepare_date_maturity_from_invoice_term_lines(sync_values),
+        )
+
+    # -------------------------------------------------------------------------
+    # DYNAMIC LINES: Refresh tax totals if necessary.
+    # -------------------------------------------------------------------------
+
+    def _tax_totals_dirty(self, move_container, lines_container, product_tax_details):
+        self.ensure_one()
+        return self.is_invoice(include_receipts=True) and bool(product_tax_details), {}
+
+    def _invalidate_tax_totals_from_invoice_lines(self, sync_values):
+        self.ensure_one()
+        self.invalidate_recordset(fnames=['tax_totals'])
+
+    @api.model
+    def _sync_tax_totals(self, move_container, lines_container, product_tax_details_per_move):
+        self._sync_lines(
+            move_container,
+            lines_container,
+            lambda move: move._tax_totals_dirty(move_container, lines_container, product_tax_details_per_move.get(move)),
+            lambda move, sync_values: move._invalidate_tax_totals_from_invoice_lines(sync_values),
         )
 
     # -------------------------------------------------------------------------
