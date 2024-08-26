@@ -203,6 +203,7 @@ export class HtmlField extends Component {
                 const { resModel, resId } = this.props.record;
                 return { resModel, resId };
             },
+            resources: {},
             ...this.props.editorConfig,
         };
 
