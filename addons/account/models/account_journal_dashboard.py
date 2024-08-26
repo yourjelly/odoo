@@ -953,9 +953,9 @@ class account_journal(models.Model):
         elif self.type == 'cash':
             return 'action_view_bank_statement_tree'
         elif self.type == 'sale':
-            return 'action_move_out_invoice_type'
+            return 'action_move_out_all_type'
         elif self.type == 'purchase':
-            return 'action_move_in_invoice_type'
+            return 'action_move_in_all_type'
         else:
             return 'action_move_journal_line'
 
@@ -969,6 +969,15 @@ class account_journal(models.Model):
             action_name = 'account.%s' % action_name
 
         action = self.env["ir.actions.act_window"]._for_xml_id(action_name)
+
+        # those two actions already define the correct domain and context using magic keyword 'active_id'
+        # in order to allow refresh to work, so the rest of the code which is supposed to parse and add
+        # journal_id to the domain/context is not necessary (and crash due to literal_eval that can't parse magic
+        # keyword 'active_id' in the action domain/context)
+        # TODO: should adapt/create other action and maybe remove this method in order to benefit from url and
+        # be allowed to refresh without loosing domain/active filter in the context
+        if action_name in ('account.action_move_out_all_type', 'account.action_move_in_all_type'):
+            return action
 
         context = self._context.copy()
         if 'context' in action and isinstance(action['context'], str):
