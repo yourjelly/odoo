@@ -406,7 +406,15 @@ class AccountMoveLine(models.Model):
     )
     is_refund = fields.Boolean(compute='_compute_is_refund')
     last_onchange_fields = fields.Json(store=False)
-    stupid_field = fields.Boolean(compute='_compute_stupid_field')
+
+    # === Dirty fields === #
+    tax_line_amounts_dirty = fields.Boolean(compute='_compute_tax_line_amounts_dirty')
+    invoice_line_taxes_dirty = fields.Boolean(compute='_compute_invoice_line_taxes_dirty')
+    misc_line_taxes_dirty = fields.Boolean(compute='_compute_misc_line_taxes_dirty')
+    invoice_line_discount_dirty = fields.Boolean(compute='_compute_invoice_line_discount_dirty')
+    line_cash_rounding_dirty = fields.Boolean(compute='_compute_line_cash_rounding_dirty')
+    line_payment_term_dirty = fields.Boolean(compute='_compute_line_payment_term_dirty')
+    line_date_maturity_dirty = fields.Boolean(compute='_compute_line_date_maturity_dirty')
 
     _sql_constraints = [
         (
@@ -846,10 +854,58 @@ class AccountMoveLine(models.Model):
                 ) if element
             )
 
-    @api.depends(lambda self: self._sync_dynamic_lines_tracked_fields())
-    def _compute_stupid_field(self):
+    @api.depends('amount_currency', 'balance')
+    def _compute_tax_line_amounts_dirty(self):
         for line in self:
-            line.stupid_field = False
+            line.tax_line_amounts_dirty = line.display_type == 'tax'
+
+    @api.depends(
+        'tax_ids', 'partner_id', 'currency_id', 'account_id', 'analytic_distribution',
+        'price_unit', 'quantity', 'discount',
+    )
+    def _compute_invoice_line_taxes_dirty(self):
+        for line in self:
+            line.invoice_line_taxes_dirty = line.move_id.is_invoice(include_receipts=True) and line.display_type == 'product'
+
+    @api.depends(
+        'tax_ids', 'partner_id', 'currency_id', 'account_id', 'analytic_distribution',
+        'amount_currency', 'balance',
+    )
+    def _compute_misc_line_taxes_dirty(self):
+        for line in self:
+            line.misc_line_taxes_dirty = line.move_id.is_entry() and line.display_type == 'product'
+
+    @api.depends('account_id', 'discount')
+    def _compute_invoice_line_discount_dirty(self):
+        for line in self:
+            line.invoice_line_discount_dirty = (
+                line.move_id.is_invoice(include_receipts=True)
+                and line.display_type == 'product'
+            )
+
+    @api.depends('amount_currency')
+    def _compute_line_cash_rounding_dirty(self):
+        for line in self:
+            line.line_cash_rounding_dirty = (
+                line.move_id.is_invoice(include_receipts=True)
+                and line.display_type in ('product', 'epd', 'tax')
+            )
+
+    @api.depends('amount_currency', 'balance')
+    def _compute_line_payment_term_dirty(self):
+        for line in self:
+            line.line_payment_term_dirty = (
+                line.move_id.is_invoice(include_receipts=True)
+                and line.display_type in ('product', 'epd', 'cash_rounding', 'tax')
+            )
+
+    @api.depends('date_maturity')
+    def _compute_line_date_maturity_dirty(self):
+        for line in self:
+            line.line_date_maturity_dirty = (
+                line.move_id.is_invoice(include_receipts=True)
+                and line.display_type == 'payment_term'
+            )
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS
@@ -1051,49 +1107,6 @@ class AccountMoveLine(models.Model):
                     raise Exception("Matching number should be the full reconcile")
             elif line.matched_debit_ids or line.matched_credit_ids:
                 raise Exception("Should have number")
-
-    # -------------------------------------------------------------------------
-    # SYNC DYNAMIC LINES
-    # -------------------------------------------------------------------------
-
-    @api.model
-    def _get_common_line_fields_sync_taxes(self):
-        return {'tax_ids', 'partner_id', 'currency_id', 'account_id', 'analytic_distribution'}
-
-    @api.model
-    def _get_invoice_line_fields_sync_taxes(self):
-        return self._get_common_line_fields_sync_taxes().union({'price_unit', 'quantity', 'discount'})
-
-    @api.model
-    def _get_misc_line_fields_sync_taxes(self):
-        return self._get_common_line_fields_sync_taxes().union({'amount_currency', 'balance'})
-
-    @api.model
-    def _get_invoice_line_fields_sync_discount(self):
-        return {'account_id', 'discount'}
-
-    @api.model
-    def _get_invoice_line_fields_sync_cash_rounding(self):
-        return {'amount_currency'}
-
-    @api.model
-    def _get_invoice_line_fields_sync_payment_term(self):
-        return {'amount_currency', 'balance'}
-
-    @api.model
-    def _get_invoice_line_fields_sync_date_maturity(self):
-        return {'date_maturity'}
-
-    @api.model
-    def _sync_dynamic_lines_tracked_fields(self):
-        return {'display_type', 'move_id'}.union(
-            self._get_invoice_line_fields_sync_taxes(),
-            self._get_misc_line_fields_sync_taxes(),
-            self._get_invoice_line_fields_sync_discount(),
-            self._get_invoice_line_fields_sync_cash_rounding(),
-            self._get_invoice_line_fields_sync_payment_term(),
-            self._get_invoice_line_fields_sync_date_maturity(),
-        )
 
     # -------------------------------------------------------------------------
     # CRUD/ORM

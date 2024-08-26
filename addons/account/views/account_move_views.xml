@@ -1307,7 +1307,6 @@
 
                                         <!-- Others fields -->
                                         <field name="last_onchange_fields" column_invisible="True"/>
-                                        <field name="stupid_field" column_invisible="True"/>
                                         <field name="balance" column_invisible="True"/>
                                         <field name="product_uom_category_id" column_invisible="True"/>
                                         <field name="tax_base_amount" force_save="1" column_invisible="True"/>
