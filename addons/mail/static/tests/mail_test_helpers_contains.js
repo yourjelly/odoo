@@ -627,7 +627,9 @@ class Contains {
         this.done = false;
         this.def = new Deferred();
         this.scrollListeners = new Set();
+        this.valueListeners = new Set();
         this.onScroll = () => this.runOnce("after scroll");
+        this.onValue = () => this.runOnce("after value change");
         if (!this.runOnce("immediately")) {
             this.timer = setTimeout(
                 () => this.runOnce("Timeout of 3 seconds", { crashOnFail: true }),
@@ -674,6 +676,10 @@ class Contains {
             clearTimeout(this.timer);
             for (const el of this.scrollListeners ?? []) {
                 el.removeEventListener("scroll", this.onScroll);
+            }
+            for (const el of this.valueListeners ?? []) {
+                el.removeEventListener("input", this.onValue);
+                el.removeEventListener("change", this.onValue);
             }
             this.done = true;
         }
@@ -926,6 +932,20 @@ class Contains {
                 if (!this.scrollListeners.has(el)) {
                     this.scrollListeners.add(el);
                     el.addEventListener("scroll", this.onScroll);
+                }
+            }
+        }
+        if (
+            this.options.value !== undefined &&
+            this.valueListeners &&
+            baseRes.length === this.options.count &&
+            res.length !== this.options.count
+        ) {
+            for (const el of baseRes) {
+                if (!this.valueListeners.has(el)) {
+                    this.valueListeners.add(el);
+                    el.addEventListener("input", this.onValue);
+                    el.addEventListener("change", this.onValue);
                 }
             }
         }
