@@ -12,7 +12,7 @@ import selectors
 import threading
 import time
 from collections import defaultdict, deque
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager, ExitStack, suppress
 from enum import IntEnum
 from psycopg2.pool import PoolError
 from urllib.parse import urlparse
@@ -37,18 +37,28 @@ _logger = logging.getLogger(__name__)
 MAX_TRY_ON_POOL_ERROR = 10
 DELAY_ON_POOL_ERROR = 0.3
 JITTER_ON_POOL_ERROR = 0.6
+# Keep 10% of the cursors to handle connection requests, rest can be used to
+# fetch notifications/process incoming messages.
+WS_MAXCONN = int(int(config.get("db_maxconn_gevent") or config["db_maxconn"]) * 0.9)
+WS_CURSORS_SEM = threading.Semaphore(WS_MAXCONN)
+WS_SEMAPHORE_TIMEOUT = 5
 
 
 @contextmanager
 def acquire_cursor(db):
     """ Try to acquire a cursor up to `MAX_TRY_ON_POOL_ERROR` """
     delay = DELAY_ON_POOL_ERROR
-    for _ in range(MAX_TRY_ON_POOL_ERROR):
-        with suppress(PoolError), odoo.registry(db).cursor() as cursor:
-            yield cursor
-            return
-        time.sleep(delay + random.uniform(0, JITTER_ON_POOL_ERROR))
-        delay *= 1.5
+    with ExitStack() as stack:
+        acquired = WS_CURSORS_SEM.acquire(timeout=WS_SEMAPHORE_TIMEOUT)
+        if not acquired:
+            raise PoolError("Failed to acquire a cursor after %d seconds." % WS_SEMAPHORE_TIMEOUT)
+        stack.callback(WS_CURSORS_SEM.release)
+        for _ in range(MAX_TRY_ON_POOL_ERROR):
+            with suppress(PoolError), odoo.registry(db).cursor() as cursor:
+                yield cursor
+                return
+            time.sleep(delay + random.uniform(0, JITTER_ON_POOL_ERROR))
+            delay *= 1.5
     raise PoolError('Failed to acquire cursor after %s retries' % MAX_TRY_ON_POOL_ERROR)
 
 
