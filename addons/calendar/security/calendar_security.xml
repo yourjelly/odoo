@@ -2,6 +2,17 @@
 <odoo>
     <data noupdate="1">
 
+        <record id="calendar_event_own_event_write" model="ir.rule">
+            <field name="name">Calendar Event: write own events</field>
+            <field ref="model_calendar_event" name="model_id"/>
+            <field name="domain_force">['|', ('partner_ids.user_ids', 'in', user.id), ('user_id.id', '=', user.id)]</field>
+            <field name="perm_unlink" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_read" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
         <record id="calendar_event_rule_my" model="ir.rule">
             <field name="name">Own events</field>
             <field ref="model_calendar_event" name="model_id"/>
@@ -31,6 +42,17 @@
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="calendar_event_admin_write" model="ir.rule">
+            <field name="name">Calendar Event: Admin can write all events</field>
+            <field ref="model_calendar_event" name="model_id"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_unlink" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_read" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="groups" eval="[(4, ref('base.group_system'))]"/>
         </record>
 
     </data>
