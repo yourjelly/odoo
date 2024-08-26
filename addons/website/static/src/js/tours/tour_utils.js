@@ -27,17 +27,6 @@ export function assertCssVariable(variableName, variableValue, trigger = ':ifram
         },
     };
 }
-export function assertPathName(pathName, trigger) {
-    return {
-        content: `Check if we have been redirected to ${pathName}`,
-        trigger: trigger,
-        run: () => {
-            if (!window.location.pathname.startsWith(pathName)) {
-                console.error(`We should be on ${pathName}.`);
-            }
-        }
-    };
-}
 
 export function changeBackground(snippet, position = "bottom") {
     return [

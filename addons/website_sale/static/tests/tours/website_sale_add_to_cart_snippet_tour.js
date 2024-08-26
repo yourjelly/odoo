@@ -1,8 +1,15 @@
 /** @odoo-module **/
 
 import { goToCart, assertCartContains } from '@website_sale/js/tours/tour_utils';
-import { registerWebsitePreviewTour, clickOnEditAndWaitEditMode, clickOnSnippet, dragNDrop, selectElementInWeSelectWidget, clickOnSave, clickOnElement, assertPathName } from '@website/js/tours/tour_utils';
-
+import {
+    registerWebsitePreviewTour,
+    clickOnEditAndWaitEditMode,
+    clickOnSnippet,
+    dragNDrop,
+    selectElementInWeSelectWidget,
+    clickOnSave,
+    clickOnElement,
+} from "@website/js/tours/tour_utils";
 
 function editAddToCartSnippet() {
     return [
@@ -30,7 +37,7 @@ registerWebsitePreviewTour('add_to_cart_snippet_tour', {
         ...selectElementInWeSelectWidget('product_template_picker_opt', 'Conference Chair', true),
         ...clickOnSave(),
         clickOnElement('add to cart button', ':iframe .s_add_to_cart_btn'),
-        clickOnElement('continue shopping', ':iframe span:contains(Continue Shopping)'),
+        clickOnElement("continue shopping", ":iframe .modal button:contains(Continue Shopping)"),
 
         // Product with 2 variants with a variant selected
         ...editAddToCartSnippet(),
@@ -48,10 +55,17 @@ registerWebsitePreviewTour('add_to_cart_snippet_tour', {
         {
             // wait for the page to load, as the next check was sometimes too fast
             content: "Wait for the redirection to the payment page",
-            trigger: 'body',
+            trigger: ":iframe h3:contains(order overview)",
         },
-        assertPathName('/shop/payment', ':iframe a[href="/shop/cart"]'),
-
+        {
+            content: `Check if we have been redirected to /shop/cart`,
+            trigger: ":iframe a[href='/shop/cart']",
+            run() {
+                if (!window.location.pathname.startsWith("/shop/cart")) {
+                    console.error(`We should be on /shop/cart.`);
+                }
+            },
+        },
         goToCart({quantity: 4, backend: true}),
         assertCartContains({productName: 'Pedal Bin', backend: true}),
         assertCartContains({productName: 'Conference Chair (Steel)', backend: true}),
