@@ -164,9 +164,17 @@ export function useSuggestion() {
                 ) {
                     return; // ignore obsolete call
                 }
-                await suggestionService.fetchSuggestions(self.search, {
-                    thread: self.thread,
-                });
+
+                if (self.search.delimiter === "@" && comp.props.type == 'note') {
+                    await suggestionService.fetchSuggestionsCustom(self.search, {
+                        thread: self.thread,
+                    });
+                }
+                else {
+                    await suggestionService.fetchSuggestions(self.search, {
+                        thread: self.thread,
+                    });
+                }
                 if (status(comp) === "destroyed") {
                     return;
                 }

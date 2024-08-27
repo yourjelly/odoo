@@ -270,6 +270,19 @@ class Partner(models.Model):
         return list(partners.mail_partner_format().values())
 
     @api.model
+    def get_mention_suggestions_custom(self, search, limit=8):
+        domain = self._get_mention_suggestions_domain_custom(search)
+        partners = self._search_mention_suggestions(domain, limit)
+        return list(partners.mail_partner_format().values())
+
+    @api.model
+    def _get_mention_suggestions_domain_custom(self, search):
+        return expression.AND([
+            self._get_mention_suggestions_domain(search),
+            [('employee_ids', '!=', False)],
+        ])
+
+    @api.model
     def _get_mention_suggestions_domain(self, search):
         return expression.AND([
             expression.OR([

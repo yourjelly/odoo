@@ -22,6 +22,39 @@ export class SuggestionService {
         return [["@"], ["#"]];
     }
 
+    async fetchSuggestionsCustom({ delimiter, term }, { thread } = {}) {
+        const cleanedSearchTerm = cleanTerm(term);
+        switch (delimiter) {
+            case "@": {
+                await this.fetchPartnersCustom(cleanedSearchTerm, thread);
+                break;
+            }
+            case "#":
+                await this.fetchThreads(cleanedSearchTerm);
+                break;
+        }
+    }
+
+    /**
+     * @param {string} term
+     * @param {import("models").Thread} [thread]
+     */
+    async fetchPartnersCustom(term, thread) {
+        const kwargs = { search: term };
+        if (thread?.model === "discuss.channel") {
+            kwargs.channel_id = thread.id;
+        }
+        const suggestedPartners = await this.orm.silent.call(
+            "res.partner",
+            thread?.model === "discuss.channel"
+                ? "get_mention_suggestions_from_channel"
+                : "get_mention_suggestions_custom",
+            [],
+            kwargs
+        );
+        this.store.Persona.insert(suggestedPartners);
+    }
+
     async fetchSuggestions({ delimiter, term }, { thread } = {}) {
         const cleanedSearchTerm = cleanTerm(term);
         switch (delimiter) {
