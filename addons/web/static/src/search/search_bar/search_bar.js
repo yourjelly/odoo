@@ -329,7 +329,6 @@ export class SearchBar extends Component {
 
     resetState() {
         this.computeState({ expanded: [], focusedIndex: 0, query: "", subItems: [] });
-        this.inputRef.el.focus();
     }
 
     /**
