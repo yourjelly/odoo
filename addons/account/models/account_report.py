@@ -557,7 +557,7 @@ class AccountReportExpression(models.Model):
         ),
     ]
 
-    @api.constrains('carryover_target', 'label')
+    @api.depends('carryover_target', 'label')
     def _check_carryover_target(self):
         for expression in self:
             if expression.carryover_target and not expression.label.startswith('_carryover_'):
