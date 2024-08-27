@@ -177,6 +177,7 @@ export class BarcodeParser {
      *      - base_code: the barcode with all the encoding parts set to zero; the one put on the product in the backend
      */
     parse_barcode(barcode) {
+        debugger
         var parsed_result = {
             encoding: '',
             type:'error',
