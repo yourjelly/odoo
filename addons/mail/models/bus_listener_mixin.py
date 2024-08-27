@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import uuid
+
 from odoo import models
 from odoo.addons.mail.tools.discuss import Store
 
@@ -19,3 +21,6 @@ class BusListenerMixin(models.AbstractModel):
             store = Store(*args, **kwargs)
         if res := store.get_result():
             self._bus_send(notification_type, res, subchannel=subchannel)
+
+    def _bus_send_store_event(self, name, data, /):
+        self._bus_send_store("StoreEvent", {"id": uuid.uuid4(), "name": name, **data})
