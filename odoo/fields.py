@@ -618,6 +618,8 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # determine dependencies, compute, inverse, and search
         self.compute = self._compute_related
+        if field.readonly and not self.readonly:
+            _logger.warning("The readonly=False of %s is ignored because the source field %s is readonly", self, field)
         if self.inherited or not (self.readonly or field.readonly):
             self.inverse = self._inverse_related
         if field._description_searchable:
