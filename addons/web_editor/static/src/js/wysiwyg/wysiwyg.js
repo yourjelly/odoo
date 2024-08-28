@@ -1105,6 +1105,7 @@ export class Wysiwyg extends Component {
      */
     cancel(reload) {
         var self = this;
+        throw Error("HUVW crash");
         return new Promise((resolve, reject) => {
             this.env.services.dialog.add(ConfirmationDialog, {
                 body: _t("If you discard the current edits, all unsaved changes will be lost. You can cancel to return to edit mode."),
