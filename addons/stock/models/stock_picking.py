@@ -568,7 +568,7 @@ class Picking(models.Model):
 
     move_type = fields.Selection([
         ('direct', 'As soon as possible'), ('one', 'When all products are ready')], 'Shipping Policy',
-        required=True,
+        compute='_compute_move_type', store=True,
         help="It specifies goods to be deliver partially or all at once")
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -709,6 +709,12 @@ class Picking(models.Model):
     def _compute_has_tracking(self):
         for picking in self:
             picking.has_tracking = any(m.has_tracking != 'none' for m in picking.move_ids)
+
+    @api.depends('picking_type_id.shipping_policy', 'group_id.move_type')
+    def _compute_move_type(self):
+        for record in self:
+            if not record.move_type:
+                record.move_type = record.group_id.move_type or record.picking_type_id.shipping_policy
 
     @api.depends('date_deadline', 'scheduled_date')
     def _compute_has_deadline_issue(self):
@@ -1017,8 +1023,8 @@ class Picking(models.Model):
 
     @api.onchange('picking_type_id', 'partner_id')
     def _onchange_picking_type(self):
-        if self.picking_type_id and not self.move_type:
-            self.move_type = self.picking_type_id.shipping_policy
+        # if self.picking_type_id and not self.move_type:
+        #     self.move_type = self.picking_type_id.shipping_policy
         if self.picking_type_id and self.state == 'draft':
             self = self.with_company(self.company_id)
             (self.move_ids | self.move_ids_without_package).update({
@@ -1063,8 +1069,8 @@ class Picking(models.Model):
     def create(self, vals_list):
         scheduled_dates = []
         for vals in vals_list:
-            if 'move_type' not in vals:
-                vals['move_type'] = 'direct'
+            # if 'move_type' not in vals:
+            #     vals['move_type'] = 'direct'
             defaults = self.default_get(['name', 'picking_type_id'])
             picking_type = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id')))
             if vals.get('name', '/') == '/' and defaults.get('name', '/') == '/' and vals.get('picking_type_id', defaults.get('picking_type_id')):
