@@ -4,6 +4,9 @@ import astroid
 import pylint.interfaces
 from pylint.checkers import BaseChecker
 
+from os.path import basename, normpath, sep
+from odoo.modules.module import get_module_root
+
 try:
     from pylint.checkers.utils import only_required_for_messages
 except ImportError:
@@ -53,6 +56,16 @@ class OdooBaseChecker(BaseChecker):
 
     @only_required_for_messages('gettext-variable', 'gettext-placeholders', 'gettext-repr')
     def visit_call(self, node):
+        file_path = self.linter.current_file
+        if (
+            "test" in file_path
+            and (module_path := get_module_root(file_path))
+            and (
+                basename(normpath(module_path)).startswith("test_")
+                or file_path[len(module_path) + 1 :].startswith("tests" + sep)
+            )
+        ):
+            return
         if not isinstance(node.func, astroid.Name) or node.func.name not in ("_", "_lt"):
             return
         first_arg = node.args[0]
