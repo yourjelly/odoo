@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <t t-inherit="mail.Composer" t-inherit-mode="extension">
         <xpath expr="//*[@t-ref='emoji-button']" position="attributes">
-            <attribute name="t-att-class">
+            <attribute t-if="props.mode !== 'extended'" name="t-att-class">
                 {'bg-300': this.picker.state.picker === this.picker.PICKERS.EMOJI or (this.picker.state.picker === this.picker.PICKERS.GIF and this.ui.isSmall)}
             </attribute>
         </xpath>

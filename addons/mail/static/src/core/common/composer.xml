@@ -98,7 +98,7 @@
                     attachments="props.composer.attachments"
                     unlinkAttachment.bind="(...args) => attachmentUploader.unlink(...args)"
                     imagesHeight="50"/>
-                <Picker t-props="picker"/>
+                <Picker t-if="props.mode !== 'extended'" t-props="picker"/>
             </div>
         </div>
         <span t-if="props.composer.message" class="text-muted px-1" t-out="CANCEL_OR_SAVE_EDIT_TEXT" t-on-click="onClickCancelOrSaveEditText"/>

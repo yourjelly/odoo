@@ -38,7 +38,22 @@ export function useEmojiPicker(ref, props, options = {}) {
             options.onClose?.();
         },
     };
-    const popover = usePopover(EmojiPicker, { ...newOptions, animation: false });
+    const store = useService("mail.store");
+    let popover;
+    const ui = useService("ui");
+    const originalOnSelect = props.onSelect;
+    if (!ui.isSmall) {
+        popover = usePopover(EmojiPicker, { ...newOptions, animation: false });
+    }
+
+    function onSelectExtension(...args) {
+        originalOnSelect(...args);
+        if (props?.resetOnSelect) {
+            store.emoji_picker_mobile.isVisible = false;
+        }
+    }
+
+    props.onSelect = onSelectExtension;
     props.storeScroll = {
         scrollValue: 0,
         set: (value) => {
@@ -47,6 +62,10 @@ export function useEmojiPicker(ref, props, options = {}) {
         get: () => {
             return props.storeScroll.scrollValue;
         },
+    };
+    store.emoji_picker_mobile = {
+        isVisible: store.emoji_picker_mobile.isVisible,
+        props: { ...props },
     };
 
     /**
@@ -66,11 +85,16 @@ export function useEmojiPicker(ref, props, options = {}) {
     }
 
     function toggle(ref, onSelect = props.onSelect) {
-        if (popover.isOpen) {
-            popover.close();
+        if (ui.isSmall) {
+            store.emoji_picker_mobile.isVisible = !store.emoji_picker_mobile.isVisible;
         } else {
-            state.isOpen = true;
-            popover.open(ref.el, { ...props, onSelect });
+            if (popover.isOpen) {
+                popover.close();
+                store.emoji_picker_mobile.isVisible = false;
+            } else {
+                state.isOpen = true;
+                popover.open(ref.el, { ...props, onSelect });
+            }
         }
     }
 
@@ -166,6 +190,7 @@ export class EmojiPicker extends Component {
     setup() {
         this.gridRef = useRef("emoji-grid");
         this.ui = useState(useService("ui"));
+        this.store = useService("mail.store");
         this.state = useState({
             activeEmojiIndex: 0,
             categoryId: null,
@@ -205,7 +230,9 @@ export class EmojiPicker extends Component {
             }
             this.highlightActiveCategory();
             if (this.props.storeScroll) {
-                this.gridRef.el.scrollTop = this.props.storeScroll.get();
+                if (this.gridRef.el) {
+                    this.gridRef.el.scrollTop = this.props.storeScroll.get();
+                }
             }
         });
         onPatched(() => {

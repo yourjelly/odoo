@@ -30,6 +30,7 @@ import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { escape, sprintf } from "@web/core/utils/strings";
 import { isMobileOS } from "@web/core/browser/feature_detection";
+import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
 
 const EDIT_CLICK_TYPE = {
     CANCEL: "cancel",
@@ -99,6 +100,11 @@ export class Composer extends Component {
         this.ref = useRef("textarea");
         this.fakeTextarea = useRef("fakeTextarea");
         this.emojiButton = useRef("emoji-button");
+        if (this.props.mode === "extended") {
+            useEmojiPicker(this.emojiButton, {
+                onSelect: (emoji) => this.addEmoji(emoji),
+            });
+        }
         this.state = useState({
             active: true,
         });
