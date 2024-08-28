@@ -2663,7 +2663,7 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
     },
     /**
      * @private
-     * @param {string} inputValue 
+     * @param {string} inputValue
      */
     _computeDisplayValue(inputValue) {
         if (this.el.dataset.toRatio) {
@@ -7144,7 +7144,7 @@ registry.ImageTools = ImageHandlerOption.extend({
     /**
      * Replace animation durations in SVG and CSS with modified values.
      *
-     * This function takes a ratio and an SVG string containing animations. It 
+     * This function takes a ratio and an SVG string containing animations. It
      * uses regular expressions to find and replace the duration values in both
      * CSS animation rules and SVG duration attributes based on the provided
      * ratio.
@@ -7153,7 +7153,7 @@ registry.ImageTools = ImageHandlerOption.extend({
      *                       durations. If speed is 0.0, the original
      *                       durations are preserved.
      * @param {string} svg The SVG string containing animations.
-     * @returns {string} The modified SVG string with updated animation 
+     * @returns {string} The modified SVG string with updated animation
      *                   durations.
      */
     _replaceAnimationDuration(speed, svg) {
@@ -7180,7 +7180,7 @@ registry.ImageTools = ImageHandlerOption.extend({
             // Replace the CSS --animation_ratio variable for future purpose.
             svg = svg.replace(CSS_ANIMATION_RATIO_REGEX, `--animation_ratio: ${ratio};`);
         } else {
-            // Add the style tag with the root variable --animation ratio for 
+            // Add the style tag with the root variable --animation ratio for
             // future purpose.
             const regex = /<svg .*>/m;
             const subst = `$&\n\t<style>\n\t\t:root { \n\t\t\t--animation_ratio: ${ratio};\n\t\t}\n\t</style>`;
