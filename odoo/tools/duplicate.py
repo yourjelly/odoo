@@ -1,3 +1,4 @@
+import math
 from collections import deque, defaultdict
 from contextlib import contextmanager
 from datetime import datetime
@@ -224,7 +225,8 @@ def variate_field(env, model, field, table_alias, series_alias):
             # we presume that 16 chars is enough to avoid collisions
             # TODO: FP wants to just append the series number for all chars, it will also handle unique violation constraints
             #  Dev note for ^: this suggestion is going to render any trigram search extremely slow (too much repetition)
-            str_variation_query = SQL('get_random_string(16)')
+            size = min(field.size if field.size else math.inf, 16)
+            str_variation_query = SQL(f'get_random_string({size})')
             # if the field is translatable, it's a JSONB column, we vary all values for each key
             if field.translate:
                 return SQL("""
@@ -437,13 +439,17 @@ DUPLICATE_BLACKLIST_TABLES = {
     # we don't have enough combinations from the base set of ids to generate all unique pairs.
     'product_template_attribute_value',  # TODO: remove when done developing, as it's case is handled by the ON CONFLICT DO NOTHING during INSERT
     # TODO: do we add to the blacklist tables like ir_ui_view/ir_ui_menu and others of the same genre?
-    # 'ir_ui_view',
-    # 'ir_ui_menu',
-    # 'ir_rule',
-    # 'res_groups',
-    # 'res_groups_users_rel',
+    'ir_ui_view',
+    'ir_ui_menu',
+    'ir_rule',
+    'res_groups',
+    'res_groups_users_rel',
     # when duplicating only stock.picking, (cid, user_id) pkey is not unique
     'res_company_users_rel', # TODO: remove when done developing, as it's case is handled by the ON CONFLICT DO NOTHING during INSERT
+    # `name` of the currency is only 3 char long and there is an unique constraint on it, no point in duplicating
+    'res_currency',
+    'res_country',
+    'res_country_state',
 }
 
 def duplicate_models(env, models, factors):
@@ -457,15 +463,18 @@ def duplicate_models(env, models, factors):
     :param: dict(int) factors: duplication factor by model.
     """
 
-    def has_records(model):
-        query = SQL('SELECT EXISTS (SELECT 1 FROM %s)', SQL.identifier(model._table))
-        return model.env.execute_query(query)[0][0]
+    def has_records(_model):
+        query = SQL('SELECT EXISTS (SELECT 1 FROM %s)', SQL.identifier(_model._table))
+        return _model.env.execute_query(query)[0][0]
+
+    def is_blacklisted(_model):
+        return _model._table in DUPLICATE_BLACKLIST_TABLES
 
     to_process = deque(models)
     duplicated = defaultdict(int)  # {model: int(old_max_id)}
     while to_process:
         model = to_process.popleft()
-        if model._table in DUPLICATE_BLACKLIST_TABLES:
+        if is_blacklisted(model):
             continue
         if not has_records(model):  # if there are no records, there is nothing to duplicate
             continue
@@ -483,7 +492,8 @@ def duplicate_models(env, models, factors):
             missing_dependencies = [m for f in related_store_fields if f.comodel_name and (m := env[f.comodel_name]) not in duplicated]
             if missing_dependencies:
                 # the check with `has_records` is to avoid infinite loops when one of the cyclic dependencies has no records to be copied
-                pending_dependencies = [dep for dep in missing_dependencies if dep not in to_process and has_records(dep)]
+                # the check on the blacklist is to avoid an infinite loop, because the dependency will never be duplicated, as it's blacklisted
+                pending_dependencies = [dep for dep in missing_dependencies if dep not in to_process and has_records(dep) and not is_blacklisted(dep)]
                 if pending_dependencies:
                     to_process.extendleft([model] + pending_dependencies)
                     factors.update({dep: factors[model] for dep in pending_dependencies})
