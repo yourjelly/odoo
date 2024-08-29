@@ -850,8 +850,9 @@
     </template>
 
     <template id="website_sale.products_categories_list" active="True" name="eCommerce Categories">
+        <div t-attf-class="d-contents">
         <h6 t-attf-class="o_categories_collapse_title mb-3 {{_titleClasses}}"><b>Categories</b></h6>
-        <div name="wsale_products_categories_list" class="wsale_products_categories_list">
+        <div name="wsale_products_categories_list" t-attf-class="wsale_products_categories_list" class="wsale_products_categories_list">
             <ul class="nav d-flex flex-column mt-3">
                 <li class="nav-item mb-1">
                     <a
@@ -866,6 +867,7 @@
                 </t>
             </ul>
         </div>
+        </div>
     </template>
 
     <template
@@ -873,40 +875,27 @@
         inherit_id="website_sale.products_categories_list"
         name="Collapsed eCommerce Categories"
     >
-        <xpath expr="." position="replace">
-            <div t-attf-class="{{not isOffcanvas and 'accordion-item'}}">
-                <h6 t-attf-class="accordion-header {{_titleClasses}}">
-                    <button
-                        class="accordion-button px-0 bg-transparent shadow-none"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        t-attf-data-bs-target="#o_wsale_categories"
-                        t-attf-aria-controls="o_wsale_categories"
-                        aria-expanded="true"
-                    >
-                        <b>Categories</b>
-                    </button>
-                </h6>
-                <div
-                    t-attf-id="{{not isOffcanvas and 'o_wsale_categories'}}"
-                    t-attf-class="wsale_products_categories_list {{not isOffcanvas and 'accordion-collapse collapse show'}}"
-                    name="wsale_products_categories_list"
-                >
-                    <ul t-attf-class="nav d-flex flex-column {{'mt-3' if isOffcanvas else 'mb-3'}}">
-                        <li class="mb-1">
-                            <a
-                                t-att-href="keep('/shop', category=0)"
-                                t-attf-class="{{not category and 'text-decoration-underline'}} p-0"
-                            >
-                                All Products
-                            </a>
-                        </li>
-                        <t t-foreach="categories" t-as="c">
-                            <t t-call="website_sale.categories_recursive"/>
-                        </t>
-                    </ul>
-                </div>
-            </div>
+        <xpath expr="//div" position="attributes">
+            <attribute name="t-attf-class" add="{{not isOffcanvas and 'accordion-item'}}" remove="d-contents" separator=" "/>
+        </xpath>
+
+        <xpath expr="//h6//b" position="replace">
+            <button
+                class="accordion-button px-0 bg-transparent shadow-none"
+                type="button"
+                data-bs-toggle="collapse"
+                t-attf-data-bs-target="#o_wsale_categories"
+                t-attf-aria-controls="o_wsale_categories"
+                aria-expanded="true"
+            >
+                <b>Categories</b>
+            </button>
+        </xpath>
+
+        <xpath expr="//div//div" position="attributes">
+            <attribute name="t-attf-id" add="{{not isOffcanvas and 'o_wsale_categories'}}" separator=" "/>
+            <attribute name="t-attf-class" add="wsale_products_categories_list {{not isOffcanvas and 'accordion-collapse collapse show'}}" separator=" "/>
+            <attribute name="name" add="wsale_products_categories_list" separator=" "/>
         </xpath>
     </template>
 
@@ -952,7 +941,7 @@
         <xpath expr="//div[@name='wsale_products_categories_list']" position="attributes">
             <!-- Replace class with t-attf-class to work correctly with website_sale.products_categories_list_collapsible -->
             <attribute name="class" remove="wsale_products_categories_list"/>
-            <attribute name="t-attf-class">wsale_products_categories_list o_shop_collapse_category accordion</attribute>
+            <attribute name="t-attf-class" add="wsale_products_categories_list o_shop_collapse_category accordion" separator=" "/>
         </xpath>
         <xpath expr="//t[@t-call='website_sale.categories_recursive']" position="attributes">
             <attribute name="t-call">website_sale.option_collapse_categories_recursive</attribute>
@@ -1037,8 +1026,12 @@
                 separator=" "
             />
         </xpath>
-        <xpath expr="//div[@t-if='a.value_ids and len(a.value_ids) &gt; 1']" position="attributes">
-            <attribute name="t-attf-class">accordion-item rounded-0</attribute>
+         <!-- <t t-foreach="attributes" t-as="a">
+                        <t t-cache="a,attrib_set">
+                            <div class="accordion-item  -->
+        <xpath expr="//t[@t-foreach]//div[hasclass('accordion-item')]" position="attributes">
+            <attribute name="class" add="accordion-item bg-danger rounded-0" separator=" "/>
+            <!-- <attribute name="t-attf-class">accordion-item bg-success rounded-0</attribute> -->
         </xpath>
         <xpath expr="//div[@t-if='a.value_ids and len(a.value_ids) &gt; 1']//h6" position="replace">
             <h6 class="accordion-header">
