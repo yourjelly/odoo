@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="wizard_data_export" model="ir.ui.view">
+            <field name="name">Export Data</field>
+            <field name="model">base.export.data</field>
+            <field name="arch" type="xml">
+                <form string="Export Data">
+                    <field name="name" invisible="1"/> <!-- The name is needed in the BinaryField component used to download the file -->
+                    <group invisible="get">
+                        <field name="record_ids" nolabel="1" colspan="2">
+                            <tree editable="bottom" readonly="0">
+                                <field name="res_model_id" readonly="0"/>
+                                <field name="res_model" column_invisible="1"/> <!-- for res_id below -->
+                                <field name="res_id" readonly="0"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <div invisible="not get">
+                        <h2>Export Complete</h2>
+                        <p>Here is the exported xml file: <field name="data" readonly="1" filename="name"/></p>
+                    </div>
+                    <footer invisible="get">
+                        <button name="xml_file" string="Export" type="object" class="btn-primary" data-hotkey="q"/>
+                        <button special="cancel" data-hotkey="x" string="Cancel" type="object" class="btn-secondary"/>
+                    </footer>
+                    <footer invisible="not get">
+                        <button special="cancel" data-hotkey="x" string="Close" type="object" class="btn-primary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_wizard_data_export" model="ir.actions.act_window">
+            <field name="name">Export Data</field>
+            <field name="res_model">base.export.data</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        <menuitem action="action_wizard_data_export" id="menu_wizard_data_export" parent="menu_translation_export"/>
+    </data>
+</odoo>
