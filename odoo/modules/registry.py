@@ -993,6 +993,11 @@ class Registry(Mapping):
                 if field.company_dependent or field.name == 'property_product_pricelist':
                     _logger.warning(f"{field} is company dependent")
                     has_company_dependent = True
+                if field.type == 'many2one':
+                    comodel = field.comodel_name
+                    if comodel._table != comodel._name.replace('.', '_'):
+                        _logger.warning(
+                            f"{comodel._name}'s table is customized as {model._table} and used for a company_dependent many2one")
             if has_company_dependent and model._table != model_name.replace('.', '_'):
                 _logger.warning(f"{model._name}'s table is customized as {model._table} and has company dependent")
 
