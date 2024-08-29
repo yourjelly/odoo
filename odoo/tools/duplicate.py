@@ -88,21 +88,6 @@ NAME_FIELDS_FORMAT = {
 
 ##### Python Variation Functions
 
-def get_query_part_random_int(env, low, high):
-    return env.cr.mogrify('''get_random_int(%s, %s)''', [low, high]).decode()
-
-def get_query_part_random_float(env, low, high):
-    return env.cr.mogrify('''get_random_numeric(%s, %s)''', [low, high]).decode()
-
-def get_query_part_random_string(env, size, strict=True):
-    """
-    :param strict: When True, return a query_part for a string of exactly `size` characters.
-        When False, return a query_part for a string of at most `size` characters.
-    """
-    if strict:
-        return env.cr.mogrify('''get_random_string(%s)''', [size]).decode()
-    return env.cr.mogrify('''get_random_string(get_random_int(%s, %s))''', [MIN_VARCHAR_LENGTH, max(MIN_VARCHAR_LENGTH, size)]).decode()
-
 def get_query_part_date_datetime(env, total_table_size, min_date=MIN_DATETIME, max_date=MAX_DATETIME):
     """
     :param datetime_column: name of the date/timestamp column
@@ -115,29 +100,6 @@ def get_query_part_date_datetime(env, total_table_size, min_date=MIN_DATETIME, m
     if total_table_size <= MIN_ROWS_PER_DAY * total_days:
         min_date = min_date + relativedelta(days=(total_days - total_table_size // MIN_ROWS_PER_DAY))
     return env.cr.mogrify('''%s + (row_number() OVER()/%s) * interval '1 day' ''', [min_date, rows_per_day]).decode()
-
-def get_query_part_formatted_string(env, format_part, python_format_args, sql_format_args):
-    query_string = format_part.format(*python_format_args)
-    return env.cr.mogrify(query_string, sql_format_args).decode()
-
-# TODO find better abstraction for this part.
-def get_query_part_for_field(env, field, tablename, duplication_number, python_format_args=(), sql_format_args=()):
-    if field.name in MANDATORY_FIELDS and NAME_FIELDS_FORMAT.get(field.name, {}).get(field.model_name):
-        return get_query_part_formatted_string(env, NAME_FIELDS_FORMAT[field.name][field.model_name], python_format_args, sql_format_args)
-    if field.name in MANDATORY_FIELDS and field.relational:
-        return field.name
-    if field.column_type[0] in ('date', 'timestamp'):
-        env.cr.execute(SQL('''SELECT COUNT(*) FROM %s;''', SQL.identifier(tablename)))
-        post_duplication_table_size = env.cr.fetchone()[0] * (duplication_number + 1)
-        return get_query_part_date_datetime(env, post_duplication_table_size)
-    if field.column_type[0] in ('numeric', 'float8'):
-        return get_query_part_random_float(env, 1.0, 50.0)
-    if field.column_type[0] == 'int4':
-        return get_query_part_random_int(env, 1, 100)
-    if field.column_type[0] == 'varchar':
-        return get_query_part_random_string(env, 10, strict=False)
-    # If no variation function for this column_type, return field as is
-    return f"{field.name}"
 
 
 @contextmanager
