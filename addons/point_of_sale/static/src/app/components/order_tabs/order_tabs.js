@@ -29,7 +29,7 @@ export class OrderTabs extends Component {
     selectFloatingOrder(order) {
         this.pos.set_order(order);
         this.pos.selectedTable = null;
-        this.pos.showScreen("ProductScreen");
+        this.pos.showScreen(order.get_screen_data().name);
         this.dialog.closeAll();
     }
     get orders() {
