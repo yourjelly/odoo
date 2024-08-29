@@ -65,16 +65,15 @@ class IrActionsReport(models.Model):
 
         content, report_type = super()._pre_render_qweb_pdf(report_ref, res_ids=res_ids, data=data)
 
-        if self._is_invoice_report(report_ref):
-            if report_type == 'html':
-                report = self._get_report(report_ref)
-                bodies, res_ids, *_unused = self._prepare_html(content, report_model=report.model)
-                return {res_id: str(body).encode() for res_id, body in zip(res_ids, bodies)}, 'html'
-            elif report_type == 'pdf':
-                pdf_dict = {res_id: stream['stream'].getvalue() for res_id, stream in content.items()}
-                for stream in content.values():
-                    stream['stream'].close()
-                return pdf_dict, 'pdf'
+        if report_type == 'html':
+            report = self._get_report(report_ref)
+            bodies, res_ids, *_unused = self._prepare_html(content, report_model=report.model)
+            return {res_id: str(body).encode() for res_id, body in zip(res_ids, bodies)}, 'html'
+        elif report_type == 'pdf':
+            pdf_dict = {res_id: stream['stream'].getvalue() for res_id, stream in content.items()}
+            for stream in content.values():
+                stream['stream'].close()
+            return pdf_dict, 'pdf'
         return content, report_type
 
     @api.ondelete(at_uninstall=False)
