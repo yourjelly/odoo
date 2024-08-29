@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 import logging
 from odoo.tools.sql import SQL
 from odoo.fields import Many2one
+from odoo.modules.db import FunctionStatus
 
 _logger = logging.getLogger(__name__)
 
@@ -178,7 +179,7 @@ def ignore_fkey_constraints(env):
 # TODO: unlogged tables context
 
 
-def field_need_variation(env, model, field):
+def field_need_variation(env, model, field, trigram_indexed_fields):
     """
     Return True/False depending on if the field needs to be varied.
     Might be necessary in the case of:
@@ -205,15 +206,19 @@ def field_need_variation(env, model, field):
         """, _model._table, _field.name)
         return _env.execute_query(query)[0][0]
 
-    if is_unique(env, model, field):
+    # Fields used in _rec_names_search need variation for SearchViews
+    if model._rec_names_search and field.name in model._rec_names_search:
         return True
-    # TODO: vary dates
-    # TODO: vary str when part of _rec_name_search
-    # TODO: vary str when part of a trigram index
-    return False
+    # Date/Datetime fields are spread evenly to avoid having all records on the same day.
+    if field.type in ('date', 'datetime'):
+        return True
+    # Field is trigram indexed
+    if field.index == 'trigram' or field.name in trigram_indexed_fields:
+        return True
+    return is_unique(env, model, field)
 
 
-def variate_field(env, model, field, table_alias, series_alias):
+def variate_field(env, model, field, table_alias, series_alias, factors):
     """
     Returns a variation of the source field,
     to avoid unique constraint, or better distribute data.
@@ -262,10 +267,13 @@ def variate_field(env, model, field, table_alias, series_alias):
             return SQL('(%s)', SQL("""
                 SELECT %(field)s FROM %(model)s GROUP BY %(field)s ORDER BY RANDOM() LIMIT 1
             """, field=SQL.identifier(field.name), model=SQL.identifier(model._table)))
+        case 'date' | 'datetime':
+            table_size_after_duplicate = model.search_count([]) * factors[model]
+            return SQL(get_query_part_date_datetime(env, table_size_after_duplicate))
         # TODO: handle other types as necessary
         case _:
             raise RuntimeError(
-                f"Unreachable code, the field {field} was marked to be varied,"
+                f"Unreachable code, the field {field} of type {field.type} was marked to be varied,"
                 f" but no variation branch was found."
             )
 
@@ -275,7 +283,7 @@ def fetch_last_id(env, model):
     return env.execute_query(query)[0][0]
 
 
-def duplicate_field(env, model, field, duplicated, factors, table_alias='t', series_alias='s'):
+def duplicate_field(env, model, field, duplicated, factors, trigram_indexed_fields, table_alias='t', series_alias='s'):
     """
     Returns a tuple representing the destination and the source expression (str column or SQL expression)
     """
@@ -286,8 +294,8 @@ def duplicate_field(env, model, field, duplicated, factors, table_alias='t', ser
         return _field.name, _field.name
 
     def copy(_field):
-        if field_need_variation(env, model, _field):
-            return _field.name, variate_field(env, model, _field, table_alias, series_alias)
+        if field_need_variation(env, model, _field, trigram_indexed_fields):
+            return _field.name, variate_field(env, model, _field, table_alias, series_alias, factors)
         else:
             return copy_raw(_field)
 
@@ -355,7 +363,7 @@ def duplicate_field(env, model, field, duplicated, factors, table_alias='t', ser
             return copy(field)
 
 
-def duplicate_model(env, model, duplicated, factors):
+def duplicate_model(env, model, duplicated, factors, trigram_index_fields):
 
     def update_sequence(_model):
         env.execute_query(SQL(f"SELECT SETVAL('{_model._table}_id_seq', {fetch_last_id(env, _model)}, TRUE)"))
@@ -369,7 +377,7 @@ def duplicate_model(env, model, duplicated, factors):
     # process all stored fields (that has a respective column), if the model has an 'id', it's processed first
     has_column = lambda f: f.store and f.column_type
     for field in (f for f in sorted(model._fields.values(), key=lambda x: x.name != 'id') if has_column(f)):
-        dest, src = duplicate_field(env, model, field, duplicated, factors, table_alias, series_alias)
+        dest, src = duplicate_field(env, model, field, duplicated, factors, trigram_index_fields, table_alias, series_alias)
         dest_fields += [dest if isinstance(dest, SQL) else SQL.identifier(dest)] if dest else []
         src_fields += [src if isinstance(src, SQL) else SQL.identifier(src)] if src else []
     # TODO: when done with development, uncomment the `ON CONFLICT DO NOTHING`
@@ -388,6 +396,30 @@ def duplicate_model(env, model, duplicated, factors):
     if duplicated[model]:
         # in case we duplicated a model with an 'id', we update the sequence
         update_sequence(model)
+
+def get_trigram_indexed_fields(env, model):
+    if env.registry.has_unaccent == FunctionStatus.INDEXABLE:
+        query = SQL(r"""
+            SELECT unnest(regexp_matches(pg_get_expr(idx.indexprs, indrelid), '\(\((\w*)\)::text', 'g'))
+            FROM pg_index idx
+                JOIN pg_class t ON t.oid = idx.indrelid
+                JOIN pg_class i on i.oid = idx.indexrelid
+                JOIN pg_am ON i.relam = pg_am.oid
+            WHERE t.relname = %s -- tablename
+                AND (SELECT oid FROM pg_opclass WHERE opcname = 'gin_trgm_ops') = ANY (idx.indclass);
+        """, model._table)
+    else:
+        query = SQL(r"""
+            SELECT a.attname
+            FROM pg_index idx
+                JOIN pg_class t ON t.oid = idx.indrelid
+                JOIN pg_class i on i.oid = idx.indexrelid
+                JOIN pg_attribute a ON a.attnum = ANY (idx.indkey) AND a.attrelid = t.oid
+                JOIN pg_am ON i.relam = pg_am.oid
+            WHERE t.relname = %s -- tablename
+                AND (SELECT oid FROM pg_opclass WHERE opcname = 'gin_trgm_ops') = ANY (idx.indclass);
+            """, model._table)
+    return {colname for colname, in env.execute_query(query)}
 
 
 def infer_many2many_model(env, field):
@@ -518,5 +550,6 @@ def duplicate_models(env, models, factors):
                         factors[m2m_model] = factors[model]
                 case _:
                     continue
+        trigram_indexed_fields = get_trigram_indexed_fields(env, model)
         with ignore_fkey_constraints(env), ignore_indexes(env, model._table):
-            duplicate_model(env, model, duplicated, factors)
+            duplicate_model(env, model, duplicated, factors, trigram_indexed_fields)
