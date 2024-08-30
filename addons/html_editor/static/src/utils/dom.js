@@ -157,7 +157,7 @@ export function removeClass(element, ...classNames) {
 export function fillEmpty(el) {
     const document = el.ownerDocument;
     const fillers = { ...fillShrunkPhrasingParent(el) };
-    if (!isVisible(el) && !el.hasAttribute("data-oe-zws-empty-inline")) {
+    if (!isBlock(el) && !isVisible(el) && !el.hasAttribute("data-oe-zws-empty-inline")) {
         // As soon as there is actual content in the node, the zero-width space
         // is removed by the sanitize function.
         const zws = document.createTextNode("\u200B");
