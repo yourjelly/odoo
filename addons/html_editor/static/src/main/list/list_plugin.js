@@ -406,14 +406,14 @@ export class ListPlugin extends Plugin {
         ) {
             const cursors = this.shared.preserveSelection();
 
-            cursors.shiftOffset(element, previousSibling.childNodes.length);
-            element.prepend(...previousSibling.childNodes);
+            previousSibling.append(...element.childNodes);
+            cursors.update(callbacksForCursorUpdate.merge(element));
 
-            cursors.remapNode(previousSibling, element);
             // @todo @phoenix: what if unremovable/unmergeable?
-            previousSibling.remove();
+            element.remove();
 
             cursors.restore();
+            return previousSibling;
         }
         return element;
     }
