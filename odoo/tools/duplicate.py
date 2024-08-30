@@ -424,6 +424,7 @@ def duplicate_models(env, models, factors):
     def is_blacklisted(_model):
         return _model._table in DUPLICATE_BLACKLIST_TABLES
 
+    factors = {key: (2**val) - 1 for key, val in factors.items()}
     to_process = deque(models)
     duplicated = defaultdict(int)  # {model: int(old_max_id)}
     while to_process:
