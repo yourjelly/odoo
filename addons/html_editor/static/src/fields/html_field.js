@@ -9,6 +9,7 @@ import {
     MAIN_EMBEDDINGS,
     READONLY_MAIN_EMBEDDINGS,
 } from "@html_editor/others/embedded_components/embedding_sets";
+import { HTMLEquals } from "@html_editor/utils/html";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { Component, status, useRef, useState } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
@@ -84,7 +85,7 @@ export class HtmlField extends Component {
             const newValue = record.data[this.props.name];
             if (!this.isDirty) {
                 const value = this.clearValueToCompare(newValue.toString());
-                if (this.lastValue !== value) {
+                if (!HTMLEquals(this.lastValue, value)) {
                     this.state.key++;
                     this.state.containsComplexHTML = computeContainsComplexHTML(
                         record.data[this.props.name]
@@ -153,13 +154,12 @@ export class HtmlField extends Component {
                 await this.updateValue(this.codeViewRef.el.value);
                 return;
             }
-
             if (urgent) {
                 await this.updateValue(this.editor.getContent());
             }
             const el = await this.getEditorContent();
-            const content = el.innerHTML;
-            if (!urgent || (urgent && this.lastValue !== content)) {
+            const content = this.clearValueToCompare(el.innerHTML);
+            if (!urgent || (urgent && !HTMLEquals(this.lastValue, content))) {
                 await this.updateValue(content);
             }
         }
