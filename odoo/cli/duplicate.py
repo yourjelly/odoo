@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from . import Command
 import odoo
-from odoo.tools.duplicate import duplicate_models, SQL_VARIATION_FUNCTIONS
+from odoo.tools.duplicate import duplicate_models
 from odoo.tools.misc import OrderedSet
 from odoo.tools.sql import SQL
 
@@ -58,7 +58,6 @@ class Duplicate(Command):
             )
             registry.duplication_done_for_model = {}.fromkeys([m._name for m in models], False)
             factors = dict(zip([m for m in models], factors))
-            env.cr.execute(''';'''.join(SQL_VARIATION_FUNCTIONS.values()))
 
             _logger.log(25, 'Duplicating models %s', models)
             t0 = time.time()
@@ -70,5 +69,4 @@ class Duplicate(Command):
             _logger.exception('Error while duplicating database models')
             env.cr.rollback()
         finally:
-            env.cr.execute(SQL(';').join(SQL('''DROP FUNCTION IF EXISTS %s''', SQL.identifier(funcname)) for funcname in SQL_VARIATION_FUNCTIONS))
             del registry.duplication_done_for_model

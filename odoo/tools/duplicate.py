@@ -10,59 +10,6 @@ from odoo.modules.db import FunctionStatus
 
 _logger = logging.getLogger(__name__)
 
-
-##### SQL Variation Functions
-
-# https://www.depesz.com/2017/02/06/generate-short-random-textual-ids/
-random_alphabetic_string = '''
-    CREATE OR REPLACE FUNCTION get_random_string(
-        IN string_length INTEGER,
-        IN possible_chars TEXT
-        DEFAULT 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-    ) RETURNS text
-    LANGUAGE plpgsql
-    AS $$
-    DECLARE
-        output TEXT = '';
-        i INT4;
-        pos INT4;
-    BEGIN
-        FOR i IN 1..string_length LOOP
-            pos := 1 + CAST( random() * ( LENGTH(possible_chars) - 1) AS INT4 );
-            output := output || substr(possible_chars, pos, 1);
-        END LOOP;
-        RETURN output;
-    END;
-    $$;
-'''
-
-# https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-random-range/
-random_integer = '''
-    CREATE OR REPLACE FUNCTION get_random_int(low INT, high INT)
-    RETURNS INT AS
-    $$
-    BEGIN
-    RETURN floor(random()* (high-low + 1) + low);
-    END;
-    $$ language 'plpgsql' STRICT;
-'''
-
-random_numeric = '''
-    CREATE OR REPLACE FUNCTION get_random_numeric(low numeric, high numeric)
-    RETURNS NUMERIC AS
-    $$
-    BEGIN
-    RETURN random()::numeric *(high-low) + low;
-    END;
-    $$ language 'plpgsql' STRICT;
-'''
-
-SQL_VARIATION_FUNCTIONS = {
-    'get_random_string': random_alphabetic_string,
-    'get_random_int': random_integer,
-    'get_random_numeric': random_numeric,
-}
-
 # Minimum length for a random varchar
 MIN_VARCHAR_LENGTH = 4
 
@@ -101,6 +48,14 @@ def get_query_part_date_datetime(env, total_table_size, min_date=MIN_DATETIME, m
         min_date = min_date + relativedelta(days=(total_days - total_table_size // MIN_ROWS_PER_DAY))
     return env.cr.mogrify('''%s + (row_number() OVER()/%s) * interval '1 day' ''', [min_date, rows_per_day]).decode()
 
+def get_random_sql_string(size):
+    return SQL('''left(md5(random()::text), %s)''', size)
+
+def get_random_sql_integer(low, high):
+    return SQL('''floor(random()* (%(high)s-%(low)s + 1) + %(low)s);''', low=low, high=high)
+
+def get_random_sql_numeric(low, high):
+    return SQL('''random()::numeric *(%(high)s-%(low)s) + %(low)s''', low=low, high=high)
 
 @contextmanager
 def ignore_indexes(env, tablename):
@@ -193,7 +148,7 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
             # TODO: FP wants to just append the series number for all chars, it will also handle unique violation constraints
             #  Dev note for ^: this suggestion is going to render any trigram search extremely slow (too much repetition)
             size = min(field.size if field.size else math.inf, 16)
-            str_variation_query = SQL(f'get_random_string({size})')
+            str_variation_query = get_random_sql_string(size)
             # if the field is translatable, it's a JSONB column, we vary all values for each key
             if field.translate:
                 return SQL("""
@@ -206,8 +161,10 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
                     END
                 """, field_column=SQL.identifier(field.name), str_vary_expr=str_variation_query)
             return str_variation_query
-        case 'integer' | 'float' | 'numeric':
-            return SQL('get_random_int(0, 10000)')
+        case 'integer':
+            return get_random_sql_integer(0, 10000)
+        case 'numeric' | 'float':
+            return get_random_sql_numeric(0, 100)
         case 'many2one':
             # select an id from the comodel's table that isn't used by the Many2one,
             # if all are used, we pick a random one.
@@ -232,6 +189,9 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
         case 'date' | 'datetime':
             table_size_after_duplicate = model.search_count([]) * factors[model]
             return SQL(get_query_part_date_datetime(env, table_size_after_duplicate))
+        case 'html':
+            # For the sake of simplicity we don't vary html fields
+            return field.name
         # TODO: handle other types as necessary
         case _:
             raise RuntimeError(
