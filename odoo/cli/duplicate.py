@@ -68,6 +68,7 @@ class Duplicate(Command):
             _logger.info('Duplicated models %s (total: %fs)', models, model_time)
         except:
             _logger.exception('Error while duplicating database models')
+            env.cr.rollback()
         finally:
             env.cr.execute(SQL(';').join(SQL('''DROP FUNCTION IF EXISTS %s''', SQL.identifier(funcname)) for funcname in SQL_VARIATION_FUNCTIONS))
             del registry.duplication_done_for_model
