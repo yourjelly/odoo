@@ -1,28 +1,26 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from datetime import timedelta
 
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo import Command, fields
 from odoo.exceptions import UserError
 from odoo.tests import Form, tagged
-from odoo import Command, fields
+
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
 class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
 
     @classmethod
     def setUpClass(cls):
-        super(TestPurchaseToInvoiceCommon, cls).setUpClass()
+        super().setUpClass()
         cls.other_currency = cls.setup_other_currency('EUR')
-        uom_unit = cls.env.ref('uom.product_uom_unit')
         uom_hour = cls.env.ref('uom.product_uom_hour')
         cls.product_order = cls.env['product.product'].create({
             'name': "Zed+ Antivirus",
             'standard_price': 235.0,
             'list_price': 280.0,
             'type': 'consu',
-            'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER',
             'taxes_id': False,
@@ -32,8 +30,6 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'standard_price': 240.0,
             'list_price': 290.0,
             'type': 'consu',
-            'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER',
             'taxes_id': False,
@@ -43,8 +39,6 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'standard_price': 235.0,
             'list_price': 280.0,
             'type': 'consu',
-            'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'purchase_method': 'purchase',
             'default_code': 'PROD_ORDER_VAR_NAME',
             'taxes_id': False,
@@ -54,8 +48,6 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'standard_price': 200.0,
             'list_price': 180.0,
             'type': 'service',
-            'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'purchase_method': 'receive',
             'default_code': 'SERV_DEL',
             'taxes_id': False,
@@ -76,8 +68,6 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'standard_price': 55.0,
             'list_price': 70.0,
             'type': 'consu',
-            'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'purchase_method': 'receive',
             'default_code': 'PROD_DEL',
             'taxes_id': False,
