@@ -15,7 +15,6 @@ class TestUi(HttpCase):
 
         self.start_tour("/web", 'point_of_sale_tour', login="admin")
 
-    @tools.mute_logger('odoo.http')
     def test_point_of_sale_furnitures_scenario_tour(self):
         for order in self.env['pos.order'].search([]):
             order.state = 'cancel'
@@ -24,4 +23,4 @@ class TestUi(HttpCase):
             session_ids.sudo().close_session_from_ui()
         self.env['pos.config'].search([]).action_archive()
         self.env['pos.category'].search([('name', 'ilike', 'Misc')], limit=1).unlink()
-        self.start_tour("/web", 'point_of_sale_furnitures_scenario_tour', login="admin", watch=True)
+        self.start_tour("/web", 'point_of_sale_furnitures_scenario_tour', login="admin")
