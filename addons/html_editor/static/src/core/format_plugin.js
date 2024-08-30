@@ -16,6 +16,7 @@ import { FONT_SIZE_CLASSES, formatsSpecs } from "../utils/formatting";
 import { boundariesIn, boundariesOut, DIRECTIONS, leftPos, rightPos } from "../utils/position";
 import { prepareUpdate } from "@html_editor/utils/dom_state";
 import { _t } from "@web/core/l10n/translation";
+import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
 
 const allWhitespaceRegex = /^[\s\u200b]*$/;
 
@@ -469,18 +470,17 @@ export class FormatPlugin extends Plugin {
         }
     }
 
-    mergeAdjacentNodes(root) {
-        let selectionToRestore = null;
+    mergeAdjacentNodes(root, { preserveSelection = true } = {}) {
+        let selectionToRestore;
         for (const node of descendants(root)) {
             if (this.shouldBeMergedWithPreviousSibling(node)) {
-                selectionToRestore ||= this.shared.getEditableSelection({ deep: true });
+                selectionToRestore ??= preserveSelection && this.shared.preserveSelection();
+                selectionToRestore?.update(callbacksForCursorUpdate.merge(node));
                 node.previousSibling.append(...node.childNodes);
                 node.remove();
             }
         }
-        if (selectionToRestore) {
-            this.shared.setSelection(selectionToRestore);
-        }
+        selectionToRestore?.restore();
     }
 
     shouldBeMergedWithPreviousSibling(node) {
