@@ -387,7 +387,7 @@ export class ListPlugin extends Plugin {
             return element;
         }
         // Transform <li> into <p> if they are not in a <ul> / <ol>.
-        const paragraph = document.createElement("p");
+        const paragraph = this.document.createElement("p");
         element.replaceWith(paragraph);
         paragraph.replaceChildren(...element.childNodes);
         return paragraph;
