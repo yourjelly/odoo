@@ -5,8 +5,7 @@ import { cleanTextNode, unwrapContents } from "../utils/dom";
 import {
     areSimilarElements,
     isContentEditable,
-    isEditorTab,
-    isProtecting,
+    isSelfClosingElement,
     isTextNode,
     isVisibleTextNode,
     isZWS,
@@ -372,14 +371,14 @@ export class FormatPlugin extends Plugin {
                 }
             }
         }
-        this.mergeAdjacentNodes(root);
+        this.mergeAdjacentInlines(root);
     }
 
     cleanForSave(root, { preserveSelection = false } = {}) {
         for (const element of root.querySelectorAll("[data-oe-zws-empty-inline]")) {
             this.cleanElement(element, { preserveSelection });
         }
-        this.mergeAdjacentNodes(root, { preserveSelection });
+        this.mergeAdjacentInlines(root, { preserveSelection });
     }
 
     cleanElement(element, { preserveSelection }) {
@@ -474,7 +473,7 @@ export class FormatPlugin extends Plugin {
         }
     }
 
-    mergeAdjacentNodes(root, { preserveSelection = true } = {}) {
+    mergeAdjacentInlines(root, { preserveSelection = true } = {}) {
         let selectionToRestore = null;
         for (const node of descendants(root)) {
             if (this.shouldBeMergedWithPreviousSibling(node)) {
@@ -491,15 +490,9 @@ export class FormatPlugin extends Plugin {
 
     shouldBeMergedWithPreviousSibling(node) {
         return (
+            !isSelfClosingElement(node) &&
             areSimilarElements(node, node.previousSibling) &&
-            !this.shared.isUnmergeable(node) &&
-            !isEditorTab(node) &&
-            !(
-                node.attributes?.length === 1 &&
-                node.hasAttribute("data-oe-zws-empty-inline") &&
-                (node.textContent === "\u200B" || node.previousSibling.textContent === "\u200B")
-            ) &&
-            !isProtecting(node)
+            !this.shared.isUnmergeable(node)
         );
     }
 }
