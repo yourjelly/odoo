@@ -1443,6 +1443,8 @@ ResUsersPatchedInTest = ResUsers
 
 
 # TODO: reorganize or split the file to avoid declaring classes multiple times
+
+
 # pylint: disable=E0102
 class ResGroups(models.Model):  # noqa: F811
     _inherit = 'res.groups'
@@ -1594,6 +1596,7 @@ class UsersImplied(models.Model):
             vals = {'groups_id': [Command.link(g.id) for g in gs]}
             super(UsersImplied, users).write(vals)
         return res
+
 
 #
 # Virtual checkbox and selection for res.user form view
