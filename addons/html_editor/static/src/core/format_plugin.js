@@ -469,42 +469,21 @@ export class FormatPlugin extends Plugin {
         }
     }
 
-    mergeAdjacentNodes(node) {
-        let selection = null;
-        let toMerge = [];
-        for (const el of descendants(node)) {
-            if (this.shouldBeMerged(el)) {
-                toMerge.push(el);
+    mergeAdjacentNodes(root) {
+        let selectionToRestore = null;
+        for (const node of descendants(root)) {
+            if (this.shouldBeMergedWithPreviousSibling(node)) {
+                selectionToRestore ||= this.shared.getEditableSelection({ deep: true });
+                node.previousSibling.append(...node.childNodes);
+                node.remove();
             }
         }
-        while (toMerge.length) {
-            // @todo: preserve selection properly
-            selection = selection || this.shared.getEditableSelection({ deep: true });
-            for (const el of toMerge) {
-                const destinationEl = el.previousSibling;
-                // @todo: no need for all for this. Simply `destinalionEl.append(...el.childNodes)`
-                const fragment = document.createDocumentFragment();
-                while (el.hasChildNodes()) {
-                    fragment.appendChild(el.firstChild);
-                }
-                destinationEl.appendChild(fragment);
-                el.remove();
-            }
-            toMerge = [];
-            for (const el of descendants(node)) {
-                if (this.shouldBeMerged(el)) {
-                    toMerge.push(el);
-                }
-            }
-        }
-
-        // @todo: preserve selection properly
-        if (selection) {
-            this.shared.setSelection(selection);
+        if (selectionToRestore) {
+            this.shared.setSelection(selectionToRestore);
         }
     }
 
-    shouldBeMerged(node) {
+    shouldBeMergedWithPreviousSibling(node) {
         return (
             areSimilarElements(node, node.previousSibling) &&
             !this.shared.isUnmergeable(node) &&
