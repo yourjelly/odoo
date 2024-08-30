@@ -136,9 +136,11 @@ export class FormatPlugin extends Plugin {
             case "FORMAT_REMOVE_FORMAT":
                 this.removeFormat();
                 break;
-            case "CLEAN_FOR_SAVE":
-                this.cleanForSave(payload.root);
+            case "CLEAN_FOR_SAVE": {
+                const { root, preserveSelection } = payload;
+                this.cleanForSave(root, { preserveSelection });
                 break;
+            }
             case "NORMALIZE":
                 this.normalize(payload.node);
                 break;
@@ -373,16 +375,18 @@ export class FormatPlugin extends Plugin {
         this.mergeAdjacentNodes(root);
     }
 
-    cleanForSave(root) {
-        root.querySelectorAll("[data-oe-zws-empty-inline]").forEach((el) => this.cleanElement(el));
-        this.mergeAdjacentNodes(root);
+    cleanForSave(root, { preserveSelection = false } = {}) {
+        for (const element of root.querySelectorAll("[data-oe-zws-empty-inline]")) {
+            this.cleanElement(element, { preserveSelection });
+        }
+        this.mergeAdjacentNodes(root, { preserveSelection });
     }
 
-    cleanElement(element) {
+    cleanElement(element, { preserveSelection }) {
         delete element.dataset.oeZwsEmptyInline;
         if (!allWhitespaceRegex.test(element.textContent)) {
             // The element has some meaningful text. Remove the ZWS in it.
-            this.cleanZWS(element, { preserveSelection: false });
+            this.cleanZWS(element, { preserveSelection });
             return;
         }
         if (this.resources.isUnremovable.some((predicate) => predicate(element))) {
@@ -471,11 +475,13 @@ export class FormatPlugin extends Plugin {
     }
 
     mergeAdjacentNodes(root, { preserveSelection = true } = {}) {
-        let selectionToRestore;
+        let selectionToRestore = null;
         for (const node of descendants(root)) {
             if (this.shouldBeMergedWithPreviousSibling(node)) {
-                selectionToRestore ??= preserveSelection && this.shared.preserveSelection();
-                selectionToRestore?.update(callbacksForCursorUpdate.merge(node));
+                if (preserveSelection) {
+                    selectionToRestore ??= this.shared.preserveSelection();
+                    selectionToRestore.update(callbacksForCursorUpdate.merge(node));
+                }
                 node.previousSibling.append(...node.childNodes);
                 node.remove();
             }
