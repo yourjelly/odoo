@@ -81,8 +81,6 @@ class HolidaysAllocation(models.Model):
     duration_display = fields.Char('Allocated (Days/Hours)', compute='_compute_duration_display',
         help="Field allowing to see the allocation duration in days or hours depending on the type_request_unit")
     last_exectued_carryover_date = fields.Date()
-    previous_level_last_date = fields.Date()
-    last_accrued_days_count = fields.Float()
     # details
     approver_id = fields.Many2one(
         'hr.employee', string='First Approval', readonly=True, copy=False,
@@ -390,18 +388,6 @@ class HolidaysAllocation(models.Model):
         If force_period is set, the accrual will run until date_to in a prorated way (used for end of year accrual actions).
         """
 
-        def accrue_days():
-            if not allocation.already_accrued and is_accrual_date:
-                allocation._add_days_to_allocation(current_level, current_level_maximum_leave, leaves_taken, period_start, period_end)
-    
-        def apply_carryover():
-            # if it's the carry-over date, adjust days using current level's carry-over policy, then continue
-            if allocation.nextcall == carryover_date:
-                if current_level.action_with_unused_accruals in ['lost', 'maximum']:
-                    allocation_days = allocation.number_of_days + leaves_taken
-                    allocation_max_days = current_level.postpone_max_days + leaves_taken
-                    allocation.number_of_days = min(allocation_days, allocation_max_days)
-
         date_to = date_to or fields.Date.today()
         first_allocation = _("""This allocation have already ran once, any modification won't be effective to the days allocated to the employee. If you need to change the configuration of the allocation, delete and create a new one.""")
         for allocation in self:
@@ -460,32 +446,52 @@ class HolidaysAllocation(models.Model):
                 carryover_date = allocation._get_carryover_date(allocation.nextcall)
                 if allocation.nextcall < carryover_date < nextcall:
                     nextcall = min(nextcall, carryover_date)
-
+                # if it's the carry-over date, adjust days using current level's carry-over policy, then continue
+                if allocation.nextcall == carryover_date:
+                    allocation.last_exectued_carryover_date = carryover_date
+                    if current_level.action_with_unused_accruals in ['lost', 'maximum']:
+                        allocation_days = allocation.number_of_days + leaves_taken
+                        allocation_max_days = current_level.postpone_max_days + leaves_taken
+                        allocation.number_of_days = min(allocation_days, allocation_max_days)
+                
                 # Only accrue on the end of the accrual period, on level transition date or on carryover date.
                 # Don't accrue on expiration date.
                 is_accrual_date = allocation.nextcall == period_end or allocation.nextcall == current_level_last_date
-                # Assume that:
-                # - an accrual period starts on 01/01/2023 and ends on 01/01/2024 and that 10 days should be accrued for the period.
-                # - Carryover date on 01/01
-                # - date_to = 01/01/2024
-                # If the accrual plan accrues days at the start, then on 01/01/2023 the employee should have 10 days
-                # and on 01/01/2024 the carryover policy should apply to these 10 days.
-                # Otherwise, if the accrual plan accrues days at the end, then on 01/01/2024 the employee should have 10 days
-                # and given that the employee has just received these days, the carryover policy shouldn't be applied to the days.
-                # That is why accrue_days() and apply_carryover() execution order is different for 'start' and 'end' cases.
-                if allocation.accrual_plan_id.accrued_gain_time == 'start':
-                    accrue_days()
-                    apply_carryover()
-                else:
-                    apply_carryover()
-                    accrue_days()
+                if not allocation.already_accrued and is_accrual_date:
+                    allocation._add_days_to_allocation(current_level, current_level_maximum_leave, leaves_taken, period_start, period_end)
+
+                # When accrued_gain_time == 'start', all the days are accrued on the start of the accrual period. For example, if the accrual period
+                # is from 01/01/2023 to 01/01/2024, then the days will be accrued on 01/01/2023. Hence, the carryover policy should apply to any day
+                # accrued during the period from 01/01/2023 to 01/01/2024. However, if a level transistion occurred, the carryover policy should apply
+                # to the days the were accrued during the carryover level only. Any days accrued before or after the carryover level should be excluded.
+                # So for the example above carryover_period_start and carryover_period_end will start as 01/01/2023, 01/01/2024 respectively and will be
+                # adjusted according to level transitions.
+                if allocation.accrual_plan_id.accrued_gain_time == 'start' and allocation.last_exectued_carryover_date:
+                    last_carryover_date = allocation.last_exectued_carryover_date
+                    carryover_level, carryover_level_idx = allocation._get_current_accrual_plan_level_id(last_carryover_date)
+                    carryover_period_start = carryover_level._get_previous_date(last_carryover_date)
+                    carryover_period_end = carryover_level._get_next_date(last_carryover_date)
+                    if allocation.accrual_plan_id.transition_mode == 'immediately':
+                        carryover_level_start_date = allocation.date_from + get_timedelta(carryover_level.start_count, carryover_level.start_type)
+                        carryover_period_start = max(carryover_period_start, carryover_level_start_date)
+                        if carryover_level_idx < (len(level_ids) - 1):
+                            next_level = level_ids[carryover_level_idx + 1]
+                            carryover_level_last_date = allocation.date_from + get_timedelta(next_level.start_count, next_level.start_type)
+                            carryover_period_end = min(carryover_period_end, carryover_level_last_date)
+                    
+                    accrued = not allocation.already_accrued and is_accrual_date
+                    # If the days were accrued on the carryover period, then apply the carryover policy
+                    if accrued and carryover_period_start <= allocation.nextcall <= carryover_period_end:
+                        if carryover_level.action_with_unused_accruals in ['lost', 'maximum']:
+                            allocation.last_exectued_carryover_date = carryover_date
+                            allocation_days = allocation.number_of_days + leaves_taken
+                            allocation_max_days = current_level.postpone_max_days + leaves_taken
+                            allocation.number_of_days = min(allocation_days, allocation_max_days)
 
                 if is_accrual_date:
                     allocation.lastcall = allocation.nextcall
                 allocation.actual_lastcall = allocation.nextcall
                 allocation.nextcall = nextcall
-                if nextcall == current_level_last_date:
-                    allocation.previous_level_last_date = nextcall
                 allocation.already_accrued = False
                 if force_period and allocation.nextcall > date_to:
                     allocation.nextcall = date_to

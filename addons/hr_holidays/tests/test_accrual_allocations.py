@@ -2037,3 +2037,420 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             })
 
             self.assertEqual(allocation.lastcall, datetime.date(2017, 12, 5))
+
+    def test_no_days_accrued_on_carryover_date(self):
+        """
+        All time off days should be accrued on the specified date by the current milestone of the accrual
+        plan. No days should be accrued on a carryover date.
+
+        Create an accrual plan:
+            - Carryover date: July 1st.
+        Create a milestone:
+            - Number of accrued days: 10
+            - Frequency: Yearly
+            - Start accrual immediately on the allocation start date.
+            - Accrual date: January 1st
+            - Carryover policy: All days carry over
+        Create an allocation:
+            - Start date: 01/01/2024
+            - Type: Accrual
+            - Accrual Plan: Use the one defined above.
+
+        On 01/01/2025 (Accrual date), 10 days are accrued to the employee.
+        On 01/07/2025 (Carryover date), no days should be accrued.
+        On 01/01/2026 (Accrual date), 10 days are accrued to the employee. Total accrued days = 20 days.
+        """
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+                'name': 'Accrual Plan For Test',
+                'carryover_date': 'other',
+                'carryover_day': 1,
+                'carryover_month': 'jul',
+                'level_ids': [(0, 0, {
+                    'added_value': 10,
+                    'added_value_type': 'day',
+                    'start_count': 0,
+                    'start_type': 'day',
+                    'frequency': 'yearly',
+                })],
+        })
+        with freeze_time('2024-1-01'):
+            allocation = self.env['hr.leave.allocation'].with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation for employee',
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+                'accrual_plan_id': accrual_plan.id,
+                'date_from': datetime.date(2024, 1, 1)
+            })
+            allocation.action_validate()
+
+        with freeze_time('2025-1-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 10, "10 days should be accrued")
+
+        with freeze_time('2025-7-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 10, "No Days should be accrued on the carryover date")
+
+        with freeze_time('2026-1-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 20,
+                         "10 additional days should be accrued on January 1st. The total number of accrued days should be 20")
+
+    def test_matching_accrual_and_carryover_dates(self):
+        """
+        When the accrual date and carry over date are the same, the carry over policy should be applied
+        first, then the time off days should be accrued to the employee
+
+        Create an accrual plan:
+            - Carryover date: January 1st.
+        Create a milestone:
+            - Number of accrued days: 10
+            - Frequency: Yearly
+            - Start accrual immediately on the allocation start date.
+            - Accrual date: January 1st
+            - Carryover policy: No days carry over
+        Create an allocation:
+            - Start date: 01/01/2024
+            - Type: Accrual
+            - Accrual Plan: Use the one defined above.
+
+        On 01/01/2025 (Accrual date), 10 days are accrued to the employee.
+        On 01/01/2026 (Accrual date and carryover date):
+            * The previous 10 days are lost.
+            * 10 days are accrued to the employee.
+            * Total employee should have 10 days.
+        """
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+                'name': 'Accrual Plan For Test',
+                'carryover_date': 'year_start',
+                'level_ids': [(0, 0, {
+                    'added_value': 10,
+                    'added_value_type': 'day',
+                    'start_count': 0,
+                    'start_type': 'day',
+                    'frequency': 'yearly',
+                    'action_with_unused_accruals': 'lost'
+                })],
+        })
+        with freeze_time('2024-1-01'):
+            allocation = self.env['hr.leave.allocation'].with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation for employee',
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+                'accrual_plan_id': accrual_plan.id,
+                'date_from': datetime.date(2024, 1, 1)
+            })
+            allocation.action_validate()
+
+        with freeze_time('2025-1-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 10, "10 days are accrued")
+
+        with freeze_time('2026-1-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 10,
+                         "All previous days are lost. 10 new days are added.")
+
+    def test_matching_carryover_and_level_transition_dates(self):
+        """
+        When the carry over date matches the date of a level transition, some days are accrued. The number of
+        accrued days is proportionate to the period that elapsed from the accrual period of the previous
+        level. For example if 24 days are accrued yearly, and only 2 months have passed before the level
+        transition has occured, then the number of accrued days will be 2/12 * 24 = 4 days
+
+        Create an accrual plan:
+            - Carryover date: July 1st.
+        Create a milestone:
+            - Number of accrued days: 12
+            - Frequency: Yearly
+            - Accrual date: January 1st
+            - Carryover policy: No days carry over
+        Create an allocation:
+            - Start date: 01/01/2024
+            - Type: Accrual
+            - Accrual Plan: Use the one defined above.
+
+        On 01/01/2025 (Accrual date), 12 days are accrued to the employee.
+        On 01/07/2025 (Level transition date and carryover date):
+            - The previous 12 days are lost.
+            - (6/12) * 12 = 6 days are accrued to the employee.
+            - Level tranisition occurs.
+        On 01/01/2026 (Accrual date):
+            - (6/12) / 14 = 7 days are accrued to the employee.
+            - Total number of days = 6 + 7 = 13 days
+        """
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+                'name': 'Accrual Plan For Test',
+                'carryover_date': 'other',
+                'carryover_day': 1,
+                'carryover_month': 'jul',
+                'level_ids': [(0, 0, {
+                    'added_value': 12,
+                    'added_value_type': 'day',
+                    'frequency': 'yearly',
+                    'start_count': 0,
+                    'start_type': 'day',
+                    'action_with_unused_accruals': 'lost'
+                }),
+                (0, 0, {
+                    'added_value': 14,
+                    'added_value_type': 'day',
+                    'frequency': 'yearly',
+                    'start_count': 18,
+                    'start_type': 'month',
+                    'action_with_unused_accruals': 'lost'
+                })],
+        })
+        with freeze_time('2024-1-01'):
+            allocation = self.env['hr.leave.allocation'].with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation for employee',
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+                'accrual_plan_id': accrual_plan.id,
+                'date_from': datetime.date(2024, 1, 1)
+            })
+            allocation.action_validate()
+
+        with freeze_time('2025-1-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 12, "12 days are accrued")
+
+        with freeze_time('2025-7-01'):
+            allocation._update_accrual()
+        self.assertAlmostEqual(allocation.number_of_days, 6, 1,
+                         "All previous days are lost. 6 new days are added.")
+        with freeze_time('2026-1-01'):
+            allocation._update_accrual()
+        self.assertAlmostEqual(allocation.number_of_days, 13, 1,
+                        "7 days are accrued. Total days = 6 + 7 = 13.")
+
+    def test_exclude_new_level_from_carryover(self):
+        """
+        Define an accrual plan:
+            1. The days are accrued at the start of the accrual period.
+            2. The carryover date is on June 1st (01/06).
+            3. Has 2 levels:
+                a. First Level:
+                      I. Starts immediately on allocation start date
+                     II. Accrues 10 days yearly on January 1st (01/01).
+                    III. Carryover policy is None (no days are carried over).
+                b. Second level:
+                      I. Starts 20 Months after allocation start date.
+                     II. Accrues 12 days yearly on January 1st (01/01).
+                    III. Carryover policy is all.
+
+        Create an allocation that starts 01/01/2024 and uses the above accrual plan.
+
+        On 01/01/2024, the employee is accrued 10 days.
+        On 01/01/2025, the employee will be accrued days as follows:
+            1. From 01/01/2025 to 01/09/2025: The accrual plan is in the first level. Accrue (8/12) * 10 = 6.67 days.
+            2. From 01/09/2025 to 31/12/2025: The accrual plan is in the second level. Accrue (4/12) * 12 = 4 days.
+            3. Total accrued days on 01/01/2025 = 10.67 days.
+        On 01/06/2025 (carryover date):
+            The Carryover should take only the days accrued from 01/01/2025 to 01/09/2025 into account.
+            The remaining days are accrued for a new accrual level.
+            The number of remaining days: 4 days
+        On 01/01/2026:
+            The employee is accrued 12 days.
+        Total number of days =  16 days
+        """
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+                'name': 'Accrual Plan For Test',
+                'accrued_gain_time': 'start',
+                'carryover_date': 'other',
+                'carryover_day': 1,
+                'carryover_month': 'jun',
+                'level_ids': [(0, 0, {
+                    'added_value': 10,
+                    'added_value_type': 'day',
+                    'frequency': 'yearly',
+                    'start_count': 0,
+                    'start_type': 'day',
+                    'action_with_unused_accruals': 'lost'
+                }),
+                (0, 0, {
+                    'added_value': 12,
+                    'added_value_type': 'day',
+                    'frequency': 'yearly',
+                    'start_count': 20,
+                    'start_type': 'month',
+                    'action_with_unused_accruals': 'all'
+                })],
+        })
+        with freeze_time('2024-1-01'):
+            allocation = self.env['hr.leave.allocation'].with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation for employee',
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+                'accrual_plan_id': accrual_plan.id,
+                'date_from': datetime.date(2024, 1, 1)
+            })
+            allocation.action_validate()
+
+        with freeze_time('2026-1-01'):
+            allocation._update_accrual()
+        self.assertAlmostEqual(allocation.number_of_days, 16, 1)
+
+    def test_exclude_new_level_from_carryover_2(self):
+        """
+        Define an accrual plan:
+            1. The days are accrued at the start of the accrual period.
+            2. The carryover date is on June 1st (01/06).
+            3. Has 2 levels:
+                a. First Level:
+                      I. Starts immediately on allocation start date
+                     II. Accrues 1 day monthly.
+                    III. Carryover policy is None (no days are carried over).
+                b. Second level:
+                      I. Starts 20 Months after allocation start date.
+                     II. Accrues 1 days monthly on January 1st (01/01).
+                    III. Carryover policy is carryover with a maximum of 5.
+
+        Create an allocation that starts 01/01/2024 and uses the above accrual plan.
+
+        1. From 01/01/2024 to 01/05/2024: The employee is accrued 5 days.
+        2. On 01/06/2024: The 5 days are lost due to carryover policy. 1 day is accrued for the new month.
+           The employee now has 1 day.
+        3. From 01/07/2024 to 01/08/2024: The employee is accrued 2 days.
+           The employee now has 3 days.
+        4. On 01/09/2024: Transition to new level. 1 day is accrued for the new month.
+           The employee now has 4 days.
+        5. From 01/010/2024 to 01/012/2024: 3 days are accrued.
+           The employee now has 7 days.
+        6. On 01/01/2025: 1 day is accrued.
+        Total number of days =  8 days
+        """
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+                'name': 'Accrual Plan For Test',
+                'accrued_gain_time': 'start',
+                'carryover_date': 'other',
+                'carryover_day': 1,
+                'carryover_month': 'jun',
+                'level_ids': [(0, 0, {
+                    'added_value': 1,
+                    'added_value_type': 'day',
+                    'frequency': 'monthly',
+                    'start_count': 0,
+                    'start_type': 'day',
+                    'action_with_unused_accruals': 'lost'
+                }),
+                (0, 0, {
+                    'added_value': 1,
+                    'added_value_type': 'day',
+                    'frequency': 'monthly',
+                    'start_count': 20,
+                    'start_type': 'month',
+                    'action_with_unused_accruals': 'maximum',
+                    'postpone_max_days': 5
+                })],
+        })
+        with freeze_time('2024-1-01'):
+            allocation = self.env['hr.leave.allocation'].with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation for employee',
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+                'accrual_plan_id': accrual_plan.id,
+                'date_from': datetime.date(2024, 1, 1)
+            })
+            allocation.action_validate()
+
+        with freeze_time('2024-5-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 5)
+
+        with freeze_time('2024-6-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 1)
+
+        with freeze_time('2024-8-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 3)
+
+        with freeze_time('2024-9-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 4)
+
+        with freeze_time('2024-12-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 7)
+        
+        with freeze_time('2025-1-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 8)
+
+    def test_include_new_level_in_carryover(self):
+        """
+        Define an accrual plan:
+            1. The days are accrued at the start of the accrual period.
+            2. The carryover date is on June 1st (01/06).
+            3. Has 2 levels:
+                a. First Level:
+                      I. Starts immediately on allocation start date
+                     II. Accrues 10 days yearly on January 1st (01/01).
+                    III. Carryover policy is None (no days are carried over).
+                b. Second level:
+                      I. Starts 15 Months after allocation start date.
+                     II. Accrues 12 days yearly on January 1st (01/01).
+                    III. Carryover policy is None (no days are carried over).
+
+        Create an allocation that starts 01/01/2024 and uses the above accrual plan.
+
+        On 01/01/2024, the employee is accrued 10 days.
+        On 01/01/2025, the employee will be accrued days as follows:
+            1. From 01/01/2025 to 01/04/2025: The accrual plan is in the first level. Accrue (3/12) * 10 = 2.5 days.
+            2. From 01/04/2025 to 31/12/2025: The accrual plan is in the second level. Accrue (9/12) * 12 = 9 days.
+            3. Total accrued days on 01/01/2026 = 11.5 days.
+        On 01/06/2025 (carryover date):
+            All the accrued days are lost due to the carryover policy 'None' (of the second level)
+        On 01/01/2026:
+            The employee is accrued 12 days.
+        Total number of days =  12 days
+        """
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+                'name': 'Accrual Plan For Test',
+                'accrued_gain_time': 'start',
+                'carryover_date': 'other',
+                'carryover_day': 1,
+                'carryover_month': 'jun',
+                'level_ids': [(0, 0, {
+                    'added_value': 10,
+                    'added_value_type': 'day',
+                    'frequency': 'yearly',
+                    'start_count': 0,
+                    'start_type': 'day',
+                    'action_with_unused_accruals': 'all'
+                }),
+                (0, 0, {
+                    'added_value': 12,
+                    'added_value_type': 'day',
+                    'frequency': 'yearly',
+                    'start_count': 15,
+                    'start_type': 'month',
+                    'action_with_unused_accruals': 'lost'
+                })],
+        })
+        with freeze_time('2024-1-01'):
+            allocation = self.env['hr.leave.allocation'].with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation for employee',
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+                'accrual_plan_id': accrual_plan.id,
+                'date_from': datetime.date(2024, 1, 1)
+            })
+            allocation.action_validate()
+
+        with freeze_time('2026-1-01'):
+            allocation._update_accrual()
+        self.assertEqual(allocation.number_of_days, 12)
