@@ -32,7 +32,7 @@ test("can create a new channel [REQUIRE FOCUS]", async () => {
         }
     });
     onRpc((params) => {
-        if (params.model === "discuss.channel" && params.method === "channel_create") {
+        if (params.model === "discuss.channel" && params.method === "channel_create_store") {
             step(
                 `${params.route} - ${JSON.stringify(
                     pick(params, "args", "kwargs", "method", "model")
@@ -71,7 +71,7 @@ test("can create a new channel [REQUIRE FOCUS]", async () => {
         ["partner_id", "=", serverState.partnerId],
     ]);
     await assertSteps([
-        `/web/dataset/call_kw/discuss.channel/channel_create - ${JSON.stringify({
+        `/web/dataset/call_kw/discuss.channel/channel_create_store - ${JSON.stringify({
             args: ["abc", null],
             kwargs: {
                 context: {
@@ -81,7 +81,7 @@ test("can create a new channel [REQUIRE FOCUS]", async () => {
                     allowed_company_ids: [1],
                 },
             },
-            method: "channel_create",
+            method: "channel_create_store",
             model: "discuss.channel",
         })}`,
         `/discuss/channel/messages - {"channel_id":${channelId},"limit":60,"around":${selfMember.new_message_separator}}`,
@@ -100,7 +100,7 @@ test("can make a DM chat", async () => {
     onRpc((params) => {
         if (
             params.model === "discuss.channel" &&
-            ["search_read", "channel_create", "channel_get"].includes(params.method)
+            ["search_read", "channel_create_store", "channel_get_store"].includes(params.method)
         ) {
             step(
                 `${params.route} - ${JSON.stringify(
@@ -137,7 +137,7 @@ test("can make a DM chat", async () => {
     await assertSteps([
         `/discuss/search - {"term":""}`,
         `/discuss/search - {"term":"mario"}`,
-        `/web/dataset/call_kw/discuss.channel/channel_get - ${JSON.stringify({
+        `/web/dataset/call_kw/discuss.channel/channel_get_store - ${JSON.stringify({
             args: [],
             kwargs: {
                 partners_to: [partnerId],
@@ -149,7 +149,7 @@ test("can make a DM chat", async () => {
                     allowed_company_ids: [1],
                 },
             },
-            method: "channel_get",
+            method: "channel_get_store",
             model: "discuss.channel",
         })}`,
         `/discuss/channel/messages - {"channel_id":${channelId},"limit":60,"around":0}`,
