@@ -13,10 +13,6 @@ class AccountChartTemplate(models.AbstractModel):
             'use_storno_accounting': True,
             'property_account_receivable_id': 'hr_120000',
             'property_account_payable_id': 'hr_220000',
-            'property_account_expense_categ_id': 'hr_400000',
-            'property_account_income_categ_id': 'hr_750000',
-            'property_account_expense_company_id': 'hr_400000',
-            'property_account_income_company_id': 'hr_750000',
         }
 
     @template('hr', 'res.company')
@@ -32,5 +28,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'expense_currency_exchange_account_id': 'hr_475000',
                 'account_sale_tax_id': 'VAT_S_IN_ROC_25',
                 'account_purchase_tax_id': 'VAT_P_IN_ROC_25',
+                'property_account_expense_company_id': 'hr_400000',
+                'property_account_income_company_id': 'hr_750000',
             },
         }

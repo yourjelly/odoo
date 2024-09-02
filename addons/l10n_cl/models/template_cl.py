@@ -12,10 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '6',
             'property_account_receivable_id': 'account_110310',
             'property_account_payable_id': 'account_210210',
-            'property_account_expense_categ_id': 'account_410235',
-            'property_account_income_categ_id': 'account_310115',
-            'property_account_expense_company_id': 'account_410235',
-            'property_account_income_company_id': 'account_310115',
             'property_stock_account_input_categ_id': 'account_210230',
             'property_stock_account_output_categ_id': 'account_110640',
             'property_stock_valuation_account_id': 'account_110610',
@@ -36,5 +32,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'tax_calculation_rounding_method': 'round_globally',
                 'account_sale_tax_id': 'ITAX_19',
                 'account_purchase_tax_id': 'OTAX_19',
+                'property_account_expense_company_id': 'account_410235',
+                'property_account_income_company_id': 'account_310115',
             },
         }

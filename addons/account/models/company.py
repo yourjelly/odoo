@@ -255,21 +255,19 @@ class ResCompany(models.Model):
         help="Default on whether the sales price used on the product and invoices with this Company includes its taxes."
     )
 
-    property_account_income_company_id = fields.Many2one('account.account',
+    property_account_income_company_id = fields.Many2one(
+        comodel_name='account.account',
         string="Income Account",
         domain=ACCOUNT_DOMAIN,
         help="This account will be used when validating a customer invoice.",
-        tracking=True,
-        company_dependent=True
     )
-    property_account_expense_company_id = fields.Many2one('account.account',
+    property_account_expense_company_id = fields.Many2one(
+        comodel_name='account.account',
         string="Expense Account",
         domain=ACCOUNT_DOMAIN,
         help="The expense is accounted for when a vendor bill is validated, except in anglo-saxon"
-            "accounting with perpetual inventory valuation in which case the expense (Cost of"
-            "Goods Sold account) is recognized at the customer invoice validation.",
-        tracking=True,
-        company_dependent=True
+             "accounting with perpetual inventory valuation in which case the expense (Cost of"
+             "Goods Sold account) is recognized at the customer invoice validation.",
     )
 
     def get_next_batch_payment_communication(self):

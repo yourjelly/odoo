@@ -11,10 +11,6 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_receivable_id': 'chart_2111',
             'property_account_payable_id': 'chart_2211',
-            'property_account_income_categ_id': 'chart_711',
-            'property_account_expense_categ_id': 'chart_311',
-            'property_account_income_company_id': 'chart_711',
-            'property_account_expense_company_id': 'chart_311',
         }
 
     @template('pt', 'res.company')
@@ -32,5 +28,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_early_pay_discount_gain_account_id': 'chart_728',
                 'account_sale_tax_id': 'iva_pt_sale_normal',
                 'account_purchase_tax_id': 'iva_pt_purchase_normal',
+                'property_account_income_company_id': 'chart_711',
+                'property_account_expense_company_id': 'chart_311',
             },
         }

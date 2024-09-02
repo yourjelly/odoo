@@ -9,48 +9,54 @@ from collections import defaultdict
 from datetime import datetime
 
 VALUATION = [
-        ('manual_periodic', 'Manual'),
-        ('real_time', 'Automated')
-    ]
+    ('manual_periodic', 'Manual'),
+    ('real_time', 'Automated'),
+]
 
 COST_METHOD = [
-        ('standard', 'Standard Price'),
-        ('fifo', 'First In First Out (FIFO)'),
-        ('average', 'Average Cost (AVCO)')
-    ]
+    ('standard', 'Standard Price'),
+    ('fifo', 'First In First Out (FIFO)'),
+    ('average', 'Average Cost (AVCO)'),
+]
 
 
 class ProductTemplate(models.Model):
     _name = 'product.template'
     _inherit = 'product.template'
 
-    cost_method = fields.Selection(string="Cost Method",
+    cost_method = fields.Selection(
+        string="Cost Method",
         selection=COST_METHOD,
         compute="_compute_cost_method",
-        readonly=True
-        )
-    valuation = fields.Selection(string="Valuation",
-    selection=VALUATION,
+        readonly=True,
+    )
+    valuation = fields.Selection(
+        string="Valuation",
+        selection=VALUATION,
         compute="_compute_valuation",
-        readonly=True)
+        readonly=True,
+    )
 
     @api.depends('categ_id')
     def _compute_valuation(self):
-        categ_records = self.filtered('categ_id')
-        non_categ_records = self - categ_records
-
-        for record in categ_records:
-            record.valuation = record.categ_id.property_valuation
-
-        if non_categ_records.env.user.has_group('stock_account.group_stock_accounting_automatic'):
-            non_categ_records.valuation = 'real_time'
+        pt_with_catogory = self.filtered('categ_id')
+        has_group_stock_accounting_automatic = self.env.user.has_group(
+            'stock_account.group_stock_accounting_automatic'
+        )
+        if has_group_stock_accounting_automatic:
+            (self - pt_with_catogory).valuation = 'real_time'
         else:
-            non_categ_records.valuation = 'manual_periodic'
+            (self - pt_with_catogory).valuation = 'manual_periodic'
+        for product_template in pt_with_catogory:
+            product_template.valuation = product_template.categ_id.property_valuation
 
     @api.depends("categ_id")
     def _compute_cost_method(self):
-        for record in self:
-            record.cost_method = record.categ_id.property_cost_method if record.categ_id else "standard"
+        for product_template in self:
+            if product_template.categ_id:
+                product_template.cost_method = product_template.categ_id.property_cost_method
+            else:
+                product_template.cost_method = "standard"
 
     def write(self, vals):
         impacted_templates = {}
@@ -143,23 +149,40 @@ class ProductProduct(models.Model):
         help="Technical field to correctly show the currently selected company's currency that corresponds "
              "to the totaled value of the product's valuation layers")
     stock_valuation_layer_ids = fields.One2many('stock.valuation.layer', 'product_id')
-    cost_method = fields.Selection(string="Cost Method", selection=COST_METHOD, compute="_compute_cost_method", readonly=True)
-    valuation = fields.Selection(string="Valuation", selection=VALUATION, compute="_compute_valuation", readonly=True)
+    cost_method = fields.Selection(
+        string="Cost Method",
+        selection=COST_METHOD,
+        compute="_compute_cost_method",
+        readonly=True,
+    )
+    valuation = fields.Selection(
+        string="Valuation",
+        selection=VALUATION,
+        compute="_compute_valuation",
+        readonly=True,
+    )
 
     @api.depends('categ_id')
     def _compute_valuation(self):
-        for record in self:
-            if record.categ_id:
-                record.valuation = record.categ_id.property_valuation
-            elif record.env.user.has_group('stock_account.group_stock_accounting_automatic'):
-                record.valuation = 'real_time'
-            else:
-                record.valuation = 'manual_periodic'
+        product_with_catogory = self.filtered('categ_id')
+        has_group_stock_accounting_automatic = self.env.user.has_group(
+            'stock_account.group_stock_accounting_automatic'
+        )
+        if has_group_stock_accounting_automatic:
+            (self - product_with_catogory).valuation = 'real_time'
+        else:
+            (self - product_with_catogory).valuation = 'manual_periodic'
+        for product in product_with_catogory:
+            product.valuation = product.categ_id.property_valuation
 
     @api.depends("categ_id")
     def _compute_cost_method(self):
-        for record in self:
-            record.cost_method = record.categ_id.property_cost_method if record.categ_id else "standard"
+        for product in self:
+            if product.categ_id:
+                product.cost_method = product.categ_id.property_cost_method
+            else:
+                product.cost_method = "standard"
+
 
     def write(self, vals):
         if 'standard_price' in vals and not self.env.context.get('disable_auto_svl'):

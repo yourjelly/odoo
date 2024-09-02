@@ -12,10 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '6',
             'property_account_receivable_id': 'mt_2050',
             'property_account_payable_id': 'mt_3100',
-            'property_account_expense_categ_id': 'mt_5550',
-            'property_account_income_categ_id': 'mt_5000',
-            'property_account_expense_company_id': 'mt_5550',
-            'property_account_income_company_id': 'mt_5000',
         }
 
     @template('mt', 'res.company')
@@ -31,5 +27,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'expense_currency_exchange_account_id': 'mt_5540',
                 'account_sale_tax_id': 'VAT_S_IN_MT_18_G',
                 'account_purchase_tax_id': 'VAT_P_IN_MT_18_G',
+                'property_account_expense_company_id': 'mt_5550',
+                'property_account_income_company_id': 'mt_5000',
             },
         }

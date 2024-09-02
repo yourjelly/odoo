@@ -11,10 +11,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '4',
             'property_account_receivable_id': 'cy_1100',
             'property_account_payable_id': 'cy_2100',
-            'property_account_expense_categ_id': 'cy_5100',
-            'property_account_income_categ_id': 'cy_4000',
-            'property_account_expense_company_id': 'cy_5100',
-            'property_account_income_company_id': 'cy_4000',
         }
 
     @template('cy', 'res.company')
@@ -30,5 +26,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'expense_currency_exchange_account_id': 'cy_7910',
                 'account_sale_tax_id': 'VAT_S_IN_CY_19_G',
                 'account_purchase_tax_id': 'VAT_P_IN_CY_19_G',
+                'property_account_expense_company_id': 'cy_5100',
+                'property_account_income_company_id': 'cy_4000',
             },
         }

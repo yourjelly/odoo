@@ -11,10 +11,6 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_receivable_id': 'l10n_pk_1121001',
             'property_account_payable_id': 'l10n_pk_2221001',
-            'property_account_income_categ_id': 'l10n_pk_3111001',
-            'property_account_expense_categ_id': 'l10n_pk_4111001',
-            'property_account_income_company_id': 'l10n_pk_3111001',
-            'property_account_expense_company_id': 'l10n_pk_4111001',
             'code_digits': '7',
         }
 
@@ -32,5 +28,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_early_pay_discount_gain_account_id': 'l10n_pk_3112004',
                 'account_sale_tax_id': 'pk_sales_tax_17',
                 'account_purchase_tax_id': 'purchases_tax_17',
+                'property_account_income_company_id': 'l10n_pk_3111001',
+                'property_account_expense_company_id': 'l10n_pk_4111001',
             },
         }

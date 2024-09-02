@@ -12,10 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '9',
             'property_account_receivable_id': 'cta110201',
             'property_account_payable_id': 'cta210101',
-            'property_account_income_categ_id': 'cta410101',
-            'property_account_expense_categ_id': 'cta510101',
-            'property_account_income_company_id': 'cta410101',
-            'property_account_expense_company_id': 'cta510101',
         }
 
     @template('gt', 'res.company')
@@ -31,6 +27,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'expense_currency_exchange_account_id': 'cta710101',
                 'account_sale_tax_id': 'impuestos_plantilla_iva_por_pagar',
                 'account_purchase_tax_id': 'impuestos_plantilla_iva_por_cobrar',
-
+                'property_account_income_company_id': 'cta410101',
+                'property_account_expense_company_id': 'cta510101',
             },
         }

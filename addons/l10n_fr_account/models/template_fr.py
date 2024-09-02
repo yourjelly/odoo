@@ -12,10 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': 6,
             'property_account_receivable_id': 'fr_pcg_recv',
             'property_account_payable_id': 'fr_pcg_pay',
-            'property_account_expense_categ_id': 'pcg_6071',
-            'property_account_income_categ_id': 'pcg_7071',
-            'property_account_expense_company_id': 'pcg_6071',
-            'property_account_income_company_id': 'pcg_7071',
         }
 
     @template('fr', 'res.company')
@@ -40,6 +36,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'l10n_fr_rounding_difference_profit_account_id': 'pcg_758',
                 'account_sale_tax_id': 'tva_normale',
                 'account_purchase_tax_id': 'tva_acq_normale',
+                'property_account_expense_company_id': 'pcg_6071',
+                'property_account_income_company_id': 'pcg_7071',
             },
         }
 
