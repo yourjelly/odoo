@@ -985,7 +985,7 @@ class AccountAccount(models.Model):
             records_list.append(new_accounts)
 
         records = self.env['account.account'].union(*records_list)
-        records.with_context(allowed_company_ids=records.company_ids.ids)._ensure_code_is_unique()
+        records.with_context(allowed_company_ids=records.sudo().company_ids.ids)._ensure_code_is_unique()
         return records
 
     def write(self, vals):

@@ -26,7 +26,7 @@ def add_guest_to_context(func):
         token = (
             req.cookies.get(req.env["mail.guest"]._cookie_name, "")
         )
-        guest = req.env["mail.guest"]._get_guest_from_token(token)
+        guest = req.env["mail.guest"]._get_guest_from_token(token).sudo()
         if guest and not guest.timezone and not req.env.cr.readonly:
             timezone = req.env["mail.guest"]._get_timezone_from_request(req)
             if timezone:
@@ -116,7 +116,7 @@ class MailGuest(models.Model):
     def _to_store(self, store: Store, /, *, fields=None):
         if fields is None:
             fields = ["im_status", "name", "write_date"]
-        store.add("mail.guest", self._read_format(fields, load=False))
+        store.add("mail.guest", self.sudo()._read_format(fields, load=False))
 
     def _set_auth_cookie(self):
         """Add a cookie to the response to identify the guest. Every route
@@ -127,7 +127,7 @@ class MailGuest(models.Model):
         expiration_date = datetime.now() + timedelta(days=365)
         request.future_response.set_cookie(
             self._cookie_name,
-            self._format_auth_cookie(),
+            self.sudo()._format_auth_cookie(),
             httponly=True,
             expires=expiration_date,
         )

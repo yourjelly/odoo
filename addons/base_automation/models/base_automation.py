@@ -371,7 +371,7 @@ class BaseAutomation(models.Model):
             else:
                 automation.trigger_field_ids = False
                 continue
-            if automation.model_id.is_mail_thread and automation.trigger in MAIL_TRIGGERS:
+            if automation.model_id.sudo().is_mail_thread and automation.trigger in MAIL_TRIGGERS:
                 continue
 
             automation.trigger_field_ids = self.env['ir.model.fields'].search(domain, limit=1)
@@ -551,7 +551,7 @@ class BaseAutomation(models.Model):
             :returns: dict -- evaluation context given to safe_eval
         """
         self.ensure_one()
-        model = self.env[self.model_name]
+        model = self.env[self.sudo().model_name]
         eval_context = {
             'datetime': safe_eval.datetime,
             'dateutil': safe_eval.dateutil,
