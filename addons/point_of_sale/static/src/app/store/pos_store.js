@@ -925,7 +925,7 @@ export class PosStore extends Reactive {
                     order.payment_ids.some((p) => p.payment_method_id.type === "pay_later"))
         );
         const orderToUpdate = this.models["pos.order"].filter((order) =>
-            this.pendingOrder.write.has(order.id)
+            this.pendingOrder.write.has(order.id && order.session_id)
         );
 
         return {
