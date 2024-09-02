@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="project.ProjectSharingBreadcrumbs" t-inherit="web.Breadcrumbs" t-inherit-mode="primary">
+        <xpath expr="//t[@t-set-slot='content']/t" position="after">
+            <DropdownItem>
+                <a href="/my/projects" style="color: inherit;">Projects</a>
+            </DropdownItem>
+        </xpath>
+
+        <xpath expr="//li[@t-if='collapsedBreadcrumbs.length']" position="after">
+            <t t-else="">
+                <a href="/my/projects" class="fw-bold text-truncate" t-att-data-tooltip="'Back to Projects'">Projects</a>
+                <span class="px-2">/</span>
+            </t>
+        </xpath>
+
+        <xpath expr="//div[@t-else='']" position="attributes">
+            <attribute name="class" add="flex-column " separator=" "/>
+        </xpath>
+
+        <xpath expr="//div[@t-else='']//div" position="attributes">
+            <attribute name="class" add="lh-1 fs-6" separator=" "/>
+        </xpath>
+
+        <xpath expr="//div[@t-else='']//div" position="before">
+            <ol class="breadcrumb flex-nowrap text-nowrap small lh-sm">
+                <li>
+                    <a href="/my/projects" class="fw-bold" t-att-data-tooltip="'Back to Projects'">Projects</a>
+                </li>
+            </ol>
+        </xpath>
+    </t>
+</templates>
