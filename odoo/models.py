@@ -7220,6 +7220,16 @@ class BaseModel(metaclass=MetaModel):
             records_batches.append(self.create(create_values))
         return self.concat(*records_batches)
 
+    def field_need_variation(self, field):
+        """ Check whether a given field need variation when duplicating self
+        """
+        return False
+
+    def variate_field(self, field):
+        """ Build an SQL-wrapped query to variate a given field
+        """
+        return SQL('''''')
+
 
 collections.abc.Set.register(BaseModel)
 # not exactly true as BaseModel doesn't have index or count

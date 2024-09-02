@@ -123,6 +123,9 @@ def field_need_variation(env, model, field, trigram_indexed_fields):
         """, _model._table, _field.name)
         return _env.execute_query(query)[0][0]
 
+    if model.field_need_variation(field):
+        return True
+
     # Fields used in _rec_names_search need variation for SearchViews
     if model._rec_names_search and field.name in model._rec_names_search:
         return True
@@ -142,6 +145,8 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
 
     :return: a str representing the source column, or an SQL(expression/subquery)
     """
+    if (variation_query := model.variate_field(field)):
+        return variation_query
     match field.type:
         case 'char':
             # we presume that 16 chars is enough to avoid collisions

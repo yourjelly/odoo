@@ -6,6 +6,7 @@ from . import models
 from . import report
 from . import wizard
 from . import populate
+from . import duplicate
 
 
 # TODO: Apply proper fix & remove in master
