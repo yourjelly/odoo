@@ -80,6 +80,9 @@ class HolidaysAllocation(models.Model):
         help="For an Accrual Allocation, this field contains the theorical amount of time given to the employee, due to a previous start date, on the first run of the plan. This can be manually edited.")
     duration_display = fields.Char('Allocated (Days/Hours)', compute='_compute_duration_display',
         help="Field allowing to see the allocation duration in days or hours depending on the type_request_unit")
+    last_exectued_carryover_date = fields.Date()
+    previous_level_last_date = fields.Date()
+    last_accrued_days_count = fields.Float()
     # details
     approver_id = fields.Many2one(
         'hr.employee', string='First Approval', readonly=True, copy=False,
@@ -481,6 +484,8 @@ class HolidaysAllocation(models.Model):
                     allocation.lastcall = allocation.nextcall
                 allocation.actual_lastcall = allocation.nextcall
                 allocation.nextcall = nextcall
+                if nextcall == current_level_last_date:
+                    allocation.previous_level_last_date = nextcall
                 allocation.already_accrued = False
                 if force_period and allocation.nextcall > date_to:
                     allocation.nextcall = date_to
