@@ -89,7 +89,7 @@ def setup_pid_file():
     This function assumes the configuration has been initialized.
     """
     config = odoo.tools.config
-    if not odoo.evented and config['pidfile']:
+    if config['pidfile']:
         pid = os.getpid()
         with open(config['pidfile'], 'w') as fd:
             fd.write(str(pid))

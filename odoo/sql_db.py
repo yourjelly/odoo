@@ -823,7 +823,7 @@ _Pool_readonly = None
 def db_connect(to, allow_uri=False, readonly=False):
     global _Pool, _Pool_readonly  # noqa: PLW0603 (global-statement)
 
-    maxconn = odoo.evented and tools.config['db_maxconn_gevent'] or tools.config['db_maxconn']
+    maxconn = tools.config['db_maxconn']
     if _Pool is None and not readonly:
         _Pool = ConnectionPool(int(maxconn), readonly=False)
     if _Pool_readonly is None and readonly:

@@ -41,7 +41,7 @@ def registry(database_name=None):
 
 # ----------------------------------------------------------
 # Import tools to patch code and libraries
-# required to do as early as possible for evented and timezone
+# required to do as early as possible for timezone
 # ----------------------------------------------------------
 from . import _monkeypatches
 _monkeypatches.patch_all()

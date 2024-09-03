@@ -280,11 +280,7 @@ class Websocket:
         # always sorted by notif_id ASC
         self._notif_history = []
         # Websocket start up
-        self.__selector = (
-            selectors.PollSelector()
-            if odoo.evented and hasattr(selectors, 'PollSelector')
-            else selectors.DefaultSelector()
-        )
+        self.__selector = selectors.DefaultSelector()
         self.__selector.register(self.__socket, selectors.EVENT_READ)
         self.__selector.register(self.__notif_sock_r, selectors.EVENT_READ)
         self.state = ConnectionState.OPEN

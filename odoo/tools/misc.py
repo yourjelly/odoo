@@ -905,17 +905,6 @@ def dumpstacks(sig=None, frame=None, thread_idents=None, log_level=logging.INFO)
             for line in extract_stack(stack):
                 code.append(line)
 
-    if odoo.evented:
-        # code from http://stackoverflow.com/questions/12510648/in-gevent-how-can-i-dump-stack-traces-of-all-running-greenlets
-        import gc
-        from greenlet import greenlet
-        for ob in gc.get_objects():
-            if not isinstance(ob, greenlet) or not ob:
-                continue
-            code.append("\n# Greenlet: %r" % (ob,))
-            for line in extract_stack(ob.gr_frame):
-                code.append(line)
-
     _logger.log(log_level, "\n".join(code))
 
 def freehash(arg):

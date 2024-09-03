@@ -2,7 +2,6 @@
 # ignore import not at top of the file
 import os
 import time
-from .evented import patch_evented
 
 
 def set_timezone_utc():
@@ -12,7 +11,6 @@ def set_timezone_utc():
 
 
 def patch_all():
-    patch_evented()
     set_timezone_utc()
 
     from .codecs import patch_codecs
