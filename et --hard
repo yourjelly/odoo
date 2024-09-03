@@ -1,0 +1,121 @@
+[1mdiff --git a/addons/mail/models/ir_attachment.py b/addons/mail/models/ir_attachment.py[m
+[1mindex a3dd25849d30..853ad021792c 100644[m
+[1m--- a/addons/mail/models/ir_attachment.py[m
+[1m+++ b/addons/mail/models/ir_attachment.py[m
+[36m@@ -60,7 +60,12 @@[m [mclass IrAttachment(models.Model):[m
+             for related_record, attachment in zip(related_records, attachments):[m
+                 with contextlib.suppress(AccessError):[m
+                     related_record._message_set_main_attachment_id(attachment, force=force)[m
+[31m-[m
+[32m+[m[32m    #def create(self, vals):[m
+[32m+[m[32m    #    res = super().create(vals)[m
+[32m+[m[32m    #    print(res)[m
+[32m+[m[32m    #    import traceback[m
+[32m+[m[32m    #    traceback.print_stack()[m
+[32m+[m[32m    #    return res[m
+     def _delete_and_notify(self, message=None):[m
+         if message:[m
+             # sudo: mail.message - safe write just updating the date, because guests don't have the rights[m
+[1mdiff --git a/addons/mail/models/mail_thread.py b/addons/mail/models/mail_thread.py[m
+[1mindex 7232f575eafb..73db53ad1974 100644[m
+[1m--- a/addons/mail/models/mail_thread.py[m
+[1m+++ b/addons/mail/models/mail_thread.py[m
+[36m@@ -2359,8 +2359,9 @@[m [mclass MailThread(models.AbstractModel):[m
+ [m
+                 # keep cid, name list and token synced with attachement_values_list length to match ids latter[m
+                 attachement_extra_list.append((cid, name, token))[m
+[31m-[m
+[32m+[m[32m            print(attachement_values_list)[m
+             new_attachments = self.env['ir.attachment'].sudo().create(attachement_values_list)[m
+[32m+[m[32m            print(new_attachments.mimetype)[m
+             attach_cid_mapping, attach_name_mapping = {}, {}[m
+             for attachment, (cid, name, token) in zip(new_attachments, attachement_extra_list):[m
+                 if cid:[m
+[1mdiff --git a/addons/mail/models/mail_thread_main_attachment.py b/addons/mail/models/mail_thread_main_attachment.py[m
+[1mindex 4be34f0fc440..763fb60f9d9a 100644[m
+[1m--- a/addons/mail/models/mail_thread_main_attachment.py[m
+[1m+++ b/addons/mail/models/mail_thread_main_attachment.py[m
+[36m@@ -37,6 +37,8 @@[m [mclass MailMainAttachmentMixin(models.AbstractModel):[m
+         """[m
+         if attachments and (force or not self.message_main_attachment_id):[m
+             # we filter out attachment with 'xml' and 'octet' types[m
+[32m+[m[32m            print(attachments)[m
+[32m+[m[32m            print(attachments.mapped('mimetype'))[m
+             if filter_xml:[m
+                 attachments = attachments.filtered([m
+                     lambda r: not r.mimetype.endswith('xml') and not r.mimetype.endswith('application/octet-stream')[m
+[36m@@ -44,6 +46,7 @@[m [mclass MailMainAttachmentMixin(models.AbstractModel):[m
+ [m
+             # Assign one of the attachments as the main according to the following priority: pdf, image, other types.[m
+             if attachments:[m
+[32m+[m[32m                print(attachments)[m
+                 self.with_context(tracking_disable=True).message_main_attachment_id = max([m
+                     attachments,[m
+                     key=lambda r: (r.mimetype.endswith('pdf'), r.mimetype.startswith('image'))[m
+[1mdiff --git a/addons/test_mail/tests/test_message_post.py b/addons/test_mail/tests/test_message_post.py[m
+[1mindex 2991c70efaa7..ae4bb2e45093 100644[m
+[1m--- a/addons/test_mail/tests/test_message_post.py[m
+[1m+++ b/addons/test_mail/tests/test_message_post.py[m
+[36m@@ -1173,7 +1173,7 @@[m [mclass TestMessagePost(TestMessagePostCommon, CronMixinCase):[m
+         -> we don't want XML nor Octet-Stream files to be set as message_main_attachment[m
+         """[m
+         xml_attachment, octet_attachment, pdf_attachment = ([m
+[31m-            [('List1', b'<xml>My xml attachment</xml>')],[m
+[32m+[m[32m            [('List1', b'<prout')],[m
+             [('List2', b'\x00\x01My octet-stream attachment\x03\x04')],[m
+             [('List3', b'%PDF My pdf attachment')])[m
+ [m
+[36m@@ -1203,7 +1203,7 @@[m [mclass TestMessagePost(TestMessagePostCommon, CronMixinCase):[m
+             )[m
+         self.assertFalse(test_record.message_main_attachment_id,[m
+                          'MailThread: main attachment should not be set with an XML')[m
+[31m-[m
+[32m+[m[32m        return[m
+         # test with octet attachment[m
+         with self.mock_mail_gateway():[m
+             test_record.message_post([m
+[1mdiff --git a/odoo/addons/base/models/ir_attachment.py b/odoo/addons/base/models/ir_attachment.py[m
+[1mindex 335e8195d047..7c7dfb55a563 100644[m
+[1m--- a/odoo/addons/base/models/ir_attachment.py[m
+[1m+++ b/odoo/addons/base/models/ir_attachment.py[m
+[36m@@ -312,7 +312,9 @@[m [mclass IrAttachment(models.Model):[m
+             elif values.get('datas'):[m
+                 raw = base64.b64decode(values['datas'])[m
+             if raw:[m
+[32m+[m[32m                print(raw)[m
+                 mimetype = guess_mimetype(raw)[m
+[32m+[m[32m                print(mimetype)[m
+         return mimetype and mimetype.lower() or 'application/octet-stream'[m
+ [m
+     def _postprocess_contents(self, values):[m
+[1mdiff --git a/odoo/tools/config.py b/odoo/tools/config.py[m
+[1mindex 6832f89668a8..57cb3c7a9da7 100644[m
+[1m--- a/odoo/tools/config.py[m
+[1m+++ b/odoo/tools/config.py[m
+[36m@@ -171,7 +171,7 @@[m [mclass configmanager(object):[m
+                          help="Launch a python test file.")[m
+         group.add_option("--test-enable", action="callback", callback=self._test_enable_callback,[m
+                          dest='test_enable',[m
+[31m-                         help="Enable unit tests.")[m
+[32m+[m[32m                         help="Enable unit tests. Implies stop after init")[m
+         group.add_option("--test-tags", dest="test_tags",[m
+                          help="Comma-separated list of specs to filter which tests to execute. Enable unit tests if set. "[m
+                          "A filter spec has the format: [-][tag][/module][:class][.method] "[m
+[36m@@ -189,7 +189,7 @@[m [mclass configmanager(object):[m
+                          "after each module installation/update and at the end "[m
+                          "of the modules loading. At each stage tests are filtered "[m
+                          "by --test-tags specs and additionally by dynamic specs "[m
+[31m-                         "'at_install' and 'post_install' correspondingly.")[m
+[32m+[m[32m                         "'at_install' and 'post_install' correspondingly. Implies stop after init")[m
+ [m
+         group.add_option("--screencasts", dest="screencasts", action="store", my_default=None,[m
+                          metavar='DIR',[m
+[36m@@ -552,6 +552,8 @@[m [mclass configmanager(object):[m
+             self.options['pg_path'] = opt.pg_path[m
+ [m
+         self.options['test_enable'] = bool(self.options['test_tags'])[m
+[32m+[m[32m        if self.options['test_tags']:[m
+[32m+[m[32m            self.options['stop_after_init'] = True[m
+ [m
+         if opt.save:[m
+             self.save()[m
