@@ -50,7 +50,6 @@ export class FormRenderer extends Component {
         translateAlert: { type: [Object, { value: null }], optional: true },
         onNotebookPageChange: { type: Function, optional: true },
         activeNotebookPages: { type: Object, optional: true },
-        saveRecord: { type: Function, optional: true },
         setFieldAsDirty: { type: Function, optional: true },
         slots: { type: Object, optional: true },
     };
