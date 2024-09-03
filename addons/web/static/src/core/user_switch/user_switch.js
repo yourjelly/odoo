@@ -16,7 +16,12 @@ export class UserSwitch extends Component {
         });
         this.form = document.querySelector("form.oe_login_form");
         this.form.classList.toggle("d-none", users.length > 1);
-        this.form.querySelector(":placeholder-shown")?.focus();
+        if (users.length === 1) {
+            this.form.querySelector("input#login").value = users[0].login;
+            this.form.querySelector("input#password").focus();
+        } else {
+            this.form.querySelector(":placeholder-shown")?.focus();
+        }
         useEffect(
             (el) => el?.querySelector("button.list-group-item-action")?.focus(),
             () => [this.root.el]
