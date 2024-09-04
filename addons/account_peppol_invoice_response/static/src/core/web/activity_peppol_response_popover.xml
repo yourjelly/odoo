@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="account_peppol_invoice_response.peppol_response_popover">
+        <table class="annotation_popover" t-ref="popoverTable">
+            <h6 t-if="props.hasHeader" class="p-2 fw-bolder bg-200 border-bottom">Send Peppol Response</h6>
+            <div class="py-2 px-3">
+            <span>
+                <div>Message Type</div>
+                <select class="detail form-select"
+                        name="peppol_invoice_response_code"
+                        t-on-change="(ev) => { state['code'] = ev.target.value }">
+                    <option t-foreach="peppolInvoiceResponseCodes" t-as="code" t-key="code" t-att-value="code">
+                        <t t-esc="peppolInvoiceResponseCodes[code]"/>
+                    </option>
+                </select>
+            </span>
+
+            <t t-foreach="state.status_ids" t-as="status" t-key="status_index">
+                <PeppolInvoiceResponseStatus statusType="status['statusType']"
+                                             code="status['code']"/>
+            </t>
+
+            <button type="button"
+                    class="btn btn-link"
+                    t-on-click="onClickAddStatus">
+                <i class="fa fa-plus me-1"/> Add Status
+            </button>
+
+
+            <!-- <Dropdown togglerClass="'dropdown-toggle'" -->
+            <!--           t-on-dropdown-item-selected.stop="onDropdownItemSelected"> -->
+            <!--           <!-\- menuClass="'dropdown-menu'" > -\-> -->
+            <!--     <t t-set-slot="toggler"> -->
+            <!--         <t t-esc="peppolInvoiceResponseCodes[this.state.code]"/> -->
+            <!--     </t> -->
+            <!--     <t t-foreach="peppolInvoiceResponseCodes" t-as="response_code" t-key="response_code"> -->
+            <!--         <DropdownItem class="'o_menu_item dropdown-item'" -->
+            <!--                       onSelected="() => { state['code'] = response_code }"> -->
+            <!--             <!-\- parentClosingMode="'none'"> -\-> -->
+            <!--             <!-\- t-att-class="{ selected: response_code === state.code }" -\-> -->
+            <!--             <!-\- payload="{ interval: interval }" -\-> -->
+            <!--             <t t-esc="peppolInvoiceResponseCodes[response_code]"/> -->
+            <!--         </DropdownItem> -->
+            <!--     </t> -->
+            <!-- </Dropdown> -->
+
+
+
+
+            </div>
+        </table>
+    </t>
+</templates>
+
+
+
+            <!-- select class="dropdown-item"> --> <!--         <!-\- t-on-change="(ev) => this.onSelected(ev)"> -\-> -->
+            <!--     <option value="" disabled="true" selected="true" hidden="true">Code</option> -->
+            <!--     <option t-foreach="props.fields" t-as="field" t-key="field.name" -->
+            <!--         t-if="field.type !== 'properties' and !field.isProperty" -->
+            <!--         t-att-value="field.name" -->
+            <!--         t-esc="field.string" -->
+            <!--     /> -->
+            <!-- </select> -->

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+   <record id="activity_type_invoice_response_ack" model="mail.activity.type">
+      <field name="name">Peppol Invoice Response</field>
+      <field name="res_model">account.move</field>
+      <field name="summary">Send Invoice Acknowledgement Message</field>
+      <field name="category">peppol_invoice_response_ack</field>
+   </record>
+
+   <record id="activity_type_invoice_response_confirm" model="mail.activity.type">
+      <field name="name">Peppol Invoice Response</field>
+      <field name="res_model">account.move</field>
+      <field name="summary">Send Invoice Accepted Message</field>
+      <field name="category">peppol_invoice_response_confirm</field>
+   </record>
+
+   <record id="activity_type_invoice_response_cancel" model="mail.activity.type">
+      <field name="name">Peppol Invoice Response</field>
+      <field name="res_model">account.move</field>
+      <field name="summary">Send Invoice Canceled Message</field>
+      <field name="category">peppol_invoice_response_cancel</field>
+   </record>
+</odoo>

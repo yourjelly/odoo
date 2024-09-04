@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="account_peppol_invoice_response.peppol_response_popover_status">
+        <div class="py-2">
+            <select class="detail form-select"
+                    name="peppol_invoice_response_status_type"
+                    t-on-change="onChangeStatusType">
+                <option value="reason">Reason</option>
+                <option value="action">Action</option>
+            </select>
+
+            <select class="detail form-select"
+                    name="peppol_invoice_response_status_code"
+                    t-on-change="onChangeStatusCode">
+
+              <t t-set="codelist"
+                 t-value="{reason: statusReasonCodes, action: statusActionCodes}[state.statusType]"
+                 t-on-change="(ev) => { state['code'] = ev.target.value }"/>
+                <option t-foreach="codelist"
+                        t-as="code"
+                        t-att-value="code"
+                        t-key="code"
+                        t-esc="codelist[code]"/>
+            </select>
+
+            <t t-foreach="state.conditions" t-as="condition" t-key="condition_index">
+                <PeppolInvoiceResponseCondition attributeID="condition.attributeID"
+                                                description="state.description"/>
+            </t>
+
+            <button type="button"
+                    class="btn btn-link"
+                    t-on-click="onClickAddCondition">
+                <i class="fa fa-plus me-1"/> Add Condition
+            </button>
+
+        </div>
+    </t>
+</templates>

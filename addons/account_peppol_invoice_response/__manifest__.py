@@ -14,6 +14,13 @@
     'data': [
         'security/ir.model.access.csv',
         'data/application_response_templates.xml',
+        'data/mail_activity_type_data.xml',
+        'views/peppol_invoice_response_views.xml',
     ],
     'license': 'LGPL-3',
+    'assets': {
+        'web.assets_backend': [
+            'account_peppol_invoice_response/static/src/**/*',
+        ],
+    },
 }

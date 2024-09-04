@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="account_peppol_invoice_response.ActivityPopoverItem"
+       t-inherit="mail.ActivityListPopoverItem"
+       t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('o-mail-ActivityListPopoverItem-markAsDone')]" position="after">
+            <button class="o-mail-ActivityListPopoverItem-editbtn btn btn-sm btn-success btn-link" t-on-click="onClickEditActivityButton">
+                <i class="fa fa-mail-reply"/>
+            </button>
+        </xpath>
+    </t>
+</templates>

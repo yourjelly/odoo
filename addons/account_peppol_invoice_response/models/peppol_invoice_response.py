@@ -46,18 +46,26 @@ class AccountPeppolInvoiceResponseStatus(models.Model):
         ],
         string='Status Reason Code',
     )
-    conditions = fields.Json('Status Condtions')
+    conditions = fields.Json('Status Conditions')
 
 class AccountPeppolInvoiceResponse(models.Model):
     _name = 'account_peppol.invoice_response'
 
+    move_id = fields.Many2one('account.move')
+    activity_id = fields.One2many('mail.activity', 'account_peppol_invoice_response_id', 'Linked Activity', readonly=True)  # One2one
     direction = fields.Selection(
         string='Direction',
         selection=[('incoming', 'Incoming'), ('outgoing', 'Outgoing')],
-        required=True,
+    )
+    state = fields.Selection(
+        selection=[
+            ('draft', 'Draft'),
+            ('done', 'Done'),
+            ('error', 'Error'),
+        ],
+        default='draft',
     )
     date = fields.Date()
-    move_id = fields.Many2one('account.move')
     company_id = fields.Many2one(related='move_id.company_id')
     partner_id = fields.Many2one(related='move_id.partner_id')
 
@@ -75,3 +83,7 @@ class AccountPeppolInvoiceResponse(models.Model):
         required=True,
     )
     status_ids = fields.One2many('account_peppol.invoice_response_status', 'invoice_response_id')
+
+    def send(self):
+        """ TODO: mocked at present, write this, and synchronous endpoint on the IAP """
+        return True

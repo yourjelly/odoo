@@ -28,7 +28,7 @@
            xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
            xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
             <cac:Response>
-                <t t-set="response" t-as="vals['response']"/>
+                <t t-set="response" t-value="vals['response']"/>
                 <cbc:ResponseCode t-out="response['code']"/>
                 <cbc:EffectiveDate t-if="response.get('effective_date')" t-out="response['effective_date']"/>
                 <t t-foreach="response.get('statuses', [])" t-as="status">
@@ -45,7 +45,7 @@
                 </t>
             </cac:Response>
             <cac:DocumentReference>
-                <t t-set="docref" t-as="vals['document_reference']"/>
+                <t t-set="docref" t-value="vals['document_reference']"/>
                 <cbc:ID t-out="docref['invoice_identifier']"/>
                 <cbc:IssueDate t-out="docref['invoice_issue_date']"/>
                 <cbc:DocumentTypeCode t-out="docref['document_type_code']"/>

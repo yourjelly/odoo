@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="account_peppol_invoice_response.Activity"
+       t-inherit="mail.Activity"
+       t-inherit-mode="extension">
+        <xpath expr="//t[@name='tools']/span[hasclass('o-mail-Activity-markDone')]" position="replace">
+          <t t-if="activity.activity_category === 'peppol_invoice_response'">
+              <span class="o-mail-Activity-edit btn btn-link text-action p-0 me-3"
+                    t-on-click="peppolInvoiceResponse">
+              <i class="fa fa-mail-reply"/> Send Peppol Response
+              </span>
+          </t>
+          <t t-elif="activity.activity_category === 'peppol_invoice_response_confirm'">
+              <span class="o-mail-Activity-edit btn btn-link text-action p-0 me-3"
+                    t-on-click="acceptPeppolInvoiceResponse">
+              <i class="fa fa-mail-reply"/> Send Confirmation
+              </span>
+          </t>
+          <t t-elif="activity.activity_category === 'peppol_invoice_response_cancel'">
+              <span class="o-mail-Activity-edit btn btn-link text-action p-0 me-3"
+                    t-on-click="cancelPeppolInvoiceResponse">
+              <i class="fa fa-mail-reply"/> Send Cancelation
+              </span>
+          </t>
+          <t t-else="">
+              <span class="o-mail-Activity-markDone btn btn-link btn-success p-0 me-3" t-on-click="onClickMarkAsDone"><i class="fa fa-check"/> Mark Done</span>
+          </t>
+        </xpath>
+    </t>
+</templates>
