@@ -126,13 +126,11 @@ def field_need_variation(env, model, field, trigram_indexed_fields):
     if (need_variation := model._duplicate_field_need_variation(field)) is not None:
         return need_variation
 
-    # Fields used in _rec_names_search need variation for SearchViews
-    if model._rec_names_search and field.name in model._rec_names_search:
+    # many2one fields are not considered, as a name_search would resolve it to the _rec_names_search of the related model
+    if model._rec_names_search and field.name in model._rec_names_search and field.type != 'many2one':
         return True
-    # Date/Datetime fields are spread evenly to avoid having all records on the same day.
     if field.type in ('date', 'datetime'):
         return True
-    # Field is trigram indexed
     if field.index == 'trigram' or field.name in trigram_indexed_fields:
         return True
     return is_unique(env, model, field)
