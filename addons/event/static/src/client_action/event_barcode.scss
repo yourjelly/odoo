@@ -24,6 +24,19 @@
         max-width: 200px;
         max-height: 100px;
     }
+    // .o_barcode_mobile_container {
+    //     margin-top: 75px;
+    //     margin-bottom: 20px;
+    //     transform: scale(2.5);
+
+    //     .o_barcode_laser{
+    //         height: 2px;
+    //     }
+    //     .o_mobile_barcode{
+    //         opacity: 0;
+    //     }
+    // }
+
     @include media-breakpoint-up(md) {
         flex: 0 0 auto;
         width: 550px;

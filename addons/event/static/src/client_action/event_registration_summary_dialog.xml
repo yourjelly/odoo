@@ -7,11 +7,11 @@
             <div class="row">
                 <div class="col-lg-10 w-100 fs-2">
                     <div t-if="registrationStatus.value === 'confirmed_registration'" class="alert alert-success text-center" role="alert">
-                        <i class="fa fa-solid fa-check-circle"/><br/>
+                        <i class="fa fa-solid fa-check-circle me-2"/>
                         <span>Successfully registered!</span>
                     </div>
                     <div t-else="" class="alert alert-warning text-center" role="alert">
-                        <i class="fa fa-solid fa-exclamation-circle"/><br/>
+                        <i class="fa fa-solid fa-exclamation-circle me-2"/>
                         <t t-if="registrationStatus.value === 'need_manual_confirmation'">
                             <span>This ticket is for another event!<br/>
                             Confirm attendance ?</span>
@@ -25,6 +25,11 @@
                         <t t-elif="registrationStatus.value == 'already_registered'">
                             <span>Ticket already scanned!</span>
                         </t>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-link" t-on-click="undoRegistration" style="margin-right: 10px;">
+                            Undo
+                        </button>
                     </div>
                 </div>
             </div>
@@ -59,18 +64,10 @@
                     </table>
                 </div>
             </div>
-            <div class="d-flex flex-column align-items-start">
-                <span class="fs-2 btn btn-link ps-0" role="button" t-on-click="() => this.onRegistrationPrintPdf()">
-                    <i class="fa fa-solid fa-print"/><span > Print Ticket</span>
-                </span>
-                <span class="fs-2 btn btn-link ps-0" role="button" t-on-click="() => this.onRegistrationView()">
-                    <i class="fa fa-external-link"/><span> Open Details</span>
-                </span>
-            </div>
             <t t-set-slot="footer">
-                <button t-if="needManualConfirmation" class="btn btn-primary" t-on-click="() => this.onRegistrationConfirm()">Confirm</button>
-                <button t-elif="isBarcodeScannerSupported" class="btn btn-primary" t-on-click="() => this.onScanNext()">Scan Next</button>
-                <button class="btn btn-secondary" t-on-click="() => this.props.close()">Close</button>
+                <button class="btn btn-primary" t-on-click="() => this.onRegistrationConfirm()">Continue</button>
+                <button class="btn btn-primary" t-on-click="() => this.onRegistrationPrintPdf()">Print</button>
+                <button class="btn btn-secondary" t-on-click="() => this.onRegistrationView()">Edit</button>
             </t>
         </Dialog>
     </t>

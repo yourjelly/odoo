@@ -32,6 +32,13 @@
     }
 }
 
+// body:has(.o_event_attendee_kanban_view),
+// body:has(.o_event_registration_view_tree) {
+//     .o_menu_systray {
+//         display: none !important;
+//     }
+// }
+
 .o_event_registration_view_tree {
     .o_list_button > .o_btn_cancel_registration {
         color: $danger;
