@@ -7220,16 +7220,34 @@ class BaseModel(metaclass=MetaModel):
             records_batches.append(self.create(create_values))
         return self.concat(*records_batches)
 
-    def field_need_variation(self, field):
-        """ Check whether a given field need variation when duplicating self
+    def _duplicate_field_need_variation(self, field):
+        """
+        Hook to specify *if* a field should be varied when duplicating self
+        Possible outputs:
+        - None -> fallback to the default evaluation
+        - False -> no variation required
+        - True -> variation required
+        """
+        return None
+
+    def _duplicate_variate_field(self, field):
+        """
+        Hook to specify *how* a field should be varied
+
+        :param field: current field instance that needs variation
+        :return SQL-wrapped query expression that variates the given field
+        """
+        return SQL('')
+
+    def _duplicate_follow_related_store(self, field):
+        """
+        Hook during the duplication process, to decide how a related store field should be copied:
+        - False | None -> copy the value from the source table
+        - True -> copy by following the relation
+
+        :param field: the related store field to be evaluated
         """
         return False
-
-    def variate_field(self, field):
-        """ Build an SQL-wrapped query to variate a given field
-        """
-        return SQL('''''')
-
 
 collections.abc.Set.register(BaseModel)
 # not exactly true as BaseModel doesn't have index or count

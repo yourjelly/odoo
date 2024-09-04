@@ -123,8 +123,8 @@ def field_need_variation(env, model, field, trigram_indexed_fields):
         """, _model._table, _field.name)
         return _env.execute_query(query)[0][0]
 
-    if model.field_need_variation(field):
-        return True
+    if (need_variation := model._duplicate_field_need_variation(field)) is not None:
+        return need_variation
 
     # Fields used in _rec_names_search need variation for SearchViews
     if model._rec_names_search and field.name in model._rec_names_search:
@@ -145,7 +145,7 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
 
     :return: a str representing the source column, or an SQL(expression/subquery)
     """
-    if (variation_query := model.variate_field(field)):
+    if variation_query := model._duplicate_variate_field(field):
         return variation_query
     match field.type:
         case 'char':
@@ -197,6 +197,9 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
         case 'html':
             # For the sake of simplicity we don't vary html fields
             return field.name
+        case 'text':
+            # TODO: what do we do here? a big random string or raw copy ? raw copy during testing
+            return field.name
         # TODO: handle other types as necessary
         case _:
             raise RuntimeError(
@@ -240,13 +243,7 @@ def duplicate_field(env, model, field, duplicated, factors, trigram_indexed_fiel
         return copy(_field)
 
     def copy_related_store(_field):
-        # TODO: for some related store field, we want to copy the raw value from the table (ex: company_id on sale.order.line),
-        #  but for others (ex: sale_id on stock.picking) we would like the value to follow the *new* value that is inserted.
-        #  One need to reference values from the same row that is being inserted.
-        #  Also a hook needs to be exposed so modules can decide if they follow the relation or not.
-        #  For now, we regularly copy the field.
-        follow_m2o = False  # TODO: this should be a customizable hook
-        if follow_m2o:
+        if model._duplicate_follow_related_store(_field):
             has_column = lambda f: f.store and f.column_type
             linking_field = model._fields[_field.related.split('.')[0]]
             linking_model = env[linking_field.comodel_name]
