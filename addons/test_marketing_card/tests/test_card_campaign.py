@@ -46,6 +46,7 @@ class TestMarketingCardMail(MailCase, MarketingCardCommon):
                 record,
                 record.partner_id,
                 "sent",
+                author=self.env.user.partner_id,
                 content=f"""<div><p>Here\'s your link</p></div>\n<a class="o_no_link_popover" href="{preview_url}">Your Card</a>"""
             )
 

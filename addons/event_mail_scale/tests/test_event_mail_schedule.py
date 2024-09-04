@@ -99,7 +99,6 @@ class TestEventMailScale(EventMailSchedulerCommon, MailCommon, CronMixinCase):
              self.capture_triggers('event.event_mail_scheduler') as capture:
             self.event_cron_id.method_direct_trigger()
         self.assertEqual(sub_mail.mail_count_done, 30)
-        self.assertTrue(sub_mail.mail_done)
         self.assertFalse(capture.records)
 
         # check before event schedulers

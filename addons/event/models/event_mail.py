@@ -238,7 +238,6 @@ class EventMailScheduler(models.Model):
                 ('scheduler_id', '=', self.id),
                 ('mail_sent', '=', True),
             ])
-            self.mail_done = total_sent >= self.event_id.seats_taken
             self.mail_count_done = total_sent
             if auto_commit:
                 self.env.cr.commit()
@@ -374,9 +373,14 @@ You receive this email because you are:
     @api.model
     def schedule_communications(self, autocommit=False):
         schedulers = self.search([
+            # skip archived events
             ('event_id.active', '=', True),
+            # scheduled
+            ('scheduled_date', '<=', fields.Datetime.now()),
+            # event-based: todo / attendee-based: running until event is not done
+            '|',
             ('mail_done', '=', False),
-            ('scheduled_date', '<=', fields.Datetime.now())
+            '&', ('interval_type', '=', 'after_sub'), ('event_id.date_end', '<', self.env.cr.now()),
         ])
 
         for scheduler in schedulers:
