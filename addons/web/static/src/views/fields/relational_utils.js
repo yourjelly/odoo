@@ -539,12 +539,22 @@ export class X2ManyFieldDialog extends Component {
         config: Object,
     };
     setup() {
+        this.actionService = useService("action");
         this.archInfo = this.props.archInfo;
         this.record = this.props.record;
         this.title = this.props.title;
         this.contentClass = computeViewClassName("form", this.archInfo.xmlDoc);
         useSubEnv({ config: this.props.config });
         this.env.dialogData.dismiss = () => this.discard();
+        this.onDialogExpand = async () => {
+            await this.save({ saveAndNew: false });
+            this.actionService.doAction({
+                type: "ir.actions.act_window",
+                res_model: this.props.record.resModel,
+                res_id: this.props.record.resId,
+                views: [[false, "form"]],
+            });
+        };
 
         useBus(this.record.model.bus, "update", () => this.render(true));
 
