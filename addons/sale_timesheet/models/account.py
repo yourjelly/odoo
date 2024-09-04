@@ -27,7 +27,8 @@ class AccountAnalyticLine(models.Model):
         return expression.OR([domain, [('qty_delivered_method', '=', 'timesheet')]])
 
     def _get_sellable_line_domain(self, domain):
-        return self.env['project.task']._get_sellable_line_domain(domain)
+        # TODO: remove me in master
+        return domain
 
     def _domain_so_line(self):
         domain = expression.AND([
