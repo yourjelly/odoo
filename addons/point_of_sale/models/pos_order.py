@@ -91,6 +91,9 @@ class PosOrder(models.Model):
         """
         draft = True if order.get('state') == 'draft' else False
         pos_session = self.env['pos.session'].browse(order['session_id'])
+        if not pos_session and existing_order:
+            pos_session = existing_order.session_id
+
         if pos_session.state == 'closing_control' or pos_session.state == 'closed':
             order['session_id'] = self._get_valid_session(order).id
 
