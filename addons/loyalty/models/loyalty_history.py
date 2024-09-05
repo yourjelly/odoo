@@ -8,10 +8,13 @@ class LoyaltyHistory(models.Model):
     _description = "History for Loyalty cards and Ewallets"
     _order = 'create_date desc'
 
-    description = fields.Text(required=True)
     card_id = fields.Many2one(comodel_name='loyalty.card', required=True, ondelete='cascade')
-    # date = fields.Datetime(default=fields.Datetime.now(), store=True)
+    description = fields.Text(required=True)
     issued = fields.Float()
     new_balance = fields.Float()
     order_id = fields.Reference(selection=[], readonly=True, store=True, ondelete='cascade')
     used = fields.Float()
+
+    def _get_order_portal_url(self):
+        self.ensure_one()
+        return False

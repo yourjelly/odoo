@@ -4,7 +4,7 @@ import publicWidget from '@web/legacy/js/public/public_widget';
 import { rpc } from '@web/core/network/rpc';
 
 publicWidget.registry.PortalLoyaltyWidget = publicWidget.Widget.extend({
-    selector: '.o_loyalty_card_modal_selector',
+    selector: '.o_loyalty_card',
     events: {
         'click .o_loyalty_button_click': '_onPortalLoyalty',
     },
@@ -12,7 +12,7 @@ publicWidget.registry.PortalLoyaltyWidget = publicWidget.Widget.extend({
     showRewards: false,
     async _loadData(ev){
         const card_id = ev.currentTarget.dataset.card;
-        let result = await rpc("/my/loyalty_portal_values", {"card_id": card_id});
+        let result = await rpc("/get/loyalty_card/values", {"card_id": card_id});
         return {
             ...result,
             'showRewards': this.showRewards,

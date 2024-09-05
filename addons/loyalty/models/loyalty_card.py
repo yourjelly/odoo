@@ -41,7 +41,11 @@ class LoyaltyCard(models.Model):
 
     use_count = fields.Integer(compute='_compute_use_count')
     active = fields.Boolean(default=True)
-    history_ids = fields.One2many(comodel_name='loyalty.history', inverse_name='card_id')
+    history_ids = fields.One2many(
+        comodel_name='loyalty.history',
+        inverse_name='card_id',
+        readonly=True,
+    )
 
     _sql_constraints = [
         ('card_code_unique', 'UNIQUE(code)', 'A coupon/loyalty card must have a unique code.')

@@ -43,7 +43,7 @@
                                     <t t-out="line.description"/>
                                 </t>
                             </div>
-                            <div t-out="line.used" class="text-end col-5"/>
+                            <div t-out="line.points" class="text-end col-5"/>
                         </div>
                     </t>
                     <t t-else="">
