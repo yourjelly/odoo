@@ -11,7 +11,7 @@
                     <img class="o-mail-MessageInReply-avatar me-2 rounded" t-att-src="authorAvatarUrl" t-att-title="props.message.parentMessage.author?.name ?? props.message.parentMessage.email_from" alt="Avatar"/>
                     <span class="o-mail-MessageInReply-content overflow-hidden smaller">
                         <b><t t-out="props.message.parentMessage.author?.name ?? props.message.parentMessage.email_from"/></b>:
-                        <span class="o-mail-MessageInReply-message ms-1 text-break">
+                        <span class="o-mail-MessageInReply-message text-break">
                             <t t-if="!props.message.parentMessage.isBodyEmpty">
                                 <t t-out="props.message.parentMessage.body"/>
                             </t>
