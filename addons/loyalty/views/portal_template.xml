@@ -17,9 +17,9 @@
                         >
                             <img
                                 class="img-fluid"
-                                t-att-src="'/loyalty/static/src/img/award.svg'
+                                t-att-src="'/loyalty/static/src/img/loyalty.svg'
                                     if program == 'loyalty'
-                                    else '/loyalty/static/src/img/wallet.svg'"
+                                    else '/loyalty/static/src/img/ewallet.svg'"
                                 width="40"
                             />
                             <div class="d-flex flex-column gap-1">

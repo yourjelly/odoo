@@ -87,7 +87,7 @@ class LoyaltyGenerateWizard(models.TransientModel):
         coupon = self.env['loyalty.card'].create(coupon_create_vals)
         for record in coupon:
             self.env['loyalty.history'].create({
-                'description': self.description if self.description else 'Gift for customer',
+                'description': self.description or 'Gift for customer',
                 'card_id': record.id,
                 'issued': self.points_granted,
                 'new_balance': self.points_granted,

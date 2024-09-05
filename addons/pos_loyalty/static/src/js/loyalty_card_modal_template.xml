@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="pos_loyalty.modal_loyalty_card_barcode" t-inherit="loyalty.modal_loyalty_card" t-inherit-mode="extension">
-        <xpath expr="//Dialog/div/div[@id='history_lines']" position="replace" >
+        <xpath expr="//Dialog/div/div[@id='history_lines']" position="before" >
             <div t-if="props.program.program_type == 'loyalty'"
                 class="d-flex align-items-center flex-column">
                 <img t-att-src="`/report/barcode/Code128/${props.card.code}?&amp;width=350&amp;height=100`"

@@ -17,7 +17,7 @@ class LoyaltyHistoryWizard(models.TransientModel):
         readonly=True,
         default=lambda self: self.env.context.get('old_balance', False),
     )
-    new_balance = fields.Float(string="New balance", default=200.0)
+    new_balance = fields.Float(string="New balance")
     description = fields.Char(string="Descriptions")
 
     @api.depends('card_id')
@@ -30,7 +30,7 @@ class LoyaltyHistoryWizard(models.TransientModel):
             raise ValidationError(_("Invalid balance"))
         self.env['loyalty.history'].create({
                 'card_id': self.card_id.id,
-                'description': self.description if self.description else "Gift for customer",
+                'description': self.description or "Gift for customer",
                 'used': self.old_balance - self.new_balance
                     if self.old_balance > self.new_balance else 0,
                 'issued': self.new_balance - self.old_balance

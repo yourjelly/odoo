@@ -52,34 +52,22 @@ class PosOrder(models.Model):
             'payload': {},
         }
 
-    def _add_loyalty_history_lines(self, coupon_data, coupon_new_id_map):
-        for record in self:
-            points_per_coupon = defaultdict(lambda: {'issued': 0, 'cost': 0})
-            all_coupons = record.env['loyalty.card'].browse(coupon_new_id_map.keys())
 
-            for coupon in all_coupons:
-                coupon_id = coupon_new_id_map[coupon.id]
-                points = coupon_data[coupon_id]['points']
-                if points > 0:
-                    points_per_coupon[coupon]['issued'] += points
-
-            for line in record.lines:
-                if line.reward_id and line.coupon_id:
-                    points_per_coupon[line.coupon_id]['cost'] += line.points_cost
-
-            for coupon, values in points_per_coupon.items():
-                issued = values['issued']
-                cost = values['cost']
-                if issued or cost:
-                    new_balance = coupon.points - cost + issued
-                    record.env['loyalty.history'].create({
-                        'card_id': coupon.id,
-                        'order_id': '%s,%i' % (record._name, record.id),
-                        'description': _('Onsite Purchase %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                        'used': cost,
-                        'issued': issued,
-                        'new_balance': new_balance
-                    })
+    def add_loyalty_history_lines(self, coupon_data, coupon_updates):
+        id_mapping = {item['old_id']: int(item['id']) for item in coupon_updates}
+        for coupon in coupon_data:
+            issued = coupon['won']
+            cost = coupon['spent']
+            card = self.env['loyalty.card'].browse(id_mapping[int(coupon['card_id'])])
+            if issued or cost:
+                self.env['loyalty.history'].create({
+                    'card_id': id_mapping[int(coupon['card_id'])],
+                    'order_id': '%s,%i' % (self._name, int(coupon['order_id'])),
+                    'description': _('Onsite Purchase %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                    'used': cost,
+                    'issued': issued,
+                    'new_balance': card.points
+                })
 
     def confirm_coupon_programs(self, coupon_data):
         """
@@ -126,7 +114,6 @@ class PosOrder(models.Model):
         for old_id, new_id in zip(coupons_to_create.keys(), new_coupons):
             coupon_new_id_map[new_id.id] = old_id
 
-        self._add_loyalty_history_lines(coupon_data, coupon_new_id_map)
 
         all_coupons = self.env['loyalty.card'].browse(coupon_new_id_map.keys()).exists()
         lines_per_reward_code = defaultdict(lambda: self.env['pos.order.line'])

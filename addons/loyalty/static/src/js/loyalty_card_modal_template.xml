@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="loyalty.modal_loyalty_card">
-        <Dialog size="'md'" footer="false" t-on-click="props.close">
-            <t t-set-slot="header">
-                <div class="d-flex justify-content-between w-100 align-items-center" t-on-click.stop="">
+        <Dialog size="'md'" header="false" footer="false" t-on-click="props.close">
+            <div class="d-flex align-items-center" t-on-click.stop="">
+                <div class="d-flex justify-content-between w-100 align-items-center">
                     <div class="d-flex align-items-center gap-2">
                         <img
                             class="img-fluid"
@@ -20,7 +20,8 @@
                     </div>
                 </div>
                 <div type="button" class="d-sm-block btn-close p-0 p-md-2" t-on-click="props.close"></div>
-            </t>
+            </div>
+            <hr/>
             <div class="mt-0 pt-0" t-on-click.stop="">
                 <div t-if="props.program.program_type != 'loyalty'" id="history_lines">
                     <t t-if="props.history_lines.length">
