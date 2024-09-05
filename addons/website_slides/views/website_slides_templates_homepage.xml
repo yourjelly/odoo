@@ -137,11 +137,9 @@
                         </div>
                         <div class="o_wslides_home_content_section mb-5"
                             t-if="channels_popular">
-                            <div class="row o_wslides_home_content_section_title align-items-center">
-                                <div class="col">
-                                    <a href="slides/all" class="float-end">View all</a>
-                                    <h5 class="mb-3">Most popular courses</h5>
-                                </div>
+                            <div class="d-flex justify-content-between o_wslides_home_content_section_title">
+                                <h5 class="mb-3">Most popular courses</h5>
+                                <a href="slides/all" class="float-end">View all</a>
                             </div>
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4">
                                 <t t-foreach="channels_popular[:3]" t-as="channel">
@@ -153,11 +151,9 @@
                         </div>
                         <div class="o_wslides_home_content_section mb-5"
                             t-if="channels_newest">
-                            <div class="row o_wslides_home_content_section_title align-items-center">
-                                <div class="col">
-                                    <a href="slides/all" class="float-end">View all</a>
-                                    <h5 class="mb-3">Newest courses</h5>
-                                </div>
+                            <div class="o_wslides_home_content_section_title d-flex justify-content-between">
+                                <h5 class="mb-3">Newest courses</h5>
+                                <a href="slides/all" class="float-end">View all</a>
                             </div>
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4">
                                 <t t-foreach="channels_newest[:3]" t-as="channel">
