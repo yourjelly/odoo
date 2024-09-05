@@ -19,26 +19,28 @@
                         </i>
                     </div>
                 </div>
-                <div type="button" class="d-sm-block btn-close p-0 p-md-2" t-on-click="props.close"></div>
+                <div
+                    type="button"
+                    class="d-sm-block btn-close p-0 p-md-2"
+                    t-on-click="props.close">
+                </div>
             </div>
             <hr/>
             <div class="mt-0 pt-0" t-on-click.stop="">
-                <div t-if="props.program.program_type != 'loyalty'" id="history_lines">
+                <div t-if="props.program.program_type == 'loyalty'" id="history_lines">
                     <t t-if="props.history_lines.length">
                         <strong>Last Transactions</strong>
-                        <div t-if="line_index&lt;5"
+                        <div
                             t-foreach="props.history_lines"
                             t-as="line"
                             t-key="line_index"
-                            class="row px-2">
+                            class="row px-2"
+                        >
                             <div class="col-7">
-                                <t t-if="line.order_id">
-                                    <a t-if="line.order_portal_url" t-att-href="line.order_portal_url">
+                                <t t-if="line.order_id and line.order_portal_url">
+                                    <a t-att-href="line.order_portal_url">
                                         <t t-out="line.description"/>
                                     </a>
-                                    <t t-else="">
-                                        <t t-out="line.description"/>
-                                    </t>
                                 </t>
                                 <t t-else="">
                                     <t t-out="line.description"/>
@@ -54,32 +56,39 @@
                     </t>
                     <br/>
                 </div>
-                <div t-if="props.program.program_type == 'ewallet'">
-                    <form action="/topup" method="post" name="topup_wallet"
-                        t-if="props.trigger_products.length">
+                <div t-else="">
+                    <form
+                        action="/topup"
+                        method="post"
+                        name="topup_wallet"
+                        t-if="props.trigger_products.length"
+                    >
                         <div class="d-flex justify-content-center">
-                            <select class="text-center w-25 border-0 border-bottom
-                                border-black bg-body me-2" name="product">
-                                <option t-foreach="props.trigger_products"
+                            <select
+                                class="text-center w-25 border-0 border-bottom border-black bg-body me-2"
+                                name="product"
+                            >
+                                <option
+                                    t-foreach="props.trigger_products"
                                     t-as="product"
                                     t-key="product_index"
-                                    t-att-value="product.id">
-                                    <t
-                                        t-out="product.list_price"
-                                    />
+                                    t-att-value="product.id"
+                                >
+                                    <t t-out="product.list_price"/>
                                 </option>
                             </select>
-                            <input type="hidden" name="csrf_token"
-                                t-att-value="csrf_token"/>
+                            <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
                             <button type="submit" class="btn btn-primary">
                                 Top up now
                             </button>
                         </div>
                     </form>
                 </div>
-                <a t-att-href="'/my/loyalty_card/history/' + props.card.id" id="more_history">
-                    -> See History
-                </a>
+                <div class="d-flex justify-content-between" name="history_div">
+                    <a t-att-href="'/my/loyalty_card/history/' + props.card.id">
+                        -> See History
+                    </a>
+                </div>
             </div>
         </Dialog>
     </t>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="loyalty_update_balance_wizard_view_form" model="ir.ui.view">
-        <field name="name">loyalty.card.points.change.wizard.view.form</field>
-        <field name="model">loyalty.card.points.change.wizard</field>
+    <record id="loyalty_card_update_balance_form" model="ir.ui.view">
+        <field name="name">loyalty.card.update.balance.view.form</field>
+        <field name="model">loyalty.card.update.balance</field>
         <field name="arch" type="xml">
             <form string="Update Balance">
                 <sheet>
@@ -15,15 +15,14 @@
                 </sheet>
                 <footer>
                     <button
-                        name="change_card_balance"
+                        name="action_update_card_point"
                         type="object"
                         class="btn-primary"
+                        data-hotkey="s"
                     >
                         Confirm
                     </button>
-                    <button special="cancel" data-hotkey="x">
-                        Cancel
-                    </button>
+                    <button special="cancel" data-hotkey="x">Cancel</button>
                 </footer>
             </form>
         </field>

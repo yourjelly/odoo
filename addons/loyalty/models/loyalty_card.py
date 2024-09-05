@@ -181,13 +181,13 @@ class LoyaltyCard(models.Model):
 
     def action_loyalty_update_balance(self):
         return {
-            'name': _('Change Points'),
+            'name': _('Update Balance'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'res_model': 'loyalty.card.points.change.wizard',
+            'res_model': 'loyalty.card.update.balance',
             'target': 'new',
             'context': {
                 'default_card_id': self.id,
-                'old_balance': self.points,
+                'default_old_balance': self.points,
             },
         }

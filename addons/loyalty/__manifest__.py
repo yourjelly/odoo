@@ -13,8 +13,8 @@
         'report/loyalty_report.xml',
         'data/mail_template_data.xml',
         'data/loyalty_data.xml',
+        'wizard/loyalty_card_update_balance_views.xml',
         'wizard/loyalty_generate_wizard_views.xml',
-        'wizard/loyalty_card_points_change_wizard_view.xml',
         'views/loyalty_card_views.xml',
         'views/loyalty_mail_views.xml',
         'views/loyalty_program_views.xml',
@@ -28,15 +28,14 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'loyalty/static/src/js/loyalty_card_list_view.js',
-            'loyalty/static/src/js/loyalty_control_panel_widget.js',
-            'loyalty/static/src/js/loyalty_list_view.js',
-            'loyalty/static/src/scss/loyalty.scss',
-            'loyalty/static/src/xml/loyalty_templates.xml',
+            'loyalty/static/src/js/**/*.js',
+            'loyalty/static/src/scss/*.scss',
+            'loyalty/static/src/xml/*.xml',
+
+            ('remove', 'loyalty/static/src/js/portal/**/*'),
         ],
         'web.assets_frontend': [
-            'loyalty/static/src/js/loyalty_card_modal_template.xml',
-            'loyalty/static/src/js/loyalty_card_modal.js',
+            'loyalty/static/src/js/portal/**/*',
         ],
     },
     'installable': True,

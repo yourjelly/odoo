@@ -1,7 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import defaultdict
-
 from odoo import _, fields
 from odoo.http import request, route
 from odoo.tools.misc import formatLang
@@ -13,17 +11,17 @@ class CustomerPortalLoyalty(CustomerPortal):
 
     def _prepare_portal_layout_values(self):
         values = super()._prepare_portal_layout_values()
-        all_cards = request.env['loyalty.card'].sudo().search([
-            ('partner_id', '=', request.env.user.partner_id.id),
-            ('program_id.active', '=', True),
-            ('program_id.program_type', 'in', ['loyalty', 'ewallet']),
-            '|', ('expiration_date', '>=', fields.Date().today()), ('expiration_date', '=', False),
-        ])
-        programs = defaultdict(list)
-        for card in all_cards:
-            program_type = card.program_id.program_type
-            programs[program_type].append(card)
-        values['loyalty_programs'] = programs
+        cards_per_programs =  dict(request.env['loyalty.card'].sudo()._read_group(
+            domain=[
+                ('partner_id', '=', request.env.user.partner_id.id),
+                ('program_id.active', '=', True),
+                ('program_id.program_type', 'in', ['loyalty', 'ewallet']),
+                '|', ('expiration_date', '>=', fields.Date().today()), ('expiration_date', '=', False),
+            ],
+            groupby=['program_id'],
+            aggregates=['id:recordset']
+        ))
+        values['cards_per_programs'] = cards_per_programs
 
         return values
 
