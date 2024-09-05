@@ -1,17 +1,14 @@
 // import { standardFieldProps } from '@web/views/fields/standard_field_props';
 import { registry } from '@web/core/registry';
-import { BinaryField, binaryField } from "@web/views/fields/binary/binary_field";
+import { BinaryField } from "@web/views/fields/binary/binary_field";
 import { onWillRender, toRaw } from "@odoo/owl";
 
 export class LoyaltyTotalComponent extends BinaryField {
     static template = "sale_loyalty.sale_order_loyalty_table";
-    static props = {
-        ...binaryField,
-    };
+    static props = ['*']
 
     setup() {
         this.loyalty_card = {};
-        this.formatData(this.props);
         onWillRender(() => this.formatData(this.props));
     }
 

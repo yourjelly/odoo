@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <templates>
     <t t-name="sale_loyalty.sale_order_loyalty_table">
         <t t-set="loyalty_card" t-value="props.loyalty_card"/>

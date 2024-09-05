@@ -10,7 +10,7 @@
                     <group>
                         <field name="old_balance"/>
                         <field name="new_balance"/>
-                        <field name="description"/>
+                        <field name="description" placeholder="Gift for customer"/>
                     </group>
                 </sheet>
                 <footer>
@@ -27,12 +27,5 @@
                 </footer>
             </form>
         </field>
-    </record>
-
-    <record id="loyalty_update_balance_wizard_action" model="ir.actions.act_window">
-        <field name="name">Update Balance</field>
-        <field name="res_model">loyalty.card.points.change.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
     </record>
 </odoo>

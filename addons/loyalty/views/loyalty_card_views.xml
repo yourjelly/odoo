@@ -13,7 +13,7 @@
                             <field name="partner_id"/>
                             <label string="Balance" for="points_display"/>
                             <button
-                                name="loyalty_update_balance_wizard_action"
+                                name="action_loyalty_update_balance"
                                 class="p-0 text-info fw-normal"
                                 type="object"
                             >

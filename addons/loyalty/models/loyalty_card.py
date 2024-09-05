@@ -175,7 +175,7 @@ class LoyaltyCard(models.Model):
             self._send_points_reach_communication(points_changes)
         return res
 
-    def loyalty_update_balance_wizard_action(self):
+    def action_loyalty_update_balance(self):
         return {
             'name': _('Change Points'),
             'type': 'ir.actions.act_window',
@@ -183,7 +183,7 @@ class LoyaltyCard(models.Model):
             'res_model': 'loyalty.card.points.change.wizard',
             'target': 'new',
             'context': {
-                'card_id': self.id,
+                'default_card_id': self.id,
                 'old_balance': self.points,
             },
         }

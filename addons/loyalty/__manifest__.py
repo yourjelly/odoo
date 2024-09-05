@@ -14,7 +14,7 @@
         'data/mail_template_data.xml',
         'data/loyalty_data.xml',
         'wizard/loyalty_generate_wizard_views.xml',
-        'wizard/loyalty_history_wizard_view.xml',
+        'wizard/loyalty_card_points_change_wizard_view.xml',
         'views/loyalty_card_views.xml',
         'views/loyalty_mail_views.xml',
         'views/loyalty_program_views.xml',

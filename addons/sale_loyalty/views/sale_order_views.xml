@@ -30,20 +30,11 @@
             <xpath expr="//tree//field[@name='tax_id']" position="attributes">
                 <attribute name="readonly" add="is_reward_line" separator=" or "/>
             </xpath>
-        </field>
-    </record>
-
-    <record id="sale_order_form_loyalty_values" model="ir.ui.view">
-        <field name="name">sale.order.form.loyalty.view</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_order_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//group[@name='note_group']" position="after">
+            <group name='note_group' position="after">
                 <group class="d-flex flex-row-reverse oe_subtotal_footer border-0">
                     <field name="loyalty_total" widget="loyalty-total-values" nolabel="1" readonly="1"/>
                 </group>
-            </xpath>
+            </group>
         </field>
     </record>
-
 </odoo>

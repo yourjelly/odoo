@@ -62,35 +62,6 @@
         </xpath>
     </template>
 
-    <template id="sale_order_loyalty_table_template">
-        <table class="table table-sm" t-if="sale_order.state == 'sale' and loyalty_card">
-            <tr class="border-0">
-                <td><strong>Loyalty Card</strong></td>
-                <td class="text-end">
-                    <span t-out="loyalty_card['old_balance']"/> <span class="d-none d-md-inline" t-out="point_name"/>
-                </td>
-            </tr>
-            <tr>
-                <td>Issued</td>
-                <td class="text-end">
-                    <span t-out="loyalty_card['issued']"/> <span class="d-none d-md-inline" t-out="point_name"/>
-                </td>
-            </tr>
-            <tr>
-                <td>Used</td>
-                <td class="text-end">
-                    <span t-out="loyalty_card['cost']"/> <span class="d-none d-md-inline" t-out="point_name"/>
-                </td>
-            </tr>
-            <tr style="border-bottom-style:hidden">
-                <td><strong>New Balance</strong></td>
-                <td class="text-end">
-                    <span t-out="loyalty_card['new_balance']"/> <span class="d-none d-md-inline" t-out="point_name"/>
-                </td>
-            </tr>
-        </table>
-    </template>
-
     <template id="sale_order_portal_loyalty_values" inherit_id="sale.sale_order_portal_content">
         <div id="total" position="attributes">
             <attribute name="class" add="d-flex gap-2" separator=" "/>

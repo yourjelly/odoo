@@ -34,11 +34,11 @@ class SaleOrder(models.Model):
         return _('Order %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
     def _add_loyalty_history_lines(self):
-        for record in self:
-            if record.state != 'sale':
+        for order in self:
+            if order.state != 'sale':
                 continue
 
-            points_per_coupon = record._get_loyalty_card_point_details()
+            points_per_coupon = order._get_loyalty_card_point_details()
 
             for coupon, values in points_per_coupon.items():
                 cost = values.get('cost', 0.0)
@@ -46,7 +46,7 @@ class SaleOrder(models.Model):
                 if not issued and not cost:
                     continue
                 existing_line = coupon.history_ids.filtered(
-                    lambda h: h.order_id and h.order_id.id == record.id
+                    lambda h: h.order_id and h.order_id.id == order.id
                 )
                 if existing_line:
                     old_balance = existing_line.new_balance + existing_line.used - existing_line.issued
@@ -57,9 +57,9 @@ class SaleOrder(models.Model):
                         'new_balance': new_balance
                     })
                 else:
-                    record.env['loyalty.history'].create({
+                    order.env['loyalty.history'].create({
                         'card_id': coupon.id,
-                        'order_id': '%s,%i' % (record._name, record.id),
+                        'order_id': '%s,%i' % (order._name, order.id),
                         'description': self._get_history_line_description(),
                         'used': cost,
                         'issued': issued,

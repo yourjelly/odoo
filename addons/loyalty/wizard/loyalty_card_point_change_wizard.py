@@ -9,15 +9,16 @@ class LoyaltyHistoryWizard(models.TransientModel):
     card_id = fields.Many2one(
         comodel_name='loyalty.card',
         required=True,
-        default=lambda self: self.env.context.get('card_id', False)
+        readonly=True,
+        default=lambda self: self.env.context.get('default_card_id', False),
     )
     old_balance = fields.Float(
         string="Old balance",
-        default=lambda self: self.env.context.get('old_balance', False),
         readonly=True,
+        default=lambda self: self.env.context.get('old_balance', False),
     )
     new_balance = fields.Float(string="New balance", default=200.0)
-    description = fields.Char(string="Descriptions", default="Gift for Customer")
+    description = fields.Char(string="Descriptions")
 
     @api.depends('card_id')
     def _compute_old_balance(self):
@@ -29,7 +30,7 @@ class LoyaltyHistoryWizard(models.TransientModel):
             raise ValidationError(_("Invalid balance"))
         self.env['loyalty.history'].create({
                 'card_id': self.card_id.id,
-                'description': self.description,
+                'description': self.description if self.description else "Gift for customer",
                 'used': self.old_balance - self.new_balance
                     if self.old_balance > self.new_balance else 0,
                 'issued': self.new_balance - self.old_balance

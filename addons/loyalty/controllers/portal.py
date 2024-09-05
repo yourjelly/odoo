@@ -100,31 +100,25 @@ class CustomerPortalLoyalty(CustomerPortal):
                 'program_name': dict(card_sudo.program_id._fields['program_type'].selection)[card_sudo.program_id.program_type],
                 "program_type": card_sudo.program_id.program_type,
             },
-            'history_lines': [
-                {
+            'history_lines': [{
                     'order_id': line.order_id,
                     'description': line.description,
                     'order_portal_url': line.order_id.get_portal_url() if line.order_id and line.order_id._name == 'sale.order' else None,
                     'used': f"""{'-' if line.issued < line.used else '+'}
                                 {card_sudo._format_points(abs(line.issued - line.used))}"""
-                } for line in card_sudo.history_ids[:5]
-            ],
-            'trigger_products': [
-                {
+                } for line in card_sudo.history_ids[:5]],
+            'trigger_products': [{
                     'id': product.id,
                     'list_price': formatLang(
                         request.env,
                         product.lst_price,
                         currency_obj=product.currency_id
                     ),
-                } for product in card_sudo.program_id.trigger_product_ids
-            ],
-            'rewards': [
-                {
+                } for product in card_sudo.program_id.trigger_product_ids],
+            'rewards': [{
                     'description': reward.description,
                     'points': card_sudo._format_points(reward.required_points),
-                } for reward in card_sudo.program_id.reward_ids
-            ],
+                } for reward in card_sudo.program_id.reward_ids],
             'img_path': '/loyalty/static/src/img/award.svg' if card_sudo.program_id.program_type == 'loyalty'
                 else '/loyalty/static/src/img/wallet.svg',
         }
