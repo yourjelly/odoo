@@ -7,25 +7,23 @@
     <t t-call="website.layout">
         <div id="wrap" class="wrap o_wslides_wrap">
             <div class="oe_structure oe_empty"/>
-            <div class="container mt16 o_wslides_home_nav position-relative">
-                <nav class="navbar navbar-expand-lg navbar-light shadow-sm">
-                    <t t-call="website.website_search_box_input">
-                        <t t-set="_form_classes" t-valuef="o_wslides_nav_navbar_right order-lg-3"/>
-                        <t t-set="search_type" t-valuef="slides"/>
-                        <t t-set="action" t-valuef="/slides/all"/>
-                        <t t-set="display_description" t-valuef="true"/>
-                        <t t-set="display_detail" t-valuef="false"/>
-                        <t t-set="placeholder">Search courses</t>
-                        <input type="hidden" name="prevent_redirect" value="True"/>
-                    </t>
-                    <button class="navbar-toggler px-2 order-1" type="button"
-                        data-bs-toggle="collapse" data-bs-target="#navbarSlidesHomepage"
-                        aria-controls="navbarSlidesHomepage" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"/>
-                    </button>
-                    <div class="collapse navbar-collapse order-2" id="navbarSlidesHomepage">
-                        <div class="navbar-nav pt-3 pt-lg-0">
-                            <a class="nav-link nav-link me-md-2 o_wslides_home_all_slides" href="/slides/all"><i class="fa fa-graduation-cap me-1"/>All courses</a>
+            <div class="container mt-3 mb-3 mb-lg-0 o_wslides_home_nav position-relative">
+                <nav class="navbar navbar-expand-lg flex-wrap align-items-center justify-content-lg-end gap-2 w-100 mb-0 mb-lg-4">
+                    <h4 class="me-auto my-0 pe-sm-4">Courses</h4>
+                    <div class="d-flex flex-wrap flex-md-nowrap justify-content-between gap-2 w-100 w-lg-auto">
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-light o_wslides_home_all_slides" href="/slides/all"><i class="fa fa-graduation-cap me-1"/>All courses</a>
+                        </div>
+                        <div class="o_wslides_search d-flex w-100">
+                            <t t-call="website.website_search_box_input">
+                                <t t-set="_form_classes" t-valuef="o_wslides_nav_navbar_right order-lg-3 w-100 flex-grow-1"/>
+                                <t t-set="search_type" t-valuef="slides"/>
+                                <t t-set="action" t-valuef="/slides/all"/>
+                                <t t-set="display_description" t-valuef="true"/>
+                                <t t-set="display_detail" t-valuef="false"/>
+                                <t t-set="placeholder">Search courses</t>
+                                <input type="hidden" name="prevent_redirect" value="True"/>
+                            </t>
                         </div>
                     </div>
                 </nav>

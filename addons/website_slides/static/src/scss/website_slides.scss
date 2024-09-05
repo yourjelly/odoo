@@ -81,15 +81,9 @@ $line-height-truncate: 1.5em;
 
 .o_wslides_body {
 
-    .o_wslides_home_nav {
-        top: -40px;
-
-        @include media-breakpoint-up(lg) {
-            .o_wslides_nav_navbar_right {
-                padding-left: $spacer;
-                margin-left: auto;
-                border-left: 1px solid $border-color;
-            }
+    .o_wslides_search {
+        @include media-breakpoint-up(md) {
+            max-width: 300px;
         }
     }
 
