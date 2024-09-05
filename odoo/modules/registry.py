@@ -992,6 +992,8 @@ class Registry(Mapping):
             for fname, field in model._fields.items():
                 if field.company_dependent or field.name == 'property_product_pricelist':
                     _logger.warning(f"{field} is company dependent")
+                    if field.type == 'monetary':
+                        _logger.warning(f"{field} is company dependent monetary")
                     has_company_dependent = True
                 if field.type == 'many2one':
                     comodel = self[field.comodel_name]
