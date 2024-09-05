@@ -108,32 +108,55 @@
                             <p class="h2">No Course created yet.</p>
                             <p groups="website_slides.group_website_slides_officer">Click on "New" in the top-right corner to write your first course.</p>
                         </div>
-                        <t t-if="channels_my">
-                            <t t-set="void_count" t-value="3 - len(channels_my[:3])"/>
-                            <div class="o_wslides_home_content_section mb-3">
-                                <div class="row o_wslides_home_content_section_title align-items-center">
-                                    <div class="col">
-                                        <a href="/slides/all?my=1" class="float-end">View all</a>
-                                        <h5 class="m-0">My courses</h5>
-                                        <hr class="mt-2 mb-2"/>
+                        <div t-if="channels_my" class="container mb-5">
+                            <div class="o_wslides_home_content_section">
+                                <div t-foreach="channels_my" t-as="channel">
+                                    <div class="d-flex">
+                                        <div t-attf-class="align-items-md-center d-flex flex-grow-1 flex-column flex-md-row">
+                                            <div class="flex-grow-1 mw-md-50">
+                                                <a t-if="channel.is_member and not channel.completed" t-attf-href="/slides/#{slug(channel)}"
+                                                t-out="channel.name"/>
+                                                <span t-else="" t-field="channel.name"/>
+                                                <span t-if="not channel.is_published" class="badge text-bg-danger">Unpublished</span>
+                                            </div>
+                                            <div t-attf-class="align-items-center d-flex flex-grow-1 #{'justify-content-sm-end' if channel.channel_type == 'documentation' else ''}">
+                                                <t t-if="channel.is_member and channel.completed">
+                                                    <div class="badge rounded-pill text-bg-success pull-right"><i class="fa fa-check"/> Completed</div>
+                                                </t>
+                                                <t t-elif="channel.is_member and channel.channel_type != 'documentation'">
+                                                    <div class="d-none d-sm-block flex-grow-1">
+                                                        <div class="progress me-3" style="height: 6px">
+                                                            <div class="progress-bar" role="progressbar" t-att-aria-valuenow="channel.completion" aria-valuemin="0" aria-valuemax="100" t-attf-style="width:#{channel.completion}%;" aria-label="Progress bar"/>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <t t-out="channel.completion"/> %
+                                                    </div>
+                                                </t>
+                                                <div t-else=""><t t-esc="channel.total_slides"/> steps</div>
+                                                <div class="ms-4 text-muted">
+                                                    <t t-out="'{:.1f}'.format(channel.total_time).rstrip('.0')"/> hours
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-2 d-flex flex-row-reverse">
+                                            <a t-if="channel.is_member and not channel.completed" class="d-flex align-items-center" t-attf-href="/slides/#{slug(channel)}">
+                                                <div class="d-none d-md-block me-2">Continue</div><i class="oi oi-arrow-right me-1"/>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div t-if="not channel_last" class="row mx-1 mt-2">
+                                        <hr/>
                                     </div>
                                 </div>
-                                <div class="row mx-n2 mt8">
-                                    <t t-foreach="channels_my[:3]" t-as="channel">
-                                        <div class="col-md-4 col-sm-6 px-2 col-xs-12 d-flex">
-                                            <t t-call="website_slides.course_card"/>
-                                        </div>
-                                    </t>
-                                </div>
                             </div>
-                        </t>
+                        </div>
                         <div class="o_wslides_home_content_section mb-3"
                             t-if="channels_popular">
                             <div class="row o_wslides_home_content_section_title align-items-center">
                                 <div class="col">
                                     <a href="slides/all" class="float-end">View all</a>
-                                    <h5 class="m-0">Most popular courses</h5>
-                                    <hr class="mt-2 mb-2"/>
+                                    <h5 class="mb-3">Most popular courses</h5>
                                 </div>
                             </div>
                             <div class="row mx-n2 mt8">
@@ -149,8 +172,7 @@
                             <div class="row o_wslides_home_content_section_title align-items-center">
                                 <div class="col">
                                     <a href="slides/all" class="float-end">View all</a>
-                                    <h5 class="m-0">Newest courses</h5>
-                                    <hr class="mt-2 mb-2"/>
+                                    <h5 class="mb-3">Newest courses</h5>
                                 </div>
                             </div>
                             <div class="row mx-n2 mt8">
