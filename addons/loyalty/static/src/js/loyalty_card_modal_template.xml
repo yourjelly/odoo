@@ -22,7 +22,7 @@
                 <div type="button" class="d-sm-block btn-close p-0 p-md-2" t-on-click="props.close"></div>
             </t>
             <div class="mt-0 pt-0" t-on-click.stop="">
-                <div t-if="props.showHistory or (props.program.program_type != 'loyalty')" id="history_lines">
+                <div t-if="props.program.program_type != 'loyalty'" id="history_lines">
                     <t t-if="props.history_lines.length">
                         <strong>Last Transactions</strong>
                         <div t-if="line_index&lt;5"
@@ -53,14 +53,6 @@
                     </t>
                     <br/>
                 </div>
-                <div t-else="">
-                    <div t-if="props.program.program_type == 'loyalty'"
-                        class="d-flex align-items-center flex-column">
-                        <img t-att-src="`/report/barcode/Code128/${props.card.code}?&amp;width=350&amp;height=100`"
-                            style="width:400px;height:100px"/>
-                        <span t-out="props.card.code" class="fs-5"/>
-                    </div>
-                </div>
                 <div t-if="props.program.program_type == 'ewallet'">
                     <form action="/topup" method="post" name="topup_wallet"
                         t-if="props.trigger_products.length">
@@ -84,26 +76,9 @@
                         </div>
                     </form>
                 </div>
-                <br/>
-                <t t-if="props.program.program_type=='loyalty' &amp;&amp; props.showRewards">
-                    <div t-foreach="props.rewards" t-as="reward" t-key="reward_index">
-                        <div class="d-flex border rounded align-items-center justify-content-center p-2">
-                            <div class="flex-fill fs-6"><t t-out="reward.description"></t></div>
-                            <span class="text-primary" t-out="reward.points"></span>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between mt-2">
-                        <a t-att-href="'/my/history?coupon_id='+props.card.id">
-                            -> See History
-                        </a>
-                        <a type="button" href="/shop" class="btn btn-primary">Use it now</a>
-                    </div>
-                </t>
-                <t t-else="">
-                    <a t-att-href="'/my/history?coupon_id='+props.card.id">
-                        -> See History
-                    </a>
-                </t>
+                <a t-att-href="'/my/loyalty_card/history/' + props.card.id" id="more_history">
+                    -> See History
+                </a>
             </div>
         </Dialog>
     </t>

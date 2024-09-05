@@ -81,7 +81,7 @@ class CustomerPortalLoyalty(CustomerPortal):
             'coupon_history_lines': coupon_history_lines,
         }
         return request.render('loyalty.portal_my_history', values)
-
+    
     @route('/my/loyalty_portal_values', type='json', auth='user')
     def get_loyalty_portal_values(self, card_id):
         card_sudo = request.env['loyalty.card'].sudo().search([
