@@ -218,11 +218,6 @@ $line-height-truncate: 1.5em;
 // **************************************************
 
 .o_wslides_course_sidebar {
-    border: 1px solid $border-color;
-
-    @include media-breakpoint-up(md) {
-        border-top-width: 0;
-    }
 
     .o_wslides_js_channel_unsubscribe {
         > .fa-times {
