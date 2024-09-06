@@ -52,7 +52,6 @@ class PosOrder(models.Model):
             'payload': {},
         }
 
-
     def add_loyalty_history_lines(self, coupon_data, coupon_updates):
         id_mapping = {item['old_id']: int(item['id']) for item in coupon_updates}
         for coupon in coupon_data:
@@ -113,7 +112,6 @@ class PosOrder(models.Model):
         # Map the newly created coupons
         for old_id, new_id in zip(coupons_to_create.keys(), new_coupons):
             coupon_new_id_map[new_id.id] = old_id
-
 
         all_coupons = self.env['loyalty.card'].browse(coupon_new_id_map.keys()).exists()
         lines_per_reward_code = defaultdict(lambda: self.env['pos.order.line'])

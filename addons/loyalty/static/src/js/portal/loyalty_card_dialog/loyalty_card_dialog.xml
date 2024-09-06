@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="loyalty.modal_loyalty_card">
+    <t t-name="loyalty.portal_loyalty_card_dialog">
         <Dialog size="'md'" header="false" footer="false" t-on-click="props.close">
             <div class="d-flex align-items-center" t-on-click.stop="">
                 <div class="d-flex justify-content-between w-100 align-items-center">
@@ -27,7 +27,7 @@
             </div>
             <hr/>
             <div class="mt-0 pt-0" t-on-click.stop="">
-                <div t-if="props.program.program_type == 'loyalty'" id="history_lines">
+                <div id="history_lines">
                     <t t-if="props.history_lines.length">
                         <strong>Last Transactions</strong>
                         <div
@@ -56,7 +56,7 @@
                     </t>
                     <br/>
                 </div>
-                <div t-else="">
+                <div t-if="props.program.program_type == 'ewallet'">
                     <form
                         action="/topup"
                         method="post"

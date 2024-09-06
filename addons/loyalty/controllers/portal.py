@@ -11,7 +11,7 @@ class CustomerPortalLoyalty(CustomerPortal):
 
     def _prepare_portal_layout_values(self):
         values = super()._prepare_portal_layout_values()
-        cards_per_programs =  dict(request.env['loyalty.card'].sudo()._read_group(
+        cards_per_programs = dict(request.env['loyalty.card'].sudo()._read_group(
             domain=[
                 ('partner_id', '=', request.env.user.partner_id.id),
                 ('program_id.active', '=', True),
