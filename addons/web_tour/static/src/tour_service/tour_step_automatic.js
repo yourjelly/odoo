@@ -77,6 +77,20 @@ export class TourStepAutomatic extends TourStep {
                 },
                 action: async (stepEl) => {
                     clearTimeout(this._timeout);
+                    const checkMs = 1500;
+                    await new Promise((resolve) =>
+                        setTimeout(() => {
+                            const checkStepEl = this.findTrigger();
+                            if (checkStepEl === stepEl) {
+                                resolve();
+                            } else {
+                                this.throwError(
+                                    `StepEl is not same as after ${checkMs}ms : undeterministic !`
+                                );
+                            }
+                        }, checkMs)
+                    );
+
                     tourState.set(this.tour.name, "currentIndex", this.index + 1);
                     if (this.tour.showPointerDuration > 0 && stepEl !== true) {
                         // Useful in watch mode.
