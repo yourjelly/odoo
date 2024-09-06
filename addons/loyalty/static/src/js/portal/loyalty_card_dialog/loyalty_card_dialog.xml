@@ -51,7 +51,7 @@
                     </t>
                     <t t-else="">
                         <p class="alert alert-warning">
-                            There are currently no transaction lines for this Card.
+                            There are currently no transaction lines for this card.
                         </p>
                     </t>
                     <br/>
@@ -63,10 +63,11 @@
                         name="topup_wallet"
                         t-if="props.trigger_products.length"
                     >
+                        <input type="hidden" name="card_id" t-att-value="props.card.id"/>
                         <div class="d-flex justify-content-center">
                             <select
                                 class="text-center w-25 border-0 border-bottom border-black bg-body me-2"
-                                name="product"
+                                name="product_id"
                             >
                                 <option
                                     t-foreach="props.trigger_products"
@@ -84,7 +85,11 @@
                         </div>
                     </form>
                 </div>
-                <div class="d-flex justify-content-between" name="history_div">
+                <div
+                    t-if="props.history_lines.length"
+                    class="d-flex justify-content-between"
+                    name="history_div"
+                >
                     <a t-att-href="'/my/loyalty_card/history/' + props.card.id">
                         -> See History
                     </a>

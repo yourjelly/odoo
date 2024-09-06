@@ -25,7 +25,7 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'sale_loyalty/static/src/components/**/*',
+            'sale_loyalty/static/src/**/*',
         ]
     },
     'uninstall_hook': 'uninstall_hook',

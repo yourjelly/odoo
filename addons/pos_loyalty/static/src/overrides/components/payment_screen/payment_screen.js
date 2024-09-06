@@ -184,7 +184,7 @@ patch(PaymentScreen.prototype, {
             this.pos.data.call("pos.order", "add_loyalty_history_lines", [
                 [],
                 loyaltyPoints,
-                couponUpdates
+                couponUpdates,
             ]);
             // Update the usage count since it is checked based on local data
             if (payload.program_updates) {

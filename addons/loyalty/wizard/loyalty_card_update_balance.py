@@ -17,7 +17,9 @@ class LoyaltyHistoryWizard(models.TransientModel):
 
     def action_update_card_point(self):
         if self.old_balance == self.new_balance or self.new_balance < 0:
-            raise ValidationError(_("New Balance should be positive and different then old balance."))
+            raise ValidationError(
+                _("New Balance should be positive and different then old balance.")
+            )
         differance = self.new_balance - self.old_balance
         used = 0
         issued = 0
@@ -34,4 +36,3 @@ class LoyaltyHistoryWizard(models.TransientModel):
                 'new_balance': self.new_balance,
             })
         self.card_id.points = self.new_balance
-        return True

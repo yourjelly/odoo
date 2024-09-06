@@ -106,8 +106,16 @@ class CustomerPortal(payment_portal.PaymentPortal):
         request.session['my_orders_history'] = values['orders'].ids[:100]
         return request.render("sale.portal_my_orders", values)
 
-    def _get_portal_loyalty_values(self, order):
-        return {}
+    def _get_order_page_values(self, order_sudo, message=False):
+        backend_url = f'/odoo/action-{order_sudo._get_portal_return_action().id}/{order_sudo.id}'
+        return {
+            'sale_order': order_sudo,
+            'product_documents': order_sudo._get_product_documents(),
+            'message': message,
+            'report_type': 'html',
+            'backend_url': backend_url,
+            'res_company': order_sudo.company_id,  # Used to display correct company logo
+        }
 
     @http.route(['/my/orders/<int:order_id>'], type='http', auth="public", website=True)
     def portal_order_page(
@@ -154,15 +162,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
                     subtype_xmlid="sale.mt_order_viewed",
                 )
 
-        backend_url = f'/odoo/action-{order_sudo._get_portal_return_action().id}/{order_sudo.id}'
-        values = {
-            'sale_order': order_sudo,
-            'product_documents': order_sudo._get_product_documents(),
-            'message': message,
-            'report_type': 'html',
-            'backend_url': backend_url,
-            'res_company': order_sudo.company_id,  # Used to display correct company logo
-        }
+        values = self._get_order_page_values(order_sudo, message)
 
         # Payment values
         if order_sudo._has_to_be_paid():
@@ -172,9 +172,6 @@ class CustomerPortal(payment_portal.PaymentPortal):
                     downpayment=downpayment == 'true' if downpayment is not None else order_sudo.prepayment_percent < 1.0
                 )
             )
-        loyaty_values = self._get_portal_loyalty_values(order_sudo)
-        if loyaty_values:
-            values.update(loyaty_values)
 
         if order_sudo.state in ('draft', 'sent', 'cancel'):
             history_session_key = 'my_quotations_history'

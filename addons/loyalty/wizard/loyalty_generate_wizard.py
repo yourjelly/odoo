@@ -84,13 +84,11 @@ class LoyaltyGenerateWizard(models.TransientModel):
             customers = wizard._get_partners() or range(wizard.coupon_qty)
             for partner in customers:
                 coupon_create_vals.append(wizard._get_coupon_values(partner))
-        coupon = self.env['loyalty.card'].create(coupon_create_vals)
-        for record in coupon:
-            self.env['loyalty.history'].create({
-                'description': self.description or 'Gift for customer',
-                'card_id': record.id,
+        coupons = self.env['loyalty.card'].create(coupon_create_vals)
+        self.env['loyalty.history'].create([{
+                'description': self.description or _("Gift For Customer"),
+                'card_id': coupon.id,
                 'issued': self.points_granted,
                 'new_balance': self.points_granted,
-                'used': 0,
-            })
+        } for coupon in coupons])
         return True

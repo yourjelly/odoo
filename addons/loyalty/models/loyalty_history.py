@@ -15,6 +15,6 @@ class LoyaltyHistory(models.Model):
     order_id = fields.Reference(selection=[], readonly=True, store=True, ondelete='cascade')
     used = fields.Float()
 
-    def _get_order_portal_url(self):
+    def get_order_portal_url(self):
         self.ensure_one()
         return False

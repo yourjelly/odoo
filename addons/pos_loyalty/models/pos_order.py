@@ -55,12 +55,15 @@ class PosOrder(models.Model):
     def add_loyalty_history_lines(self, coupon_data, coupon_updates):
         id_mapping = {item['old_id']: int(item['id']) for item in coupon_updates}
         for coupon in coupon_data:
+            if int(coupon['card_id']) not in id_mapping:
+                continue
+            card_id = id_mapping[int(coupon['card_id'])]
             issued = coupon['won']
             cost = coupon['spent']
-            card = self.env['loyalty.card'].browse(id_mapping[int(coupon['card_id'])])
-            if issued or cost:
+            if (issued or cost) and card_id > 0:
+                card = self.env['loyalty.card'].browse(card_id)
                 self.env['loyalty.history'].create({
-                    'card_id': id_mapping[int(coupon['card_id'])],
+                    'card_id': card_id,
                     'order_id': '%s,%i' % (self._name, int(coupon['order_id'])),
                     'description': _('Onsite Purchase %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                     'used': cost,

@@ -1,6 +1,6 @@
 <odoo>
     <template id="loyalty_buttons" inherit_id="portal.side_content">
-        <div id="portal_contact" position="after">
+        <div name="portal_contact" position="after">
             <div class='o_loyalty_container'>
                 <div
                     t-foreach="cards_per_programs"
@@ -53,9 +53,9 @@
             <t t-call="portal.portal_searchbar">
                 <t t-set="title">Loyalty Transaction</t>
             </t>
-            <t t-if="not card_history_lines">
+            <t t-if="not history_lines">
                 <p class="alert alert-warning">
-                    There are currently no transaction lines for this Card.
+                    There are currently no transaction lines for this card.
                 </p>
             </t>
             <t t-else="" t-call="portal.portal_table">
@@ -70,11 +70,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="card_history_lines" t-as="line">
+                    <t t-foreach="history_lines" t-as="line">
                       <tr>
-                            <td><span t-out="line.description"></span></td>
+                            <td><span t-out="line.description"/></td>
+                            <t t-set="order_portal_url" t-value="line.get_order_portal_url()"/>
                             <td t-if="line.order_id">
-                                <a t-if="line.order_id._name == 'sale.order'" t-att-href="line.order_id.sudo().get_portal_url()">
+                                <a t-if="order_portal_url" t-att-href="order_portal_url">
                                     <t t-out="line.order_id.display_name"/>
                                 </a>
                                 <t t-else="">
