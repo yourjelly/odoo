@@ -410,6 +410,14 @@ function selectElementInWeSelectWidget(widgetName, elementName, searchNeeded = f
     }
     steps.push(clickOnElement(`${elementName} in the ${widgetName} widget`,
         `we-select[data-name=${widgetName}] we-button:contains(${elementName})`));
+    steps.push({
+        content: "Check we-select is set",
+        trigger: `we-select[data-name=${widgetName}]:contains(${elementName})`,
+        async run() {
+            // TODO: remove this delay
+            await new Promise((resolve) => setTimeout(resolve, 300));
+        }
+    });
     return steps;
 }
 
