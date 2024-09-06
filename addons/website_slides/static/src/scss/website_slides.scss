@@ -81,6 +81,8 @@ $line-height-truncate: 1.5em;
 
 .o_wslides_body {
 
+    --Avatar-size: 30px;
+
     .o_wslides_search {
         @include media-breakpoint-up(md) {
             max-width: 300px;
@@ -172,10 +174,6 @@ $line-height-truncate: 1.5em;
     // ****************************************
     .text_small_caps {
         font-variant: small-caps;
-    }
-
-    .o_wslides_entry_muted {
-        opacity: 0.1;
     }
 
     // Solve an overfow issue caused in some
