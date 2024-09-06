@@ -7220,7 +7220,7 @@ class BaseModel(metaclass=MetaModel):
             records_batches.append(self.create(create_values))
         return self.concat(*records_batches)
 
-    def _duplicate_field_need_variation(self, field):
+    def _duplicate_field_need_variation(self, field, **kwargs):
         """
         Hook to specify *if* a field should be varied when duplicating self
         Possible outputs:
@@ -7230,7 +7230,7 @@ class BaseModel(metaclass=MetaModel):
         """
         return None
 
-    def _duplicate_variate_field(self, field):
+    def _duplicate_variate_field(self, field, **kwargs):
         """
         Hook to specify *how* a field should be varied
 
@@ -7239,7 +7239,7 @@ class BaseModel(metaclass=MetaModel):
         """
         return SQL('')
 
-    def _duplicate_follow_related_store(self, field):
+    def _duplicate_follow_related_store(self, field, **kwargs):
         """
         Hook during the duplication process, to decide how a related store field should be copied:
         - False | None -> copy the value from the source table

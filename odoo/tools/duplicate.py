@@ -10,41 +10,26 @@ from odoo.modules.db import FunctionStatus
 
 _logger = logging.getLogger(__name__)
 
-# Minimum length for a random varchar
-MIN_VARCHAR_LENGTH = 4
-
 # Min/Max value for a date/datetime field
 MIN_DATETIME = datetime((datetime.now() - relativedelta(years=4)).year, 1, 1)
 MAX_DATETIME = datetime.now()
 MIN_ROWS_PER_DAY = 1000
 
-##### Mandatory fields
-
-MANDATORY_FIELDS = ['company_id', 'invoice_date_due', 'move_name', 'invoice_date', 'name', 'invoice_date']
-
-NAME_FIELDS_FORMAT = {
-    "move_name": {
-        "account.move.line": r"""CASE WHEN move_name='/' THEN '/' ELSE regexp_replace(move_name, '(\w+\/).*', '\1') END || EXTRACT('year' FROM {1}) || '/' || CASE WHEN move_name ~ '.*(\/\d\d\/).*' THEN LPAD(EXTRACT('month' FROM {1})::text, 2, '0') || '/' ELSE '' END || {0} END"""
-    },
-    "name": {
-        "account.move": r"""CASE WHEN name='/' THEN '/' ELSE regexp_replace(name, '(\w+\/).*', '\1') || EXTRACT('year' FROM {0}) || '/' || CASE WHEN name ~ '.*(\/\d\d\/).*' THEN LPAD(EXTRACT('month' FROM {0})::text, 2, '0') || '/' ELSE '' END || %s + row_number() OVER() END""",
-    },
-}
-
 ##### Python Variation Functions
 
-def get_query_part_date_datetime(env, total_table_size, min_date=MIN_DATETIME, max_date=MAX_DATETIME):
+def get_query_part_date_datetime(env, model, factors, min_date=MIN_DATETIME, max_date=MAX_DATETIME):
     """
     :param datetime_column: name of the date/timestamp column
     :param total_table_size: total_size of the table after the duplication process.
     """
+    total_table_size = model.search_count([]) * factors[model]
     if total_table_size <= MIN_ROWS_PER_DAY:
-        return '''now()::timestamp'''
+        return SQL('''now()::timestamp''')
     total_days = (max_date - min_date).days
     rows_per_day = max(MIN_ROWS_PER_DAY, total_table_size // total_days + 1)
     if total_table_size <= MIN_ROWS_PER_DAY * total_days:
         min_date = min_date + relativedelta(days=(total_days - total_table_size // MIN_ROWS_PER_DAY))
-    return env.cr.mogrify('''%s + (row_number() OVER()/%s) * interval '1 day' ''', [min_date, rows_per_day]).decode()
+    return SQL('''%s + (row_number() OVER()/%s) * interval '1 day' ''', min_date, rows_per_day)
 
 def get_random_sql_string(size):
     return SQL('''left(md5(random()::text), %s)''', size)
@@ -141,7 +126,7 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
 
     :return: a str representing the source column, or an SQL(expression/subquery)
     """
-    if variation_query := model._duplicate_variate_field(field):
+    if variation_query := model._duplicate_variate_field(field, factors=factors):
         return variation_query
     match field.type:
         case 'char' | 'text' as field_type:
@@ -188,8 +173,7 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
                 SELECT %(field)s FROM %(model)s GROUP BY %(field)s ORDER BY RANDOM() LIMIT 1
             """, field=SQL.identifier(field.name), model=SQL.identifier(model._table)))
         case 'date' | 'datetime':
-            table_size_after_duplicate = model.search_count([]) * factors[model]
-            return SQL(get_query_part_date_datetime(env, table_size_after_duplicate))
+            return get_query_part_date_datetime(env, model, factors)
         case 'html':
             # For the sake of simplicity we don't vary html fields
             return field.name

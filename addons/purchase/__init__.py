@@ -6,3 +6,4 @@ from . import models
 from . import report
 from . import populate
 from . import wizard
+from . import duplicate

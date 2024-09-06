@@ -4,8 +4,8 @@ from odoo import models
 from odoo.tools.duplicate import fetch_last_id
 from odoo.tools.sql import SQL
 
-class SaleOrder(models.Model):
-    _inherit = 'sale.order'
+class PurchaseOrder(models.Model):
+    _inherit = 'purchase.order'
 
     def _duplicate_field_need_variation(self, field, **kwargs):
         if field.name == 'name':
@@ -14,8 +14,8 @@ class SaleOrder(models.Model):
 
     def _duplicate_variate_field(self, field, **kwargs):
         if field.name == 'name':
-            seq = self.env['ir.sequence'].with_company(self.env.company).search([('code', '=', 'sale.order')])
+            seq = self.env['ir.sequence'].with_company(self.env.company).search([('code', '=', 'purchase.order')])
             padding = (seq and seq.padding) or 5
-            return SQL(f''' 'S' || TO_CHAR(%(last_id)s + row_number() OVER(), 'fm{'0' * padding}')''',
+            return SQL(f''' 'P' || TO_CHAR(%(last_id)s + row_number() OVER(), 'fm{'0' * padding}')''',
                        last_id=fetch_last_id(self.env, self))
         return super()._duplicate_variate_field(field)

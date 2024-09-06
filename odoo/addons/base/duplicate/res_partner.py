@@ -8,12 +8,12 @@ from odoo.tools.sql import SQL
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    def _duplicate_field_need_variation(self, field):
+    def _duplicate_field_need_variation(self, field, **kwargs):
         if field.name == 'name':
             return True
         return super()._duplicate_field_need_variation(field)
 
-    def _duplicate_variate_field(self, field):
+    def _duplicate_variate_field(self, field, **kwargs):
         if field.name == 'name':
             first_name = get_random_sql_string(randint(4, 10))
             last_name = get_random_sql_string(randint(5, 11))
