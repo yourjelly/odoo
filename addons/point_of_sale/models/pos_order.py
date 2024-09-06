@@ -977,7 +977,7 @@ class PosOrder(models.Model):
             new_move = order._create_invoice(move_vals)
 
             order.write({'account_move': new_move.id, 'state': 'invoiced'})
-            new_move.sudo().with_company(order.company_id).with_context(skip_invoice_sync=True)._post()
+            new_move.sudo().with_company(order.company_id).with_context(skip_invoice_sync=False)._post()
 
             moves += new_move
             payment_moves = order._apply_invoice_payments(order.session_id.state == 'closed')

@@ -377,6 +377,7 @@ export class PaymentScreen extends Component {
         }
 
         if (switchScreen) {
+            // console.log(this.currentOrder['account_move']['l10n_br_edi_avatax_data']);
             this.pos.showScreen(nextScreen);
         }
     }
