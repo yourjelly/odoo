@@ -9,7 +9,7 @@
                     <option value="">AFIP Responsibility...</option>
                     <t t-foreach="responsibility_types" t-as="resp_type">
                         <option t-att-value="resp_type.id"
-                            t-att-selected="resp_type.id == partner_sudo.l10n_ar_afip_responsibility_type_id.id">
+                            t-att-selected="resp_type.id == partner.l10n_ar_afip_responsibility_type_id.id">
                             <t t-out="resp_type.name"/>
                         </option>
                     </t>
@@ -17,12 +17,12 @@
             </t>
             <t t-else="">
                 <p class="form-control"
-                    t-out="partner_sudo.l10n_ar_afip_responsibility_type_id.name"
+                    t-out="partner.l10n_ar_afip_responsibility_type_id.name"
                     readonly="1"
                     title="Changing AFIP Responsibility type is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."/>
                 <input name="l10n_ar_afip_responsibility_type_id"
                     class="form-control"
-                    t-att-value="partner_sudo.l10n_ar_afip_responsibility_type_id.id"
+                    t-att-value="partner.l10n_ar_afip_responsibility_type_id.id"
                     type="hidden"/>
             </t>
         </div>
@@ -42,12 +42,12 @@
             </t>
             <t t-else="">
                 <p class="form-control"
-                    t-out="partner_sudo.l10n_latam_identification_type_id.name"
+                    t-out="partner.l10n_latam_identification_type_id.name"
                     readonly="1"
                     title="Changing Identification type is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."/>
                 <input name="l10n_latam_identification_type_id"
                     class="form-control"
-                    t-att-value="partner_sudo.l10n_latam_identification_type_id.id"
+                    t-att-value="partner.l10n_latam_identification_type_id.id"
                     type="hidden"/>
             </t>
         </div>
