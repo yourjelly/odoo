@@ -28,8 +28,6 @@ NAME_FIELDS_FORMAT = {
     },
     "name": {
         "account.move": r"""CASE WHEN name='/' THEN '/' ELSE regexp_replace(name, '(\w+\/).*', '\1') || EXTRACT('year' FROM {0}) || '/' || CASE WHEN name ~ '.*(\/\d\d\/).*' THEN LPAD(EXTRACT('month' FROM {0})::text, 2, '0') || '/' ELSE '' END || %s + row_number() OVER() END""",
-        "stock.picking": r"""regexp_replace(name, '(.*\/)\d*', '\1') || '0' || (%s + row_number() OVER ())""",
-        "sale.order": r"""'S' || %s + row_number() OVER()""",
     },
 }
 

@@ -6,6 +6,7 @@ from . import controllers
 from . import report
 from . import wizard
 from . import populate
+from . import duplicate
 
 
 def _synchronize_cron(env):
