@@ -6,7 +6,7 @@ from odoo.addons.event_crm.tests.common import TestEventCrmCommon
 
 class TestWebsiteEventCrmFlow(TestEventCrmCommon):
 
-    @users('user_eventregistrationdesk')
+    @users('user_eventuser')
     def test_visitor_language_propagation(self):
         """
         This test makes sure that visitor and its language are propagated to the lead when a lead is

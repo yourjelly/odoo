@@ -30,7 +30,7 @@ class EventRegistration(models.Model):
         """Update lead values from Lead Generation rules to include the visitor and their language"""
         lead_values = super()._get_lead_values(rule)
         lead_values.update({
-            'visitor_ids': self.sudo().visitor_id,
-            'lang_id': self.sudo().visitor_id.lang_id.id,
+            'visitor_ids': self.visitor_id,
+            'lang_id': self.visitor_id.lang_id.id,
         })
         return lead_values
