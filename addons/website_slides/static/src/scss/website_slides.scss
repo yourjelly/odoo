@@ -252,28 +252,26 @@ $line-height-truncate: 1.5em;
 }
 
 @mixin o-wslides-tabs($tab-active-color: $o-wslides-color-bg) {
-    margin-top: ($o-wslides-tabs-height * -1);
-    border-bottom: 0;
 
     .nav-link {
-        border-radius: 0;
-        border-width: 0 1px;
-        line-height: $line-height-base;
-        @include o-hover-text-color(rgba(white, 0.8), white);
+        // border-radius: 0;
+        // border-width: 0 1px;
+        // line-height: $line-height-base;
+        //@include o-hover-text-color(rgba(white, 0.8), white);
 
         & {
             border-color: transparent;
         }
 
-        &:hover {
-            background: #3d2938;
-        }
+        // &:hover {
+        //     background: #3d2938;
+        // }
 
-        &.active {
-            color: color-contrast($tab-active-color);
-            background: $tab-active-color;
-            border-color: $tab-active-color;
-        }
+        // &.active {
+        //     color: color-contrast($tab-active-color);
+        //     background: $tab-active-color;
+        //     border-color: $tab-active-color;
+        // }
     }
 }
 
@@ -340,7 +338,16 @@ $line-height-truncate: 1.5em;
     from course to review tab */
     min-height: 70vh;
 
-    .o_wslides_nav_tabs {
+    .o_wslides_nav_pills {
+        --nav-link-color: #{$white};
+        --nav-link-hover-color: #{color-contrast($white)};
+        --nav-pills-link-active-bg: #{$white};
+        --nav-pills-link-active-color: #{color-contrast($white)};
+        
+        .nav-link:not(.active):hover {
+            background: var(--nav-link-hover-background, $white);
+        }
+
         @include media-breakpoint-up(md)  {
             @include o-wslides-tabs();
         }
@@ -400,12 +407,6 @@ $line-height-truncate: 1.5em;
             & + ul {
                 z-index: 0;
             }
-            .o_wslides_js_category_delete {
-                display: none;
-            }
-            &:hover .o_wslides_js_category_delete {
-                display: block;
-            }
         }
 
         .o_text_link {
@@ -428,9 +429,9 @@ $line-height-truncate: 1.5em;
             &:hover i { opacity: 1; }
         }
 
-        .o_wslides_slide_list_category_header, .o_wslides_slides_list_slide {
-            border: 1px solid $border-color;
-        }
+        // .o_wslides_slide_list_category_header, .o_wslides_slides_list_slide {
+        //     border: 1px solid $border-color;
+        // }
 
         .o_wslides_slides_list_slide {
 
