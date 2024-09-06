@@ -144,11 +144,11 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
     if variation_query := model._duplicate_variate_field(field):
         return variation_query
     match field.type:
-        case 'char':
-            # we presume that 16 chars is enough to avoid collisions
+        case 'char' | 'text' as field_type:
+            # we presume that 16 | 40 chars is enough to avoid collisions
             # TODO: FP wants to just append the series number for all chars, it will also handle unique violation constraints
             #  Dev note for ^: this suggestion is going to render any trigram search extremely slow (too much repetition)
-            size = min(field.size if field.size else math.inf, 16)
+            size = min(field.size or math.inf, 16 if field_type == 'char' else 40)
             str_variation_query = get_random_sql_string(size)
             # if the field is translatable, it's a JSONB column, we vary all values for each key
             if field.translate:
@@ -192,9 +192,6 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
             return SQL(get_query_part_date_datetime(env, table_size_after_duplicate))
         case 'html':
             # For the sake of simplicity we don't vary html fields
-            return field.name
-        case 'text':
-            # TODO: what do we do here? a big random string or raw copy ? raw copy during testing
             return field.name
         # TODO: handle other types as necessary
         case _:
