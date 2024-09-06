@@ -1285,6 +1285,7 @@ export class PosStore extends Reactive {
     }
     switchPane() {
         this.mobile_pane = this.mobile_pane === "left" ? "right" : "left";
+        this.ui.isSmall && this.get_order().deselect_orderline();
     }
     switchPaneTicketScreen() {
         this.ticket_screen_mobile_pane =
