@@ -524,8 +524,8 @@
             <t t-set="challenge_done" t-value="challenge in challenges_done if challenges_done else False"/>
             <div t-attf-class="d-flex gap-2 #{'opacity-50' if not challenge_done else ''}">
                 <div t-if="challenge.reward_id.image_1920" t-field="challenge.reward_id.image_1920"
-                    t-options="{'widget': 'image', 'preview_image': 'image_128', 'style': 'max-height: 36px'}"/>
-                <img t-else="" t-attf-src="'/website_profile/static/src/img/badge_%s.svg' % (challenge.reward_id.level)" t-att-alt="challenge.reward_id.name" style="max-height: 36px"/>
+                    t-options="{'widget': 'image', 'preview_image': 'image_128', 'style': 'max-height: 44px'}"/>
+                <img t-else="" t-attf-src="'/website_profile/static/src/img/badge_%s.svg' % (challenge.reward_id.level)" t-att-alt="challenge.reward_id.name" style="max-height: 44px"/>
                 <div class="flex-grow-1">
                     <div class="small lh-1" t-esc="challenge.reward_id.name"/>
                     <small class="text-muted" t-esc="challenge.reward_id.description"/>
