@@ -285,7 +285,7 @@ $line-height-truncate: 1.5em;
 }
 
 .o_wslides_course_nav {
-    @include o-position-absolute(0,0,auto,0);
+    // @include o-position-absolute(0,0,auto,0);
     border-width: 1px 0;
 
     &, .o_wslides_course_nav_search {
@@ -504,11 +504,11 @@ $line-height-truncate: 1.5em;
             transform: rotate(90deg);
         }
 
-        .o_wslides_lesson_aside_list {
-            @include media-breakpoint-up (lg) {
-                top: -58px;
-            }
-        }
+        // .o_wslides_lesson_aside_list {
+        //     @include media-breakpoint-up (lg) {
+        //         top: -58px;
+        //     }
+        // }
 
         .o_wslides_lesson_aside_list_links i {
             padding-right: 10px;
@@ -521,9 +521,9 @@ $line-height-truncate: 1.5em;
             .o_wslides_lesson_aside_list_link {
                 @include o-hover-text-color($gray-600, $headings-color );
 
-                &.active {
-                    box-shadow:inset 2px 0 map-get($theme-colors, 'primary');
-                }
+                // &.active {
+                //     box-shadow:inset 2px 0 map-get($theme-colors, 'primary');
+                // }
             }
             button {
                 padding-top: 0;
@@ -544,28 +544,28 @@ $line-height-truncate: 1.5em;
         }
     }
 
-    .o_wslides_lesson_content {
-        .o_wslides_lesson_nav {
-            .nav-link {
-                background-color: transparent;
-                border: 0;
-                border-bottom: 1px solid $border-color;
-                color: $gray-600;
+    // .o_wslides_lesson_content {
+    //     .o_wslides_lesson_nav {
+    //         .nav-link {
+    //             background-color: transparent;
+    //             border: 0;
+    //             border-bottom: 1px solid $border-color;
+    //             color: $gray-600;
 
-                &.active {
-                    border-bottom: 1px solid $success;
-                    color: $gray-800;
-                }
-            }
-        }
-    }
+    //             &.active {
+    //                 border-bottom: 1px solid $success;
+    //                 color: $gray-800;
+    //             }
+    //         }
+    //     }
+    // }
 
-    .o_wslides_undone_button.disabled,
-    .o_wslides_done_button.disabled {
-        // Show title attribute on disabled link
-        color: white !important;
-        pointer-events: auto;
-    }
+    // .o_wslides_undone_button.disabled,
+    // .o_wslides_done_button.disabled {
+    //     // Show title attribute on disabled link
+    //     color: white !important;
+    //     pointer-events: auto;
+    // }
 }
 
 // Enforce the height of the lesson header, so the DOM element size do not change
