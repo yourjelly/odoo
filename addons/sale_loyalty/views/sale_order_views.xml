@@ -32,7 +32,7 @@
             </xpath>
             <group name='note_group' position="after">
                 <group class="d-flex flex-row-reverse oe_subtotal_footer border-0">
-                    <field name="loyalty_total" widget="loyalty-total-values" nolabel="1" readonly="1"/>
+                    <field name="loyalty_data" widget="loyalty_data_field" nolabel="1" readonly="1"/>
                 </group>
             </group>
         </field>

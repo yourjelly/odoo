@@ -28,7 +28,7 @@ class SaleOrder(models.Model):
     coupon_point_ids = fields.One2many(
         comodel_name='sale.order.coupon.points', inverse_name='order_id', copy=False)
     reward_amount = fields.Float(compute='_compute_reward_total')
-    loyalty_total = fields.Binary(compute='_compute_loyalty_total')
+    loyalty_data = fields.Binary(compute='_compute_loyalty_data')
 
     def _get_history_line_description(self):
         return _('Order %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -48,27 +48,24 @@ class SaleOrder(models.Model):
             order.reward_amount = reward_amount
 
     @api.depends('order_line', 'state')
-    def _compute_loyalty_total(self):
+    def _compute_loyalty_data(self):
         for order in self:
-            if order.state != 'sale':
-                order.loyalty_total = {}
-                continue
             coupon_points = self.coupon_point_ids
             coupons = coupon_points.coupon_id
+            if order.state != 'sale' or not coupons:
+                order.loyalty_data = {}
+                continue
             old_balance = sum(coupons.mapped('points'))
             total_points_issed = sum(coupon_points.mapped('points'))
             total_points_cost = sum(order.order_line.mapped('points_cost'))
             new_balance = old_balance + total_points_issed - total_points_cost
-            loyalty_total = {
-                'loyalty_card': {
-                    'old_balance': old_balance,
-                    'issued': total_points_issed,
-                    'cost': total_points_cost,
-                    'new_balance': new_balance,
-                },
+            order.loyalty_data = {
                 'point_name': coupons[0].point_name,
+                'old_balance': old_balance,
+                'issued': total_points_issed,
+                'cost': total_points_cost,
+                'new_balance': new_balance,
             }
-            order.loyalty_total = loyalty_total
 
     def _get_no_effect_on_threshold_lines(self):
         """Return the lines that have no effect on the minimum amount to reach."""
