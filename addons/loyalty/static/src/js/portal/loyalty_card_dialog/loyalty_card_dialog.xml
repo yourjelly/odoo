@@ -27,7 +27,7 @@
             </div>
             <hr/>
             <div class="mt-0 pt-0" t-on-click.stop="">
-                <div id="history_lines">
+                <div name="history_lines">
                     <t t-if="props.history_lines.length">
                         <strong>Last Transactions</strong>
                         <div

@@ -22,7 +22,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="history_page">
+                        <page string="History Lines">
                             <field name="history_ids">
                                 <tree>
                                     <field name="description"/>

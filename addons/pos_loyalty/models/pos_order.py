@@ -52,25 +52,6 @@ class PosOrder(models.Model):
             'payload': {},
         }
 
-    def add_loyalty_history_lines(self, coupon_data, coupon_updates):
-        id_mapping = {item['old_id']: int(item['id']) for item in coupon_updates}
-        for coupon in coupon_data:
-            if int(coupon['card_id']) not in id_mapping:
-                continue
-            card_id = id_mapping[int(coupon['card_id'])]
-            issued = coupon['won']
-            cost = coupon['spent']
-            if (issued or cost) and card_id > 0:
-                card = self.env['loyalty.card'].browse(card_id)
-                self.env['loyalty.history'].create({
-                    'card_id': card_id,
-                    'order_id': '%s,%i' % (self._name, int(coupon['order_id'])),
-                    'description': _('Onsite Purchase %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                    'used': cost,
-                    'issued': issued,
-                    'new_balance': card.points
-                })
-
     def confirm_coupon_programs(self, coupon_data):
         """
         This is called after the order is created.
@@ -95,6 +76,10 @@ class PosOrder(models.Model):
             'code': p.get('code') or p.get('barcode') or self.env['loyalty.card']._generate_code(),
             'points': 0,
             'source_pos_order_id': self.id,
+            'history_ids': (0, 0, {
+                'order_id': '%s,%i' % (self._name, self.id),
+                'points': 0,
+            }),
         } for p in coupons_to_create.values()]
 
         # Pos users don't have the create permission
