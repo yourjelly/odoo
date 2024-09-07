@@ -47,6 +47,41 @@
         </div>
     </template>
 
+    <template id="sale_order_portal_loyalty_content">
+        <div class="col-xs-5 col-md-6 col-lg-5">
+            <table class="table table-sm" t-if="loyalty_data">
+                <tr class="border-0">
+                    <td><strong>Loyalty Card</strong></td>
+                    <td class="text-end">
+                        <span t-out="loyalty_data['old_balance']"/>
+                        <span class="d-none d-md-inline" t-out="loyalty_data['point_name']"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Issued</td>
+                    <td class="text-end">
+                        <span t-out="loyalty_data['issued']"/>
+                        <span class="d-none d-md-inline" t-out="loyalty_data['point_name']"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Used</td>
+                    <td class="text-end">
+                        <span t-out="loyalty_data['cost']"/>
+                        <span class="d-none d-md-inline" t-out="loyalty_data['point_name']"/>
+                    </td>
+                </tr>
+                <tr style="border-bottom-style:hidden">
+                    <td><strong>New Balance</strong></td>
+                    <td class="text-end">
+                        <span t-out="loyalty_data['new_balance']"/>
+                        <span class="d-none d-md-inline" t-out="loyalty_data['point_name']"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
     <template id="sale_order_portal_content_inherit"
               name="Gift Card Products Portal"
               inherit_id="sale.sale_order_portal_content">
@@ -60,50 +95,13 @@
                 <t t-set="hide_intro" t-value="1"/>
             </t>
         </xpath>
-    </template>
-
-    <template id="sale_order_portal_loyalty_values" inherit_id="sale.sale_order_portal_content">
         <div id="total" position="attributes">
             <attribute name="class" add="d-flex gap-2" separator=" "/>
         </div>
-        <xpath expr="//div[@id='total']/*" position="before">
-            <div class="col-xs-5 col-md-6 col-lg-5">
-                <table class="table table-sm" t-if="sale_order.state == 'sale' and loyalty_data">
-                    <tr class="border-0">
-                        <td>
-                            <strong>Loyalty Card</strong>
-                        </td>
-                        <td class="text-end">
-                            <span t-out="loyalty_data['old_balance']"/>
-                            <span class="d-none d-md-inline" t-out="loyalty_data['point_name']"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Issued</td>
-                        <td class="text-end">
-                            <span t-out="loyalty_data['issued']"/>
-                            <span class="d-none d-md-inline" t-out="loyalty_data['point_name']"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Used</td>
-                        <td class="text-end">
-                            <span t-out="loyalty_data['cost']"/>
-                            <span class="d-none d-md-inline" t-out="loyalty_data['point_name']"/>
-                        </td>
-                    </tr>
-                    <tr style="border-bottom-style:hidden">
-                        <td>
-                            <strong>New Balance</strong>
-                        </td>
-                        <td class="text-end">
-                            <span t-out="loyalty_data['new_balance']"/>
-                            <span class="d-none d-md-inline" t-out="loyalty_data['point_name']"/>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </xpath>
+        <div id="total" position="before">
+            <t t-call="sale_loyalty.sale_order_portal_loyalty_content">
+            </t>
+        </div>
     </template>
 
 </odoo>

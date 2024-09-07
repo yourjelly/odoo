@@ -30,9 +30,6 @@ class SaleOrder(models.Model):
     reward_amount = fields.Float(compute='_compute_reward_total')
     loyalty_data = fields.Binary(compute='_compute_loyalty_data')
 
-    def _get_history_line_description(self):
-        return _('Order %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
     @api.depends('order_line')
     def _compute_reward_total(self):
         for order in self:
@@ -66,6 +63,9 @@ class SaleOrder(models.Model):
                 'cost': total_points_cost,
                 'new_balance': new_balance,
             }
+
+    def _get_history_line_description(self):
+        return _("Order %s", fields.Datetime.to_string(fields.Datetime.now()))
 
     def _get_no_effect_on_threshold_lines(self):
         """Return the lines that have no effect on the minimum amount to reach."""

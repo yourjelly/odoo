@@ -146,6 +146,12 @@ class SaleOrder(models.Model):
             reward_lines = order.website_order_line.filtered(lambda line: line.is_reward_line)
             order.cart_quantity -= int(sum(reward_lines.mapped('product_uom_qty')))
 
+    def _get_history_line_description(self):
+        if self.website_id:
+            return _("Online purchase %s", fields.Datetime.to_string(fields.Datetime.now()))
+        else:
+            return super()._get_history_line_description()
+
     def get_promo_code_error(self, delete=True):
         error = request.session.get('error_promo_code')
         if error and delete:
@@ -244,10 +250,3 @@ class SaleOrder(models.Model):
         lines = super()._cart_find_product_line(product_id, line_id, **kwargs)
         lines = lines.filtered(lambda l: not l.is_reward_line) if not line_id else lines
         return lines
-
-    def _get_history_line_description(self):
-        des = super()._get_history_line_description()
-        if self.website_id:
-            return _('Online purchase %s', fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        else:
-            return des
