@@ -363,6 +363,15 @@ $line-height-truncate: 1.5em;
         }
     }
 
+    .o_wslides_documentation_filter:not(.active) {
+        --bg-solid: #{$border-color};
+        --color: #{$primary};
+
+        &:hover {
+            border-color: #{$primary};
+        }
+    }
+
     .o_wslides_doc_nav_tabs {
         @include o-wslides-tabs($gray-100);
     }
