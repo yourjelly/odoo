@@ -82,7 +82,7 @@
 
 <!-- Slide: sidebar training mode -->
 <template id="slide_aside_training" name="Slide: Sidebar in Training">
-    <div class="o_wslides_lesson_aside_list position-relative bg-white border-bottom mt-4">
+    <div class="d-none d-lg-block o_wslides_lesson_aside_list position-relative bg-white border-bottom mt-4">
         <ul class="list-unstyled my-0 pb-3 collapse d-lg-block">
             <t t-set="i" t-value="0"/>
             <t t-if="category.get('slides')" t-foreach="category_data" t-as="category">
@@ -91,6 +91,23 @@
                 </t>
             </t>
         </ul>
+    </div>
+    <!-- Slide: mobile sidebar training mode -->
+    <div id="o_wslides_mobile_sidebar" class="offcanvas offcanvas-end d-block d-lg-none">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasExampleLabel">Course content</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="list-unstyled my-0 pb-3">
+                <t t-set="i" t-value="0"/>
+                <t t-if="category.get('slides')" t-foreach="category_data" t-as="category">
+                    <t t-call="website_slides.slide_aside_training_category">
+                        <t t-set="category_slide_ids" t-value="category['slides']"/>
+                    </t>
+                </t>
+            </ul>
+        </div>
     </div>
 </template>
 
@@ -228,6 +245,9 @@
                     <span class="d-none d-sm-inline-block">Next</span> <i class="oi oi-chevron-right ms-2"></i>
                 </a>
             </div>
+            <button class="btn btn-light d-block d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#o_wslides_mobile_sidebar" aria-controls="offcanvasExample">
+                <i class="fa fa-list-ul me-2"/>Contents
+            </button>
             <a class="btn btn-light" role="button" t-att-href="'/slides/slide/%s?fullscreen=1' % (slug(slide))" aria-label="Fullscreen">
                 <i class="fa fa-expand"/>
             </a>
