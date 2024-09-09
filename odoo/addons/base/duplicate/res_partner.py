@@ -11,11 +11,11 @@ class ResPartner(models.Model):
     def _duplicate_field_need_variation(self, field, **kwargs):
         if field.name == 'name':
             return True
-        return super()._duplicate_field_need_variation(field)
+        return super()._duplicate_field_need_variation(field, **kwargs)
 
     def _duplicate_variate_field(self, field, **kwargs):
         if field.name == 'name':
             first_name = vary_string_field(randint(4, 10))
             last_name = vary_string_field(randint(5, 11))
             return SQL('''%s || ' ' ||  %s''', first_name, last_name)
-        return super()._duplicate_variate_field(field)
+        return super()._duplicate_variate_field(field, **kwargs)

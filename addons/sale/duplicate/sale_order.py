@@ -10,7 +10,7 @@ class SaleOrder(models.Model):
     def _duplicate_field_need_variation(self, field, **kwargs):
         if field.name == 'name':
             return True
-        return super()._duplicate_field_need_variation(field)
+        return super()._duplicate_field_need_variation(field, **kwargs)
 
     def _duplicate_variate_field(self, field, **kwargs):
         if field.name == 'name':
@@ -18,4 +18,4 @@ class SaleOrder(models.Model):
             padding = (seq and seq.padding) or 5
             return SQL(f''' 'S' || TO_CHAR(%(last_id)s + row_number() OVER(), 'fm{'0' * padding}')''',
                        last_id=fetch_last_id(self.env, self))
-        return super()._duplicate_variate_field(field)
+        return super()._duplicate_variate_field(field, **kwargs)

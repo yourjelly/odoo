@@ -10,10 +10,11 @@ class AccountMove(models.Model):
     def _duplicate_field_need_variation(self, field, **kwargs):
         if field.name == 'name':
             return True
-        return super()._duplicate_field_need_variation(field)
+        return super()._duplicate_field_need_variation(field, **kwargs)
 
-    def _duplicate_variate_field(self, field, factors, **kwargs):
+    def _duplicate_variate_field(self, field, **kwargs):
         if field.name == 'name':
+            factors = kwargs.get('factors')
             date = vary_date_field(self.env, self, factors)
             last_id = fetch_last_id(self.env, self)
             return SQL(
@@ -26,4 +27,4 @@ class AccountMove(models.Model):
                 date=date,
                 last_id=last_id,
             )
-        return super()._duplicate_variate_field(field)
+        return super()._duplicate_variate_field(field, **kwargs)
