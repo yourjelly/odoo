@@ -603,89 +603,70 @@
     <div t-if="not invite_preview" class="o_wslides_lesson_nav mb-4">
         <div class="container">
             <div class="row">
-                <nav class="navbar navbar-expand-lg navbar-light bg-transparent col">
-                    <a class="navbar-brand d-lg-none" href="#">Filter &amp; order</a>
-
-                    <div class="ms-auto d-lg-none" t-if="search_slide_category or search">
-                        <a t-att-href="'/slides/%s' % (slug(channel))" class="btn btn-info me-3">
-                            <i class="fa fa-eraser me-1"/>Clear filters
-                        </a>
-                    </div>
-
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-
-                    <div class="collapse navbar-collapse row" id="navbarSupportedContent">
-                        <div class="d-flex justify-content-between">
-                            <ul class="list-unstyled d-flex align-items-lg-center gap-2">
-
-                                <t t-set="slide_category_keys" t-value="slide_categories.keys()"/>
-                                <t t-foreach="slide_category_keys" t-as="slide_category_key">
-                                    <t t-if="search_category">
-                                        <li t-if="search_category['nbr_%s' % slide_category_key] > 0" class="nav-item">
-                                            <a t-att-href="'/slides/%s/category/%s?%s' % (slug(channel), slug(search_category), keep_query(slide_category=slide_category_key))"
-                                               t-att-class="'nav-link d-flex align-items-center justify-content-between me-1 %s' % ('active' if search_slide_category == slide_category_key else '')">
-                                               <t t-esc="slide_categories[slide_category_key]"/>
-                                               <span t-attf-class="badge ms-1 #{'text-bg-info' if search_slide_category == slide_category_key else 'bg-400'}" t-esc="search_category['nbr_%s' % slide_category_key]"/>
-                                            </a>
-                                        </li>
-                                    </t>
-                                    <t t-else="">
-                                        <li t-if="channel['nbr_%s' % slide_category_key] > 0" class="nav-item">
-                                            <a t-att-href="'/slides/%s?%s' % (slug(channel), keep_query(slide_category=slide_category_key))"
-                                               t-att-class="'o_wslides_documentation_filter badge py-2 d-flex align-items-center gap-2 %s' % ('active text-bg-primary' if search_slide_category == slide_category_key else '')">
-                                               <t t-if="slide_categories[slide_category_key] == 'Article'">
-                                                    <i class="fa fa-file-text" role="img"/>
-                                               </t>
-                                               <t t-elif="slide_categories[slide_category_key] == 'Document'">
-                                                    <i class="fa fa-folder" role="img"/>
-                                               </t>
-                                               <t t-elif="slide_categories[slide_category_key] == 'Video'">
-                                                    <i class="fa fa-video-camera" role="img"/>
-                                               </t>
-                                               <t t-esc="slide_categories[slide_category_key]"/>
-                                            </a>
-                                        </li>
-                                    </t>
-                                </t>
-                            </ul>
-                            <ul class="list-unstyled">
-                                <li class="nav-item dropdown d-flex align-items-center gap-2 ms-lg-auto">
-                                    Order by:
-                                    <a class="dropdown-toggle dropdown-toggle align-items-center d-flex btn btn-light" type="button" id="slidesChannelDropdownSort"
-                                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#">
-                                        <span class="d-none d-xl-inline">
-                                            <t t-if="sorting == 'most_voted'">Most Voted</t>
-                                            <t t-elif="sorting == 'most_viewed'">Most Viewed</t>
-                                            <t t-else="">Newest</t>
-                                        </span>
+                <div>Filter &amp; order</div>
+                <div class="d-flex justify-content-between">
+                    <ul class="list-unstyled d-flex flex-wrap align-items-lg-center gap-2">
+                        <li>
+                            <a t-att-href="'/slides/%s' % (slug(channel))" t-att-class="'o_wslides_documentation_filter badge py-2 d-flex align-items-center gap-2 %s' % ('active text-bg-primary' if search_slide_category == slide_category_key else '')">
+                                All Types
+                            </a>
+                        </li>
+                        <t t-set="slide_category_keys" t-value="slide_categories.keys()"/>
+                        <t t-foreach="slide_category_keys" t-as="slide_category_key">
+                            <t t-if="search_category">
+                                <li t-if="search_category['nbr_%s' % slide_category_key] > 0" class="nav-item">
+                                    <a t-att-href="'/slides/%s/category/%s?%s' % (slug(channel), slug(search_category), keep_query(slide_category=slide_category_key))"
+                                        t-att-class="'o_wslides_documentation_filter badge py-2 d-flex align-items-center gap-2 %s' % ('active text-bg-primary' if search_slide_category == slide_category_key else '')">
+                                        <t t-if="slide_categories[slide_category_key] == 'Article'">
+                                            <i class="fa fa-file-text" role="img"/>
+                                        </t>
+                                        <t t-elif="slide_categories[slide_category_key] == 'Document'">
+                                            <i class="fa fa-folder" role="img"/>
+                                        </t>
+                                        <t t-elif="slide_categories[slide_category_key] == 'Video'">
+                                            <i class="fa fa-video-camera" role="img"/>
+                                        </t>
+                                        <t t-esc="slide_categories[slide_category_key]"/>
                                     </a>
-                                    <div class="dropdown-menu" aria-labelledby="slidesChannelDropdownSort" role="menu">
-                                        <h6 class="dropdown-header">Sort by</h6>
-                                        <a role="menuitem" t-att-href="'/slides/%s?%s' % (slug(channel), keep_query('slide_category', sorting='latest'))"
-                                           t-att-class="'dropdown-item %s' % ('active' if sorting and sorting == 'latest' else '')">Newest</a>
-                                        <a role="menuitem" t-att-href="'/slides/%s?%s' % (slug(channel), keep_query('slide_category', sorting='most_voted'))"
-                                           t-att-class="'dropdown-item %s' % ('active' if sorting and sorting == 'most_voted' else '')">Most Voted</a>
-                                        <a role="menuitem" t-att-href="'/slides/%s?%s' % (slug(channel), keep_query('slide_category', sorting='most_viewed'))"
-                                           t-att-class="'dropdown-item %s' % ('active' if sorting and sorting == 'most_viewed' else '')">Most Viewed</a>
-                                    </div>
                                 </li>
-                            </ul>
-                        </div>
+                            </t>
+                            <t t-else="">
+                                <li t-if="channel['nbr_%s' % slide_category_key] > 0" class="nav-item">
+                                    <a t-att-href="'/slides/%s?%s' % (slug(channel), keep_query(slide_category=slide_category_key))"
+                                        t-att-class="'o_wslides_documentation_filter badge py-2 d-flex align-items-center gap-2 %s' % ('active text-bg-primary' if search_slide_category == slide_category_key else '')">
+                                        <t t-if="slide_categories[slide_category_key] == 'Article'">
+                                            <i class="fa fa-file-text" role="img"/>
+                                        </t>
+                                        <t t-elif="slide_categories[slide_category_key] == 'Document'">
+                                            <i class="fa fa-folder" role="img"/>
+                                        </t>
+                                        <t t-elif="slide_categories[slide_category_key] == 'Video'">
+                                            <i class="fa fa-video-camera" role="img"/>
+                                        </t>
+                                        <t t-elif="slide_categories[slide_category_key] == 'Quiz'">
+                                            <i class="fa fa-question-circle" role="img"/>
+                                        </t>
+                                        <t t-elif="slide_categories[slide_category_key] == 'Certification'">
+                                            <i class="fa fa-trophy" role="img"/>
+                                        </t>
+                                        <t t-esc="slide_categories[slide_category_key]"/>
+                                    </a>
+                                </li>
+                            </t>
+                        </t>
+                    </ul>
+                </div>
 
-                        <div class="col-12 d-flex align-items-start">
-                            <form t-attf-action="/slides/#{slug(channel)}" role="search" method="get" class="my-2 my-lg-0">
-                                <div class="input-group position-relative">
-                                    <input type="text" class="form-control border" name="search" placeholder="Search in content" t-att-value="search"/>
-                                    <button class="btn border" type="submit" aria-label="Search" title="Search">
-                                        <i class="fa fa-search"/>
-                                    </button>
-                                </div>
-                            </form>
+                <div class="col-12 d-flex align-items-start">
+                    <form t-attf-action="/slides/#{slug(channel)}" role="search" method="get" class="my-2 my-lg-0">
+                        <div class="input-group position-relative">
+                            <input type="text" class="form-control border" name="search" placeholder="Search in content" t-att-value="search"/>
+                            <button class="btn border" type="submit" aria-label="Search" title="Search">
+                                <i class="fa fa-search"/>
+                            </button>
                         </div>
-                    </div>
-                </nav>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -750,14 +731,16 @@
             Completed
             <i class="fa fa-check-circle ms-1"/>
         </span>
+        <span t-elif="slide.is_preview and not channel.is_member" class="position-absolute end-0 m-3 badge text-bg-success">
+            Free Preview
+        </span>
+        <span t-elif="not slide.is_published and channel.can_publish" class="position-absolute end-0 m-3 badge text-bg-danger">
+            Unpublished
+        </span>
 
         <div class="card-body d-flex flex-column px-3">
             <a t-if="can_access" class="card-title h5 o_wslides_desc_truncate_2" t-attf-href="/slides/slide/#{slug(slide)}#{query_string}" t-esc="slide.name"/>
             <span t-else="" class="card-title h5 o_wslides_desc_truncate_2 text-muted" t-esc="slide.name"/>
-            <div class="text-muted o_wslides_desc_truncate_2 mb-2" t-if="slide.is_preview or (not slide.is_published and user.has_group('website_slides.group_website_slides_officer'))">
-                <span t-if="slide.is_preview" class="badge text-bg-info">Preview</span>
-                <span t-if="not slide.is_published and channel.can_publish" class="badge text-bg-danger">Unpublished</span>
-            </div>
             <div class="card-text mb-auto">
                 <div class="o_wslides_desc_truncate_3 fw-light oe_no_empty" t-field="slide.description"/>
             </div>
