@@ -7,11 +7,21 @@ from odoo import fields, models
 class LoyaltyCard(models.Model):
     _inherit = 'loyalty.card'
 
+    def default_get(self, fields_list):
+        # EXTENDS base
+        defaults = super().default_get(fields_list)
+        if 'order_id' in fields_list and defaults.get('order_id'):
+            default_order = defaults['order_id']
+            defaults['last_update_order_id'] = f'"sale.order",{default_order}'
+        return defaults
+
+
     order_id = fields.Many2one(
         comodel_name='sale.order',
         string="Order Reference",
         readonly=True,
         help="The sales order from which coupon is generated")
+    last_update_order_id = fields.Reference(selection_add=[('sale.order', 'Sale Order')])
 
     def _get_default_template(self):
         default_template = super()._get_default_template()

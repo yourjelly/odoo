@@ -20,8 +20,6 @@ class LoyaltyHistoryWizard(models.TransientModel):
             raise ValidationError(
                 _("New Balance should be positive and different then old balance.")
             )
-        differance = self.new_balance - self.old_balance
-        used = 0
         issued = 0
         if differance > 0:
             issued = differance

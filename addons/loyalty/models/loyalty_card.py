@@ -46,6 +46,12 @@ class LoyaltyCard(models.Model):
         inverse_name='card_id',
         readonly=True,
     )
+    last_update_order_id = fields.Reference(
+        selection=[],
+        readonly=True,
+        store=True,
+        ondelete='cascade',
+    )
 
     _sql_constraints = [
         ('card_code_unique', 'UNIQUE(code)', 'A coupon/loyalty card must have a unique code.')
@@ -163,21 +169,49 @@ class LoyaltyCard(models.Model):
                 continue
             this_milestone.mail_template_id.send_mail(res_id=coupon.id, email_layout_xmlid='mail.mail_notification_light')
 
-
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            vals['history_ids'] = [(0, 0, {
+                'description': self._get_history_line_description(),
+                'order_id': vals.get('last_update_order_id', False),
+                'issued': max(vals.get('points', 0), 0),
+                'used': abs(vals['points']) if vals.get('points', 0) < 0 else 0,
+            })]
         res = super().create(vals_list)
         res._send_creation_communication()
         return res
 
     def write(self, vals):
-        if not self.env.context.get('loyalty_no_mail', False) and 'points' in vals:
+        if 'points' in vals:
             points_before = {coupon: coupon.points for coupon in self}
         res = super().write(vals)
-        if not self.env.context.get('loyalty_no_mail', False) and 'points' in vals:
+        if 'points' in vals:
             points_changes = {coupon: {'old': points_before[coupon], 'new': coupon.points} for coupon in self}
-            self._send_points_reach_communication(points_changes)
+            self._create_loyalty_history(points_changes)
+            if not self.env.context.get('loyalty_no_mail', False):
+                self._send_points_reach_communication(points_changes)
         return res
+
+    def _get_history_line_description(self):
+        return _("Gift for customer")
+
+    def _create_loyalty_history(self, points_changes):
+        print("\n\n\n coupon", points_changes)
+        for coupon, point_mapping in points_changes.items():
+            diff = point_mapping['new'] - point_mapping['old']
+            if diff > 0:
+                issued = diff
+                used = 0
+            else:
+                issued = 0
+                used = abs(diff)
+            coupon.history_ids = [(0, 0, {
+                'description': self._get_history_line_description(),
+                'order_id': coupon.last_update_order_id,
+                'issued': issued,
+                'used': used,
+            })]
 
     def action_loyalty_update_balance(self):
         return {

@@ -7,8 +7,17 @@ class LoyaltyCard(models.Model):
     _name = 'loyalty.card'
     _inherit = ['loyalty.card', 'pos.load.mixin']
 
+    def default_get(self, fields_list):
+        # EXTENDS base
+        defaults = super().default_get(fields_list)
+        if 'source_pos_order_id' in fields_list and defaults.get('source_pos_order_id'):
+            default_source_pos_order_id = defaults['source_pos_order_id']
+            defaults['last_update_order_id'] = f'"pos.order",{default_source_pos_order_id}'
+        return defaults
+
     source_pos_order_id = fields.Many2one('pos.order', "PoS Order Reference",
         help="PoS order where this coupon was generated.")
+    last_update_order_id = fields.Reference(selection_add=[('pos.order', "POS Order")])
 
     @api.model
     def _load_pos_data_domain(self, data):
