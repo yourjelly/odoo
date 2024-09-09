@@ -356,6 +356,13 @@ def infer_many2many_model(env, field):
         def __hash__(self):
             return hash(self._name)
 
+        def _duplicate_field_need_variation(self, field, **kwargs):
+            # if the comodel wasn't priorly duplicated, duplicating the many2one to the non-duplicated comodel
+            # will fallback on the default behaviour, which checks for need of variation before the default copy.
+            # By default, the 2 columns are part of an unique compound primary index, therefor a variation would be needed,
+            # but the unique constraint can be satisfied only by varying 1 of the 2 m2o.
+            return False
+
     # check if the relation is an existing model
     if model := next((model for model in env.registry.models.values() if model._table == field.relation), None):
         return env[model._name]  # `model` is a MetaModel, re-fetch from env to get the actual ORM model
@@ -437,11 +444,6 @@ def duplicate_models(env, models, factors):
                         to_process.append(comodel)
                         factors[comodel] = factors[model]
                 case 'many2many':
-                    # duplicate first the comodel of the m2m, then the relation table/model linking the two
-                    comodel = env[field.comodel_name]
-                    if comodel != model and comodel not in duplicated and comodel not in to_process:
-                        to_process.append(comodel)
-                        factors[comodel] = factors[model]
                     m2m_model = infer_many2many_model(env, field)
                     if m2m_model not in duplicated and m2m_model not in to_process:
                         to_process.append(m2m_model)
