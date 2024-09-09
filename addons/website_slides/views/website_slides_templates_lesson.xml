@@ -28,7 +28,7 @@
                         <t t-if="slide.channel_id.channel_type == 'documentation'" t-call="website_slides.slide_aside_documentation"/>
                     </div>
                     <div t-attf-class="o_wslides_lesson_aside col-lg-3 #{'order-2' if slide.channel_id.channel_type == 'documentation' else ''}">
-                        <t t-if="slide.channel_id.channel_type == 'training'" t-call="website_slides.slide_aside_training"/>
+                        <t t-call="website_slides.slide_aside"/>
                     </div>
                 </div>
             </div>
@@ -39,8 +39,8 @@
 <!-- Slide: sidebar documentation mode -->
 <template id="slide_aside_documentation" name="Slide: Sidebar in Documentation">
     <div class="o_wslides_lesson_aside_doc border-top pt-5">
-        <h3 class="mb-5">More from this documentation</h3>
-        <div class="row row-cols-2 g-5">
+        <h3 class="mb-5">Explore more content</h3>
+        <div class="row row-cols-md-2 g-5">
                 <t t-set="related_slides_list" t-value="list(related_slides)"/>
                 <t t-if="not related_slides_list">
                     No presentation available.
@@ -62,7 +62,7 @@
 <!-- Slide sub-template: display an item in a list of related slides (Related, Most Viewed, ...) -->
 <template id="slide_aside_card" name="Related Slide">
     <a class="d-flex align-items-center gap-3 border-bottom pb-5" t-att-href="'/slides/slide/%s' % (slug(aside_slide))">
-        <div class="me-1 border o_wslides_background_image_aside_card ratio ratio-1x1 w-25 rounded-3" t-attf-style="background-image: url(#{website.image_url(aside_slide, 'image_256')});"/>
+        <div class="o_wslides_background_image_aside_card flex-shrink-0 ratio ratio-1x1 rounded-3" t-attf-style="background-image: url(#{website.image_url(aside_slide, 'image_256')});"/>
         <div class="overflow-hidden d-flex flex-column gap-1 h-100">
             <small class="text-uppercase text-muted fw-bold">
                 <t t-if="most_viewed_slides_list">
@@ -80,20 +80,20 @@
     </a>
 </template>
 
-<!-- Slide: sidebar training mode -->
-<template id="slide_aside_training" name="Slide: Sidebar in Training">
+<!-- Slide: sidebar  -->
+<template id="slide_aside" name="Slide: Sidebar">
     <div class="d-none d-lg-block o_wslides_lesson_aside_list position-relative bg-white border-bottom mt-4">
         <ul class="list-unstyled my-0 pb-3 collapse d-lg-block">
             <t t-set="i" t-value="0"/>
             <t t-if="category.get('slides')" t-foreach="category_data" t-as="category">
-                <t t-call="website_slides.slide_aside_training_category">
+                <t t-call="website_slides.slide_aside_category">
                     <t t-set="category_slide_ids" t-value="category['slides']"/>
                 </t>
             </t>
         </ul>
     </div>
     <!-- Slide: mobile sidebar training mode -->
-    <div id="o_wslides_mobile_sidebar" class="offcanvas offcanvas-end d-block d-lg-none">
+    <div id="o_wslides_mobile_sidebar" class="offcanvas offcanvas-end d-lg-none">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasExampleLabel">Course content</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -102,7 +102,7 @@
             <ul class="list-unstyled my-0 pb-3">
                 <t t-set="i" t-value="0"/>
                 <t t-if="category.get('slides')" t-foreach="category_data" t-as="category">
-                    <t t-call="website_slides.slide_aside_training_category">
+                    <t t-call="website_slides.slide_aside_category">
                         <t t-set="category_slide_ids" t-value="category['slides']"/>
                     </t>
                 </t>
@@ -111,7 +111,7 @@
     </div>
 </template>
 
-<template id="slide_aside_training_category" name="Category item for the slide detailed view list">
+<template id="slide_aside_category" name="Category item for the slide detailed view list">
     <t t-set="category_collapsed" t-value="category and category.get('is_collapsed')"/>
     <t t-if="category" t-set="category" t-value="category.get('category')"/>
     <li class="o_wslides_fs_sidebar_section mt32">
@@ -188,12 +188,32 @@
 
 <!-- Slide: all its content, not fullscreen mode -->
 <template id="slide_content_detailed" name="Slide: Detailed Content">
-    <div class="d-flex flex-wrap justify-content-between mt32">
+    <div class="d-flex flex-column flex-lg-row flex-wrap justify-content-between">
         <t t-set="slide_completed" t-value="channel_progress[slide.id].get('completed')"/>
-        <h5 class="h4 my-0 d-flex flex_row overflow-hidden">
-            <span class="text-truncate" t-field="slide.name"/>
-        </h5>
-        <div class="col-12 col-md order-1 order-md-2 text-nowrap flex-grow-0 d-flex flex-wrap flex-md-nowrap justify-content-center justify-content-md-end align-items-center mb-3 mb-md-0">
+        <h4 class="mt-3 m-lg-0 w-100" t-field="slide.name"/>
+        <div class="d-flex d-md-none align-items-center">
+            <button class="o_wslides_share btn btn-link text-decoration-none" role="button" t-att-data-name="slide.name"
+                t-att-data-id="slide.id" t-att-data-url="slide.website_share_url" t-att-data-category="slide.slide_category"
+                t-att-data-email-sharing="bool(slide.channel_id.share_slide_template_id)"
+                t-att-data-embed-code="slide.embed_code_external if slide.slide_category in ['video', 'document'] else False"
+                aria-label="Share">
+                <i class="fa fa-share-alt me-xl-2 my-1"/>
+                <span>Share this content</span>
+            </button>
+            <div t-if="slide.channel_id.allow_comment" class="d-flex">
+                    <div class="o_wslides_js_slide_like me-2">
+                        <span t-attf-class="o_wslides_js_slide_like_up #{'disabled' if not slide.channel_id.can_vote else ''}" tabindex="0" data-bs-toggle="popover" t-att-data-slide-id="slide.id" t-att-data-user-vote="slide.user_vote">
+                            <i t-attf-class="fa fa-1x #{'fa-thumbs-up' if slide.user_vote == 1 else 'fa-thumbs-o-up'}" role="img" aria-label="Likes" title="Like"/>
+                            <span t-field="slide.likes" t-options="{'format_decimalized_number': True}"/>
+                        </span>
+                        <span t-attf-class="o_wslides_js_slide_like_down ms-3 #{'disabled' if not slide.channel_id.can_vote else ''}" tabindex="0" data-bs-toggle="popover" t-att-data-slide-id="slide.id" t-att-data-user-vote="slide.user_vote">
+                            <i t-attf-class="fa fa-1x #{'fa-thumbs-down' if slide.user_vote == -1 else 'fa-thumbs-o-down'}" role="img" aria-label="Dislikes" title="Dislike"/>
+                            <span t-field="slide.dislikes" t-options="{'format_decimalized_number': True}"/>
+                        </span>
+                    </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between order-first order-lg-0">
             <t t-set="quiz_karma_won" t-value="channel_progress[slide.id].get('quiz_karma_won', 0)"/>
             <t t-set="quiz_karma_gain" t-value="channel_progress[slide.id].get('quiz_karma_gain', 0)"/>
             <span t-if="slide.question_ids and (slide_completed or quiz_karma_gain)" style="flex-basis: 100%"
@@ -210,41 +230,6 @@
                     <span>XP</span>
                 </t>
             </span>
-            <div t-if="slide.channel_id.channel_type == 'documentation'" class="btn-group flex-grow-1 flex-sm-0 my-1" role="group" aria-label="Lesson Nav">
-                <a t-attf-class="o_wslides_nav_button btn btn-light border my-auto #{'disabled' if not previous_slide else ''} me-2"
-                    role="button" t-att-aria-disabled="'true' if not previous_slide else None" aria-label="Previous"
-                    t-att-href="'/slides/slide/%s' % (slug(previous_slide)) if previous_slide else '#'">
-                    <i class="oi oi-chevron-left me-2"></i> <span class="d-none d-sm-inline-block">Prev</span>
-                </a>
-                <t t-if="slide.channel_id.channel_type == 'documentation' and slide.channel_id.is_member">
-                    <t t-set="is_quiz" t-value="slide.slide_category == 'quiz' or slide.question_ids"/>
-                    <a t-if="slide_completed and slide.can_self_mark_uncompleted" role="button"
-                        class="o_wslides_undone_button btn btn-light border me-2"
-                        t-attf-href="/slides/slide/#{slide.id}/set_uncompleted">
-                        Mark To Do
-                    </a>
-                    <a t-elif="not slide_completed and is_quiz" role="button"
-                        class="o_wslides_done_button btn btn-primary border text-white me-2"
-                        href="#quiz_container">
-                        Take Quiz
-                    </a>
-                    <a t-else="not slide_completed and slide.can_self_mark_completed" role="button"
-                        class="o_wslides_done_button btn btn-primary border text-white me-2"
-                        t-attf-href="/slides/slide/#{slide.id}/set_completed?next_slide_id=#{next_slide.id if next_slide else ''}">
-                        Mark Done
-                    </a>
-                </t>
-                <div t-if="slide.channel_id.channel_type == 'documentation' and not slide.channel_id.is_member" class="me-2">
-                    <t t-call="website_slides.course_join">
-                        <t t-set="channel" t-value="slide.channel_id"/>
-                    </t>
-                </div>
-                <a t-attf-class="o_wslides_nav_button btn btn-light border my-auto #{'disabled' if not next_slide else ''}"
-                    role="button" t-att-aria-disabled="'true' if not next_slide else None" aria-label="Next"
-                    t-att-href="'/slides/slide/%s' % (slug(next_slide)) if next_slide else '#'">
-                    <span class="d-none d-sm-inline-block">Next</span> <i class="oi oi-chevron-right ms-2"></i>
-                </a>
-            </div>
             <button class="btn btn-light d-block d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#o_wslides_mobile_sidebar" aria-controls="offcanvasExample">
                 <i class="fa fa-list-ul me-2"/>Contents
             </button>
@@ -276,12 +261,11 @@
     <div class="mt-2 mb-5">
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div t-if="slide.tag_ids">
-                <span class="fw-bold">Tags:</span>
                 <t t-foreach="slide.tag_ids" t-as="tag">
                     <a t-att-href="'/slides/%s/tag/%s' % (slug(slide.channel_id), slug(tag))" class="badge text-bg-info" t-esc="tag.name"/>
                 </t>
             </div>
-            <div class="d-flex align-items-center">
+            <div class="d-none d-md-flex align-items-center">
                 <div t-if="slide.channel_id.allow_comment" class="d-flex">
                         <div class="o_wslides_js_slide_like me-2">
                             <span t-attf-class="o_wslides_js_slide_like_up #{'disabled' if not slide.channel_id.can_vote else ''}" tabindex="0" data-bs-toggle="popover" t-att-data-slide-id="slide.id" t-att-data-user-vote="slide.user_vote">

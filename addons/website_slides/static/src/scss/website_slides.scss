@@ -497,16 +497,17 @@ $line-height-truncate: 1.5em;
     }
 }
 
-
+.o_wslides_lesson_aside_doc {
+    .o_wslides_background_image_aside_card {
+        width: 110px;
+    }
+}
 // New lesson page (not fullscreens)
 // **************************************************
 .o_wslides_lesson_main {
     .o_wslides_lesson_aside {
         .o_wslides_background_image_aside_card {
-            min-width: 20%;
-            padding-top: 20%;
-            background-size: cover;
-            background-position: center;
+            width: 110px;
         }
 
         .o_wslides_lesson_aside_collapse.collapsed {
