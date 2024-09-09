@@ -1258,6 +1258,8 @@ class ResUsers(models.Model):
         result = self._has_group(group_ext_id)
         if group_ext_id == 'base.group_no_one':
             result = result and bool(request and request.session.debug)
+        elif group_ext_id == 'base.group_multi_company':
+            result = result and len(self.company_ids) > 1
         return result
 
     def _has_group(self, group_ext_id: str) -> bool:
@@ -1503,50 +1505,6 @@ class ResUsers(models.Model):
 
 
 ResUsersPatchedInTest = ResUsers
-
-
-# pylint: disable=E0102
-class ResUsers(models.Model):  # noqa: F811
-    _inherit = ['res.users']
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        users = super().create(vals_list)
-        group_multi_company_id = self.env['ir.model.data']._xmlid_to_res_id(
-            'base.group_multi_company', raise_if_not_found=False)
-        if group_multi_company_id:
-            for user in users:
-                if len(user.company_ids) <= 1 and group_multi_company_id in user.groups_id.ids:
-                    user.write({'groups_id': [Command.unlink(group_multi_company_id)]})
-                elif len(user.company_ids) > 1 and group_multi_company_id not in user.groups_id.ids:
-                    user.write({'groups_id': [Command.link(group_multi_company_id)]})
-        return users
-
-    def write(self, values):
-        res = super().write(values)
-        if 'company_ids' not in values:
-            return res
-        group_multi_company = self.env.ref('base.group_multi_company', False)
-        if group_multi_company:
-            for user in self:
-                if len(user.company_ids) <= 1 and user.id in group_multi_company.users.ids:
-                    user.write({'groups_id': [Command.unlink(group_multi_company.id)]})
-                elif len(user.company_ids) > 1 and user.id not in group_multi_company.users.ids:
-                    user.write({'groups_id': [Command.link(group_multi_company.id)]})
-        return res
-
-    @api.model
-    def new(self, values=None, origin=None, ref=None):
-        if values is None:
-            values = {}
-        user = super().new(values=values, origin=origin, ref=ref)
-        group_multi_company = self.env.ref('base.group_multi_company', False)
-        if group_multi_company and 'company_ids' in values:
-            if len(user.company_ids) <= 1 and user.id in group_multi_company.users.ids:
-                user.update({'groups_id': [Command.unlink(group_multi_company.id)]})
-            elif len(user.company_ids) > 1 and user.id not in group_multi_company.users.ids:
-                user.update({'groups_id': [Command.link(group_multi_company.id)]})
-        return user
 
 
 class ResUsersIdentitycheck(models.TransientModel):
