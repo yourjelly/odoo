@@ -152,7 +152,7 @@ class IrRule(models.Model):
 
         # browse user and rules with sudo to avoid access errors!
         eval_context = self._eval_context()
-        user_groups = self.env.user.groups_id
+        user_groups = self.env.user.group_ids.all_implied_ids
         group_domains = []                      # list of domains
         for rule in rules.sudo():
             # evaluate the domain for the current user

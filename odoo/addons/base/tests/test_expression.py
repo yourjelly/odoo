@@ -2059,33 +2059,33 @@ class TestMany2many(TransactionCase):
             SELECT "res_users"."id"
             FROM "res_users"
             WHERE EXISTS (
-                SELECT 1 FROM "res_groups_users_rel" AS "res_users__groups_id"
-                WHERE "res_users__groups_id"."uid" = "res_users"."id"
-                AND "res_users__groups_id"."gid" IN %s
+                SELECT 1 FROM "res_groups_users_rel" AS "res_users__group_ids"
+                WHERE "res_users__group_ids"."uid" = "res_users"."id"
+                AND "res_users__group_ids"."gid" IN %s
             )
             ORDER BY "res_users"."id"
         ''']):
-            self.User.search([('groups_id', 'in', group.ids)], order='id')
+            self.User.search([('group_ids', 'in', group.ids)], order='id')
 
         with self.assertQueries(['''
             SELECT "res_users"."id"
             FROM "res_users"
             WHERE NOT EXISTS (
-                SELECT 1 FROM "res_groups_users_rel" AS "res_users__groups_id"
-                WHERE "res_users__groups_id"."uid" = "res_users"."id"
-                AND "res_users__groups_id"."gid" IN %s
+                SELECT 1 FROM "res_groups_users_rel" AS "res_users__group_ids"
+                WHERE "res_users__group_ids"."uid" = "res_users"."id"
+                AND "res_users__group_ids"."gid" IN %s
             )
             ORDER BY "res_users"."id"
         ''']):
-            self.User.search([('groups_id', 'not in', group.ids)], order='id')
+            self.User.search([('group_ids', 'not in', group.ids)], order='id')
 
         with self.assertQueries(['''
             SELECT "res_users"."id"
             FROM "res_users"
             WHERE EXISTS (
-                SELECT 1 FROM "res_groups_users_rel" AS "res_users__groups_id"
-                WHERE "res_users__groups_id"."uid" = "res_users"."id"
-                AND "res_users__groups_id"."gid" IN (
+                SELECT 1 FROM "res_groups_users_rel" AS "res_users__group_ids"
+                WHERE "res_users__group_ids"."uid" = "res_users"."id"
+                AND "res_users__group_ids"."gid" IN (
                     SELECT "res_groups"."id"
                     FROM "res_groups"
                     WHERE ("res_groups"."color" = %s)
@@ -2099,9 +2099,9 @@ class TestMany2many(TransactionCase):
             SELECT "res_users"."id"
             FROM "res_users"
             WHERE EXISTS (
-                SELECT 1 FROM "res_groups_users_rel" AS "res_users__groups_id"
-                WHERE "res_users__groups_id"."uid" = "res_users"."id"
-                AND "res_users__groups_id"."gid" IN (
+                SELECT 1 FROM "res_groups_users_rel" AS "res_users__group_ids"
+                WHERE "res_users__group_ids"."uid" = "res_users"."id"
+                AND "res_users__group_ids"."gid" IN (
                     SELECT "res_groups"."id"
                     FROM "res_groups"
                     WHERE EXISTS (
@@ -2151,8 +2151,8 @@ class TestMany2many(TransactionCase):
             SELECT "res_users"."id"
             FROM "res_users"
             WHERE EXISTS (
-                SELECT 1 FROM "res_groups_users_rel" AS "res_users__groups_id"
-                WHERE "res_users__groups_id"."uid" = "res_users"."id"
+                SELECT 1 FROM "res_groups_users_rel" AS "res_users__group_ids"
+                WHERE "res_users__group_ids"."uid" = "res_users"."id"
             )
             ORDER BY "res_users"."id"
         ''']):
@@ -2162,8 +2162,8 @@ class TestMany2many(TransactionCase):
             SELECT "res_users"."id"
             FROM "res_users"
             WHERE NOT EXISTS (
-                SELECT 1 FROM "res_groups_users_rel" AS "res_users__groups_id"
-                WHERE "res_users__groups_id"."uid" = "res_users"."id"
+                SELECT 1 FROM "res_groups_users_rel" AS "res_users__group_ids"
+                WHERE "res_users__group_ids"."uid" = "res_users"."id"
             )
             ORDER BY "res_users"."id"
         ''']):
