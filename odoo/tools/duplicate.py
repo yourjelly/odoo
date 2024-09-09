@@ -15,30 +15,28 @@ MIN_DATETIME = datetime((datetime.now() - relativedelta(years=4)).year, 1, 1)
 MAX_DATETIME = datetime.now()
 MIN_ROWS_PER_DAY = 1000
 
-##### Python Variation Functions
 
-def get_query_part_date_datetime(env, model, factors, min_date=MIN_DATETIME, max_date=MAX_DATETIME):
+def vary_date_field(env, model, factors, min_date=MIN_DATETIME, max_date=MAX_DATETIME):
     """
-    :param datetime_column: name of the date/timestamp column
-    :param total_table_size: total_size of the table after the duplication process.
+    Spreads uniformly dates in the date range specified by [min_date, max_date]
     """
     total_table_size = model.search_count([]) * factors[model]
     if total_table_size <= MIN_ROWS_PER_DAY:
-        return SQL('''now()::timestamp''')
+        return SQL('now()::timestamp')
     total_days = (max_date - min_date).days
     rows_per_day = max(MIN_ROWS_PER_DAY, total_table_size // total_days + 1)
     if total_table_size <= MIN_ROWS_PER_DAY * total_days:
         min_date = min_date + relativedelta(days=(total_days - total_table_size // MIN_ROWS_PER_DAY))
-    return SQL('''%s + (row_number() OVER()/%s) * interval '1 day' ''', min_date, rows_per_day)
+    return SQL("%s + (row_number() OVER() / %s) * interval '1 day'", min_date, rows_per_day)
 
-def get_random_sql_string(size):
-    return SQL('''left(md5(random()::text), %s)''', size)
+def vary_string_field(size):
+    return SQL('left(md5(random()::text), %s)', size)
 
-def get_random_sql_integer(low, high):
-    return SQL('''floor(random()* (%(high)s-%(low)s + 1) + %(low)s);''', low=low, high=high)
+def vary_integer_field(low, high):
+    return SQL('floor(random() * (%(high)s - %(low)s + 1) + %(low)s)', low=low, high=high)
 
-def get_random_sql_numeric(low, high):
-    return SQL('''random()::numeric *(%(high)s-%(low)s) + %(low)s''', low=low, high=high)
+def vary_numeric_field(low, high):
+    return SQL('random()::numeric * (%(high)s - %(low)s) + %(low)s', low=low, high=high)
 
 @contextmanager
 def ignore_indexes(env, tablename):
@@ -131,10 +129,8 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
     match field.type:
         case 'char' | 'text' as field_type:
             # we presume that 16 | 40 chars is enough to avoid collisions
-            # TODO: FP wants to just append the series number for all chars, it will also handle unique violation constraints
-            #  Dev note for ^: this suggestion is going to render any trigram search extremely slow (too much repetition)
             size = min(field.size or math.inf, 16 if field_type == 'char' else 40)
-            str_variation_query = get_random_sql_string(size)
+            str_variation_query = vary_string_field(size)
             # if the field is translatable, it's a JSONB column, we vary all values for each key
             if field.translate:
                 return SQL("""
@@ -148,9 +144,9 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
                 """, field_column=SQL.identifier(field.name), str_vary_expr=str_variation_query)
             return str_variation_query
         case 'integer':
-            return get_random_sql_integer(0, 10000)
+            return vary_integer_field(0, 10000)
         case 'numeric' | 'float':
-            return get_random_sql_numeric(0, 100)
+            return vary_numeric_field(0, 100)
         case 'many2one':
             # select an id from the comodel's table that isn't used by the Many2one,
             # if all are used, we pick a random one.
@@ -173,7 +169,7 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
                 SELECT %(field)s FROM %(model)s GROUP BY %(field)s ORDER BY RANDOM() LIMIT 1
             """, field=SQL.identifier(field.name), model=SQL.identifier(model._table)))
         case 'date' | 'datetime':
-            return get_query_part_date_datetime(env, model, factors)
+            return vary_date_field(env, model, factors)
         case 'html':
             # For the sake of simplicity we don't vary html fields
             return field.name

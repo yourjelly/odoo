@@ -2,7 +2,7 @@
 
 from random import randint
 from odoo import models
-from odoo.tools.duplicate import get_random_sql_string
+from odoo.tools.duplicate import vary_string_field
 from odoo.tools.sql import SQL
 
 class ResPartner(models.Model):
@@ -15,7 +15,7 @@ class ResPartner(models.Model):
 
     def _duplicate_variate_field(self, field, **kwargs):
         if field.name == 'name':
-            first_name = get_random_sql_string(randint(4, 10))
-            last_name = get_random_sql_string(randint(5, 11))
+            first_name = vary_string_field(randint(4, 10))
+            last_name = vary_string_field(randint(5, 11))
             return SQL('''%s || ' ' ||  %s''', first_name, last_name)
         return super()._duplicate_variate_field(field)
