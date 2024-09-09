@@ -52,7 +52,7 @@ class TestMailComposer(MailCommon, TestRecipients):
             notification_type='inbox',
             signature='--\nErnest'
         )
-        cls.env.ref('mail.group_mail_template_editor').user_ids -= cls.user_rendering_restricted
+        cls.env.ref('mail.group_mail_template_editor').write({'implied_by_ids': [Command.clear()]})
 
         with cls.mock_datetime_and_now(cls, cls.reference_now):
             cls.test_record = cls.env['mail.test.ticket.mc'].with_context(cls._test_context).create({
@@ -2386,7 +2386,7 @@ class TestComposerResultsMass(TestMailComposer):
         super(TestComposerResultsMass, cls).setUpClass()
         # ensure employee can create partners, necessary for templates
         cls.user_employee.write({
-            'group_ids': [(4, cls.env.ref('base.group_partner_manager').id)],
+            'group_ids': [(4, cls.env.ref('base.group_partner_manager').id), (4, cls.env.ref('mail.group_mail_template_editor').id)],
         })
         cls.template.write({
             "scheduled_date": False,

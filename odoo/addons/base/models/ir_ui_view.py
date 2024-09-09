@@ -669,13 +669,13 @@ actual arch.
         """
         if self.inherit_id and self.mode != 'primary':
             return self.inherit_id._check_view_access()
-        if self.group_ids & self.env.user.group_ids:
+        if set(self.group_ids.ids) & set(self.env.user._get_group_ids()):
             return True
         if self.group_ids:
             error = _(
                 "View '%(name)s' accessible only to groups %(groups)s ",
                 name=self.key,
-                groups=", ".join([g.name for g in self.groups_id]
+                groups=", ".join([g.name for g in self.group_ids]
             ))
         else:
             error = _("View '%(name)s' is private", name=self.key)
