@@ -1684,6 +1684,7 @@ export class ListRenderer extends Component {
         if (!this.canSelectRecord) {
             return;
         }
+        this.props.list.selectDomain(true);
         return list.toggleSelection();
     }
 
