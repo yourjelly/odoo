@@ -1600,7 +1600,7 @@ class Float(Field[float]):
         digits = self.get_digits(record.env)
         if digits:
             precision, scale = digits
-            result = float_repr(float_round(result, precision_digits=scale), precision_digits=scale)
+            result = float_round(result, precision_digits=scale)
         return result
 
     def convert_to_cache(self, value, record, validate=True):
