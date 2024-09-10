@@ -51,9 +51,9 @@ function getLimits(el, limitEl) {
     const offsetParentRect = el.offsetParent.getBoundingClientRect();
     return {
         minX: limitRect.left - offsetParentRect.left,
-        maxX: limitRect.left - offsetParentRect.left + limitRect.width,
+        maxX: limitRect.left - offsetParentRect.left + offsetParentRect.width,
         minY: limitRect.top - offsetParentRect.top,
-        maxY: limitRect.top - offsetParentRect.top + limitRect.height,
+        maxY: limitRect.top - offsetParentRect.top + offsetParentRect.height,
     };
 }
 const areElementsIntersecting = (el1, el2) => {
