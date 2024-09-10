@@ -29,14 +29,10 @@ def vary_date_field(env, model, factors, min_date=MIN_DATETIME, max_date=MAX_DAT
         min_date = min_date + relativedelta(days=(total_days - total_table_size // MIN_ROWS_PER_DAY))
     return SQL("%s + (row_number() OVER() / %s) * interval '1 day'", min_date, rows_per_day)
 
+
 def vary_string_field(size):
     return SQL('left(md5(random()::text), %s)', size)
 
-def vary_integer_field(low, high):
-    return SQL('floor(random() * (%(high)s - %(low)s + 1) + %(low)s)', low=low, high=high)
-
-def vary_numeric_field(low, high):
-    return SQL('random()::numeric * (%(high)s - %(low)s) + %(low)s', low=low, high=high)
 
 @contextmanager
 def ignore_indexes(env, tablename):
@@ -140,10 +136,6 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
                     END
                 """, field_column=SQL.identifier(field.name), str_vary_expr=str_variation_query)
             return str_variation_query
-        case 'integer':
-            return vary_integer_field(0, 10000)
-        case 'numeric' | 'float':
-            return vary_numeric_field(0, 100)
         case 'many2one':
             # select an id from the comodel's table that isn't used by the Many2one,
             # if all are used, we pick a random one.
@@ -170,12 +162,10 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
         case 'html':
             # For the sake of simplicity we don't vary html fields
             return field.name
-        # TODO: handle other types as necessary
         case _:
-            raise RuntimeError(
-                f"Unreachable code, the field {field} of type {field.type} was marked to be varied,"
-                f" but no variation branch was found."
-            )
+            _logger.warning("the field %s of type %s was marked to be varied, but no variation branch was found!", field, field.type)
+            # fallback on a raw copy
+            return field.name
 
 
 def fetch_last_id(env, model):
