@@ -3,6 +3,8 @@
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
 from odoo.tests import tagged
 
+from freezegun import freeze_time
+
 import time
 
 
@@ -290,3 +292,61 @@ class TestAveragePrice(ValuationReconciliationTestCommon):
         po.invoice_ids[0].action_post()
 
         self.assertFalse(po.picking_ids.move_ids.stock_valuation_layer_ids.stock_valuation_layer_ids)
+
+    def test_avco_currency_exchange_account_balance(self):
+        """
+        """
+        self.env.ref('base.EUR').active = True
+        self.env['res.currency.rate'].create({
+            'name': '2000-05-05',
+            'company_rate': 90,
+            'currency_id': self.env.ref('base.EUR').id,
+            'company_id': self.env.company.id,
+        })
+        self.env['res.currency.rate'].create({
+            'name': '2000-05-06',
+            'company_rate': 110,
+            'currency_id': self.env.ref('base.EUR').id,
+            'company_id': self.env.company.id,
+        })
+        self.stock_account_product_categ.property_cost_method = 'average'
+        self.env['product.supplierinfo'].create({
+            'partner_id': self.partner_a.id,
+            'product_id': self.test_product_order.id,
+            'price': 25,
+        })
+        with freeze_time('2000-05-05'):
+            purchase_order = self.env['purchase.order'].create({
+                'partner_id': self.partner_a.id,
+                'currency_id': self.env.ref('base.EUR').id,
+                'order_line': [(0, 0, {
+                    'product_id': self.test_product_order.id,
+                    'product_qty': 10,
+                    #'taxes_id': [(4, self.tax_purchase_a.id)],
+                })],
+            })
+            purchase_order.button_confirm()
+            purchase_order.picking_ids.move_ids.quantity = 10
+            purchase_order.picking_ids.button_validate()
+
+        with freeze_time('2000-05-06'):
+            purchase_order.action_create_invoice()
+            purchase_order.invoice_ids.invoice_date = '2005-05-06'
+            purchase_order.invoice_ids.action_post()
+
+        valuation_entries = self.env['account.move.line'].search([
+            ('account_id', '=', self.stock_account_product_categ.property_stock_valuation_account_id.id)
+        ])
+        stock_input_entries = self.env['account.move.line'].search([
+            ('account_id', '=', self.stock_account_product_categ.property_stock_account_input_categ_id.id)
+        ])
+        """ Current Entries:
+            ACCOUNT                             ENTRY LABEL                                                             DEBIT   CREDIT
+            'default_account_stock_valuation', 'BILL/2005/05/0001 - Test product template invoiced on order',           0.0,    45.45
+            'default_account_stock_valuation', 'compa/IN/00001 - Test product template invoiced on order',              250.0,  0.00
+            'default_account_stock_in',        'BILL/2005/05/0001 - Test product template invoiced on order',           45.45,  0.00
+            'default_account_stock_in',        'Currency exchange rate difference',                                     45.45,  0.00
+            'default_account_stock_in',        'P00029: Test product template invoiced on order',                       204.55, 0.00
+            'default_account_stock_in',        'compa/IN/00001 - Test product template invoiced on order',              0.0,    250.00
+        """
+        pass
