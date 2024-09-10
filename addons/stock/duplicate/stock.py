@@ -20,8 +20,3 @@ class StockPicking(models.Model):
             return SQL(rf"regexp_replace(name, '(.*\/)\d*', '\1') || TO_CHAR(%s + row_number() OVER (), 'fm{'0' * padding}')",
                        fetch_last_id(self.env, self))
         return super()._duplicate_variate_field(field, **kwargs)
-
-    def _duplicate_follow_related_store(self, field, **kwargs):
-        if field.name == 'sale_id':
-            return True
-        return super()._duplicate_follow_related_store(field, **kwargs)

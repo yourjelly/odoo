@@ -7239,15 +7239,6 @@ class BaseModel(metaclass=MetaModel):
         """
         return SQL('')
 
-    def _duplicate_follow_related_store(self, field, **kwargs):
-        """
-        Hook during the duplication process, to decide how a related store field should be copied:
-        - False | None -> copy the value from the source table
-        - True -> copy by following the relation
-
-        :param field: the related store field to be evaluated
-        """
-        return False
 
 collections.abc.Set.register(BaseModel)
 # not exactly true as BaseModel doesn't have index or count

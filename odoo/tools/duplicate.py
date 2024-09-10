@@ -216,21 +216,20 @@ def duplicate_field(env, model, field, duplicated, factors, trigram_indexed_fiel
         return copy(_field)
 
     def copy_related_store(_field):
-        if model._duplicate_follow_related_store(_field):
-            has_column = lambda f: f.store and f.column_type
-            linking_field = model._fields[_field.related.split('.')[0]]
-            linking_model = env[linking_field.comodel_name]
-            if linking_model in duplicated and has_column(linking_field) and has_column(_field.related_field):
-                # we know that linking_model is in duplicated -> we get the SQL expr for the m2o remapping
-                _, m2o_sql_expr = copy_many2one(linking_field)
-                return _field.name, SQL('(%s)', SQL(f"""
-                    SELECT %(related_field)s
-                    FROM %(linking_model)s
-                    WHERE id = %(m2o_sql_expr)s
-                """, related_field=SQL.identifier(_field.related_field.name),
-                     linking_model=SQL.identifier(linking_model._table),
-                     linking_field=SQL.identifier(linking_field.name),
-                     m2o_sql_expr=m2o_sql_expr))
+        has_column = lambda f: f.store and f.column_type
+        linking_field = model._fields[_field.related.split('.')[0]]
+        linking_model = env[linking_field.comodel_name]
+        if linking_model in duplicated and has_column(linking_field) and has_column(_field.related_field):
+            # we know that linking_model is in duplicated -> we get the SQL expr for the m2o remapping
+            _, m2o_sql_expr = copy_many2one(linking_field)
+            return _field.name, SQL('(%s)', SQL(f"""
+                SELECT %(related_field)s
+                FROM %(linking_model)s
+                WHERE id = %(m2o_sql_expr)s
+            """, related_field=SQL.identifier(_field.related_field.name),
+                 linking_model=SQL.identifier(linking_model._table),
+                 linking_field=SQL.identifier(linking_field.name),
+                 m2o_sql_expr=m2o_sql_expr))
         return copy(_field)
 
     if field.name == 'id':
