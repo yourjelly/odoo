@@ -3,6 +3,7 @@ import logging
 
 from odoo import models, _
 from odoo.exceptions import AccessError
+from odoo.osv import expression
 
 
 _logger = logging.getLogger(__name__)
@@ -19,6 +20,8 @@ class IrAttachment(models.Model):
         """
         if not self.env.is_admin():
             raise AccessError(_('Only administrators can execute this action.'))
+        if self._storage() == "db":
+            return
         domain = self._get_spreadsheet_attachment_domain()
         attachments = self.search(domain)
         for attachment in attachments:
@@ -35,7 +38,7 @@ class IrAttachment(models.Model):
             raise AccessError(_('Only administrators can execute this action.'))
         if self._storage() == "db":
             return
-        domain = self._get_spreadsheet_attachment_domain()
+        domain = expression.AND([self._get_spreadsheet_attachment_domain(), [('db_datas', '!=', False)]])
         attachments = self.search(domain)
         for attachment in attachments:
             attachment.raw = attachment.db_datas
@@ -47,4 +50,4 @@ class IrAttachment(models.Model):
         Override this method to include attachments containing spreadsheet data
         to be be sent to the upgrade platform.
         """
-        return []
+        return expression.FALSE_DOMAIN
