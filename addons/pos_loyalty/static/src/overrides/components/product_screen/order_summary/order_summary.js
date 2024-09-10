@@ -47,6 +47,22 @@ patch(OrderSummary.prototype, {
                 return;
             }
         }
+
+        const numpadMode = this.pos.numpadMode;
+        if (
+            selectedLine?.uiState?.isRewardProductLine &&
+            ["price", "discount"].includes(numpadMode) &&
+            key !== "Backspace"
+        ) {
+            let notificationString = _t("The price of the Reward product can't be changed.");
+            if (numpadMode === "discount") {
+                notificationString = _t("No discounts can be applied to the Reward product.");
+            }
+            if (notificationString) {
+                this.notification.add(notificationString, 4000);
+                return;
+            }
+        }
         return super.updateSelectedOrderline({ buffer, key });
     },
     /**
@@ -81,6 +97,20 @@ patch(OrderSummary.prototype, {
             !selectedLine.is_reward_line ||
             (selectedLine.is_reward_line && ["", "remove"].includes(val))
         ) {
+            const relatedLine = this.currentOrder.lines.find(
+                (line) => line._reward_product_id?.id === selectedLine.product_id.id
+            );
+            const relatedLoyaltyProgram = this.currentOrder
+                .getLoyaltyPoints()
+                .find((lp) => lp.program.id === relatedLine?.reward_id.program_id.id);
+            const maximumRewardQty = parseInt(
+                relatedLine?.qty +
+                    (relatedLoyaltyProgram?.points.total / relatedLine?.points_cost) *
+                        relatedLine?.qty
+            );
+            if (val > maximumRewardQty) {
+                val = maximumRewardQty;
+            }
             super._setValue(val);
         }
         if (!selectedLine.is_reward_line || (selectedLine.is_reward_line && val === "remove")) {
