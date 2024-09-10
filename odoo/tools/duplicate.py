@@ -74,9 +74,6 @@ def ignore_fkey_constraints(env):
     env.cr.execute('RESET session_replication_role')
 
 
-# TODO: unlogged tables context
-
-
 def field_need_variation(env, model, field, trigram_indexed_fields):
     """
     Return True/False depending on if the field needs to be varied.
