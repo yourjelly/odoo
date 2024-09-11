@@ -147,10 +147,6 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
                 SELECT id FROM %(comodel)s ORDER BY RANDOM() LIMIT 1
             """, comodel=SQL.identifier(comodel._table)))
             return SQL('(%s)', SQL('SELECT COALESCE(%s, %s)', different_fkey_query, random_fkey_query))
-        case 'selection':
-            return SQL('(%s)', SQL("""
-                SELECT %(field)s FROM %(model)s GROUP BY %(field)s ORDER BY RANDOM() LIMIT 1
-            """, field=SQL.identifier(field.name), model=SQL.identifier(model._table)))
         case 'date' | 'datetime':
             return vary_date_field(env, model, factors)
         case 'html':
