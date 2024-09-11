@@ -174,7 +174,7 @@ def duplicate_field(env, model, field, duplicated, factors, trigram_indexed_fiel
         if (comodel := env[_field.comodel_name]) in duplicated:
             comodel_max_id = duplicated[comodel]
             # we use MOD() instead of %, because % cannot be correctly escaped, it's a limitation of the SQL wrapper
-            return _field.name, SQL(f"{table_alias}.{_field.name} + {comodel_max_id} * (MOD({series_alias} - 1, {factors[model]}) + 1)")
+            return _field.name, SQL(f"{table_alias}.{_field.name} + {comodel_max_id} * (MOD({series_alias} - 1, {factors[comodel]}) + 1)")
         return copy(_field)
 
     def copy_related_store(_field):
