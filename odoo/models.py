@@ -7220,37 +7220,6 @@ class BaseModel(metaclass=MetaModel):
             records_batches.append(self.create(create_values))
         return self.concat(*records_batches)
 
-    def _duplicate_field_need_variation(self, field, **kwargs):
-        """
-        Hook to specify *if* a field should be varied when duplicating self
-        Possible outputs:
-        - None -> fallback to the default evaluation
-        - False -> no variation required
-        - True -> variation required
-        """
-        return None
-
-    def _duplicate_variate_field(self, field, **kwargs):
-        """
-        Hook to specify *how* a field should be varied
-
-        :param field: current field instance that needs variation
-        :return SQL-wrapped query expression that variates the given field
-        """
-        return SQL('')
-
-    def _duplicate_force_factor(self, curr_factor, **kwargs):
-        """
-        Hook to allow models to cap the duplication size.
-        Might be required for some models that have an implicit maximum limit of rows it can have.
-        (ex: small fixed sized char fields with an unique constraint on it)
-
-        :param curr_factor: the current factor the duplication algorithm is considering
-        :return: a new factor that will override the current one.
-         None is interpreted as "use the current one"
-        """
-        return None
-
 
 collections.abc.Set.register(BaseModel)
 # not exactly true as BaseModel doesn't have index or count

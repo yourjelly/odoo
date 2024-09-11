@@ -6,7 +6,6 @@ from . import models
 from . import populate
 from . import report
 from . import wizard
-from . import duplicate
 
 
 def post_init(env):

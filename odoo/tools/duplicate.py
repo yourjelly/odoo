@@ -67,7 +67,7 @@ def ignore_fkey_constraints(env):
     env.cr.execute('RESET session_replication_role')
 
 
-def field_need_variation(env, model, field, trigram_indexed_fields):
+def field_need_variation(env, model, field):
     """
     Return True/False depending on if the field needs to be varied.
     Might be necessary in the case of:
@@ -94,15 +94,12 @@ def field_need_variation(env, model, field, trigram_indexed_fields):
         """, _model._table, _field.name)
         return _env.execute_query(query)[0][0]
 
-    if (need_variation := model._duplicate_field_need_variation(field)) is not None:
-        return need_variation
-
     # many2one fields are not considered, as a name_search would resolve it to the _rec_names_search of the related model
     if model._rec_names_search and field.name in model._rec_names_search and field.type != 'many2one':
         return True
     if field.type in ('date', 'datetime'):
         return True
-    if field.index == 'trigram' or field.name in trigram_indexed_fields:
+    if field.index == 'trigram':
         return True
     return is_unique(env, model, field)
 
@@ -114,8 +111,6 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
 
     :return: a str representing the source column, or an SQL(expression/subquery)
     """
-    if variation_query := model._duplicate_variate_field(field, factors=factors):
-        return variation_query
     match field.type:
         case 'char' | 'text':
             # if the field is translatable, it's a JSONB column, we vary all values for each key
@@ -148,7 +143,7 @@ def fetch_last_id(env, model):
     return env.execute_query(query)[0][0]
 
 
-def duplicate_field(env, model, field, duplicated, factors, trigram_indexed_fields, table_alias='t', series_alias='s'):
+def duplicate_field(env, model, field, duplicated, factors, table_alias='t', series_alias='s'):
     """
     Returns a tuple representing the destination and the source expression (str column or SQL expression)
     """
@@ -159,7 +154,7 @@ def duplicate_field(env, model, field, duplicated, factors, trigram_indexed_fiel
         return _field.name, _field.name
 
     def copy(_field):
-        if field_need_variation(env, model, _field, trigram_indexed_fields):
+        if field_need_variation(env, model, _field):
             return _field.name, variate_field(env, model, _field, table_alias, series_alias, factors)
         else:
             return copy_raw(_field)
@@ -177,27 +172,8 @@ def duplicate_field(env, model, field, duplicated, factors, trigram_indexed_fiel
             return _field.name, SQL(f"{table_alias}.{_field.name} + {comodel_max_id} * (MOD({series_alias} - 1, {factors[comodel]}) + 1)")
         return copy(_field)
 
-    def copy_related_store(_field):
-        has_column = lambda f: f.store and f.column_type
-        linking_field = model._fields[_field.related.split('.')[0]]
-        linking_model = env[linking_field.comodel_name]
-        if linking_model in duplicated and has_column(linking_field) and has_column(_field.related_field):
-            # we know that linking_model is in duplicated -> we get the SQL expr for the m2o remapping
-            _, m2o_sql_expr = copy_many2one(linking_field)
-            return _field.name, SQL('(%s)', SQL(f"""
-                SELECT %(related_field)s
-                FROM %(linking_model)s
-                WHERE id = %(m2o_sql_expr)s
-            """, related_field=SQL.identifier(_field.related_field.name),
-                 linking_model=SQL.identifier(linking_model._table),
-                 linking_field=SQL.identifier(linking_field.name),
-                 m2o_sql_expr=m2o_sql_expr))
-        return copy(_field)
-
     if field.name == 'id':
         return copy_id()
-    if field.related and field.store:
-        return copy_related_store(field)
     match field.type:
         case 'one2many':
             # there is nothing to copy, as it's value is implicitly read from the inverse Many2one
@@ -221,7 +197,7 @@ def duplicate_field(env, model, field, duplicated, factors, trigram_indexed_fiel
             return copy(field)
 
 
-def duplicate_model(env, model, duplicated, factors, trigram_index_fields):
+def duplicate_model(env, model, duplicated, factors):
 
     def update_sequence(_model):
         env.execute_query(SQL(f"SELECT SETVAL('{_model._table}_id_seq', {fetch_last_id(env, _model)}, TRUE)"))
@@ -232,12 +208,10 @@ def duplicate_model(env, model, duplicated, factors, trigram_index_fields):
     src_fields = []
     table_alias = 't'
     series_alias = 's'
-    if (new_factor := model._duplicate_force_factor(factors[model])) is not None and new_factor != factors[model]:
-        factors[model] = new_factor
     # process all stored fields (that has a respective column), if the model has an 'id', it's processed first
     has_column = lambda f: f.store and f.column_type
     for field in (f for f in sorted(model._fields.values(), key=lambda x: x.name != 'id') if has_column(f)):
-        dest, src = duplicate_field(env, model, field, duplicated, factors, trigram_index_fields, table_alias, series_alias)
+        dest, src = duplicate_field(env, model, field, duplicated, factors, table_alias, series_alias)
         dest_fields += [dest if isinstance(dest, SQL) else SQL.identifier(dest)] if dest else []
         src_fields += [src if isinstance(src, SQL) else SQL.identifier(src)] if src else []
     query = SQL(f"""
@@ -254,30 +228,6 @@ def duplicate_model(env, model, duplicated, factors, trigram_index_fields):
     if duplicated[model]:
         # in case we duplicated a model with an 'id', we update the sequence
         update_sequence(model)
-
-def get_trigram_indexed_fields(env, model):
-    if env.registry.has_unaccent == FunctionStatus.INDEXABLE:
-        query = SQL(r"""
-            SELECT unnest(regexp_matches(pg_get_expr(idx.indexprs, indrelid), '\(\((\w*)\)::text', 'g'))
-            FROM pg_index idx
-                JOIN pg_class t ON t.oid = idx.indrelid
-                JOIN pg_class i on i.oid = idx.indexrelid
-                JOIN pg_am ON i.relam = pg_am.oid
-            WHERE t.relname = %s -- tablename
-                AND (SELECT oid FROM pg_opclass WHERE opcname = 'gin_trgm_ops') = ANY (idx.indclass);
-        """, model._table)
-    else:
-        query = SQL(r"""
-            SELECT a.attname
-            FROM pg_index idx
-                JOIN pg_class t ON t.oid = idx.indrelid
-                JOIN pg_class i on i.oid = idx.indexrelid
-                JOIN pg_attribute a ON a.attnum = ANY (idx.indkey) AND a.attrelid = t.oid
-                JOIN pg_am ON i.relam = pg_am.oid
-            WHERE t.relname = %s -- tablename
-                AND (SELECT oid FROM pg_opclass WHERE opcname = 'gin_trgm_ops') = ANY (idx.indclass);
-            """, model._table)
-    return {colname for colname, in env.execute_query(query)}
 
 
 def infer_many2many_model(env, field):
@@ -299,6 +249,7 @@ def infer_many2many_model(env, field):
             self._table = field.relation
             self._inherits = {}
             self.env = env
+            self._rec_names_search = []
             # if the field is inherited, the column attributes are defined on the base_field
             column1 = field.column1 if field.column1 else field.base_field.column1
             column2 = field.column2 if field.column2 else field.base_field.column2
@@ -317,28 +268,12 @@ def infer_many2many_model(env, field):
         def __hash__(self):
             return hash(self._name)
 
-        def _duplicate_field_need_variation(self, field, **kwargs):
-            # if the comodel wasn't priorly duplicated, duplicating the many2one to the non-duplicated comodel
-            # will fallback on the default behaviour, which checks for need of variation before the default copy.
-            # By default, the 2 columns are part of an unique compound primary index, therefor a variation would be needed,
-            # but the unique constraint can be satisfied only by varying 1 of the 2 m2o.
-            return False
-
-        def _duplicate_force_factor(self, curr_factor, **kwargs):
-            # no need to force factor for the default relational table, it's PKey has enough values possible,
-            # since at least 1 of the linked model is duplicated, and we can't specify a factor for an M2M via the CLI.
-            return None
-
     # check if the relation is an existing model
     if model := next((model for model in env.registry.models.values() if model._table == field.relation), None):
         return env[model._name]  # `model` is a MetaModel, re-fetch from env to get the actual ORM model
     # the relation is a relational table, return a wrapped version
     return Many2manyModelWrapper(field)
 
-# list of tables to not duplicate
-DUPLICATE_BLACKLIST_TABLES = {
-    # TODO: remove the blacklist when checked that it's not needed.
-}
 
 def duplicate_models(env, models, factors):
     """
@@ -355,16 +290,10 @@ def duplicate_models(env, models, factors):
         query = SQL('SELECT EXISTS (SELECT 1 FROM %s)', SQL.identifier(_model._table))
         return _model.env.execute_query(query)[0][0]
 
-    def is_blacklisted(_model):
-        return _model._table in DUPLICATE_BLACKLIST_TABLES
-
-    factors = {key: (2**val) - 1 for key, val in factors.items()}
     to_process = deque(models)
     duplicated = defaultdict(int)  # {model: int(old_max_id)}
     while to_process:
         model = to_process.popleft()
-        if is_blacklisted(model):
-            continue
         if not has_records(model):  # if there are no records, there is nothing to duplicate
             continue
         # if the model has _inherits, the delegated models need to have been duplicated before the current one
@@ -375,23 +304,6 @@ def duplicate_models(env, models, factors):
                 to_process.extendleft([model] + pending_dependencies)
                 factors.update({dep: factors[model] for dep in pending_dependencies})
                 continue
-        # if there is a related stored field, the related model should be duplicated before the current one
-        related_store_fields = [f for f in model._fields.values() if f.related and f.store]
-        if related_store_fields:
-            missing_dependencies = []
-            for field in related_store_fields:
-                linking_field = model._fields[field.related.split('.')[0]]
-                if linking_field.comodel_name and (linking_model := env[linking_field.comodel_name]) not in duplicated:
-                    missing_dependencies.append(linking_model)
-            missing_dependencies += [m for f in related_store_fields if f.comodel_name and (m := env[f.comodel_name]) not in duplicated]
-            if missing_dependencies:
-                # the check with `has_records` is to avoid infinite loops when one of the cyclic dependencies has no records to be copied
-                # the check on the blacklist is to avoid an infinite loop, because the dependency will never be duplicated, as it's blacklisted
-                pending_dependencies = [dep for dep in unique(missing_dependencies) if dep not in to_process and has_records(dep) and not is_blacklisted(dep)]
-                if pending_dependencies:
-                    to_process.extendleft([model] + pending_dependencies)
-                    factors.update({dep: factors[model] for dep in pending_dependencies})
-                    continue
         # models on the other end of X2many relation should also be duplicated (ex: to avoid SO with no SOL)
         for field in (f for f in model._fields.values() if f.store and f.copy):
             match field.type:
@@ -407,6 +319,5 @@ def duplicate_models(env, models, factors):
                         factors[m2m_model] = factors[model]
                 case _:
                     continue
-        trigram_indexed_fields = get_trigram_indexed_fields(env, model)
         with ignore_fkey_constraints(env), ignore_indexes(env, model._table):
-            duplicate_model(env, model, duplicated, factors, trigram_indexed_fields)
+            duplicate_model(env, model, duplicated, factors)
