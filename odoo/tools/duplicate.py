@@ -257,12 +257,10 @@ def duplicate_model(env, model, duplicated, factors, trigram_index_fields):
         dest, src = duplicate_field(env, model, field, duplicated, factors, trigram_index_fields, table_alias, series_alias)
         dest_fields += [dest if isinstance(dest, SQL) else SQL.identifier(dest)] if dest else []
         src_fields += [src if isinstance(src, SQL) else SQL.identifier(src)] if src else []
-    # TODO: when done with development, uncomment the `ON CONFLICT DO NOTHING`
     query = SQL(f"""
         INSERT INTO %(table)s (%(dest_columns)s)
         SELECT %(src_columns)s FROM %(table)s {table_alias},
         GENERATE_SERIES(1, {factors[model]}) {series_alias}
---         ON CONFLICT DO NOTHING
     """, table=SQL.identifier(model._table),
          dest_columns=SQL(', ').join(dest_fields),
          src_columns=SQL(', ').join(src_fields))
