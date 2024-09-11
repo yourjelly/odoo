@@ -89,6 +89,7 @@ export class TourInteractive {
             console.warn(`Step '${this.currentAction.anchor}' ignored because no 'run'`);
             this.currentActionIndex++;
             this.play();
+            return;
         }
 
         if (!this.currentAction.step.active) {
