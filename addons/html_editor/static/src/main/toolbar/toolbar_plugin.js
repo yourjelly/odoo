@@ -49,11 +49,11 @@ export class ToolbarPlugin extends Plugin {
             this.resolveButtonInheritance(button.id);
         }
 
-        const updateToolbar = () => this.handleSelectionChange(this.shared.getSelectionData());
-        const updateToolbarNextTick = () => setTimeout(() => updateToolbar());
+        const updateToolbarNextTick = () => setTimeout(() => this.updateToolbar());
+
         this.addDomListener(this.document, "pointerup", updateToolbarNextTick);
         this.addDomListener(this.document, "pointerdown", updateToolbarNextTick);
-        this.addDomListener(this.editable, "keyup", updateToolbar);
+        this.addDomListener(this.editable, "keyup", updateToolbarNextTick);
     }
 
     /**
@@ -77,18 +77,20 @@ export class ToolbarPlugin extends Plugin {
 
     handleCommand(command, payload) {
         switch (command) {
+            // @todo use STEP_ADDED instead
             case "CONTENT_UPDATED":
-                if (this.overlay.isOpen) {
-                    const selectionData = this.shared.getSelectionData();
-                    if (
-                        !selectionData.documentSelectionIsInEditable ||
-                        selectionData.editableSelection.isCollapsed
-                    ) {
-                        this.overlay.close();
-                    } else {
-                        this.updateButtonsStates(selectionData.editableSelection);
-                    }
-                }
+                this.updateToolbar();
+                // if (this.overlay.isOpen) {
+                //     const selectionData = this.shared.getSelectionData();
+                //     if (
+                //         !selectionData.documentSelectionIsInEditable ||
+                //         selectionData.editableSelection.isCollapsed
+                //     ) {
+                //         this.overlay.close();
+                //     } else {
+                //         this.updateButtonsStates(selectionData.editableSelection);
+                //     }
+                // }
                 break;
         }
     }
@@ -102,21 +104,11 @@ export class ToolbarPlugin extends Plugin {
         };
     }
 
-    handleSelectionChange(selectionData) {
+    updateToolbar() {
+        const selectionData = this.shared.getSelectionData();
         this.updateToolbarVisibility(selectionData);
         if (this.overlay.isOpen || this.config.disableFloatingToolbar) {
-            const selectedNodes = this.shared.getTraversedNodes();
-            let foundNamespace = false;
-            for (let i = 0; i < this.resources.toolbarNamespace.length && !foundNamespace; i++) {
-                const namespace = this.resources.toolbarNamespace[i];
-                if (namespace.isApplied(selectedNodes)) {
-                    this.state.namespace = namespace.id;
-                    foundNamespace = true;
-                }
-            }
-            if (!foundNamespace) {
-                this.state.namespace = undefined;
-            }
+            this.updateNamespace();
             this.updateButtonsStates(selectionData.editableSelection);
         }
     }
@@ -143,6 +135,7 @@ export class ToolbarPlugin extends Plugin {
                 }
                 this.overlay.close();
             } else {
+                // @todo remove me?
                 this.overlay.open({ props }); // will update position
             }
         } else if (inEditable && !isCollapsed) {
@@ -150,11 +143,22 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 
-    updateButtonsStates(selection) {
+    updateNamespace() {
+        const traversedNodes = this.shared.getTraversedNodes();
+        for (const namespace of this.resources.toolbarNamespace || []) {
+            if (namespace.isApplied(traversedNodes)) {
+                this.state.namespace = namespace.id;
+                return;
+            }
+        }
+        this.state.namespace = undefined;
+    }
+
+    updateButtonsStates(editableSelection) {
         if (!this.updateSelection) {
             queueMicrotask(() => this._updateButtonsStates());
         }
-        this.updateSelection = selection;
+        this.updateSelection = editableSelection;
     }
     _updateButtonsStates() {
         const selection = this.updateSelection;
