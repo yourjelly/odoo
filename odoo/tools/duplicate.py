@@ -30,10 +30,6 @@ def vary_date_field(env, model, factors, min_date=MIN_DATETIME, max_date=MAX_DAT
     return SQL("%s + (row_number() OVER() / %s) * interval '1 day'", min_date, rows_per_day)
 
 
-def vary_string_field(size):
-    return SQL('left(md5(random()::text), %s)', size)
-
-
 @contextmanager
 def ignore_indexes(env, tablename):
     """
@@ -120,22 +116,20 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
     if variation_query := model._duplicate_variate_field(field, factors=factors):
         return variation_query
     match field.type:
-        case 'char' | 'text' as field_type:
-            # we presume that 16 | 40 chars is enough to avoid collisions
-            size = min(field.size or math.inf, 16 if field_type == 'char' else 40)
-            str_variation_query = vary_string_field(size)
+        case 'char' | 'text':
             # if the field is translatable, it's a JSONB column, we vary all values for each key
             if field.translate:
-                return SQL("""
+                return SQL(f"""
                     CASE
                         WHEN %(field_column)s IS NOT NULL THEN (
-                            SELECT jsonb_object_agg(key, %(str_vary_expr)s)
+                            SELECT jsonb_object_agg(key, value || %(space)s || %(series)s)
                             FROM jsonb_each(%(field_column)s)
                         )
                         ELSE NULL
                     END
-                """, field_column=SQL.identifier(field.name), str_vary_expr=str_variation_query)
-            return str_variation_query
+                """, field_column=SQL.identifier(field.name), space=SQL('CHR(32)'), series=SQL(f'{series_alias}::text'))
+            return SQL(f'%(field)s || %(space)s || %(series)s',
+                       field=SQL.identifier(field.name), space=SQL('CHR(32)'), series=SQL(f'{series_alias}::text'))
         case 'many2one':
             # select an id from the comodel's table that isn't used by the Many2one,
             # if all are used, we pick a random one.
