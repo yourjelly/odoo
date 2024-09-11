@@ -6,10 +6,6 @@ export class ToolbarPlugin extends Plugin {
     static name = "toolbar";
     static dependencies = ["overlay", "selection"];
     static shared = ["getToolbarInfo"];
-    /** @type { (p: ToolbarPlugin) => Record<string, any> } */
-    static resources = (p) => ({
-        onSelectionChange: p.handleSelectionChange.bind(p),
-    });
 
     setup() {
         const categoryIds = new Set();
@@ -52,6 +48,12 @@ export class ToolbarPlugin extends Plugin {
         for (const button of Object.values(this.buttonsDict)) {
             this.resolveButtonInheritance(button.id);
         }
+
+        const updateToolbar = () => this.handleSelectionChange(this.shared.getSelectionData());
+        const updateToolbarNextTick = () => setTimeout(() => updateToolbar());
+        this.addDomListener(this.document, "pointerup", updateToolbarNextTick);
+        this.addDomListener(this.document, "pointerdown", updateToolbarNextTick);
+        this.addDomListener(this.editable, "keyup", updateToolbar);
     }
 
     /**
