@@ -10,3 +10,4 @@ class TestSnippets(odoo.tests.HttpCase):
         demo_provider.write({'state': 'test'})
 
         self.start_tour("/?enable_editor=1", "donation_snippet_edition", login='admin')
+        self.start_tour("/", "donation_snippet_use")
