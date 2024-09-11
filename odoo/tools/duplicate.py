@@ -3,6 +3,8 @@ from contextlib import contextmanager
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import logging
+
+from odoo.tools import unique
 from odoo.tools.sql import SQL
 from odoo.fields import Many2one
 from odoo.modules.db import FunctionStatus
@@ -376,11 +378,16 @@ def duplicate_models(env, models, factors):
         # if there is a related stored field, the related model should be duplicated before the current one
         related_store_fields = [f for f in model._fields.values() if f.related and f.store]
         if related_store_fields:
-            missing_dependencies = [m for f in related_store_fields if f.comodel_name and (m := env[f.comodel_name]) not in duplicated]
+            missing_dependencies = []
+            for field in related_store_fields:
+                linking_field = model._fields[field.related.split('.')[0]]
+                if linking_field.comodel_name and (linking_model := env[linking_field.comodel_name]) not in duplicated:
+                    missing_dependencies.append(linking_model)
+            missing_dependencies += [m for f in related_store_fields if f.comodel_name and (m := env[f.comodel_name]) not in duplicated]
             if missing_dependencies:
                 # the check with `has_records` is to avoid infinite loops when one of the cyclic dependencies has no records to be copied
                 # the check on the blacklist is to avoid an infinite loop, because the dependency will never be duplicated, as it's blacklisted
-                pending_dependencies = [dep for dep in missing_dependencies if dep not in to_process and has_records(dep) and not is_blacklisted(dep)]
+                pending_dependencies = [dep for dep in unique(missing_dependencies) if dep not in to_process and has_records(dep) and not is_blacklisted(dep)]
                 if pending_dependencies:
                     to_process.extendleft([model] + pending_dependencies)
                     factors.update({dep: factors[model] for dep in pending_dependencies})
