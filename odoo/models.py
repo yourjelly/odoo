@@ -7239,6 +7239,18 @@ class BaseModel(metaclass=MetaModel):
         """
         return SQL('')
 
+    def _duplicate_force_factor(self, curr_factor, **kwargs):
+        """
+        Hook to allow models to cap the duplication size.
+        Might be required for some models that have an implicit maximum limit of rows it can have.
+        (ex: small fixed sized char fields with an unique constraint on it)
+
+        :param curr_factor: the current factor the duplication algorithm is considering
+        :return: a new factor that will override the current one.
+         None is interpreted as "use the current one"
+        """
+        return None
+
 
 collections.abc.Set.register(BaseModel)
 # not exactly true as BaseModel doesn't have index or count

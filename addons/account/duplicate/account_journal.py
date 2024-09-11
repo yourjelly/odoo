@@ -14,3 +14,13 @@ class AccountJournal(models.Model):
             # TODO: find an alternative to the randomness
             return SQL('left(md5(random()::text), %s)', field.size)
         return super()._duplicate_variate_field(field, **kwargs)
+
+    def _duplicate_force_factor(self, curr_factor, **kwargs):
+        # the `code` field has a short size that needs to be unique
+        # therefor we can't have more than [a-zA-Z0-9] ** size different journals.
+        curr_tbl_size = self.search_count([])
+        char_cardinality = 26 * 2 + 10  # number of diff chars in [a-zA-Z0-9]
+        max_size = char_cardinality ** self._fields['code'].size
+        if curr_tbl_size * curr_factor > max_size:
+            return max_size // curr_tbl_size
+        return super()._duplicate_force_factor(curr_factor, **kwargs)

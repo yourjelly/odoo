@@ -247,6 +247,8 @@ def duplicate_model(env, model, duplicated, factors, trigram_index_fields):
     src_fields = []
     table_alias = 't'
     series_alias = 's'
+    if (new_factor := model._duplicate_force_factor(factors[model])) is not None and new_factor != factors[model]:
+        factors[model] = new_factor
     # process all stored fields (that has a respective column), if the model has an 'id', it's processed first
     has_column = lambda f: f.store and f.column_type
     for field in (f for f in sorted(model._fields.values(), key=lambda x: x.name != 'id') if has_column(f)):
@@ -336,6 +338,11 @@ def infer_many2many_model(env, field):
             # By default, the 2 columns are part of an unique compound primary index, therefor a variation would be needed,
             # but the unique constraint can be satisfied only by varying 1 of the 2 m2o.
             return False
+
+        def _duplicate_force_factor(self, curr_factor, **kwargs):
+            # no need to force factor for the default relational table, it's PKey has enough values possible,
+            # since at least 1 of the linked model is duplicated, and we can't specify a factor for an M2M via the CLI.
+            return None
 
     # check if the relation is an existing model
     if model := next((model for model in env.registry.models.values() if model._table == field.relation), None):
