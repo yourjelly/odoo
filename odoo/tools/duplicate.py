@@ -351,21 +351,7 @@ def infer_many2many_model(env, field):
 
 # list of tables to not duplicate
 DUPLICATE_BLACKLIST_TABLES = {
-    # Due to the unique constraint `attribute_value_unique`, and both Fkey are required,
-    # we don't have enough combinations from the base set of ids to generate all unique pairs.
-    'product_template_attribute_value',  # TODO: remove when done developing, as it's case is handled by the ON CONFLICT DO NOTHING during INSERT
-    # TODO: do we add to the blacklist tables like ir_ui_view/ir_ui_menu and others of the same genre?
-    'ir_ui_view',
-    'ir_ui_menu',
-    'ir_rule',
-    'res_groups',
-    'res_groups_users_rel',
-    # when duplicating only stock.picking, (cid, user_id) pkey is not unique
-    'res_company_users_rel', # TODO: remove when done developing, as it's case is handled by the ON CONFLICT DO NOTHING during INSERT
-    # `name` of the currency is only 3 char long and there is an unique constraint on it, no point in duplicating
-    'res_currency',
-    'res_country',
-    'res_country_state',
+    # TODO: remove the blacklist when checked that it's not needed.
 }
 
 def duplicate_models(env, models, factors):
