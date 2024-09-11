@@ -3,7 +3,7 @@ import { setupEditor } from "./_helpers/editor";
 import { press, queryAll, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { contains, onRpc } from "@web/../tests/web_test_helpers";
-import { insertText } from "./_helpers/user_actions";
+import { insertText, selectWithPointer } from "./_helpers/user_actions";
 import { getContent } from "./_helpers/selection";
 import { ChatGPTPlugin } from "../src/main/chatgpt/chatgpt_plugin";
 import { loadLanguages } from "@web/core/l10n/translation";
@@ -48,10 +48,11 @@ test("ChatGPT dialog opens in prompt mode when selection is collapsed (with Powe
 });
 
 test("ChatGPT dialog opens in alternatives mode when selection is not collapsed (with toolbar)", async () => {
-    await setupEditor("<p>te[s]t</p>", {
+    const { el } = await setupEditor("<p>test</p>", {
         config: { Plugins: [...MAIN_PLUGINS, ChatGPTPlugin] },
     });
 
+    await selectWithPointer(el, "<p>te[s]t</p>");
     // Select ChatGPT in the toolbar.
     await openFromToolbar();
 
@@ -65,9 +66,11 @@ test("ChatGPT dialog opens in alternatives mode when selection is not collapsed 
 });
 
 test("ChatGPT dialog opens in translate mode when clicked on translate button in toolbar", async () => {
-    await setupEditor("<p>te[s]t</p>", {
+    const { el } = await setupEditor("<p>test</p>", {
         config: { Plugins: [...MAIN_PLUGINS, ChatGPTPlugin] },
     });
+    await selectWithPointer(el, "<p>te[s]t</p>");
+    await waitFor(".o-we-toolbar");
 
     // Expect the toolbar to not have translate dropdown.
     expect(".o-we-toolbar [name='translate'].o-dropdown").toHaveCount(0);
@@ -95,9 +98,11 @@ test("ChatGPT dialog opens in translate mode when clicked on translate dropdown 
             ["fr_BE", "French (BE) / Français (BE)"],
         ];
     });
-    await setupEditor("<p>te[s]t</p>", {
+    const { el } = await setupEditor("<p>test</p>", {
         config: { Plugins: [...MAIN_PLUGINS, ChatGPTPlugin] },
     });
+    await selectWithPointer(el, "<p>te[s]t</p>");
+    await waitFor(".o-we-toolbar");
 
     // Expect the toolbar to have translate dropdown.
     expect(".o-we-toolbar [name='translate'].o-dropdown").toHaveCount(1);
@@ -118,11 +123,14 @@ test("ChatGPT dialog opens in translate mode when clicked on translate dropdown 
 });
 
 test("ChatGPT alternatives dialog generates alternatives for each button", async () => {
-    const { editor } = await setupEditor("<p>[test]</p>", {
+    const { editor, el } = await setupEditor("<p>test</p>", {
         config: { Plugins: [...MAIN_PLUGINS, ChatGPTPlugin] },
     });
     let rpcIndex = 1;
     onRpc("/html_editor/generate_text", () => `Alternative #${rpcIndex++}`);
+
+    await selectWithPointer(el, "<p>[test]</p>");
+    await waitFor(".o-we-toolbar");
 
     // Select ChatGPT in the toolbar.
     await openFromToolbar();
@@ -182,12 +190,13 @@ Enjoy :-)
 });
 
 test("insert the response from ChatGPT alternatives dialog", async () => {
-    const { el } = await setupEditor("<p>t[es]t</p>", {
+    const { el } = await setupEditor("<p>test</p>", {
         config: { Plugins: [...MAIN_PLUGINS, ChatGPTPlugin] },
     });
     let rpcIndex = 1;
     onRpc("/html_editor/generate_text", () => `Alternative #${rpcIndex++}`);
 
+    await selectWithPointer(el, "<p>t[es]t</p>");
     // Select ChatGPT in the Powerbox.
     await openFromToolbar();
 
@@ -211,10 +220,12 @@ test("insert the response from ChatGPT translate dialog", async () => {
             ["fr_BE", "French (BE) / Français (BE)"],
         ];
     });
-    const { editor, el } = await setupEditor("<p>[Hello]</p>", {
+    const { editor, el } = await setupEditor("<p>Hello</p>", {
         config: { Plugins: [...MAIN_PLUGINS, ChatGPTPlugin] },
     });
     onRpc("/html_editor/generate_text", () => `Bonjour`);
+
+    await selectWithPointer(el, "<p>[Hello]</p>");
 
     // Select Translate button in the toolbar.
     await translateButtonFromToolbar();
