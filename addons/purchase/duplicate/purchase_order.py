@@ -16,6 +16,7 @@ class PurchaseOrder(models.Model):
         if field.name == 'name':
             seq = self.env['ir.sequence'].with_company(self.env.company).search([('code', '=', 'purchase.order')])
             padding = (seq and seq.padding) or 5
-            return SQL(f''' 'P' || TO_CHAR(%(last_id)s + row_number() OVER(), 'fm{'0' * padding}')''',
-                       last_id=fetch_last_id(self.env, self))
+            return SQL(''' 'P' || LPAD((%(last_id)s + row_number() OVER())::text, GREATEST(LENGTH((%(last_id)s + row_number() OVER())::text), %(padding)s), '0')''',
+                       last_id=fetch_last_id(self.env, self),
+                       padding=padding)
         return super()._duplicate_variate_field(field, **kwargs)

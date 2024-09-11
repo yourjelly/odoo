@@ -17,6 +17,7 @@ class StockPicking(models.Model):
         if field.name == 'name':
             seq = self.env['ir.sequence'].with_company(self.env.company).search([('code', '=', 'stock.picking')])
             padding = (seq and seq.padding) or 5
-            return SQL(rf"regexp_replace(name, '(.*\/)\d*', '\1') || TO_CHAR(%s + row_number() OVER (), 'fm{'0' * padding}')",
-                       fetch_last_id(self.env, self))
+            return SQL(r"regexp_replace(name, '(.*\/)\d*', '\1') || LPAD((%(last_id)s + row_number() OVER())::text, GREATEST(LENGTH((%(last_id)s + row_number() OVER())::text), %(padding)s), '0')",
+                       last_id=fetch_last_id(self.env, self),
+                       padding=padding)
         return super()._duplicate_variate_field(field, **kwargs)
