@@ -1,4 +1,3 @@
-import math
 from collections import deque, defaultdict
 from contextlib import contextmanager
 from datetime import datetime
@@ -130,30 +129,14 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
                 """, field_column=SQL.identifier(field.name), space=SQL('CHR(32)'), series=SQL(f'{series_alias}::text'))
             return SQL(f'%(field)s || %(space)s || %(series)s',
                        field=SQL.identifier(field.name), space=SQL('CHR(32)'), series=SQL(f'{series_alias}::text'))
-        case 'many2one':
-            # select an id from the comodel's table that isn't used by the Many2one,
-            # if all are used, we pick a random one.
-            comodel = env[field.comodel_name]
-            different_fkey_query = SQL('(%s)', SQL("""
-                SELECT id
-                FROM %(comodel)s AS comodel
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM %(model)s AS model WHERE model.%(fkey)s = comodel.id
-                )
-                ORDER BY RANDOM()
-                LIMIT 1
-            """, comodel=SQL.identifier(comodel._table), model=SQL.identifier(model._table), fkey=SQL.identifier(field.name)))
-            random_fkey_query = SQL('(%s)', SQL("""
-                SELECT id FROM %(comodel)s ORDER BY RANDOM() LIMIT 1
-            """, comodel=SQL.identifier(comodel._table)))
-            return SQL('(%s)', SQL('SELECT COALESCE(%s, %s)', different_fkey_query, random_fkey_query))
         case 'date' | 'datetime':
             return vary_date_field(env, model, factors)
         case 'html':
             # For the sake of simplicity we don't vary html fields
             return field.name
         case _:
-            _logger.warning("the field %s of type %s was marked to be varied, but no variation branch was found!", field, field.type)
+            _logger.warning("The field %s of type %s was marked to be varied, "
+                            "but no variation branch was found! Defaulting to a raw copy.", field, field.type)
             # fallback on a raw copy
             return field.name
 
