@@ -2,17 +2,6 @@
 <templates>
     <div t-name="spreadsheet_dashboard.DashboardAction" class="o_action o_spreadsheet_dashboard_action o_field_highlight">
         <ControlPanel display="controlPanelDisplay">
-            <t t-set-slot="layout-actions">
-                <t t-set="status" t-value="state.activeDashboard and state.activeDashboard.status"/>
-                <FilterValue
-                    t-if="status === Status.Loaded"
-                    filter="filter"
-                    model="state.activeDashboard.model"
-                    t-as="filter"
-                    t-foreach="filters"
-                    t-key="filter.id"
-                />
-            </t>
             <t t-set-slot="control-panel-navigation-additional">
                 <SpreadsheetShareButton t-key="activeDashboardId" model="state.activeDashboard?.model" onSpreadsheetShared.bind="shareSpreadsheet" togglerClass="'btn-light'"/>
             </t>
@@ -47,8 +36,49 @@
                     </div>
                 </t>
             </t>
+            <!-- Filter Side Bar -->
+            <t t-if="!env.isSmall and state.activeDashboard">
+                <t t-if="state.filterPanelExpanded" t-call="spreadsheet_dashboard.FilterPanel.Expanded"/>
+                <t t-else="" t-call="spreadsheet_dashboard.FilterPanel.Collapsed"/>
+            </t>
         </div>
     </div>
+
+    <t t-name="spreadsheet_dashboard.FilterPanel.Collapsed">
+        <div class="bg-view h-100 o_search_panel_sidebar cursor-pointer" t-on-click="toggleFilterPanel">
+            <div class="d-flex">
+                <button class="btn btn-light btn-sm m-1 mb-2 p-2">
+                    <i class="fa fa-angle-double-left"/>
+                </button>
+                <div class="mx-auto">Filters</div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="spreadsheet_dashboard.FilterPanel.Expanded">
+        <div class="o_spreadsheet_dashboard_filter_panel o_search_panel flex-grow-0 border-end flex-shrink-0 pe-2 pb-5 ps-4 h-100 bg-view overflow-auto position-relative">
+            <button t-if="!env.isSmall" class="btn btn-light btn-sm start-0 m-1 mb-2 position-absolute px-2 py-1 top-0 z-1" t-on-click="toggleFilterPanel">
+                <i class="fa fa-fw fa-angle-double-right"/>
+            </button>
+            <div class="d-flex flex-column mt-4">
+                <div class="o-section pivot_filter_section py-3"
+                    t-if="status === Status.Loaded"
+                    t-foreach="filters"
+                    t-as="filter"
+                    t-key="'filter_' + filter_index"
+                >
+
+                    <div class="fw-bold" t-esc="filter.label"/>
+                    <div class="pivot_filter position-relative">
+                        <FilterValue
+                            filter="filter"
+                            model="state.activeDashboard.model"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
 
     <t t-name="spreadsheet_dashboard.DashboardAction.Collapsed">
         <div class="bg-view h-100 o_search_panel_sidebar cursor-pointer" t-on-click="toggleSidebar">

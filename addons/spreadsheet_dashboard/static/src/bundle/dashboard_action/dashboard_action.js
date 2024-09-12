@@ -79,7 +79,11 @@ export class SpreadsheetDashboardAction extends Component {
         });
         useSpreadsheetPrint(() => this.state.activeDashboard?.model);
         /** @type {{ activeDashboard: import("./dashboard_loader").Dashboard}} */
-        this.state = useState({ activeDashboard: undefined, sidebarExpanded: true });
+        this.state = useState({
+            activeDashboard: undefined,
+            sidebarExpanded: true,
+            filterPanelExpanded: true,
+        });
     }
 
     /**
@@ -127,6 +131,16 @@ export class SpreadsheetDashboardAction extends Component {
      */
     openDashboard(dashboardId) {
         this.state.activeDashboard = this.loader.getDashboard(dashboardId);
+    }
+
+    toggleFilterPanel() {
+        this.state.filterPanelExpanded = !this.state.filterPanelExpanded;
+    }
+
+    openFilterPanel() {
+        if (!this.state.activeDashboard) {
+            return;
+        }
     }
 
     /**
