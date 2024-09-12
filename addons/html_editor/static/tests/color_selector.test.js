@@ -8,6 +8,7 @@ import {
     waitUntil,
     edit,
     queryAllValues,
+    pointerUp,
 } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor as _setupEditor } from "./_helpers/editor";
