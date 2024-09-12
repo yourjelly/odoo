@@ -8,13 +8,11 @@ import {
     waitUntil,
     edit,
     queryAllValues,
-    pointerUp,
 } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor as _setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { contains } from "@web/../tests/web_test_helpers";
-import { selectWithPointer } from "./_helpers/user_actions";
 
 const setupEditor = async (...args) => {
     const { el, ...rest } = await _setupEditor(...args);
@@ -23,8 +21,7 @@ const setupEditor = async (...args) => {
 };
 
 test("can set foreground color", async () => {
-    const { el } = await setupEditor("<p>test</p>");
-    await selectWithPointer(el, "<p>[test]</p>");
+    const { el } = await setupEditor("<p>[test]</p>");
 
     await waitFor(".o-we-toolbar");
     expect(".o_font_color_selector").toHaveCount(0);
@@ -41,8 +38,7 @@ test("can set foreground color", async () => {
 });
 
 test("can set background color", async () => {
-    const { el } = await setupEditor("<p>test</p>");
-    await selectWithPointer(el, "<p>[test]</p>");
+    const { el } = await setupEditor("<p>[test]</p>");
 
     await waitFor(".o-we-toolbar");
     expect(".o_font_color_selector").toHaveCount(0);
@@ -61,8 +57,7 @@ test("can set background color", async () => {
 });
 
 test("can render and apply color theme", async () => {
-    const { el } = await setupEditor("<p>test</p>");
-    await selectWithPointer(el, "<p>[test]</p>");
+    await setupEditor("<p>[test]</p>");
 
     await waitFor(".o-we-toolbar");
     expect(".o_font_color_selector").toHaveCount(0);
@@ -81,8 +76,7 @@ test("can render and apply color theme", async () => {
 });
 
 test("can render and apply gradient color", async () => {
-    const { el } = await setupEditor("<p>test</p>");
-    await selectWithPointer(el, "<p>[test]</p>");
+    await setupEditor("<p>[test]</p>");
 
     await waitFor(".o-we-toolbar");
     click(".o-we-toolbar .o-select-color-foreground");
@@ -107,14 +101,12 @@ test("can render and apply gradient color", async () => {
 });
 
 test("custom colors used in the editor are shown in the colorpicker", async () => {
-    const { el } = await setupEditor(
+    await setupEditor(
         `<p>
             <font style="color: rgb(255, 0, 0);">test</font>
             <font style="color: rgb(0, 255, 0);">[test]</font>
         </p>`
     );
-    // Simulate selection done with the mouse, so that the toolbar is displayed.
-    pointerUp(el);
     await waitFor(".o-we-toolbar");
     expect(".o_font_color_selector").toHaveCount(0);
     click(".o-we-toolbar .o-select-color-foreground");
@@ -134,8 +126,7 @@ test("custom colors used in the editor are shown in the colorpicker", async () =
 });
 
 test("select hex color and apply it", async () => {
-    const { el } = await setupEditor(`<p>test</p>`);
-    await selectWithPointer(el, "<p>[test]</p>");
+    const { el } = await setupEditor(`<p>[test]</p>`);
     await waitFor(".o-we-toolbar");
     expect(".o_font_color_selector").toHaveCount(0);
 
@@ -163,7 +154,6 @@ test("select hex color and apply it", async () => {
 
 test("always show the current custom color", async () => {
     const { el } = await setupEditor(`<p>[test]</p>`);
-    pointerUp(el);
     await waitFor(".o-we-toolbar");
     click(".o-we-toolbar .o-select-color-foreground");
     await animationFrame();
@@ -195,13 +185,7 @@ test("always show the current custom color", async () => {
 });
 
 test("Can reset a color", async () => {
-    const { editor, el } = await setupEditor(
-        `<p class="tested">
-            <font style="color: rgb(255, 0, 0);">test</font>
-        </p>`
-    );
-    await selectWithPointer(
-        el,
+    const { editor } = await setupEditor(
         `<p class="tested">
             <font style="color: rgb(255, 0, 0);">[test]</font>
         </p>`
