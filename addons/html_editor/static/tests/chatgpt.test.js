@@ -243,7 +243,7 @@ test("insert the response from ChatGPT translate dialog", async () => {
 
     // Expect to undo and redo the inserted text.
     editor.dispatch("HISTORY_UNDO");
-    expect(getContent(el)).toBe(`<p>[]Hello</p>`);
+    expect(getContent(el)).toBe(`<p>[Hello]</p>`);
     editor.dispatch("HISTORY_REDO");
     expect(getContent(el)).toBe(`<p>Bonjour[]</p>`);
 });
@@ -277,7 +277,8 @@ test("ChatGPT prompt dialog properly formats an unordered list", async () => {
 });
 
 test("ChatGPT toolbar button should have icon and 'AI' text", async () => {
-    await setupEditor("<p>[abc]</p>");
+    const { el } = await setupEditor("<p>abc</p>");
+    await selectWithPointer(el, "<p>[abc]</p>");
     await waitFor(".o-we-toolbar");
 
     // Icon should be present.
@@ -288,7 +289,8 @@ test("ChatGPT toolbar button should have icon and 'AI' text", async () => {
 });
 
 test("Translate button should be positioned before ChatGPT button in toolbar", async () => {
-    await setupEditor("<p>[abc]</p>");
+    const { el } = await setupEditor("<p>abc</p>");
+    await selectWithPointer(el, "<p>[abc]</p>");
     await waitFor(".o-we-toolbar");
 
     const buttons = queryAll(".o-we-toolbar .btn-group[name='ai'] .btn");

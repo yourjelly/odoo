@@ -1,9 +1,16 @@
 import { closestBlock } from "@html_editor/utils/blocks";
 import { endPos } from "@html_editor/utils/position";
 import { findInSelection } from "@html_editor/utils/selection";
-import { click, manuallyDispatchProgrammaticEvent, pointerDown, pointerUp, press, waitFor } from "@odoo/hoot-dom";
+import {
+    click,
+    manuallyDispatchProgrammaticEvent,
+    pointerDown,
+    pointerUp,
+    press,
+    waitFor,
+} from "@odoo/hoot-dom";
 import { tick } from "@odoo/hoot-mock";
-import { setContent, setSelection } from "./selection";
+import { getSelection, setSelection } from "./selection";
 
 /** @typedef {import("@html_editor/plugin").Editor} Editor */
 
@@ -273,7 +280,8 @@ export async function tripleClick(node) {
 
 export async function selectWithPointer(editable, content) {
     pointerDown(editable);
-    setContent(editable, content);
+    const selection = getSelection(editable, content);
+    setSelection(selection);
     await tick();
     pointerUp(editable);
 }
