@@ -240,7 +240,7 @@ const FormEditor = options.Class.extend({
         const template = document.createElement('template');
         const renderType = field.type === "tags" ? "many2many" : field.type;
         template.content.append(renderToElement("website.form_field_" + renderType, params));
-        if (!field.noNullOption && field.type == "many2one") {
+        if (!field.noNullOption && field.type === "many2one") {
             template.content.querySelector("option").classList.add("s_website_form_placeholder");
         }
         if (field.description && field.description !== true) {
@@ -1058,15 +1058,22 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         field.description = !!value; // Will be changed to default description in qweb
         await this._replaceField(field);
     },
-    applyPlaceholder: async function(previewMode, value, params) {
+    async applyPlaceholder(previewMode, value, params) {
         const field = this._getActiveField();
         field.placeholder = value;
         await this._replaceField(field);
     },
-    allowEmpty: async function(previewMode, value, params) {
+    async allowEmpty(previewMode, value, params) {
         const field = this._getActiveField();
         field.noNullOption = !value;
         await this._replaceField(field);
+        // Mark field required if allowEmpty = false.
+        this.$target[0].classList.toggle("s_website_form_required", !value);
+        this.$target[0].querySelectorAll('input, select, textarea').forEach(el => el.toggleAttribute('required', !value));
+        this.trigger_up('option_update', {
+            optionName: 'WebsiteFormEditor',
+            name: 'field_mark',
+        });
     },
     /**
      * Replace the current field with the custom field selected.
@@ -1340,11 +1347,13 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                 }
                 return (['text', 'email', 'tel', 'url', 'search', 'password', 'number'].includes(dependencyEl.type)
                     || dependencyEl.nodeName === 'TEXTAREA') && !['set', '!set'].includes(this.$target[0].dataset.visibilityComparator);
-            case "hidden_condition_option_list":
-                return dependencyEl && (dependencyEl.type === "checkbox" || dependencyEl.type === "radio" || dependencyEl.nodeName === "SELECT")
-                    && !["set", "!set"].includes(this.$target[0].dataset.visibilityComparator);
             case 'hidden_condition_no_text_opt':
-                return dependencyEl && (dependencyEl.type === 'checkbox' || dependencyEl.type === 'radio' || dependencyEl.nodeName === 'SELECT');
+                const isCheckboxRadioOrSelect = dependencyEl &&
+                    (['checkbox', 'radio'].includes(dependencyEl.type) || dependencyEl.nodeName === 'SELECT');
+                if( params.attributeName === "visibilityCondition" ) {
+                    return isCheckboxRadioOrSelect && !['set', '!set'].includes(this.$target[0].dataset.visibilityComparator);
+                }
+                return isCheckboxRadioOrSelect;
             case 'hidden_condition_num_opt':
                 return dependencyEl && dependencyEl.type === 'number';
             case 'hidden_condition_text_opt':
@@ -1374,7 +1383,11 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             case 'multi_check_display_opt':
                 return !!this._getMultipleInputs();
             case "required_opt":
-                return !["many2one"].includes(this.$target[0].dataset.type) || this.$target[0].querySelector(".s_website_form_placeholder");
+                return !this.$target[0].classList.contains('s_website_form_model_required')
+                    && (
+                        !["many2one"].includes(this.$target[0].dataset.type)
+                        || this.$target[0].querySelector(".s_website_form_placeholder")
+                    );
             case 'hidden_opt':
             case 'type_opt':
                 return !this.$target[0].classList.contains('s_website_form_model_required');
