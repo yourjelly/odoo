@@ -26,9 +26,6 @@ class Duplicate(Command):
         group.add_option("--models",
                          dest='duplicate_models',
                          help="Comma separated list of models")
-        group.add_option("--unlogged", dest="unlogged", action="store_true",
-                         help="Set all tables in the database as UNLOGGED. UNLOGGED tables don't write to the WAL so this leaves the database not "
-                              "safe on crashes but provides a ~200%% speedup.")
         opt = odoo.tools.config.parse_config(cmdargs)
         duplicate_models = opt.duplicate_models and OrderedSet(opt.duplicate_models.split(','))
         factors = opt.factors and [int(f) for f in opt.factors.split(',')]
@@ -40,18 +37,12 @@ class Duplicate(Command):
         registry = odoo.registry(dbname)
         with registry.cursor() as cr:
             env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {'active_test': False})
-            self.duplicate(env, factors, duplicate_models, opt.unlogged)
+            self.duplicate(env, factors, duplicate_models)
 
     @classmethod
-    def _switch_database_unlogged(unlogged=False):
-        pass
-
-    @classmethod
-    def duplicate(cls, env, factors, model_names, unlogged=False):
+    def duplicate(cls, env, factors, model_names):
         registry = env.registry
         try:
-            if unlogged:
-                cls._switch_database_unlogged(unlogged)
             models = sorted(
                 [m for m in env.values() if m._name in model_names and not (m._transient and m._abstract)],
                 key=lambda m: list(model_names).index(m._name)
