@@ -6,6 +6,128 @@
             <NavBar/>
         </t>
         <ActionContainer/>
+        <div class="text-bg-danger d-flex gap-1">
+
+            <button class="btn text-bg-danger py-0" data-tooltip="Open Model Data">
+                res.partner
+            </button>
+            <button class="btn text-bg-danger py-0" data-tooltip="Open View Data">
+                Form
+            </button>
+            <button class="btn text-bg-danger py-0" data-tooltip="Copy Record Id">
+                27
+            </button>
+
+            <div class="border-end"></div>
+
+            <DropdownGroup>
+                <Dropdown>
+                    <button class="btn text-bg-danger py-0">
+                        Record(s)
+                    </button>
+                    <t t-set-slot="content">
+                        <DropdownItem>Metadata</DropdownItem>
+                        <DropdownItem>Data</DropdownItem>
+                        <DropdownItem>Messages</DropdownItem>
+                        <DropdownItem>Attachments</DropdownItem>
+                        <DropdownItem>Set Default Values</DropdownItem>
+                    </t>
+                </Dropdown>
+    
+                <Dropdown>
+                    <button class="btn text-bg-danger py-0">
+                        User Interface
+                    </button>
+                    <t t-set-slot="content">
+                        <DropdownItem>Action</DropdownItem>
+                        <DropdownItem>Search View</DropdownItem>
+                        <DropdownItem>Fields</DropdownItem>
+                        <DropdownItem>Filters</DropdownItem>
+                        <DropdownItem>Computed Arch</DropdownItem>
+                    </t>
+                </Dropdown>
+    
+                <Dropdown>
+                    <button class="btn text-bg-danger py-0">
+                        Security
+                    </button>
+                    <t t-set-slot="content">
+                        <DropdownItem>Access Rights</DropdownItem>
+                        <DropdownItem>Record Rules</DropdownItem>
+                    </t>
+                </Dropdown>
+            </DropdownGroup>
+
+            <div class="border-end"></div>
+            <div class="ms-auto"></div>
+            <div class="border-end"></div>
+
+            <button class="btn text-bg-danger py-0">
+                Open View
+            </button>
+
+            <div class="border-end"></div>
+
+            <button class="btn text-bg-danger py-0" data-tooltip="Run Unit Tests">
+                <i class="fa fa-tasks"/>
+            </button>
+            <button class="btn text-bg-danger py-0" data-tooltip="Run Click Everywhere">
+                <i class="fa fa-hand-pointer-o"/>
+            </button>
+            
+            <div class="border-end"></div>
+
+            <div class="o_debug_profiling_item d-flex justify-content-between">
+                <div class="align-self-center">
+                    <span class="o_profiling_switch">
+                        <span class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input"/>
+                            <label class="form-check-label">Record Tour</label>
+                        </span>
+                    </span>
+                </div>
+                <a href="#" class="btn text-bg-danger py-0 align-self-baseline">
+                    <i class="o_open_profiling oi oi-launch"/>
+                </a>
+            </div>
+
+            <div class="border-end"></div>
+
+            <div class="o_debug_profiling_item d-flex justify-content-between">
+                <div class="align-self-center">
+                    <span class="o_profiling_switch">
+                        <span class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input"/>
+                            <label class="form-check-label">Enable profiling</label>
+                        </span>
+                    </span>
+                </div>
+                <a href="#" class="btn text-bg-danger py-0 align-self-baseline">
+                    <i class="o_open_profiling oi oi-launch"/>
+                </a>
+            </div>
+
+            <div class="border-end"></div>
+
+            <button class="btn text-bg-danger py-0" data-tooltip="Become Super User">
+                <i class="fa fa-user-secret"/>
+            </button>
+
+            <div class="border-end"></div>
+
+            <Dropdown>
+                <button class="btn text-bg-danger py-0" data-tooltip="Debug Modes">
+                    <i class="fa fa-bug"/>
+                </button>
+                <t t-set-slot="content">
+                    <DropdownItem>Simple</DropdownItem>
+                    <DropdownItem>Assets</DropdownItem>
+                    <DropdownItem>Tests</DropdownItem>
+                    <DropdownItem>Assets + Tests</DropdownItem>
+                    <DropdownItem>No debug</DropdownItem>
+                </t>
+            </Dropdown>
+        </div>
         <MainComponentsContainer/>
     </t>
 

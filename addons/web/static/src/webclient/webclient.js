@@ -10,6 +10,9 @@ import { NavBar } from "./navbar/navbar";
 import { Component, onMounted, onWillStart, useExternalListener, useState } from "@odoo/owl";
 import { router, routerBus } from "@web/core/browser/router";
 import { browser } from "@web/core/browser/browser";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { DropdownGroup } from "@web/core/dropdown/dropdown_group";
 
 export class WebClient extends Component {
     static template = "web.WebClient";
@@ -18,6 +21,9 @@ export class WebClient extends Component {
         ActionContainer,
         NavBar,
         MainComponentsContainer,
+        Dropdown,
+        DropdownItem,
+        DropdownGroup,
     };
 
     setup() {
