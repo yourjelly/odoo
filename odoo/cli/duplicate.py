@@ -10,7 +10,7 @@ from odoo.tools.duplicate import duplicate_models
 from odoo.tools.misc import OrderedSet
 from odoo.tools.sql import SQL
 
-DEFAULT_FACTOR = 1
+DEFAULT_FACTOR = 10000
 _logger = logging.getLogger(__name__)
 
 
@@ -30,7 +30,8 @@ class Duplicate(Command):
         duplicate_models = opt.duplicate_models and OrderedSet(opt.duplicate_models.split(','))
         factors = opt.factors and [int(f) for f in opt.factors.split(',')]
         if factors:
-            factors += [DEFAULT_FACTOR for _ in range(len(duplicate_models) - len(factors))]
+            last_factor = factors[:-1]
+            factors += [last_factor for _ in range(len(duplicate_models) - len(factors))]
         else:
             factors = [DEFAULT_FACTOR for _ in range(len(duplicate_models))]
         dbname = odoo.tools.config['db_name']
