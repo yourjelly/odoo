@@ -310,7 +310,8 @@ export const htmlField = {
             dynamicPlaceholder: options.dynamic_placeholder,
             dynamicPlaceholderModelReferenceField:
                 options.dynamic_placeholder_model_reference_field,
-            embeddedComponents: options.embedded_components,
+            embeddedComponents:
+                "embedded_components" in options ? options.embedded_components : true,
             sandboxedPreview: Boolean(options.sandboxedPreview),
             cssReadonlyAssetId: options.cssReadonly,
             codeview: Boolean(odoo.debug && options.codeview),
