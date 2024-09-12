@@ -11,10 +11,16 @@ import {
     pointerUp,
 } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { setupEditor } from "./_helpers/editor";
+import { setupEditor as _setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { contains } from "@web/../tests/web_test_helpers";
 import { selectWithPointer } from "./_helpers/user_actions";
+
+const setupEditor = async (...args) => {
+    const { el, ...rest } = await _setupEditor(...args);
+    pointerUp(el);
+    return { el, ...rest };
+};
 
 test("can set foreground color", async () => {
     const { el } = await setupEditor("<p>test</p>");
