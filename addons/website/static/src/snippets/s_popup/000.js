@@ -315,7 +315,11 @@ const noBackdropPopupWidget = publicWidget.Widget.extend({
             // scrollbar must be displayed because we must be able to scroll the
             // page (e.g. a "cookies bar" popup at the bottom of the page must
             // not prevent scrolling the page).
-            modalInstance._resetAdjustments();
+            const openNoBackdropPopupEl =
+                document.body.querySelector(".s_popup:not(.s_popup_no_backdrop) .modal.show");
+            if (!openNoBackdropPopupEl || openNoBackdropPopupEl === this.el) {
+                modalInstance._resetAdjustments();
+            }
         }
     },
     /**

@@ -2234,7 +2234,9 @@ we-select.o_we_border_preview_aligned_select {
 
 // MANIPULATORS
 #oe_manipulators {
-    position: relative;
+    position: fixed !important;
+    @include o-position-absolute(0, 0, 0, 0);
+    overflow: hidden;
     z-index: $o-we-overlay-zindex;
     pointer-events: none;
 

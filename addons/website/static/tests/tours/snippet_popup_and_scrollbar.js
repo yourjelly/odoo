@@ -112,7 +112,7 @@ registerWebsitePreviewTour("snippet_popup_and_scrollbar", {
         trigger: ':iframe .o_snippet_preview_wrap[data-snippet-id="s_media_list"]',
         run: "click",
     },
-    checkScrollbar(true), // The popup backdrop is activated so there should be a scrollbar
+    checkScrollbar(false),
     {
         content: 'Click on the s_popup snippet',
         trigger: ':iframe .s_popup .modal',
