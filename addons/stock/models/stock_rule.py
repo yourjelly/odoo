@@ -539,22 +539,17 @@ class ProcurementGroup(models.Model):
         """ Find a pull rule for the location_id, fallback on the parent
         locations if it could not be found.
         """
-        result = self.env['stock.rule']
-        location = location_id
-        while (not result) and location:
-            domain = self._get_rule_domain(location, values)
-            result = self._search_rule(values.get('route_ids', False), values.get('product_packaging_id', False), product_id, values.get('warehouse_id', location.warehouse_id), domain)
-            location = location.location_id
-        return result
+        domain = self._get_rule_domain(location_id, values)
+        return self._search_rule(values.get('route_ids', False), values.get('product_packaging_id', False), product_id, values.get('warehouse_id', location_id.warehouse_id), domain)
 
     @api.model
     def _get_rule_domain(self, location, values):
-        domain = ['&', ('location_dest_id', '=', location.id), ('action', '!=', 'push')]
+        domain = ['&', ('location_dest_id', 'parent_of', location.id), ('action', '!=', 'push')]
         # If the method is called to find rules towards the Inter-company location, also add the 'Customer' location in the domain.
         # This is to avoid having to duplicate every rules that deliver to Customer to have the Inter-company part.
         if self.env.user.has_group('base.group_multi_company') and location.usage == 'transit':
             inter_comp_location = self.env.ref('stock.stock_location_inter_company', raise_if_not_found=False)
-            if inter_comp_location and location.id == inter_comp_location.id:
+            if inter_comp_location and location._child_of(inter_comp_location):
                 customers_location = self.env.ref('stock.stock_location_customers', raise_if_not_found=False)
                 domain = expression.OR([domain, ['&', ('location_dest_id', '=', customers_location.id), ('action', '!=', 'push')]])
         # In case the method is called by the superuser, we need to restrict the rules to the
