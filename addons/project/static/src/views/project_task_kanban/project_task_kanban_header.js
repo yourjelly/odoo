@@ -21,19 +21,19 @@ export class ProjectTaskKanbanHeader extends KanbanHeader {
         }
     }
 
-    async deleteGroup() {
-        if (this.group.groupByField.name === 'stage_id') {
-            const action = await this.group.model.orm.call(
-                this.group.groupByField.relation,
-                'unlink_wizard',
-                [this.group.value],
-                { context: this.group.context },
-            );
-            this.action.doAction(action);
-            return;
-        }
-        super.deleteGroup();
-    }
+    // async deleteGroup() {
+    //     if (this.group.groupByField.name === 'stage_id') {
+    //         const action = await this.group.model.orm.call(
+    //             this.group.groupByField.relation,
+    //             'unlink_wizard',
+    //             [this.group.value],
+    //             { context: this.group.context },
+    //         );
+    //         this.action.doAction(action);
+    //         return;
+    //     }
+    //     super.deleteGroup();
+    // }
 
     canEditGroup(group) {
         return super.canEditGroup(group) && (!this.props.list.isGroupedByStage || this.isProjectManager);
