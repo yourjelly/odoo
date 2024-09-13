@@ -40,25 +40,18 @@ def vary_char_field(env, model, field, postfix=None):
         postfix = SQL(f'{postfix}::text')
     # if the field is translatable, it's a JSONB column, we vary all values for each key
     if field.translate:
-        return SQL(r"""
+        return SQL("""
             CASE
                 WHEN %(field)s IS NOT NULL
                 THEN (
-                    SELECT jsonb_object_agg(
-                        key,
-                        CASE
-                            WHEN value IS NULL OR value IN ('/', '')
-                            THEN value
-                            ELSE value || %(postfix)s
-                        END
-                    )
+                    SELECT jsonb_object_agg(key, value || %(postfix)s)
                     FROM jsonb_each(%(field)s)
                 )
                 ELSE NULL
             END
         """, field=SQL.identifier(field.name), postfix=postfix)
     else:
-        return SQL(r"""
+        return SQL("""
             CASE
                 WHEN %(field)s IS NULL OR %(field)s IN ('/', '')
                 THEN %(field)s
