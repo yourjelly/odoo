@@ -37,7 +37,7 @@ def vary_char_field(env, model, field, postfix=None):
     if postfix is None:
         return field.name
     if not isinstance(postfix, SQL):
-        postfix = SQL(f'{postfix}::text')
+        postfix = SQL(postfix)
     # if the field is translatable, it's a JSONB column, we vary all values for each key
     if field.translate:
         return SQL("""
@@ -45,7 +45,7 @@ def vary_char_field(env, model, field, postfix=None):
                 WHEN %(field)s IS NOT NULL
                 THEN (
                     SELECT jsonb_object_agg(key, value || %(postfix)s)
-                    FROM jsonb_each(%(field)s)
+                    FROM jsonb_each_text(%(field)s)
                 )
                 ELSE NULL
             END
