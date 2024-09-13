@@ -4,10 +4,8 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import logging
 
-from odoo.tools import unique
 from odoo.tools.sql import SQL
 from odoo.fields import Many2one
-from odoo.modules.db import FunctionStatus
 
 _logger = logging.getLogger(__name__)
 
@@ -29,6 +27,44 @@ def vary_date_field(env, model, factors, min_date=MIN_DATETIME, max_date=MAX_DAT
     if total_table_size <= MIN_ROWS_PER_DAY * total_days:
         min_date = min_date + relativedelta(days=(total_days - total_table_size // MIN_ROWS_PER_DAY))
     return SQL("%s + (row_number() OVER() / %s) * interval '1 day'", min_date, rows_per_day)
+
+
+def vary_char_field(env, model, field, postfix=None):
+    """
+    Append the `postfix` string to a char|text field.
+    If no postfix is provided, returns no variation
+    """
+    if postfix is None:
+        return field.name
+    if not isinstance(postfix, SQL):
+        postfix = SQL(f'{postfix}::text')
+    # if the field is translatable, it's a JSONB column, we vary all values for each key
+    if field.translate:
+        return SQL(r"""
+            CASE
+                WHEN %(field)s IS NOT NULL
+                THEN (
+                    SELECT jsonb_object_agg(
+                        key,
+                        CASE
+                            WHEN value IS NULL OR value IN ('/', '')
+                            THEN value
+                            ELSE value || %(postfix)s
+                        END
+                    )
+                    FROM jsonb_each(%(field)s)
+                )
+                ELSE NULL
+            END
+        """, field=SQL.identifier(field.name), postfix=postfix)
+    else:
+        return SQL(r"""
+            CASE
+                WHEN %(field)s IS NULL OR %(field)s IN ('/', '')
+                THEN %(field)s
+                ELSE %(field)s || %(postfix)s
+            END
+        """, field=SQL.identifier(field.name), postfix=postfix)
 
 
 @contextmanager
@@ -113,19 +149,7 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
     """
     match field.type:
         case 'char' | 'text':
-            # if the field is translatable, it's a JSONB column, we vary all values for each key
-            if field.translate:
-                return SQL(f"""
-                    CASE
-                        WHEN %(field_column)s IS NOT NULL OR %(field)s != '/' THEN (
-                            SELECT jsonb_object_agg(key, value %(series)s)
-                            FROM jsonb_each(%(field_column)s)
-                        )
-                        ELSE %(field_column)s
-                    END
-                """, field_column=SQL.identifier(field.name), series=SQL(f'{series_alias}::text'))
-            return SQL("CASE WHEN %(field)s IS NULL OR %(field)s = '/' THEN %(field)s ELSE %(field)s || %(series)s END",
-                       field=SQL.identifier(field.name), series=SQL(f'{series_alias}::text'))
+            return vary_char_field(env, model, field, postfix=series_alias)
         case 'date' | 'datetime':
             return vary_date_field(env, model, factors)
         case 'html':
@@ -203,7 +227,7 @@ def duplicate_model(env, model, duplicated, factors, char_separator_code):
         env.execute_query(SQL(f"SELECT SETVAL('{_model._table}_id_seq', {fetch_last_id(env, _model)}, TRUE)"))
 
     assert model not in duplicated, f"We do not duplicate a model ({model}) that has already been duplicated."
-    _logger.info('Duplicating model %s...', model._name)
+    _logger.info('Duplicating model %s %s times...', model._name, factors[model])
     dest_fields = []
     src_fields = []
     update_fields = []
@@ -217,25 +241,14 @@ def duplicate_model(env, model, duplicated, factors, char_separator_code):
         dest, src = duplicate_field(env, model, field, duplicated, factors, table_alias, series_alias)
         dest_fields += [dest if isinstance(dest, SQL) else SQL.identifier(dest)] if dest else []
         src_fields += [src if isinstance(src, SQL) else SQL.identifier(src)] if src else []
-    # Update char/text fields for existing rows
+    # Update char/text fields for existing rows, to allow re-entrance
     if update_fields:
-        query = SQL(
-            """
-            UPDATE %(table)s SET (%(src_columns)s) = ROW(%(dest_columns)s)
-        """,
-            table=SQL.identifier(model._table),
-            src_columns=SQL(", ").join(
-                SQL.identifier(field.name) for field in update_fields
-            ),
-            dest_columns=SQL(", ").join(
-                SQL(
-                    "CASE WHEN %(field_column)s IS NULL OR %(field_column)s = '/' THEN %(field_column)s ELSE %(field_column)s || %(sep)s END",
-                    field_column=SQL.identifier(field.name),
-                    sep=SQL(f"CHR({char_separator_code})"),
-                )
-                for field in update_fields
-            ),
-        )
+        query = SQL('UPDATE %(table)s SET (%(src_columns)s) = ROW(%(dest_columns)s)',
+                    table=SQL.identifier(model._table),
+                    src_columns=SQL(", ").join(SQL.identifier(field.name) for field in update_fields),
+                    dest_columns=SQL(", ").join(
+                        vary_char_field(env, model, field, postfix=SQL(f"CHR({char_separator_code})"))
+                        for field in update_fields))
         env.cr.execute(query)
     query = SQL(f"""
         INSERT INTO %(table)s (%(dest_columns)s)
@@ -300,7 +313,7 @@ def infer_many2many_model(env, field):
 
 def duplicate_models(env, models, factors, char_separator_code):
     """
-    Create `2^factors` new records using existing records as templates.
+    Create factors new records using existing records as templates.
 
     If a dependency is found for a specific model, but it isn't specified by the user,
     it will inherit the factor of the dependant model.
