@@ -11,6 +11,8 @@ from odoo.tools.misc import OrderedSet
 from odoo.tools.sql import SQL
 
 DEFAULT_FACTOR = 10000
+DEFAULT_SEPARATOR = '_'
+
 _logger = logging.getLogger(__name__)
 
 
@@ -26,9 +28,17 @@ class Duplicate(Command):
         group.add_option("--models",
                          dest='duplicate_models',
                          help="Comma separated list of models")
+        group.add_option("--sep",
+                         dest='char_separator',
+                         help="Single character separator for char/text fields.",
+                         default=DEFAULT_SEPARATOR)
         opt = odoo.tools.config.parse_config(cmdargs)
         duplicate_models = opt.duplicate_models and OrderedSet(opt.duplicate_models.split(','))
         factors = opt.factors and [int(f) for f in opt.factors.split(',')]
+        try:
+            char_separator_code = ord(opt.char_separator)
+        except TypeError:
+            raise ValueError("Seperator must be a single Unicode character.")
         if factors:
             last_factor = factors[:-1]
             factors += [last_factor for _ in range(len(duplicate_models) - len(factors))]
@@ -38,10 +48,10 @@ class Duplicate(Command):
         registry = odoo.registry(dbname)
         with registry.cursor() as cr:
             env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {'active_test': False})
-            self.duplicate(env, factors, duplicate_models)
+            self.duplicate(env, factors, duplicate_models, char_separator_code)
 
     @classmethod
-    def duplicate(cls, env, factors, model_names):
+    def duplicate(cls, env, factors, model_names, char_separator_code):
         registry = env.registry
         try:
             models = sorted(
@@ -53,7 +63,7 @@ class Duplicate(Command):
 
             _logger.log(25, 'Duplicating models %s', models)
             t0 = time.time()
-            duplicate_models(env, models, factors)
+            duplicate_models(env, models, factors, char_separator_code)
             env.flush_all()
             model_time = time.time() - t0
             _logger.info('Duplicated models %s (total: %fs)', models, model_time)

@@ -117,15 +117,15 @@ def variate_field(env, model, field, table_alias, series_alias, factors):
             if field.translate:
                 return SQL(f"""
                     CASE
-                        WHEN %(field_column)s IS NOT NULL THEN (
-                            SELECT jsonb_object_agg(key, value || %(space)s || %(series)s)
+                        WHEN %(field_column)s IS NOT NULL OR %(field)s != '/' THEN (
+                            SELECT jsonb_object_agg(key, value %(series)s)
                             FROM jsonb_each(%(field_column)s)
                         )
-                        ELSE NULL
+                        ELSE %(field_column)s
                     END
-                """, field_column=SQL.identifier(field.name), space=SQL('CHR(32)'), series=SQL(f'{series_alias}::text'))
-            return SQL(f'%(field)s || %(space)s || %(series)s',
-                       field=SQL.identifier(field.name), space=SQL('CHR(32)'), series=SQL(f'{series_alias}::text'))
+                """, field_column=SQL.identifier(field.name), series=SQL(f'{series_alias}::text'))
+            return SQL("CASE WHEN %(field)s IS NULL OR %(field)s = '/' THEN %(field)s ELSE %(field)s || %(series)s END",
+                       field=SQL.identifier(field.name), series=SQL(f'{series_alias}::text'))
         case 'date' | 'datetime':
             return vary_date_field(env, model, factors)
         case 'html':
@@ -197,7 +197,7 @@ def duplicate_field(env, model, field, duplicated, factors, table_alias='t', ser
             return copy(field)
 
 
-def duplicate_model(env, model, duplicated, factors):
+def duplicate_model(env, model, duplicated, factors, char_separator_code):
 
     def update_sequence(_model):
         env.execute_query(SQL(f"SELECT SETVAL('{_model._table}_id_seq', {fetch_last_id(env, _model)}, TRUE)"))
@@ -206,14 +206,37 @@ def duplicate_model(env, model, duplicated, factors):
     _logger.info('Duplicating model %s...', model._name)
     dest_fields = []
     src_fields = []
+    update_fields = []
     table_alias = 't'
     series_alias = 's'
     # process all stored fields (that has a respective column), if the model has an 'id', it's processed first
     has_column = lambda f: f.store and f.column_type
     for field in (f for f in sorted(model._fields.values(), key=lambda x: x.name != 'id') if has_column(f)):
+        if field_need_variation(env, model, field) and field.type in ('char', 'text'):
+            update_fields += [field]
         dest, src = duplicate_field(env, model, field, duplicated, factors, table_alias, series_alias)
         dest_fields += [dest if isinstance(dest, SQL) else SQL.identifier(dest)] if dest else []
         src_fields += [src if isinstance(src, SQL) else SQL.identifier(src)] if src else []
+    # Update char/text fields for existing rows
+    if update_fields:
+        query = SQL(
+            """
+            UPDATE %(table)s SET (%(src_columns)s) = ROW(%(dest_columns)s)
+        """,
+            table=SQL.identifier(model._table),
+            src_columns=SQL(", ").join(
+                SQL.identifier(field.name) for field in update_fields
+            ),
+            dest_columns=SQL(", ").join(
+                SQL(
+                    "CASE WHEN %(field_column)s IS NULL OR %(field_column)s = '/' THEN %(field_column)s ELSE %(field_column)s || %(sep)s END",
+                    field_column=SQL.identifier(field.name),
+                    sep=SQL(f"CHR({char_separator_code})"),
+                )
+                for field in update_fields
+            ),
+        )
+        env.cr.execute(query)
     query = SQL(f"""
         INSERT INTO %(table)s (%(dest_columns)s)
         SELECT %(src_columns)s FROM %(table)s {table_alias},
@@ -275,7 +298,7 @@ def infer_many2many_model(env, field):
     return Many2manyModelWrapper(field)
 
 
-def duplicate_models(env, models, factors):
+def duplicate_models(env, models, factors, char_separator_code):
     """
     Create `2^factors` new records using existing records as templates.
 
@@ -320,4 +343,4 @@ def duplicate_models(env, models, factors):
                 case _:
                     continue
         with ignore_fkey_constraints(env), ignore_indexes(env, model._table):
-            duplicate_model(env, model, duplicated, factors)
+            duplicate_model(env, model, duplicated, factors, char_separator_code)
