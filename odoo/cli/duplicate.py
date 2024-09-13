@@ -8,10 +8,10 @@ from . import Command
 import odoo
 from odoo.tools.duplicate import duplicate_models
 from odoo.tools.misc import OrderedSet
-from odoo.tools.sql import SQL
 
 DEFAULT_FACTOR = 10000
 DEFAULT_SEPARATOR = '_'
+DEFAULT_MODELS = 'res.partner,product.template,account.move,sale.order,crm.lead,stock.picking,project.task'
 
 _logger = logging.getLogger(__name__)
 
@@ -27,7 +27,8 @@ class Duplicate(Command):
                         help="Duplicate models by given factors. A factor of 3 will duplicate the given model 2³ times.")
         group.add_option("--models",
                          dest='duplicate_models',
-                         help="Comma separated list of models")
+                         help="Comma separated list of models",
+                         default=DEFAULT_MODELS)
         group.add_option("--sep",
                          dest='char_separator',
                          help="Single character separator for char/text fields.",
