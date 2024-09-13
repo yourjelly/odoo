@@ -49,6 +49,9 @@ export function onExternalClick(refName, cb) {
  * @param {function} [props.onClose]
  */
 export function useEmojiPickerMobile(ref, props, options = {}) {
+    registry
+        .category("main_components")
+        .add("mail.EmojiPickerMobile", { Component: EmojiPickerMobile });
     const targets = [];
     const state = useState({ isOpen: false });
     const newOptions = {
@@ -194,7 +197,3 @@ export class EmojiPickerMobile extends EmojiPicker {
         );
     }
 }
-
-registry
-    .category("main_components")
-    .add("mail.EmojiPickerMobile", { Component: EmojiPickerMobile });
