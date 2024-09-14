@@ -10,6 +10,8 @@ from odoo.addons.hw_drivers.tools import helpers
 from odoo.netsvc import DBFormatter
 from odoo.tools import config
 
+# abcdefghijk
+
 _logger = logging.getLogger(__name__)
 
 IOT_LOG_TO_SERVER_CONFIG_NAME = 'iot_log_to_server'  # config name in odoo.conf
