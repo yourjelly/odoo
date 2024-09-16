@@ -1,3 +1,5 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from markupsafe import Markup
 
 from odoo import _, models
@@ -53,7 +55,7 @@ class SaleEdiCommon(models.AbstractModel):
         logs = []
         lines_values = []
         for line_tree in tree.iterfind(xpath):
-            line_values = self._retrieve_line_vals(line_tree)
+            line_values = self._retrieve_line_vals(order, line_tree)
             line_values = {
                 **line_values,
                 'product_uom_qty': line_values['quantity'],
@@ -68,6 +70,8 @@ class SaleEdiCommon(models.AbstractModel):
             lines_values += self._retrieve_line_charges(order, line_values, line_values['tax_ids'])
             if not line_values['product_uom_id']:
                 line_values.pop('product_uom_id')  # if no uom, pop it so it's inferred from the product_id
+            default_code_xpath = self._get_product_xpaths()['buyer_product_code']
+            line_values['edi_customer_product_ref'] = self._find_value(default_code_xpath, line_tree)
             lines_values.append(line_values)
 
         return lines_values, logs
@@ -96,7 +100,7 @@ class SaleEdiCommon(models.AbstractModel):
         return dest_partner, logs
 
     def _import_partner(self, company_id, name, phone, email, vat, **kwargs):
-        """ Override of edi.mixin to set current user partner if there is no matching partner
+        """ Override of account.edi.common to set current user partner if there is no matching partner
         found and log details related to partner."""
         partner, logs = super()._import_partner(company_id, name, phone, email, vat, **kwargs)
         if not partner:
@@ -118,3 +122,15 @@ class SaleEdiCommon(models.AbstractModel):
             partner_details += _(", Email: %(email)s", email=email)
 
         return partner_details
+
+    def _import_product(self, partner, **product_vals):
+        """ Override of account.edi.common to set product from previous SO if no product found. """
+        buyer_product_code = product_vals.pop('buyer_product_code', '')
+        product = super()._import_product(partner, **product_vals)
+        if not product:
+            product = self.env['customer.product.reference'].search([
+                ('partner_id', '=', partner.id),
+                ('customer_product_reference', '=', buyer_product_code),
+            ], limit=1).product_id
+
+        return product
