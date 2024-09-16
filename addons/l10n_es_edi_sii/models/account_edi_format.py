@@ -336,7 +336,6 @@ class AccountEdiFormat(models.Model):
 
             if invoice.is_sale_document():
                 # Customer invoices
-
                 if com_partner.country_id.code in ('ES', False) and not (com_partner.vat or '').startswith("ESN"):
                     tax_details_info_vals = self._l10n_es_edi_get_invoices_tax_details_info(invoice)
                     invoice_node['TipoDesglose'] = {'DesgloseFactura': tax_details_info_vals['tax_details_info']}
@@ -356,13 +355,11 @@ class AccountEdiFormat(models.Model):
                         filter_invl_to_apply=lambda x: any(t.tax_scope == 'consu' for t in x.tax_ids)
                     )
 
+                    invoice_node.setdefault('TipoDesglose', {})
+                    invoice_node['TipoDesglose'].setdefault('DesgloseTipoOperacion', {})
                     if tax_details_info_service_vals['tax_details_info']:
-                        invoice_node.setdefault('TipoDesglose', {})
-                        invoice_node['TipoDesglose'].setdefault('DesgloseTipoOperacion', {})
                         invoice_node['TipoDesglose']['DesgloseTipoOperacion']['PrestacionServicios'] = tax_details_info_service_vals['tax_details_info']
                     if tax_details_info_consu_vals['tax_details_info']:
-                        invoice_node.setdefault('TipoDesglose', {})
-                        invoice_node['TipoDesglose'].setdefault('DesgloseTipoOperacion', {})
                         invoice_node['TipoDesglose']['DesgloseTipoOperacion']['Entrega'] = tax_details_info_consu_vals['tax_details_info']
                     if not invoice_node.get('TipoDesglose'):
                         raise UserError(_(

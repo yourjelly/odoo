@@ -71,6 +71,10 @@ class AccountEdiFormat(models.Model):
         if self.code != 'es_tbai' or invoice.country_code != 'ES':
             return errors
 
+        # Every invoice line should have a tax available
+        if any(l.display_type == 'product' and not l.tax_ids for l in invoice.invoice_line_ids):
+            errors.append(_("Please make sure that every line has a tax. "))
+
         # Ensure a certificate is available.
         if not invoice.company_id.l10n_es_edi_certificate_id:
             errors.append(_("Please configure the certificate for TicketBAI/SII."))
@@ -444,16 +448,14 @@ class AccountEdiFormat(models.Model):
             )
             service_retention = tax_details_info_service_vals['tax_amount_retention']
             consu_retention = tax_details_info_consu_vals['tax_amount_retention']
-            desglose = {}
+            desglose = {'DesgloseTipoOperacion': {}}
             if tax_details_info_service_vals['tax_details_info']:
-                desglose.setdefault('DesgloseTipoOperacion', {})
                 desglose['DesgloseTipoOperacion']['PrestacionServicios'] = tax_details_info_service_vals['tax_details_info']
                 desglose['DesgloseTipoOperacion']['PrestacionServicios'].update(
                     {'S1': tax_details_info_service_vals['S1_list'],
                      'S2': tax_details_info_service_vals['S2_list']})
 
             if tax_details_info_consu_vals['tax_details_info']:
-                desglose.setdefault('DesgloseTipoOperacion', {})
                 desglose['DesgloseTipoOperacion']['Entrega'] = tax_details_info_consu_vals['tax_details_info']
                 desglose['DesgloseTipoOperacion']['Entrega'].update(
                     {'S1': tax_details_info_consu_vals['S1_list'],
