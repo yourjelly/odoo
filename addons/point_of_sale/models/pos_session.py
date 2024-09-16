@@ -1838,6 +1838,8 @@ class PosSession(models.Model):
             body = 'Action cancelled ({ACTION})'.format(ACTION=action)
         elif message_type == 'CASH_DRAWER_ACTION':
             body = 'Cash drawer opened ({ACTION})'.format(ACTION=action)
+        else:
+            body = '{ACTION}'.format(ACTION=action)
 
         self.message_post(body=body, author_id=partner_id)
 

@@ -113,6 +113,7 @@ export function useCashierSelector({ exclusive, onScan } = { onScan: () => {}, e
         if (login && employee) {
             pos.hasLoggedIn = true;
             pos.set_cashier(employee);
+            pos.logEmployeeMessage("Logged in");
         }
 
         const currentScreen = pos.mainScreen.component.name;

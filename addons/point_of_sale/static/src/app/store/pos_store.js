@@ -163,6 +163,7 @@ export class PosStore extends Reactive {
 
     reset_cashier() {
         this.cashier = false;
+        this.logEmployeeMessage("Logged out");
         sessionStorage.removeItem("connected_cashier");
     }
 
