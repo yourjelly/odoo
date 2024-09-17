@@ -838,6 +838,10 @@ export class SelectionPlugin extends Plugin {
 
         // Whether the character next to the cursor should be skipped.
         const shouldSkipCallbacks = this.resources.arrows_should_skip || [];
+        // TODO ABD: what if the current selection is not collapsed, and the arrow
+        // pressed (without shift) is in the direction of the anchorNode and not the
+        // focusNode => I believe the first adjacent character returned here won't
+        // be the correct one since it always uses the focusNode + offset.
         let adjacentCharacter = getAdjacentCharacter(selection, domDirection, this.editable);
         let shouldSkip = shouldSkipCallbacks.some((cb) => cb(ev, adjacentCharacter));
 
