@@ -369,8 +369,9 @@ class HolidaysAllocation(models.Model):
         return carryover_date
 
     def _add_days_to_allocation(self, current_level, current_level_maximum_leave, leaves_taken, period_start, period_end):
+        date_start, date_end = self.env.context.get('override_accrual_dates', (self.lastcall, self.nextcall))
         days_to_add = self._process_accrual_plan_level(
-            current_level, period_start, self.lastcall, period_end, self.nextcall)
+            current_level, period_start, date_start, period_end, date_end)
         self.number_of_days += days_to_add
         if current_level.cap_accrued_time:
             self.number_of_days = min(self.number_of_days, current_level_maximum_leave + leaves_taken)
@@ -458,6 +459,50 @@ class HolidaysAllocation(models.Model):
         """
         date_to = date_to or fields.Date.today()
         first_allocation = _("""This allocation have already ran once, any modification won't be effective to the days allocated to the employee. If you need to change the configuration of the allocation, delete and create a new one.""")
+
+        def period_boundaries(level, date):
+            return level._get_previous_date(date), level._get_next_date(date)
+
+        def get_max_days(alloc, level):
+            if not level.cap_accrued_time:
+                return None
+
+            if level.added_value_type == "day":
+                return level.maximum_leave
+            else:
+                hours_per_day = alloc.employee_id.sudo().resource_id.calendar_id.hours_per_day or HOURS_PER_DAY
+                return level.maximum_leave / hours_per_day
+
+        def get_level_data(alloc, date):
+            level, level_idx = alloc._get_current_accrual_plan_level_id(date)
+            if not level:
+                level, level_idx = level_ids[0], 0
+            return level, level_idx, get_max_days(alloc, level)
+
+        def carryover(allocation, current_level, nextcall):
+            """ Apply carryover when relevant,
+                or return the next carryover date when the next call should be a carryover
+            """
+            carryover_date = allocation._get_carryover_date(allocation.nextcall)
+            # If there is a carryover date coming, nextcall is set to it
+            # so the cron is called when we need to remove days
+            if allocation.nextcall < carryover_date < nextcall:
+                nextcall = min(nextcall, carryover_date)
+            # If it's the carry-over date, adjust days using current level's carry-over policy, then continue
+            if allocation.nextcall == carryover_date:
+                if current_level.action_with_unused_accruals in ['lost', 'maximum']:
+                    allocation_days = allocation.number_of_days + leaves_taken
+                    allocation_max_days = current_level.postpone_max_days + leaves_taken
+                    allocation.number_of_days = min(allocation_days, allocation_max_days)
+            return nextcall
+
+        def set_nextcall(allocation, date_to, force_period):
+            allocation.lastcall = allocation.nextcall
+            allocation.nextcall = nextcall
+            if force_period and allocation.nextcall > date_to:
+                allocation.nextcall = date_to
+                force_period = False
+
         for allocation in self:
             level_ids = allocation.accrual_plan_id.level_ids.sorted('sequence')
             if not level_ids:
@@ -469,19 +514,20 @@ class HolidaysAllocation(models.Model):
             first_level_start_date = allocation.date_from + get_timedelta(first_level.start_count, first_level.start_type)
             leaves_taken = allocation.leaves_taken if first_level.added_value_type == "day" else allocation.leaves_taken / (allocation.employee_id.sudo().resource_id.calendar_id.hours_per_day or HOURS_PER_DAY)
             # first time the plan is run, initialize nextcall and take carryover / level transition into account
+            at_period_start = (allocation.accrual_plan_id.accrued_gain_time == 'start')
             if not allocation.nextcall:
                 # Accrual plan is not configured properly or has not started
                 if date_to < first_level_start_date:
                     continue
                 allocation.lastcall = max(allocation.lastcall, first_level_start_date)
-                allocation.nextcall = first_level._get_next_date(allocation.lastcall)
+                # when starting on an accrual day for at period start, the nextcall is the first date
+                if at_period_start and allocation.lastcall == first_level._get_previous_date(allocation.lastcall):
+                    allocation.nextcall = allocation.lastcall
+                else:
+                    allocation.nextcall = first_level._get_next_date(allocation.lastcall)
                 # adjust nextcall for carryover
                 carryover_date = allocation._get_carryover_date(allocation.nextcall)
                 allocation.nextcall = min(carryover_date, allocation.nextcall)
-                # adjust nextcall for level_transition
-                if len(level_ids) > 1:
-                    second_level_start_date = allocation.date_from + get_timedelta(level_ids[1].start_count, level_ids[1].start_type)
-                    allocation.nextcall = min(second_level_start_date, allocation.nextcall)
                 if log:
                     allocation._message_log(body=first_allocation)
             (current_level, current_level_idx) = (False, 0)
@@ -489,57 +535,77 @@ class HolidaysAllocation(models.Model):
             # all subsequent runs, at every loop:
             # get current level and normal period boundaries, then set nextcall, adjusted for level transition and carryover
             # add days, trimmed if there is a maximum_leave
-            while allocation.nextcall <= date_to:
-                (current_level, current_level_idx) = allocation._get_current_accrual_plan_level_id(allocation.nextcall)
-                if not current_level:
-                    break
-                if current_level.cap_accrued_time:
-                    current_level_maximum_leave = current_level.maximum_leave if current_level.added_value_type == "day" else current_level.maximum_leave / (allocation.employee_id.sudo().resource_id.calendar_id.hours_per_day or HOURS_PER_DAY)
-                nextcall = current_level._get_next_date(allocation.nextcall)
-                # Since _get_previous_date returns the given date if it corresponds to a call date
-                # this will always return lastcall except possibly on the first call
-                # this is used to prorate the first number of days given to the employee
-                period_start = current_level._get_previous_date(allocation.lastcall)
-                period_end = current_level._get_next_date(allocation.lastcall)
-                # There are 2 cases where nextcall could be closer than the normal period:
-                # 1. Passing from one level to another, if mode is set to 'immediately'
-                if current_level_idx < (len(level_ids) - 1) and allocation.accrual_plan_id.transition_mode == 'immediately':
-                    next_level = level_ids[current_level_idx + 1]
-                    current_level_last_date = allocation.date_from + get_timedelta(next_level.start_count, next_level.start_type)
-                    if allocation.nextcall != current_level_last_date:
-                        nextcall = min(nextcall, current_level_last_date)
-                # 2. On carry-over date
-                carryover_date = allocation._get_carryover_date(allocation.nextcall)
-                if allocation.nextcall < carryover_date < nextcall:
-                    nextcall = min(nextcall, carryover_date)
-                if not allocation.already_accrued:
-                    allocation._add_days_to_allocation(current_level, current_level_maximum_leave, leaves_taken, period_start, period_end)
-                # if it's the carry-over date, adjust days using current level's carry-over policy, then continue
-                if allocation.nextcall == carryover_date:
-                    if current_level.action_with_unused_accruals in ['lost', 'maximum']:
-                        allocation_days = allocation.number_of_days + leaves_taken
-                        allocation_max_days = current_level.postpone_max_days + leaves_taken
-                        allocation.number_of_days = min(allocation_days, allocation_max_days)
 
-                allocation.lastcall = allocation.nextcall
-                allocation.nextcall = nextcall
-                allocation.already_accrued = False
-                if force_period and allocation.nextcall > date_to:
-                    allocation.nextcall = date_to
-                    force_period = False
+            if at_period_start:
+                # Allocate days for the first partial period if not already done
+                if not allocation.already_accrued and allocation.nextcall <= date_to:
+                    start_level, __, start_level_maximum_leave = get_level_data(allocation, allocation.nextcall)
+                    period_start, period_end = period_boundaries(start_level, allocation.lastcall)
+                    allocation._add_days_to_allocation(start_level, start_level_maximum_leave, leaves_taken, period_start, period_end)
+                    allocation.already_accrued = True
 
-            # if plan.accrued_gain_time == 'start', process next period and set flag 'already_accrued', this will skip adding days
-            # once, preventing double allocation.
-            if allocation.accrual_plan_id.accrued_gain_time == 'start':
-                # check that we are at the start of a period, not on a carry-over or level transition date
-                current_level = current_level or allocation.accrual_plan_id.level_ids[0]
-                period_start = current_level._get_previous_date(allocation.lastcall)
-                if allocation.lastcall != period_start:
-                    continue
-                if current_level.cap_accrued_time:
-                    current_level_maximum_leave = current_level.maximum_leave if current_level.added_value_type == "day" else current_level.maximum_leave / (allocation.employee_id.sudo().resource_id.calendar_id.hours_per_day or HOURS_PER_DAY)
-                allocation._add_days_to_allocation(current_level, current_level_maximum_leave, leaves_taken, allocation.lastcall, allocation.nextcall)
-                allocation.already_accrued = True
+                while allocation.nextcall <= date_to:
+                    current_level, current_level_idx, current_level_maximum_leave = get_level_data(allocation, allocation.nextcall)
+
+                    # get the period start and end for the **ongoing** period (as of `allocation.nextcall`), since we accrue days in advance
+                    period_start, period_end = period_boundaries(current_level, allocation.nextcall)
+                    nextcall = period_end
+
+                    # apply carryover when relevant
+                    nextcall = carryover(allocation, current_level, nextcall)
+
+                    if period_start == allocation.nextcall:  # on a regular allocation date (i.e. not carryover; not level change)
+                        allocation.with_context(
+                            override_accrual_dates=(period_start, period_end)
+                        )._add_days_to_allocation(
+                            current_level, current_level_maximum_leave, leaves_taken, period_start, period_end
+                        )
+
+                    set_nextcall(allocation, date_to, force_period)
+            else:
+                while allocation.nextcall <= date_to:
+                    current_level, current_level_idx, current_level_maximum_leave = get_level_data(allocation, allocation.lastcall)
+                    # Get the period start and end for the **last finished** period (as of `allocation.nextcall`)
+                    # Since _get_previous_date returns the given date if it corresponds to a call date
+                    # this will always return lastcall except possibly on the first call
+                    # this is used to prorate the first number of days given to the employee
+                    period_start, period_end = period_boundaries(current_level, allocation.lastcall)
+                    nextcall = current_level._get_next_date(allocation.nextcall)
+
+                    # apply carryover when relevant
+                    nextcall = carryover(allocation, current_level, nextcall)
+
+                    if allocation.nextcall == period_end:  # on a regular allocation date (i.e. not carryover; not level change)
+                        if allocation.accrual_plan_id.transition_mode == 'immediately':
+                            # loop over the different levels that overlap the current period and add days
+                            # as a prorata of the duration each level was in effect
+                            subperiod_start = max(period_start, first_level_start_date)
+                            while current_level_idx < len(level_ids) - 1:
+                                next_level = level_ids[current_level_idx + 1]
+                                current_level_last_date = allocation.date_from + get_timedelta(next_level.start_count, next_level.start_type)
+                                if current_level_last_date >= period_end:
+                                    break
+
+                                allocation.with_context(
+                                    override_accrual_dates=(subperiod_start, current_level_last_date)
+                                )._add_days_to_allocation(
+                                    current_level, current_level_maximum_leave, leaves_taken, period_start, period_end
+                                )
+
+                                subperiod_start = current_level_last_date
+                                current_level = next_level
+                                current_level_maximum_leave = get_max_days(allocation, current_level)
+                                current_level_idx += 1
+                            # Last iteration
+                            allocation.with_context(
+                                override_accrual_dates=(subperiod_start, period_end)
+                            )._add_days_to_allocation(
+                                current_level, current_level_maximum_leave, leaves_taken, period_start, period_end
+                            )
+                        else:
+                            allocation._add_days_to_allocation(current_level, current_level_maximum_leave, leaves_taken, period_start, period_end)
+
+                    set_nextcall(allocation, date_to, force_period)
 
     @api.model
     def _update_accrual(self):
@@ -870,6 +936,7 @@ class HolidaysAllocation(models.Model):
         self.number_of_days_display = 0.0
         self.number_of_hours_display = 0.0
         self.number_of_days = 0.0
+        self.already_accrued = False
         date_to = min(self.date_to, date.today()) if self.date_to else False
         self._process_accrual_plans(date_to)
 
