@@ -33,7 +33,7 @@ patch(accountTaxHelpers, {
             });
 
             // Rate.
-            const gst_tax_amounts = taxes_computation.taxes_data
+            const gst_tax_amounts = taxes_computation.taxes
                 .filter((x) => ["igst", "cgst", "sgst"].includes(x.tax.l10n_in_tax_type))
                 .map((x) => [x.tax.id, x.tax.amount]);
             let rate = 0;
@@ -65,7 +65,7 @@ patch(accountTaxHelpers, {
                 };
             }
 
-            for (const tax_data of taxes_computation.taxes_data) {
+            for (const tax_data of taxes_computation.taxes) {
                 if (tax_data.tax.l10n_in_tax_type) {
                     results_map[keyStr].tax_amounts[tax_data.tax.l10n_in_tax_type] += tax_data.tax_amount;
                     l10n_in_tax_types.add(tax_data.tax.l10n_in_tax_type);

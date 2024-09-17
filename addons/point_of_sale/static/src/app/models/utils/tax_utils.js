@@ -25,7 +25,7 @@ export const compute_price_force_price_include = (
         "total_included"
     );
     let new_price = tax_res.total_excluded;
-    new_price += tax_res.taxes_data
+    new_price += tax_res.taxes
         .filter((tax) => models["account.tax"].get(tax.id).price_include)
         .reduce((sum, tax) => (sum += tax.tax_amount), 0);
     return new_price;
@@ -50,7 +50,7 @@ export const getTaxesValues = (
         ),
         special_mode: special_mode,
     });
-    for (const taxData of results.taxes_data) {
+    for (const taxData of results.taxes) {
         Object.assign(taxData, taxData.tax);
     }
     return results;

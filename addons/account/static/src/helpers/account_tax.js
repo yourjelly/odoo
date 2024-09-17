@@ -359,7 +359,7 @@ export const accountTaxHelpers = {
         return {
             total_excluded: total_excluded,
             total_included: total_included,
-            taxes_data: taxes_data_list.map(tax_data => Object.assign({}, {
+            taxes: taxes_data_list.map(tax_data => Object.assign({}, {
                 tax: tax_data.tax,
                 group: batching_results.group_per_tax[tax_data.tax.id],
                 batch: batching_results.batch_per_tax[tax_data.tax.id],
