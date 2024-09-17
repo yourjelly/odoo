@@ -394,6 +394,3 @@ export const many2OneField = {
 };
 
 registry.category("fields").add("many2one", many2OneField);
-// the two following lines are there to prevent the fallback on legacy widgets
-registry.category("fields").add("list.many2one", many2OneField);
-registry.category("fields").add("kanban.many2one", many2OneField);
