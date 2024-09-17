@@ -15,7 +15,7 @@ export class PassKeyIdentityCheckFormController extends FormController {
             clickParams.name === "run_check" &&
             this.model.root.data.auth_method == "webauthn"
         ) {
-            const serverOptions = await rpc("/auth/passkey/start-auth");
+            const serverOptions = await rpc("/auth/passkey/start-auth", {user_verification: false});
             const auth = await startAuthentication(serverOptions).catch(e => console.log(e));
             // In case the user cancelled the passkey browser check, just interrupt.
             if(!auth) return false;

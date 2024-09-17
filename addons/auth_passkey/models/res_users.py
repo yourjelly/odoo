@@ -49,7 +49,7 @@ class UsersPasskey(models.Model):
                 credential['login'] = res[0]
         return super()._login(db, credential, user_agent_env=user_agent_env)
 
-    def _check_credentials(self, credential, env):
+    def _check_credentials(self, credential, env, strong_authentication=True):
         if credential['type'] == 'webauthn':
             webauthn = json.loads(credential['webauthn_response'])
             passkey = self.env['auth.passkey.key'].sudo().search([
@@ -63,6 +63,7 @@ class UsersPasskey(models.Model):
                     webauthn,
                     passkey.public_key,
                     passkey.sign_count,
+                    user_verification=strong_authentication,
                 )
             except InvalidAuthenticationResponse as e:
                 raise AccessDenied(e.args[0]) from None
@@ -73,7 +74,7 @@ class UsersPasskey(models.Model):
                 'mfa': 'skip',
             }
         else:
-            return super()._check_credentials(credential, env)
+            return super()._check_credentials(credential, env, strong_authentication)
 
     def _get_session_token_fields(self):
         return super()._get_session_token_fields() | {'auth_passkey_key_ids'}

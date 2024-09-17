@@ -22,7 +22,7 @@ class CheckIdentityPasskeys(CheckIdentity):
                     'webauthn_response': self.password,
                     'type': 'webauthn',
                 }
-                self.create_uid._check_credentials(credential, {'interactive': True})
+                self.create_uid._check_credentials(credential, {'interactive': True}, strong_authentication=False)
             except AccessDenied:
                 raise UserError(_("Incorrect Passkey. Please provide a valid passkey or use a different authentication method."))
         else:

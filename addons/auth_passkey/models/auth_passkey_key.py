@@ -12,7 +12,7 @@ from odoo.addons.base.models.res_users import check_identity
 
 from .._vendor.webauthn import base64url_to_bytes, generate_authentication_options, generate_registration_options, options_to_json, verify_authentication_response, verify_registration_response
 from .._vendor.webauthn.helpers import bytes_to_base64url
-from .._vendor.webauthn.helpers.structs import AuthenticatorSelectionCriteria, ResidentKeyRequirement, UserVerificationRequirement
+from .._vendor.webauthn.helpers.structs import AuthenticatorSelectionCriteria, PublicKeyCredentialDescriptor, ResidentKeyRequirement, UserVerificationRequirement
 
 _logger = logging.getLogger(__name__)
 
@@ -64,17 +64,28 @@ class PassKey(models.Model):
         return challenge
 
     @api.model
-    def _start_auth(self):
+    def _start_auth(self, user_verification=True):
         assert request
         authentication_options = json.loads(options_to_json(generate_authentication_options(
             rp_id=url_parse(self.get_base_url()).host,
-            user_verification=UserVerificationRequirement.REQUIRED,
+            user_verification=(
+                UserVerificationRequirement.REQUIRED
+                if user_verification
+                else UserVerificationRequirement.DISCOURAGED
+            ),
+            # It's required to pass `allow_credentials` so Google Chrome respects the `discouraged` user verification
+            # to only require users to touch the key without entering the PIN.
+            # Besides, it's an additional security layer.
+            allow_credentials=[
+                PublicKeyCredentialDescriptor(base64url_to_bytes(key.credential_identifier))
+                for key in self.env.user.auth_passkey_key_ids
+            ] if request.session.uid else None,
         )))
         request.session['webauthn_challenge'] = authentication_options['challenge']
         return authentication_options
 
     @api.model
-    def _verify_auth(self, auth, public_key, sign_count):
+    def _verify_auth(self, auth, public_key, sign_count, user_verification=True):
         parsed_url = url_parse(self.get_base_url())
         auth_verification = verify_authentication_response(
             credential=auth,
@@ -83,6 +94,7 @@ class PassKey(models.Model):
             expected_rp_id=parsed_url.host,
             credential_public_key=base64url_to_bytes(public_key),
             credential_current_sign_count=sign_count,
+            require_user_verification=user_verification,
         )
         return auth_verification.new_sign_count
 
@@ -110,6 +122,7 @@ class PassKey(models.Model):
             expected_challenge=base64url_to_bytes(self._get_session_challenge()),
             expected_origin=parsed_url.replace(path='').to_url(),
             expected_rp_id=parsed_url.host,
+            require_user_verification=True,
         )
         return {
             'credential_id': verification.credential_id,

@@ -136,8 +136,8 @@ class PasskeyTest(HttpCase):
         """Force the webauthn challenge for unit tests testing the authentication"""
         origin_start_auth = self.env.registry['auth.passkey.key']._start_auth
 
-        def _start_auth(self):
-            res = origin_start_auth(self)
+        def _start_auth(self, user_verification=True):
+            res = origin_start_auth(self, user_verification)
             res['challenge'] = request.session['webauthn_challenge'] = challenge
             return res
 

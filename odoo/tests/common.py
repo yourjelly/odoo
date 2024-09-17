@@ -1879,7 +1879,7 @@ class HttpCase(TransactionCase):
             self.cr.flush()
             self.cr.clear()
 
-            def patched_check_credentials(self, credential, env):
+            def patched_check_credentials(self, credential, env, strong_authentication=True):
                 return {'uid': self.id, 'auth_method': 'password', 'mfa': 'default'}
 
             # patching to speedup the check in case the password is hashed with many hashround + avoid to update the password

@@ -34,9 +34,9 @@ class Users(models.Model):
                         }
                 raise e
 
-    def _check_credentials(self, credential, env):
+    def _check_credentials(self, credential, env, strong_authentication=True):
         try:
-            return super()._check_credentials(credential, env)
+            return super()._check_credentials(credential, env, strong_authentication)
         except AccessDenied:
             passwd_allowed = env['interactive'] or not self.env.user._rpc_api_keys_only()
             if passwd_allowed and self.env.user.active:
@@ -46,7 +46,7 @@ class Users(models.Model):
                         return {
                             'uid': self.env.user.id,
                             'auth_method': 'ldap',
-                            'mfa': 'default',
+                            'mfa': 'default' if strong_authentication else 'skip',
                         }
             raise
 

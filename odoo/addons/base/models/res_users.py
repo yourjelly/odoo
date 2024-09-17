@@ -442,7 +442,7 @@ class Users(models.Model):
         )
         self.browse(uid).invalidate_recordset(['password'])
 
-    def _check_credentials(self, credential, env):
+    def _check_credentials(self, credential, env, strong_authentication=True):
         """ Validates the current user's password.
 
         Override this method to plug additional authentication methods.
@@ -459,6 +459,9 @@ class Users(models.Model):
         instead.
 
         Credentials are considered to be untrusted user input, for more information please check :func:`~.authenticate`
+
+        :param strong_authentication: whether a strong authentication is required or not.
+        This influences if a multi-factor authentication must be asked or not.
 
         :returns: auth_info dictionary containing:
           - uid: the uid of the authenticated user
@@ -495,7 +498,7 @@ class Users(models.Model):
         return {
             'uid': self.env.user.id,
             'auth_method': 'password',
-            'mfa': 'default',
+            'mfa': 'skip' if not strong_authentication else 'default',
         }
 
     def _compute_password(self):
@@ -2135,7 +2138,7 @@ class CheckIdentity(models.TransientModel):
                 'password': self.password,
                 'type': 'password',
             }
-            self.create_uid._check_credentials(credential, {'interactive': True})
+            self.create_uid._check_credentials(credential, {'interactive': True}, strong_authentication=False)
         except AccessDenied:
             raise UserError(_("Incorrect Password, try again or click on Forgot Password to reset your password."))
 
@@ -2241,7 +2244,7 @@ class APIKeysUser(models.Model):
         """ To be overridden if RPC access needs to be restricted to API keys, e.g. for 2FA """
         return False
 
-    def _check_credentials(self, credential, user_agent_env):
+    def _check_credentials(self, credential, user_agent_env, strong_authentication=True):
         user_agent_env = user_agent_env or {}
         if user_agent_env.get('interactive', True):
             if 'interactive' not in user_agent_env:
@@ -2250,11 +2253,11 @@ class APIKeysUser(models.Model):
                     Check calls and overrides to ensure the 'interactive' key is properly set in \
                     all _check_credentials environments"
                 )
-            return super()._check_credentials(credential, user_agent_env)
+            return super()._check_credentials(credential, user_agent_env, strong_authentication)
 
         if not self.env.user._rpc_api_keys_only():
             try:
-                return super()._check_credentials(credential, user_agent_env)
+                return super()._check_credentials(credential, user_agent_env, strong_authentication)
             except AccessDenied:
                 pass
 
@@ -2263,7 +2266,7 @@ class APIKeysUser(models.Model):
             return {
                 'uid': self.env.user.id,
                 'auth_method': 'apikey',
-                'mfa': 'default',
+                'mfa': 'skip' if strong_authentication else 'default',
             }
 
         raise AccessDenied()
