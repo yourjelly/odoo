@@ -231,6 +231,14 @@ export class KanbanRecord extends Component {
         return getFormattedValue(record, name, archInfo.fieldNodes[fieldId]);
     }
 
+    getFieldTitle(fieldId) {
+        const { archInfo, record } = this.props;
+        const { name } = archInfo.fieldNodes[fieldId];
+        if (record.fields[name].type === "many2one") {
+            return getFormattedValue(record, name, archInfo.fieldNodes[fieldId]);
+        }
+    }
+
     /**
      * Assigns "widget" properties on the kanban record.
      *

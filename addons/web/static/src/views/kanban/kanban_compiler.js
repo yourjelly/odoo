@@ -124,6 +124,7 @@ export class KanbanCompiler extends ViewCompiler {
             compiled = createElement("span", {
                 "t-out": params.formattedValueExpr || `__comp__.getFormattedValue("${fieldId}")`,
             });
+            compiled.setAttribute("t-att-title", `__comp__.getFieldTitle("${fieldId}")`);
         } else {
             compiled = super.compileField(el, params);
             const fieldId = el.getAttribute("field_id");

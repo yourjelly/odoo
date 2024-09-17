@@ -642,9 +642,7 @@
                                     <t t-name="kanban-card" class="row g-0 ps-0 pe-0">
                                         <t t-if="!record.display_type.raw_value">
                                             <aside class="col-2 p-1">
-                                                <span t-att-title="record.product_id.value">
-                                                    <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
-                                                </span>
+                                                <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
                                             </aside>
                                             <main class="col">
                                                 <div class="row">

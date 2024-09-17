@@ -65,6 +65,13 @@ export class ImageField extends Component {
         return this.props.alt;
     }
 
+    get imgTitle() {
+        if (this.fieldType === "many2one" && this.props.record.data[this.props.name]) {
+            return this.props.record.data[this.props.name][1];
+        }
+        return undefined;
+    }
+
     get imgClass() {
         return ["img", "img-fluid"].concat(this.props.imgClass.split(" ")).join(" ");
     }
