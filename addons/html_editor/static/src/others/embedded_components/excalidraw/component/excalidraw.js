@@ -16,6 +16,8 @@ export class ExcalidrawEmbeddedComponent extends ReadonlyExcalidrawEmbeddedCompo
     setup() {
         super.setup();
         this.embeddedState = useEmbeddedState(this.props.host);
+        this.embeddedState.width = this.embeddedState.width || "100%";
+        this.embeddedState.height = this.embeddedState.height || "400px";
     }
 
     get templateState() {
