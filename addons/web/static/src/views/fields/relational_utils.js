@@ -331,7 +331,9 @@ export class Many2XAutocomplete extends Component {
         this.lastProm = this.abortableSearch(request);
         const records = await this.lastProm.promise;
 
-        const options = records.map((result) => this.mapRecordToOption(result));
+        const options = records
+            .slice(0, this.props.searchLimit)
+            .map((result) => this.mapRecordToOption(result));
 
         if (this.props.quickCreate && request.length) {
             options.push({
@@ -354,7 +356,7 @@ export class Many2XAutocomplete extends Component {
             });
         }
 
-        if (!this.props.noSearchMore && records.length > 0) {
+        if (!this.props.noSearchMore && records.length > this.props.searchLimit) {
             options.push({
                 label: this.SearchMoreButtonLabel,
                 action: this.onSearchMore.bind(this, request),

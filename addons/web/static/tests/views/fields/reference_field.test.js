@@ -391,6 +391,10 @@ test("reference in form view", async () => {
 });
 
 test("Many2One 'Search more...' updates on resModel change", async () => {
+    // add enough records to display "Search More..."
+    for (let i = 0; i < 10; i++) {
+        Product._records.push({ name: `product_${i}` });
+    }
     onRpc("has_group", () => true);
 
     Product._views[["list", false]] = /* xml */ `<list><field name="display_name"/></list>`;
