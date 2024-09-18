@@ -53,6 +53,7 @@ class IrActions(models.Model):
     _name = 'ir.actions.actions'
     _description = 'Actions'
     _table = 'ir_actions'
+    _inherit = ['xmlid.mixin']
     _order = 'name'
     _allow_sudo_commands = False
 
@@ -60,7 +61,6 @@ class IrActions(models.Model):
 
     name = fields.Char(string='Action Name', required=True, translate=True)
     type = fields.Char(string='Action Type', required=True)
-    xml_id = fields.Char(compute='_compute_xml_id', string="External ID")
     path = fields.Char(string="Path to show in the URL")
     help = fields.Html(string='Action Description',
                        help='Optional help text for the users with a description of the target view, such as its usage and purpose.',
@@ -95,11 +95,6 @@ class IrActions(models.Model):
                 # within the same table before checking the uniqueness across all the tables.
                 if (self.env['ir.actions.actions'].search_count([('path', '=', action.path)]) > 1):
                     raise ValidationError(_("Path to show in the URL must be unique! Please choose another one."))
-
-    def _compute_xml_id(self):
-        res = self.get_external_id()
-        for record in self:
-            record.xml_id = res.get(record.id)
 
     @api.model_create_multi
     def create(self, vals_list):

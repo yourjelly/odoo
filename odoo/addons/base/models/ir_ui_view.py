@@ -143,6 +143,7 @@ WRONGCLASS = re.compile(r"(@class\s*=|=\s*@class|contains\(@class)")
 class View(models.Model):
     _name = 'ir.ui.view'
     _description = 'View'
+    _inherit = ['xmlid.mixin']
     _order = "priority,name,id"
     _allow_sudo_commands = False
 
@@ -174,8 +175,6 @@ class View(models.Model):
     inherit_children_ids = fields.One2many('ir.ui.view', 'inherit_id', string='Views which inherit from this one')
     model_data_id = fields.Many2one('ir.model.data', string="Model Data",
                                     compute='_compute_model_data_id', search='_search_model_data_id')
-    xml_id = fields.Char(string="External ID", compute='_compute_xml_id',
-                         help="ID of the view defined in xml file")
     groups_id = fields.Many2many('res.groups', 'ir_ui_view_group_rel', 'view_id', 'group_id',
                                  string='Groups', help="If this field is empty, the view applies to all users. Otherwise, the view applies to the users of those groups only.")
     mode = fields.Selection([('primary', "Base view"), ('extension', "Extension View")],
@@ -316,14 +315,6 @@ actual arch.
     def _inverse_compute_model_id(self):
         for record in self:
             record.model = record.model_id.model
-
-    def _compute_xml_id(self):
-        xml_ids = collections.defaultdict(list)
-        domain = [('model', '=', 'ir.ui.view'), ('res_id', 'in', self.ids)]
-        for data in self.env['ir.model.data'].sudo().search_read(domain, ['module', 'name', 'res_id']):
-            xml_ids[data['res_id']].append("%s.%s" % (data['module'], data['name']))
-        for view in self:
-            view.xml_id = xml_ids.get(view.id, [''])[0]
 
     def _valid_inheritance(self, arch):
         """ Check whether view inheritance is based on translated attribute. """
