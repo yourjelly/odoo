@@ -703,10 +703,11 @@ export function makeActionManager(env, router = _router) {
             "no_breadcrumbs" in action.context ? action.context.no_breadcrumbs : target === "new";
         delete action.context.no_breadcrumbs;
 
-        const embeddedActions =
+        const embeddedActions = reactive(
             view.type === "form"
                 ? []
-                : context.parent_action_embedded_actions || action.embedded_action_ids;
+                : context.parent_action_embedded_actions || action.embedded_action_ids
+        );
         const parentActionId = (view.type !== "form" && context.parent_action_id) || false;
         const currentEmbeddedActionId = context.current_embedded_action_id || false;
         return {
