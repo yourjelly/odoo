@@ -217,28 +217,38 @@ export class ViewCompiler {
 
     setup() {}
 
-    /**
-     * @param {any} invisible
-     * @param {Element} compiled
-     * @param {Record<string, any>} params
-     * @returns {Element}
-     */
-    applyInvisible(invisible, compiled, params) {
+    _getIsVisibleExpr(node, params) {
+        const invisible = getModifier(node, "invisible");
         if (!invisible || invisible === "False") {
-            return compiled;
+            return "true";
         }
         if (invisible === "True" || invisible === "1") {
-            return;
+            return "false";
         }
         const recordExpr = params.recordExpr || "__comp__.props.record";
-        let isVisileExpr = `!__comp__.evaluateBooleanExpr(${JSON.stringify(
+        const isVisibleExpr = `!__comp__.evaluateBooleanExpr(${JSON.stringify(
             invisible
         )},${recordExpr}.evalContextWithVirtualIds)`;
-        if (compiled.hasAttribute("t-if")) {
-            const formerTif = compiled.getAttribute("t-if");
-            isVisileExpr = `( ${formerTif} ) and ${isVisileExpr}`;
+        return isVisibleExpr;
+    }
+
+    /**
+     * @param {string} invisible
+     * @param {Element} compiled
+     * @returns {Element}
+     */
+    applyInvisible(isVisibleExpr, compiled) {
+        if (isVisibleExpr === "true") {
+            return compiled;
+        } else if (isVisibleExpr === "false") {
+            return;
+        } else {
+            if (compiled.hasAttribute("t-if")) {
+                const formerTif = compiled.getAttribute("t-if");
+                isVisibleExpr = `( ${formerTif} ) and ${isVisibleExpr}`;
+            }
+            compiled.setAttribute("t-if", isVisibleExpr);
         }
-        compiled.setAttribute("t-if", isVisileExpr);
         return compiled;
     }
 
@@ -269,10 +279,10 @@ export class ViewCompiler {
         }
 
         this.validateNode(node);
-        let invisible;
+        let isVisibleExpr;
         if (evalInvisible) {
-            invisible = getModifier(node, "invisible");
-            if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
+            isVisibleExpr = this._getIsVisibleExpr(node, params);
+            if (!params.compileInvisibleNodes && isVisibleExpr === "false") {
                 return;
             }
         }
@@ -289,7 +299,7 @@ export class ViewCompiler {
         }
 
         if (evalInvisible && compiledNode) {
-            compiledNode = this.applyInvisible(invisible, compiledNode, params);
+            compiledNode = this.applyInvisible(isVisibleExpr, compiledNode);
         }
         return compiledNode;
     }

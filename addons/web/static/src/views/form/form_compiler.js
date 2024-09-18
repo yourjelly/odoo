@@ -305,8 +305,8 @@ export class FormCompiler extends ViewCompiler {
                 continue;
             }
 
-            const invisible = getModifier(child, "invisible");
-            if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
+            const isVisibleExpr = this._getIsVisibleExpr(child, params);
+            if (!params.compileInvisibleNodes && isVisibleExpr === "false") {
                 continue;
             }
 
@@ -368,16 +368,6 @@ export class FormCompiler extends ViewCompiler {
             }
 
             if (slotContent && !isTextNode(slotContent)) {
-                let isVisibleExpr;
-                if (!invisible || invisible === "False" || invisible === "0") {
-                    isVisibleExpr = "true";
-                } else if (invisible === "True" || invisible === "1") {
-                    isVisibleExpr = "false";
-                } else {
-                    isVisibleExpr = `!__comp__.evaluateBooleanExpr(${JSON.stringify(
-                        invisible
-                    )},__comp__.props.record.evalContextWithVirtualIds)`;
-                }
                 mainSlot.setAttribute("isVisible", isVisibleExpr);
                 if (itemSpan > 0) {
                     mainSlot.setAttribute("itemSpan", `${itemSpan}`);
@@ -673,7 +663,7 @@ export class FormCompiler extends ViewCompiler {
     compileSeparator(el, params = {}) {
         const separator = makeSeparator(el.getAttribute("string"));
         copyAttributes(el, separator);
-        return this.applyInvisible(getModifier(el, "invisible"), separator, params);
+        return this.applyInvisible(this._getIsVisibleExpr(el, params), separator);
     }
 
     /**
