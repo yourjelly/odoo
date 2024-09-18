@@ -174,7 +174,7 @@ class TestEventSaleMailSchedule(TestEventFullCommon):
             lambda m: m.interval_type == "after_sub"
         )
         self.assertTrue(aftersub)
-        self.aftersub.template_ref.email_from = "{{ (object.event_id.organizer_id.email_formatted or object.event_id.user_id.email_formatted or '') }}"
+        aftersub.template_ref.email_from = "{{ (object.event_id.organizer_id.email_formatted or object.event_id.user_id.email_formatted or '') }}"
         self.assertEqual(self.test_event.organizer_id, self.test_event.env.company.partner_id)
 
         registration = self.env["event.registration"].create(
