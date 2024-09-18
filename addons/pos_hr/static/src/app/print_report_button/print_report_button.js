@@ -20,8 +20,6 @@ class PrintReportButton extends Component {
     async onClick() {
         const context = makeContext([this.props.record.evalContext || {}]);
 
-        const promises = [];
-
         const single_report_action = await this.orm.call(
             "pos.daily.sales.reports.wizard",
             "get_single_report_print_action",
@@ -30,7 +28,7 @@ class PrintReportButton extends Component {
                 pos_session_id: context.pos_session_id,
             }
         );
-        promises.push(this.action.doAction(single_report_action));
+        await this.action.doAction(single_report_action);
 
         if (context.add_report_per_employee) {
             const multi_report_action = await this.orm.call(
@@ -42,10 +40,8 @@ class PrintReportButton extends Component {
                     employee_ids: context.employee_ids,
                 }
             );
-            promises.push(this.action.doAction(multi_report_action));
+            await this.action.doAction(multi_report_action);
         }
-
-        await Promise.all(promises);
     }
 }
 
