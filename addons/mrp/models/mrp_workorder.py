@@ -147,16 +147,17 @@ class MrpWorkorder(models.Model):
                                      domain="[('allow_workorder_dependencies', '=', True), ('id', '!=', id), ('production_id', '=', production_id)]",
                                      copy=False)
 
-    @api.depends('production_availability', 'blocked_by_workorder_ids.state')
+    @api.depends('production_availability', 'blocked_by_workorder_ids.state', 'move_raw_ids.state')
     def _compute_state(self):
         # Force to compute the production_availability right away.
         # It is a trick to force that the state of workorder is computed at the end of the
         # cyclic depends with the mo.state, mo.reservation_state and wo.state and avoid recursion error
         self.mapped('production_availability')
         for workorder in self:
+            move_raws_availability = bool((not workorder.move_raw_ids or all(move.state ==  "assigned" for move in workorder.move_raw_ids)))
             if workorder.state == 'pending':
                 if all([wo.state in ('done', 'cancel') for wo in workorder.blocked_by_workorder_ids]):
-                    workorder.state = 'ready' if workorder.production_availability == 'assigned' else 'waiting'
+                    workorder.state = 'ready' if workorder.production_availability == 'assigned' and move_raws_availability else 'waiting'
                     continue
             if workorder.state not in ('waiting', 'ready'):
                 continue
@@ -165,9 +166,9 @@ class MrpWorkorder(models.Model):
                 continue
             if workorder.production_availability not in ('waiting', 'confirmed', 'assigned'):
                 continue
-            if workorder.production_availability == 'assigned' and workorder.state == 'waiting':
+            if workorder.production_availability == 'assigned' and move_raws_availability and workorder.state == 'waiting':
                 workorder.state = 'ready'
-            elif workorder.production_availability != 'assigned' and workorder.state == 'ready':
+            elif (workorder.production_availability != 'assigned' or not move_raws_availability) and workorder.state == 'ready':
                 workorder.state = 'waiting'
 
     @api.depends('production_state', 'date_start', 'date_finished')
