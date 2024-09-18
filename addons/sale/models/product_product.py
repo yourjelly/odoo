@@ -42,13 +42,10 @@ class ProductProduct(models.Model):
             product.sales_count = float_round(r.get(product.id, 0), precision_rounding=product.uom_id.rounding)
         return r
 
-    @api.onchange('type')
+    @api.constrains('type')
     def _onchange_type(self):
         if self._origin and self.sales_count > 0:
-            return {'warning': {
-                'title': _("Warning"),
-                'message': _("You cannot change the product's type because it is already used in sales orders.")
-            }}
+            raise UserError(_("You cannot change the product's type because it is already used in sales orders."))
 
     @api.depends_context('order_id')
     def _compute_product_is_in_sale_order(self):

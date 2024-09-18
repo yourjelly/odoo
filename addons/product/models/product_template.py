@@ -456,7 +456,7 @@ class ProductTemplate(models.Model):
         if self.uom_id and self.uom_po_id and self.uom_id.category_id != self.uom_po_id.category_id:
             self.uom_po_id = self.uom_id
 
-    @api.onchange('type')
+    @api.constrains('type')
     def _onchange_type(self):
         # Do nothing but needed for inheritance
         return {}

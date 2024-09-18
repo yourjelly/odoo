@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.addons.base.models.res_partner import WARNING_MESSAGE, WARNING_HELP
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from odoo.tools.float_utils import float_round
 
 
@@ -90,15 +90,11 @@ class ProductTemplate(models.Model):
         }
         return action
 
-    @api.onchange('type')
+    @api.constrains('type')
     def _onchange_type(self):
-        res = super(ProductTemplate, self)._onchange_type()
         if self._origin and self.sales_count > 0:
-            res['warning'] = {
-                'title': _("Warning"),
-                'message': _("You cannot change the product's type because it is already used in sales orders.")
-            }
-        return res
+            raise UserError(_("You cannot change the product's type because it is already used in sales orders."))
+        super()._onchange_type()
 
     @api.depends('type')
     def _compute_service_type(self):
