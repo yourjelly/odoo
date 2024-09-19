@@ -3,6 +3,7 @@
 import { patch } from "@web/core/utils/patch";
 import { ImageSelector } from '@web_editor/components/media_dialog/image_selector';
 import { ImageSelector as HtmlImageSelector } from "@html_editor/main/media/media_dialog/image_selector";
+import { FileDocumentsSelector } from "@html_editor/main/media/media_dialog/file_documents_selector";
 
 patch(ImageSelector.prototype, {
     get attachmentsDomain() {
