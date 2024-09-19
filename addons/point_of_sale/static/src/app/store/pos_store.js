@@ -1,6 +1,5 @@
 /* global waitForWebfonts */
 
-import { Mutex } from "@web/core/utils/concurrency";
 import { markRaw } from "@odoo/owl";
 import { floatIsZero } from "@web/core/utils/numbers";
 import { registry } from "@web/core/registry";
@@ -86,7 +85,6 @@ export class PosStore extends Reactive {
         this.sound = env.services["mail.sound_effects"];
         this.notification = notification;
         this.unwatched = markRaw({});
-        this.pushOrderMutex = new Mutex();
 
         // Business data; loaded from the server at launch
         this.company_logo = null;
@@ -109,15 +107,6 @@ export class PosStore extends Reactive {
 
         this.loadingOrderState = false; // used to prevent orders fetched to be put in the update set during the reactive change
 
-        // Handle offline mode
-        // All of Set of ids
-        this.pendingOrder = {
-            write: new Set(),
-            delete: new Set(),
-            create: new Set(),
-        };
-
-        this.synch = { status: "connected", pending: 0 };
         this.hardwareProxy = hardware_proxy;
         this.hiddenProductIds = new Set();
         this.selectedOrderUuid = null;
@@ -327,7 +316,8 @@ export class PosStore extends Reactive {
             const nbrProduct = products.length;
 
             for (let i = 0; i < nbrProduct - 1; i++) {
-                products[i].available_in_pos = false;
+                // FIXME
+                // products[i].available_in_pos = false;
                 this.mainProductVariant[products[i].id] = products[nbrProduct - 1];
             }
         }
@@ -371,7 +361,6 @@ export class PosStore extends Reactive {
                 }
 
                 const cancelled = this.removeOrder(order, true);
-                this.removePendingOrder(order);
                 if (!cancelled) {
                     return false;
                 } else if (typeof order.id === "number") {
@@ -437,15 +426,6 @@ export class PosStore extends Reactive {
     }
 
     async afterProcessServerData() {
-        // Adding the not synced paid orders to the pending orders
-        const paidUnsyncedOrderIds = this.models["pos.order"]
-            .filter((order) => order.isUnsyncedPaid)
-            .map((order) => order.id);
-
-        if (paidUnsyncedOrderIds.length > 0) {
-            this.addPendingOrder(paidUnsyncedOrderIds);
-        }
-
         const openOrders = this.data.models["pos.order"].filter((order) => !order.finalized);
         this.syncAllOrders();
 
@@ -907,17 +887,6 @@ export class PosStore extends Reactive {
      * @param order
      */
     removeOrder(order, removeFromServer = true) {
-        if (this.isOpenOrderShareable() || removeFromServer) {
-            if (typeof order.id === "number" && !order.finalized) {
-                this.addPendingOrder([order.id], true);
-            }
-        }
-
-        if (typeof order.id === "string" && order.finalized) {
-            this.addPendingOrder([order.id]);
-            return;
-        }
-
         return this.data.localDeleteCascade(order, removeFromServer);
     }
 
@@ -926,7 +895,6 @@ export class PosStore extends Reactive {
      * @returns {name: string, id: int, role: string}
      */
     get_cashier() {
-        this.user.role = this.user._raw.role;
         return this.user;
     }
     get_cashier_user_id() {
@@ -1026,68 +994,6 @@ export class PosStore extends Reactive {
         }
     }
 
-    addPendingOrder(orderIds, remove = false) {
-        if (remove) {
-            for (const id of orderIds) {
-                this.pendingOrder["create"].delete(id);
-                this.pendingOrder["write"].delete(id);
-            }
-
-            this.pendingOrder["delete"].add(...orderIds);
-            return true;
-        }
-
-        for (const id of orderIds) {
-            if (typeof id === "number") {
-                this.pendingOrder["write"].add(id);
-            } else {
-                this.pendingOrder["create"].add(id);
-            }
-        }
-
-        return true;
-    }
-
-    getPendingOrder() {
-        const orderToCreate = this.models["pos.order"].filter(
-            (order) =>
-                this.pendingOrder.create.has(order.id) &&
-                (order.lines.length > 0 ||
-                    order.payment_ids.some((p) => p.payment_method_id.type === "pay_later"))
-        );
-        const orderToUpdate = this.models["pos.order"].readMany(
-            Array.from(this.pendingOrder.write)
-        );
-        const orderToDelele = this.models["pos.order"].readMany(
-            Array.from(this.pendingOrder.delete)
-        );
-
-        return {
-            orderToDelele,
-            orderToCreate,
-            orderToUpdate,
-        };
-    }
-
-    getOrderIdsToDelete() {
-        return [...this.pendingOrder.delete];
-    }
-
-    removePendingOrder(order) {
-        this.pendingOrder["create"].delete(order.id);
-        this.pendingOrder["write"].delete(order.id);
-        this.pendingOrder["delete"].delete(order.id);
-        return true;
-    }
-
-    clearPendingOrder() {
-        this.pendingOrder = {
-            create: new Set(),
-            write: new Set(),
-            delete: new Set(),
-        };
-    }
-
     getSyncAllOrdersContext(orders, options = {}) {
         return {
             config_id: this.config.id,
@@ -1173,10 +1079,6 @@ export class PosStore extends Reactive {
         } finally {
             orders.forEach((order) => this.syncingOrders.delete(order.id));
         }
-    }
-
-    push_single_order(order) {
-        return this.pushOrderMutex.exec(() => this.syncAllOrders(order));
     }
 
     setLoadingOrderState(bool) {
@@ -1446,7 +1348,7 @@ export class PosStore extends Reactive {
             { webPrintFallback: true }
         );
         const nbrPrint = order.nb_print;
-        await this.data.write("pos.order", [order.id], { nb_print: nbrPrint + 1 });
+        order.update({ nb_print: nbrPrint + 1 });
         return true;
     }
     getOrderChanges(skipped = false, order = this.get_order()) {
