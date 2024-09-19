@@ -3,6 +3,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from ast import literal_eval
+import json
 
 
 class IrEmbeddedActions(models.Model):
@@ -49,6 +50,8 @@ class IrEmbeddedActions(models.Model):
     def create(self, vals_list):
         # The name by default is computed based on the triggered action if a action_id is defined.
         for vals in vals_list:
+            if vals.get('context') and json.loads(vals.get('context')).get('test'):
+                vals['action_id'] = False
             if "name" not in vals:
                 vals["name"] = self.env["ir.actions.act_window"].browse(vals["action_id"]).name
         return super().create(vals_list)

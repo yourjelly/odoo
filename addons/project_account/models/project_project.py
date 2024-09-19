@@ -174,22 +174,6 @@ class Project(models.Model):
         }
 
     def action_open_analytic_items(self):
-        # action1 = {
-        #     'name': 'Analytic Items',
-        #     'type': 'ir.actions.act_window',
-        #     'res_model': 'account.analytic.line',
-        #     'domain': [('account_id', '=', self.account_id.id)],
-        #     # 'views': [[False, "list"], [False, "kanban"], [False, "graph"], [False, "pivot"],
-        #     #                [False, "grid"],[False, "form"]],
-        #     'view_mode': 'list,form',
-        #     'search_view_id': (self.env.ref('account.view_account_analytic_line_filter_inherit_account').id, 'account.analytic.line.select.inherit.account'),
-        #     'context': {
-        #         'create': self.env.context.get('from_embedded_action', False),
-        #         'default_account_id': self.account_id.id,
-        #         'search_default_group_by_analytic_account': 1
-        #     },
-        #     'xml_id': 'analytic.account_analytic_line_action_entries',
-        # }
         action = self.env['ir.actions.act_window']._for_xml_id('analytic.account_analytic_line_action_entries')
         action['domain'] = [('account_id', '=', self.account_id.id)]
         context = literal_eval(action['context'])
