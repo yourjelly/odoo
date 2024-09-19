@@ -16,7 +16,6 @@ import { ActionpadWidget } from "@point_of_sale/app/screens/product_screen/actio
 import { Orderline } from "@point_of_sale/app/generic_components/orderline/orderline";
 import { OrderWidget } from "@point_of_sale/app/generic_components/order_widget/order_widget";
 import { OrderSummary } from "@point_of_sale/app/screens/product_screen/order_summary/order_summary";
-import { ProductInfoPopup } from "./product_info_popup/product_info_popup";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { ProductCard } from "@point_of_sale/app/generic_components/product_card/product_card";
 import {
@@ -26,6 +25,7 @@ import {
 import { pick } from "@web/core/utils/objects";
 import { unaccent } from "@web/core/utils/strings";
 import { CameraBarcodeScanner } from "@point_of_sale/app/screens/product_screen/camera_barcode_scanner";
+import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 
 export class ProductScreen extends Component {
     static template = "point_of_sale.ProductScreen";
@@ -429,8 +429,11 @@ export class ProductScreen extends Component {
     }
 
     async onProductInfoClick(product) {
-        const info = await reactive(this.pos).getProductInfo(product, 1);
-        this.dialog.add(ProductInfoPopup, { info: info, product: product });
+        this.dialog.add(FormViewDialog, {
+            resModel: "product.template",
+            resId: product.raw.product_tmpl_id,
+            title: _t("Product Information"),
+        });
     }
 }
 
