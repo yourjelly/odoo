@@ -9,6 +9,8 @@ $embedded-toc-bg--active: #1ba1e4;
         @for $depth from 0 through 5 {
             a.o_embedded_toc_link_depth_#{$depth} {
                 padding-left: calc(5px + Min(30px, 10%) * #{$depth});
+                font-family: $font-family-base !important;
+                font-weight: $font-weight-bolder;
                 border-radius: 5px;
                 min-height: $line-height-base * $font-size-base;
                 border: transparent;
