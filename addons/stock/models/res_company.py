@@ -202,24 +202,7 @@ class Company(models.Model):
             company.sudo()._create_per_company_sequences()
             company.sudo()._create_per_company_picking_types()
             company.sudo()._create_per_company_rules()
-            company.sudo()._set_per_company_inter_company_locations(inter_company_location)
         test_mode = getattr(threading.current_thread(), 'testing', False)
         if test_mode:
             self.env['stock.warehouse'].sudo().create([{'company_id': company.id} for company in companies])
         return companies
-
-    def _set_per_company_inter_company_locations(self, inter_company_location):
-        self.ensure_one()
-        if not self.env.user.has_group('base.group_multi_company'):
-            return
-        other_companies = self.env['res.company'].search([('id', '!=', self.id)])
-        other_companies.partner_id.with_company(self).write({
-            'property_stock_customer': inter_company_location.id,
-            'property_stock_supplier': inter_company_location.id,
-        })
-        for company in other_companies:
-            # Still need to insert those one by one, as the env company must be different every time
-            self.partner_id.with_company(company).write({
-                'property_stock_customer': inter_company_location.id,
-                'property_stock_supplier': inter_company_location.id,
-            })

@@ -279,7 +279,7 @@ class SaleOrderLine(models.Model):
     def _get_location_final(self):
         # Can be overriden for inter-company transactions.
         self.ensure_one()
-        return self.order_id.partner_shipping_id.property_stock_customer
+        return self.order_id.partner_shipping_id._get_customer_location()
 
     def _get_qty_procurement(self, previous_product_uom_qty=False):
         self.ensure_one()

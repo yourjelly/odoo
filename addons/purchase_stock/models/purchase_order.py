@@ -235,13 +235,13 @@ class PurchaseOrder(models.Model):
     def _get_destination_location(self):
         self.ensure_one()
         if self.dest_address_id and self.picking_type_id.code == "dropship":
-            return self.dest_address_id.property_stock_customer.id
+            return self.dest_address_id._get_customer_location().id
         return self.picking_type_id.default_location_dest_id.id
 
     def _get_final_location_record(self):
         self.ensure_one()
         if self.dest_address_id and self.picking_type_id.code == 'dropship':
-            return self.dest_address_id.property_stock_customer
+            return self.dest_address_id._get_customer_location()
         return self.picking_type_id.warehouse_id.lot_stock_id
 
     @api.model
@@ -269,7 +269,7 @@ class PurchaseOrder(models.Model):
             'date': self.date_order,
             'origin': self.name,
             'location_dest_id': self._get_destination_location(),
-            'location_id': self.partner_id.property_stock_supplier.id,
+            'location_id': self.partner_id._get_supplier_location().id,
             'company_id': self.company_id.id,
             'state': 'draft',
         }

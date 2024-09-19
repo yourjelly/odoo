@@ -287,7 +287,7 @@ class PurchaseOrderLine(models.Model):
             'product_id': self.product_id.id,
             'date': date_planned,
             'date_deadline': date_planned,
-            'location_id': self.order_id.partner_id.property_stock_supplier.id,
+            'location_id': self.order_id.partner_id._get_supplier_location().id,
             'location_dest_id': location_dest.id,
             'location_final_id': location_final.id,
             'picking_id': picking.id,

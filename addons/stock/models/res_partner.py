@@ -19,3 +19,11 @@ class Partner(models.Model):
         help="The stock location used as source when receiving goods from this contact.")
     picking_warn = fields.Selection(WARNING_MESSAGE, 'Stock Picking', help=WARNING_HELP, default='no-message')
     picking_warn_msg = fields.Text('Message for Stock Picking')
+
+    def _get_customer_location(self):
+        self.ensure_one()
+        return self.property_stock_customer
+
+    def _get_supplier_location(self):
+        self.ensure_one()
+        return self.property_stock_supplier
