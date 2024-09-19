@@ -18,6 +18,11 @@ export class MailMessage extends models.ServerModel {
     is_discussion = fields.Boolean({ string: "Discussion" });
     is_note = fields.Boolean({ string: "Note" });
     pinned_at = fields.Generic({ default: false });
+    link_preview_message_ids = fields.One2many({
+        relation: "mail.link.preview.message",
+        relation_field: "message_id",
+    });
+    link_preview_ids = fields.Many2many({ relation: "mail.link.preview" });
 
     /** @param {DomainListRepr} [domain] */
     mark_all_as_read(domain) {
@@ -79,8 +84,10 @@ export class MailMessage extends models.ServerModel {
         const IrAttachment = this.env["ir.attachment"];
         /** @type {import("mock_models").MailFollowers} */
         const MailFollowers = this.env["mail.followers"];
-        /** @type {import("mock_models").MailLinkPreview} */
+        /** @type {import("mock_models").LinkPreview} */
         const MailLinkPreview = this.env["mail.link.preview"];
+        /** @type {import("mock_models").LinkPreviewMessage} */
+        const MailLinkPreviewMessage = this.env["mail.link.preview.message"];
         /** @type {import("mock_models").MailMessage} */
         const MailMessage = this.env["mail.message"];
         /** @type {import("mock_models").MailMessageReaction} */
@@ -156,7 +163,18 @@ export class MailMessage extends models.ServerModel {
                         : MailThread._message_compute_subject([message.res_id])
                     ).get(message.res_id),
                 link_preview_ids: mailDataHelpers.Store.many(
-                    MailLinkPreview.browse(message.link_preview_ids)
+                    MailLinkPreview.browse(
+                        message.link_preview_message_ids.map(
+                            (lpm) =>
+                                !MailLinkPreviewMessage.browse(lpm)[0].is_hidden &&
+                                MailLinkPreviewMessage.browse(lpm)[0].link_preview_id
+                        )
+                    )
+                ),
+                link_preview_message_ids: mailDataHelpers.Store.many(
+                    MailLinkPreviewMessage.browse(message.link_preview_message_ids).filter(
+                        (lpm) => !lpm.is_hidden
+                    )
                 ),
                 notifications: mailDataHelpers.Store.many(
                     notifications.filter(

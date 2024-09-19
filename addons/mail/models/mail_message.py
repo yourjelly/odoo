@@ -90,9 +90,19 @@ class MailMessage(models.Model):
     preview = fields.Char(
         'Preview', compute='_compute_preview',
         help='The text-only beginning of the body used as email preview.')
-    link_preview_ids = fields.One2many(
-        'mail.link.preview', 'message_id', string='Link Previews',
-        groups="base.group_erp_manager")
+    link_preview_message_ids = fields.One2many(
+        "mail.link.preview.message",
+        "message_id", domain=[("is_hidden", "=", False)], groups="base.group_erp_manager")
+    link_preview_ids = fields.Many2many(
+        comodel_name='mail.link.preview',
+        relation="mail_link_preview_message",
+        column1="message_id",
+        column2="link_preview_id",
+        string='Link Previews',
+        groups="base.group_erp_manager",
+        domain=[("link_preview_message_ids.is_hidden", "=", False)],
+    )
+
     reaction_ids = fields.One2many(
         'mail.message.reaction', 'message_id', string="Reactions",
         groups="base.group_system")
@@ -1003,9 +1013,8 @@ class MailMessage(models.Model):
                 # sudo: mail.message - reading attachments on accessible message is allowed
                 "attachment_ids": Store.many(message.sudo().attachment_ids.sorted("id")),
                 # sudo: mail.message - reading link preview on accessible message is allowed
-                "link_preview_ids": Store.many(
-                    message.sudo().link_preview_ids.filtered(lambda l: not l.is_hidden)
-                ),
+                "link_preview_ids": Store.many(message.sudo().link_preview_ids),
+                "link_preview_message_ids": Store.many(message.sudo().link_preview_message_ids),
                 # sudo: mail.message - reading reactions on accessible message is allowed
                 "reactions": Store.many(message.sudo().reaction_ids),
                 "record_name": record_name,  # keep for iOS app

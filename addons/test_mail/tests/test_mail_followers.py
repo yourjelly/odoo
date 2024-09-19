@@ -891,6 +891,7 @@ class UnfollowFromInboxTest(MailCommon, HttpCase):
                     "is_discussion": True,
                     "is_note": False,
                     "link_preview_ids": [],
+                    "link_preview_message_ids": [],
                     "message_type": "notification",
                     "model": "mail.test.simple",
                     "needaction": True,
