@@ -187,7 +187,7 @@ describe("wrapInlinesInBlocks", () => {
             `<div><br></div><div contenteditable="false" style="display: inline;">inline</div>`
         );
         const div = el.querySelector("div");
-        editor.shared.setSelection({ anchorNode: div, anchorOffset: 0 });
+        editor.shared.setSelection({ anchorNode: div, anchorOffset: 0 }, { force: true });
         editor.shared.domInsert(
             parseHTML(
                 editor.document,
@@ -215,7 +215,7 @@ describe("wrapInlinesInBlocks", () => {
             `<div><br></div>text<div contenteditable="false" style="display: inline;">inline</div><span class="a">span</span>`
         );
         const div = el.querySelector("div");
-        editor.shared.setSelection({ anchorNode: div, anchorOffset: 0 });
+        editor.shared.setSelection({ anchorNode: div, anchorOffset: 0 }, { force: true });
         editor.shared.domInsert(
             parseHTML(
                 editor.document,
@@ -243,7 +243,7 @@ describe("wrapInlinesInBlocks", () => {
             `<div>[]<br></div>text<br><div contenteditable="false" style="display: inline;">inline</div><br><span class="a">span</span>`
         );
         const div = el.querySelector("div");
-        editor.shared.setSelection({ anchorNode: div, anchorOffset: 0 });
+        editor.shared.setSelection({ anchorNode: div, anchorOffset: 0 }, { force: true });
         editor.shared.domInsert(
             parseHTML(
                 editor.document,

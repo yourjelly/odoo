@@ -285,7 +285,7 @@ describe("prevent mutationFilteredClasses to be set from history", () => {
                 undo(editor);
                 redo(editor);
             },
-            contentAfter: `[]<p class="y">a</p>`,
+            contentAfter: `<p class="y">a</p>`,
             config: { Plugins: Plugins },
         });
     });

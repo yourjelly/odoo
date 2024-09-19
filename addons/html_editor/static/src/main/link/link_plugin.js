@@ -322,13 +322,15 @@ export class LinkPlugin extends Plugin {
                     this.linkElement.href = url;
                     if (cleanZWChars(this.linkElement.innerText) === label) {
                         this.overlay.close();
-                        this.shared.setSelection(this.shared.getEditableSelection());
+                        this.shared.setSelection(this.shared.getEditableSelection(), {
+                            force: true,
+                        });
                     } else {
                         const restore = prepareUpdate(...leftPos(this.linkElement));
                         this.linkElement.innerText = label;
                         restore();
                         this.overlay.close();
-                        this.shared.setCursorEnd(this.linkElement);
+                        this.shared.setCursorEnd(this.linkElement, { force: true });
                     }
                     if (classes) {
                         this.linkElement.className = classes;
@@ -394,7 +396,7 @@ export class LinkPlugin extends Plugin {
                 link.append(content);
             }
             this.shared.domInsert(link);
-            this.shared.setCursorEnd(link);
+            this.shared.setCursorEnd(link, { force: true });
             return link;
         }
     }

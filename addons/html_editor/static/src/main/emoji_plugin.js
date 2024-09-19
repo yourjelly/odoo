@@ -53,10 +53,12 @@ export class EmojiPlugin extends Plugin {
             props: {
                 close: () => {
                     this.overlay.close();
+                    this.shared.setActiveSelection();
                 },
                 onSelect: (str) => {
                     if (!onSelect) {
                         this.shared.domInsert(str);
+                        // this.shared.setActiveSelection();
                         this.dispatch("ADD_STEP");
                         return;
                     }

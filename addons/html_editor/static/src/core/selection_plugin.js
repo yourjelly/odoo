@@ -120,6 +120,7 @@ export class SelectionPlugin extends Plugin {
         "getTraversedBlocks",
         "modifySelection",
         "rectifySelection",
+        "setActiveSelection",
         // "collapseIfZWS",
     ];
     static resources = (p) => ({
@@ -412,7 +413,7 @@ export class SelectionPlugin extends Plugin {
      */
     setSelection(
         { anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset },
-        { normalize = true } = {}
+        { normalize = true, force = false, plop } = {}
     ) {
         if (!this.isSelectionInEditable({ anchorNode, focusNode })) {
             throw new Error("Selection is not in editor");
@@ -431,8 +432,10 @@ export class SelectionPlugin extends Plugin {
         [anchorNode, anchorOffset] = normalizeFakeBR(anchorNode, anchorOffset);
         [focusNode, focusOffset] = normalizeFakeBR(focusNode, focusOffset);
         const selection = this.document.getSelection();
+        const { documentSelectionIsInEditable } = this.getSelectionData();
+        // debugger
         if (selection) {
-            if (this.canApplySelectionToDocument) {
+            if (documentSelectionIsInEditable || plop) {
                 if (
                     selection.anchorNode !== anchorNode ||
                     selection.focusNode !== focusNode ||
@@ -473,16 +476,16 @@ export class SelectionPlugin extends Plugin {
      * Set the cursor at the start of the given node.
      * @param { Node } node
      */
-    setCursorStart(node) {
-        return this.setSelection({ anchorNode: node, anchorOffset: 0 });
+    setCursorStart(node, { force } = {}) {
+        return this.setSelection({ anchorNode: node, anchorOffset: 0 }, { force });
     }
 
     /**
      * Set the cursor at the end of the given node.
      * @param { Node } node
      */
-    setCursorEnd(node) {
-        return this.setSelection({ anchorNode: node, anchorOffset: nodeSize(node) });
+    setCursorEnd(node, { force } = {}) {
+        return this.setSelection({ anchorNode: node, anchorOffset: nodeSize(node) }, { force });
     }
 
     /**
@@ -862,5 +865,9 @@ export class SelectionPlugin extends Plugin {
             this.editable.contains(anchorNode) &&
             (focusNode === anchorNode || this.editable.contains(focusNode))
         );
+    }
+
+    setActiveSelection() {
+        this.setSelection(this.getEditableSelection(), { force: true, plop: true });
     }
 }

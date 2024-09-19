@@ -129,7 +129,7 @@ describe("collapsed selection", () => {
         await testEditor({
             contentBefore: "<p>content</p>",
             stepFunction: async (editor) => {
-                editor.shared.setCursorEnd(editor.editable, false);
+                editor.shared.setCursorEnd(editor.editable, { force: true });
                 editor.shared.domInsert(parseHTML(editor.document, "<p>def</p>"));
                 editor.dispatch("ADD_STEP");
             },
@@ -141,7 +141,7 @@ describe("collapsed selection", () => {
         await testEditor({
             contentBefore: "<p>content</p>",
             stepFunction: async (editor) => {
-                editor.shared.setCursorEnd(editor.editable, false);
+                editor.shared.setCursorEnd(editor.editable, { force: true });
                 await tick();
                 editor.shared.domInsert(parseHTML(editor.document, "<div>abc</div><p>def</p>"));
                 editor.dispatch("ADD_STEP");

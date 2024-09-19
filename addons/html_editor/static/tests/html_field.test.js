@@ -1063,6 +1063,7 @@ test("edit and enable/disable codeview with editor toolbar", async () => {
     await contains(".o_codeview_btn").click();
     expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p> Yop </p>");
 
+    setSelectionInHtmlField();
     undo(htmlEditor);
     expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p>Hello first </p>");
 

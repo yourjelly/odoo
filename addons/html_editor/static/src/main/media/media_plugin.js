@@ -154,7 +154,7 @@ export class MediaPlugin extends Plugin {
         }
         // Collapse selection after the inserted/replaced element.
         const [anchorNode, anchorOffset] = rightPos(element);
-        this.shared.setSelection({ anchorNode, anchorOffset });
+        this.shared.setSelection({ anchorNode, anchorOffset }, { force: true });
 
         this.dispatch("ADD_STEP");
     }

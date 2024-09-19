@@ -180,7 +180,10 @@ export class ImagePlugin extends Plugin {
         this.addDomListener(this.editable, "pointerup", (e) => {
             if (e.target.tagName === "IMG") {
                 const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesOut(e.target);
-                this.shared.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+                this.shared.setSelection(
+                    { anchorNode, anchorOffset, focusNode, focusOffset },
+                    { force: true }
+                );
             }
         });
         this.fileViewer = createFileViewer();

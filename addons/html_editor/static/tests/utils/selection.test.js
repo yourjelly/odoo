@@ -321,7 +321,7 @@ describe("ensureFocus", () => {
                     await dispatch(element, "keyup", { key: "2" });
                     await dispatch(editor.editable, "keydown", { key: "Enter" });
                     const activeElement = document.activeElement;
-                    editor.shared.setCursorStart(activeElement.lastElementChild);
+                    editor.shared.setCursorStart(activeElement.lastElementChild, { force: true });
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                 },
@@ -348,7 +348,7 @@ describe("ensureFocus", () => {
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                     let activeElement = document.activeElement;
-                    editor.shared.setCursorStart(activeElement.lastElementChild);
+                    editor.shared.setCursorStart(activeElement.lastElementChild, { force: true });
                     insertText(editor, "focusWasConserved");
                     // Proof that a simple call to Element.focus would change
                     // the focus in this case.
@@ -356,7 +356,7 @@ describe("ensureFocus", () => {
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                     activeElement = document.activeElement;
-                    editor.shared.setCursorStart(activeElement.lastElementChild);
+                    editor.shared.setCursorStart(activeElement.lastElementChild, { force: true });
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                 },
@@ -386,7 +386,7 @@ describe("ensureFocus", () => {
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                     const activeElement = document.activeElement;
-                    editor.shared.setCursorStart(activeElement.lastElementChild);
+                    editor.shared.setCursorStart(activeElement.lastElementChild, { force: true });
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                 },
@@ -408,10 +408,13 @@ describe("setSelection", () => {
             const { editor, el } = await setupEditor("<p>abc</p>");
             const p = el.firstChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: p.firstChild,
-                    anchorOffset: 0,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: p.firstChild,
+                        anchorOffset: 0,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([p.firstChild, 0, p.firstChild, 0]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -427,10 +430,13 @@ describe("setSelection", () => {
             const { editor, el } = await setupEditor("<p>abcd</p>");
             const p = el.firstChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: p.firstChild,
-                    anchorOffset: 2,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: p.firstChild,
+                        anchorOffset: 2,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([p.firstChild, 2, p.firstChild, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -446,10 +452,13 @@ describe("setSelection", () => {
             const { editor, el } = await setupEditor("<p>abc</p>");
             const p = el.firstChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: p.firstChild,
-                    anchorOffset: 3,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: p.firstChild,
+                        anchorOffset: 3,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([p.firstChild, 3, p.firstChild, 3]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -466,10 +475,13 @@ describe("setSelection", () => {
             const p = el.firstChild;
             const cd = p.childNodes[1].firstChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: cd,
-                    anchorOffset: 2,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: cd,
+                        anchorOffset: 2,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([cd, 2, cd, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -481,10 +493,13 @@ describe("setSelection", () => {
             const p = el.firstChild;
             const ef = p.childNodes[1].childNodes[1].firstChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: ef,
-                    anchorOffset: 0,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: ef,
+                        anchorOffset: 0,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([ef, 0, ef, 0]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -496,10 +511,13 @@ describe("setSelection", () => {
             const p = el.firstChild;
             const efgh = p.childNodes[1].childNodes[1].firstChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: efgh,
-                    anchorOffset: 2,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: efgh,
+                        anchorOffset: 2,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([efgh, 2, efgh, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -511,10 +529,13 @@ describe("setSelection", () => {
             const p = el.firstChild;
             const ef = p.childNodes[1].childNodes[1].firstChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: ef,
-                    anchorOffset: 2,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: ef,
+                        anchorOffset: 2,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([ef, 2, ef, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -527,10 +548,13 @@ describe("setSelection", () => {
             const ef = p.childNodes[1].childNodes[1].firstChild;
             const gh = p.childNodes[1].lastChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: gh,
-                    anchorOffset: 0,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: gh,
+                        anchorOffset: 0,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([ef, 2, ef, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -539,7 +563,7 @@ describe("setSelection", () => {
             const nonNormalizedResult = getProcessSelection(
                 editor.shared.setSelection(
                     { anchorNode: gh, anchorOffset: 0 },
-                    { normalize: false }
+                    { normalize: false, force: true }
                 )
             );
             expect(nonNormalizedResult).toEqual([gh, 0, gh, 0]);
@@ -558,12 +582,15 @@ describe("setSelection", () => {
             const { editor, el } = await setupEditor("<p>abc</p>");
             const p = el.firstChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: p.firstChild,
-                    anchorOffset: 0,
-                    focusNode: p.firstChild,
-                    focusOffset: 3,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: p.firstChild,
+                        anchorOffset: 0,
+                        focusNode: p.firstChild,
+                        focusOffset: 3,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([p.firstChild, 0, p.firstChild, 3]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -584,12 +611,15 @@ describe("setSelection", () => {
             const qr = p2.childNodes[1].childNodes[2];
             const st = p2.childNodes[2];
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: ef,
-                    anchorOffset: 1,
-                    focusNode: st,
-                    focusOffset: 0,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: ef,
+                        anchorOffset: 1,
+                        focusNode: st,
+                        focusOffset: 0,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([ef, 1, qr, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -603,7 +633,7 @@ describe("setSelection", () => {
                         focusNode: st,
                         focusOffset: 0,
                     },
-                    { normalize: false }
+                    { normalize: false, force: true }
                 )
             );
             expect(nonNormalizedResult).toEqual([ef, 1, st, 0]);
@@ -622,12 +652,15 @@ describe("setSelection", () => {
             const { editor, el } = await setupEditor("<p>abc</p>");
             const p = el.firstChild;
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: p.firstChild,
-                    anchorOffset: 3,
-                    focusNode: p.firstChild,
-                    focusOffset: 0,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: p.firstChild,
+                        anchorOffset: 3,
+                        focusNode: p.firstChild,
+                        focusOffset: 0,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([p.firstChild, 3, p.firstChild, 0]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -648,12 +681,15 @@ describe("setSelection", () => {
             const qr = p2.childNodes[1].childNodes[2];
             const st = p2.childNodes[2];
             const result = getProcessSelection(
-                editor.shared.setSelection({
-                    anchorNode: st,
-                    anchorOffset: 0,
-                    focusNode: ef,
-                    focusOffset: 1,
-                })
+                editor.shared.setSelection(
+                    {
+                        anchorNode: st,
+                        anchorOffset: 0,
+                        focusNode: ef,
+                        focusOffset: 1,
+                    },
+                    { force: true }
+                )
             );
             expect(result).toEqual([qr, 2, ef, 1]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
@@ -667,7 +703,7 @@ describe("setSelection", () => {
                         focusNode: ef,
                         focusOffset: 1,
                     },
-                    { normalize: false }
+                    { normalize: false, force: true }
                 )
             );
             expect(nonNormalizedResult).toEqual([st, 0, ef, 1]);
@@ -686,7 +722,7 @@ describe("setCursorStart", () => {
     test("should collapse the cursor at the beginning of an element", async () => {
         const { editor, el } = await setupEditor("<p>abc</p>");
         const p = el.firstChild;
-        const result = getProcessSelection(editor.shared.setCursorStart(p));
+        const result = getProcessSelection(editor.shared.setCursorStart(p, { force: true }));
         expect(result).toEqual([p.firstChild, 0, p.firstChild, 0]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([
@@ -702,7 +738,7 @@ describe("setCursorStart", () => {
         const p = el.firstChild;
         const b = p.childNodes[1].childNodes[1];
         const ef = b.firstChild;
-        const result = getProcessSelection(editor.shared.setCursorStart(b));
+        const result = getProcessSelection(editor.shared.setCursorStart(b, { force: true }));
         expect(result).toEqual([ef, 0, ef, 0]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 0, ef, 0]);
@@ -713,7 +749,7 @@ describe("setCursorStart", () => {
         const p = el.firstChild;
         const ef = p.childNodes[1].childNodes[1].firstChild;
         const gh = p.childNodes[1].lastChild;
-        const result = getProcessSelection(editor.shared.setCursorStart(gh));
+        const result = getProcessSelection(editor.shared.setCursorStart(gh, { force: true }));
         expect(result).toEqual([ef, 2, ef, 2]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 2, ef, 2]);
@@ -735,7 +771,7 @@ describe("setCursorEnd", () => {
     test("should collapse the cursor at the end of an element", async () => {
         const { editor, el } = await setupEditor("<p>abc</p>");
         const p = el.firstChild;
-        const result = getProcessSelection(editor.shared.setCursorEnd(p));
+        const result = getProcessSelection(editor.shared.setCursorEnd(p, { force: true }));
         expect(result).toEqual([p.firstChild, 3, p.firstChild, 3]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([
@@ -750,7 +786,7 @@ describe("setCursorEnd", () => {
         const { editor, el } = await setupEditor("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
         const p = el.firstChild;
         const cd = p.childNodes[1].firstChild;
-        const result = getProcessSelection(editor.shared.setCursorEnd(cd));
+        const result = getProcessSelection(editor.shared.setCursorEnd(cd, { force: true }));
         expect(result).toEqual([cd, 2, cd, 2]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([cd, 2, cd, 2]);
@@ -761,7 +797,7 @@ describe("setCursorEnd", () => {
         const p = el.firstChild;
         const b = p.childNodes[1].childNodes[1];
         const ef = b.firstChild;
-        const result = getProcessSelection(editor.shared.setCursorEnd(b));
+        const result = getProcessSelection(editor.shared.setCursorEnd(b, { force: true }));
         expect(result).toEqual([ef, 2, ef, 2]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 2, ef, 2]);
