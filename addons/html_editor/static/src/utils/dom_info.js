@@ -425,6 +425,13 @@ export function isProtecting(node) {
     );
 }
 
+export function isUnprotecting(node) {
+    return (
+        node.nodeType === Node.ELEMENT_NODE &&
+        (node.dataset.oeProtected === "false" || node.dataset.oeProtected === undefined)
+    );
+}
+
 // This is a list of "paragraph-related elements", defined as elements that
 // behave like paragraphs.
 export const paragraphRelatedElements = [
