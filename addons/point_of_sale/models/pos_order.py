@@ -236,7 +236,8 @@ class PosOrder(models.Model):
                 self.pricelist_id.item_ids.filtered(
                     lambda rule: rule.compute_price == "percentage")
             )
-            if is_percentage and float_compare(line.price_subtotal_incl, line.product_id.lst_price * line.qty, precision_rounding=self.currency_id.rounding) < 0:
+            a = line.product_id.taxes_id.compute_all(line.product_id.lst_price, product=line.product_id, partner=line.product_id.env['res.partner'])
+            if is_percentage and float_compare(line.price_subtotal_incl, a['total_included'] * line.qty, precision_rounding=self.currency_id.rounding) < 0:
                 invoice_lines.append((0, None, {
                     'name': _('Price discount from %(original_price)s to %(discounted_price)s',
                               original_price=float_repr(line.product_id.lst_price * line.qty, self.currency_id.decimal_places),
