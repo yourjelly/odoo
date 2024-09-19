@@ -198,9 +198,9 @@ export class HtmlViewer extends Component {
             getTemplate: getRawTemplate,
             props,
         });
-        // copy templates so they don't have to be recompiled.
         app.rawTemplates = mainApp.rawTemplates;
-        app.templates = mainApp.templates;
+        // Can't copy compiled templates because they have a reference to the main app
+        // app.templates = mainApp.templates;
         app.mount(host);
         // Patch mount fiber to hook into the exact call stack where app is
         // mounted (but before). This will remove host children synchronously
