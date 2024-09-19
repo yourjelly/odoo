@@ -1,6 +1,6 @@
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
-import { FileMediaDialog } from "@html_editor/others/embedded_components/file/file_media_dialog/file_media_dialog";
+import { FileMediaDialog } from "@html_editor/main/media/media_dialog/file_media_dialog";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { nextLeaf } from "@html_editor/utils/dom_info";
 import { isBlock } from "@html_editor/utils/blocks";

@@ -34,11 +34,6 @@ export class FileDocumentsSelector extends DocumentSelector {
             ["url", "=ilike", "/html_editor/shape/%"]
         );
         domain.push("!", ["name", "=like", "%.crop"]);
-        // website domain should be added here, because a patch in the website
-        // module would not be applied when searching in documents i.e. in
-        // Knowledge (since website assets are not loaded).
-        domain.push("|", ["url", "=", false], "!", ["url", "=like", "/web/image/website.%"]);
-        domain.push(["key", "=", false]);
         return domain;
     }
 }
