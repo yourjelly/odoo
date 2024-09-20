@@ -19,7 +19,6 @@ export class EventScanView extends Component {
     setup() {
         this.actionService = useService("action");
         this.dialog = useService("dialog");
-        this.home = useService("home_menu");
         this.notification = useService("notification");
         this.orm = useService("orm");
 
@@ -133,6 +132,17 @@ export class EventScanView extends Component {
             });
         }
     }
+
+    onClickBackToEvents() {
+        if (this.isMultiEvent) {
+            // define action from scratch instead of using existing 'action_event_view' to avoid
+            // messing with menu bar
+            this.actionService.doAction("event.action_event_view", { clearBreadcrumbs: true });
+        } else {
+            this.actionService.restore();
+        }
+    }
+
 }
 
 registry.category("actions").add("event.event_barcode_scan_view", EventScanView);
