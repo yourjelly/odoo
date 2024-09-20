@@ -46,6 +46,10 @@ class MrpWipAccounting(models.TransientModel):
         productions = self.env['mrp.production'].browse(self.env.context.get('active_ids'))
         # ignore selected MOs that aren't a WIP
         productions = productions.filtered(lambda mo: mo.state in ['progress', 'to_close', 'confirmed'])
+        if 'journal_id' in fields_list:
+            default = self.env['product.category']._fields['property_stock_journal'].get_company_dependent_fallback(self.env['product.category'])
+            if default:
+                res['journal_id'] = default.id
         if 'reference' in fields_list:
             res['reference'] = _("Manufacturing WIP - %(orders_list)s", orders_list=productions and format_list(self.env, productions.mapped('name')) or _("Manual Entry"))
         if 'mo_ids' in fields_list:
