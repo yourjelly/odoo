@@ -125,6 +125,12 @@ class ProductTemplate(models.Model):
     packaging_ids = fields.One2many(
         'product.packaging', string="Product Packages", compute="_compute_packaging_ids", inverse="_set_packaging_ids",
         help="Gives the different ways to package the same product.")
+    origin_country_id = fields.Many2one(
+        comodel_name= 'res.country',
+        compute='_compute_origin_country_id',
+        inverse='_set_origin_country_id',
+        help="The country of origin for the product, often required by customs authorities.",
+    )
     seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', 'Vendors', depends_context=('company',))
     variant_seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id')
 
@@ -435,6 +441,20 @@ class ProductTemplate(models.Model):
             if len(p.product_variant_ids) == 1:
                 p.product_variant_ids.packaging_ids = p.packaging_ids
 
+    @api.depends('product_variant_ids.customs_code_ids')
+    def _compute_customs_code_ids(self):
+        self._compute_template_field_from_variant_field('customs_code_ids')
+
+    def _set_customs_code_ids(self):
+        self._set_product_variant_field('customs_code_ids')
+
+    @api.depends('product_variant_ids.origin_country_id')
+    def _compute_origin_country_id(self):
+        self._compute_template_field_from_variant_field('origin_country_id')
+
+    def _set_origin_country_id(self):
+        self._set_product_variant_field('origin_country_id')
+
     @api.depends('type')
     def _compute_product_tooltip(self):
         self.product_tooltip = False
@@ -495,7 +515,7 @@ class ProductTemplate(models.Model):
 
     def _get_related_fields_variant_template(self):
         """ Return a list of fields present on template and variants models and that are related"""
-        return ['barcode', 'default_code', 'standard_price', 'volume', 'weight', 'packaging_ids', 'product_properties']
+        return ['barcode', 'default_code', 'standard_price', 'volume', 'weight', 'packaging_ids', 'product_properties', 'origin_country_id']
 
     @api.model_create_multi
     def create(self, vals_list):

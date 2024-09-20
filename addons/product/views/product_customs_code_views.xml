@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="product_customs_code_tree_view" model="ir.ui.view">
+        <field name="name">product.customs.code.tree.view</field>
+        <field name="model">product.customs_code</field>
+        <field name="arch" type="xml">
+            <list string="Customs Codes" name="customs_codes">
+                <field name="code"/>
+                <field name="code_type"/>
+                <field name="description"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="product_customs_code_form_view" model="ir.ui.view">
+        <field name="name">product.customs.code.form.view</field>
+        <field name="model">product.customs_code</field>
+        <field name="arch" type="xml">
+            <form string="Customs Codes" name="customs_codes">
+                <field name="code"/>
+                <field name="code_type"/>
+                <field name="description"/>
+            </form>
+        </field>
+    </record>
+
+</odoo>

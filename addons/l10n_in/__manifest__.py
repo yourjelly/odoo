@@ -53,6 +53,7 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
     'demo': [
         'demo/product_demo.xml',
         'demo/demo_company.xml',
+        'data/product.customs_code.csv',
     ],
     'post_init_hook': 'post_init',
     'license': 'LGPL-3',

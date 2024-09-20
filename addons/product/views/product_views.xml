@@ -204,6 +204,9 @@
                                         <field name="volume_uom_name"/>
                                     </div>
                                 </group>
+                                <group name="customs" string="Customs">
+                                    <field name="origin_country_id"/>
+                                </group>
                             </group>
                             <group name="packaging" string="Packaging"
                                 colspan="4"
@@ -377,7 +380,11 @@
                             </group>
                             <group name="sales" string="Sales">
                                 <field name="product_tag_ids" widget="many2many_tags" readonly="1"/>
-                                <field name="additional_product_tag_ids" widget="many2many_tags" context="{'product_variant_id': id}"/>
+                                <field name="additional_product_tag_ids"
+                                       widget="many2many_tags"/>
+                            </group>
+                            <group name="customs" string="Customs">
+                                <field name="origin_country_id"/>
                             </group>
                         </group>
                         <group>

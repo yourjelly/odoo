@@ -16,6 +16,7 @@ access_product_template_attribute_line,product.template.attribute line,model_pro
 access_product_tag_user,product.tag.user,model_product_tag,base.group_user,1,0,0,0
 access_product_combo_user,product.combo.user,model_product_combo,base.group_user,1,0,0,0
 access_product_combo_item_user,product.combo.item.user,model_product_combo_item,base.group_user,1,0,0,0
+access_product_customs_code_user,product.customs.code.user,model_product_customs_code,base.group_user,1,0,0,0
 access_product_category_manager,product.category.manager,model_product_category,group_product_manager,1,1,1,1
 access_product_template_manager,product.template.manager,model_product_template,group_product_manager,1,1,1,1
 access_product_packaging_manager,product.packaging.manager,model_product_packaging,group_product_manager,1,1,1,1
@@ -35,3 +36,4 @@ access_product_combo_manager,product.combo.manager,model_product_combo,group_pro
 access_product_combo_item_manager,product.combo.item.manager,model_product_combo_item,group_product_manager,1,1,1,1
 access_product_document_user,access_product_document_user,model_product_document,base.group_user,1,1,1,1
 access_update_product_attribute_value_manager,update.product.attribute.value,model_update_product_attribute_value,group_product_manager,1,1,1,0
+access_product_customs_code_manager,product.customs.code.manager,model_product_customs_code,group_product_manager,1,1,1,1

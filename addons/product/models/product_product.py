@@ -104,6 +104,13 @@ class ProductProduct(models.Model):
     can_image_1024_be_zoomed = fields.Boolean("Can Image 1024 be zoomed", compute='_compute_can_image_1024_be_zoomed')
     write_date = fields.Datetime(compute='_compute_write_date', store=True)
 
+    # Customs details
+    origin_country_id = fields.Many2one('res.country', string="Country of Origin")
+    customs_code_ids = fields.Many2many(
+        comodel_name='product.customs_code',
+        compute='_compute_customs_code_ids',
+    )
+
     @api.depends('image_variant_1920', 'image_variant_1024')
     def _compute_can_image_variant_1024_be_zoomed(self):
         for record in self:
@@ -327,6 +334,11 @@ class ProductProduct(models.Model):
             product.all_product_tag_ids = (
                 product.product_tag_ids | product.additional_product_tag_ids
             ).sorted('sequence')
+
+    @api.depends()
+    def _compute_customs_code_ids(self):
+        self.customs_code_ids = None
+        return
 
     def _search_all_product_tag_ids(self, operator, operand):
         if operator in expression.NEGATIVE_TERM_OPERATORS:
