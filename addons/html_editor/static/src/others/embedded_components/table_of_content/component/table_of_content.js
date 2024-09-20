@@ -1,5 +1,4 @@
 import { Component, onWillStart, useState } from "@odoo/owl";
-import { getEmbeddedProps } from "@html_editor/others/embedded_component_utils";
 import { TableOfContentManager } from "@html_editor/others/embedded_components/table_of_content/table_of_content_manager";
 
 export class EmbeddedTableOfContentComponent extends Component {
@@ -29,23 +28,15 @@ export class EmbeddedTableOfContentComponent extends Component {
 }
 
 export const tableOfContentEmbedding = {
-    name: "table-of-content",
+    name: "tableOfContent",
     Component: EmbeddedTableOfContentComponent,
-    getProps: (host) => {
-        return {
-            // @TODO ABD will probably be needed for the version, currently not used
-            ...getEmbeddedProps(host),
-        };
-    },
 };
 
 export const readonlyTableOfContentEmbedding = {
-    name: "table-of-content",
+    name: "tableOfContent",
     Component: EmbeddedTableOfContentComponent,
     getProps: (host) => {
         return {
-            // @TODO ABD will probably be needed for the version, currently not used
-            ...getEmbeddedProps(host),
             readonly: true,
         };
     },

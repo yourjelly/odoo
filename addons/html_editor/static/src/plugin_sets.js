@@ -1,4 +1,5 @@
 import { DynamicPlaceholderPlugin } from "@html_editor/others/dynamic_placeholder/dynamic_placeholder";
+import { VersionPlugin } from "./core/version_plugin";
 import { ClipboardPlugin } from "./core/clipboard_plugin";
 import { CommentPlugin } from "./core/comment_plugin";
 import { DeletePlugin } from "./core/delete_plugin";
@@ -57,6 +58,7 @@ import { VideoPlugin } from "./others/embedded_components/video/video_plugin";
 import { QWebPlugin } from "./others/qweb_plugin";
 
 export const CORE_PLUGINS = [
+    VersionPlugin,
     ClipboardPlugin,
     CommentPlugin,
     DeletePlugin,

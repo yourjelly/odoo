@@ -9,7 +9,7 @@ import {
     MAIN_EMBEDDINGS,
     READONLY_MAIN_EMBEDDINGS,
 } from "@html_editor/others/embedded_components/embedding_sets";
-import { HTMLEquals } from "@html_editor/utils/html";
+import { formatHTML } from "@html_editor/utils/html";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { Component, status, useRef, useState } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
@@ -21,6 +21,7 @@ import { useRecordObserver } from "@web/model/relational_model/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { TranslationButton } from "@web/views/fields/translation_button";
 import { HtmlViewer } from "./html_viewer";
+import { stripVersion } from "@html_editor/versioning/__editor_manifest__";
 
 /**
  * Check whether the current value contains nodes that would break
@@ -84,8 +85,12 @@ export class HtmlField extends Component {
             // Reset Wysiwyg when we discard or onchange value
             const newValue = record.data[this.props.name];
             if (!this.isDirty) {
-                const value = this.clearValueToCompare(newValue.toString());
-                if (!HTMLEquals(this.lastValue, value)) {
+                const value = formatHTML(
+                    document,
+                    newValue.toString(),
+                    this.clearElementToCompare.bind(this)
+                );
+                if (this.lastValue !== value) {
                     this.state.key++;
                     this.state.containsComplexHTML = computeContainsComplexHTML(
                         record.data[this.props.name]
@@ -124,17 +129,17 @@ export class HtmlField extends Component {
         return this.props.record.fields[this.props.name].translate;
     }
 
-    clearValueToCompare(value) {
+    clearElementToCompare(element) {
         if (this.props.isCollaborative) {
-            value = stripHistoryIds(value);
+            stripHistoryIds(element);
         }
-        return value;
+        stripVersion(element);
     }
 
     async updateValue(value) {
-        this.lastValue = this.clearValueToCompare(value);
+        this.lastValue = formatHTML(document, value, this.clearElementToCompare.bind(this));
         this.isDirty = false;
-        await this.props.record.update({ [this.props.name]: this.lastValue }).catch(() => {
+        await this.props.record.update({ [this.props.name]: value }).catch(() => {
             this.isDirty = true;
         });
         this.props.record.model.bus.trigger("FIELD_IS_DIRTY", this.isDirty);
@@ -158,8 +163,10 @@ export class HtmlField extends Component {
                 await this.updateValue(this.editor.getContent());
             }
             const el = await this.getEditorContent();
-            const content = this.clearValueToCompare(el.innerHTML);
-            if (!urgent || (urgent && !HTMLEquals(this.lastValue, content))) {
+            const content = el.innerHTML;
+            this.clearElementToCompare(el);
+            const comparisonValue = el.innerHTML;
+            if (!urgent || (urgent && this.lastValue !== comparisonValue)) {
                 await this.updateValue(content);
             }
         }

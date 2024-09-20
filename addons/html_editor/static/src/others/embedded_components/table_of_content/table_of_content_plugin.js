@@ -90,7 +90,7 @@ export class TableOfContentPlugin extends Plugin {
     }
 
     setupNewToc({ name, props }) {
-        if (name === "table-of-content") {
+        if (name === "tableOfContent") {
             Object.assign(props, {
                 manager: this.manager,
             });

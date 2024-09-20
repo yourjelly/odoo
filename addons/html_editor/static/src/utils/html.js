@@ -22,14 +22,13 @@ export function parseHTML(document, html) {
  *
  * @param { Document } document
  * @param { string } html
+ * @param { function } cleanup receives the body element containing the parsed
+ *        html, to perform some cleanup for the comparison.
  * @returns { string }
  */
-export function formatHTMLString(document, html) {
+export function formatHTML(document, html, cleanup = () => {}) {
     const parser = new document.defaultView.DOMParser();
-    const parsedDocument = parser.parseFromString(html, "text/html");
-    return parsedDocument.body.innerHTML;
-}
-
-export function HTMLEquals(str1, str2) {
-    return formatHTMLString(document, str1) === formatHTMLString(document, str2);
+    const body = parser.parseFromString(html, "text/html").body;
+    cleanup(body);
+    return body.innerHTML;
 }

@@ -1,7 +1,8 @@
 $embedded-toc-bg--active: #1ba1e4;
 
-[data-embedded="table-of-content"] {
-    border: 1px solid $o-gray-200;
+[data-embedded="tableOfContent"] {
+    outline: 1px solid $o-gray-300;
+    outline-offset: -1px;
     border-radius: 5px;
     margin: 16px 0;
     padding: 8px;

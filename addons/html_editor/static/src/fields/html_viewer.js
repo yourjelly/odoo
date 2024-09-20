@@ -11,6 +11,7 @@ import {
 import { getBundle } from "@web/core/assets";
 import { memoize } from "@web/core/utils/functions";
 import { TableOfContentManager } from "@html_editor/others/embedded_components/table_of_content/table_of_content_manager";
+import { HtmlUpgradeManager } from "@html_editor/versioning/html_upgrade_manager";
 
 // Ensure all links are opened in a new tab.
 function retargetLinks(container) {
@@ -35,10 +36,11 @@ export class HtmlViewer extends Component {
         this.state = useState({
             iframeVisible: false,
         });
+        this.htmlUpgradeManager = new HtmlUpgradeManager(this.env);
 
         if (this.showIframe) {
             onMounted(() => {
-                const onLoadIframe = () => this.onLoadIframe(this.props.config.value);
+                const onLoadIframe = () => this.onLoadIframe(this.value);
                 this.iframeRef.el.addEventListener("load", onLoadIframe, { once: true });
                 // Force the iframe to call the `load` event. Without this line, the
                 // event 'load' might never trigger.
@@ -88,6 +90,10 @@ export class HtmlViewer extends Component {
         return this.props.config.hasFullHtml || this.props.config.cssAssetId;
     }
 
+    get value() {
+        return this.htmlUpgradeManager.processForUpgrade(this.props.config.value);
+    }
+
     updateIframeContent(content) {
         const contentWindow = this.iframeRef.el.contentWindow;
         const iframeTarget = this.props.config.hasFullHtml
@@ -124,7 +130,7 @@ export class HtmlViewer extends Component {
             }
         }
 
-        this.updateIframeContent(this.props.config.value);
+        this.updateIframeContent(this.value);
         this.state.iframeVisible = true;
     }
 
@@ -166,7 +172,7 @@ export class HtmlViewer extends Component {
     }
 
     setupNewComponent({ name, env, props }) {
-        if (name === "table-of-content") {
+        if (name === "tableOfContent") {
             Object.assign(props, {
                 manager: this.tocManager,
             });

@@ -79,7 +79,9 @@ class PeerTest {
         });
     }
     getValue() {
-        return stripHistoryIds(getContent(this.editor.editable));
+        const clone = this.editor.editable.cloneNode(true);
+        stripHistoryIds(clone);
+        return getContent(clone);
     }
     async writeToServer() {
         this.pool.lastRecordSaved = this.editor.getContent();

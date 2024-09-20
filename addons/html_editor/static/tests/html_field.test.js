@@ -1,7 +1,7 @@
 import { HtmlField } from "@html_editor/fields/html_field";
 import { MediaDialog } from "@html_editor/main/media/media_dialog/media_dialog";
 import { stripHistoryIds } from "@html_editor/others/collaboration/collaboration_odoo_plugin";
-import { parseHTML } from "@html_editor/utils/html";
+import { formatHTML, parseHTML } from "@html_editor/utils/html";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import {
@@ -1232,7 +1232,7 @@ test("edit and save a html field in collaborative should keep the same wysiwyg",
 
     onRpc("partner", "web_save", ({ args }) => {
         const txt = args[1].txt;
-        expect(stripHistoryIds(txt)).toBe("<p>Hello first</p>");
+        expect(formatHTML(document, txt, stripHistoryIds)).toBe("<p>Hello first</p>");
         expect.step("web_save");
         args[1].txt = txt.replace(
             /\sdata-last-history-steps="[^"]*?"/,

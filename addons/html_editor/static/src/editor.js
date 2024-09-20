@@ -2,6 +2,7 @@ import { MAIN_PLUGINS } from "./plugin_sets";
 import { removeClass } from "./utils/dom";
 import { isEmpty } from "./utils/dom_info";
 import { initElementForEdition } from "./utils/sanitize";
+import { HtmlUpgradeManager } from "./versioning/html_upgrade_manager";
 
 /**
  * @typedef { import("./plugin").SharedMethods } SharedMethods
@@ -83,6 +84,7 @@ export class Editor {
         this.document = null;
         /** @ts-ignore  @type { SharedMethods } **/
         this.shared = {};
+        this.htmlUpgradeManager = new HtmlUpgradeManager(this.config.embeddedComponentInfo?.env);
     }
 
     attachTo(editable) {
@@ -92,7 +94,7 @@ export class Editor {
         this.editable = editable;
         this.document = editable.ownerDocument;
         if (this.config.content) {
-            editable.innerHTML = this.config.content;
+            editable.innerHTML = this.htmlUpgradeManager.processForUpgrade(this.config.content);
             if (isEmpty(editable)) {
                 editable.innerHTML = "<p><br></p>";
             }
