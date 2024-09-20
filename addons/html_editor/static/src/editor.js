@@ -1,6 +1,6 @@
 import { MAIN_PLUGINS } from "./plugin_sets";
 import { removeClass } from "./utils/dom";
-import { isEmpty } from "./utils/dom_info";
+import { isEmpty, isEmptyBlock } from "./utils/dom_info";
 import { initElementForEdition } from "./utils/sanitize";
 
 /**
@@ -217,6 +217,11 @@ export class Editor {
         const el = this.editable.cloneNode(true);
         this.dispatch("CLEAN_FOR_SAVE", { root: el });
         return el;
+    }
+
+    /** @returns {boolean} */
+    isEmpty() {
+        return isEmptyBlock(this.editable);
     }
 
     destroy(willBeRemoved) {
