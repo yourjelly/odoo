@@ -570,7 +570,7 @@ class ResPartner(models.Model):
         compute='_compute_invoice_edi_format',
         inverse='_inverse_invoice_edi_format',
     )
-    invoice_eid_format_store = fields.Char(company_dependent=True)
+    invoice_edi_format_store = fields.Char(company_dependent=True)
     display_invoice_edi_format = fields.Boolean(compute='_compute_display_invoice_edi_format')
     invoice_template_pdf_report_id = fields.Many2one(
         comodel_name='ir.actions.report',
@@ -643,14 +643,14 @@ class ResPartner(models.Model):
     @api.depends_context('company')
     def _compute_invoice_edi_format(self):
         for partner in self:
-            partner.invoice_eid_format = partner.invoice_eid_format_store or partner._get_suggested_invoice_edi_format()
+            partner.invoice_edi_format = partner.invoice_edi_format_store or partner._get_suggested_invoice_edi_format()
 
     def _inverse_invoice_edi_format(self):
         for partner in self:
-            if partner.invoice_eid_format == partner._get_suggested_invoice_edi_format():
-                partner.invoice_eid_format_store = False
+            if partner.invoice_edi_format == partner._get_suggested_invoice_edi_format():
+                partner.invoice_edi_format_store = False
             else:
-                partner.invoice_eid_format_store = partner.invoice_eid_format
+                partner.invoice_edi_format_store = partner.invoice_edi_format
 
     @api.depends('bank_ids')
     def _compute_duplicated_bank_account_partners_count(self):
