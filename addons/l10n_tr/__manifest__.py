@@ -22,6 +22,9 @@
     'auto_install': ['account'],
     'data': [
         'data/account_tax_report_data.xml',
+
+        'views/account_journal_views.xml',
+        'views/product_view.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
