@@ -768,16 +768,7 @@ class ResPartner(models.Model):
                     vals['customer_rank'] = 1
                 elif is_supplier and 'supplier_rank' not in vals:
                     vals['supplier_rank'] = 1
-        if res := super().create(vals_list):
-            # we need the partner record to set the property 'invoice_edi_format'
-            # we need to bypass the write of partner for account_peppol else it will try to
-            # _update_peppol_state_per_company as if the record wasn't new
-            for partner, vals in zip(res, vals_list):
-                if 'invoice_edi_format' not in vals:
-                    self.env.cache.set(partner, self._fields['invoice_edi_format'], partner._get_suggested_invoice_edi_format())
-        res._inverse_invoice_edi_format()
-        res.invalidate_recordset(fnames=['invoice_edi_format'])
-        return res
+        return super().create(vals_list)
 
     @api.ondelete(at_uninstall=False)
     def _unlink_if_partner_in_account_move(self):
