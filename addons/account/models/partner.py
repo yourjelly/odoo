@@ -565,13 +565,12 @@ class ResPartner(models.Model):
         company_dependent=True,
     )
     invoice_edi_format = fields.Selection(
-        # company_dependent-like field
         string="eInvoice format",
         selection=[],  # to extend
         compute='_compute_invoice_edi_format',
-        search='_search_invoice_edi_format',
         inverse='_inverse_invoice_edi_format',
     )
+    invoice_eid_format_store = fields.Char(company_dependent=True)
     display_invoice_edi_format = fields.Boolean(compute='_compute_display_invoice_edi_format')
     invoice_template_pdf_report_id = fields.Many2one(
         comodel_name='ir.actions.report',
@@ -643,23 +642,15 @@ class ResPartner(models.Model):
 
     @api.depends_context('company')
     def _compute_invoice_edi_format(self):
-        values = self.env['ir.property'].sudo()._get_multi('invoice_edi_format', self._name, self.ids)
         for partner in self:
-            if partner.id not in values:
-                partner.invoice_edi_format = partner._get_suggested_invoice_edi_format()
-            else:
-                partner.invoice_edi_format = values[partner.id]
-
-    def _search_invoice_edi_format(self, operator, value):
-        return self._fields['invoice_edi_format']._search_company_dependent(self.with_company(self.env.company.root_id), operator, value)
+            partner.invoice_eid_format = partner.invoice_eid_format_store or partner._get_suggested_invoice_edi_format()
 
     def _inverse_invoice_edi_format(self):
-        values = {
-            # Need to access record.code with `company = self.env.company`
-            record.id: self._fields['invoice_edi_format'].convert_to_write(record.invoice_edi_format, record)
-            for record in self
-        }
-        self.env['ir.property'].sudo()._set_multi('invoice_edi_format', 'res.partner', values)
+        for partner in self:
+            if partner.invoice_eid_format == partner._get_suggested_invoice_edi_format():
+                partner.invoice_eid_format_store = False
+            else:
+                partner.invoice_eid_format_store = partner.invoice_eid_format
 
     @api.depends('bank_ids')
     def _compute_duplicated_bank_account_partners_count(self):
