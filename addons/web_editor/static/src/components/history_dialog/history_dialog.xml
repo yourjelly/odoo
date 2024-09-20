@@ -22,11 +22,17 @@
                 <div class="history-container">
                     <Notebook defaultPage="'history'">
                         <t t-set-slot="history" name="'history'" isVisible="true" title="notebookTabs[0]">
-                            <t t-if="state.revisionContent?.length" t-out="state.revisionContent"/>
+                            <t t-if="state.revisionContent?.length">
+                                <div class="pe-none">
+                                    <HtmlViewer config="getConfig('revisionContent')"/>
+                                </div>
+                            </t>
                             <t t-else="" t-out="props.noContentHelper" />
                         </t>
                         <t t-set-slot="comparison" name="'comparison'" isVisible="true" title="notebookTabs[1]">
-                            <t t-out="state.revisionComparison"/>
+                            <div class="pe-none">
+                                <HtmlViewer config="getConfig('revisionComparison')"/>
+                            </div>
                         </t>
                     </Notebook>
                 </div>

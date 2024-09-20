@@ -20,3 +20,4 @@ export const READONLY_MAIN_EMBEDDINGS = [
     readonlyTableOfContentEmbedding,
     videoEmbedding,
 ];
+export const HISTORY_EMBEDDINGS = [...READONLY_MAIN_EMBEDDINGS];
