@@ -354,6 +354,7 @@ registerWebsitePreviewTour(
     {
         test: true,
         url: "/",
+        checkDelay: 150,
     },
     () => [
         ...openCreatePageDialog,
@@ -364,22 +365,23 @@ registerWebsitePreviewTour(
         },
         {
             content: "Name page",
-            trigger: ".modal-body input",
+            trigger: ".modal:not(.o_inactive_modal):contains(new page) .modal-body input",
             run: "edit New Page",
         },
         {
             content: "Don't add to menu",
-            trigger: ".modal-body .o_switch",
-            run: "click",
+            trigger: ".modal:not(.o_inactive_modal):contains(new page) .modal-body .o_switch",
+            run: "uncheck",
         },
         {
             content: "Click on Create button",
-            trigger: ".modal-footer .btn-primary",
+            trigger: ".modal:not(.o_inactive_modal):contains(new page) button:contains(create)",
             run: "click",
         },
         {
             content: "Wait for editor to open",
             trigger: ".o_website_navbar_hide",
+            timeout: 20000,
         },
         ...clickOnSave(),
         stepUtils.waitIframeIsReady(),

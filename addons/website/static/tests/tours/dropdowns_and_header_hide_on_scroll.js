@@ -40,6 +40,10 @@ registerWebsitePreviewTour("dropdowns_and_header_hide_on_scroll", {
     selectHeader(),
     changeOption("undefined", 'we-select[data-variable="header-scroll-effect"]'),
     changeOption("undefined", 'we-button[data-name="header_effect_fixed_opt"]'),
+    {
+        trigger: ":iframe #wrapwrap header.o_header_fixed",
+    },
+    selectHeader(),
     changeOption("WebsiteLevelColor", 'we-select[data-variable="header-template"] we-toggler'),
     changeOption("WebsiteLevelColor", 'we-button[data-name="header_sales_two_opt"]'),
     ...clickOnSave(undefined, 30000),
