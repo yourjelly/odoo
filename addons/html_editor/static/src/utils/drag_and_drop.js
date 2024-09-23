@@ -133,7 +133,7 @@ const dragAndDropHookParams = {
         if (frameElement) {
             addStyle(frameElement, { pointerEvents: "auto" });
         }
-
+ 
         addCleanup(() => ctx.current.helper.remove());
 
         updateElementPosition(ctx.current.helper, ctx.pointer, addStyle, ctx.current.helperOffset);
