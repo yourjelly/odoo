@@ -116,6 +116,7 @@ const dragAndDropHookParams = {
         ctx.current.helperOffset = { x: 0, y: 0 };
     },
     onDragStart: ({ ctx, addStyle, addCleanup }) => {
+        //check
         // Use the helper as the tracking element to properly update scroll values.
         ctx.current.element = ctx.getHelper({ ...ctx.current, ...ctx.pointer });
         ctx.current.helper = ctx.current.element;
