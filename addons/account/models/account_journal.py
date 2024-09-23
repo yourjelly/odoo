@@ -91,6 +91,7 @@ class AccountJournal(models.Model):
             ('purchase', 'Purchase'),
             ('cash', 'Cash'),
             ('bank', 'Bank'),
+            ('credit', 'Credit Card'),
             ('general', 'Miscellaneous'),
         ], required=True,
         help="Select 'Sale' for customer invoices journals.\n"\
