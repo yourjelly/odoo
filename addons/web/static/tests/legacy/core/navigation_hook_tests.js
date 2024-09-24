@@ -1,5 +1,6 @@
 /** @odoo-module alias=@web/../tests/core/navigation_hook_tests default=false */
 
+import { hover } from "@odoo/hoot-dom";
 import { Component, xml } from "@odoo/owl";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { getFixture, mount, patchWithCleanup, triggerHotkey } from "@web/../tests/helpers/utils";
@@ -8,6 +9,7 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { useNavigation } from "@web/core/navigation/navigation";
 import { registry } from "@web/core/registry";
 import { useAutofocus } from "@web/core/utils/hooks";
+import { assert } from "qunit";
 
 const serviceRegistry = registry.category("services");
 let target;
@@ -175,5 +177,34 @@ QUnit.module("Hooks", ({ beforeEach }) => {
         await navigate("arrowdown", ".two");
         await triggerHotkey("enter");
         assert.verifySteps(["2"]);
+    });
+
+    QUnit.test("hover selects the items makes but doesn't focus", async () => {
+        await mountWithCleanup(BasicHookParent);
+        const env = await makeTestEnv();
+        await mount(createNavComponent(), target, { env });
+
+        await triggerHotkey("arrowdown");
+
+        assert.strictEqual(document.activeElement, target.querySelector(".two"));
+        assert.hasClass(target.querySelector(".two"), "focus");
+
+
+        const event = new MouseEvent('mouseenter', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+        });
+        document.querySelector(".three").dispatchEvent(event);
+
+        assert.strictEqual(document.activeElement, target.querySelector(".two"));
+        assert.hasClass(target.querySelector(".three"), "focus");
+        assert.notStrictEqual(document.activeElement, target.querySelector(".three"));
+        assert.hasClass(target.querySelector(".three"), "focus");
+
+        await triggerHotkey("arrowdown");
+        await animationFrame();
+        expect(".four").toBeFocused();
+        expect(".four").toHaveClass("focus");
     });
 });
