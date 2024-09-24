@@ -158,7 +158,8 @@ class ProductProduct(models.Model):
 
     def _get_tax_included_unit_price(self, company, currency, document_date, document_type,
         is_refund_document=False, product_uom=None, product_currency=None,
-        product_price_unit=None, product_taxes=None, fiscal_position=None
+        product_price_unit=None, product_taxes=None, fiscal_position=None,
+        forced_currency_rate=None,
     ):
         """ Helper to get the price unit from different models.
             This is needed to compute the same unit price in different models (sale order, account move, etc.) with same parameters.
@@ -202,7 +203,9 @@ class ProductProduct(models.Model):
             )
 
         # Apply currency rate.
-        if currency != product_currency:
+        if forced_currency_rate:
+            product_price_unit = product_price_unit * forced_currency_rate
+        elif currency != product_currency:
             product_price_unit = product_currency._convert(product_price_unit, currency, company, document_date, round=False)
 
         return product_price_unit

@@ -858,7 +858,7 @@ class AccountMoveLine(models.Model):
             else:
                 line.price_total = line.price_subtotal = subtotal
 
-    @api.depends('product_id', 'product_uom_id')
+    @api.depends('product_id', 'product_uom_id', 'currency_rate')
     def _compute_price_unit(self):
         for line in self:
             if not line.product_id or line.display_type in ('line_section', 'line_note'):
@@ -876,6 +876,7 @@ class AccountMoveLine(models.Model):
                 document_type,
                 fiscal_position=line.move_id.fiscal_position_id,
                 product_uom=line.product_uom_id,
+                forced_currency_rate=line.currency_rate,
             )
 
     @api.depends('product_id', 'product_uom_id')
