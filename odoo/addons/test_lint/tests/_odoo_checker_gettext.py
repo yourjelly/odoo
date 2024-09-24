@@ -49,10 +49,17 @@ class OdooBaseChecker(BaseChecker):
             'gettext-repr',
             'Don\'t use %r to automatically insert quotes in translation strings. Quotes can be different depending on the language: they must be part of the translated string.',
         ),
+        'E8513': (
+            'Deeply nested gettext call',
+            'deeply-nested',
+            'test',
+        ),
     }
 
-    @only_required_for_messages('gettext-variable', 'gettext-placeholders', 'gettext-repr')
+    @only_required_for_messages('gettext-variable', 'gettext-placeholders', 'gettext-repr', "deeply-nested")
     def visit_call(self, node):
+        if isinstance(node.func, astroid.Name) and node.func.name == "_" and self._contains_deeply_nested_call(node):
+            self.add_message('deeply-nested', node=node)
         if isinstance(node.func, astroid.Name):
             # direct function call to _
             node_name = node.func.name
@@ -71,6 +78,19 @@ class OdooBaseChecker(BaseChecker):
             self.add_message("gettext-placeholders", node=node)
         if re.search(REPR_REGEXP, first_arg.value):
             self.add_message("gettext-repr", node=node)
+
+    def _contains_deeply_nested_call(self, node, depth=0, max_depth=5):
+        if depth > max_depth:
+            return False
+        for arg in node.args:
+            if isinstance(arg, astroid.Call):
+                if isinstance(arg.func, astroid.Name):
+                    if arg.func.name == "_" and depth > 1:
+                        return True
+                    else:
+                        return self._contains_deeply_nested_call(arg, depth + 1, max_depth)
+                return self._contains_deeply_nested_call(arg, depth + 1, max_depth)
+        return False
 
 
 def register(linter):

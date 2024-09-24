@@ -36,6 +36,7 @@ class TestPyLint(TransactionCase):
         'gettext-variable',
         'gettext-placeholders',
         'gettext-repr',
+        "deeply-nested",
         'raise-unlink-override',
     ]
 
