@@ -122,22 +122,58 @@
     {
         'BG.PNG': 261,
         'BGFLIP.PNG': 264,
-        'ECUST.PNG': 266,
-        'ECUSTF.PNG': 267,
-        'OPART.PNG': 268,
-        'OPARTF.PNG': 269,
-        'PCUST.PNG': 270,
-        'PCUSTF.PNG': 271,
-        'PPART.PNG': 272,
-        'PPARTF.PNG': 273,
-        'TEACHER.PNG': 274,
-        'TEACHERF.PNG': 275,
         'INTER.TTF': 265,
         'INTERB.TTF': 280
     }
     "/>
     <t t-set="font" t-value="'INTER.TTF'"/>
     <t t-set="font_bold" t-value="'INTERB.TTF'"/>
+
+    <t t-if="any('Existing Customer' in attendee.registration_answer_choice_ids.mapped('display_name') for attendee in docs)">
+        <t t-set="attachment_ids" t-value="
+        {
+            **attachment_ids,
+            'ECUST.PNG': 266,
+            'ECUSTF.PNG': 267
+        }
+        "/>
+    </t>
+    <t t-if="any('Official Partner' in attendee.registration_answer_choice_ids.mapped('display_name') for attendee in docs)">
+        <t t-set="attachment_ids" t-value="
+        {
+            **attachment_ids,
+            'OPART.PNG': 268,
+            'OPARTF.PNG': 269
+        }
+        "/>
+    </t>
+    <t t-if="any('Potential Customer' in attendee.registration_answer_choice_ids.mapped('display_name') for attendee in docs)">
+        <t t-set="attachment_ids" t-value="
+        {
+            **attachment_ids,
+            'PCUST.PNG': 270,
+            'PCUSTF.PNG': 271
+        }
+        "/>
+    </t>
+    <t t-if="any('Potential Partner' in attendee.registration_answer_choice_ids.mapped('display_name') for attendee in docs)">
+        <t t-set="attachment_ids" t-value="
+        {
+            **attachment_ids,
+            'PPART.PNG': 272,
+            'PPARTF.PNG': 273
+        }
+        "/>
+    </t>
+    <t t-if="any('Teacher/Student' in attendee.registration_answer_choice_ids.mapped('display_name') for attendee in docs)">
+        <t t-set="attachment_ids" t-value="
+        {
+            **attachment_ids,
+            'TEACHER.PNG': 274,
+            'TEACHERF.PNG': 275
+        }
+        "/>
+    </t>
 
     <!-- Printer Setup -->
     ^XA
