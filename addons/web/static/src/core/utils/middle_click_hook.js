@@ -1,39 +1,10 @@
-import { useEffect, useRef, Component, xml } from "@odoo/owl";
-import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { _t } from "@web/core/l10n/translation";
+import { useEffect, useRef } from "@odoo/owl";
 import { router, stateToUrl } from "@web/core/browser/router";
-import { useService } from "./hooks";
 
 const EXCLUDED_TAGS = ["A", "IMG"];
-class OptionsMenuPopover extends Component {
-    static components = {
-        DropdownItem,
-    };
-    static template = xml`
-        <t t-foreach="props.options" t-as="option" t-key="option.description">
-            <div t-if="option.separator" role="separator" class="dropdown-divider"></div>
-            <DropdownItem t-else="" onSelected="() => this.onSelected(option.callback)"><i t-attf-class="fa me-2 {{option.icon}}"/><t t-out="option.description"/></DropdownItem>
-        </t>
-    `;
-    static props = {
-        close: Function,
-        options: Object,
-    };
-
-    setup() {
-        this.actionService = useService("action");
-        this.orm = useService("orm");
-    }
-
-    onSelected(callback) {
-        callback();
-        this.props.close();
-    }
-}
 
 export function useMiddleClick({ refName, clickParams, selector, contextMenuOptions = [] }) {
     const ref = useRef(refName || "middleclick");
-    const popoverService = useService("popover");
     let _onCtrlClick;
     if (clickParams) {
         if (clickParams.onCtrlClick) {
@@ -67,47 +38,7 @@ export function useMiddleClick({ refName, clickParams, selector, contextMenuOpti
         }
         if ((_onCtrlClick && ev.ctrlKey && ev.button === 0) || ev.button === 1) {
             _onCtrlClick(ev);
-        } else if (!ev.ctrlKey && ev.button === 2) {
-            ev.preventDefault();
-            displayOptionMenu(ev.target);
-            return false;
         }
-    };
-    let touchTimeout;
-    let _preventTouchEnd = false;
-    const displayOptionMenu = (target) => {
-        const options = [...contextMenuOptions];
-        const displayOpenOption = _onCtrlClick || clickParams.displayOpenOption;
-        if (displayOpenOption) {
-            options.unshift({
-                icon: "fa-external-link",
-                callback: () => {
-                    if (clickParams.isRouterHandled) {
-                        router.enableOpenNewWindow();
-                        ref.el.click();
-                        router.disableOpenNewWindow();
-                    } else {
-                        _onCtrlClick();
-                    }
-                },
-                description: _t("Open in new tab"),
-            });
-        }
-        if (!options.length) {
-            return;
-        }
-        popoverService.add(
-            target,
-            OptionsMenuPopover,
-            {
-                options,
-            },
-            {
-                arrow: false,
-                role: "menu",
-                popoverClass: "o-dropdown--menu dropdown-menu mx-0",
-            }
-        );
     };
     const styleControlPressed = (ev) => {
         if (ev.key === "Control") {
@@ -125,22 +56,6 @@ export function useMiddleClick({ refName, clickParams, selector, contextMenuOpti
             }
         }
     };
-    const onTouchStart = (ev) => {
-        touchTimeout = setTimeout(() => {
-            _preventTouchEnd = true;
-            displayOptionMenu(ev.target);
-        }, 500);
-    };
-
-    const onTouchCancel = (ev) => {
-        if (_preventTouchEnd) {
-            // this prevents the browser context menu to appear, or to trigger a click
-            // under the element, to use the popover sould be used instead
-            _preventTouchEnd = false;
-            ev.preventDefault();
-        }
-        clearTimeout(touchTimeout);
-    };
     useEffect(
         () => {
             if (ref.el) {
@@ -151,10 +66,6 @@ export function useMiddleClick({ refName, clickParams, selector, contextMenuOpti
                         el.classList.add("middle_clickable_record");
                     }
                     el.addEventListener("click", handleClick, { capture: true });
-                    el.addEventListener("contextmenu", handleClick, { capture: true });
-                    el.addEventListener("touchstart", onTouchStart, { capture: true });
-                    el.addEventListener("touchend", onTouchCancel, { capture: true });
-                    //el.addEventListener("touchmove", onTouchCancel, { capture: true });
                 });
                 window.addEventListener("keydown", styleControlPressed);
                 window.addEventListener("keyup", styleControlUp);
