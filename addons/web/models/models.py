@@ -866,7 +866,12 @@ class Base(models.AbstractModel):
             missing_names = [fname for fname in fields_spec if fname not in values]
             defaults = self.default_get(missing_names)
             for field_name in missing_names:
-                values[field_name] = defaults.get(field_name, False)
+                if field_name not in defaults:
+                    # Let the compute method be called if necessary
+                    if not self._fields[field_name].compute:
+                        values[field_name] = False
+                else:
+                    values[field_name] = defaults[field_name]
                 if field_name in defaults:
                     field_names.append(field_name)
 
