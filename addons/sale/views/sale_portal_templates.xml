@@ -413,7 +413,7 @@
                         <h5 class="mb-1">Sale Information</h5>
                         <hr class="mt-1 mb-2"/>
                     </span>
-                    <table class="table table-borderless table-sm">
+                    <table class="table-borderless table-sm">
                         <tbody style="white-space:nowrap" id="sale_info_table">
                             <tr>
                                 <th t-if="sale_order.state in ['sale', 'cancel']" class="ps-0 pb-0">Order Date:</th>
@@ -518,9 +518,9 @@
                 <t t-set="display_discount" t-value="True in [line.discount > 0 for line in sale_order.order_line]"/>
 
                 <div class="table-responsive">
-                    <table t-att-data-order-id="sale_order.id" t-att-data-token="sale_order.access_token" class="table table-sm" id="sales_order_table">
+                    <table t-att-data-order-id="sale_order.id" t-att-data-token="sale_order.access_token" class="table-sm" id="sales_order_table">
                         <thead>
-                            <tr>
+                            <tr class="border-bottom">
                                 <th class="text-start" id="product_name_header">Products</th>
                                 <th class="text-end" id="product_qty_header">Quantity</th>
                                 <th t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
@@ -548,16 +548,16 @@
 
                                 <tr t-att-class="'bg-200 fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
                                     <t t-if="not line.display_type">
-                                        <td id="product_name">
+                                        <td class="border-bottom" id="product_name">
                                             <span t-field="line.name"/>
                                         </td>
-                                        <td class="text-end" id="quote_qty_td">
+                                        <td class="border-bottom text-end" id="quote_qty_td">
                                             <div id="quote_qty">
                                                 <span t-field="line.product_uom_qty"/>
                                                 <span t-field="line.product_uom"/>
                                             </div>
                                         </td>
-                                        <td t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
+                                        <td t-attf-class="border-bottom text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
                                             <div
                                                 t-if="line.discount &gt;= 0"
                                                 t-field="line.price_unit"
@@ -568,15 +568,15 @@
                                                 <t t-out="(1-line.discount / 100.0) * line.price_unit" t-options='{"widget": "float", "decimal_precision": "Product Price"}'/>
                                             </div>
                                         </td>
-                                        <td t-if="display_discount" t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
+                                        <td t-if="display_discount" t-attf-class="border-bottom text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
                                             <strong t-if="line.discount &gt; 0" class="text-info">
                                                 <t t-out="((line.discount % 1) and '%s' or '%d') % line.discount"/>%
                                             </strong>
                                         </td>
-                                        <td t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}" id="taxes">
+                                        <td t-attf-class="border-bottom text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}" id="taxes">
                                             <span t-out="', '.join(map(lambda x: (x.name), line.tax_id))"/>
                                         </td>
-                                        <td t-if="not line.is_downpayment" class="text-end" id="subtotal">
+                                        <td t-if="not line.is_downpayment" class="border-bottom text-end" id="subtotal">
                                         <span class="oe_order_line_price_subtotal" t-field="line.price_subtotal"/>
                                         </td>
                                     </t>
@@ -646,7 +646,7 @@
     </template>
 
     <template id="sale_order_portal_content_totals_table">
-        <table class="table table-sm">
+        <table class="table-sm">
             <t t-set="tax_totals" t-value="sale_order.tax_totals"/>
             <t t-call="#{sale_order._get_name_tax_totals_view()}"/>
         </table>
