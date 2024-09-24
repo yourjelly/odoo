@@ -270,7 +270,7 @@
                 ^FS
             </t>
 
-            <t t-set="font_size" t-value="200 if len(attendee.name) &lt;= 20 else 120"/>
+            <t t-set="font_size" t-value="200 if len(attendee.name) &lt;= 18 else 160 if len(attendee.name) &lt;= 22 else 120 if len(attendee.name) &lt;= 27 else 100"/>
             <t t-set="y_pos" t-value="1000 - int(font_size/2)"/>
             <t t-set="y_pos_inv" t-value="2930 - int(font_size/2)"/>
 
@@ -290,13 +290,13 @@
                 <!-- Print attendee company -->
                 ^FO200,1150
                 ^A@N,90,90,R:<t t-out="font"/>
-                ^FB2200,1,0,L
+                ^FB2200,2,0,L
                 ^FD<t t-raw="attendee.company_name"/>^FS
 
                 <!-- Print attendee company (reverse side) -->
-                ^FO0,2690
+                ^FO0,2590
                 ^A@I,90,90,R:<t t-out="font"/>
-                ^FB2200,1,0,L
+                ^FB2200,2,0,L
                 ^FD<t t-raw="attendee.company_name"/>^FS
             </t>
 
