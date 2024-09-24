@@ -13,7 +13,7 @@ DOMAINS = {
     'account.tax': lambda operator, value: [('company_id.check_account_audit_trail', operator, value)],
     'res.partner': lambda operator, value: [
         '|', ('company_id', '=', False), ('company_id.check_account_audit_trail', operator, value),
-        '|', ('customer_rank', '>', 0), ('supplier_rank', '>', 0),
+        ('invoice_ids.company_id.check_account_audit_trail', operator, value)
     ],
     'res.company': lambda operator, value: [('check_account_audit_trail', operator, value)],
 }
