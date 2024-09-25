@@ -62,7 +62,8 @@ class AccountMove(models.Model):
         return enabled_feature and bool(
             (self.amount_residual or not transactions)
             and self.state == 'posted'
-            and self.payment_state in ('not_paid', 'partial')
+            and self.payment_state in ('not_paid', 'in_payment', 'partial')
+            and self.amount_residual != 0
             and self.amount_total
             and self.move_type == 'out_invoice'
             and not pending_transactions

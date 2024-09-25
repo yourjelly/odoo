@@ -203,6 +203,7 @@ class PaymentTransaction(models.Model):
                 lambda line: line.account_id == payment.destination_account_id
                 and not line.reconciled
             ).reconcile()
+            invoices.matched_payment_ids += payment
 
         return payment
 
