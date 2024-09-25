@@ -122,6 +122,7 @@
     <t t-name="point_of_sale.ProductConfiguratorPopup">
         <Dialog title.translate="Attribute selection">
             <ProductInfoBanner product="this.state.product" />
+            <div t-if="!this.state.available" class="alert alert-warning mt-3"><span>This option or combination of options is not available</span></div>
             <div t-ref="input-area">
                 <div t-foreach="this.props.product.attribute_line_ids" t-as="attributeLine" t-key="attributeLine.id" class="attribute mb-3">
                     <div class="attribute_name mb-2 fw-bolder" t-esc="attributeLine.attribute_id.name"/>
@@ -133,7 +134,7 @@
                 </div>
             </div>
             <t t-set-slot="footer">
-                <button class="btn btn-primary btn-lg lh-lg o-default-button" t-on-click="confirm">Ok</button>
+                <button class="btn btn-primary btn-lg lh-lg o-default-button" t-att-class="{'disabled' : !this.state.available}" t-on-click="confirm">Ok</button>
                 <button class="btn btn-secondary btn-lg lh-lg o-default-button" t-on-click="close">Discard</button>
             </t>
         </Dialog>

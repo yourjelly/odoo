@@ -118,6 +118,7 @@ export class ProductConfiguratorPopup extends Component {
         this.state = useState({
             product: this.props.product,
             payload: this.env.attribute_components,
+            available: true,
         });
 
         this.computeProductProduct();
@@ -156,6 +157,10 @@ export class ProductConfiguratorPopup extends Component {
         const alwaysVariants = this.props.product.attribute_line_ids.every(
             (line) => line.attribute_id.create_variant === "always"
         );
+
+        let activeCombinations = product.product_variant_ids?.map(prd => [...prd.product_template_variant_value_ids?.map(ptav => ptav.id)]);
+        let isAvailable = activeCombinations.some(ac => JSON.stringify(ac) === JSON.stringify(formattedPayload.attribute_value_ids));
+        this.state.available = formattedPayload.attribute_value_ids.length > 0 ? isAvailable : true;
 
         if (alwaysVariants) {
             const newProduct = this.pos.models["product.product"]
