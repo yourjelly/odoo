@@ -201,11 +201,10 @@ export const tourService = {
                 new TourInteractive(tour).start(pointer, async () => {
                     pointer.stop();
                     endTour(tour);
-
                     if (tourConfig.rainbowManMessage) {
                         effect.add({
                             type: "rainbow_man",
-                            message: tourConfig.rainbowManMessage,
+                            message: markup(tourConfig.rainbowManMessage),
                         });
                     }
 
