@@ -110,6 +110,8 @@ export class ListPlugin extends Plugin {
             { commandId: "toggleListOL" },
             { commandId: "toggleListCL" },
         ],
+        input_handlers: this.onInput.bind(this),
+        normalize_handlers: this.normalize.bind(this),
     };
 
     setup() {
@@ -161,7 +163,7 @@ export class ListPlugin extends Plugin {
                 focusNode: selection.focusNode,
                 focusOffset: selection.focusOffset,
             });
-            this.dispatch("DELETE_SELECTION");
+            this.shared.deleteSelection();
             if (shouldCreateNumberList) {
                 const listStyle = { a: "lower-alpha", A: "upper-alpha", 1: null }[
                     stringToConvert.substring(0, 1)
@@ -172,7 +174,7 @@ export class ListPlugin extends Plugin {
             } else if (shouldCreateCheckList) {
                 this.toggleList("CL");
             }
-            this.dispatch("ADD_STEP");
+            this.shared.addStep();
         }
     }
 
@@ -621,7 +623,7 @@ export class ListPlugin extends Plugin {
             this.indentListNodes(listItems);
             this.shared.indentBlocks(nonListItems);
             // Do nothing to nav-items.
-            this.dispatch("ADD_STEP");
+            this.shared.addStep();
             return true;
         }
     }
@@ -643,7 +645,7 @@ export class ListPlugin extends Plugin {
             this.outdentListNodes(listItems);
             this.shared.outdentBlocks(nonListItems);
             // Do nothing to nav-items.
-            this.dispatch("ADD_STEP");
+            this.shared.addStep();
             return true;
         }
     }
@@ -749,7 +751,7 @@ export class ListPlugin extends Plugin {
         if (isChecklistItem && this.isPointerInsideCheckbox(node, offsetX, offsetY)) {
             toggleClass(node, "o_checked");
             ev.preventDefault();
-            this.dispatch("ADD_STEP");
+            this.shared.addStep();
         }
     }
 

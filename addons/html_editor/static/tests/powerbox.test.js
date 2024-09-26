@@ -24,6 +24,7 @@ import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { PowerboxPlugin } from "@html_editor/main/powerbox/powerbox_plugin";
 import { SearchPowerboxPlugin } from "@html_editor/main/powerbox/search_powerbox_plugin";
 import { withSequence } from "@html_editor/utils/resource";
+import { execCommand } from "./_helpers/userCommands";
 
 function commandNames() {
     return queryAllTexts(".o-we-command-name");
@@ -119,13 +120,13 @@ describe("search", () => {
                 powerbox_categories: { id: "test", name: "Test" },
                 powerbox_items: [
                     {
-                        name: "Test1",
+                        title: "Test1",
                         description: "Test1",
                         categoryId: "test",
                         commandId: "testCommand",
                     },
                     {
-                        name: "Test12",
+                        title: "Test12",
                         description: "Test12",
                         categoryId: "test",
                         commandId: "testCommand",
@@ -262,14 +263,14 @@ describe("search", () => {
                     powerbox_categories: { id: "test", name: "Test" },
                     powerbox_items: [
                         {
-                            name: "Test1",
+                            title: "Test1",
                             description: "Test1",
                             categoryId: "test",
                             commandId: "testCommand",
                             keywords: ["apple", "orange"],
                         },
                         {
-                            name: "Test2",
+                            title: "Test2",
                             description: "Test2 has apples and oranges in its description",
                             categoryId: "test",
                             commandId: "testCommand",
@@ -312,19 +313,19 @@ describe("search", () => {
                     powerbox_categories: { id: "test", name: "Test" },
                     powerbox_items: [
                         {
-                            name: "Change direction", // "icon" fuzzy matches this
+                            title: "Change direction", // "icon" fuzzy matches this
                             description: "test",
                             categoryId: "test",
                             commandId: "testCommand",
                         },
                         {
-                            name: "Some command",
+                            title: "Some command",
                             description: "add a big section", // "icon" fuzzy matches this
                             categoryId: "test",
                             commandId: "testCommand",
                         },
                         {
-                            name: "Insert a pictogram",
+                            title: "Insert a pictogram",
                             description: "test",
                             categoryId: "test",
                             commandId: "testCommand",
@@ -517,7 +518,7 @@ class NoOpPlugin extends Plugin {
         powerbox_categories: { id: "no_op", name: "No-op" },
         powerbox_items: [
             {
-                name: "No-op",
+                title: "No-op",
                 description: "No-op",
                 categoryId: "no_op",
                 icon: "fa-header",
@@ -585,17 +586,17 @@ test("should discard /command insertion from history when command is executed", 
     expect(commandNames(el)).toEqual(["Heading 1"]);
     await press("Enter");
     expect(getContent(el)).toBe("<h1>abc[]</h1>");
-    editor.dispatch("HISTORY_UNDO");
+    execCommand(editor, "historyUndo");
     expect(getContent(el)).toBe("<p>abc[]</p>");
-    editor.dispatch("HISTORY_REDO");
+    execCommand(editor, "historyRedo");
     expect(getContent(el)).toBe("<h1>abc[]</h1>");
-    editor.dispatch("HISTORY_UNDO");
+    execCommand(editor, "historyUndo");
     expect(getContent(el)).toBe("<p>abc[]</p>");
-    editor.dispatch("HISTORY_UNDO");
+    execCommand(editor, "historyUndo");
     expect(getContent(el)).toBe("<p>ab[]</p>");
-    editor.dispatch("HISTORY_UNDO");
+    execCommand(editor, "historyUndo");
     expect(getContent(el)).toBe("<p>a[]</p>");
-    editor.dispatch("HISTORY_UNDO");
+    execCommand(editor, "historyUndo");
     expect(getContent(el)).toBe(
         `<p class="o-we-hint" placeholder='Type "/" for commands'>[]<br></p>`
     );

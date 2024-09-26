@@ -119,7 +119,7 @@ export class SelectionPlugin extends Plugin {
         "getTraversedBlocks",
         "modifySelection",
         "rectifySelection",
-// todo: ideally, this should not be shared
+        // todo: ideally, this should not be shared
         "resetActiveSelection",
         "focusEditable",
         // "collapseIfZWS",
@@ -147,11 +147,11 @@ export class SelectionPlugin extends Plugin {
     }
 
     selectAll() {
-                    const selection = this.getEditableSelection();
-                    const containerSelector = "#wrap > *, .oe_structure > *, [contenteditable]";
+        const selection = this.getEditableSelection();
+        const containerSelector = "#wrap > *, .oe_structure > *, [contenteditable]";
         const container = selection && closestElement(selection.anchorNode, containerSelector);
         const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesIn(container);
-                    this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+        this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
     }
 
     resetSelection() {
@@ -178,9 +178,7 @@ export class SelectionPlugin extends Plugin {
                 return;
             }
         }
-        for (const handler of this.getResource("onSelectionChange")) {
-            handler(selectionData);
-        }
+        this.dispatchTo("selectionchange_handlers", selectionData);
     }
 
     /**

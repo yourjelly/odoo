@@ -436,7 +436,11 @@ test("plugins can create buttons with text in toolbar", async () => {
             toolbar_items: [
                 {
                     id: "test_btn",
+<<<<<<< HEAD
                     groupId: "test_group",
+=======
+                    category: "test_group",
+>>>>>>> bf72a0681cef... [REF] html_editor: remove dispatch
                     commandId: "test_cmd",
                     title: "Test Button",
                     text: "Text button",
@@ -495,22 +499,28 @@ test("toolbar buttons should have title attribute", async () => {
 
 test("toolbar buttons should have title attribute with translated text", async () => {
     // Retrieve toolbar buttons descriptions in English
-    const { editor } = await setupEditor("");
-    // item.title could be a LazyTranslatedString so we ensure it is a string with toString()
-    const titles = editor.resources.toolbarItems.map((item) => item.title.toString());
+    const { editor, plugins } = await setupEditor("");
+    // item.label could be a LazyTranslatedString so we ensure it is a string with toString()
+    const titles = plugins
+        .get("toolbar")
+        .getButtons()
+        .map((item) => item.title.toString());
     editor.destroy();
 
     // Patch translations to return "Translated" for these terms
     patchTranslations(Object.fromEntries(titles.map((title) => [title, "Translated"])));
 
     // Instantiate a new editor.
-    const { editor: postPatchEditor } = await setupEditor("<p>[abc]</p>");
+    const { plugins: postPatchPlugins } = await setupEditor("<p>[abc]</p>");
 
     // Check that every registered button has the result of the call to _t
-    postPatchEditor.resources.toolbarItems.forEach((item) => {
-        // item.title could be a LazyTranslatedString so we ensure it is a string with toString()
-        expect(item.title.toString()).toBe("Translated");
-    });
+    postPatchPlugins
+        .get("toolbar")
+        .getButtons()
+        .forEach((item) => {
+            // item.label could be a LazyTranslatedString so we ensure it is a string with toString()
+            expect(item.title.toString()).toBe("Translated");
+        });
 
     await waitFor(".o-we-toolbar");
 

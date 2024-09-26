@@ -61,25 +61,20 @@ export class TablePlugin extends Plugin {
         isUnremovable: isUnremovableTableComponent,
         isUnsplittable: (element) =>
             element.tagName === "TABLE" || tableInnerComponents.has(element.tagName),
-        onSelectionChange: this.updateSelectionTable.bind(this),
+        selectionchange_handlers: this.updateSelectionTable.bind(this),
         color_apply_overrides: this.applyTableColor.bind(this),
+        clean_handlers: this.deselectTable.bind(this),
+        clean_for_save_handlers: ({ root }) => this.deselectTable(root),
         modifyTraversedNodes: this.adjustTraversedNodes.bind(this),
         considerNodeFullySelected: (node) => !!closestElement(node, ".o_selected_td"),
+        before_line_break_handlers: this.resetTableSelection.bind(this),
+        before_split_block_handlers: this.resetTableSelection.bind(this),
     };
 
     setup() {
         this.addDomListener(this.editable, "mousedown", this.onMousedown);
         this.addDomListener(this.editable, "mouseup", this.onMouseup);
         this.onMousemove = this.onMousemove.bind(this);
-    }
-
-    handleCommand(command, payload) {
-        switch (command) {
-            case "CLEAN":
-            case "CLEAN_FOR_SAVE":
-                this.deselectTable(payload.root);
-                break;
-        }
     }
 
     handleTab() {
@@ -91,7 +86,7 @@ export class TablePlugin extends Plugin {
             if (shouldAddNewRow) {
                 this.addRow("after", findInSelection(selection, "tr"));
                 this.shiftCursorToTableCell(1);
-                this.dispatch("ADD_STEP");
+                this.shared.addStep();
             }
             return true;
         }
@@ -139,6 +134,7 @@ export class TablePlugin extends Plugin {
     insertTable({ rows = 2, cols = 2 } = {}) {
         const table = this._insertTable({ rows, cols });
         this.shared.setCursorStart(table.querySelector("p"));
+        this.shared.addStep();
     }
     addColumn(position, reference) {
         const columnIndex = getColumnIndex(reference);

@@ -6,7 +6,7 @@ import { isContentEditable, isTextNode } from "@html_editor/utils/dom_info";
 
 export class TextDirectionPlugin extends Plugin {
     static name = "text_direction";
-    static dependencies = ["selection", "split", "format"];
+    static dependencies = ["selection", "history", "split", "format"];
     resources = {
         user_commands: [
             {
@@ -66,6 +66,6 @@ export class TextDirectionPlugin extends Plugin {
                 element.style.setProperty("text-align", "right");
             }
         }
-        this.dispatch("ADD_STEP");
+        this.shared.addStep();
     }
 }
