@@ -560,6 +560,8 @@ class StockWarehouseOrderpoint(models.Model):
                         else:
                             origin = orderpoint.name
                         if float_compare(orderpoint.qty_to_order, 0.0, precision_rounding=orderpoint.product_uom.rounding) == 1:
+                            if orderpoint.unwanted_replenish:
+                                continue
                             date = orderpoint._get_orderpoint_procurement_date()
                             global_visibility_days = self.env['ir.config_parameter'].sudo().get_param('stock.visibility_days')
                             if global_visibility_days:
