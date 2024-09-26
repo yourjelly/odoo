@@ -71,7 +71,7 @@ export class ConfirmationPage extends Component {
             order_access_tokens: [this.props.orderAccessToken],
         });
         this.selfOrder.models.loadData(data);
-        const order = this.selfOrder.models["pos.order"].find(
+        const order = this.selfOrder.models["sale.order"].find(
             (o) => o.access_token === this.props.orderAccessToken
         );
         order.tracking_number = "S" + order.tracking_number;

@@ -101,7 +101,7 @@ export class PaymentScreen extends Component {
         return config;
     }
     get currentOrder() {
-        return this.pos.models["pos.order"].getBy("uuid", this.props.orderUuid);
+        return this.pos.models["sale.order"].getBy("uuid", this.props.orderUuid);
     }
     get paymentLines() {
         return this.currentOrder.payment_ids;

@@ -8,7 +8,7 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     def _create_move_from_pos_order_lines(self, lines):
-        lines_to_unreserve = self.env['pos.order.line']
+        lines_to_unreserve = self.env['sale.order.line']
         for line in lines:
             if line.order_id.shipping_date:
                 continue

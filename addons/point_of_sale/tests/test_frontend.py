@@ -560,7 +560,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenTour', login="pos_user")
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ReceiptScreenTour', login="pos_user")
 
-        for order in self.env['pos.order'].search([]):
+        for order in self.env['sale.order'].search([]):
             self.assertEqual(order.state, 'paid', "Validated order has payment of " + str(order.amount_paid) + " and total of " + str(order.amount_total))
 
         # check if email from ReceiptScreenTour is properly sent
@@ -579,11 +579,11 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ChromeTour', login="pos_user")
-        n_invoiced = self.env['pos.order'].search_count([('state', '=', 'invoiced')])
-        n_paid = self.env['pos.order'].search_count([('state', '=', 'paid')])
+        n_invoiced = self.env['sale.order'].search_count([('state', '=', 'invoiced')])
+        n_paid = self.env['sale.order'].search_count([('state', '=', 'paid')])
         self.assertEqual(n_invoiced, 1, 'There should be 1 invoiced order.')
         self.assertEqual(n_paid, 2, 'There should be 2 paid order.')
-        last_order = self.env['pos.order'].search([])[-1]
+        last_order = self.env['sale.order'].search([])[-1]
         self.assertEqual(last_order.lines[0].price_subtotal, 12.0)
         self.assertEqual(last_order.lines[0].price_subtotal_incl, 12.0)
 
@@ -805,7 +805,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenRoundingHalfUpCashAndBank', login="pos_user")
 
-        invoiced_orders = self.env['pos.order'].search([('state', '=', 'invoiced')])
+        invoiced_orders = self.env['sale.order'].search([('state', '=', 'invoiced')])
         self.assertEqual(len(invoiced_orders), 2, 'There should be 2 invoiced orders.')
 
         for order in invoiced_orders:
@@ -1007,11 +1007,11 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.office_combo.write({'lst_price': 50})
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('ProductComboPriceTaxIncludedTour')
-        order = self.env['pos.order'].search([])
+        order = self.env['sale.order'].search([])
         self.assertEqual(len(order.lines), 4, "There should be 4 order lines - 1 combo parent and 3 combo lines")
         # check that the combo lines are correctly linked to each other
-        parent_line_id = self.env['pos.order.line'].search([('product_id.name', '=', 'Office Combo'), ('order_id', '=', order.id)])
-        combo_line_ids = self.env['pos.order.line'].search([('product_id.name', '!=', 'Office Combo'), ('order_id', '=', order.id)])
+        parent_line_id = self.env['sale.order.line'].search([('product_id.name', '=', 'Office Combo'), ('order_id', '=', order.id)])
+        combo_line_ids = self.env['sale.order.line'].search([('product_id.name', '!=', 'Office Combo'), ('order_id', '=', order.id)])
         self.assertEqual(parent_line_id.combo_line_ids, combo_line_ids, "The combo parent should have 3 combo lines")
         # In the future we might want to test also if:
         #   - the combo lines are correctly stored in and restored from local storage
@@ -1342,7 +1342,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         def sync_from_ui_patch(*_args, **_kwargs):
             raise UserError('Test Error')
 
-        with patch.object(self.env.registry.models['pos.order'], "sync_from_ui", sync_from_ui_patch):
+        with patch.object(self.env.registry.models['sale.order'], "sync_from_ui", sync_from_ui_patch):
             # If there is problem in the tour, remove the log catcher to debug.
             with self.assertLogs(level="WARNING") as log_catcher:
                 self.main_pos_config.with_user(self.pos_user).open_ui()

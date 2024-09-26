@@ -78,9 +78,9 @@ class TestPosQris(AccountTestInvoicingHttpCommon):
         })
 
     def test_qris_transaction_allow_pos_order(self):
-        """ pos.order model should be created """
+        """ sale.order model should be created """
         self.env['l10n_id.qris.transaction'].create({
-            'model': 'pos.order',
+            'model': 'sale.order',
             'model_id': '1234512345'
         })
         self.env['l10n_id.qris.transaction'].create({
@@ -95,10 +95,10 @@ class TestPosQris(AccountTestInvoicingHttpCommon):
             })
 
     def test_qris_link_with_pos_order(self):
-        """ Test whether it's possible to link QRIS transaction with a pos.order record through
+        """ Test whether it's possible to link QRIS transaction with a sale.order record through
         UUID field instead of id """
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        pos_order = self.env['pos.order'].create({
+        pos_order = self.env['sale.order'].create({
             'company_id': self.env.company.id,
             'session_id': self.main_pos_config.current_session_id.id,
             'partner_id': self.partner_a.id,
@@ -120,7 +120,7 @@ class TestPosQris(AccountTestInvoicingHttpCommon):
             'amount_return': 10.0,
         })
         qris_transaction = self.env['l10n_id.qris.transaction'].create({
-            'model': 'pos.order',
+            'model': 'sale.order',
             'model_id': '1234512345',
         })
 

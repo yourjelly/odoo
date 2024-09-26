@@ -7,7 +7,7 @@ from odoo.tools import float_compare
 import base64
 
 class PosOrder(models.Model):
-    _inherit = 'pos.order'
+    _inherit = 'sale.order'
 
     def validate_coupon_programs(self, point_changes, new_codes):
         """
@@ -119,7 +119,7 @@ class PosOrder(models.Model):
             coupon_new_id_map[new_id.id] = old_id
 
         all_coupons = self.env['loyalty.card'].browse(coupon_new_id_map.keys()).exists()
-        lines_per_reward_code = defaultdict(lambda: self.env['pos.order.line'])
+        lines_per_reward_code = defaultdict(lambda: self.env['sale.order.line'])
         for line in self.lines:
             if not line.reward_identifier_code:
                 continue
@@ -206,7 +206,7 @@ class PosOrder(models.Model):
                             'type': 'binary',
                             'datas': base64.b64encode(report[0]),
                             'store_fname': filename,
-                            'res_model': 'pos.order',
+                            'res_model': 'sale.order',
                             'res_id': self.ids[0],
                             'mimetype': 'application/x-pdf'
                         })

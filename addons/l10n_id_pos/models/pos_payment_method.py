@@ -13,7 +13,7 @@ class PosPaymentMethod(models.Model):
         """
         if self.payment_method_type != 'qr_code' or self.qr_code_method != 'id_qr':
             return True
-        trx = self.env['l10n_id.qris.transaction']._get_latest_transaction('pos.order', trx_uuid)
+        trx = self.env['l10n_id.qris.transaction']._get_latest_transaction('sale.order', trx_uuid)
         if not trx:
             raise UserError(_("No QRIS transaction record is found based on this order"))
 

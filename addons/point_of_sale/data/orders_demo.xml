@@ -12,7 +12,7 @@
                 eval="(DateTime.today() + relativedelta(days=-1, hours=1)).strftime('%Y-%m-%d %H:%M:%S')" />
         </record>
 
-        <record id="pos_closed_order_1_1" model="pos.order" forcecreate="False">
+        <record id="pos_closed_order_1_1" model="sale.order" forcecreate="False">
             <field name="session_id" ref="pos_closed_session_1" />
             <field name="company_id" ref="base.main_company" />
             <field name="name">ClosedDemo/0001</field>
@@ -24,7 +24,7 @@
             <field name="pos_reference">Order 00000-001-1001</field>
         </record>
 
-        <record id="pos_closed_orderline_1_1_1" model="pos.order.line" forcecreate="False">
+        <record id="pos_closed_orderline_1_1_1" model="sale.order.line" forcecreate="False">
             <field name="product_id" ref="wall_shelf" />
             <field name="price_subtotal">1.98</field>
             <field name="price_subtotal_incl">1.98</field>
@@ -33,7 +33,7 @@
             <field name="full_product_name">Wall Shelf</field>
         </record>
 
-        <record id="pos_closed_orderline_1_1_2" model="pos.order.line" forcecreate="False">
+        <record id="pos_closed_orderline_1_1_2" model="sale.order.line" forcecreate="False">
             <field name="product_id" ref="small_shelf" />
             <field name="price_subtotal">2.83</field>
             <field name="price_subtotal_incl">2.83</field>
@@ -48,7 +48,7 @@
             <field name="amount">4.81</field>
         </record>
 
-        <record id="pos_closed_order_1_2" model="pos.order" forcecreate="False">
+        <record id="pos_closed_order_1_2" model="sale.order" forcecreate="False">
             <field name="session_id" ref="pos_closed_session_1" />
             <field name="company_id" ref="base.main_company" />
             <field name="name">ClosedDemo/0002</field>
@@ -60,7 +60,7 @@
             <field name="pos_reference">Order 00000-001-1002</field>
         </record>
 
-        <record id="pos_closed_orderline_1_2_1" model="pos.order.line" forcecreate="False">
+        <record id="pos_closed_orderline_1_2_1" model="sale.order.line" forcecreate="False">
             <field name="product_id" ref="magnetic_board" />
             <field name="price_subtotal">1.98</field>
             <field name="price_subtotal_incl">1.98</field>
@@ -69,7 +69,7 @@
             <field name="full_product_name">Magnetic Board</field>
         </record>
 
-        <record id="pos_closed_orderline_1_2_2" model="pos.order.line" forcecreate="False">
+        <record id="pos_closed_orderline_1_2_2" model="sale.order.line" forcecreate="False">
             <field name="product_id" ref="letter_tray" />
             <field name="price_subtotal">4.80</field>
             <field name="price_subtotal_incl">4.80</field>
@@ -101,7 +101,7 @@
             <field name="stop_at" eval="(DateTime.today() + relativedelta(hours=-2)).strftime('%Y-%m-%d %H:%M:%S')" />
         </record>
 
-        <record id="pos_closed_order_2_1" model="pos.order" forcecreate="False">
+        <record id="pos_closed_order_2_1" model="sale.order" forcecreate="False">
             <field name="session_id" ref="pos_closed_session_2" />
             <field name="company_id" ref="base.main_company" />
             <field name="name">ClosedDemo/0003</field>
@@ -113,7 +113,7 @@
             <field name="pos_reference">Order 00000-002-1001</field>
         </record>
 
-        <record id="pos_closed_orderline_2_1_1" model="pos.order.line" forcecreate="False">
+        <record id="pos_closed_orderline_2_1_1" model="sale.order.line" forcecreate="False">
             <field name="name">Closed Orderline 2.1.1</field>
             <field name="product_id" ref="letter_tray" />
             <field name="price_subtotal">4.80</field>
@@ -123,7 +123,7 @@
             <field name="full_product_name">Letter Tray</field>
         </record>
 
-        <record id="pos_closed_orderline_2_1_2" model="pos.order.line" forcecreate="False">
+        <record id="pos_closed_orderline_2_1_2" model="sale.order.line" forcecreate="False">
             <field name="name">Closed Orderline 2.1.2</field>
             <field name="product_id" ref="product.desk_organizer" />
             <field name="price_subtotal">5.10</field>
@@ -139,7 +139,7 @@
             <field name="amount">9.90</field>
         </record>
 
-        <record id="pos_closed_order_2_2" model="pos.order" forcecreate="False">
+        <record id="pos_closed_order_2_2" model="sale.order" forcecreate="False">
             <field name="session_id" ref="pos_closed_session_2" />
             <field name="company_id" ref="base.main_company" />
             <field name="name">ClosedDemo/0004</field>
@@ -151,7 +151,7 @@
             <field name="pos_reference">Order 00000-002-1002</field>
         </record>
 
-        <record id="pos_closed_orderline_2_2_1" model="pos.order.line" forcecreate="False">
+        <record id="pos_closed_orderline_2_2_1" model="sale.order.line" forcecreate="False">
             <field name="name">Closed Orderline 2.2.1</field>
             <field name="product_id" ref="magnetic_board" />
             <field name="price_subtotal">1.98</field>
@@ -161,7 +161,7 @@
             <field name="full_product_name">Magnetic Board</field>
         </record>
 
-        <record id="pos_closed_orderline_2_2_2" model="pos.order.line" forcecreate="False">
+        <record id="pos_closed_orderline_2_2_2" model="sale.order.line" forcecreate="False">
             <field name="name">Closed Orderline 2.1.2</field>
             <field name="product_id" ref="product.monitor_stand" />
             <field name="price_subtotal">6.38</field>

@@ -17,7 +17,7 @@ class PosSelfOrderControllerStripe(PosSelfOrderController):
     def stripe_capture_payment(self, access_token, order_access_token, payment_intent_id, payment_method_id):
         pos_config, _ = self._verify_authorization(access_token, "", False)
         stripe_confirmation = pos_config.env['pos.payment.method'].stripe_capture_payment(payment_intent_id)
-        order = pos_config.env['pos.order'].search([('access_token', '=', order_access_token), ('config_id', '=', pos_config.id)])
+        order = pos_config.env['sale.order'].search([('access_token', '=', order_access_token), ('config_id', '=', pos_config.id)])
 
         if not order:
             raise Unauthorized()
@@ -47,15 +47,15 @@ class PosSelfOrderControllerStripe(PosSelfOrderController):
                 request.env['bus.bus']._sendone(f'pos_config-{order.config_id.access_token}', 'PAYMENT_STATUS', {
                     'payment_result': 'Success',
                     'data': {
-                        'pos.order': order.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
-                        'pos.order.line': order.lines.read(order._load_pos_self_data_fields(order.config_id.id), load=False)
+                        'sale.order': order.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
+                        'sale.order.line': order.lines.read(order._load_pos_self_data_fields(order.config_id.id), load=False)
                     }
                 })
         else:
             request.env['bus.bus']._sendone(f'pos_config-{order.config_id.access_token}', 'PAYMENT_STATUS', {
                 'payment_result': 'fail',
                 'data': {
-                    'pos.order': order.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
-                    'pos.order.line': order.lines.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
+                    'sale.order': order.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
+                    'sale.order.line': order.lines.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
                 }
             })

@@ -12,7 +12,7 @@ patch(OrderSummary.prototype, {
         }
         return (
             this.pos.config.module_pos_restaurant &&
-            !this.pos.models["pos.order"].some(
+            !this.pos.models["sale.order"].some(
                 (o) =>
                     o.table_id?.id === this.pos.selectedTable.id &&
                     o.finalized === false &&
@@ -28,7 +28,7 @@ patch(OrderSummary.prototype, {
         if (this.pos.selectedTable) {
             return (
                 this.pos.config.module_pos_restaurant &&
-                !this.pos.models["pos.order"].some(
+                !this.pos.models["sale.order"].some(
                     (o) =>
                         o.table_id?.id === this.pos.selectedTable.id &&
                         o.finalized === false &&

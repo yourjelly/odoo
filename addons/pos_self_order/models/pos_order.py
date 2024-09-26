@@ -7,7 +7,7 @@ from odoo import models, fields, api
 
 
 class PosOrderLine(models.Model):
-    _inherit = "pos.order.line"
+    _inherit = "sale.order.line"
 
     combo_id = fields.Many2one('product.combo', string='Combo reference')
 
@@ -32,7 +32,7 @@ class PosOrderLine(models.Model):
         return super().write(vals)
 
 class PosOrder(models.Model):
-    _inherit = "pos.order"
+    _inherit = "sale.order"
 
     table_stand_number = fields.Char(string="Table Stand Number")
 
@@ -47,7 +47,7 @@ class PosOrder(models.Model):
                 order_id = order['id']
 
                 if isinstance(order_id, int):
-                    old_order = self.env['pos.order'].browse(order_id)
+                    old_order = self.env['sale.order'].browse(order_id)
                     if old_order.takeaway:
                         order['takeaway'] = old_order.takeaway
 
@@ -63,7 +63,7 @@ class PosOrder(models.Model):
 
     @api.model
     def remove_from_ui(self, server_ids):
-        order_ids = self.env['pos.order'].browse(server_ids)
+        order_ids = self.env['sale.order'].browse(server_ids)
         order_ids.state = 'cancel'
         self._send_notification(order_ids)
         return super().remove_from_ui(server_ids)
@@ -71,8 +71,8 @@ class PosOrder(models.Model):
     def _send_notification(self, order_ids):
         for order in order_ids:
             order._notify('ORDER_STATE_CHANGED', {
-                'pos.order': order.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
-                'pos.order.line': order.lines.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
+                'sale.order': order.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
+                'sale.order.line': order.lines.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
                 'pos.payment': order.payment_ids.read(order.payment_ids._load_pos_data_fields(order.config_id.id), load=False),
                 'pos.payment.method': order.payment_ids.mapped('payment_method_id').read(self.env['pos.payment.method']._load_pos_data_fields(order.config_id.id), load=False),
                 'product.attribute.custom.value':  order.lines.custom_attribute_value_ids.read(order.lines.custom_attribute_value_ids._load_pos_data_fields(order.config_id.id), load=False),

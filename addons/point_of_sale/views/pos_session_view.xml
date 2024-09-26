@@ -27,14 +27,14 @@
                             <field name="picking_count" widget="statinfo" string="Pickings" invisible="failed_pickings"/>
                             <field name="picking_count" widget="statinfo" string="Pickings" class="text-danger" invisible="not failed_pickings"/>
                         </button>
-                        <button
+                        <!-- <button
                             name="action_show_payments_list"
                             type="object"
                             class="oe_stat_button"
                             icon="fa-dollar"
                             >
                             <field name="total_payments_amount" widget="statinfo" string="Payments"/>
-                        </button>
+                        </button> -->
                         <button
                             name="show_journal_items"
                             type="object"

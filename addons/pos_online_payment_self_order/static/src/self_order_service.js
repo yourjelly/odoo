@@ -11,8 +11,8 @@ patch(SelfOrder.prototype, {
             this.onlinePaymentStatus = status;
             this.paymentError = status === "fail";
 
-            const order = this.models["pos.order"].find(
-                (o) => o.access_token === data["pos.order"][0].access_token
+            const order = this.models["sale.order"].find(
+                (o) => o.access_token === data["sale.order"][0].access_token
             );
             if (status === "success" && !this.currentOrder.access_token && order) {
                 this.confirmationPage("order", this.config.self_ordering_mode, order.access_token);

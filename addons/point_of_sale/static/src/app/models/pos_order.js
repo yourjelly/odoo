@@ -13,7 +13,7 @@ const { DateTime } = luxon;
 const formatCurrency = registry.subRegistries.formatters.content.monetary[1];
 
 export class PosOrder extends Base {
-    static pythonModel = "pos.order";
+    static pythonModel = "sale.order";
 
     setup(vals) {
         super.setup(vals);
@@ -258,7 +258,7 @@ export class PosOrder extends Base {
         // Checks whether an orderline has been deleted from the order since it
         // was last sent to the preparation tools. If so we delete it to the changes.
         for (const [key, change] of Object.entries(this.last_order_preparation_change.lines)) {
-            if (!this.models["pos.order.line"].getBy("uuid", change.uuid)) {
+            if (!this.models["sale.order.line"].getBy("uuid", change.uuid)) {
                 delete this.last_order_preparation_change.lines[key];
             }
         }

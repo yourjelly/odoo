@@ -128,7 +128,7 @@ export class TicketScreen extends Component {
         }
     }
     async onInvoiceOrder(orderId) {
-        const order = this.pos.models["pos.order"].get(orderId);
+        const order = this.pos.models["sale.order"].get(orderId);
         this.state.selectedOrder = order;
     }
     onClickOrderline(orderline) {
@@ -140,7 +140,7 @@ export class TicketScreen extends Component {
     }
     onClickRefundOrderUid(orderUuid) {
         // Open the refund order.
-        const refundOrder = this.pos.models["pos.order"].find((order) => order.uuid == orderUuid);
+        const refundOrder = this.pos.models["sale.order"].find((order) => order.uuid == orderUuid);
         if (refundOrder) {
             this._setOrder(refundOrder);
         }
@@ -231,7 +231,7 @@ export class TicketScreen extends Component {
         const lines = [];
         for (const refundDetail of this._getRefundableDetails(partner, order)) {
             const refundLine = refundDetail.line;
-            const line = this.pos.models["pos.order.line"].create({
+            const line = this.pos.models["sale.order.line"].create({
                 qty: -refundDetail.qty,
                 price_unit: refundLine.price_unit,
                 product_id: refundLine.product_id,
@@ -313,7 +313,7 @@ export class TicketScreen extends Component {
         return (!o.finalized || screen.includes(oScreen.name)) && o.uiState.displayed;
     }
     getFilteredOrderList() {
-        const orderModel = this.pos.models["pos.order"];
+        const orderModel = this.pos.models["sale.order"];
         let orders =
             this.state.filter === "SYNCED"
                 ? orderModel.filter((o) => o.finalized && o.uiState.displayed)
@@ -405,7 +405,7 @@ export class TicketScreen extends Component {
      * Hide the delete button if one of the payments is a 'done' electronic payment.
      */
     shouldHideDeleteButton(order) {
-        const orders = this.pos.models["pos.order"].filter((o) => !o.finalized);
+        const orders = this.pos.models["sale.order"].filter((o) => !o.finalized);
         return (
             (orders.length === 1 && orders[0].lines.length === 0) ||
             (this.ui.isSmall && order != this.state.selectedOrder) ||
@@ -476,7 +476,7 @@ export class TicketScreen extends Component {
     _getEmptyOrder(partner) {
         let emptyOrderForPartner = null;
         let emptyOrder = null;
-        for (const order of this.pos.models["pos.order"].filter((order) => !order.finalized)) {
+        for (const order of this.pos.models["sale.order"].filter((order) => !order.finalized)) {
             if (order.get_orderlines().length === 0 && order.payment_ids.length === 0) {
                 if (order.get_partner() === partner) {
                     emptyOrderForPartner = order;
@@ -565,7 +565,7 @@ export class TicketScreen extends Component {
         this.closeTicketScreen();
     }
     _getOrderList() {
-        return this.pos.models["pos.order"].getAll();
+        return this.pos.models["sale.order"].getAll();
     }
     _getFilterOptions() {
         const orderStates = this._getOrderStates();
@@ -682,7 +682,7 @@ export class TicketScreen extends Component {
         const offset = screenState.offsetByDomain[JSON.stringify(domain)] || 0;
         const config_id = this.pos.config.id;
         const { ordersInfo, totalCount } = await this.pos.data.call(
-            "pos.order",
+            "sale.order",
             "search_paid_order_ids",
             [],
             {
@@ -701,7 +701,7 @@ export class TicketScreen extends Component {
 
         const idsNotInCacheOrOutdated = ordersInfo
             .filter((orderInfo) => {
-                const order = this.pos.models["pos.order"].get(orderInfo[0]);
+                const order = this.pos.models["sale.order"].get(orderInfo[0]);
 
                 if (
                     order &&
@@ -716,7 +716,7 @@ export class TicketScreen extends Component {
             .map((info) => info[0]);
 
         if (idsNotInCacheOrOutdated.length > 0) {
-            await this.pos.data.read("pos.order", Array.from(new Set(idsNotInCacheOrOutdated)));
+            await this.pos.data.read("sale.order", Array.from(new Set(idsNotInCacheOrOutdated)));
         }
     }
 }

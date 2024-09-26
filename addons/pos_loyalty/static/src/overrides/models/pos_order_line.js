@@ -6,33 +6,33 @@ patch(PosOrderline, {
     extraFields: {
         ...(PosOrderline.extraFields || {}),
         _e_wallet_program_id: {
-            model: "pos.order.line",
+            model: "sale.order.line",
             name: "_e_wallet_program_id",
             relation: "loyalty.program",
             type: "many2one",
             local: true,
         },
         gift_code: {
-            model: "pos.order.line",
+            model: "sale.order.line",
             name: "gift_code",
             type: "char",
             local: true,
         },
         _gift_barcode: {
-            model: "pos.order.line",
+            model: "sale.order.line",
             name: "_gift_barcode",
             type: "char",
             local: true,
         },
         _gift_card_id: {
-            model: "pos.order.line",
+            model: "sale.order.line",
             name: "_gift_card_id",
             relation: "loyalty.card",
             type: "many2one",
             local: true,
         },
         _reward_product_id: {
-            model: "pos.order.line",
+            model: "sale.order.line",
             name: "_reward_product_id",
             relation: "product.product",
             type: "many2one",

@@ -362,7 +362,7 @@ export class PosStore extends Reactive {
         }
 
         if (ids.size > 0) {
-            await this.data.call("pos.order", "action_pos_order_cancel", [Array.from(ids)]);
+            await this.data.call("sale.order", "action_pos_order_cancel", [Array.from(ids)]);
         }
 
         return true;
@@ -490,7 +490,7 @@ export class PosStore extends Reactive {
     }
 
     async afterProcessServerData() {
-        const openOrders = this.data.models["pos.order"].filter((order) => !order.finalized);
+        const openOrders = this.data.models["sale.order"].filter((order) => !order.finalized);
 
         if (!this.config.module_pos_restaurant) {
             this.selectedOrderUuid = openOrders.length
@@ -826,7 +826,7 @@ export class PosStore extends Reactive {
             values.price_unit = price;
         }
 
-        const line = this.data.models["pos.order.line"].create({ ...values, order_id: order });
+        const line = this.data.models["sale.order.line"].create({ ...values, order_id: order });
         line.setOptions(options);
         this.selectOrderLine(order, line);
         this.numberBuffer.reset();
@@ -969,7 +969,7 @@ export class PosStore extends Reactive {
         });
 
         const uniqId = this.generate_unique_id();
-        const order = this.models["pos.order"].create({
+        const order = this.models["sale.order"].create({
             session_id: this.session,
             company_id: this.company,
             config_id: this.config,
@@ -1000,7 +1000,7 @@ export class PosStore extends Reactive {
     }
 
     selectNextOrder() {
-        const orders = this.models["pos.order"].filter((order) => !order.finalized);
+        const orders = this.models["sale.order"].filter((order) => !order.finalized);
         if (orders.length > 0) {
             this.selectedOrderUuid = orders[0].uuid;
         } else {
@@ -1031,16 +1031,16 @@ export class PosStore extends Reactive {
     }
 
     getPendingOrder() {
-        const orderToCreate = this.models["pos.order"].filter(
+        const orderToCreate = this.models["sale.order"].filter(
             (order) =>
                 this.pendingOrder.create.has(order.id) &&
                 (order.lines.length > 0 ||
                     order.payment_ids.some((p) => p.payment_method_id.type === "pay_later"))
         );
-        const orderToUpdate = this.models["pos.order"].readMany(
+        const orderToUpdate = this.models["sale.order"].readMany(
             Array.from(this.pendingOrder.write)
         );
-        const orderToDelele = this.models["pos.order"].readMany(
+        const orderToDelele = this.models["sale.order"].readMany(
             Array.from(this.pendingOrder.delete)
         );
 
@@ -1107,13 +1107,13 @@ export class PosStore extends Reactive {
             const serializedOrder = orders.map((order) =>
                 order.serialize({ orm: true, clear: true })
             );
-            const data = await this.data.call("pos.order", "sync_from_ui", [serializedOrder], {
+            const data = await this.data.call("sale.order", "sync_from_ui", [serializedOrder], {
                 context,
             });
             const missingRecords = await this.data.missingRecursive(data);
             const newData = this.models.loadData(missingRecords);
 
-            for (const line of newData["pos.order.line"]) {
+            for (const line of newData["sale.order.line"]) {
                 const refundedOrderLine = line.refunded_orderline_id;
 
                 if (refundedOrderLine) {
@@ -1123,7 +1123,7 @@ export class PosStore extends Reactive {
                 }
             }
 
-            this.postSyncAllOrders(newData["pos.order"]);
+            this.postSyncAllOrders(newData["sale.order"]);
 
             if (data["pos.session"].length > 0) {
                 // Replace the original session by the rescue one. And the rescue one will have
@@ -1133,7 +1133,7 @@ export class PosStore extends Reactive {
             }
 
             this.clearPendingOrder();
-            return newData["pos.order"];
+            return newData["sale.order"];
         } catch (error) {
             if (options.throw) {
                 throw error;
@@ -1190,7 +1190,7 @@ export class PosStore extends Reactive {
         ]);
     }
     async loadServerOrders(domain) {
-        const orders = await this.data.searchRead("pos.order", domain);
+        const orders = await this.data.searchRead("sale.order", domain);
         for (const order of orders) {
             order.update({
                 config_id: this.config,
@@ -1247,7 +1247,7 @@ export class PosStore extends Reactive {
             return undefined;
         }
 
-        return this.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
+        return this.models["sale.order"].getBy("uuid", this.selectedOrderUuid);
     }
     get selectedOrder() {
         return this.get_order();
@@ -1263,7 +1263,7 @@ export class PosStore extends Reactive {
 
     // return the list of unpaid orders
     get_open_orders() {
-        return this.models["pos.order"].filter((o) => !o.finalized);
+        return this.models["sale.order"].filter((o) => !o.finalized);
     }
 
     // To be used in the context of closing the POS
@@ -1336,7 +1336,7 @@ export class PosStore extends Reactive {
      * @param {str} terminalName
      */
     getPendingPaymentLine(terminalName) {
-        for (const order of this.models["pos.order"].getAll()) {
+        for (const order of this.models["sale.order"].getAll()) {
             const paymentLine = order.payment_ids.find(
                 (paymentLine) =>
                     paymentLine.payment_method_id.use_payment_terminal === terminalName &&
@@ -1349,7 +1349,7 @@ export class PosStore extends Reactive {
     }
 
     get linesToRefund() {
-        return this.models["pos.order"].reduce((acc, order) => {
+        return this.models["sale.order"].reduce((acc, order) => {
             acc.push(...Object.values(order.uiState.lineToRefund));
             return acc;
         }, []);
@@ -1412,7 +1412,7 @@ export class PosStore extends Reactive {
             { webPrintFallback: true }
         );
         const nbrPrint = order.nb_print;
-        await this.data.write("pos.order", [order.id], { nb_print: nbrPrint + 1 });
+        await this.data.write("sale.order", [order.id], { nb_print: nbrPrint + 1 });
         return true;
     }
     getOrderChanges(skipped = false, order = this.get_order()) {
@@ -1545,10 +1545,10 @@ export class PosStore extends Reactive {
     }
     async orderDetails(order) {
         this.dialog.add(FormViewDialog, {
-            resModel: "pos.order",
+            resModel: "sale.order",
             resId: order.id,
             onRecordSaved: async (record) => {
-                await this.data.read("pos.order", [record.evalContext.id]);
+                await this.data.read("sale.order", [record.evalContext.id]);
                 await this.data.read(
                     "pos.payment",
                     order.payment_ids.map((p) => p.id)
@@ -1623,7 +1623,7 @@ export class PosStore extends Reactive {
 
         let existingLots = [];
         try {
-            existingLots = await this.data.call("pos.order.line", "get_existing_lots", [
+            existingLots = await this.data.call("sale.order.line", "get_existing_lots", [
                 this.company.id,
                 product.id,
             ]);

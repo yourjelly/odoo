@@ -76,7 +76,7 @@ class PosSession(models.Model):
     # Total Cash In/Out
     cash_real_transaction = fields.Monetary(string='Transaction', readonly=True)
 
-    order_ids = fields.One2many('pos.order', 'session_id',  string='Orders')
+    order_ids = fields.One2many('sale.order', 'session_id',  string='Orders')
     order_count = fields.Integer(compute='_compute_order_count')
     statement_line_ids = fields.One2many('account.bank.statement.line', 'pos_session_id', string='Cash Lines', readonly=True)
     failed_pickings = fields.Boolean(compute='_compute_picking_count')
@@ -88,7 +88,7 @@ class PosSession(models.Model):
         copy=False)
     move_id = fields.Many2one('account.move', string='Journal Entry', index=True)
     payment_method_ids = fields.Many2many('pos.payment.method', related='config_id.payment_method_ids', string='Payment Methods')
-    total_payments_amount = fields.Float(compute='_compute_total_payments_amount', string='Total Payments Amount')
+    # total_payments_amount = fields.Float(compute='_compute_total_payments_amount', string='Total Payments Amount')
     is_in_company_currency = fields.Boolean('Is Using Company Currency', compute='_compute_is_in_company_currency')
     update_stock_at_closing = fields.Boolean('Stock should be updated at closing')
     bank_payment_ids = fields.One2many('account.payment', 'pos_session_id', 'Bank Payments', help='Account payments representing aggregated and bank split payments.')
@@ -129,7 +129,7 @@ class PosSession(models.Model):
 
     @api.model
     def _load_pos_data_models(self, config_id):
-        return ['pos.config', 'pos.order', 'pos.order.line', 'pos.pack.operation.lot', 'pos.payment', 'pos.payment.method', 'pos.printer',
+        return ['pos.config', 'sale.order', 'sale.order.line', 'pos.pack.operation.lot', 'pos.payment', 'pos.payment.method', 'pos.printer',
             'pos.category', 'pos.bill', 'res.company', 'account.tax', 'account.tax.group', 'product.product', 'product.attribute', 'product.attribute.custom.value',
             'product.template.attribute.line', 'product.template.attribute.value', 'product.combo', 'product.combo.item', 'product.packaging', 'res.users', 'res.partner',
             'decimal.precision', 'uom.uom', 'uom.category', 'res.country', 'res.country.state', 'res.lang', 'product.pricelist', 'product.pricelist.item', 'product.category',
@@ -245,7 +245,7 @@ class PosSession(models.Model):
             session.total_payments_amount = session_amount_map.get(session.id) or 0
 
     def _compute_order_count(self):
-        orders_data = self.env['pos.order']._read_group([('session_id', 'in', self.ids)], ['session_id'], ['__count'])
+        orders_data = self.env['sale.order']._read_group([('session_id', 'in', self.ids)], ['session_id'], ['__count'])
         sessions_data = {session.id: count for session, count in orders_data}
         for session in self:
             session.order_count = sessions_data.get(session.id, 0)
@@ -459,7 +459,7 @@ class PosSession(models.Model):
             if self.move_id.line_ids:
                 self.move_id.sudo().with_company(self.company_id)._post()
                 # Set the uninvoiced orders' state to 'done'
-                self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
+                self.env['sale.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
             else:
                 self.move_id.sudo().unlink()
             self.sudo().with_company(self.company_id)._reconcile_account_move_lines(data)
@@ -1514,7 +1514,7 @@ class PosSession(models.Model):
         :param partial_move_line_vals dict:
             initial values in creating account.move.line
         :param amount float:
-            amount derived from pos.payment, pos.order, or pos.order.line records
+            amount derived from pos.payment, sale.order, or sale.order.line records
         :param amount_converted float:
             converted value of `amount` from the given `session_currency` to company currency
 
@@ -1659,7 +1659,7 @@ class PosSession(models.Model):
     def action_view_order(self):
         return {
             'name': _('Orders'),
-            'res_model': 'pos.order',
+            'res_model': 'sale.order',
             'view_mode': 'list,form',
             'views': [
                 (self.env.ref('point_of_sale.view_pos_order_tree_no_session_id').id, 'list'),
@@ -1818,7 +1818,7 @@ class PosSession(models.Model):
 
     def get_total_discount(self):
         amount = 0
-        for line in self.env['pos.order.line'].search([('order_id', 'in', self._get_closed_orders().ids), ('discount', '>', 0)]):
+        for line in self.env['sale.order.line'].search([('order_id', 'in', self._get_closed_orders().ids), ('discount', '>', 0)]):
             amount += line._get_discount_amount()
 
         return amount

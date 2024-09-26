@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_pos_pos_form" model="ir.ui.view">
-        <field name="name">pos.order.form</field>
-        <field name="model">pos.order</field>
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
         <field name="arch" type="xml">
             <form string="Point of Sale Orders" create="0">
                 <header>
@@ -210,8 +210,8 @@
     </record>
 
     <record model="ir.ui.view" id="view_pos_order_kanban">
-        <field name="name">pos.order.kanban</field>
-        <field name="model">pos.order</field>
+        <field name="name">sale.order.kanban</field>
+        <field name="model">sale.order</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" create="0" sample="1">
                 <field name="currency_id"/>
@@ -238,8 +238,8 @@
         </field>
     </record>
     <record model="ir.ui.view" id="view_pos_order_pivot">
-        <field name="name">pos.order.pivot</field>
-        <field name="model">pos.order</field>
+        <field name="name">sale.order.pivot</field>
+        <field name="model">sale.order</field>
         <field name="arch" type="xml">
             <pivot string="PoS Orders" sample="1">
                 <field name="date_order" type="row"/>
@@ -252,7 +252,7 @@
 
     <record id="action_pos_pos_form" model="ir.actions.act_window">
         <field name="name">Orders</field>
-        <field name="res_model">pos.order</field>
+        <field name="res_model">sale.order</field>
         <field name="path">pos-orders</field>
         <field name="view_mode">list,form,kanban,pivot</field>
         <field name="view_id" eval="False"/>
@@ -268,7 +268,7 @@
 
     <record id="action_pos_sale_graph" model="ir.actions.act_window">
         <field name="name">Orders</field>
-        <field name="res_model">pos.order</field>
+        <field name="res_model">sale.order</field>
         <field name="view_mode">graph,list,form,kanban,pivot</field>
         <field name="domain">[('state', 'not in', ['draft', 'cancel', 'invoiced'])]</field>
         <field name="help" type="html">
@@ -281,8 +281,8 @@
     </record>
 
     <record id="view_pos_order_tree" model="ir.ui.view">
-        <field name="name">pos.order.list</field>
-        <field name="model">pos.order</field>
+        <field name="name">sale.order.list</field>
+        <field name="model">sale.order</field>
         <field name="arch" type="xml">
             <list string="POS Orders" create="0" sample="1" decoration-info="state == 'draft'" decoration-muted="state == 'cancel'" duplicate="0">
                 <field name="currency_id" column_invisible="True"/>
@@ -301,8 +301,8 @@
         </field>
     </record>
     <record id="view_pos_order_tree_no_session_id" model="ir.ui.view">
-        <field name="name">pos.order.tree_no_session_id</field>
-        <field name="model">pos.order</field>
+        <field name="name">sale.order.tree_no_session_id</field>
+        <field name="model">sale.order</field>
         <field name="mode">primary</field>
         <field name="priority">1000</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
@@ -312,8 +312,8 @@
     </record>
 
     <record id="view_pos_order_search" model="ir.ui.view">
-        <field name="name">pos.order.search.view</field>
-        <field name="model">pos.order</field>
+        <field name="name">sale.order.search.view</field>
+        <field name="model">sale.order</field>
         <field name="arch" type="xml">
             <search string="Point of Sale Orders">
                 <field name="name"/>
@@ -325,8 +325,8 @@
     <menuitem id="menu_point_ofsale" parent="menu_point_of_sale" action="action_pos_pos_form" sequence="2" groups="group_pos_manager,group_pos_user"/>
 
     <record id="view_pos_order_line" model="ir.ui.view">
-        <field name="name">pos.order.line.list</field>
-        <field name="model">pos.order.line</field>
+        <field name="name">sale.order.line.list</field>
+        <field name="model">sale.order.line</field>
         <field name="arch" type="xml">
             <list string="POS Order lines">
                 <field name="product_id" readonly="1"/>
@@ -342,8 +342,8 @@
     </record>
 
     <record id="view_pos_order_line_form" model="ir.ui.view">
-        <field name="name">pos.order.line.form</field>
-        <field name="model">pos.order.line</field>
+        <field name="name">sale.order.line.form</field>
+        <field name="model">sale.order.line</field>
         <field name="arch" type="xml">
             <form string="POS Order line">
                 <group col="4">
@@ -360,29 +360,29 @@
 
     <record id="action_pos_order_line" model="ir.actions.act_window">
         <field name="name">Sale line</field>
-        <field name="res_model">pos.order.line</field>
+        <field name="res_model">sale.order.line</field>
         <field name="view_mode">list</field>
         <field name="view_id" ref="view_pos_order_line"/>
     </record>
 
     <record id="action_pos_order_line_form" model="ir.actions.act_window">
         <field name="name">Sale line</field>
-        <field name="res_model">pos.order.line</field>
+        <field name="res_model">sale.order.line</field>
         <field name="view_mode">form,list</field>
         <field name="view_id" ref="view_pos_order_line_form"/>
     </record>
 
     <record id="action_pos_order_line_day" model="ir.actions.act_window">
         <field name="name">Sale line</field>
-        <field name="res_model">pos.order.line</field>
+        <field name="res_model">sale.order.line</field>
         <field name="view_mode">list</field>
         <field name="view_id" ref="view_pos_order_line"/>
         <field name="domain">[('create_date', '&gt;=', time.strftime('%Y-%m-%d 00:00:00')),('create_date', '&lt;=', time.strftime('%Y-%m-%d 23:59:59'))]</field>
     </record>
 
     <record id="view_pos_order_tree_all_sales_lines" model="ir.ui.view">
-        <field name="name">pos.order.line.all.sales.list</field>
-        <field name="model">pos.order.line</field>
+        <field name="name">sale.order.line.all.sales.list</field>
+        <field name="model">sale.order.line</field>
         <field name="arch" type="xml">
             <list string="POS Orders lines">
                 <field name="order_id" />
@@ -396,13 +396,13 @@
     </record>
      <record id="action_pos_all_sales_lines" model="ir.actions.act_window">
         <field name="name">All sales lines</field>
-        <field name="res_model">pos.order.line</field>
+        <field name="res_model">sale.order.line</field>
         <field name="view_id" ref="view_pos_order_tree_all_sales_lines" />
     </record>
 
     <record id="view_pos_order_filter" model="ir.ui.view">
-        <field name="name">pos.order.list.select</field>
-        <field name="model">pos.order</field>
+        <field name="name">sale.order.list.select</field>
+        <field name="model">sale.order</field>
         <field name="arch" type="xml">
             <search string="Search Sales Order">
                 <field name="name"/>

@@ -11,7 +11,7 @@ import {
 } from "@point_of_sale/app/models/utils/tax_utils";
 
 export class PosOrderline extends Base {
-    static pythonModel = "pos.order.line";
+    static pythonModel = "sale.order.line";
 
     setup(vals) {
         super.setup(vals);
@@ -197,7 +197,7 @@ export class PosOrderline extends Base {
         const quant =
             typeof quantity === "number" ? quantity : parseFloat("" + (quantity ? quantity : 0));
 
-        const allLineToRefundUuids = this.models["pos.order"].reduce((acc, order) => {
+        const allLineToRefundUuids = this.models["sale.order"].reduce((acc, order) => {
             Object.assign(acc, order.uiState.lineToRefund);
             return acc;
         }, {});

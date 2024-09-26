@@ -63,7 +63,7 @@ export class RestaurantTable extends Base {
         };
     }
     get orders() {
-        return this.models["pos.order"].filter(
+        return this.models["sale.order"].filter(
             (o) =>
                 o.table_id?.id === this.id &&
                 // Include the orders that are in tipping state.
@@ -71,7 +71,7 @@ export class RestaurantTable extends Base {
         );
     }
     getOrder() {
-        return this.parent_id?.getOrder?.() || this["<-pos.order.table_id"][0];
+        return this.parent_id?.getOrder?.() || this["<-sale.order.table_id"][0];
     }
     setPositionAsIfLinked(parent, side) {
         // console.log("132")

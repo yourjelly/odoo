@@ -108,7 +108,7 @@ export class ReceiptScreen extends Component {
         }
         const fullTicketImage = await this.generateTicketImage();
         const basicTicketImage = await this.generateTicketImage(true);
-        await this.pos.data.call("pos.order", action, [
+        await this.pos.data.call("sale.order", action, [
             [order.id],
             destination,
             fullTicketImage,

@@ -39,7 +39,7 @@ patch(PaymentScreen.prototype, {
         if (Object.keys(pointChanges || {}).length > 0 || newCodes.length) {
             try {
                 const { successful, payload } = await this.pos.data.call(
-                    "pos.order",
+                    "sale.order",
                     "validate_coupon_programs",
                     [[], pointChanges, newCodes]
                 );
@@ -125,7 +125,7 @@ patch(PaymentScreen.prototype, {
                 .map(([key, value]) => [key, omit(value, "appliedRules")])
         );
         if (Object.keys(couponData || {}).length > 0) {
-            const payload = await this.pos.data.call("pos.order", "confirm_coupon_programs", [
+            const payload = await this.pos.data.call("sale.order", "confirm_coupon_programs", [
                 order.id,
                 couponData,
             ]);
@@ -181,7 +181,7 @@ patch(PaymentScreen.prototype, {
                 id: item.id,
                 old_id: item.old_id,
             }));
-            this.pos.data.call("pos.order", "add_loyalty_history_lines", [
+            this.pos.data.call("sale.order", "add_loyalty_history_lines", [
                 [this.currentOrder.id],
                 loyaltyPoints,
                 couponUpdates,

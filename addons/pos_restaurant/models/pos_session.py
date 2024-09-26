@@ -17,7 +17,7 @@ class PosSession(models.Model):
     @api.model
     def _set_last_order_preparation_change(self, order_ids):
         for order_id in order_ids:
-            order = self.env['pos.order'].browse(order_id)
+            order = self.env['sale.order'].browse(order_id)
             last_order_preparation_change = {
                 'lines': {},
                 'generalNote': '',

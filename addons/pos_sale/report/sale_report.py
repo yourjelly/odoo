@@ -21,7 +21,7 @@ class SaleReport(models.Model):
         ],
     )
 
-    order_reference = fields.Reference(selection_add=[('pos.order', 'POS Order')])
+    order_reference = fields.Reference(selection_add=[('sale.order', 'POS Order')])
 
     def _select_pos(self):
         select_ = f"""
@@ -81,7 +81,7 @@ class SaleReport(models.Model):
                 / {self._case_value_or_one('pos.currency_rate')}
                 * {self._case_value_or_one('account_currency_table.rate')}))
             AS discount_amount,
-            concat('pos.order', ',', pos.id) AS order_reference"""
+            concat('sale.order', ',', pos.id) AS order_reference"""
 
         additional_fields = self._select_additional_fields()
         additional_fields_info = self._fill_pos_fields(additional_fields)

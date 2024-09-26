@@ -609,7 +609,7 @@ export class FloorScreen extends Component {
             this.onClickTable(table.parent_id, ev);
             return;
         }
-        const oToTrans = this.pos.models["pos.order"].getBy("uuid", this.pos.orderToTransferUuid);
+        const oToTrans = this.pos.models["sale.order"].getBy("uuid", this.pos.orderToTransferUuid);
         if (oToTrans) {
             await this.pos.transferOrder(table);
             this.pos.showScreen("ProductScreen");
@@ -949,7 +949,7 @@ export class FloorScreen extends Component {
         // If the table is not synced, we need to count the unsynced orders
         let changeCount = 0;
         let skipCount = 0;
-        const tableOrders = this.pos.models["pos.order"].filter(
+        const tableOrders = this.pos.models["sale.order"].filter(
             (o) => o.table_id?.id === table.id && !o.finalized
         );
 

@@ -14,7 +14,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
     def _check_order_access(self, pos_order_id, access_token):
         try:
             order_sudo = self._document_check_access(
-                'pos.order', pos_order_id, access_token)
+                'sale.order', pos_order_id, access_token)
         except:
             raise AccessError(
                 _("The provided order or access token is invalid."))
@@ -85,7 +85,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
     def pos_order_pay(self, pos_order_id, access_token=None, exit_route=None):
         """ Behaves like payment.PaymentPortal.payment_pay but for POS online payment.
 
-        :param int pos_order_id: The POS order to pay, as a `pos.order` id
+        :param int pos_order_id: The POS order to pay, as a `sale.order` id
         :param str access_token: The access token used to verify the user
         :param str exit_route: The URL to open to leave the POS online payment flow
 
@@ -163,7 +163,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
     def pos_order_pay_transaction(self, pos_order_id, access_token=None, **kwargs):
         """ Behaves like payment.PaymentPortal.payment_transaction but for POS online payment.
 
-        :param int pos_order_id: The POS order to pay, as a `pos.order` id
+        :param int pos_order_id: The POS order to pay, as a `sale.order` id
         :param str access_token: The access token used to verify the user
         :param str exit_route: The URL to open to leave the POS online payment flow
         :param dict kwargs: Data from payment module
@@ -246,7 +246,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
     def pos_order_pay_confirmation(self, pos_order_id, tx_id=None, access_token=None, exit_route=None, **kwargs):
         """ Behaves like payment.PaymentPortal.payment_confirm but for POS online payment.
 
-        :param int pos_order_id: The POS order to confirm, as a `pos.order` id
+        :param int pos_order_id: The POS order to confirm, as a `sale.order` id
         :param str tx_id: The transaction to confirm, as a `payment.transaction` id
         :param str access_token: The access token used to verify the user
         :param str exit_route: The URL to open to leave the POS online payment flow

@@ -229,14 +229,14 @@ export class PosData extends Reactive {
         this.relations = relations;
         this.models = models;
 
-        const order = data["pos.order"] || [];
-        const orderlines = data["pos.order.line"] || [];
+        const order = data["sale.order"] || [];
+        const orderlines = data["sale.order.line"] || [];
 
-        delete data["pos.order"];
-        delete data["pos.order.line"];
+        delete data["sale.order"];
+        delete data["sale.order.line"];
 
         this.models.loadData(data, this.modelToLoad);
-        this.models.loadData({ "pos.order": order, "pos.order.line": orderlines });
+        this.models.loadData({ "sale.order": order, "sale.order.line": orderlines });
         const dbData = await this.loadIndexedDBData();
         this.loadedIndexedDBProducts = dbData ? dbData["product.product"] : [];
         this.network.loading = false;

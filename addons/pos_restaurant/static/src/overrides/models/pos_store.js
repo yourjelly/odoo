@@ -51,11 +51,11 @@ patch(PosStore.prototype, {
             return;
         }
 
-        const orderIds = this.models["pos.order"]
+        const orderIds = this.models["sale.order"]
             .filter((order) => !order.finalized && typeof order.id === "number")
             .map((o) => o.id);
         const orderToLoad = new Set([...data["order_ids"], ...orderIds]);
-        await this.data.read("pos.order", [...orderToLoad]);
+        await this.data.read("sale.order", [...orderToLoad]);
     },
     get categoryCount() {
         const orderChanges = this.getOrderChanges();
@@ -250,7 +250,7 @@ patch(PosStore.prototype, {
             if (currentOrder) {
                 this.set_order(currentOrder);
             } else {
-                const potentialsOrders = this.models["pos.order"].filter(
+                const potentialsOrders = this.models["sale.order"].filter(
                     (o) => !o.table_id && !o.finalized && o.lines.length === 0
                 );
 
@@ -310,7 +310,7 @@ patch(PosStore.prototype, {
         this.set_order(null);
     },
     getActiveOrdersOnTable(table) {
-        return this.models["pos.order"].filter(
+        return this.models["sale.order"].filter(
             (o) => o.table_id?.id === table.id && !o.finalized && o.lines.length
         );
     },
@@ -318,7 +318,7 @@ patch(PosStore.prototype, {
         return this.getActiveOrdersOnTable(table).length > 0;
     },
     async transferOrder(destinationTable) {
-        const order = this.models["pos.order"].getBy("uuid", this.orderToTransferUuid);
+        const order = this.models["sale.order"].getBy("uuid", this.orderToTransferUuid);
         const originalTable = order.table_id;
         this.loadingOrderState = false;
         this.orderToTransferUuid = null;

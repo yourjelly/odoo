@@ -72,7 +72,7 @@ class RestaurantFloor(models.Model):
         }
 
     def deactivate_floor(self, session_id):
-        draft_orders = self.env['pos.order'].search([('session_id', '=', session_id), ('state', '=', 'draft'), ('table_id.floor_id', '=', self.id)])
+        draft_orders = self.env['sale.order'].search([('session_id', '=', session_id), ('state', '=', 'draft'), ('table_id.floor_id', '=', self.id)])
         if draft_orders:
             raise UserError(_("You cannot delete a floor when orders are still in draft for this floor."))
         for table in self.table_ids:
@@ -115,7 +115,7 @@ class RestaurantTable(models.Model):
         return ['table_number', 'width', 'height', 'position_h', 'position_v', 'parent_id', 'shape', 'floor_id', 'color', 'seats', 'active']
 
     def are_orders_still_in_draft(self):
-        draft_orders_count = self.env['pos.order'].search_count([('table_id', 'in', self.ids), ('state', '=', 'draft')])
+        draft_orders_count = self.env['sale.order'].search_count([('table_id', 'in', self.ids), ('state', '=', 'draft')])
 
         if draft_orders_count > 0:
             raise UserError(_("You cannot delete a table when orders are still in draft for this table."))

@@ -33,9 +33,9 @@ class PosSelfOrderController(http.Controller):
         order['date_order'] = str(fields.Datetime.now())
         order['fiscal_position_id'] = fiscal_position.id if fiscal_position else False
 
-        results = pos_config.env['pos.order'].sudo().with_context(from_self=True).with_company(pos_config.company_id.id).sync_from_ui([order])
-        line_ids = pos_config.env['pos.order.line'].browse([line['id'] for line in results['pos.order.line']])
-        order_ids = pos_config.env['pos.order'].browse([order['id'] for order in results['pos.order']])
+        results = pos_config.env['sale.order'].sudo().with_context(from_self=True).with_company(pos_config.company_id.id).sync_from_ui([order])
+        line_ids = pos_config.env['sale.order.line'].browse([line['id'] for line in results['sale.order.line']])
+        order_ids = pos_config.env['sale.order'].browse([order['id'] for order in results['sale.order']])
 
         self._verify_line_price(line_ids, pos_config)
 
@@ -51,8 +51,8 @@ class PosSelfOrderController(http.Controller):
 
     def _generate_return_values(self, order, config_id):
         return {
-            'pos.order': order.read(order._load_pos_data_fields(config_id.id), load=False),
-            'pos.order.line': order.lines.read(order._load_pos_data_fields(config_id.id), load=False),
+            'sale.order': order.read(order._load_pos_data_fields(config_id.id), load=False),
+            'sale.order.line': order.lines.read(order._load_pos_data_fields(config_id.id), load=False),
             'pos.payment': order.payment_ids.read(order.payment_ids._load_pos_data_fields(order.config_id.id), load=False),
             'pos.payment.method': order.payment_ids.mapped('payment_method_id').read(order.env['pos.payment.method']._load_pos_data_fields(order.config_id.id), load=False),
             'product.attribute.custom.value':  order.lines.custom_attribute_value_ids.read(order.lines.custom_attribute_value_ids._load_pos_data_fields(config_id.id), load=False),
@@ -122,11 +122,11 @@ class PosSelfOrderController(http.Controller):
         pos_config = self._verify_pos_config(access_token)
         results = self.process_order(order, access_token, None, device_type)
 
-        if not results['pos.order'][0].get('id'):
+        if not results['sale.order'][0].get('id'):
             raise BadRequest("Something went wrong")
 
         # access_token verified in process_new_order
-        order_sudo = pos_config.env['pos.order'].browse(results['pos.order'][0]['id'])
+        order_sudo = pos_config.env['sale.order'].browse(results['sale.order'][0]['id'])
         payment_method_sudo = pos_config.env["pos.payment.method"].browse(payment_method_id)
         if not order_sudo or not payment_method_sudo or payment_method_sudo not in order_sudo.config_id.payment_method_ids:
             raise NotFound("Order or payment method not found")

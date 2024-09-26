@@ -6,7 +6,7 @@ from odoo.tools import float_compare, float_is_zero
 
 
 class PosOrder(models.Model):
-    _inherit = 'pos.order'
+    _inherit = 'sale.order'
 
     currency_rate = fields.Float(compute='_compute_currency_rate', store=True, digits=0, readonly=True)
     crm_team_id = fields.Many2one('crm.team', string="Sales Team", ondelete="set null")
@@ -50,7 +50,7 @@ class PosOrder(models.Model):
         if len(orders) == 0:
             return data
 
-        order_ids = self.browse([o['id'] for o in data["pos.order"]])
+        order_ids = self.browse([o['id'] for o in data["sale.order"]])
         for order in order_ids:
             for line in order.lines.filtered(lambda l: l.product_id == order.config_id.down_payment_product_id and l.qty != 0 and (l.sale_order_origin_id or l.refunded_orderline_id.sale_order_origin_id)):
                 sale_lines = line.sale_order_origin_id.order_line or line.refunded_orderline_id.sale_order_origin_id.order_line
@@ -160,7 +160,7 @@ class PosOrder(models.Model):
         return inv_line_vals
 
 class PosOrderLine(models.Model):
-    _inherit = 'pos.order.line'
+    _inherit = 'sale.order.line'
 
     sale_order_origin_id = fields.Many2one('sale.order', string="Linked Sale Order")
     sale_order_line_id = fields.Many2one('sale.order.line', string="Source Sale Order Line")

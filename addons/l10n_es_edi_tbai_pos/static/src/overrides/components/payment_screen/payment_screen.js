@@ -8,7 +8,7 @@ patch(PaymentScreen.prototype, {
     async _postPushOrderResolve(order, order_server_ids) {
         if (this.pos.company.l10n_es_tbai_is_enabled) {
             const l10n_es_pos_tbai_qrurl = await this.pos.data.call(
-                "pos.order",
+                "sale.order",
                 "get_l10n_es_pos_tbai_qrurl",
                 [order.id]
             );

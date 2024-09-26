@@ -322,7 +322,7 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         # Make a sale paid by bank
         self.other_currency_config.open_ui()
         session_id = self.other_currency_config.current_session_id
-        order = self.env['pos.order'].create({
+        order = self.env['sale.order'].create({
             'company_id': self.env.company.id,
             'session_id': session_id.id,
             'partner_id': False,

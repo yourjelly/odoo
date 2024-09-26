@@ -1511,7 +1511,7 @@
           }
         }
       ],
-      "model": "pos.order",
+      "model": "sale.order",
       "columns": [],
       "rows": [
         {
@@ -1566,7 +1566,7 @@
           }
         }
       ],
-      "model": "pos.order",
+      "model": "sale.order",
       "columns": [],
       "rows": [
         {
@@ -1664,7 +1664,7 @@
           "format": ""
         }
       ],
-      "model": "report.pos.order",
+      "model": "report.sale.order",
       "columns": [],
       "rows": [],
       "name": "Point of Sale Analysis",
@@ -1749,7 +1749,7 @@
           "format": ""
         }
       ],
-      "model": "pos.order",
+      "model": "sale.order",
       "columns": [],
       "rows": [],
       "name": "PoS Orders",
@@ -1809,7 +1809,7 @@
           "format": ""
         }
       ],
-      "model": "report.pos.order",
+      "model": "report.sale.order",
       "columns": [],
       "rows": [{ "fieldName": "product_id" }],
       "name": "Point of Sale Analysis by Product",
@@ -1876,7 +1876,7 @@
           "format": ""
         }
       ],
-      "model": "pos.order",
+      "model": "sale.order",
       "columns": [],
       "rows": [{ "fieldName": "table_id" }],
       "name": "PoS Orders by Table",
@@ -1929,7 +1929,7 @@
           "format": ""
         }
       ],
-      "model": "report.pos.order",
+      "model": "report.sale.order",
       "columns": [],
       "rows": [{ "fieldName": "pos_categ_id" }, { "fieldName": "product_id" }],
       "name": "Point of Sale Analysis by Point of Sale Category",
@@ -1978,7 +1978,7 @@
           "format": ""
         }
       ],
-      "model": "report.pos.order",
+      "model": "report.sale.order",
       "columns": [],
       "rows": [{ "fieldName": "user_id" }],
       "name": "Point of Sale Analysis by User",

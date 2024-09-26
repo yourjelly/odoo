@@ -22,7 +22,7 @@ export class PosOrderLineRefund {
             return false;
         }
 
-        return this.models["pos.order.line"].find((l) => l.uuid === this.line_uuid);
+        return this.models["sale.order.line"].find((l) => l.uuid === this.line_uuid);
     }
 
     get destination_order() {
@@ -30,7 +30,7 @@ export class PosOrderLineRefund {
             return false;
         }
 
-        return this.models["pos.order"].find((o) => o.uuid === this.destination_order_uuid);
+        return this.models["sale.order"].find((o) => o.uuid === this.destination_order_uuid);
     }
 
     get maxQty() {

@@ -31,7 +31,7 @@ class TestPointOfSaleCommon(ValuationReconciliationTestCommon):
         cls.AccountBankStatement = cls.env['account.bank.statement']
         cls.AccountBankStatementLine = cls.env['account.bank.statement.line']
         cls.PosMakePayment = cls.env['pos.make.payment']
-        cls.PosOrder = cls.env['pos.order']
+        cls.PosOrder = cls.env['sale.order']
         cls.PosSession = cls.env['pos.session']
         cls.company = cls.company_data['company']
         cls.product3 = cls.env['product.product'].create({
@@ -662,11 +662,11 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
         return pos_session
 
     def _create_orders(self, order_data_params):
-        '''Returns a dict mapping uuid to its created pos.order record.'''
+        '''Returns a dict mapping uuid to its created sale.order record.'''
         result = {}
         order_data = [self.create_ui_order_data(**params) for params in order_data_params]
-        order_ids = [order['id'] for order in self.env['pos.order'].sync_from_ui(order_data)['pos.order']]
-        for order_id in self.env["pos.order"].browse(order_ids):
+        order_ids = [order['id'] for order in self.env['sale.order'].sync_from_ui(order_data)['sale.order']]
+        for order_id in self.env["sale.order"].browse(order_ids):
             result[order_id.uuid] = order_id
         return result
 

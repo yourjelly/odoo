@@ -58,7 +58,7 @@ patch(PosOrder, {
     extraFields: {
         ...(PosOrder.extraFields || {}),
         _code_activated_coupon_ids: {
-            model: "pos.order",
+            model: "sale.order",
             name: "_code_activated_coupon_ids",
             relation: "loyalty.card",
             type: "one2many",
@@ -843,7 +843,7 @@ patch(PosOrder.prototype, {
                 coupon_id: this.models["loyalty.card"].get(rewardLine.coupon_id),
                 tax_ids: rewardLine.tax_ids.map((tax) => ["link", tax]),
             };
-            this.models["pos.order.line"].create({
+            this.models["sale.order.line"].create({
                 ...prepareRewards,
                 order_id: this,
                 price_type: "manual",

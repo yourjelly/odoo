@@ -12,7 +12,7 @@ class TestAngloSaxonCommon(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.PosMakePayment = cls.env['pos.make.payment']
-        cls.PosOrder = cls.env['pos.order']
+        cls.PosOrder = cls.env['sale.order']
         cls.Statement = cls.env['account.bank.statement']
         cls.company = cls.env.company
         cls.warehouse = cls.env['stock.warehouse'].search([('company_id', '=', cls.env.company.id)], limit=1)
@@ -133,7 +133,7 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
 
     def _prepare_pos_order(self):
         """ Set the cost method of `self.product` as FIFO. Receive 5@5 and 5@1 and
-        create a `pos.order` record selling 7 units @ 450.
+        create a `sale.order` record selling 7 units @ 450.
         """
         # check fifo Costing Method of product.category
         self.product.categ_id.property_cost_method = 'fifo'
@@ -200,7 +200,7 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
         current_session_id.close_session_from_ui()
 
         # check the anglo saxon move lines
-        # with uninvoiced orders, the account_move field of pos.order is empty.
+        # with uninvoiced orders, the account_move field of sale.order is empty.
         # the accounting lines are in move_id of pos.session.
         session_move = pos_order_pos0.session_id.move_id
         line = session_move.line_ids.filtered(lambda l: l.debit and l.account_id == self.category.property_account_expense_categ_id)

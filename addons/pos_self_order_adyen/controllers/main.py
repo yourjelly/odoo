@@ -18,7 +18,7 @@ class PosSelfAdyenController(PosAdyenController):
         if not self_order_id:
             return super()._process_payment_response(data, adyen_pm_sudo)
 
-        order_sudo = request.env['pos.order'].sudo().search([('id', '=', self_order_id)], limit=1)
+        order_sudo = request.env['sale.order'].sudo().search([('id', '=', self_order_id)], limit=1)
         if not order_sudo:
             _logger.warning('Received an Adyen event notification for the self order #%d that does not exist (anymore)', self_order_id)
             return request.make_json_response('[accepted]') # https://docs.adyen.com/point-of-sale/design-your-integration/choose-your-architecture/cloud/#guarantee
@@ -49,8 +49,8 @@ class PosSelfAdyenController(PosAdyenController):
             order.config_id._notify('PAYMENT_STATUS', {
                 'payment_result': payment_result,
                 'data': {
-                    'pos.order': order.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
-                    'pos.order.line': order.lines.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
+                    'sale.order': order.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
+                    'sale.order.line': order.lines.read(order._load_pos_self_data_fields(order.config_id.id), load=False),
                 }
             })
         return request.make_json_response('[accepted]') # https://docs.adyen.com/point-of-sale/design-your-integration/choose-your-architecture/cloud/#guarantee

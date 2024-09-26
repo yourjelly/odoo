@@ -13,13 +13,13 @@ class PosMakePayment(models.TransientModel):
     def _default_config(self):
         active_id = self.env.context.get('active_id')
         if active_id:
-            return self.env['pos.order'].browse(active_id).session_id.config_id
+            return self.env['sale.order'].browse(active_id).session_id.config_id
         return False
 
     def _default_amount(self):
         active_id = self.env.context.get('active_id')
         if active_id:
-            order = self.env['pos.order'].browse(active_id)
+            order = self.env['sale.order'].browse(active_id)
             amount_total = order.amount_total
             # If we refund the entire order, we refund what was paid originally, else we refund the value of the items returned
             if float_is_zero(order.refunded_order_id.amount_total + order.amount_total, precision_rounding=order.currency_id.rounding):
@@ -30,7 +30,7 @@ class PosMakePayment(models.TransientModel):
     def _default_payment_method(self):
         active_id = self.env.context.get('active_id')
         if active_id:
-            order_id = self.env['pos.order'].browse(active_id)
+            order_id = self.env['sale.order'].browse(active_id)
             return order_id.session_id.payment_method_ids.sorted(lambda pm: pm.is_cash_count, reverse=True)[:1]
         return False
 
@@ -47,7 +47,7 @@ class PosMakePayment(models.TransientModel):
         """
         self.ensure_one()
 
-        order = self.env['pos.order'].browse(self.env.context.get('active_id', False))
+        order = self.env['sale.order'].browse(self.env.context.get('active_id', False))
         if self.payment_method_id.split_transactions and not order.partner_id:
             raise UserError(_(
                 "Customer is required for %s payment method.",

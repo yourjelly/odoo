@@ -92,8 +92,8 @@ export class SelfOrder extends Reactive {
             this.onNotified("PAYMENT_STATUS", ({ payment_result, data }) => {
                 if (payment_result === "Success") {
                     this.models.loadData(data);
-                    const order = this.models["pos.order"].find(
-                        (o) => o.access_token === data["pos.order"][0].access_token
+                    const order = this.models["sale.order"].find(
+                        (o) => o.access_token === data["sale.order"][0].access_token
                     );
                     if (["paid", "invoiced", "done"].includes(order?.state)) {
                         this.notification.add(_t("Your order has been paid"), {
@@ -149,7 +149,7 @@ export class SelfOrder extends Reactive {
         const handleMessage = (data) => {
             let message = "";
             this.models.loadData(data);
-            const oUpdated = data["pos.order"].find((o) => o.uuid === this.selectedOrderUuid);
+            const oUpdated = data["sale.order"].find((o) => o.uuid === this.selectedOrderUuid);
 
             if (["paid", "invoiced", "done"].includes(oUpdated?.state)) {
                 message = _t("Your order has been paid");
@@ -280,7 +280,7 @@ export class SelfOrder extends Reactive {
             values.price_unit = price;
         }
 
-        const newLine = this.models["pos.order.line"].create(values);
+        const newLine = this.models["sale.order.line"].create(values);
         newLine.full_product_name = constructFullProductName(
             newLine,
             this.models["product.template.attribute.value"].getAllBy("id"),
@@ -370,12 +370,12 @@ export class SelfOrder extends Reactive {
             return isDraft || (isPaid && isZeroAmount && isKiosk);
         };
 
-        const order = this.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
+        const order = this.models["sale.order"].getBy("uuid", this.selectedOrderUuid);
         if (order && orderAvailable(order)) {
             return order;
         }
 
-        const existingOrder = this.models["pos.order"].find((o) => orderAvailable(o));
+        const existingOrder = this.models["sale.order"].find((o) => orderAvailable(o));
         if (existingOrder) {
             this.selectedOrderUuid = existingOrder.uuid;
             return existingOrder;
@@ -385,7 +385,7 @@ export class SelfOrder extends Reactive {
             return fp.id === this.config.default_fiscal_position_id?.id;
         });
 
-        const newOrder = this.models["pos.order"].create({
+        const newOrder = this.models["sale.order"].create({
             company_id: this.company,
             session_id: this.session,
             config_id: this.config,
@@ -393,7 +393,7 @@ export class SelfOrder extends Reactive {
         });
         this.selectedOrderUuid = newOrder.uuid;
 
-        return this.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
+        return this.models["sale.order"].getBy("uuid", this.selectedOrderUuid);
     }
 
     markupDescriptions() {
@@ -506,7 +506,7 @@ export class SelfOrder extends Reactive {
             }
         }
 
-        this.models["pos.order"]
+        this.models["sale.order"]
             .filter((o) => o.access_token && o.finalized)
             .forEach((o) => orderAccessTokenSet.add(o.access_token));
 
@@ -623,7 +623,7 @@ export class SelfOrder extends Reactive {
                 }
             );
             this.models.loadData(data);
-            for (const order of data["pos.order"]) {
+            for (const order of data["sale.order"]) {
                 this.subscribeToOrderChannel(order);
             }
 
@@ -633,9 +633,9 @@ export class SelfOrder extends Reactive {
 
             this.currentOrder.recomputeChanges();
             this.saveOrdersAccessTokens();
-            return this.models["pos.order"].getBy("uuid", uuid);
+            return this.models["sale.order"].getBy("uuid", uuid);
         } catch (error) {
-            const order = this.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
+            const order = this.models["sale.order"].getBy("uuid", this.selectedOrderUuid);
             this.handleErrorNotification(error, [order.access_token]);
             return false;
         }
@@ -643,7 +643,7 @@ export class SelfOrder extends Reactive {
 
     async getOrdersFromServer() {
         const localAccessToken = [...this.saveOrdersAccessTokens()];
-        const accessTokens = this.models["pos.order"]
+        const accessTokens = this.models["sale.order"]
             .map((order) => order.access_token)
             .filter(Boolean);
 
@@ -661,7 +661,7 @@ export class SelfOrder extends Reactive {
         } catch (error) {
             this.handleErrorNotification(
                 error,
-                this.models["pos.order"].map((order) => order.access_token)
+                this.models["sale.order"].map((order) => order.access_token)
             );
         }
     }

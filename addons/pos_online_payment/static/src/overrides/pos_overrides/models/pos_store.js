@@ -20,7 +20,7 @@ patch(PosStore.prototype, {
             return false;
         }
         try {
-            const opData = await this.data.call("pos.order", "get_and_set_online_payments_data", [
+            const opData = await this.data.call("sale.order", "get_and_set_online_payments_data", [
                 order.id,
                 next_online_payment_amount,
             ]);

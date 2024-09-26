@@ -2,8 +2,8 @@
 <odoo>
     <!-- POS order form -->
     <record id="view_pos_pos_form_simplified_invoice" model="ir.ui.view">
-        <field name="name">pos.order.form</field>
-        <field name="model">pos.order</field>
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_pos_form" />
         <field name="arch" type="xml">
             <field name="name" position="after">
@@ -13,7 +13,7 @@
     </record>
     <!-- POS order tree -->
     <record id="view_pos_order_tree" model="ir.ui.view">
-        <field name="model">pos.order</field>
+        <field name="model">sale.order</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_order_tree" />
         <field name="arch" type="xml">
             <field name="pos_reference" position="before">

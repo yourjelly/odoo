@@ -208,11 +208,11 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
             'payment_ids': [],
         }
 
-        create_result = self.env['pos.order'].with_user(self.pos_user).sync_from_ui([order_data])
+        create_result = self.env['sale.order'].with_user(self.pos_user).sync_from_ui([order_data])
         self.assertEqual(len(current_session.order_ids), 1)
-        order_id = next(result_order_data for result_order_data in create_result['pos.order'] if result_order_data['pos_reference'] == order_pos_reference)['id']
+        order_id = next(result_order_data for result_order_data in create_result['sale.order'] if result_order_data['pos_reference'] == order_pos_reference)['id']
 
-        order = self.env['pos.order'].search([('id', '=', order_id)])
+        order = self.env['sale.order'].search([('id', '=', order_id)])
         self.assertEqual(order.state, 'draft')
         return order
 

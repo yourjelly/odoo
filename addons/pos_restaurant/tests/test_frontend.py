@@ -227,14 +227,14 @@ class TestFrontend(TestPointOfSaleHttpCommon):
 
         self.start_pos_tour('pos_restaurant_sync')
 
-        self.assertEqual(1, self.env['pos.order'].search_count([('amount_total', '=', 4.4), ('state', '=', 'draft')]))
-        self.assertEqual(1, self.env['pos.order'].search_count([('amount_total', '=', 4.4), ('state', '=', 'paid')]))
+        self.assertEqual(1, self.env['sale.order'].search_count([('amount_total', '=', 4.4), ('state', '=', 'draft')]))
+        self.assertEqual(1, self.env['sale.order'].search_count([('amount_total', '=', 4.4), ('state', '=', 'paid')]))
 
         self.start_pos_tour('pos_restaurant_sync_second_login')
 
-        self.assertEqual(0, self.env['pos.order'].search_count([('amount_total', '=', 4.4), ('state', '=', 'draft')]))
-        self.assertEqual(1, self.env['pos.order'].search_count([('amount_total', '=', 2.2), ('state', '=', 'draft')]))
-        self.assertEqual(2, self.env['pos.order'].search_count([('amount_total', '=', 4.4), ('state', '=', 'paid')]))
+        self.assertEqual(0, self.env['sale.order'].search_count([('amount_total', '=', 4.4), ('state', '=', 'draft')]))
+        self.assertEqual(1, self.env['sale.order'].search_count([('amount_total', '=', 2.2), ('state', '=', 'draft')]))
+        self.assertEqual(2, self.env['sale.order'].search_count([('amount_total', '=', 4.4), ('state', '=', 'paid')]))
 
     def test_02_others(self):
         self.pos_config.with_user(self.pos_user).open_ui()
@@ -254,11 +254,11 @@ class TestFrontend(TestPointOfSaleHttpCommon):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('PosResTipScreenTour')
 
-        order1 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0001')], limit=1, order='id desc')
-        order2 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0002')], limit=1, order='id desc')
-        order3 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0003')], limit=1, order='id desc')
-        order4 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0004')], limit=1, order='id desc')
-        order5 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0005')], limit=1, order='id desc')
+        order1 = self.env['sale.order'].search([('pos_reference', 'ilike', '%-0001')], limit=1, order='id desc')
+        order2 = self.env['sale.order'].search([('pos_reference', 'ilike', '%-0002')], limit=1, order='id desc')
+        order3 = self.env['sale.order'].search([('pos_reference', 'ilike', '%-0003')], limit=1, order='id desc')
+        order4 = self.env['sale.order'].search([('pos_reference', 'ilike', '%-0004')], limit=1, order='id desc')
+        order5 = self.env['sale.order'].search([('pos_reference', 'ilike', '%-0005')], limit=1, order='id desc')
 
         self.assertTrue(order1.is_tipped and order1.tip_amount == 0.40)
         self.assertTrue(order2.is_tipped and order2.tip_amount == 1.00)
@@ -301,7 +301,7 @@ class TestFrontend(TestPointOfSaleHttpCommon):
         self.pos_config.write({'order_edit_tracking': True})
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('OrderTrackingTour')
-        order1 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0001')], limit=1, order='id desc')
+        order1 = self.env['sale.order'].search([('pos_reference', 'ilike', '%-0001')], limit=1, order='id desc')
         self.assertTrue(order1.is_edited)
 
     def test_13_category_check(self):

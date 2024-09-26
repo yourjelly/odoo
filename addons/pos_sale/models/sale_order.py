@@ -8,7 +8,7 @@ class SaleOrder(models.Model):
     _name = 'sale.order'
     _inherit = ['sale.order', 'pos.load.mixin']
 
-    pos_order_line_ids = fields.One2many('pos.order.line', 'sale_order_origin_id', string="Order lines Transfered to Point of Sale", readonly=True, groups="point_of_sale.group_pos_user")
+    pos_order_line_ids = fields.One2many('sale.order.line', 'sale_order_origin_id', string="Order lines Transfered to Point of Sale", readonly=True, groups="point_of_sale.group_pos_user")
     pos_order_count = fields.Integer(string='Pos Order Count', compute='_count_pos_order', readonly=True, groups="point_of_sale.group_pos_user")
     amount_unpaid = fields.Monetary(
         string="Amount To Pay In POS",
@@ -37,7 +37,7 @@ class SaleOrder(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': _('Linked POS Orders'),
-            'res_model': 'pos.order',
+            'res_model': 'sale.order',
             'view_mode': 'list,form',
             'domain': [('id', 'in', linked_orders.ids)],
         }
@@ -53,7 +53,7 @@ class SaleOrderLine(models.Model):
     _name = 'sale.order.line'
     _inherit = ['sale.order.line', 'pos.load.mixin']
 
-    pos_order_line_ids = fields.One2many('pos.order.line', 'sale_order_line_id', string="Order lines Transfered to Point of Sale", readonly=True, groups="point_of_sale.group_pos_user")
+    pos_order_line_ids = fields.One2many('sale.order.line', 'sale_order_line_id', string="Order lines Transfered to Point of Sale", readonly=True, groups="point_of_sale.group_pos_user")
 
     @api.model
     def _load_pos_data_domain(self, data):

@@ -11,7 +11,7 @@ class PosInvoiceReport(models.AbstractModel):
 
     @api.model
     def _get_report_values(self, docids, data=None):
-        PosOrder = self.env['pos.order']
+        PosOrder = self.env['sale.order']
         ids_to_print = []
         invoiced_posorders_ids = []
         selected_orders = PosOrder.browse(docids)

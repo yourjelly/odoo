@@ -4,7 +4,7 @@ from odoo.exceptions import UserError
 
 
 class PosOrder(models.Model):
-    _inherit = 'pos.order'
+    _inherit = 'sale.order'
 
     l10n_es_tbai_state = fields.Selection([
             ('to_send', 'To Send'),
@@ -169,7 +169,7 @@ class PosOrder(models.Model):
     def _l10n_es_tbai_get_attachment_values(self):
         return {
             'attachment_name': self.name + '_post.xml',
-            'res_model': 'pos.order',
+            'res_model': 'sale.order',
             'res_id': self.id,
         }
 

@@ -72,5 +72,5 @@ class TestFrontendMobile(SelfOrderCommonTest):
         )
 
         result = response.json()
-        order_id = result['result']['pos.order'][0]['id']
-        self.assertEqual(self.env['pos.order'].browse(order_id).fiscal_position_id.id, alternative_fp.id)
+        order_id = result['result']['sale.order'][0]['id']
+        self.assertEqual(self.env['sale.order'].browse(order_id).fiscal_position_id.id, alternative_fp.id)

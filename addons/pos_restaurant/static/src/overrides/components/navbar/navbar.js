@@ -24,7 +24,7 @@ patch(Navbar.prototype, {
     },
     getTable() {
         return this.pos.orderToTransferUuid
-            ? this.pos.models["pos.order"].find((o) => o.uuid == this.pos.orderToTransferUuid)
+            ? this.pos.models["sale.order"].find((o) => o.uuid == this.pos.orderToTransferUuid)
                   ?.table_id
             : this.pos.selectedTable;
     },
@@ -88,7 +88,7 @@ patch(Navbar.prototype, {
     },
     getOrderToDisplay() {
         const currentOrder = this.pos.get_order();
-        const orderToTransfer = this.pos.models["pos.order"].find((order) => {
+        const orderToTransfer = this.pos.models["sale.order"].find((order) => {
             return order.uuid === this.pos.orderToTransferUuid;
         });
         return currentOrder || orderToTransfer;

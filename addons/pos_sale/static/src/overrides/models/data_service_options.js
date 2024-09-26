@@ -8,7 +8,7 @@ patch(DataServiceOptions.prototype, {
             "sale.order": {
                 key: "id",
                 condition: (record) => {
-                    return record.models["pos.order.line"].find(
+                    return record.models["sale.order.line"].find(
                         (l) => l.sale_order_origin_id?.id === record.id
                     );
                 },
@@ -16,7 +16,7 @@ patch(DataServiceOptions.prototype, {
             "sale.order.line": {
                 key: "id",
                 condition: (record) => {
-                    return record.models["pos.order.line"].find(
+                    return record.models["sale.order.line"].find(
                         (l) => l.sale_order_line_id?.id === record.id
                     );
                 },

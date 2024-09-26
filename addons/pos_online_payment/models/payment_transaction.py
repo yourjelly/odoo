@@ -8,7 +8,7 @@ from odoo.exceptions import ValidationError
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
-    pos_order_id = fields.Many2one('pos.order', string='POS Order', help='The Point of Sale order linked to the payment transaction', readonly=True)
+    pos_order_id = fields.Many2one('sale.order', string='POS Order', help='The Point of Sale order linked to the payment transaction', readonly=True)
 
     @api.model
     def _compute_reference_prefix(self, provider_code, separator, **values):
@@ -19,7 +19,7 @@ class PaymentTransaction(models.Model):
         """
         pos_order_id = values.get('pos_order_id')
         if pos_order_id:
-            pos_order = self.env['pos.order'].sudo().browse(pos_order_id).exists()
+            pos_order = self.env['sale.order'].sudo().browse(pos_order_id).exists()
             if pos_order:
                 return pos_order.pos_reference
         return super()._compute_reference_prefix(provider_code, separator, **values)
@@ -76,7 +76,7 @@ class PaymentTransaction(models.Model):
         action = {
             'name': _("POS Order"),
             'type': 'ir.actions.act_window',
-            'res_model': 'pos.order',
+            'res_model': 'sale.order',
             'target': 'current',
             'res_id': self.pos_order_id.id,
             'view_mode': 'form'

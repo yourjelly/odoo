@@ -15,11 +15,11 @@ class AccountTax(models.Model):
             'include_base_amount', 'is_base_affected',
         }
         if forbidden_fields & set(vals.keys()):
-            lines = self.env['pos.order.line'].sudo().search([
+            lines = self.env['sale.order.line'].sudo().search([
                 ('order_id.session_id.state', '!=', 'closed')
             ])
             self_ids = set(self.ids)
-            for lines_chunk in map(self.env['pos.order.line'].sudo().browse, split_every(100000, lines.ids)):
+            for lines_chunk in map(self.env['sale.order.line'].sudo().browse, split_every(100000, lines.ids)):
                 if any(tid in self_ids for ts in lines_chunk.read(['tax_ids']) for tid in ts['tax_ids']):
                     raise UserError(_(
                         'It is forbidden to modify a tax used in a POS order not posted. '
@@ -35,7 +35,7 @@ class AccountTax(models.Model):
         taxes_to_compute -= used_taxes
 
         if taxes_to_compute:
-            self.env['pos.order.line'].flush_model(['tax_ids'])
+            self.env['sale.order.line'].flush_model(['tax_ids'])
             self.env.cr.execute("""
                 SELECT id
                 FROM account_tax

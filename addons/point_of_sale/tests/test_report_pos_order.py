@@ -17,7 +17,7 @@ class TestReportPoSOrder(TestPoSCommon):
 
         self.open_new_session()
         session = self.pos_session
-        self.env['pos.order'].create({
+        self.env['sale.order'].create({
             'session_id': session.id,
             'lines': [
                 (0, 0, {
@@ -36,7 +36,7 @@ class TestReportPoSOrder(TestPoSCommon):
             'amount_return': 0.0,
         })
         # PoS Orders have negative IDs to avoid conflict, so reports[0] will correspond to the newest order
-        reports = self.env['report.pos.order'].sudo().search([('product_id', '=', product1.id)], order='id')
+        reports = self.env['report.sale.order'].sudo().search([('product_id', '=', product1.id)], order='id')
 
         self.assertEqual(reports[0].margin, 150)
         self.assertEqual(reports[0].price_total, 150)
@@ -49,7 +49,7 @@ class TestReportPoSOrder(TestPoSCommon):
         self.open_new_session()
         session = self.pos_session
 
-        self.env['pos.order'].create({
+        self.env['sale.order'].create({
             'session_id': session.id,
             'lines': [(0, 0, {
                 'name': "OL/0001",
@@ -67,7 +67,7 @@ class TestReportPoSOrder(TestPoSCommon):
         })
 
         # PoS Orders have negative IDs to avoid conflict, so reports[0] will correspond to the newest order
-        reports = self.env['report.pos.order'].sudo().search([('product_id', '=', product1.id)], order='id')
+        reports = self.env['report.sale.order'].sudo().search([('product_id', '=', product1.id)], order='id')
 
         self.assertEqual(reports[0].margin, 150)
         self.assertEqual(reports[0].price_total, 165)
@@ -80,7 +80,7 @@ class TestReportPoSOrder(TestPoSCommon):
         self.open_new_session()
         session = self.pos_session
 
-        self.env['pos.order'].create({
+        self.env['sale.order'].create({
             'session_id': session.id,
             'lines': [
                 (0, 0, {
@@ -100,7 +100,7 @@ class TestReportPoSOrder(TestPoSCommon):
         })
 
         # PoS Orders have negative IDs to avoid conflict, so reports[0] will correspond to the newest order
-        reports = self.env['report.pos.order'].sudo().search([('product_id', '=', product1.id)], order='id')
+        reports = self.env['report.sale.order'].sudo().search([('product_id', '=', product1.id)], order='id')
 
         self.assertEqual(reports[0].margin, 135)
         self.assertEqual(reports[0].price_total, 135)

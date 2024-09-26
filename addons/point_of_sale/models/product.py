@@ -235,11 +235,11 @@ class ProductAttributeCustomValue(models.Model):
     _name = 'product.attribute.custom.value'
     _inherit = ["product.attribute.custom.value", "pos.load.mixin"]
 
-    pos_order_line_id = fields.Many2one('pos.order.line', string="PoS Order Line", ondelete='cascade')
+    pos_order_line_id = fields.Many2one('sale.order.line', string="PoS Order Line", ondelete='cascade')
 
     @api.model
     def _load_pos_data_domain(self, data):
-        return [('pos_order_line_id', 'in', [line['id'] for line in data['pos.order.line']['data']])]
+        return [('pos_order_line_id', 'in', [line['id'] for line in data['sale.order.line']['data']])]
 
     @api.model
     def _load_pos_data_fields(self, config_id):

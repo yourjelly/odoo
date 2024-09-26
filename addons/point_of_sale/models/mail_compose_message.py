@@ -6,7 +6,7 @@ class MailComposer(models.TransientModel):
 
     def action_send_mail(self):
         res = super().action_send_mail()
-        if self.filtered(lambda l: l.model == 'pos.order'):
+        if self.filtered(lambda l: l.model == 'sale.order'):
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',

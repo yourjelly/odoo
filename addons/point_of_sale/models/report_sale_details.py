@@ -69,7 +69,7 @@ class ReportSaleDetails(models.AbstractModel):
             date_start, date_stop = self._get_date_start_and_date_stop(date_start, date_stop)
 
         domain = self._get_domain(date_start, date_stop, config_ids, session_ids, **kwargs)
-        orders = self.env['pos.order'].search(domain)
+        orders = self.env['sale.order'].search(domain)
 
         if config_ids:
             config_currencies = self.env['pos.config'].search([('id', 'in', config_ids)]).mapped('currency_id')
@@ -375,7 +375,7 @@ class ReportSaleDetails(models.AbstractModel):
                 total_cat += product['base_amount']
             category_dict['total'] = total_cat
             category_dict['qty'] = qty_cat
-        # IMPROVEMENT: It would be better if the `products` are grouped by pos.order.line.id.
+        # IMPROVEMENT: It would be better if the `products` are grouped by sale.order.line.id.
         unique_products = list({tuple(sorted(product.items())): product for category in categories for product in category['products']}.values())
         all_qty = sum([product['quantity'] for product in unique_products])
         all_total = sum([product['base_amount'] for product in unique_products])

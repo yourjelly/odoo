@@ -3,11 +3,11 @@
 export class DataServiceOptions {
     get databaseTable() {
         return {
-            "pos.order": {
+            "sale.order": {
                 key: "uuid",
                 condition: (record) => record.finalized && typeof record.id === "number",
             },
-            "pos.order.line": {
+            "sale.order.line": {
                 key: "uuid",
                 condition: (record) =>
                     record.order_id?.finalized && typeof record.order_id.id === "number",
@@ -26,7 +26,7 @@ export class DataServiceOptions {
             "product.product": {
                 key: "id",
                 condition: (record) => {
-                    return record.models["pos.order.line"].find(
+                    return record.models["sale.order.line"].find(
                         (l) => l.product_id?.id === record.id
                     );
                 },
@@ -34,7 +34,7 @@ export class DataServiceOptions {
             "product.attribute.custom.value": {
                 key: "id",
                 condition: (record) => {
-                    return record.models["pos.order.line"].find((l) => {
+                    return record.models["sale.order.line"].find((l) => {
                         const customAttrIds = l.custom_attribute_value_ids.map((v) => v.id);
                         return customAttrIds.includes(record.id);
                     });
@@ -46,8 +46,8 @@ export class DataServiceOptions {
     get databaseIndex() {
         const databaseTable = this.databaseTable;
         const indexes = {
-            "pos.order": ["uuid"],
-            "pos.order.line": ["uuid"],
+            "sale.order": ["uuid"],
+            "sale.order.line": ["uuid"],
             "product.product": ["barcode", "pos_categ_ids", "write_date"],
             "account.fiscal.position": ["tax_ids"],
             "product.packaging": ["barcode"],
@@ -76,14 +76,14 @@ export class DataServiceOptions {
             "pos.session",
             "pos.config",
             "res.users",
-            "pos.order",
+            "sale.order",
             "account.tax", // Cannot be auto-loaded because the record needs adaptions
         ];
     }
 
     get cascadeDeleteModels() {
         return [
-            "pos.order.line",
+            "sale.order.line",
             "pos.payment",
             "product.attribute.custom.value",
             "pos.pack.operation.lot",

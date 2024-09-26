@@ -7,15 +7,15 @@ from . import account_payment
 from . import account_journal
 from . import account_tax
 from . import account_tax_group
-from . import account_move
+# from . import account_move
 from . import pos_bus_mixin
 from . import barcode_rule
 from . import binary
 from . import digest
 from . import ir_binary
+from . import sale_order
 from . import pos_category
 from . import pos_config
-from . import pos_order
 from . import pos_session
 from . import product
 from . import product_combo
@@ -26,10 +26,10 @@ from . import res_config_settings
 from . import stock_picking
 from . import stock_rule
 from . import stock_warehouse
-from . import pos_payment
+# from . import pos_payment
 from . import pos_payment_method
 from . import pos_bill
-from . import report_sale_details
+# from . import report_sale_details
 from . import pos_printer
 from . import pos_note
 from . import res_users

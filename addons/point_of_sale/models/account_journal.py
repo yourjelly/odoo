@@ -7,18 +7,18 @@ from odoo.exceptions import ValidationError
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
-    pos_payment_method_ids = fields.One2many('pos.payment.method', 'journal_id', string='Point of Sale Payment Methods')
+    # pos_payment_method_ids = fields.One2many('pos.payment.method', 'journal_id', string='Point of Sale Payment Methods')
 
     def action_archive(self):
         if self.pos_payment_method_ids:
             raise ValidationError(_("This journal is associated with a payment method. You cannot archive it"))
         return super().action_archive()
 
-    @api.constrains('type')
-    def _check_type(self):
-        methods = self.env['pos.payment.method'].sudo().search([("journal_id", "in", self.ids)])
-        if methods:
-            raise ValidationError(_("This journal is associated with a payment method. You cannot modify its type"))
+    # @api.constrains('type')
+    # def _check_type(self):
+    #     methods = self.env['pos.payment.method'].sudo().search([("journal_id", "in", self.ids)])
+    #     if methods:
+    #         raise ValidationError(_("This journal is associated with a payment method. You cannot modify its type"))
 
     def _get_journal_inbound_outstanding_payment_accounts(self):
         res = super()._get_journal_inbound_outstanding_payment_accounts()

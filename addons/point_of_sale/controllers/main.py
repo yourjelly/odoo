@@ -103,7 +103,7 @@ class PosController(PortalAccount):
                 errors['pos_reference'] = _("The Ticket Number should be at least 14 characters long.")
             else:
                 date_order = datetime(*[int(i) for i in form_values['date_order'].split('-')])
-                order = request.env['pos.order'].sudo().search([
+                order = request.env['sale.order'].sudo().search([
                     ('pos_reference', '=like', '%' + form_values['pos_reference'].strip().replace('%', r'\%').replace('_', r'\_')),
                     ('date_order', '>=', date_order),
                     ('date_order', '<', date_order + timedelta(days=1)),
@@ -140,7 +140,7 @@ class PosController(PortalAccount):
         if not access_token:
             return request.not_found()
         # Get the order using the access token. We can't use the id in the route because we may not have it yet when the QR code is generated.
-        pos_order = request.env['pos.order'].sudo().search([('access_token', '=', access_token)])
+        pos_order = request.env['sale.order'].sudo().search([('access_token', '=', access_token)])
         if not pos_order:
             return request.not_found()
 

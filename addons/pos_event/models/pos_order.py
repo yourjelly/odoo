@@ -3,7 +3,7 @@ from odoo import models, fields, api
 
 
 class PosOrder(models.Model):
-    _inherit = 'pos.order'
+    _inherit = 'sale.order'
 
     attendee_count = fields.Integer('Attendee Count', compute='_compute_attendee_count')
 
@@ -20,7 +20,7 @@ class PosOrder(models.Model):
     @api.model
     def sync_from_ui(self, orders):
         results = super().sync_from_ui(orders)
-        paid_orders = self.browse([order['id'] for order in results['pos.order'] if order['state'] in ['paid', 'done', 'invoiced']])
+        paid_orders = self.browse([order['id'] for order in results['sale.order'] if order['state'] in ['paid', 'done', 'invoiced']])
 
         if not paid_orders:
             return results
@@ -45,7 +45,7 @@ class PosOrder(models.Model):
     def _process_order(self, order, existing_order):
         res = super()._process_order(order, existing_order)
         refunded_line_ids = [line[2].get('refunded_orderline_id') for line in order.get('lines') if line[0] in [0, 1] and line[2].get('refunded_orderline_id')]
-        refunded_orderlines = self.env['pos.order.line'].browse(refunded_line_ids)
+        refunded_orderlines = self.env['sale.order.line'].browse(refunded_line_ids)
         event_to_cancel = []
 
         for refunded_orderline in refunded_orderlines:

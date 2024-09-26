@@ -96,6 +96,6 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
            'last_order_preparation_change': '{}',
            'user_id': self.env.uid}
 
-        order = self.env['pos.order'].sync_from_ui([pos_order])
-        self.assertEqual(self.env['pos.order'].browse(order['pos.order'][0]['id']).picking_ids.move_line_ids.lot_id, lot1)
+        order = self.env['sale.order'].sync_from_ui([pos_order])
+        self.assertEqual(self.env['sale.order'].browse(order['sale.order'][0]['id']).picking_ids.move_line_ids.lot_id, lot1)
         self.assertEqual(sale_order.picking_ids.move_line_ids.lot_id, lot2)

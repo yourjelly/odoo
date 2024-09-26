@@ -19,7 +19,7 @@ export class LandingPage extends Component {
 
         onWillStart(() => {
             if (this.selfOrder.config.self_ordering_mode === "kiosk") {
-                const orders = this.selfOrder.models["pos.order"].getAll();
+                const orders = this.selfOrder.models["sale.order"].getAll();
                 for (const order of orders) {
                     order.delete();
                 }
@@ -62,7 +62,7 @@ export class LandingPage extends Component {
     }
 
     get draftOrder() {
-        return this.selfOrder.models["pos.order"].filter(
+        return this.selfOrder.models["sale.order"].filter(
             (o) => o.access_token && o.state === "draft"
         );
     }
@@ -119,7 +119,7 @@ export class LandingPage extends Component {
     }
 
     showMyOrderBtn() {
-        const ordersNotDraft = this.selfOrder.models["pos.order"].find((o) => o.access_token);
+        const ordersNotDraft = this.selfOrder.models["sale.order"].find((o) => o.access_token);
         return this.selfOrder.ordering && ordersNotDraft;
     }
 }

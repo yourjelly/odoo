@@ -7,7 +7,7 @@ class LoyaltyCard(models.Model):
     _name = 'loyalty.card'
     _inherit = ['loyalty.card', 'pos.load.mixin']
 
-    source_pos_order_id = fields.Many2one('pos.order', "PoS Order Reference",
+    source_pos_order_id = fields.Many2one('sale.order', "PoS Order Reference",
         help="PoS order where this coupon was generated.")
 
     @api.model
@@ -35,7 +35,7 @@ class LoyaltyCard(models.Model):
 
     def _compute_use_count(self):
         super()._compute_use_count()
-        read_group_res = self.env['pos.order.line']._read_group(
+        read_group_res = self.env['sale.order.line']._read_group(
             [('coupon_id', 'in', self.ids)], ['coupon_id'], ['__count'])
         count_per_coupon = {coupon.id: count for coupon, count in read_group_res}
         for card in self:

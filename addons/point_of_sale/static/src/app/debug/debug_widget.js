@@ -113,7 +113,7 @@ export class DebugWidget extends Component {
             ),
             confirm: () => {
                 this.pos.data.resetUnsyncQueue();
-                const orders = this.pos.models["pos.order"].filter(
+                const orders = this.pos.models["sale.order"].filter(
                     (order) => order.finalized === paid
                 );
 
@@ -128,7 +128,7 @@ export class DebugWidget extends Component {
         });
     }
     exportOrders({ paid = true } = {}) {
-        const orders = this.pos.models["pos.order"]
+        const orders = this.pos.models["sale.order"]
             .filter((order) => order.finalized === paid)
             .map((o) => o.serialize({ orm: true }));
 
@@ -148,9 +148,9 @@ export class DebugWidget extends Component {
         if (file) {
             const jsonData = JSON.parse(await file.text());
             const data = {
-                "pos.order": [],
+                "sale.order": [],
             };
-            const manyRel = Object.values(this.pos.data.relations["pos.order"]).filter((rel) =>
+            const manyRel = Object.values(this.pos.data.relations["sale.order"]).filter((rel) =>
                 ["one2many", "many2many"].includes(rel.type)
             );
 
@@ -174,12 +174,12 @@ export class DebugWidget extends Component {
                     data[rel.relation].push(...records);
                 }
 
-                data["pos.order"].push(order);
+                data["sale.order"].push(order);
             }
 
             const missing = await this.pos.data.missingRecursive(data);
             this.pos.data.models.loadData(missing, [], true);
-            this.notification.add(_t("%s orders imported", data["pos.order"].length));
+            this.notification.add(_t("%s orders imported", data["sale.order"].length));
         }
     }
     refreshDisplay() {

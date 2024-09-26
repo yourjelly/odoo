@@ -38,7 +38,7 @@ patch(ReceiptScreen.prototype, {
                 return false;
             }
 
-            return this.pos.models["pos.order"].find(
+            return this.pos.models["sale.order"].find(
                 (o) => o.uuid === originalOrderUuid && !o.finalized && o.lines.length
             );
         } else {

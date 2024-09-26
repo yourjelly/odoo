@@ -54,7 +54,7 @@ class TestPosMrp(TestPointOfSaleCommon):
         self.bom_a = bom_product_form.save()
 
         self.pos_config.open_ui()
-        order = self.env['pos.order'].create({
+        order = self.env['sale.order'].create({
             'session_id': self.pos_config.current_session_id.id,
             'lines': [(0, 0, {
                 'name': self.kit.name,
@@ -81,7 +81,7 @@ class TestPosMrp(TestPointOfSaleCommon):
         order_payment.with_context(**payment_context).check()
 
         self.pos_config.current_session_id.action_pos_session_closing_control()
-        pos_order = self.env['pos.order'].search([], order='id desc', limit=1)
+        pos_order = self.env['sale.order'].search([], order='id desc', limit=1)
         self.assertEqual(pos_order.lines[0].total_cost, 15.0)
 
     def test_bom_kit_with_kit_invoice_valuation(self):
@@ -235,8 +235,8 @@ class TestPosMrp(TestPointOfSaleCommon):
             'uuid': '00042-003-0014',
             'user_id': self.env.uid
         }
-        order = self.env['pos.order'].sync_from_ui([order_data])
-        order = self.env['pos.order'].browse(order['pos.order'][0]['id'])
+        order = self.env['sale.order'].sync_from_ui([order_data])
+        order = self.env['sale.order'].browse(order['sale.order'][0]['id'])
         self.assertEqual(order.lines.filtered(lambda l: l.product_id == self.kit).total_cost, 15.0)
         accounts = self.kit.product_tmpl_id.get_product_accounts()
         debit_interim_account = accounts['stock_output']
@@ -322,8 +322,8 @@ class TestPosMrp(TestPointOfSaleCommon):
                                     'payment_method_id': self.cash_payment_method.id}]],
                 'uuid': '00042-003-0014',
                 'user_id': self.env.uid}
-        order = self.env['pos.order'].sync_from_ui([order_data])
-        order = self.env['pos.order'].browse(order['pos.order'][0]['id'])
+        order = self.env['sale.order'].sync_from_ui([order_data])
+        order = self.env['sale.order'].browse(order['sale.order'][0]['id'])
         accounts = self.kit.product_tmpl_id.get_product_accounts()
         expense_line = order.account_move.line_ids.filtered(lambda l: l.account_id.id == accounts['expense'].id)
         self.assertEqual(expense_line.filtered(lambda l: l.product_id == self.kit).debit, 6000.0)

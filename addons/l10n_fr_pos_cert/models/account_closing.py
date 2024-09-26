@@ -29,7 +29,7 @@ class AccountClosing(models.Model):
     total_interval = fields.Monetary(string="Period Total", help='Total in receivable accounts during the interval, excluding overlapping periods', readonly=True, required=True)
     cumulative_total = fields.Monetary(string="Cumulative Grand Total", help='Total in receivable accounts since the beginnig of times', readonly=True, required=True)
     sequence_number = fields.Integer('Sequence #', readonly=True, required=True)
-    last_order_id = fields.Many2one('pos.order', string='Last Pos Order', help='Last Pos order included in the grand total', readonly=True)
+    last_order_id = fields.Many2one('sale.order', string='Last Pos Order', help='Last Pos order included in the grand total', readonly=True)
     last_order_hash = fields.Char(string='Last Order entry\'s inalteralbility hash', readonly=True)
     currency_id = fields.Many2one('res.currency', string='Currency', help="The company's currency", readonly=True, related='company_id.currency_id', store=True)
 
@@ -80,7 +80,7 @@ class AccountClosing(models.Model):
             ('frequency', '=', frequency),
             ('company_id', '=', company.id)], limit=1, order='sequence_number desc')
 
-        first_order = self.env['pos.order']
+        first_order = self.env['sale.order']
         date_start = interval_dates['interval_from']
         cumulative_total = 0
         if previous_closing:
@@ -95,7 +95,7 @@ class AccountClosing(models.Model):
             #the first time we compute the closing, we consider only from the installation of the module
             domain = AND([domain, [('date_order', '>=', date_start)]])
 
-        orders = self.env['pos.order'].search(domain, order='date_order desc')
+        orders = self.env['sale.order'].search(domain, order='date_order desc')
 
         total_interval = sum(orders.mapped('amount_total'))
         cumulative_total += total_interval

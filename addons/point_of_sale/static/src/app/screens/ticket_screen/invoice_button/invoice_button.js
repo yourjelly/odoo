@@ -34,7 +34,7 @@ export class InvoiceButton extends Component {
     }
     async _downloadInvoice(orderId) {
         try {
-            const orderWithInvoice = await this.pos.data.read("pos.order", [orderId], [], {
+            const orderWithInvoice = await this.pos.data.read("sale.order", [orderId], [], {
                 load: false,
             });
             const order = orderWithInvoice[0];
@@ -72,7 +72,7 @@ export class InvoiceButton extends Component {
         }
 
         // Part 1: Handle missing partner.
-        // Write to pos.order the selected partner.
+        // Write to sale.order the selected partner.
         let partner = order.get_partner();
         if (!partner) {
             const _confirmed = await ask(this.dialog, {
@@ -87,7 +87,7 @@ export class InvoiceButton extends Component {
                 return;
             }
 
-            await this.pos.data.ormWrite("pos.order", [orderId], { partner_id: partner.id });
+            await this.pos.data.ormWrite("sale.order", [orderId], { partner_id: partner.id });
         }
 
         const confirmed = await this.onWillInvoiceOrder(order, partner);
@@ -97,7 +97,7 @@ export class InvoiceButton extends Component {
 
         // Part 2: Invoice the order.
         // FIXME POSREF timeout
-        await this.pos.data.silentCall("pos.order", "action_pos_order_invoice", [orderId]);
+        await this.pos.data.silentCall("sale.order", "action_pos_order_invoice", [orderId]);
 
         // Part 3: Download invoice.
         await this._downloadInvoice(orderId);

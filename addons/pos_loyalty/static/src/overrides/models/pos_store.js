@@ -41,7 +41,7 @@ patch(PosStore.prototype, {
                     this.updateOrder(order);
                 }
             }),
-            [this.data.records["pos.order"]]
+            [this.data.records["sale.order"]]
         );
     },
     async updateOrder(order) {

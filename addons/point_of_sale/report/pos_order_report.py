@@ -5,14 +5,14 @@ from odoo import fields, models, tools
 
 
 class PosOrderReport(models.Model):
-    _name = "report.pos.order"
+    _name = "report.sale.order"
     _description = "Point of Sale Orders Report"
     _auto = False
     _order = 'date desc'
     _rec_name = 'order_id'
 
     date = fields.Datetime(string='Order Date', readonly=True)
-    order_id = fields.Many2one('pos.order', string='Order', readonly=True)
+    order_id = fields.Many2one('sale.order', string='Order', readonly=True)
     partner_id = fields.Many2one('res.partner', string='Customer', readonly=True)
     product_id = fields.Many2one('product.product', string='Product', readonly=True)
     product_tmpl_id = fields.Many2one('product.template', string='Product Template', readonly=True)

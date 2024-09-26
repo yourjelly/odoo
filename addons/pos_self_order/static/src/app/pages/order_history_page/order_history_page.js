@@ -26,7 +26,7 @@ export class OrdersHistoryPage extends Component {
     }
 
     get orders() {
-        return this.selfOrder.models["pos.order"]
+        return this.selfOrder.models["sale.order"]
             .filter((o) => o.access_token)
             .sort((a, b) => b.id - a.id);
     }

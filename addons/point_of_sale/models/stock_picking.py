@@ -12,7 +12,7 @@ class StockPicking(models.Model):
     _inherit='stock.picking'
 
     pos_session_id = fields.Many2one('pos.session', index=True)
-    pos_order_id = fields.Many2one('pos.order', index=True)
+    pos_order_id = fields.Many2one('sale.order', index=True)
 
     def _prepare_picking_vals(self, partner, picking_type, location_id, location_dest_id):
         return {
@@ -92,7 +92,7 @@ class StockPicking(models.Model):
         lines_by_product = groupby(sorted(lines, key=lambda l: l.product_id.id), key=lambda l: l.product_id.id)
         move_vals = []
         for dummy, olines in lines_by_product:
-            order_lines = self.env['pos.order.line'].concat(*olines)
+            order_lines = self.env['sale.order.line'].concat(*olines)
             move_vals.append(self._prepare_stock_move_vals(order_lines[0], order_lines))
         moves = self.env['stock.move'].create(move_vals)
         confirmed_moves = moves._action_confirm()
@@ -186,7 +186,7 @@ class StockPickingType(models.Model):
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
-    pos_order_id = fields.Many2one('pos.order', 'POS Order')
+    pos_order_id = fields.Many2one('sale.order', 'POS Order')
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
@@ -205,14 +205,14 @@ class StockMove(models.Model):
     def _prepare_lines_data_dict(self, order_lines):
         lines_data = defaultdict(dict)
         for product_id, olines in groupby(sorted(order_lines, key=lambda l: l.product_id.id), key=lambda l: l.product_id.id):
-            lines_data[product_id].update({'order_lines': self.env['pos.order.line'].concat(*olines)})
+            lines_data[product_id].update({'order_lines': self.env['sale.order.line'].concat(*olines)})
         return lines_data
 
     def _create_production_lots_for_pos_order(self, lines):
         ''' Search for existing lots and create missing ones.
 
             :param lines: pos order lines with pack lot ids.
-            :type lines: pos.order.line recordset.
+            :type lines: sale.order.line recordset.
 
             :return stock.lot recordset.
         '''

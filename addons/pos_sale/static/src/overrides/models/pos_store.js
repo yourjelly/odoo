@@ -143,7 +143,7 @@ patch(PosStore.prototype, {
                 let remaining_quantity = newLine.qty;
                 newLine.delete();
                 while (!this.env.utils.floatIsZero(remaining_quantity)) {
-                    const splitted_line = this.models["pos.order.line"].create({
+                    const splitted_line = this.models["sale.order.line"].create({
                         ...newLineValues,
                     });
                     splitted_line.set_quantity(Math.min(remaining_quantity, 1.0), true);

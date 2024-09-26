@@ -24,7 +24,7 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'taxes_id': False,
         })
         self.main_pos_config.open_ui()
-        self.pos_order = self.env['pos.order'].create({
+        self.pos_order = self.env['sale.order'].create({
             'company_id': self.env.company.id,
             'session_id': self.main_pos_config.current_session_id.id,
             'partner_id': self.new_partner.id,
@@ -85,7 +85,7 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'taxes_id': False,
         })
         self.main_pos_config.open_ui()
-        self.pos_order = self.env['pos.order'].create({
+        self.pos_order = self.env['sale.order'].create({
             'session_id': self.main_pos_config.current_session_id.id,
             'company_id': self.env.company.id,
             'access_token': '1234567890',

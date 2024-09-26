@@ -19,7 +19,7 @@ class TestPoSSaleMarginReport(TestPoSCommon):
         self.open_new_session()
         session = self.pos_session
 
-        self.env['pos.order'].create({
+        self.env['sale.order'].create({
             'session_id': session.id,
             'lines': [(0, 0, {
                 'name': "OL/0001",

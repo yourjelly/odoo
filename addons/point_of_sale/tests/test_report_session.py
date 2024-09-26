@@ -21,7 +21,7 @@ class TestReportSession(TestPoSCommon):
 
         self.config.open_ui()
         session_id = self.config.current_session_id.id
-        order = self.env['pos.order'].create({
+        order = self.env['sale.order'].create({
             'company_id': self.env.company.id,
             'session_id': session_id,
             'partner_id': self.partner_a.id,
@@ -85,10 +85,10 @@ class TestReportSession(TestPoSCommon):
                       'to_invoice': False,
                       }
 
-        order = self.env['pos.order'].create(order_info)
+        order = self.env['sale.order'].create(order_info)
         self.make_payment(order, self.bank_pm1, 100)
 
-        order = self.env['pos.order'].create(order_info)
+        order = self.env['sale.order'].create(order_info)
         self.make_payment(order, self.cash_pm1, 100)
 
         self.config.current_session_id.action_pos_session_closing_control()
@@ -96,10 +96,10 @@ class TestReportSession(TestPoSCommon):
         self.config.open_ui()
         session_id_2 = self.config.current_session_id.id
         order_info['session_id'] = session_id_2
-        order = self.env['pos.order'].create(order_info)
+        order = self.env['sale.order'].create(order_info)
         self.make_payment(order, self.bank_pm1, 100)
 
-        order = self.env['pos.order'].create(order_info)
+        order = self.env['sale.order'].create(order_info)
         self.make_payment(order, self.cash_pm1, 100)
 
         self.config.current_session_id.action_pos_session_closing_control()
@@ -135,7 +135,7 @@ class TestReportSession(TestPoSCommon):
         session = self.pos_session
 
         self.tax_sale_a['amount'] = 10
-        order = self.env['pos.order'].create({
+        order = self.env['sale.order'].create({
             'session_id': session.id,
             'lines': [(0, 0, {
                 'name': "TR/0001",
@@ -170,7 +170,7 @@ class TestReportSession(TestPoSCommon):
         for payment in order_payment:
             payment.with_context(**payment_context).check()
 
-        order_report_lines = self.env['report.pos.order'].sudo().search([('order_id', '=', order.id)])
+        order_report_lines = self.env['report.sale.order'].sudo().search([('order_id', '=', order.id)])
 
         self.assertEqual(len(order_report_lines), 2)
         self.assertEqual(order_report_lines[0].payment_method_id.id, order_report_lines[1].payment_method_id.id)
@@ -180,8 +180,8 @@ class TestReportSession(TestPoSCommon):
             self.assertEqual(order.nbr_lines, 1)
             self.assertEqual(order.product_qty, 1)
 
-        order_report_lines_count_product1 = self.env['report.pos.order'].sudo().search_count([('product_id', '=', product1.id)])
-        order_report_lines_count_product2 = self.env['report.pos.order'].sudo().search_count([('product_id', '=', product2.id)])
+        order_report_lines_count_product1 = self.env['report.sale.order'].sudo().search_count([('product_id', '=', product1.id)])
+        order_report_lines_count_product2 = self.env['report.sale.order'].sudo().search_count([('product_id', '=', product2.id)])
 
         self.assertEqual(order_report_lines_count_product1, 1)
         self.assertEqual(order_report_lines_count_product2, 1)

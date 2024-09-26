@@ -4,11 +4,11 @@ import { patch } from "@web/core/utils/patch";
 patch(DataServiceOptions.prototype, {
     get databaseTable() {
         return {
-            "pos.order": {
+            "sale.order": {
                 key: "uuid",
                 condition: (record) => false,
             },
-            "pos.order.line": {
+            "sale.order.line": {
                 key: "uuid",
                 condition: (record) => false,
             },

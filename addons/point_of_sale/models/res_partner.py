@@ -11,7 +11,7 @@ class ResPartner(models.Model):
         help="The number of point of sales orders related to this customer",
         groups="point_of_sale.group_pos_user",
     )
-    pos_order_ids = fields.One2many('pos.order', 'partner_id', readonly=True)
+    pos_order_ids = fields.One2many('sale.order', 'partner_id', readonly=True)
 
     @api.model
     def _load_pos_data_domain(self, data):
@@ -31,7 +31,7 @@ class ResPartner(models.Model):
             [('id', 'child_of', self.ids)],
             ['parent_id'],
         )
-        pos_order_data = self.env['pos.order']._read_group(
+        pos_order_data = self.env['sale.order']._read_group(
             domain=[('partner_id', 'in', all_partners.ids)],
             groupby=['partner_id'], aggregates=['__count']
         )

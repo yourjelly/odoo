@@ -44,12 +44,12 @@ LINE_FIELDS = ['notice', 'product_id', 'qty', 'price_unit', 'discount', 'tax_ids
 
 
 class pos_order(models.Model):
-    _inherit = 'pos.order'
+    _inherit = 'sale.order'
 
     l10n_fr_hash = fields.Char(string="Inalteralbility Hash", readonly=True, copy=False)
     l10n_fr_secure_sequence_number = fields.Integer(string="Inalteralbility No Gap Sequence #", readonly=True, copy=False)
     l10n_fr_string_to_hash = fields.Char(compute='_compute_string_to_hash', readonly=True, store=False)
-    previous_order_id = fields.Many2one('pos.order', string='Previous Order', readonly=True, compute='_compute_previous_order', store=True, copy=False)
+    previous_order_id = fields.Many2one('sale.order', string='Previous Order', readonly=True, compute='_compute_previous_order', store=True, copy=False)
     pos_version = fields.Char(help="Version of Odoo that created the order", readonly=True, copy=False)
 
     @api.depends('l10n_fr_secure_sequence_number')
@@ -124,7 +124,7 @@ class pos_order(models.Model):
         has_been_posted = False
         for order in self:
             if order.company_id._is_accounting_unalterable():
-                # write the hash and the secure_sequence_number when posting or invoicing an pos.order
+                # write the hash and the secure_sequence_number when posting or invoicing an sale.order
                 if vals.get('state') in ['paid', 'done', 'invoiced']:
                     has_been_posted = True
 
@@ -155,7 +155,7 @@ class pos_order(models.Model):
                 raise UserError(_("According to French law, you cannot delete a point of sale order."))
 
 class PosOrderLine(models.Model):
-    _inherit = "pos.order.line"
+    _inherit = "sale.order.line"
 
     def write(self, vals):
         # restrict the operation in case we are trying to write a forbidden field

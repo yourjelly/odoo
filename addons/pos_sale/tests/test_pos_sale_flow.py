@@ -261,7 +261,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.main_pos_config.open_ui()
         self.start_pos_tour('PosSettleOrderRealTime', login="accountman")
         self.main_pos_config.current_session_id.close_session_from_ui()
-        pos_order = self.env['pos.order'].search([], order='id desc', limit=1)
+        pos_order = self.env['sale.order'].search([], order='id desc', limit=1)
         self.assertEqual(pos_order.picking_ids.move_line_ids[0].quantity, 2)
         self.assertEqual(pos_order.picking_ids.move_line_ids[0].location_id.id, self.shelf_1.id)
         self.assertEqual(pos_order.picking_ids.move_line_ids[1].quantity, 2)
@@ -374,7 +374,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.main_pos_config.open_ui()
         current_session = self.main_pos_config.current_session_id
         partner_1 = self.env['res.partner'].create({'name': 'Test Partner'})
-        order = self.env['pos.order'].create({
+        order = self.env['sale.order'].create({
             'company_id': self.env.company.id,
             'session_id': current_session.id,
             'partner_id': partner_1.id,
@@ -480,7 +480,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
            'uuid': str(uuid4()),
             }
 
-        self.env['pos.order'].sync_from_ui([pos_order])
+        self.env['sale.order'].sync_from_ui([pos_order])
         self.assertEqual(sale_order.order_line[0].untaxed_amount_invoiced, 10, "Untaxed invoiced amount should be 10")
         self.assertEqual(sale_order.order_line[1].untaxed_amount_invoiced, 0, "Untaxed invoiced amount should be 0")
 
@@ -661,7 +661,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PoSDownPaymentLinesPerTax', login="accountman")
 
         # We check the content of the invoice to make sure Product A/B/C only appears only once
-        invoice_pdf_content = str(self.env['pos.order'].search([]).account_move._get_invoice_legal_documents('pdf', allow_fallback=True).get('content'))
+        invoice_pdf_content = str(self.env['sale.order'].search([]).account_move._get_invoice_legal_documents('pdf', allow_fallback=True).get('content'))
         self.assertEqual(invoice_pdf_content.count('Product A'), 1)
         self.assertEqual(invoice_pdf_content.count('Product B'), 1)
         self.assertEqual(invoice_pdf_content.count('Product C'), 1)
@@ -724,7 +724,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.main_pos_config.write({'crm_team_id': sale_team})
         self.main_pos_config.open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosSaleTeam', login="accountman")
-        order = self.env['pos.order'].search([])
+        order = self.env['sale.order'].search([])
         self.assertEqual(len(order), 1)
         self.assertEqual(order.crm_team_id, sale_team)
 

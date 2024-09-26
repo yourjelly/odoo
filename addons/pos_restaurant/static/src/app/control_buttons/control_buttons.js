@@ -65,7 +65,7 @@ patch(ControlButtons.prototype, {
             startingValue: order.floating_order_name || "",
             getPayload: async (newName) => {
                 if (typeof order.id == "number") {
-                    this.pos.data.write("pos.order", [order.id], {
+                    this.pos.data.write("sale.order", [order.id], {
                         floating_order_name: newName,
                     });
                 } else {
