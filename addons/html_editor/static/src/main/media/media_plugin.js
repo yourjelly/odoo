@@ -22,8 +22,11 @@ export class MediaPlugin extends Plugin {
         const powerboxItems = [];
         if (!p.config.disableImage) {
             powerboxItems.push({
-                name: _t("Image"),
-                description: _t("Insert an image"),
+                name: _t("Media"),
+                description: p.config.disableVideo
+                    ? _t("Insert image, document or icon")
+                    : _t("Insert image, document, icon or video"),
+                searchKeywords: [_t("Images"), _t("Documents"), _t("Icons")],
                 category: "media",
                 fontawesome: "fa-file-image-o",
                 action() {

@@ -574,10 +574,10 @@ test("A new MediaDialog after switching record in a Form view should have the co
     expect(".odoo-editor-editable p:contains(second)").toHaveCount(1);
 
     setSelectionInHtmlField();
-    insertText(htmlEditor, "/Image");
+    insertText(htmlEditor, "/Media");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
-    expect(".active .o-we-command-name").toHaveText("Image");
+    expect(".active .o-we-command-name").toHaveText("Media");
 
     press("Enter");
     await animationFrame();
@@ -769,7 +769,7 @@ test("'Video' command is available by default", async () => {
     setSelectionInHtmlField();
     insertText(htmlEditor, "/video");
     await waitFor(".o-we-powerbox");
-    expect(queryAllTexts(".o-we-command-name")).toEqual(["Video"]);
+    expect(queryAllTexts(".o-we-command-name")).toInclude("Video");
 });
 
 test("'Video' command is not available when 'disableVideo' = true", async () => {
@@ -861,7 +861,7 @@ test("'Video' command is available when sanitize_tags = true and 'disableVideo' 
     insertText(htmlEditor, "/video");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
-    expect(queryAllTexts(".o-we-command-name")).toEqual(["Video"]);
+    expect(queryAllTexts(".o-we-command-name")).toInclude("Video");
 });
 
 test("MediaDialog contains 'Videos' tab by default in html field", async () => {
@@ -877,7 +877,7 @@ test("MediaDialog contains 'Videos' tab by default in html field", async () => {
     setSelectionInHtmlField();
     insertText(htmlEditor, "/image");
     await waitFor(".o-we-powerbox");
-    expect(queryAllTexts(".o-we-command-name")).toEqual(["Image"]);
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Media"]);
 
     press("Enter");
     await animationFrame();
@@ -903,7 +903,7 @@ test("MediaDialog don't contains 'Videos' tab in html field when 'disableVideo' 
     setSelectionInHtmlField();
     insertText(htmlEditor, "/image");
     await waitFor(".o-we-powerbox");
-    expect(queryAllTexts(".o-we-command-name")).toEqual(["Image"]);
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Media"]);
 
     press("Enter");
     await animationFrame();
@@ -927,7 +927,7 @@ test("'Image' command is available by default", async () => {
     setSelectionInHtmlField();
     insertText(htmlEditor, "/image");
     await waitFor(".o-we-powerbox");
-    expect(queryAllTexts(".o-we-command-name")).toEqual(["Image"]);
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Media"]);
 });
 
 test("'Image' command is not available when 'disableImage' = true", async () => {
