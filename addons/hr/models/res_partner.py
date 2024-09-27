@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields, models, _
+from odoo.api import depends
 
 
 class ResPartner(models.Model):
@@ -9,6 +10,7 @@ class ResPartner(models.Model):
         'hr.employee', 'work_contact_id', string='Employees', groups="hr.group_hr_user",
         help="Related employees based on their private address")
     employees_count = fields.Integer(compute='_compute_employees_count', groups="hr.group_hr_user")
+    employee = fields.Boolean(help="Whether this contact is an Employee.", compute='_compute_employee', store=True)
 
     def _compute_employees_count(self):
         for partner in self:
@@ -50,3 +52,8 @@ class ResPartner(models.Model):
             'country': employee_id.private_country_id.code,
         }
         return [pstl_addr] + super()._get_all_addr()
+
+    @depends('employee_ids')
+    def _compute_employee(self):
+        for partner in self:
+            partner.employee = bool(partner.employee_ids)
