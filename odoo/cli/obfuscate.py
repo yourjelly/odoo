@@ -248,6 +248,7 @@ class Obfuscate(Command):
                     self.commit()
                 else:
                     self.rollback()
+                    sys.exit(1)
 
         except Exception as e:  # noqa: BLE001
             sys.exit("ERROR: %s" % e)
