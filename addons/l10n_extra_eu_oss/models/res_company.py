@@ -1,5 +1,5 @@
 from odoo import Command, api, models
-from .extra_eu_tag_map import EXTRA_EU_TAG_MAP
+from odoo.addons.l10n_eu_oss.models.eu_tag_map import EU_TAG_MAP
 from .extra_eu_tax_map import EXTRA_EU_TAX_MAP
 
 
@@ -16,18 +16,17 @@ class Company(models.Model):
     def _map_extra_eu_taxes(self, country=False):
         '''Creates or updates Fiscal Positions for each non EU country excluding the company's account_fiscal_country_id
         '''
-        import pudb;pu.db
         ioss_mapping_countries = self.env["res.country"].search([("code", "in", [t[2] for t in EXTRA_EU_TAX_MAP])])
         ioss_tax_groups = self.env['ir.model.data'].search([
             ('module', '=', 'l10n_extra_eu_oss'),
             ('model', '=', 'account.tax.group')])
         for company in self:
-            invoice_repartition_lines, refund_repartition_lines = company._get_repartition_lines_ioss()
+            invoice_repartition_lines, refund_repartition_lines = company._get_repartition_lines_ioss(country or False)
             taxes = self.env['account.tax'].search([
                 ('type_tax_use', '=', 'sale'),
                 ('amount_type', '=', 'percent'),
                 ('company_id', '=', company.id),
-                ('country_id', '=', country.id if country else company.account_fiscal_country_id.id),
+                ('country_id', '=', company.account_fiscal_country_id.id),
                 ('tax_group_id', 'not in', ioss_tax_groups.mapped('res_id'))])
 
             multi_tax_reports_countries_fpos = self.env['account.fiscal.position'].search([
@@ -38,7 +37,7 @@ class Company(models.Model):
             for destination_country in ioss_countries:
                 mapping = []
                 fpos = self.env['account.fiscal.position'].search([
-                            ('country_id', '=', country.id if country else destination_country.id),
+                            ('country_id', '=', country.id or destination_country.id),
                             ('fiscal_country_id', '=', destination_country.id),
                             ('company_id', '=', company.id),
                             ('auto_apply', '=', True),
@@ -47,7 +46,7 @@ class Company(models.Model):
                 if not fpos:
                     fpos = self.env['account.fiscal.position'].create({
                         'name': f'IOSS B2C {destination_country.name}',
-                        'fiscal_country_id': country.id if country else destination_country.id,
+                        'fiscal_country_id': country.id or destination_country.id,
                         'country_id': destination_country.id,
                         'company_id': company.id,
                         'auto_apply': True,
@@ -76,7 +75,7 @@ class Company(models.Model):
                                 'type_tax_use': 'sale',
                                 'description': f"{tax_amount}%",
                                 'tax_group_id': self.env.ref(f'l10n_extra_eu_oss.{ioss_tax_group_local_xml_id}').id,
-                                'country_id': country.id if country else company.account_fiscal_country_id.id,
+                                'country_id': country.id or company.account_fiscal_country_id.id,
                                 'sequence': 1000,
                                 'company_id': company.id,
                             })
@@ -86,10 +85,10 @@ class Company(models.Model):
                         'tax_ids': mapping
                     })
 
-    def _get_repartition_lines_ioss(self):
+    def _get_repartition_lines_ioss(self, country):
         self.ensure_one()
         defaults = self.env['account.tax'].with_company(self).default_get(['invoice_repartition_line_ids', 'refund_repartition_line_ids'])
-        ioss_account, ioss_tags = self._get_ioss_account(), self._get_ioss_tags()
+        ioss_account, ioss_tags = self._get_ioss_account(), self._get_ioss_tags(country or False)
         base_line, tax_line, vals = 0, 1, 2
         for doc_type in 'invoice', 'refund':
             if ioss_account:
@@ -124,12 +123,12 @@ class Company(models.Model):
                 })
         return self.env.ref(f'l10n_extra_eu_oss.ioss_tax_account_company_{self.id}')
 
-    def _get_ioss_tags(self):
+    def _get_ioss_tags(self, country):
         ioss_tag = self.env.ref('l10n_eu_oss.tag_eu_import')
         chart_template_xml_id = ''
         if self.chart_template_id:
-            [chart_template_xml_id] = self.chart_template_id.parent_id.get_external_id().values() or self.chart_template_id.get_external_id().values()
-        tag_for_country = EXTRA_EU_TAG_MAP.get(chart_template_xml_id, {
+            [chart_template_xml_id] = self.env['account.chart.template'].search([('country_id', '=', country.id)]).get_external_id().values()
+        tag_for_country = EU_TAG_MAP.get(chart_template_xml_id, {
             'invoice_base_tag': None,
             'invoice_tax_tag': None,
             'refund_base_tag': None,
@@ -139,8 +138,8 @@ class Company(models.Model):
         mapping = {}
         for repartition_line_key, tag_xml_id in tag_for_country.items():
             tag = self.env.ref(tag_xml_id) if tag_xml_id else self.env['account.account.tag']
-            if tag and tag._name == "account.tax.report.line":
-                tag = tag.tag_ids.filtered(lambda t: not t.tax_negate)
+            if tag and tag._name == "account.report.expression":
+                tag = tag._get_matching_tags("+")
             mapping[repartition_line_key] = tag + ioss_tag
 
         return mapping
