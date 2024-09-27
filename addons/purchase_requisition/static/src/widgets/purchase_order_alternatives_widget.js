@@ -5,9 +5,23 @@ import { ListRenderer } from "@web/views/list/list_renderer";
 
 
 export class FieldMany2ManyAltPOsRenderer extends ListRenderer {
+   getSortedRecords(records) {
+      const currentRecord = records.find(record => this.isCurrentRecord(record));  // Use isCurrentRecord to find the current record
+      const otherRecords = records.filter(record => !this.isCurrentRecord(record));  // Filter out the current record
+
+      // If currentRecord exists, put it at the top, otherwise return the original list
+      return currentRecord ? [currentRecord, ...otherRecords] : records;
+   }
+
+   // Override the render method to use the sorted records
+   render() {
+      const sortedRecords = this.getSortedRecords(this.props.records);  // Get sorted records
+      return super.render({ ...this.props, records: sortedRecords });  // Pass the sorted records to the parent renderer
+   }
+
    isCurrentRecord(record) {
       return record.resId === this.props.list.model.root.resId;
-  }
+   }
 }
 
 FieldMany2ManyAltPOsRenderer.recordRowTemplate = "purchase_requisition.AltPOsListRenderer.RecordRow";
