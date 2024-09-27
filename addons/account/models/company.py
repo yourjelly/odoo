@@ -221,7 +221,7 @@ class ResCompany(models.Model):
             val['company_id'][0]: val['country_ids']
             for val in self.env['account.fiscal.position'].read_group(
                 domain=[('company_id', 'in', self.ids), ('foreign_vat', '!=', False)],
-                fields=['country_ids:array_agg(country_id)'],
+                fields=['country_ids:array_agg(fiscal_country_id)'],
                 groupby='company_id',
             )
         }
