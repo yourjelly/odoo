@@ -143,6 +143,7 @@ class Obfuscate(Command):
         group.add_option('--allfields', action='store_true', default=False, help="Used in unobfuscate mode, try to unobfuscate all fields. Cannot be used in obfuscate mode. Slower than specifying fields.")
         group.add_option('--vacuum', action='store_true', default=False, help="Vacuum database after unobfuscating")
         group.add_option('--pertablecommit', action='store_true', default=False, help="Commit after each table instead of a big transaction")
+        group.add_option('-y', '--yes', dest="yes", action='store_true', default=False, help="Don't ask for manual confirmation. Use it carefully as the obfuscate method is not considered as safe to transfer anonymous datas to a third party.")
 
         parser.add_option_group(group)
         if not cmdargs:
@@ -215,7 +216,7 @@ class Obfuscate(Command):
                             _logger.error("Invalid fields: %s", ', '.join([f"{f[0]}.{f[1]}" for f in invalid_fields]))
                             fields = [f for f in fields if f not in invalid_fields]
 
-                    if not opt.unobfuscate:
+                    if not opt.unobfuscate and not opt.yes:
                         self.confirm_not_secure()
 
                     _logger.info("Processing fields: %s", ', '.join([f"{f[0]}.{f[1]}" for f in fields]))
