@@ -221,6 +221,7 @@ export class HtmlField extends Component {
                 return { resModel, resId };
             },
             ...this.props.editorConfig,
+            disableVideo: false,
         };
 
         const { sanitize_tags, sanitize } = this.props.record.fields[this.props.name];
