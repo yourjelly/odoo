@@ -16,6 +16,7 @@ class Company(models.Model):
     def _map_extra_eu_taxes(self, country=False):
         '''Creates or updates Fiscal Positions for each non EU country excluding the company's account_fiscal_country_id
         '''
+        import pudb;pu.db
         ioss_mapping_countries = self.env["res.country"].search([("code", "in", [t[2] for t in EXTRA_EU_TAX_MAP])])
         ioss_tax_groups = self.env['ir.model.data'].search([
             ('module', '=', 'l10n_extra_eu_oss'),
@@ -26,8 +27,7 @@ class Company(models.Model):
                 ('type_tax_use', '=', 'sale'),
                 ('amount_type', '=', 'percent'),
                 ('company_id', '=', company.id),
-                ('country_id', '=', country.id or company.account_fiscal_country_id.id),
-                ('fiscal_country_id', '=', company.account_fiscal_country_id.id),
+                ('country_id', '=', country.id if country else company.account_fiscal_country_id.id),
                 ('tax_group_id', 'not in', ioss_tax_groups.mapped('res_id'))])
 
             multi_tax_reports_countries_fpos = self.env['account.fiscal.position'].search([
@@ -38,7 +38,7 @@ class Company(models.Model):
             for destination_country in ioss_countries:
                 mapping = []
                 fpos = self.env['account.fiscal.position'].search([
-                            ('country_id', '=', country.id or destination_country.id),
+                            ('country_id', '=', country.id if country else destination_country.id),
                             ('fiscal_country_id', '=', destination_country.id),
                             ('company_id', '=', company.id),
                             ('auto_apply', '=', True),
@@ -47,7 +47,7 @@ class Company(models.Model):
                 if not fpos:
                     fpos = self.env['account.fiscal.position'].create({
                         'name': f'IOSS B2C {destination_country.name}',
-                        'fiscal_country_id': country.id or destination_country.id,
+                        'fiscal_country_id': country.id if country else destination_country.id,
                         'country_id': destination_country.id,
                         'company_id': company.id,
                         'auto_apply': True,
@@ -76,8 +76,7 @@ class Company(models.Model):
                                 'type_tax_use': 'sale',
                                 'description': f"{tax_amount}%",
                                 'tax_group_id': self.env.ref(f'l10n_extra_eu_oss.{ioss_tax_group_local_xml_id}').id,
-                                'country_id': country.id or company.account_fiscal_country_id.id,
-                                'fiscal_country_id': company.account_fiscal_country_id.id,
+                                'country_id': country.id if country else company.account_fiscal_country_id.id,
                                 'sequence': 1000,
                                 'company_id': company.id,
                             })

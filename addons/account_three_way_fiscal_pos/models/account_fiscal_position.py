@@ -53,9 +53,9 @@ class AccountFiscalPosition(models.Model):
                 record.foreign_vat_header_mode = None
                 continue
 
-            if self.env['account.tax'].search([('country_id', '=', record.country_id.id)], limit=1) and self.env['account.tax'].search([('country_id', '=', record.fiscal_country_id.id)], limit=1):
+            if self.env['account.tax'].search([('country_id', '=', record.fiscal_country_id.id)], limit=1):
                 record.foreign_vat_header_mode = None
-            elif self.env['account.tax.template'].search([('chart_template_id.country_id', '=', record.country_id.id)], limit=1) or self.env['account.tax.template'].search([('chart_template_id.country_id', '=', record.fiscal_country_id.id)], limit=1):
+            elif self.env['account.tax.template'].search([('chart_template_id.country_id', '=', record.fiscal_country_id.id)], limit=1):
                 record.foreign_vat_header_mode = 'templates_found'
             else:
                 record.foreign_vat_header_mode = 'no_template'
@@ -100,6 +100,9 @@ class AccountFiscalPosition(models.Model):
     def action_create_foreign_taxes(self):
         super().action_create_foreign_taxes()
         self.env['account.tax.template']._try_instantiating_foreign_taxes(self.fiscal_country_id, self.company_id)
+
+    def action_create_foreign_oss(self):
+        self.company_id._map_extra_eu_taxes(self.fiscal_country_id)
 
     def _get_fiscal_country(self):
         return self.fiscal_country_id

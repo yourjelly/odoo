@@ -33,6 +33,13 @@
                                 style="padding: 0; vertical-align: baseline;"/>
                         </span>
                     </div>
+    
+                    <button
+                        type="object"
+                        name="action_create_foreign_oss"
+                        class="oe_link">
+                        IOSS
+                    </button>
 
                     <sheet>
                     <div class="oe_button_box" name="button_box"/>
