@@ -769,7 +769,8 @@ test("'Video' command is available by default", async () => {
     setSelectionInHtmlField();
     insertText(htmlEditor, "/video");
     await waitFor(".o-we-powerbox");
-    expect(queryAllTexts(".o-we-command-name")).toInclude("Video");
+    // /video is alias for /media
+    expect(queryAllTexts(".o-we-command-name")).toInclude("Media");
 });
 
 test("'Video' command is not available when 'disableVideo' = true", async () => {
@@ -861,7 +862,8 @@ test("'Video' command is available when sanitize_tags = true and 'disableVideo' 
     insertText(htmlEditor, "/video");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
-    expect(queryAllTexts(".o-we-command-name")).toInclude("Video");
+    // /video is alias for /media
+    expect(queryAllTexts(".o-we-command-name")).toInclude("Media");
 });
 
 test("MediaDialog contains 'Videos' tab by default in html field", async () => {
