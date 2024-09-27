@@ -83,7 +83,16 @@ class Obfuscate(Command):
         return False
 
     def get_all_fields(self):
-        qry = "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND udt_name IN ['text', 'varchar', 'jsonb'] AND NOT table_name LIKE 'ir_%' ORDER BY 1,2"
+        qry = """
+            SELECT c.table_name, c.column_name
+            FROM information_schema.columns c
+            JOIN information_schema.tables t ON c.table_name = t.table_name
+            WHERE c.table_schema='public'
+                AND c.udt_name IN ('text', 'varchar', 'jsonb')
+                AND NOT c.table_name LIKE 'ir_%'
+                AND NOT t.table_type='VIEW'
+            ORDER BY 1,2
+        """
         self.cr.execute(qry)
         return self.cr.fetchall()
 
