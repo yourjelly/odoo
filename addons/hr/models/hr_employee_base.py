@@ -211,10 +211,11 @@ class HrEmployeeBase(models.AbstractModel):
             else:
                 employee.work_phone = False
 
-    @api.depends('work_contact_id', 'work_contact_id.mobile', 'work_contact_id.email')
+    @api.depends('work_contact_id', 'work_contact_id.mobile', 'work_contact_id.email', 'work_contact_id.name')
     def _compute_work_contact_details(self):
         for employee in self:
             if employee.work_contact_id:
+                employee.name = employee.work_contact_id.name
                 employee.mobile_phone = employee.work_contact_id.mobile
                 employee.work_email = employee.work_contact_id.email
 
@@ -238,6 +239,7 @@ class HrEmployeeBase(models.AbstractModel):
                 employees_without_work_contact += employee
             else:
                 employee.work_contact_id.sudo().write({
+                    'name': employee.name,
                     'email': employee.work_email,
                     'mobile': employee.mobile_phone,
                 })

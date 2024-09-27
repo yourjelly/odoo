@@ -244,6 +244,13 @@ class HrEmployeePrivate(models.Model):
         for employee in self:
             employee.distance_home_work = employee.km_home_work / 1.609 if employee.distance_home_work_unit == "miles" else employee.distance_home_work
 
+    @api.onchange('name')
+    def _inverse_employee_name(self):
+        for employee in self:
+            employee.work_contact_id.sudo().write({
+                'name': employee.name
+            })
+
     def _get_partner_count_depends(self):
         return ['user_id']
 

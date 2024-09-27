@@ -74,7 +74,7 @@ class TestHrEmployee(TestHrCommon):
         employee_form.work_email = 'raoul@example.com'
         employee_form.user_id = self.res_users_hr_officer
         employee = employee_form.save()
-        self.assertEqual(employee.name, 'Raoul Grosbedon')
+        self.assertEqual(employee.name, 'HR Officer')
         self.assertEqual(employee.work_email, self.res_users_hr_officer.email)
         self.assertEqual(employee.tz, self.res_users_hr_officer.tz)
 
@@ -88,7 +88,7 @@ class TestHrEmployee(TestHrCommon):
         employee_form.tz = _tz
         employee_form.user_id = self.res_users_hr_officer
         employee = employee_form.save()
-        self.assertEqual(employee.name, 'Raoul Grosbedon')
+        self.assertEqual(employee.name, 'HR Officer')
         self.assertEqual(employee.work_email, self.res_users_hr_officer.email)
         self.assertEqual(employee.tz, _tz)
 
