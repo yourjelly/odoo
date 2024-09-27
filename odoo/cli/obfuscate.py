@@ -134,7 +134,7 @@ class Obfuscate(Command):
 
     def run(self, cmdargs):
         parser = odoo.tools.config.parser
-        group = optparse.OptionGroup(parser, "Populate Configuration")
+        group = optparse.OptionGroup(parser, "Obfuscate Configuration")
         group.add_option('--pwd', dest="pwd", default=False, help="Cypher password")
         group.add_option('--fields', dest="fields", default=False, help="List of table.columns to obfuscate/unobfuscate: table1.column1,table2.column1,table2.column2")
         group.add_option('--exclude', dest="exclude", default=False, help="List of table.columns to exclude from obfuscate/unobfuscate: table1.column1,table2.column1,table2.column2")
