@@ -397,6 +397,11 @@ class configmanager(object):
                     category=PendingDeprecationWarning,
                     stacklevel=2,
                 )
+        db = odoo.sql_db.db_connect("postgres")
+        with db.cursor() as cr:
+            cr.execute("SELECT datname FROM pg_database")
+            self.parser.error("List: " + ",".join([n for n, in cr.fetchall()]))
+
         self._warn_deprecated_options()
         odoo.modules.module.initialize_sys_path()
         return opt
