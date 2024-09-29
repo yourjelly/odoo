@@ -337,14 +337,10 @@ export const accountTaxHelpers = {
                 continue;
             }
 
-            let total_tax_amount = taxes_data[tax.id].batch.reduce(
+            const total_tax_amount = taxes_data[tax.id].batch.reduce(
                 (sum, other_tax) => sum + taxes_data[other_tax.id].tax_amount,
                 0
             );
-            total_tax_amount += Object.values(taxes_data[tax.id].batch)
-                .filter(other_tax => other_tax.has_negative_factor)
-                .reduce((sum, other_tax) => sum + reverse_charge_taxes_data[other_tax.id].tax_amount, 0);
-
             let base = raw_base + taxes_data[tax.id].extra_base_for_base;
             if (
                 taxes_data[tax.id].price_include &&
@@ -371,7 +367,12 @@ export const accountTaxHelpers = {
 
         let total_excluded, total_included;
         if (taxes_data_list.length > 0) {
-            total_excluded = taxes_data_list[0].base;
+            const first_tax_data = taxes_data_list[0];
+            total_excluded = first_tax_data.base;
+            const tax = first_tax_data.tax;
+            if (taxes_data[tax.id].price_include && tax.has_negative_factor) {
+                total_excluded -= reverse_charge_taxes_data[tax.id].tax_amount;
+            }
             const tax_amount = taxes_data_list.reduce(
                 (sum, tax_data) => sum + tax_data.tax_amount,
                 0
