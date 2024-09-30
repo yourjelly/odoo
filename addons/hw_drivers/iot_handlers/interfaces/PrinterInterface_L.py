@@ -7,17 +7,27 @@ from threading import Lock
 
 from odoo.addons.hw_drivers.interface import Interface
 
-conn = CupsConnection()
-PPDs = conn.getPPDs()
-cups_lock = Lock()  # We can only make one call to Cups at a time
+# conn = CupsConnection()
+# PPDs = conn.getPPDs()
+# cups_lock = Lock()  # We can only make one call to Cups at a time
 
 
 class PrinterInterface(Interface):
     _loop_delay = 120
     connection_type = 'printer'
-    printer_devices = {}
+    printer_devices = {
+        'printer' : {
+            'supported' : True,
+            'url' : 'urlPrinter',
+            'identifier' : 'printerID',
+            'device-class' : 'direct',
+            'device-make-and-model ': 'PrinterMake',
+            'device-id': '',
+        },
+    }
 
     def get_devices(self):
+        return self.printer_devices
         discovered_devices = {}
         with cups_lock:
             printers = conn.getPrinters()

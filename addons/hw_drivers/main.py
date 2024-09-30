@@ -111,7 +111,7 @@ class Manager(Thread):
         # We first add the IoT Box to the connected DB because IoT handlers cannot be downloaded if
         # the identifier of the Box is not found in the DB. So add the Box to the DB.
         self.send_alldevices(iot_client)
-        helpers.download_iot_handlers()
+        # helpers.download_iot_handlers()
         helpers.load_iot_handlers()
 
         # Start the interfaces
