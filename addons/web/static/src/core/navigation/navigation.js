@@ -25,8 +25,8 @@ class NavigationItem {
             this.target = el;
         }
 
-        const onFocus = () => this.setActive(false);
-        const onMouseEnter = (ev) => this.onMouseEnter(ev);
+        const onFocus = () => this.focus(false);
+        const onMouseEnter = () => this.onMouseEnter();
 
         this.target.addEventListener("focus", onFocus);
         this.target.addEventListener("mouseenter", onMouseEnter);
@@ -37,16 +37,16 @@ class NavigationItem {
     }
 
     select() {
-        this.setActive();
+        this.focus();
         this.target.click();
     }
 
-    setActive(focus = true) {
+    focus(doRealFocus = true) {
         scrollTo(this.target);
         this.setActiveItem(this.index, this);
         this.target.classList.add(ACTIVE_ELEMENT_CLASS);
 
-        if (focus && !this.options.virtualFocus) {
+        if (doRealFocus && !this.options.virtualFocus) {
             focusElement(this.target);
         }
     }
@@ -56,7 +56,7 @@ class NavigationItem {
     }
 
     onMouseEnter() {
-        this.setActive(false);
+        this.focus(false);
         this.options.onMouseEnter?.(this);
     }
 }
@@ -74,11 +74,11 @@ class Navigator {
             const isFocused = this.activeItem?.el.isConnected;
             const index = this.currentActiveIndex + increment;
             if (isFocused && index >= 0) {
-                return this.items[index % this.items.length]?.setActive();
+                return this.items[index % this.items.length]?.focus();
             } else if (!isFocused && increment >= 0) {
-                return this.items[0]?.setActive();
+                return this.items[0]?.focus();
             } else {
-                return this.items.at(-1)?.setActive();
+                return this.items.at(-1)?.focus();
             }
         };
 
@@ -90,8 +90,8 @@ class Navigator {
             ...options,
 
             hotkeys: {
-                home: (index, items) => items[0]?.setActive(),
-                end: (index, items) => items.at(-1)?.setActive(),
+                home: (index, items) => items[0]?.focus(),
+                end: (index, items) => items.at(-1)?.focus(),
                 tab: () => focusAt(+1),
                 "shift+tab": () => focusAt(-1),
                 arrowdown: () => focusAt(+1),
@@ -155,7 +155,7 @@ class Navigator {
         if (this.options.onEnabled) {
             this.options.onEnabled(this.items);
         } else if (this.items.length > 0) {
-            this.items[0]?.setActive();
+            this.items[0]?.focus();
         }
 
         this.enabled = true;
@@ -202,7 +202,7 @@ class Navigator {
         });
 
         if (oldItemsLength != this.items.length && this.currentActiveIndex >= this.items.length) {
-            this.items.at(-1)?.setActive();
+            this.items.at(-1)?.focus();
         }
     }
 

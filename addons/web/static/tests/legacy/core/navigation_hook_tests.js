@@ -1,6 +1,5 @@
 /** @odoo-module alias=@web/../tests/core/navigation_hook_tests default=false */
 
-import { hover } from "@odoo/hoot-dom";
 import { Component, xml } from "@odoo/owl";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { getFixture, mount, patchWithCleanup, triggerHotkey } from "@web/../tests/helpers/utils";
@@ -9,7 +8,6 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { useNavigation } from "@web/core/navigation/navigation";
 import { registry } from "@web/core/registry";
 import { useAutofocus } from "@web/core/utils/hooks";
-import { assert } from "qunit";
 
 const serviceRegistry = registry.category("services");
 let target;
@@ -179,8 +177,7 @@ QUnit.module("Hooks", ({ beforeEach }) => {
         assert.verifySteps(["2"]);
     });
 
-    QUnit.test("hover selects the items makes but doesn't focus", async () => {
-        await mountWithCleanup(BasicHookParent);
+    QUnit.test("hovering an item makes it active but doesn't focus", async (assert) => {
         const env = await makeTestEnv();
         await mount(createNavComponent(), target, { env });
 
@@ -203,8 +200,7 @@ QUnit.module("Hooks", ({ beforeEach }) => {
         assert.hasClass(target.querySelector(".three"), "focus");
 
         await triggerHotkey("arrowdown");
-        await animationFrame();
-        expect(".four").toBeFocused();
-        expect(".four").toHaveClass("focus");
+        assert.strictEqual(document.activeElement, target.querySelector(".four"));
+        assert.hasClass(target.querySelector(".four"), "focus");
     });
 });
