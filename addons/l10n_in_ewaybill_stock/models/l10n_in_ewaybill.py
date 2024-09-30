@@ -9,6 +9,12 @@ class Ewaybill(models.Model):
     _inherit = "l10n.in.ewaybill"
     _check_company_auto = True
 
+    state = fields.Selection(
+        selection_add=[('challan', 'Challan')],
+        ondelete={
+            'challan': 'cascade'
+        }
+    )
     type_description = fields.Char(string="Description")
 
     # Stock picking details
