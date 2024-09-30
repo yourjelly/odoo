@@ -367,12 +367,7 @@ export const accountTaxHelpers = {
 
         let total_excluded, total_included;
         if (taxes_data_list.length > 0) {
-            const first_tax_data = taxes_data_list[0];
-            total_excluded = first_tax_data.base;
-            const tax = first_tax_data.tax;
-            if (taxes_data[tax.id].price_include && tax.has_negative_factor) {
-                total_excluded -= reverse_charge_taxes_data[tax.id].tax_amount;
-            }
+            total_excluded = taxes_data_list[0].base;
             const tax_amount = taxes_data_list.reduce(
                 (sum, tax_data) => sum + tax_data.tax_amount,
                 0
