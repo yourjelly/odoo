@@ -51,6 +51,9 @@
             .nav-link {
                 margin-bottom: -1px;
 
+                &.active {
+                    color: inherit;
+                }
                 &:not(.active) {
                     border: 0;
                 }
