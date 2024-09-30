@@ -10,11 +10,12 @@ from uuid import uuid4
 import psycopg2
 import pytz
 
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, tools, _, Command
 from odoo.tools import float_is_zero, float_round, float_repr, float_compare, formatLang
 from odoo.exceptions import ValidationError, UserError
 from odoo.osv.expression import AND
 import base64
+
 
 _logger = logging.getLogger(__name__)
 
@@ -663,61 +664,48 @@ class PosOrder(models.Model):
 
     def _create_invoice(self, move_vals):
         self.ensure_one()
-        new_move = self.env['account.move'].sudo().with_company(self.company_id).with_context(default_move_type=move_vals['move_type'], linked_to_pos=True).create(move_vals)
-        message = _("This invoice has been created from the point of sale session: %s",
-            self._get_html_link())
+        invoice = self.env['account.move'].sudo()\
+            .with_company(self.company_id)\
+            .with_context(default_move_type=move_vals['move_type'], linked_to_pos=True)\
+            .create(move_vals)
 
-        new_move.message_post(body=message)
         if self.config_id.cash_rounding:
-            with self.env['account.move']._check_balanced({'records': new_move}):
-                rounding_applied = float_round(self.amount_paid - self.amount_total,
-                                            precision_rounding=new_move.currency_id.rounding)
-                rounding_line = new_move.line_ids.filtered(lambda line: line.display_type == 'rounding')
-                if rounding_line and rounding_line.debit > 0:
-                    rounding_line_difference = rounding_line.debit + rounding_applied
-                elif rounding_line and rounding_line.credit > 0:
-                    rounding_line_difference = -rounding_line.credit + rounding_applied
+            line_ids_commands = []
+            rate = invoice.invoice_currency_rate
+            sign = invoice.direction_sign
+            difference_currency = sign * (self.amount_paid - invoice.amount_total)
+            difference_balance = invoice.company_currency_id.round(difference_currency / rate) if rate else 0.0
+            if not self.currency_id.is_zero(difference_currency):
+                rounding_line = invoice.line_ids.filtered(lambda line: line.display_type == 'rounding' and not line.tax_line_id)
+                if rounding_line:
+                    line_ids_commands.append(Command.update(rounding_line.id, {
+                        'amount_currency': rounding_line.amount_currency + difference_currency,
+                        'balance': rounding_line.balance + difference_balance,
+                    }))
                 else:
-                    rounding_line_difference = rounding_applied
-                if rounding_applied:
-                    if rounding_applied > 0.0:
-                        account_id = new_move.invoice_cash_rounding_id.loss_account_id.id
+                    if difference_currency > 0.0:
+                        account = invoice.invoice_cash_rounding_id.loss_account_id
                     else:
-                        account_id = new_move.invoice_cash_rounding_id.profit_account_id.id
-                    if rounding_line:
-                        if rounding_line_difference:
-                            rounding_line.with_context(skip_invoice_sync=True).write({
-                                'debit': rounding_applied < 0.0 and -rounding_applied or 0.0,
-                                'credit': rounding_applied > 0.0 and rounding_applied or 0.0,
-                                'account_id': account_id,
-                                'price_unit': rounding_applied,
-                            })
-
-                    else:
-                        self.env['account.move.line'].sudo().with_context(skip_invoice_sync=True).create({
-                            'balance': -rounding_applied,
-                            'quantity': 1.0,
-                            'partner_id': new_move.partner_id.id,
-                            'move_id': new_move.id,
-                            'currency_id': new_move.currency_id.id,
-                            'company_id': new_move.company_id.id,
-                            'company_currency_id': new_move.company_id.currency_id.id,
-                            'display_type': 'rounding',
-                            'sequence': 9999,
-                            'name': self.config_id.rounding_method.name,
-                            'account_id': account_id,
-                        })
-                else:
-                    if rounding_line:
-                        rounding_line.with_context(skip_invoice_sync=True).unlink()
-                if rounding_line_difference:
-                    existing_terms_line = new_move.line_ids.filtered(
-                        lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
-                    existing_terms_line_new_val = float_round(
-                        existing_terms_line.balance + rounding_line_difference,
-                        precision_rounding=new_move.currency_id.rounding)
-                    existing_terms_line.with_context(skip_invoice_sync=True).balance = existing_terms_line_new_val
-        return new_move
+                        account = invoice.invoice_cash_rounding_id.profit_account_id
+                    line_ids_commands.append(Command.create({
+                        'name': invoice.invoice_cash_rounding_id.name,
+                        'amount_currency': difference_currency,
+                        'balance': difference_balance,
+                        'currency_id': invoice.currency_id.id,
+                        'display_type': 'rounding',
+                        'account_id': account.id,
+                    }))
+                existing_terms_line = invoice.line_ids\
+                    .filtered(lambda line: line.display_type == 'payment_term')\
+                    .sorted(lambda line: -abs(line.amount_currency))[:1]
+                line_ids_commands.append(Command.update(existing_terms_line.id, {
+                    'amount_currency': existing_terms_line.amount_currency - difference_currency,
+                    'balance': existing_terms_line.balance - difference_balance,
+                }))
+                with self.env['account.move']._check_balanced({'records': invoice}):
+                    invoice.with_context(skip_invoice_sync=True).line_ids = line_ids_commands
+        invoice.message_post(body=_("This invoice has been created from the point of sale session: %s", self._get_html_link()))
+        return invoice
 
     def action_pos_order_paid(self):
         self.ensure_one()
@@ -757,6 +745,7 @@ class PosOrder(models.Model):
         for orderline in self.lines:
             if orderline.refunded_orderline_id and orderline.refunded_orderline_id.order_id.account_move:
                 pos_refunded_invoice_ids.append(orderline.refunded_orderline_id.order_id.account_move.id)
+
         vals = {
             'invoice_origin': self.name,
             'pos_refunded_invoice_ids': pos_refunded_invoice_ids,
@@ -771,9 +760,7 @@ class PosOrder(models.Model):
             'fiscal_position_id': self.fiscal_position_id.id,
             'invoice_line_ids': self._prepare_invoice_lines(),
             'invoice_payment_term_id': self.partner_id.property_payment_term_id.id or False,
-            'invoice_cash_rounding_id': self.config_id.rounding_method.id
-            if self.config_id.cash_rounding and (not self.config_id.only_round_cash_method or any(p.payment_method_id.is_cash_count for p in self.payment_ids))
-            else False
+            'invoice_cash_rounding_id': self.config_id.rounding_method.id,
         }
         if self.refunded_order_id.account_move:
             vals['ref'] = _('Reversal of: %s', self.refunded_order_id.account_move.name)
@@ -1675,4 +1662,4 @@ class AccountCashRounding(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config_id):
-        return ['id', 'name', 'rounding', 'rounding_method']
+        return ['id', 'name', 'rounding', 'rounding_method', 'strategy']
