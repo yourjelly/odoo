@@ -983,15 +983,20 @@ export class Record extends DataPoint {
             reload = true;
         }
         // before saving, abandon new invalid, untouched records in x2manys
+        const unsetRequiredFields = [];
         for (const fieldName in this.activeFields) {
             const field = this.fields[fieldName];
             if (["one2many", "many2many"].includes(field.type) && !field.relatedPropertyField) {
                 this.data[fieldName]._abandonRecords();
             }
+            // Check the unset required fields
+            if (this._isRequired(fieldName) && !this.data[fieldName]) {
+                unsetRequiredFields.push(fieldName);
+            }
         }
         const changes = this._getChanges();
         delete changes.id; // id never changes, and should not be written
-        if (!creation && !Object.keys(changes).length) {
+        if (!creation && !Object.keys(changes).length && !unsetRequiredFields.length) {
             return true;
         }
         if (!this._checkValidity({ displayNotification: true })) {
