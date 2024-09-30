@@ -12,11 +12,12 @@ import { withSequence } from "@html_editor/utils/resource";
  * @property {string} sequence
  *
  * @typedef {Object} Command
- * @property {string} name
+ * @property {string} label
  * @property {string} description
  * @property {string} category
- * @property {string} fontawesome
- * @property {Function} action
+ * @property {string} icon
+ * @property {string} commandId
+ * @property {string} commandParams
  *
  * @typedef {Object} CommandGroup
  * @property {string} id
@@ -41,7 +42,7 @@ function target(selectionData) {
 
 export class PowerboxPlugin extends Plugin {
     static name = "powerbox";
-    static dependencies = ["overlay", "selection", "history"];
+    static dependencies = ["overlay", "selection", "history", "user_command"];
     static shared = ["openPowerbox", "updatePowerbox", "closePowerbox"];
     resources = {
         hints: {
@@ -147,7 +148,7 @@ export class PowerboxPlugin extends Plugin {
 
     applyCommand(command) {
         this.onApplyCommand(command);
-        command.action(this.dispatch);
+        command.run();
         this.closePowerbox();
     }
 }

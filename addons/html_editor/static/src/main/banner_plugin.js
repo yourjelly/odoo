@@ -9,49 +9,67 @@ function isAvailable(node) {
 }
 export class BannerPlugin extends Plugin {
     static name = "banner";
-    static dependencies = ["dom", "emoji", "selection"];
+    static dependencies = ["history", "dom", "emoji", "selection"];
     resources = {
-        powerboxCategory: withSequence(20, { id: "banner", name: _t("Banner") }),
-        powerboxItems: [
+        user_commands: [
             {
-                category: "banner",
-                name: _t("Banner Info"),
+                id: "banner_info",
+                label: _t("Banner Info"),
                 description: _t("Insert an info banner"),
-                fontawesome: "fa-info-circle",
-                isAvailable,
-                action: () => {
+                icon: "fa-info-circle",
+                run: () => {
                     this.insertBanner(_t("Banner Info"), "💡", "info");
                 },
             },
             {
-                category: "banner",
-                name: _t("Banner Success"),
-                description: _t("Insert an success banner"),
-                fontawesome: "fa-check-circle",
-                isAvailable,
-                action: () => {
+                id: "banner_success",
+                label: _t("Banner Success"),
+                description: _t("Insert a success banner"),
+                icon: "fa-check-circle",
+                run: () => {
                     this.insertBanner(_t("Banner Success"), "✅", "success");
                 },
             },
             {
-                category: "banner",
-                name: _t("Banner Warning"),
-                description: _t("Insert an warning banner"),
-                fontawesome: "fa-exclamation-triangle",
-                isAvailable,
-                action: () => {
+                id: "banner_warning",
+                label: _t("Banner Warning"),
+                description: _t("Insert a warning banner"),
+                icon: "fa-exclamation-triangle",
+                run: () => {
                     this.insertBanner(_t("Banner Warning"), "⚠️", "warning");
                 },
             },
             {
-                category: "banner",
-                name: _t("Banner Danger"),
-                description: _t("Insert an danger banner"),
-                fontawesome: "fa-exclamation-circle",
-                isAvailable,
-                action: () => {
+                id: "banner_danger",
+                label: _t("Banner Danger"),
+                description: _t("Insert a danger banner"),
+                icon: "fa-exclamation-circle",
+                run: () => {
                     this.insertBanner(_t("Banner Danger"), "❌", "danger");
                 },
+            },
+        ],
+        powerboxCategory: withSequence(20, { id: "banner", name: _t("Banner") }),
+        powerboxItems: [
+            {
+                commandId: "banner_info",
+                category: "banner",
+                isAvailable,
+            },
+            {
+                commandId: "banner_success",
+                category: "banner",
+                isAvailable,
+            },
+            {
+                commandId: "banner_warning",
+                category: "banner",
+                isAvailable,
+            },
+            {
+                commandId: "banner_danger",
+                category: "banner",
+                isAvailable,
             },
         ],
     };
@@ -83,7 +101,7 @@ export class BannerPlugin extends Plugin {
             bannerElement.before(zws);
         }
         this.shared.setCursorStart(bannerElement.querySelector(".o_editor_banner > div > p"));
-        this.dispatch("ADD_STEP");
+        this.shared.addStep();
     }
 
     onBannerEmojiChange(iconElement) {
@@ -91,7 +109,7 @@ export class BannerPlugin extends Plugin {
             target: iconElement,
             onSelect: (emoji) => {
                 iconElement.textContent = emoji;
-                this.dispatch("ADD_STEP");
+                this.shared.addStep();
             },
         });
     }

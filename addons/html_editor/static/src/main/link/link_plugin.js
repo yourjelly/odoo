@@ -100,32 +100,27 @@ async function fetchInternalMetaData(url) {
     return result;
 }
 
-const linkItem = {
-    id: "link",
-    title: _t("Link"),
-    action(dispatch) {
-        dispatch("CREATE_LINK_ON_SELECTION");
-    },
-    icon: "fa-link",
-    isFormatApplied: isLinkActive,
-};
-const unlinkItem = {
-    id: "unlink",
-    title: _t("Remove Link"),
-
-    action(dispatch) {
-        dispatch("REMOVE_LINK_FROM_SELECTION");
-    },
-    icon: "fa-unlink",
-    isAvailable: isSelectionHasLink,
-};
-
 export class LinkPlugin extends Plugin {
     static name = "link";
-    static dependencies = ["dom", "selection", "split", "line_break", "overlay"];
+    static dependencies = ["dom", "history", "selection", "split", "line_break", "overlay"];
     // @phoenix @todo: do we want to have createLink and insertLink methods in link plugin?
     static shared = ["createLink", "insertLink", "getPathAsUrlCommand"];
     resources = {
+        user_commands: [
+            {
+                id: "toggleLinkTools",
+                label: _t("Link"),
+                description: _t("Add a link"),
+                icon: "fa-link",
+                run: this.toggleLinkTools.bind(this),
+            },
+            {
+                id: "removeLinkFromSelection",
+                label: _t("Remove Link"),
+                icon: "fa-unlink",
+                run: this.removeLinkFromSelection.bind(this),
+            },
+        ],
         onBeforeInput: withSequence(5, this.onBeforeInput.bind(this)),
         toolbarCategory: [
             withSequence(40, {
@@ -138,47 +133,49 @@ export class LinkPlugin extends Plugin {
         ],
         toolbarItems: [
             {
-                ...linkItem,
+                id: "link",
                 category: "link",
+                commandId: "toggleLinkTools",
+                isFormatApplied: isLinkActive,
             },
             {
-                ...unlinkItem,
+                id: "unlink",
                 category: "link",
+                commandId: "removeLinkFromSelection",
+                isAvailable: isSelectionHasLink,
             },
             {
-                ...linkItem,
+                id: "link",
                 category: "image_link",
+                commandId: "toggleLinkTools",
+                isFormatApplied: isLinkActive,
             },
             {
-                ...unlinkItem,
+                id: "unlink",
                 category: "image_link",
+                commandId: "removeLinkFromSelection",
+                isAvailable: isSelectionHasLink,
             },
         ],
 
         powerboxCategory: withSequence(50, { id: "navigation", name: _t("Navigation") }),
         powerboxItems: [
             {
-                name: _t("Link"),
-                description: _t("Add a link"),
                 category: "navigation",
-                fontawesome: "fa-link",
-                action(dispatch) {
-                    dispatch("TOGGLE_LINK");
-                },
+                commandId: "toggleLinkTools",
             },
             {
-                name: _t("Button"),
+                label: _t("Button"),
                 description: _t("Add a button"),
                 category: "navigation",
-                fontawesome: "fa-link",
-                action(dispatch) {
-                    dispatch("TOGGLE_LINK");
-                },
+                commandId: "toggleLinkTools",
             },
         ],
         onSelectionChange: this.handleSelectionChange.bind(this),
         split_element_block: this.handleSplitBlock.bind(this),
         handle_insert_line_break_element: this.handleInsertLineBreak.bind(this),
+        clean_for_save_listeners: ({ root }) => this.removeEmptyLinks(root),
+        normalize_listeners: this.normalizeLink.bind(this),
     };
     setup() {
         this.overlay = this.shared.createOverlay(LinkPopover, {}, { sequence: 40 });
@@ -212,26 +209,6 @@ export class LinkPlugin extends Plugin {
         this.removeLinkShortcut();
     }
 
-    handleCommand(command, payload) {
-        switch (command) {
-            case "CREATE_LINK_ON_SELECTION":
-                this.toggleLinkTools(payload.options);
-                break;
-            case "TOGGLE_LINK":
-                this.toggleLinkTools(payload.options);
-                break;
-            case "NORMALIZE":
-                this.normalizeLink();
-                break;
-            case "CLEAN_FOR_SAVE":
-                this.removeEmptyLinks(payload.root);
-                break;
-            case "REMOVE_LINK_FROM_SELECTION":
-                this.removeLinkFromSelection();
-                break;
-        }
-    }
-
     // -------------------------------------------------------------------------
     // Commands
     // -------------------------------------------------------------------------
@@ -263,7 +240,7 @@ export class LinkPlugin extends Plugin {
             link = this.createLink(url, label);
             this.shared.domInsert(link);
         }
-        this.dispatch("ADD_STEP");
+        this.shared.addStep();
         const linkParent = link.parentElement;
         const linkOffset = Array.from(linkParent.childNodes).indexOf(link);
         this.shared.setSelection(
@@ -277,12 +254,12 @@ export class LinkPlugin extends Plugin {
      */
     getPathAsUrlCommand(text, url) {
         const pasteAsURLCommand = {
-            name: _t("Paste as URL"),
+            label: _t("Paste as URL"),
             description: _t("Create an URL."),
-            fontawesome: "fa-link",
-            action: () => {
+            icon: "fa-link",
+            run: () => {
                 this.shared.domInsert(this.createLink(url, text));
-                this.dispatch("ADD_STEP");
+                this.shared.addStep();
             },
         };
         return pasteAsURLCommand;
@@ -318,7 +295,7 @@ export class LinkPlugin extends Plugin {
             onRemove: () => {
                 this.removeLink();
                 this.overlay.close();
-                this.dispatch("ADD_STEP");
+                this.shared.addStep();
             },
             onCopy: () => {
                 this.overlay.close();
@@ -356,7 +333,7 @@ export class LinkPlugin extends Plugin {
                         this.shared.setCursorEnd(this.linkElement);
                         this.shared.focusEditable();
                         this.removeCurrentLinkIfEmtpy();
-                        this.dispatch("ADD_STEP");
+                        this.shared.addStep();
                     },
                 };
 
@@ -411,7 +388,7 @@ export class LinkPlugin extends Plugin {
                     }
                     this.shared.focusEditable();
                     this.removeCurrentLinkIfEmtpy();
-                    this.dispatch("ADD_STEP");
+                    this.shared.addStep();
                 },
             };
 
@@ -448,7 +425,7 @@ export class LinkPlugin extends Plugin {
                     after = linkElement.nextSibling;
                 }
                 this.shared.setCursorEnd(linkElement);
-                this.dispatch("ADD_STEP");
+                this.shared.addStep();
             }
             return linkElement;
         } else {
@@ -492,7 +469,7 @@ export class LinkPlugin extends Plugin {
             !this.linkElement.hasAttribute("t-att-href")
         ) {
             this.removeLink();
-            this.dispatch("ADD_STEP");
+            this.shared.addStep();
         }
     }
 
@@ -548,7 +525,7 @@ export class LinkPlugin extends Plugin {
                 selectedImageNodes.length === 1 &&
                 selectedImageNodes.length === selectedNodes.length
             ) {
-                this.dispatch("ADD_STEP");
+                this.shared.addStep();
                 return;
             }
         }
@@ -582,7 +559,7 @@ export class LinkPlugin extends Plugin {
             }
             cursors.restore();
         }
-        this.dispatch("ADD_STEP");
+        this.shared.addStep();
     }
 
     removeEmptyLinks(root) {
@@ -644,7 +621,7 @@ export class LinkPlugin extends Plugin {
                 textNodeToReplace.splitText(match[0].length);
                 selection.anchorNode.parentElement.replaceChild(link, textNodeToReplace);
                 this.shared.setCursorStart(nodeForSelectionRestore);
-                this.dispatch("ADD_STEP");
+                this.shared.addStep();
             }
         }
     }

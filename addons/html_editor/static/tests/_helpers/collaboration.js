@@ -77,26 +77,17 @@ export const setupMultiEditor = async (spec) => {
                 selection = parseMultipleTextualSelection(editable, peerId);
             },
             config: {
-                Plugins: [
-                    ...defaultPlugins,
-                    CollaborationPlugin,
-                    class TestHistoryAdapterPlugin extends Plugin {
-                        static name = "test-history-adapter";
-                        handleCommand(commandId, payload) {
-                            switch (commandId) {
-                                case "COLLABORATION_STEP_ADDED":
-                                    peerInfo.steps.push(payload);
-                                    break;
-                                case "HISTORY_MISSING_PARENT_STEP":
-                                    historyMissingParentSteps(peerInfos, peerInfo, payload);
-                                    break;
-                            }
-                        }
-                    },
-                    ...(spec.Plugins || []),
-                ],
+                Plugins: [...defaultPlugins, CollaborationPlugin, ...(spec.Plugins || [])],
                 collaboration: { peerId },
-                resources: spec.resources,
+                resources: {
+                    ...spec.resources,
+                    collaboration_step_added_listeners: (step) => {
+                        peerInfo.steps.push(step);
+                    },
+                    history_missing_parent_step_listeners: (params) => {
+                        historyMissingParentSteps(peerInfos, peerInfo, params);
+                    },
+                },
             },
         });
         peerInfo.editor = base.editor;

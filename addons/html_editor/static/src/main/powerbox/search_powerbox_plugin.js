@@ -8,10 +8,13 @@ import { Plugin } from "../../plugin";
 
 export class SearchPowerboxPlugin extends Plugin {
     static name = "search_powerbox";
-    static dependencies = ["powerbox", "selection", "history"];
+    static dependencies = ["powerbox", "selection", "history", "user_command"];
     resources = {
         onBeforeInput: this.onBeforeInput.bind(this),
         onInput: this.onInput.bind(this),
+        delete_listeners: this.update.bind(this),
+        post_undo_listeners: this.update.bind(this),
+        post_redo_listeners: this.update.bind(this),
     };
     setup() {
         const categoryIds = new Set();
@@ -22,22 +25,27 @@ export class SearchPowerboxPlugin extends Plugin {
             categoryIds.add(category.id);
         }
         this.categories = this.getResource("powerboxCategory");
-        this.commands = this.getResource("powerboxItems").map((command) => ({
-            ...command,
-            categoryName: this.categories.find((category) => category.id === command.category).name,
-        }));
 
+        this.commands = this.getCommands();
         this.shouldUpdate = false;
     }
-    handleCommand(command) {
-        switch (command) {
-            case "DELETE_BACKWARD":
-            case "DELETE_FORWARD":
-            case "HISTORY_UNDO":
-            case "HISTORY_REDO":
-                this.update();
-                break;
-        }
+    getCommands() {
+        const powerboxItems = this.getResource("powerboxItems");
+        const userCommands = this.shared.getCommands();
+        const categoryDict = Object.fromEntries(
+            this.categories.map((category) => [category.id, category])
+        );
+        return powerboxItems.map((item) => {
+            const userCommand = userCommands[item.commandId];
+            return {
+                label: item.label || userCommand?.label,
+                description: item.description || userCommand?.description,
+                icon: item.icon || userCommand?.icon,
+                categoryName: categoryDict[item.category].name,
+                run: () => this.shared.execCommand(item.commandId, item.commandParams),
+                ...item,
+            };
+        });
     }
     onBeforeInput(ev) {
         if (ev.data === "/") {
@@ -83,7 +91,7 @@ export class SearchPowerboxPlugin extends Plugin {
      */
     filterCommands(searchTerm) {
         return fuzzyLookup(searchTerm, this.enabledCommands, (cmd) => [
-            cmd.name,
+            cmd.label,
             cmd.categoryName,
             cmd.description,
             ...(cmd.searchKeywords || []),

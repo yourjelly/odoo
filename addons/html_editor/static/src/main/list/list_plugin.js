@@ -33,8 +33,35 @@ function isListActive(listMode) {
 
 export class ListPlugin extends Plugin {
     static name = "list";
-    static dependencies = ["tabulation", "split", "selection", "delete", "dom"];
+    static dependencies = ["tabulation", "history", "split", "selection", "delete", "dom"];
     resources = {
+        user_commands: [
+            {
+                id: "toggleList",
+                run: this.toggleListCommand.bind(this),
+            },
+            {
+                id: "toggleListUL",
+                label: _t("Bulleted list"),
+                description: _t("Create a simple bulleted list"),
+                icon: "fa-list-ul",
+                run: () => this.toggleListCommand({ mode: "UL" }),
+            },
+            {
+                id: "toggleListOL",
+                label: _t("Numbered list"),
+                description: _t("Create a list with numbering"),
+                icon: "fa-list-ol",
+                run: () => this.toggleListCommand({ mode: "OL" }),
+            },
+            {
+                id: "toggleListCL",
+                label: _t("Checklist"),
+                description: _t("Track tasks with a checklist"),
+                icon: "fa-check-square-o",
+                run: () => this.toggleListCommand({ mode: "CL" }),
+            },
+        ],
         handle_delete_backward: this.handleDeleteBackward.bind(this),
         handle_delete_range: this.handleDeleteRange.bind(this),
         handle_tab: this.handleTab.bind(this),
@@ -47,66 +74,39 @@ export class ListPlugin extends Plugin {
             {
                 id: "bulleted_list",
                 category: "list",
-                action(dispatch) {
-                    dispatch("TOGGLE_LIST", { mode: "UL" });
-                },
-                icon: "fa-list-ul",
-                title: _t("Bulleted list"),
+                commandId: "toggleListUL",
                 isFormatApplied: isListActive("UL"),
             },
             {
                 id: "numbered_list",
                 category: "list",
-                action(dispatch) {
-                    dispatch("TOGGLE_LIST", { mode: "OL" });
-                },
-                icon: "fa-list-ol",
-                title: _t("Numbered list"),
+                commandId: "toggleListOL",
                 isFormatApplied: isListActive("OL"),
             },
             {
                 id: "checklist",
                 category: "list",
-                action(dispatch) {
-                    dispatch("TOGGLE_LIST", { mode: "CL" });
-                },
-                icon: "fa-check-square-o",
-                title: _t("Checklist"),
+                commandId: "toggleListCL",
                 isFormatApplied: isListActive("CL"),
             },
         ],
         powerboxItems: [
             {
-                name: _t("Bulleted list"),
-                description: _t("Create a simple bulleted list"),
                 category: "structure",
-                fontawesome: "fa-list-ul",
-                action(dispatch) {
-                    dispatch("TOGGLE_LIST", { mode: "UL" });
-                },
+                commandId: "toggleListUL",
             },
             {
-                name: _t("Numbered list"),
-                description: _t("Create a list with numbering"),
                 category: "structure",
-                fontawesome: "fa-list-ol",
-                action(dispatch) {
-                    dispatch("TOGGLE_LIST", { mode: "OL" });
-                },
+                commandId: "toggleListOL",
             },
             {
-                name: _t("Checklist"),
-                description: _t("Track tasks with a checklist"),
                 category: "structure",
-
-                fontawesome: "fa-check-square-o",
-                action(dispatch) {
-                    dispatch("TOGGLE_LIST", { mode: "CL" });
-                },
+                commandId: "toggleListCL",
             },
         ],
         hints: [{ selector: "LI", text: _t("List") }],
         onInput: this.onInput.bind(this),
+        normalize_listeners: this.normalize.bind(this),
     };
 
     setup() {
@@ -114,17 +114,9 @@ export class ListPlugin extends Plugin {
         this.addDomListener(this.editable, "mousedown", this.onPointerdown);
     }
 
-    handleCommand(command, payload) {
-        switch (command) {
-            case "TOGGLE_LIST":
-                this.toggleList(payload.mode);
-                this.dispatch("ADD_STEP");
-                break;
-            case "NORMALIZE": {
-                this.normalize(payload.node);
-                break;
-            }
-        }
+    toggleListCommand({ mode } = {}) {
+        this.toggleList(mode);
+        this.shared.addStep();
     }
 
     onInput(ev) {
@@ -157,7 +149,7 @@ export class ListPlugin extends Plugin {
                 focusNode: selection.focusNode,
                 focusOffset: selection.focusOffset,
             });
-            this.dispatch("DELETE_SELECTION");
+            this.shared.deleteSelection();
             if (shouldCreateNumberList) {
                 const listStyle = { a: "lower-alpha", A: "upper-alpha", 1: null }[
                     stringToConvert.substring(0, 1)
@@ -168,7 +160,7 @@ export class ListPlugin extends Plugin {
             } else if (shouldCreateCheckList) {
                 this.toggleList("CL");
             }
-            this.dispatch("ADD_STEP");
+            this.shared.addStep();
         }
     }
 
@@ -617,7 +609,7 @@ export class ListPlugin extends Plugin {
             this.indentListNodes(listItems);
             this.shared.indentBlocks(nonListItems);
             // Do nothing to nav-items.
-            this.dispatch("ADD_STEP");
+            this.shared.addStep();
             return true;
         }
     }
@@ -639,7 +631,7 @@ export class ListPlugin extends Plugin {
             this.outdentListNodes(listItems);
             this.shared.outdentBlocks(nonListItems);
             // Do nothing to nav-items.
-            this.dispatch("ADD_STEP");
+            this.shared.addStep();
             return true;
         }
     }
@@ -745,7 +737,7 @@ export class ListPlugin extends Plugin {
         if (isChecklistItem && this.isPointerInsideCheckbox(node, offsetX, offsetY)) {
             toggleClass(node, "o_checked");
             ev.preventDefault();
-            this.dispatch("ADD_STEP");
+            this.shared.addStep();
         }
     }
 
