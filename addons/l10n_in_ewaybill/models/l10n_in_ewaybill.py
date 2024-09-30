@@ -35,10 +35,10 @@ class Ewaybill(models.Model):
         ('generated', 'Generated'),
         ('cancel', 'Cancelled'),
     ], required=True, readonly=True, copy=False, tracking=True, default='pending')
-    is_incoming = fields.Boolean(compute="_compute_is_incoming")
+    is_incoming = fields.Boolean(compute="_compute_is_incoming", store=True)
 
     # Account Move details
-    account_move_id = fields.Many2one('account.move', copy=False, readonly=True)
+    account_move_id = fields.Many2one('account.move', copy=False)
 
     # Document details
     document_date = fields.Datetime("Document Date", compute="_compute_ewaybill_document_details")
@@ -164,7 +164,9 @@ class Ewaybill(models.Model):
 
     def _get_seller_buyer_details(self):
         self.ensure_one()
-        return self.account_move_id._get_l10n_in_seller_buyer_party()
+        if self.account_move_id:
+            return self.account_move_id._get_l10n_in_seller_buyer_party()
+        return {}
 
     def _is_incoming(self):
         self.ensure_one()
@@ -197,10 +199,10 @@ class Ewaybill(models.Model):
     def _compute_document_partners_details(self):
         for ewaybill in self.filtered(lambda ewb: ewb.state == 'pending'):
             seller_buyer_details = ewaybill._get_seller_buyer_details()
-            ewaybill.partner_bill_to_id = seller_buyer_details['buyer_details']
-            ewaybill.partner_bill_from_id = seller_buyer_details['seller_details']
-            ewaybill.partner_ship_to_id = seller_buyer_details['ship_to_details']
-            ewaybill.partner_ship_from_id = seller_buyer_details['dispatch_details']
+            ewaybill.partner_bill_to_id = seller_buyer_details.get('buyer_details')
+            ewaybill.partner_bill_from_id = seller_buyer_details.get('seller_details')
+            ewaybill.partner_ship_to_id = seller_buyer_details.get('ship_to_details')
+            ewaybill.partner_ship_from_id = seller_buyer_details.get('dispatch_details')
 
     @api.depends('partner_ship_from_id', 'partner_ship_to_id', 'partner_bill_from_id', 'partner_bill_to_id')
     def _compute_is_editable(self):

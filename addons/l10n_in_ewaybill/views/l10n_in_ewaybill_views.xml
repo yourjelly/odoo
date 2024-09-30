@@ -42,6 +42,7 @@
                         </group>
                         <group>
                             <field name="ewaybill_date" invisible="not ewaybill_date"/>
+                            <field name="account_move_id"/>
                             <field name="document_number"/>
                             <field name="document_date" readonly="1"/>
                         </group>
@@ -131,6 +132,64 @@
             </form>
         </field>
     </record>
+
+    <record id="view_l10n_in_ewaybill_list" model="ir.ui.view">
+        <field name="name">l10n.in.ewaybill.list</field>
+        <field name="model">l10n.in.ewaybill</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="account_move_id"/>
+                <field name="ewaybill_date"/>
+                <field name="state" widget="badge" decoration-info="state == 'pending'" decoration-success="state == 'generated'" />
+            </list>
+        </field>
+    </record>
+
+    <record id="action_l10n_in_ewaybill_in" model="ir.actions.act_window">
+        <field name="name">Customer Indian E-waybill</field>
+        <field name="res_model">l10n.in.ewaybill</field>
+        <field name="view_mode">list,form,kanban,activity</field>
+        <field name="view_id" ref="view_l10n_in_ewaybill_list"/>
+        <!-- <field name="search_view_id" ref="view_batch_payment_search"/> -->
+        <field name="domain">[('is_incoming', '=', False)]</field>
+        <!-- <field name="context">{'search_default_open': 1, 'default_batch_type': 'inbound'}</field> -->
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new E-waybill
+            </p>
+        </field>
+    </record>
+
+    <record id="action_l10n_in_ewaybill_out" model="ir.actions.act_window">
+        <field name="name">Vendor Indian E-waybill</field>
+        <field name="res_model">l10n.in.ewaybill</field>
+        <field name="view_mode">list,form,kanban,activity</field>
+        <field name="view_id" ref="view_l10n_in_ewaybill_list"/>
+        <!-- <field name="search_view_id" ref="view_batch_payment_search"/> -->
+        <field name="domain">[('is_incoming', '=', True)]</field>
+        <!-- <field name="context">{'search_default_open': 1, 'default_batch_type': 'outbound'}</field> -->
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new E-waybill
+            </p>
+        </field>
+    </record>
+
+    <menuitem action="action_l10n_in_ewaybill_in"
+              name="Indian E-waybill"
+              id="menu_l10n_in_ewaybill_sales"
+              parent="account.menu_finance_receivables"
+              sequence="20"
+              groups="account.group_account_basic,account.group_account_readonly"
+    />
+    <menuitem action="action_l10n_in_ewaybill_out"
+              name="Indian E-waybill"
+              id="menu_l10n_in_ewaybill_purchases"
+              parent="account.menu_finance_payables"
+              sequence="25"
+              groups="account.group_account_basic,account.group_account_readonly"
+    />
 
     <record id="l10n_in_ewaybill_form_action" model="ir.actions.act_window">
         <field name="name">e-Waybill</field>
