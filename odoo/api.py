@@ -15,6 +15,8 @@ __all__ = [
     'call_kw',
 ]
 
+import odoo._framework
+
 import logging
 import typing
 import warnings

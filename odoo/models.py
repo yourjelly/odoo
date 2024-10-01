@@ -49,7 +49,7 @@ import psycopg2
 import psycopg2.extensions
 from psycopg2.extras import Json
 
-import odoo
+import odoo._framework
 from . import SUPERUSER_ID
 from . import api
 from . import tools

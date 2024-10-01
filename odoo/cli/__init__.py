@@ -2,7 +2,7 @@ import logging
 import sys
 import os
 
-import odoo
+import odoo._framework
 
 from .command import Command, main
 
