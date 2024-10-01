@@ -109,11 +109,8 @@ class SaleOrder(models.Model):
             return {'type': 'ir.actions.act_window_close'}
 
         action = self.env["ir.actions.actions"]._for_xml_id("sale_timesheet.timesheet_action_from_sales_order")
-        default_sale_line = next((sale_line for sale_line in self.order_line if sale_line.is_service and sale_line.product_id.service_policy in ['ordered_prepaid', 'delivered_timesheet']), self.env['sale.order.line'])
         context = {
             'search_default_billable_timesheet': True,
-            'default_is_so_line_edited': True,
-            'default_so_line': default_sale_line.id,
         }  # erase default filters
 
         tasks = self.order_line.task_id._filtered_access('write')
@@ -125,6 +122,12 @@ class SaleOrder(models.Model):
                 context['default_project_id'] = projects[0].id
             elif self.project_ids:
                 context['default_project_id'] = self.project_ids[0].id
+            else:
+                default_sale_line = next((sale_line for sale_line in self.order_line if sale_line.is_service and sale_line.product_id.service_policy in ['ordered_prepaid', 'delivered_timesheet']), self.env['sale.order.line'])
+                if default_sale_line:
+                    context['default_is_so_line_edited'] = True
+                    context['default_so_line'] = default_sale_line.id
+
         action.update({
             'context': context,
             'domain': [('so_line', 'in', self.order_line.ids), ('project_id', '!=', False)],
