@@ -215,7 +215,10 @@ export class MediaDialog extends Component {
                 for (const name of TABS[otherTab].Component.mediaExtraClasses) {
                     if (typeof(name) === 'string') {
                         extraClassesToRemove.push(name);
-                    } else { // Regex
+                    } else 
+                        if (typeof(name) === 'function') {
+                            continue;
+                        } else { // Regex
                         for (const className of element.classList) {
                             if (className.match(name)) {
                                 extraClassesToRemove.push(className);
@@ -230,7 +233,10 @@ export class MediaDialog extends Component {
                             if (candidateName === name) {
                                 return false;
                             }
-                        } else { // Regex
+                        } else 
+                            if (typeof(name) === 'function') {
+                                continue;
+                            } else { // Regex
                             for (const className of element.classList) {
                                 if (className.match(candidateName)) {
                                     return false;
@@ -241,6 +247,11 @@ export class MediaDialog extends Component {
                     return true;
                 }));
             }
+            for (const candidateFunc of TABS[this.state.activeTab].Component.mediaExtraClasses) {
+                if (typeof(candidateFunc) === 'function') {
+                    element.classList.add(candidateFunc(this.props));
+                }
+            };
             element.classList.remove(...this.initialIconClasses);
             element.classList.remove('o_modified_image_to_save');
             element.classList.remove('oe_edited_link');
