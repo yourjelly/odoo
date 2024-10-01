@@ -1,7 +1,12 @@
 [build-system]
-requires = ["setuptools>=41"]
-build-backend = "pep517_odoo"
-backend-path = ["setup"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# XXX building
+# docker run -it --rm -v $PWD/odoo:/mnt/odoo:ro ubuntu
+# apt update && apt install -y python3-{build,venv}
+# cd /mnt/odoo
+# python3 -m build -o /tmp/build --sdist --wheel
 
 [project]
 name = "odoo"
@@ -178,8 +183,24 @@ odoo-bin = "odoo.cli:main"
 "Documentation" = "https://www.odoo.com/documentation"
 "Bug Tracker" = "https://www.odoo.com/help"
 
-[tool.setuptools]
-packages = ["odoo"]
+[tool.hatch]
+version = {path = "odoo/release.py"}
 
-[tool.setuptools.dynamic]
-version = {attr = "odoo.release.version"}
+[tool.hatch.build.targets.sdist]
+include = [
+  "odoo/**/*",
+  "CONTRIBUTING*",
+  "COPYRIGHT*",
+  "LICENSE",
+  "odoo-bin",
+  "pyproject.toml",
+  "README*",
+  "requirements*",
+  "SECURITY*",
+]
+force-include = { "./addons" = "odoo/addons" }
+
+[tool.hatch.build.targets.wheel]
+packages = ["odoo"]
+force-include = { "./addons" = "odoo/addons" }
+#sources = { "addons" = "odoo/addons" }
