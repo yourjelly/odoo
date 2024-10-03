@@ -362,12 +362,14 @@ class TestCheckoutAddress(BaseUsersCommon, WebsiteSaleCommon):
             self.assertEqual(self.demo_partner, so.partner_shipping_id)
 
             # 1. Logged-in user, new shipping
+            self.default_address_values.update({'parent_id': self.demo_partner.id})
             self.WebsiteSaleController.shop_address_submit(**self.default_address_values)
             new_shipping = self._get_last_address(self.demo_partner)
             msg = "New shipping address should have its type set as 'delivery'"
             self.assertTrue(new_shipping.type == 'delivery', msg)
 
             # 2. Logged-in user, new billing
+            self.default_billing_address_values.update({'parent_id': self.demo_partner.id})
             self.WebsiteSaleController.shop_address_submit(**self.default_billing_address_values)
             new_billing = self._get_last_address(self.demo_partner)
             msg = "New billing should have its type set as 'invoice'"

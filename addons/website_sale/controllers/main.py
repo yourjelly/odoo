@@ -1206,6 +1206,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         self._complete_address_values(partner_sudo, address_values, address_type, use_delivery_as_billing, order_sudo)
         # arj todo: crap... when we write on the public user...
         if partner_sudo != request.website.user_id.sudo().partner_id:
+            if partner_sudo.id == address_values.get('parent_id',0):
+                address_values.pop('parent_id')
             partner_sudo.write(address_values)
         is_anonymous_cart = order_sudo._is_anonymous_cart()
         if not partner_id:
