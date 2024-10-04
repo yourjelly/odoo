@@ -228,11 +228,9 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             }
 
             this.currentOrder.initialize_validation_date();
-            for (let line of this.paymentLines) {
-                if (!line.amount === 0) {
-                     this.currentOrder.remove_paymentline(line);
-                }
-            }
+            const lines = Array.from(this.paymentLines)
+            for (let line of lines)
+                if (!line.amount) this.currentOrder.remove_paymentline(line);
             this.currentOrder.finalized = true;
 
             let syncOrderResult, hasError;
