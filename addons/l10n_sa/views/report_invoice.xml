@@ -28,6 +28,96 @@
                 </p>
             </t>
         </xpath>
+        <xpath expr="//th[@name='th_total']//span" position="attributes">
+            <attribute name="style">display: none;</attribute>
+        </xpath>
+        <xpath expr="//th[@name='th_total']//span[2]" position="attributes">
+            <span>
+                <attribute name="style">display: none;</attribute>
+            </span>
+        </xpath>
+        <xpath expr="//th[@name='th_subtotal']//span" position="attributes">
+            <span>
+                <attribute name="style">display: none;</attribute>
+            </span>
+        </xpath>
+        <xpath expr="//th[@name='th_subtotal']//span[2]" position="attributes">
+            <span>
+                <attribute name="style">display: none;</attribute>
+            </span>
+        </xpath>
+        <xpath expr="//th[@name='th_taxes']//span" position="attributes">
+            <attribute name="style">display: none;</attribute>
+        </xpath>
+        <xpath expr="//th[@name='th_total']//span" position="after">
+            <span>
+                المجموع شامل ضريبة القيمة المضافة
+            </span>
+        </xpath>
+        <xpath expr="//th[@name='th_total']//span[2]" position="after">
+            <br/>
+            <span>
+                Subtotal (Incl. of VAT)
+            </span>
+        </xpath>
+        <xpath expr="//th[@name='th_subtotal']//span" position="after">
+            <span>
+                المجموع الفرعي بدون الضريبة
+            </span>
+        </xpath>
+        <xpath expr="//th[@name='th_subtotal']//span[2]" position="after">
+            <br/>
+            <span>
+                Subtotal (Excl. of VAT)
+            </span>
+        </xpath>
+        <xpath expr="//th[@name='th_taxes']//span" position="after">
+            <span>
+                نسبة الضريبة
+            </span>
+        </xpath>
+        <xpath expr="//span[@t-field='line.l10n_gcc_invoice_tax_amount']" position="attributes">
+            <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='line.price_unit']" position="attributes">
+            <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('clearfix')]//strong" position="attributes">
+            <attribute name="style">display: none;</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('clearfix')]//strong" position="after">
+            <strong>
+                Total
+                /
+                المجموع
+            </strong>
+        </xpath>
+        <xpath expr="//div[hasclass('clearfix')]//span[@t-if]" position="attributes">
+            <attribute name="style">display: none;</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('clearfix')]//span[@t-if]" position="after">
+            /
+            <span>ضريبة القيمة المضافة</span>
+        </xpath>
+        <xpath expr="//tr[hasclass('o_total')]//strong" position="attributes">
+            <attribute name="style">display: none;</attribute>
+        </xpath>
+        <xpath expr="//tr[hasclass('o_total')]//strong" position="after">
+            <strong>
+                Total (Incl. of VAT)
+                /
+                المجموع شامل ضريبة القيمة المضافة
+            </strong>
+        </xpath>
+        <xpath expr="//div[@name='payment_communication']//strong" position="attributes">
+            <attribute name="style">display: none;</attribute>
+        </xpath>
+        <xpath expr="//div[@name='payment_communication']//strong" position="after">
+            <strong>
+                مرجع الدفع
+                Payment Reference:
+            </strong>
+        </xpath>
     </template>
 
 </odoo>
