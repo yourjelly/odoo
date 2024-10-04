@@ -250,7 +250,7 @@ export class PaymentScreen extends Component {
         if (await this._isOrderValid(isForceValidate)) {
             // remove pending payments before finalizing the validation
             for (const line of this.paymentLines) {
-                if (!line.is_done()) {
+                if (!line.is_done() || !+(line.amount)) {
                     this.currentOrder.remove_paymentline(line);
                 }
             }
