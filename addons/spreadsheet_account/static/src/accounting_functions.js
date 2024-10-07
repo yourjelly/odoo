@@ -301,11 +301,14 @@ functionRegistry.add("ODOO.FISCALYEAR.END", {
 
 functionRegistry.add("ODOO.ACCOUNT.GROUP", {
     description: _t("Returns the account ids of a given group."),
-    args: [arg("type (string)", _t("The account type (income, expense, asset_current,...)."))],
+    args: [
+        arg("type (string)", _t("The account type (income, expense, asset_current,...).")),
+        arg("company_id (number, optional)", _t("The company.")),
+    ],
     category: "Odoo",
     returns: ["NUMBER"],
-    compute: function (accountType) {
-        const accountTypes = this.getters.getAccountGroupCodes(toString(accountType));
+    compute: function (accountType, companyId = { value: null }) {
+        const accountTypes = this.getters.getAccountGroupCodes(toString(accountType), toNumber(companyId, this.locale));
         return accountTypes.join(",");
     },
 });

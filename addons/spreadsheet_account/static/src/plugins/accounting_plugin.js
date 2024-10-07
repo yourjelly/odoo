@@ -85,10 +85,11 @@ export class AccountingPlugin extends OdooUIPlugin {
 
     /**
      * @param {string} accountType
+     * @param {number | undefined} companyId specific company to target
      * @returns {string[]}
      */
-    getAccountGroupCodes(accountType) {
-        return this.serverData.batch.get("account.account", "get_account_group", accountType);
+    getAccountGroupCodes(accountType, companyId) {
+        return this.serverData.batch.get("account.account", "get_account_group", { account_type: accountType, company_id: companyId });
     }
 
     /**

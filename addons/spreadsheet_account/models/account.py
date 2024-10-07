@@ -119,14 +119,18 @@ class AccountMove(models.Model):
         return results
 
     @api.model
-    def get_account_group(self, account_types):
-        data = self._read_group(
-            [
-                *self._check_company_domain(self.env.company),
-                ("account_type", "in", account_types),
-            ],
-            ['account_type'],
-            ['code:array_agg'],
-        )
-        mapped = dict(data)
-        return [mapped.get(account_type, []) for account_type in account_types]
+    def get_account_group(self, args_list):
+        results = []
+        breakpoint()
+        for args in args_list:
+            print("******************")
+            # company_id = args.get("company_id") or self.env.company.id
+            accounts = self.with_company(args.get("company_id")).search(
+                [
+                    *self._check_company_domain(args.get("company_id") or self.env.companies),
+                    ("account_type", "=", args["account_type"]),
+                ]
+            )
+            results.append(accounts.filtered("code").mapped("code"))
+        print("******************")
+        return results
