@@ -29,6 +29,10 @@ export class SplitBillScreen extends Component {
         return Object.values(this.priceTracker).reduce((a, b) => a + b, 0);
     }
 
+    get qtyTrackerLength() {
+        return Object.values(this.qtyTracker).filter((l) => l > 0).length;
+    }
+
     onClickLine(line) {
         const lines = line.getAllLinesInCombo();
 
@@ -80,7 +84,7 @@ export class SplitBillScreen extends Component {
         return `${latestOrderName.slice(0, -1)}${nextChar}`;
     }
 
-    createSplittedOrder() {
+    async createSplittedOrder() {
         const curOrderUuid = this.currentOrder.uuid;
         const originalOrder = this.pos.models["pos.order"].find((o) => o.uuid === curOrderUuid);
         this.pos.selectedTable = null;
@@ -120,15 +124,16 @@ export class SplitBillScreen extends Component {
             line.delete();
         }
 
-        // for the kitchen printer we assume that everything
-        // has already been sent to the kitchen before splitting
-        // the bill. So we save all changes both for the old
-        // order and for the new one. This is not entirely correct
-        // but avoids flooding the kitchen with unnecessary orders.
-        // Not sure what to do in this case.
-        if (this.pos.orderPreparationCategories.size) {
+        // send both orders if preparation display includes originalOrder.
+        if (
+            this.pos.orderPreparationCategories.size &&
+            Object.keys(originalOrder.last_order_preparation_change.lines).length > 0
+        ) {
             originalOrder.updateLastOrderChange();
             newOrder.updateLastOrderChange();
+
+            await this.pos.sendOrderInPreparationUpdateLastChange(originalOrder);
+            await this.pos.sendOrderInPreparationUpdateLastChange(newOrder);
         }
 
         originalOrder.customerCount -= 1;
