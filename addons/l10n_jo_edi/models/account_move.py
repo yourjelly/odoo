@@ -5,6 +5,7 @@ import uuid
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError, UserError
+from odoo.tools.float_utils import float_round
 
 JOFOTARA_URL = "https://backend.jofotara.gov.jo/core/invoices/"
 INVOICE_NUMBERS = {
@@ -229,15 +230,15 @@ class AccountMoveLine(models.Model):
         discount_amount = 0
         if self.discount != 0:
             discount_amount = self._get_tax_exclusive_amount_jod() * (self.discount / 100)
-        return discount_amount
+        return float_round(discount_amount, 9)
 
     def _get_tax_exclusive_amount_jod(self):
         self.ensure_one()
-        return self._get_unit_price_jod() * self.quantity
+        return float_round(self._get_unit_price_jod() * self.quantity, 9)
 
     def _get_tax_inclusive_amount_jod(self):
         self.ensure_one()
-        return self._get_tax_exclusive_amount_jod() + self._get_special_tax_amount_jod() + self._get_general_tax_amount_jod() - self._get_discount_amount_jod()
+        return float_round(self._get_tax_exclusive_amount_jod() + self._get_special_tax_amount_jod() + self._get_general_tax_amount_jod() - self._get_discount_amount_jod(), 9)
 
     def _get_special_tax_amount_jod(self):
         self.ensure_one()
@@ -250,8 +251,8 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
         for tax in self.tax_ids:
             if tax.get_jo_tax_type() == 'general':
-                return (self._get_tax_exclusive_amount_jod() - self._get_discount_amount_jod() + self._get_special_tax_amount_jod()) * (tax.amount / 100)
+                return float_round((self._get_tax_exclusive_amount_jod() - self._get_discount_amount_jod() + self._get_special_tax_amount_jod()) * (tax.amount / 100), 9)
         return 0
 
     def _get_unit_price_jod(self):
-        return self.price_unit / self._get_conversion_rate()
+        return float_round(self.price_unit / self._get_conversion_rate(), 9)
