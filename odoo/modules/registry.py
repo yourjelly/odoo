@@ -191,6 +191,8 @@ class Registry(Mapping):
 
         # company dependent
         self.many2one_company_dependents = Collector()  # {model_name: (field1, field2, ...)}
+        # constraint dependencies
+        self.constraint_depends = defaultdict(list)
 
         # cache of methods get_field_trigger_tree() and is_modifying_relations()
         self._field_trigger_trees = {}
@@ -345,6 +347,7 @@ class Registry(Mapping):
         self.field_depends_context.clear()
         self.field_inverses.clear()
         self.many2one_company_dependents.clear()
+        self.constraint_depends.clear()
 
         # do the actual setup
         for model in models:
@@ -364,6 +367,8 @@ class Registry(Mapping):
                 depends, depends_context = field.get_depends(model)
                 self.field_depends[field] = tuple(depends)
                 self.field_depends_context[field] = tuple(depends_context)
+
+            self.constraint_depends[model._name].extend(model._constraint_depends())
 
         # clean the lazy_property again in case they are cached by another ongoing registry readonly request
         lazy_property.reset_all(self)
@@ -505,14 +510,20 @@ class Registry(Mapping):
     def _field_triggers(self):
         """ Return the field triggers, i.e., the inverse of field dependencies,
         as a dictionary like ``{field: {path: fields}}``, where ``field`` is a
-        dependency, ``path`` is a sequence of fields to inverse and ``fields``
-        is a collection of fields that depend on ``field``.
+        dependency, ``path`` is a sequence of fields/constraints to inverse and ``fields``
+        is a collection of fields/constraints (string) that depend on ``field``.
         """
         triggers = defaultdict(lambda: defaultdict(OrderedSet))
 
         for Model in self.models.values():
             if Model._abstract:
                 continue
+
+            for method_name, dependencies in self.constraint_depends[Model._name]:
+                for dependency in Model._resolve_constraint_depends(self, method_name, dependencies):
+                    *path, dep_field = dependency
+                    triggers[dep_field][tuple(reversed(path))].add(method_name)
+
             for field in Model._fields.values():
                 try:
                     dependencies = list(field.resolve_depends(self))
@@ -538,6 +549,7 @@ class Registry(Mapping):
                 field.relational or self.field_inverses[field] or any(
                     dep.relational or self.field_inverses[dep]
                     for dep in self.get_dependent_fields(field)
+                    if not isinstance(dep, str)  # filter out constraint method
                 )
             )
             self._is_modifying_relations[field] = result

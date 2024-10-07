@@ -832,6 +832,15 @@ class Environment(Mapping):
         self._recompute_all()
         for model_name in OrderedSet(field.model_name for field in self.cache.get_dirty_fields()):
             self[model_name].flush_model()
+        # Execute Python constraints
+        tocheck = self.transaction.tocheck
+        for model_name in list(tocheck):
+            constrains_dict = tocheck.pop(model_name)
+            for method_name, record_ids in constrains_dict.items():
+                records = self[model_name].browse(record_ids)
+                assert '__' not in method_name, "Constraint method should never contains '__'"
+                print(f'Call {method_name} on {len(records)}')
+                getattr(records, method_name)()  # TODO: check security
 
     def is_protected(self, field, record):
         """ Return whether `record` is protected against invalidation or
@@ -893,6 +902,9 @@ class Environment(Mapping):
             return records
         assert field.store and field.compute, "Cannot add to recompute no-store or no-computed field"
         self.transaction.tocompute[field].update(records._ids)
+
+    def add_constraint_to_check(self, records, method_name):
+        self.transaction.tocheck[records._name][method_name].update(records._ids)
 
     def remove_to_compute(self, field, records):
         """ Mark ``field`` as computed on ``records``. """
@@ -979,7 +991,7 @@ class Environment(Mapping):
 
 class Transaction:
     """ A object holding ORM data structures for a transaction. """
-    __slots__ = ('_Transaction__file_open_tmp_paths', 'cache', 'envs', 'protected', 'registry', 'tocompute')
+    __slots__ = ('_Transaction__file_open_tmp_paths', 'cache', 'envs', 'protected', 'registry', 'tocompute', 'tocheck')
 
     def __init__(self, registry):
         self.registry = registry
@@ -994,6 +1006,8 @@ class Transaction:
         self.tocompute = defaultdict(OrderedSet)
         # temporary directories (managed in odoo.tools.file_open_temporary_directory)
         self.__file_open_tmp_paths = ()  # noqa: PLE0237
+        # deferred constraint to check {model_name: {method_name: ids}}
+        self.tocheck = defaultdict(lambda: defaultdict(OrderedSet))
 
     def flush(self):
         """ Flush pending computations and updates in the transaction. """
