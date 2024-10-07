@@ -158,7 +158,7 @@ def propagate(method1, method2):
     return method2
 
 
-def constrains(*args: str) -> Callable[[T], T]:
+def constrains(*args: str, deferred=True) -> Callable[[T], T]:
     """Decorate a constraint checker.
 
     Each argument must be a field name used in the check::
@@ -193,7 +193,7 @@ def constrains(*args: str) -> Callable[[T], T]:
     """
     if args and callable(args[0]):
         args = args[0]
-    return attrsetter('_constrains', args)
+    return attrsetter('_constrains', (args, deferred))
 
 
 def ondelete(*, at_uninstall):

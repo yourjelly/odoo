@@ -898,15 +898,10 @@ class BaseModel(metaclass=MetaModel):
 
         cls = self.env.registry[self._name]
         for attr, func in getmembers(cls, is_constraint):
-            if callable(func._constrains):
-                func._constrains = func._constrains(self)
-            yield (attr, tuple(func._constrains))
-            # for name in func._constrains:
-            #     field = cls._fields.get(name)
-            #     if not field:
-            #         _logger.warning("method %s.%s: @constrains parameter %r is not a field name", self._name, attr, name)
-            #     elif not (field.store or field.inverse or field.inherited):
-            #         _logger.warning("method %s.%s: @constrains parameter %r is not writeable", cls._name, attr, name)
+            constraints, deferred = func._constrains
+            if callable(constraints):
+                constraints = constraints(self)
+            yield (attr, tuple(constraints), deferred)
 
     @classmethod
     def _resolve_constraint_depends(cls, registry, method_name, depends):
@@ -7140,12 +7135,19 @@ class BaseModel(metaclass=MetaModel):
         # process what to trigger by lazily chaining todo
         for field, records, create in itertools.chain.from_iterable(todo):
 
-            if isinstance(field, str):  # Method name of a constraint
-                # TODO: Don't check new records OR add an new mechanisme about it.
+            if isinstance(field, tuple):  # (method_name, deferred)
+
+                # TODO: Can we execute constraint in onchange to have warning for the user ?
                 if not any(id_ for id_ in records._ids):
                     continue
 
-                self.env.add_constraint_to_check(records, field)
+                method_name, deferred = field
+                if deferred:
+                    self.env.add_constraint_to_check(records, method_name)
+                else:
+                    assert '__' not in method_name, "Constraint method should never contains '__'"
+                    getattr(records, method_name)()  # TODO: check security
+
                 continue
 
             records -= self.env.protected(field)
@@ -7193,7 +7195,10 @@ class BaseModel(metaclass=MetaModel):
         # This allows us to discard subtrees from the merged tree when they
         # only contain such fields.
         def select(field: Field | str):
-            return isinstance(field, str) or (field.compute and field.store) or cache.contains_field(field)
+            return (
+                not isinstance(field, Field) or
+                (field.compute and field.store) or cache.contains_field(field)
+            )
 
         tree = self.pool.get_trigger_tree(fields, select=select)
         if not tree:

@@ -192,7 +192,7 @@ class Registry(Mapping):
         # company dependent
         self.many2one_company_dependents = Collector()  # {model_name: (field1, field2, ...)}
         # constraint dependencies
-        self.constraint_depends = defaultdict(list)
+        self.constraint_depends = defaultdict(list)  # {model_name: [(method_name, deferred)]}
 
         # cache of methods get_field_trigger_tree() and is_modifying_relations()
         self._field_trigger_trees = {}
@@ -519,10 +519,10 @@ class Registry(Mapping):
             if Model._abstract:
                 continue
 
-            for method_name, dependencies in self.constraint_depends[Model._name]:
+            for method_name, dependencies, deferred in self.constraint_depends[Model._name]:
                 for dependency in Model._resolve_constraint_depends(self, method_name, dependencies):
                     *path, dep_field = dependency
-                    triggers[dep_field][tuple(reversed(path))].add(method_name)
+                    triggers[dep_field][tuple(reversed(path))].add((method_name, deferred))
 
             for field in Model._fields.values():
                 try:
@@ -549,7 +549,7 @@ class Registry(Mapping):
                 field.relational or self.field_inverses[field] or any(
                     dep.relational or self.field_inverses[dep]
                     for dep in self.get_dependent_fields(field)
-                    if not isinstance(dep, str)  # filter out constraint method
+                    if not isinstance(dep, tuple)  # filter out constraint method
                 )
             )
             self._is_modifying_relations[field] = result

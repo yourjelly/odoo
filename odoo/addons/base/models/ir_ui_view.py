@@ -347,10 +347,11 @@ actual arch.
                         self._raise_view_error(message, node)
         return True
 
-    @api.constrains('arch_db')
+    @api.constrains('arch_db', deferred=False)
     def _check_xml(self):
         # Sanity checks: the view should not break anything upon rendering!
         # Any exception raised below will cause a transaction rollback.
+        # TODO: Context key is not keep anymore when the constraint is deferred
         partial_validation = self.env.context.get('ir_ui_view_partial_validation')
         self = self.with_context(validate_view_ids=(self._ids if partial_validation else True))
 
