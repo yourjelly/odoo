@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="business_card_scanner.ContactBusinessCardUploader">
+        <div t-att-class="divClass">
+            <FileUploader
+                acceptedFileExtensions="props.acceptedFileExtensions"
+                multiUpload="true"
+                onUploaded.bind="onFileUploaded"
+                onUploadComplete.bind="onUploadComplete">
+                <t t-set-slot="toggler">
+                    <t t-if="props.togglerTemplate" t-call="{{ props.togglerTemplate }}"/>
+                    <t t-else="" t-slot="toggler"/>
+                </t>
+                <t t-slot="default"/>
+            </FileUploader>
+        </div>
+    </t>
+
+    <t t-name="business_card_scanner.contact.ListView.Buttons" t-inherit="web.ListView.Buttons"
+        t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_buttons')]" position="inside">
+            <t t-call="business_card_scanner.ContactBusinessCardUploaderButton" />
+        </xpath>
+    </t>
+
+    <t t-name="business_card_scanner.contact.KanbanView.Buttons" t-inherit="web.KanbanView.Buttons"
+        t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_cp_buttons')]" position="before">
+            <t t-call="business_card_scanner.ContactBusinessCardUploaderButton" />
+        </xpath>
+    </t>
+    
+    <t t-name="business_card_scanner.ContactBusinessCardUploaderButton">
+        <ContactBusinessCardUploader>
+            <t t-set-slot="toggler">
+                <button type="button" class="btn btn-secondary">
+                    <i class="fa fa-upload"/>
+                    Upload
+                </button>
+            </t>
+        </ContactBusinessCardUploader>
+    </t>
+</templates>    

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_res_partner_uploader_tree" model="ir.ui.view">
+            <field name="name">res.partner.tree.uploader.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//list" position="attributes">
+                    <attribute name="js_class">contacts_upload_tree</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_res_partner_uploader_form" model="ir.ui.view">
+            <field name="name">res.partner.form.uploader.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet" position="before">
+                    <header>
+                        <button name="action_contact_digitization" class="oe_highlight"
+                        string="Digitize Contact" type="object"
+                        invisible="not can_show_digitize_contact_button" />
+                    </header>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_res_partner_uploader_kanban" model="ir.ui.view">
+            <field name="name">res.partner.kanaban.uploader.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.res_partner_kanban_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//kanban" position="attributes">
+                    <attribute name="js_class">contacts_upload_kanban</attribute>
+                </xpath>
+            </field>
+        </record>
+</odoo>

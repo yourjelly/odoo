@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.crm.openai</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="crm.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='convert_visitor_setting_container']" position="inside">
+                <div>
+                    <setting id="bcs_api_setting" string="Business Card To CRM Lead"
+                        help="Read text from the business cards to digitize contacts and crm leads"
+                        documentation="https://platform.openai.com/docs/overview">
+                        <field name="openai_api_key" placeholder="Paste your API key" />
+                    </setting>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_res_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="res_config_settings_view_form"/>
+        <field name="target">current</field>
+    </record>
+</odoo>

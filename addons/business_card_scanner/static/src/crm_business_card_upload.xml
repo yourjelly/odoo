@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="business_card_scanner.CrmBusinessCardUploader">
+        <div t-att-class="divClass">
+            <FileUploader
+                acceptedFileExtensions="props.acceptedFileExtensions"
+                multiUpload="true"
+                onUploaded.bind="onFileUploaded"
+                onUploadComplete.bind="onUploadComplete">
+                <t t-set-slot="toggler">
+                    <t t-if="props.togglerTemplate" t-call="{{ props.togglerTemplate }}"/>
+                    <t t-else="" t-slot="toggler"/>
+                </t>
+                <t t-slot="default"/>
+            </FileUploader>
+        </div>
+    </t>
+
+    <t t-name="business_card_scanner.crm.ListView.Buttons" t-inherit="web.ListView.Buttons"
+        t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_buttons')]" position="before">
+            <t t-call="business_card_scanner.CrmBusinessCardUploaderButton" />
+        </xpath>
+    </t>
+
+    <t t-name="business_card_scanner.CrmBusinessCardUploaderButton">
+        <CrmBusinessCardUploader>
+            <t t-set-slot="toggler">
+                <button type="button" class="btn btn-secondary">
+                    <i class="fa fa-upload"/>
+                    Upload
+                </button>
+            </t>
+        </CrmBusinessCardUploader>
+    </t>
+</templates>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_crm_lead_uploader_tree" model="ir.ui.view">
+            <field name="name">crm.lead.tree.uploader.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+            <field name="arch" type="xml">
+                <xpath expr="//list" position="attributes">
+                    <attribute name="js_class">crm_upload_tree</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_crm_lead_uploader_form" model="ir.ui.view">
+            <field name="name">crm.lead.form.uploader.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <button name="action_crm_lead_digitization" class="oe_highlight"
+                    string="Digitize CRM Lead" type="object"
+                    invisible="not can_show_digitize_crm_lead_button" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_crm_lead_uploader_kanban" model="ir.ui.view">
+            <field name="name">crm.lead.kanaban.uploader.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.view_crm_lead_kanban"/>
+            <field name="arch" type="xml">
+                <xpath expr="//kanban" position="attributes">
+                    <attribute name="js_class">crm_upload_kanban</attribute>
+                </xpath>
+            </field>
+        </record>
+</odoo>
