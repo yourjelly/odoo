@@ -593,12 +593,22 @@ class TestMailScheduleInternals(EventMailCommon):
             ("before_event", "days", 3, start - relativedelta(days=3)),
             ("before_event", "weeks", 3, start - relativedelta(weeks=3)),
             ("before_event", "months", 3, start - relativedelta(months=3)),
+            ("before_event_neg", "now", 3, start),
+            ("before_event_neg", "hours", 3, start + relativedelta(hours=3)),
+            ("before_event_neg", "days", 3, start + relativedelta(days=3)),
+            ("before_event_neg", "weeks", 3, start + relativedelta(weeks=3)),
+            ("before_event_neg", "months", 3, start + relativedelta(months=3)),
             # event: end date
             ("after_event", "now", 3, end),
             ("after_event", "hours", 3, end + relativedelta(hours=3)),
             ("after_event", "days", 3, end + relativedelta(days=3)),
             ("after_event", "weeks", 3, end + relativedelta(weeks=3)),
             ("after_event", "days", 3, end + relativedelta(days=3)),
+            ("after_event_neg", "now", 3, end),
+            ("after_event_neg", "hours", 3, end - relativedelta(hours=3)),
+            ("after_event_neg", "days", 3, end - relativedelta(days=3)),
+            ("after_event_neg", "weeks", 3, end - relativedelta(weeks=3)),
+            ("after_event_neg", "months", 3, end - relativedelta(months=3)),
         ]:
             with self.subTest(i_type=i_type, i_unit=i_unit, i_nbr=i_nbr):
                 event.write({
