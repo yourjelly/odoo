@@ -1538,7 +1538,7 @@ class MailCommon(common.TransactionCase, MailCase):
             }
         })
 
-    def _filter_messages_fields(self, /, *messages_data):
+    def _filter_store_messages_fields(self, /, *messages_data):
         """ Remove store message data dependant on other modules if they are not not installed.
         Not written in a modular way to avoid complex override for a simple test tool.
         """
@@ -1547,7 +1547,7 @@ class MailCommon(common.TransactionCase, MailCase):
                 data.pop("rating_id", None)
         return list(messages_data)
 
-    def _filter_partners_fields(self, /, *partners_data):
+    def _filter_store_partners_fields(self, /, *partners_data):
         """ Remove store partner data dependant on other modules if they are not not installed.
         Not written in a modular way to avoid complex override for a simple test tool.
         """
@@ -1556,7 +1556,7 @@ class MailCommon(common.TransactionCase, MailCase):
                 data.pop("out_of_office_date_end", None)
         return list(partners_data)
 
-    def _filter_threads_fields(self, /, *threads_data):
+    def _filter_store_threads_fields(self, /, *threads_data):
         """ Remove store thread data dependant on other modules if they are not not installed.
         Not written in a modular way to avoid complex override for a simple test tool.
         """
