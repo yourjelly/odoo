@@ -848,9 +848,9 @@ class Environment(Mapping):
         """
         return record.id in self._protected.get(field, ())
 
-    def protected(self, field):
+    def protected(self, field, record):
         """ Return the recordset for which ``field`` should not be invalidated or recomputed. """
-        return self[field.model_name].browse(self._protected.get(field, ()))
+        return record.browse(self._protected.get(field, ()))
 
     @contextmanager
     def protecting(self, what, records=None):
@@ -905,6 +905,10 @@ class Environment(Mapping):
 
     def add_constraint_to_check(self, records, method_name):
         self.transaction.tocheck[records._name][method_name].update(records._ids)
+
+    def remove_to_check(self, records):
+        for ids_tocheck in self.transaction.tocheck[records._name].values():
+            ids_tocheck.difference_update(records._ids)
 
     def remove_to_compute(self, field, records):
         """ Mark ``field`` as computed on ``records``. """
@@ -1024,6 +1028,7 @@ class Transaction:
         """ Clear the caches and pending computations and updates in the translations. """
         self.cache.clear()
         self.tocompute.clear()
+        self.tocheck.clear()
 
     def reset(self):
         """ Reset the transaction.  This clears the transaction, and reassigns

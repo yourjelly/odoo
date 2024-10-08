@@ -77,7 +77,8 @@ class AnalyticPlanFields(models.AbstractModel):
     def _get_plan_domain(self, plan):
         return [('plan_id', 'child_of', plan.id)]
 
-    @api.constrains(lambda self: self._get_plan_fnames())
+    # TODO: it is depends of data... is it working ?
+    # @api.constrains(lambda self: self._get_plan_fnames())
     def _check_account_id(self):
         fnames = self._get_plan_fnames()
         for line in self:

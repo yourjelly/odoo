@@ -4513,7 +4513,7 @@ class BaseModel(metaclass=MetaModel):
         # of those two fields
         for field in self._fields.values():
             self.env.remove_to_compute(field, self)
-
+        self.env.remove_to_check(self)
         self.env.flush_all()
 
         cr = self._cr
@@ -4525,7 +4525,10 @@ class BaseModel(metaclass=MetaModel):
 
         # mark fields that depend on 'self' to recompute them after 'self' has
         # been deleted (like updating a sum of lines after deleting one line)
-        with self.env.protecting(self._fields.values(), self):
+        protected_list = list(self._fields.values()) + [
+            method_name for method_name, *__ in self._constraint_depends()
+        ]
+        with self.env.protecting(protected_list, self):  # TODO: protected constrainst too
             self.modified(self._fields, before=True)
 
         for sub_ids in cr.split_for_in_conditions(self.ids):
@@ -7142,6 +7145,10 @@ class BaseModel(metaclass=MetaModel):
                     continue
 
                 method_name, deferred = field
+                records -= self.env.protected(method_name, records)
+                if not records:
+                    continue
+
                 if deferred:
                     self.env.add_constraint_to_check(records, method_name)
                 else:
@@ -7150,7 +7157,7 @@ class BaseModel(metaclass=MetaModel):
 
                 continue
 
-            records -= self.env.protected(field)
+            records -= self.env.protected(field, records)
             if not records:
                 continue
 
