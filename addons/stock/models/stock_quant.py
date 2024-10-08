@@ -187,11 +187,10 @@ class StockQuant(models.Model):
         for quant in self:
             quant.last_count_date = date_by_quant.get((quant.location_id.id, quant.package_id.id, quant.product_id.id, quant.lot_id.id, quant.owner_id.id))
 
-    @api.depends('inventory_quantity', 'inventory_quantity_set')
+    @api.depends('inventory_quantity')
     def _compute_inventory_diff_quantity(self):
         for quant in self:
-            if quant.inventory_quantity_set:
-                quant.inventory_diff_quantity = quant.inventory_quantity - quant.quantity
+            quant.inventory_diff_quantity = quant.inventory_quantity - quant.quantity
 
     @api.depends('inventory_quantity')
     def _compute_inventory_quantity_set(self):
@@ -285,6 +284,7 @@ class StockQuant(models.Model):
                 quants |= quant
             else:
                 quant = super().create(vals)
+                quant.inventory_diff_quantity = 0
                 if 'quants_cache' in self.env.context:
                     self.env.context['quants_cache'][
                         quant.product_id.id, quant.location_id.id, quant.lot_id.id, quant.package_id.id, quant.owner_id.id
@@ -524,9 +524,15 @@ class StockQuant(models.Model):
         }
 
     def action_set_inventory_quantity_to_zero(self):
-        self.inventory_quantity = 0
-        self.inventory_diff_quantity = 0
-        self.inventory_quantity_set = False
+        self.write(self._vals_inventory_qty_to_zero())
+
+    @api.model
+    def _vals_inventory_qty_to_zero(self):
+        return {
+            'inventory_quantity': 0,
+            'inventory_diff_quantity': 0,
+            'inventory_quantity_set': False,
+        }
 
     def action_warning_duplicated_sn(self):
         return {
@@ -759,7 +765,6 @@ class StockQuant(models.Model):
         move_vals = []
         if not self.user_has_groups('stock.group_stock_manager'):
             raise UserError(_('Only a stock manager can validate an inventory adjustment.'))
-        self.inventory_quantity_set = True
         for quant in self:
             # Create and validate a move so that the quant matches its `inventory_quantity`.
             if float_compare(quant.inventory_diff_quantity, 0, precision_rounding=quant.product_uom_id.rounding) > 0:
