@@ -4,6 +4,7 @@ import publicWidget from '@web/legacy/js/public/public_widget';
 publicWidget.registry.WebsiteSaleCheckout.include({
     events: Object.assign({}, publicWidget.registry.WebsiteSaleCheckout.prototype.events, {
         'click .js_delete_product': '_onClickDeleteProduct',
+        'click .o_wsale_reload': '_onClickReload',
     }),
 
     // #=== EVENT HANDLERS ===#
@@ -20,7 +21,16 @@ publicWidget.registry.WebsiteSaleCheckout.include({
             set_qty: 0,
             display: false,  // No need to return the rendered templates.
         });
-        window.location.reload();  // Reload all cart values.
+    },
+
+    /**
+     * Reload the current page to refresh all values.
+     *
+     * @private
+     * @return {void}
+     */
+    _onClickReload() {
+        window.location.reload();
     },
 
     // #=== DOM MANIPULATION ===#
