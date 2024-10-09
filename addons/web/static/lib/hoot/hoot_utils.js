@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { queryAll } from "@odoo/hoot-dom";
 import { reactive, useExternalListener } from "@odoo/owl";
 import { isNode } from "@web/../lib/hoot-dom/helpers/dom";
 import { isIterable, toSelector } from "@web/../lib/hoot-dom/hoot_dom_utils";
@@ -12,10 +13,12 @@ import { getRunner } from "./main_runner";
  * @typedef {"any"
  *  | "bigint"
  *  | "boolean"
+ *  | "date"
  *  | "error"
  *  | "function"
  *  | "integer"
  *  | "node"
+ *  | "null"
  *  | "number"
  *  | "object"
  *  | "regex"
@@ -93,6 +96,26 @@ const $writeText = $clipboard?.writeText.bind($clipboard);
 //-----------------------------------------------------------------------------
 
 /**
+ * @param {(...args: any[]) => any} fn
+ */
+const getFunctionString = (fn) => {
+    if (R_CLASS.test(fn.name)) {
+        return `${fn.name ? `class ${fn.name}` : "anonymous class"} { … }`;
+    }
+    const strFn = fn.toString();
+    const prefix = R_ASYNC_FUNCTION.test(strFn) ? "async " : "";
+
+    if (R_NAMED_FUNCTION.test(strFn)) {
+        return `${
+            fn.name ? `${prefix}function ${fn.name}` : `anonymous ${prefix}function`
+        }() { … }`;
+    }
+
+    const args = fn.length ? "...args" : "";
+    return `${prefix}(${args}) => { … }`;
+};
+
+/**
  * @template {(...args: any[]) => T} T
  * @param {T} instanceGetter
  * @returns {T}
@@ -109,6 +132,25 @@ const memoize = (instanceGetter) => {
     };
 };
 
+/**
+ * @param {string} value
+ */
+const truncate = (value) => {
+    const strValue = String(value);
+    return strValue.length <= MAX_HUMAN_READABLE_SIZE
+        ? strValue
+        : strValue.slice(0, MAX_HUMAN_READABLE_SIZE) + "…";
+};
+
+const BACK_TICK = "`";
+const DOUBLE_QUOTES = '"';
+const SINGLE_QUOTE = "'";
+
+const MAX_HUMAN_READABLE_SIZE = 80;
+
+const R_ASYNC_FUNCTION = /^\s*async/;
+const R_CLASS = /^[A-Z][a-z]/;
+const R_NAMED_FUNCTION = /^\s*(async\s+)?function/;
 const R_INVISIBLE_CHARACTERS = /[\u00a0\u200b-\u200d\ufeff]/g;
 const R_OBJECT = /^\[object \w+\]$/;
 
@@ -145,7 +187,7 @@ export function consumeCallbackList(callbacks, method, ...args) {
 export async function copy(text) {
     try {
         await $writeText(text);
-        $debug(`Copied to clipboard: "${text}"`);
+        $debug(`Copied to clipboard: ${stringify(text)}`);
     } catch (error) {
         console.warn("Could not copy to clipboard:", error);
     }
@@ -279,6 +321,9 @@ export function deepCopy(value) {
         }
     }
     if (typeof value === "object" && !Markup.isMarkup(value)) {
+        if (value instanceof String || value instanceof Number || value instanceof Boolean) {
+            return value;
+        }
         if (isNode(value)) {
             // Nodes
             return value.cloneNode(true);
@@ -463,34 +508,33 @@ export function ensureError(value) {
 
 /**
  * @param {unknown} value
- * @param {{ depth?: number }} [options]
+ * @param {Set<any>} [seen]
  * @returns {string}
  */
-export function formatHumanReadable(value, options) {
-    if (value instanceof RawString) {
-        return value;
+export function formatHumanReadable(value, seen) {
+    if (!(seen instanceof Set)) {
+        seen = new Set();
     }
     if (typeof value === "string") {
-        if (value.length > 255) {
-            value = value.slice(0, 255) + "...";
-        }
-        return `"${value}"`;
+        return stringify(truncate(value));
     } else if (typeof value === "number") {
         if (value << 0 === value) {
-            return String(value);
+            return truncate(value);
         }
         let fixed = value.toFixed(3);
         while (fixed.endsWith("0")) {
             fixed = fixed.slice(0, -1);
         }
-        return fixed;
+        return truncate(fixed);
     } else if (typeof value === "function") {
-        const name = value.name || "anonymous";
-        const prefix = /^[A-Z][a-z]/.test(name) ? `class ${name}` : `Function ${name}()`;
-        return `${prefix} { ... }`;
+        return getFunctionString(value);
     } else if (value && typeof value === "object") {
+        if (seen.has(value)) {
+            return "…";
+        }
+        seen.add(value);
         if (value instanceof RegExp) {
-            return value.toString();
+            return truncate(value);
         } else if (value instanceof Date) {
             return value.toISOString();
         } else if (isNode(value)) {
@@ -499,32 +543,28 @@ export function formatHumanReadable(value, options) {
             const values = [...value];
             if (values.length === 1 && isNode(values[0])) {
                 // Special case for single-element nodes arrays
-                return `<${values[0].nodeName.toLowerCase()}>`;
+                return formatHumanReadable(values[0], seen);
             }
-            const depth = options?.depth || 0;
             const constructorPrefix =
                 value.constructor.name === "Array" ? "" : `${value.constructor.name} `;
             let content = "";
-            if (values.length > 1 || depth > 0) {
-                content = "...";
-            } else if (values.length) {
-                content = formatHumanReadable(values[0], { depth: depth + 1 });
+            if (values.length) {
+                content = truncate(values.map((v) => formatHumanReadable(v, seen)).join(", "));
             }
-            return `${constructorPrefix}[${content}]`;
+            return `${constructorPrefix}[${truncate(content)}]`;
         } else {
-            const depth = options?.depth || 0;
             const keys = $keys(value);
             const constructorPrefix =
                 value.constructor.name === "Object" ? "" : `${value.constructor.name} `;
             let content = "";
-            if (keys.length > 1 || depth > 0) {
-                content = "...";
-            } else if (keys.length) {
-                content = `${keys[0]}: ${formatHumanReadable(value[keys[0]], {
-                    depth: depth + 1,
-                })}`;
+            if (value.constructor.name !== "Window") {
+                if (keys.length) {
+                    content = truncate(
+                        keys.map((k) => `${k}: ${formatHumanReadable(value[k], seen)}`).join(", ")
+                    );
+                }
             }
-            return `${constructorPrefix}{ ${content} }`;
+            return `${constructorPrefix}{ ${truncate(content)} }`;
         }
     }
     return String(value);
@@ -542,16 +582,14 @@ export function formatTechnical(
 ) {
     const baseIndent = isObjectValue ? "" : " ".repeat(depth * 2);
     if (typeof value === "string") {
-        return `${baseIndent}"${value}"`;
+        return `${baseIndent}${stringify(value)}`;
     } else if (typeof value === "number") {
         return `${baseIndent}${value << 0 === value ? String(value) : value.toFixed(3)}`;
     } else if (typeof value === "function") {
-        const name = value.name || "anonymous";
-        const prefix = /^[A-Z][a-z]/.test(name) ? `class ${name}` : `Function ${name}()`;
-        return `${baseIndent}${prefix} { ... }`;
+        return `${baseIndent}${getFunctionString(value)}`;
     } else if (value && typeof value === "object") {
         if (cache.has(value)) {
-            return `${baseIndent}${$isArray(value) ? "[...]" : "{ ... }"}`;
+            return `${baseIndent}${$isArray(value) ? "[…]" : "{ … }"}`;
         } else {
             cache.add(value);
             const startIndent = " ".repeat((depth + 1) * 2);
@@ -689,6 +727,49 @@ export function getFuzzyScore(pattern, string) {
     return patternIndex === pattern.length ? totalScore : 0;
 }
 
+/**
+ * @param {unknown} value
+ * @returns {ArgumentType}
+ */
+export function getTypeOf(value) {
+    const type = typeof value;
+    switch (type) {
+        case "number": {
+            return $isInteger(value) ? "integer" : "number";
+        }
+        case "object": {
+            if (value === null) {
+                return "null";
+            }
+            if (value instanceof Date) {
+                return "date";
+            }
+            if (value instanceof Error) {
+                return "error";
+            }
+            if (isNode(value)) {
+                return "node";
+            }
+            if (value instanceof RegExp) {
+                return "regex";
+            }
+            if (isIterable(value)) {
+                const types = [...value].map(getTypeOf);
+                const arrayType = new Set(types).size === 1 ? types[0] : "any";
+                if (arrayType.endsWith("[]")) {
+                    return "object[]";
+                } else {
+                    return `${arrayType}[]`;
+                }
+            }
+            /** fallsthrough */
+        }
+        default: {
+            return type;
+        }
+    }
+}
+
 export function hasClipboard() {
     return Boolean($clipboard);
 }
@@ -715,11 +796,14 @@ export function isOfType(value, type) {
         return isIterable(value) && [...value].every((v) => isOfType(v, itemType));
     }
     switch (type) {
+        case "null":
         case null:
         case undefined:
             return value === null || value === undefined;
         case "any":
             return true;
+        case "date":
+            return value instanceof Date;
         case "error":
             return value instanceof Error;
         case "integer":
@@ -902,6 +986,19 @@ export function strictEqual(a, b) {
 }
 
 /**
+ * @param {unknown} value
+ */
+export function stringify(value) {
+    const strValue = String(value);
+    const quotes = strValue.includes(DOUBLE_QUOTES)
+        ? strValue.includes(SINGLE_QUOTE)
+            ? BACK_TICK
+            : SINGLE_QUOTE
+        : DOUBLE_QUOTES;
+    return quotes + strValue + quotes;
+}
+
+/**
  * @param {string} string
  */
 export function stringToNumber(string) {
@@ -1060,6 +1157,67 @@ export class Callbacks {
     }
 }
 
+/**
+ * @template T
+ * @extends {Map<Element, T>}
+ */
+export class ElementMap extends Map {
+    /** @type {string | null} */
+    selector = null;
+
+    /**
+     * @param {Target} target
+     * @param {(element: Element) => T} [mapFn]
+     */
+    constructor(target, mapFn) {
+        const mapValues = [];
+        for (const element of queryAll(target)) {
+            mapValues.push([element, mapFn ? mapFn(element) : element]);
+        }
+
+        super(mapValues);
+
+        this.selector = target;
+    }
+
+    get first() {
+        return this.values().next().value;
+    }
+
+    /**
+     * @template [N=Element]
+     * @param {(element: Element) => N} [mapFn]
+     * @returns {N[]}
+     */
+    getElements(mapFn) {
+        const result = [];
+        for (const element of this.keys()) {
+            result.push(mapFn ? mapFn(element) : element);
+        }
+        return result;
+    }
+
+    /**
+     * @template [N=T]
+     * @param {(value: T) => N} [mapFn]
+     * @returns {N[]}
+     */
+    getValues(mapFn) {
+        const result = [];
+        for (const value of this.values()) {
+            result.push(mapFn ? mapFn(value) : value);
+        }
+        return result;
+    }
+
+    /**
+     * @param {unknown} object
+     */
+    static isElementMap(object) {
+        return object instanceof ElementMap;
+    }
+}
+
 export class HootError extends Error {
     name = "HootError";
 }
@@ -1149,7 +1307,34 @@ export class Markup {
     }
 }
 
-export class RawString extends String {}
+export class TaggedString extends String {
+    static RAW = "raw";
+
+    /** @type {string} */
+    tag;
+
+    /**
+     * @param {unknown} value
+     * @param {string} [tag]
+     */
+    constructor(value, tag) {
+        if (!tag) {
+            if (value instanceof TaggedString) {
+                tag = value.tag;
+            } else {
+                tag = getTypeOf(value);
+            }
+        }
+
+        if (tag !== TaggedString.RAW) {
+            value = formatHumanReadable(value);
+        }
+
+        super(value);
+
+        this.tag = tag;
+    }
+}
 
 export const INCLUDE_LEVEL = {
     url: 1,
