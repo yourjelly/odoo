@@ -123,3 +123,38 @@ class TestPortalThreadController(MailControllerThreadCommon):
                 test_partners(self.user_employee, True, all_partners, route_kw=sign),
             ),
         )
+
+    def test_message_fetch_access_portal(self):
+        record = self.env["mail.test.portal.no.partner"].create({"name": "Test"})
+        token, bad_token, sign, bad_sign, _ = self._get_sign_token_params(record)
+        self._execute_message_fetch_subtests(
+            record,
+            (
+                (self.user_public, False),
+                (self.user_public, False, bad_token),
+                (self.user_public, False, bad_sign),
+                (self.user_public, "only_comments", token),
+                (self.user_public, "only_comments", sign),
+                (self.guest, False),
+                (self.guest, False, bad_token),
+                (self.guest, False, bad_sign),
+                (self.guest, "only_comments", token),
+                (self.guest, "only_comments", sign),
+                # portal users with read access to the document can read the messages
+                (self.user_portal, "only_comments"),
+                (self.user_portal, "only_comments", bad_token),
+                (self.user_portal, "only_comments", bad_sign),
+                (self.user_portal, "only_comments", token),
+                (self.user_portal, "only_comments", sign),
+                (self.user_employee, "only_comments"),
+                (self.user_employee, "only_comments", bad_token),
+                (self.user_employee, "only_comments", bad_sign),
+                (self.user_employee, "only_comments", token),
+                (self.user_employee, "only_comments", sign),
+                (self.user_admin, "only_comments"),
+                (self.user_admin, "only_comments", bad_token),
+                (self.user_admin, "only_comments", bad_sign),
+                (self.user_admin, "only_comments", token),
+                (self.user_admin, "only_comments", sign),
+            ),
+        )
