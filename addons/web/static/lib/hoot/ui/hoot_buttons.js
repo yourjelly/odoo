@@ -11,16 +11,6 @@ import { HootLink } from "./hoot_link";
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    clearTimeout,
-    Object: { keys: $keys },
-    setTimeout,
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -81,7 +71,7 @@ export class HootButtons extends Component {
             }
         });
 
-        subscribeToURLParams(...$keys(runner.config));
+        subscribeToURLParams(...Object.keys(runner.config));
     }
 
     onRunClick() {

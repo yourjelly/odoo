@@ -1,7 +1,8 @@
-import { describe, destroy, expect, mountOnFixture, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { click } from "@odoo/hoot-dom";
 import { Deferred, advanceTime, animationFrame, microTick, runAllTimers } from "@odoo/hoot-mock";
 import { Component, xml } from "@odoo/owl";
+import { destroy, mountWithCleanup } from "@web/../tests/web_test_helpers";
 
 import {
     batched,
@@ -458,7 +459,6 @@ describe("throttleForAnimationScrollEvent", () => {
         });
         await throttled;
         expect.verifySteps(["throttled function called with null in event, but DIV in parameter"]);
-        el.remove();
     });
 });
 
@@ -471,7 +471,7 @@ describe("useDebounced", () => {
                 this.debounced = useDebounced(() => expect.step("debounced"), 1000);
             }
         }
-        const component = await mountOnFixture(TestComponent);
+        const component = await mountWithCleanup(TestComponent);
         expect.verifySteps([]);
         expect("button.c").toHaveCount(1);
 
@@ -501,7 +501,7 @@ describe("useDebounced", () => {
                 });
             }
         }
-        const component = await mountOnFixture(TestComponent);
+        const component = await mountWithCleanup(TestComponent);
         expect.verifySteps([]);
         expect(`button.c`).toHaveCount(1);
 
@@ -530,7 +530,7 @@ describe("useDebounced", () => {
                 });
             }
         }
-        const component = await mountOnFixture(TestComponent);
+        const component = await mountWithCleanup(TestComponent);
         expect.verifySteps([]);
         expect(`button.c`).toHaveCount(1);
 
@@ -556,7 +556,7 @@ describe("useThrottleForAnimation", () => {
                 this.throttled = useThrottleForAnimation(() => expect.step("throttled"), 1000);
             }
         }
-        const component = await mountOnFixture(TestComponent);
+        const component = await mountWithCleanup(TestComponent);
         expect.verifySteps([]);
         expect(`button.c`).toHaveCount(1);
 

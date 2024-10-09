@@ -30,7 +30,7 @@ import { HootJobButtons } from "./hoot_job_buttons";
 // Global
 //-----------------------------------------------------------------------------
 
-const { Boolean, location: actualLocation, Object, String } = globalThis;
+const { location: actualLocation } = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal

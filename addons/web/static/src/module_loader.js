@@ -77,7 +77,7 @@
             if (typeof name !== "string") {
                 throw new Error(`Invalid name definition: ${name} (should be a string)"`);
             }
-            if (!(deps instanceof Array)) {
+            if (!Array.isArray(deps)) {
                 throw new Error(`Dependencies should be defined by an array: ${deps}`);
             }
             if (typeof factory !== "function") {
@@ -117,6 +117,13 @@
             return null;
         }
 
+        /**
+         * @param {string} dependency
+         */
+        require(dependency) {
+            return this.modules.get(dependency);
+        }
+
         startModules() {
             let job;
             while ((job = this.findJob())) {
@@ -128,12 +135,11 @@
          * @param {string} name
          */
         startModule(name) {
-            const require = (dependency) => this.modules.get(dependency);
             this.jobs.delete(name);
             const factory = this.factories.get(name);
             let value = null;
             try {
-                value = factory.fn(require);
+                value = factory.fn(this.require.bind(this));
             } catch (error) {
                 this.failed.add(name);
                 throw new Error(`Error while loading "${name}":\n${error}`);

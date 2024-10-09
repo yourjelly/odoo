@@ -1,4 +1,4 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAllAttributes, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
 import {
     contains,
@@ -115,7 +115,7 @@ test("in editable list view", async () => {
     expect(cell.parentElement).toHaveClass("o_selected_row");
     expect(cell.querySelector("input")).toHaveValue("example.com");
     await fieldInput("url").edit("test");
-    await contains(getFixture()).click(); // click out
+    await contains("body").click(); // click out
     cell = queryFirst("tbody td:not(.o_list_record_selector)");
     expect(cell.parentElement).not.toHaveClass("o_selected_row");
     expect("tbody td:not(.o_list_record_selector) a").toHaveCount(2);

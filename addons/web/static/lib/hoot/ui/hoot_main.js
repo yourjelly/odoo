@@ -1,8 +1,9 @@
 /** @odoo-module */
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, useRef, useState, xml } from "@odoo/owl";
+import { defineRootNode } from "../../hoot-dom/helpers/dom";
 import { createUrl } from "../core/url";
-import { useWindowListener } from "../hoot_utils";
+import { useTrustedListener } from "../hoot_utils";
 import { HootButtons } from "./hoot_buttons";
 import { HootConfigDropdown } from "./hoot_config_dropdown";
 import { HootDebugToolBar } from "./hoot_debug_toolbar";
@@ -85,6 +86,31 @@ export class HootMain extends Component {
                 <HootDebugToolBar test="state.debugTest" />
             </t>
         </t>
+        <t t-if="!state.iframeLoaded">
+            <div class="absolute w-full h-full top-0 flex flex-col gap-4 justify-center items-center backdrop-blur">
+                <h3>
+                    <t t-if="env.runner.state.url">
+                        Loading tests from
+                        <span class="text-primary" t-esc="env.runner.state.url" />
+                    </t>
+                    <t t-else="">
+                        <span class="text-fail">No URL given</span>
+                    </t>
+                </h3>
+                <div
+                    class="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"
+                    role="status"
+                    title="Loading"
+                />
+            </div>
+        </t>
+        <iframe
+            t-ref="iframe"
+            class="hoot-fixture"
+            t-att-class="{ 'z-1': state.debugTest }"
+            t-att-src="env.runner.state.url"
+            t-on-load="() => (this.state.iframeLoaded = true)"
+        />
     `;
 
     createUrl = createUrl;
@@ -92,26 +118,43 @@ export class HootMain extends Component {
 
     setup() {
         const { runner } = this.env;
+        this.iframeRef = useRef("iframe");
         this.state = useState({
             debugTest: null,
+            iframeLoaded: false,
+        });
+
+        defineRootNode(() => this.iframeRef.el?.contentDocument);
+
+        runner.beforeEach(() => {
+            this.withIframeWindow((win) => {
+                win.getSelection().removeAllRanges();
+                win.document.body?.remove();
+                win.document.body = win.document.createElement("body");
+            });
         });
 
         runner.beforeAll(() => {
-            if (!runner.debug) {
-                return;
+            if (runner.debug) {
+                if (runner.debug === true) {
+                    this.state.debugTest = runner.state.tests[0];
+                } else {
+                    this.state.debugTest = runner.debug;
+                }
             }
-            if (runner.debug === true) {
-                this.state.debugTest = runner.state.tests[0];
-            } else {
-                this.state.debugTest = runner.debug;
-            }
+            const onError = runner._handleError.bind(runner);
+            this.withIframeWindow((win) => {
+                win.addEventListener("error", onError);
+                win.addEventListener("unhandledrejection", onError);
+                win.addEventListener("keydown", (ev) => ev.isTrusted && this.onWindowKeyDown(ev));
+            });
         });
         runner.afterAll(() => {
             this.state.debugTest = null;
         });
 
-        useWindowListener("keydown", (ev) => this.onWindowKeyDown(ev), { capture: true });
-        useWindowListener("resize", (ev) => this.onWindowResize(ev));
+        useTrustedListener(window, "keydown", (ev) => this.onWindowKeyDown(ev), { capture: true });
+        useTrustedListener(window, "resize", (ev) => this.onWindowResize(ev));
     }
 
     /**
@@ -152,5 +195,15 @@ export class HootMain extends Component {
 
     onWindowResize() {
         this.env.runner.checkPresetForViewPort();
+    }
+
+    /**
+     * @param {(iframeWindow: Window) => any} callback
+     */
+    withIframeWindow(callback) {
+        const iframeWindow = this.iframeRef.el?.contentWindow;
+        if (iframeWindow) {
+            callback(iframeWindow);
+        }
     }
 }

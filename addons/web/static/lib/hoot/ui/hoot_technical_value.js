@@ -10,22 +10,13 @@ import {
 } from "@odoo/owl";
 import { isNode, toSelector } from "@web/../lib/hoot-dom/helpers/dom";
 import { isIterable } from "@web/../lib/hoot-dom/hoot_dom_utils";
-import { getTypeOf, Markup, stringify, toExplicitString } from "../hoot_utils";
+import { getTypeOf, isInstanceOf, Markup, stringify, toExplicitString } from "../hoot_utils";
 
 /**
  * @typedef {{
  *  value?: any;
  * }} TechnicalValueProps
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Object: { keys: $keys },
-    console: { log: $log },
-} = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -178,10 +169,10 @@ export class HootTechnicalValue extends Component {
     }
 
     getLabelAndSize() {
-        if (this.value instanceof Date) {
+        if (isInstanceOf(this.value, Date)) {
             return [this.value.toISOString(), null];
         }
-        if (this.value instanceof RegExp) {
+        if (isInstanceOf(this.value, RegExp)) {
             return [String(this.value), null];
         }
         return [this.value.constructor.name, this.getSize()];
@@ -189,11 +180,11 @@ export class HootTechnicalValue extends Component {
 
     getSize() {
         for (const Class of INVARIABLE_OBJECTS) {
-            if (this.value instanceof Class) {
+            if (isInstanceOf(this.value, Class)) {
                 return null;
             }
         }
-        const values = isIterable(this.value) ? [...this.value] : $keys(this.value);
+        const values = isIterable(this.value) ? [...this.value] : Object.keys(this.value);
         return values.length;
     }
 
@@ -206,7 +197,7 @@ export class HootTechnicalValue extends Component {
             return;
         }
         this.logged = true;
-        $log(this.value);
+        console.log(this.value);
     }
 
     wrapPromiseValue(promise) {

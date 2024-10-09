@@ -5,11 +5,11 @@
  */
 
 export {
+    Deferred,
     advanceFrame,
     advanceTime,
     animationFrame,
     cancelAllTimers,
-    Deferred,
     delay,
     freezeTime,
     microTick,
@@ -22,4 +22,4 @@ export { makeSeededRandom } from "./mock/math";
 export { mockPermission, mockSendBeacon, mockUserAgent, mockVibrate } from "./mock/navigator";
 export { mockFetch, mockLocation, mockWebSocket, mockWorker } from "./mock/network";
 export { flushNotifications } from "./mock/notification";
-export { mockTouch, watchKeys, watchListeners } from "./mock/window";
+export { mockTouch, patchWindow, watchKeys, watchListeners } from "./mock/window";

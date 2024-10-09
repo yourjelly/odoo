@@ -1,8 +1,6 @@
-import { busService } from "@bus/services/bus_service";
 import { busModels } from "@bus/../tests/bus_test_helpers";
-
 import { mailGlobal } from "@mail/utils/common/misc";
-import { after, before, getFixture } from "@odoo/hoot";
+import { after, before } from "@odoo/hoot";
 import { hover as hootHover, resize } from "@odoo/hoot-dom";
 import { Component, onMounted, onPatched, onWillDestroy, status } from "@odoo/owl";
 import {
@@ -66,11 +64,12 @@ import { ResUsers } from "./mock_server/mock_models/res_users";
 import { ResUsersSettings } from "./mock_server/mock_models/res_users_settings";
 import { ResUsersSettingsVolumes } from "./mock_server/mock_models/res_users_settings_volumes";
 
+import { busService } from "@bus/services/bus_service";
+import { logger } from "@web/../lib/hoot/core/logger";
+import { patch } from "@web/core/utils/patch";
 import { contains } from "./mail_test_helpers_contains";
 
 export { SIZES } from "@web/core/ui/ui_service";
-import { patch } from "@web/core/utils/patch";
-import { logger } from "@web/../lib/hoot/core/logger";
 
 export * from "./mail_test_helpers_contains";
 
@@ -306,7 +305,7 @@ export async function start(options) {
     if (!MockServer.current) {
         await startServer();
     }
-    let target = getFixture();
+    let target = document.body;
     const pyEnv = MockServer.env;
     if (options?.authenticateAs !== undefined) {
         if (options.authenticateAs === false) {

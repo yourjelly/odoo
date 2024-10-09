@@ -17,27 +17,13 @@ import { CONFIG_KEYS, CONFIG_SCHEMA, FILTER_KEYS, FILTER_SCHEMA } from "./config
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    history,
-    location,
-    Object: { entries: $entries, fromEntries: $fromEntries, keys: $keys },
-    Set,
-    URIError,
-    URL,
-    URLSearchParams,
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
 const debouncedUpdateUrl = debounce(function updateUrl() {
     const url = createUrl({});
     url.search = "";
-    for (const [key, value] of $entries(urlParams)) {
+    for (const [key, value] of Object.entries(urlParams)) {
         if (isIterable(value)) {
             for (const value of urlParams[key]) {
                 if (value) {
@@ -83,10 +69,10 @@ export function createUrl(params) {
  * @param {CreateUrlFromIdOptions} [options]
  */
 export function createUrlFromId(id, type, options) {
-    const clearAll = () => $keys(nextParams).forEach((key) => nextParams[key].clear());
+    const clearAll = () => Object.keys(nextParams).forEach((key) => nextParams[key].clear());
 
     const ids = ensureArray(id);
-    const nextParams = $fromEntries(FILTER_KEYS.map((k) => [k, new Set(urlParams[k] || [])]));
+    const nextParams = Object.fromEntries(FILTER_KEYS.map((k) => [k, new Set(urlParams[k] || [])]));
     if (urlParams.filter) {
         nextParams.filter = new Set([urlParams.filter]);
     }
@@ -170,7 +156,7 @@ export function refresh() {
  * @param {Partial<DEFAULT_CONFIG & DEFAULT_FILTERS>} params
  */
 export function setParams(params) {
-    for (const [key, value] of $entries(params)) {
+    for (const [key, value] of Object.entries(params)) {
         if (!CONFIG_KEYS.includes(key) && !FILTER_KEYS.includes(key)) {
             throw new URIError(`unknown URL param key: "${key}"`);
         }
@@ -205,7 +191,7 @@ export const urlParams = reactive({});
 
 const searchParams = new URLSearchParams(location.search);
 const searchKeys = new Set(searchParams.keys());
-for (const [configKey, { aliases, parse }] of $entries({
+for (const [configKey, { aliases, parse }] of Object.entries({
     ...CONFIG_SCHEMA,
     ...FILTER_SCHEMA,
 })) {

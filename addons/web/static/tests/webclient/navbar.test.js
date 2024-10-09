@@ -1,4 +1,4 @@
-import { beforeEach, destroy, expect, test } from "@odoo/hoot";
+import { beforeEach, expect, test } from "@odoo/hoot";
 import { queryAll, queryAllAttributes, queryAllTexts, resize } from "@odoo/hoot-dom";
 import { advanceTime, animationFrame, runAllTimers } from "@odoo/hoot-mock";
 import {
@@ -6,6 +6,7 @@ import {
     contains,
     defineMenus,
     defineParams,
+    destroy,
     getService,
     makeMockEnv,
     mountWithCleanup,
@@ -395,7 +396,7 @@ test.tags("desktop")("can adapt with 'more' menu sections behavior", async () =>
     expect(".o_menu_sections_more").toHaveCount(0);
 
     // Force minimal width
-    await resize({ width: 0 });
+    await resize({ width: 1 });
     await waitNavbarAdaptation();
 
     expect(".o_menu_sections").not.toBeVisible({
@@ -403,7 +404,7 @@ test.tags("desktop")("can adapt with 'more' menu sections behavior", async () =>
     });
 
     // Reset to full width
-    await resize({ width: 1366 });
+    await resize({ width: "100%" });
     await waitNavbarAdaptation();
 
     expect(".o_menu_sections > *:not(.o_menu_sections_more):not(.d-none)").toHaveCount(3, {
@@ -490,10 +491,10 @@ test.tags("desktop")(
             message: "during adapt, render not triggered as the navbar has no app sub menus",
         });
 
-        await resize({ width: 0 });
+        await resize({ width: 1 });
         await waitNavbarAdaptation();
 
-        expect(".o_navbar").toHaveRect({ width: 0 });
+        expect(".o_navbar").toHaveRect({ width: 1 });
         expect(adaptCount).toBe(2);
         expect(adaptRenderCount).toBe(0, {
             message: "during adapt, render not triggered as the navbar has no app sub menus",
@@ -527,7 +528,7 @@ test.tags("desktop")(
         });
 
         // Reset to full width
-        await resize({ width: 1366 });
+        await resize({ width: "100%" });
         await waitNavbarAdaptation();
 
         expect(navbar.currentAppSections).toHaveLength(3, { message: "still 3 app sub menus" });
@@ -605,7 +606,7 @@ test.tags("desktop")("'more' menu sections properly updated on app change", asyn
     await mountWithCleanup(NavBar);
 
     // Force minimal width
-    await resize({ width: 0 });
+    await resize({ width: 1 });
     await waitNavbarAdaptation();
     expect(".o_menu_sections > *:not(.d-none)").toHaveCount(1, {
         message: "only one menu section should be displayed",
@@ -651,10 +652,10 @@ test("Do not execute adapt when navbar is destroyed", async () => {
     getService("menu").setCurrentMenu(1);
     const navbar = await mountWithCleanup(MyNavbar);
     expect.verifySteps(["adapt NavBar"]);
-    await resize();
+    await resize({ width: "101%" });
     await runAllTimers();
     expect.verifySteps(["adapt NavBar"]);
-    await resize();
+    await resize({ width: "100%" });
     destroy(navbar);
     await runAllTimers();
     expect.verifySteps([]);

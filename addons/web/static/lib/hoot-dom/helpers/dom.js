@@ -4,11 +4,9 @@ import { HootDomError, getTag, isFirefox, isIterable, parseRegExp } from "../hoo
 import { Deferred, waitUntil } from "./time";
 
 /**
- * @typedef {number | [number, number] | {
- *  w?: number;
- *  h?: number;
- *  width?: number;
- *  height?: number;
+ * @typedef {string | [number | string] | [number | string, number | string] | {
+ *  width?: number | string;
+ *  height?: number | string;
  * }} Dimensions
  *
  * @typedef {{
@@ -84,24 +82,6 @@ import { Deferred, waitUntil } from "./time";
  * @template [T=Node]
  * @typedef {MaybeIterable<T> | string | null | undefined | false} Target
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Boolean,
-    document,
-    DOMParser,
-    innerWidth,
-    innerHeight,
-    Map,
-    MutationObserver,
-    Number: { isInteger: $isInteger, isNaN: $isNaN, parseInt: $parseInt, parseFloat: $parseFloat },
-    Object: { keys: $keys, values: $values },
-    RegExp,
-    Set,
-} = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -258,6 +238,8 @@ const generateStringFromLayers = (layers, tabSize) => {
     return result.join("\n");
 };
 
+const getContainer = () => window.frameElement || getDefaultRoot();
+
 /**
  * @param {Node} node
  * @returns {NodeValue}
@@ -399,19 +381,19 @@ const matchesQueryPart = (query, width, height) => {
                 break;
             }
             case "max-height": {
-                result = height <= $parseFloat(value);
+                result = height <= Number.parseFloat(value);
                 break;
             }
             case "max-width": {
-                result = width <= $parseFloat(value);
+                result = width <= Number.parseFloat(value);
                 break;
             }
             case "min-height": {
-                result = height >= $parseFloat(value);
+                result = height >= Number.parseFloat(value);
                 break;
             }
             case "min-width": {
-                result = width >= $parseFloat(value);
+                result = width >= Number.parseFloat(value);
                 break;
             }
             case "orientation": {
@@ -421,11 +403,11 @@ const matchesQueryPart = (query, width, height) => {
             case "pointer": {
                 switch (value) {
                     case "coarse": {
-                        result = globalThis.ontouchstart !== undefined;
+                        result = getWindow().ontouchstart !== undefined;
                         break;
                     }
                     case "fine": {
-                        result = globalThis.ontouchstart === undefined;
+                        result = getWindow().ontouchstart === undefined;
                         break;
                     }
                 }
@@ -643,7 +625,7 @@ const parseXml = (xmlString, type) => {
  *
  * @param {string} val
  */
-const pixelValueToNumber = (val) => $parseFloat(val.endsWith("px") ? val.slice(0, -2) : val);
+const pixelValueToNumber = (val) => Number.parseFloat(val.endsWith("px") ? val.slice(0, -2) : val);
 
 /**
  * @param {Node[]} nodes
@@ -771,10 +753,6 @@ const NEXT_SIBLINGS = (node, selector) => {
 
 /** @type {Map<HTMLElement, { callbacks: Set<MutationCallback>, observer: MutationObserver }>} */
 const observers = new Map();
-const currentDimensions = {
-    width: innerWidth,
-    height: innerHeight,
-};
 let getDefaultRoot = () => document;
 
 //-----------------------------------------------------------------------------
@@ -797,8 +775,8 @@ customPseudoClasses
         };
     })
     .set("eq", (content) => {
-        const index = $parseInt(content);
-        if (!$isInteger(index)) {
+        const index = Number.parseInt(content);
+        if (!Number.isInteger(index)) {
             throw selectorError("eq", `expected index to be an integer (got ${content})`);
         }
         return function eq(node, i, nodes) {
@@ -878,10 +856,6 @@ const rCustomPseudoClass = compilePseudoClassRegex();
 //-----------------------------------------------------------------------------
 
 export function cleanupDOM() {
-    // Dimensions
-    currentDimensions.width = innerWidth;
-    currentDimensions.height = innerHeight;
-
     // Observers
     const remainingObservers = observers.size;
     if (remainingObservers) {
@@ -893,20 +867,10 @@ export function cleanupDOM() {
 }
 
 /**
- * @param {Node | () => Node} node
+ * @param {() => Node} getNode
  */
-export function defineRootNode(node) {
-    if (typeof node === "function") {
-        getDefaultRoot = node;
-    } else if (node) {
-        getDefaultRoot = () => node;
-    } else {
-        getDefaultRoot = () => document;
-    }
-}
-
-export function getCurrentDimensions() {
-    return currentDimensions;
+export function defineRootNode(getNode) {
+    getDefaultRoot = getNode;
 }
 
 export function getDefaultRootNode() {
@@ -1068,7 +1032,7 @@ export function isEmpty(value) {
             return isEmpty(getNodeContent(value));
         }
         if (!isIterable(value)) {
-            value = $keys(value);
+            value = Object.keys(value);
         }
         return [...value].length === 0;
     }
@@ -1694,7 +1658,7 @@ export function queryAll(target, options) {
     }
 
     const count = nodes.length;
-    if ($isInteger(exact) && count !== exact) {
+    if (Number.isInteger(exact) && count !== exact) {
         const s = count === 1 ? "" : "s";
         const strPrefix = prefix ? `${prefix} ` : "";
         const strSuffix = suffix ? ` ${suffix}` : "";
@@ -1813,7 +1777,7 @@ export function queryOne(target, options) {
     if (target.raw) {
         return queryOne(String.raw(...arguments));
     }
-    if ($isInteger(options?.exact)) {
+    if (Number.isInteger(options?.exact)) {
         throw new HootDomError(
             `cannot call \`queryOne\` with 'exact'=${options.exact}: did you mean to use \`queryAll\`?`
         );
@@ -1860,6 +1824,30 @@ export function queryText(target, options) {
  */
 export function queryValue(target, options) {
     return getNodeValue(queryOne(...arguments));
+}
+
+/**
+ * @param {HTMLElement} target
+ * @param {Dimensions} dimensions
+ */
+export function setStyle(target, dimensions) {
+    if (typeof dimensions === "string") {
+        const style = target.getAttribute("style");
+        target.setAttribute("style", style ? [style, dimensions].join(";") : dimensions);
+    } else if (dimensions && typeof dimensions === "object") {
+        const properties = {};
+        if (isIterable(dimensions)) {
+            [properties.width, properties.height] = dimensions;
+        } else {
+            Object.assign(properties, dimensions);
+        }
+        for (const [property, value] of Object.entries(properties)) {
+            if (value === null || value === undefined) {
+                continue;
+            }
+            target.style?.setProperty(property, isNaN(value) ? value : `${value}px`, "important");
+        }
+    }
 }
 
 /**

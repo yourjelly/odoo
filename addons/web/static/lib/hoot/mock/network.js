@@ -5,32 +5,9 @@ import {
     mockedRequestAnimationFrame,
 } from "@web/../lib/hoot-dom/helpers/time";
 import { makeNetworkLogger } from "../core/logger";
-import { ensureArray, makePublicListeners } from "../hoot_utils";
+import { getTargetWindow } from "../hoot_globals";
+import { ensureArray, isInstanceOf, makePublicListeners } from "../hoot_utils";
 import { getSyncValue, MockBlob, setSyncValue } from "./sync_values";
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    AbortController,
-    BroadcastChannel,
-    document,
-    EventTarget,
-    fetch,
-    Headers,
-    Map,
-    Math: { max: $max, min: $min },
-    Object: { assign: $assign, entries: $entries, fromEntries: $fromEntries },
-    ProgressEvent,
-    Request,
-    Response,
-    Set,
-    SharedWorker,
-    URL,
-    WebSocket,
-    Worker,
-} = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -41,25 +18,26 @@ const {
  */
 const makeWorkerScope = (worker) => {
     const execute = async () => {
+        const win = getTargetWindow();
         const scope = new MockDedicatedWorkerGlobalScope(worker);
         const keys = Reflect.ownKeys(scope);
-        const values = $fromEntries(keys.map((key) => [key, globalThis[key]]));
-        $assign(globalThis, scope);
+        const values = Object.fromEntries(keys.map((key) => [key, win[key]]));
+        Object.assign(win, scope);
 
         script(scope);
         mockWorkerConnection(worker);
 
-        if (typeof globalThis.onconnect === "function") {
-            globalThis.onconnect();
+        if (typeof win.onconnect === "function") {
+            win.onconnect();
         }
 
-        $assign(globalThis, values);
+        Object.assign(win, values);
     };
 
     const load = async () => {
         await Promise.resolve();
 
-        const response = await globalThis.fetch(worker.url);
+        const response = await mockedFetch(worker.url);
         const content = await response.text();
         script = new Function("self", content);
     };
@@ -168,9 +146,9 @@ export async function mockedFetch(input, init) {
 
     /** @type {Headers} */
     let headers;
-    if (result && result.headers instanceof Headers) {
+    if (result && isInstanceOf(result.headers, Headers)) {
         headers = result.headers;
-    } else if (init.headers instanceof Headers) {
+    } else if (isInstanceOf(init.headers, Headers)) {
         headers = init.headers;
     } else {
         headers = new Headers(init.headers);
@@ -187,7 +165,7 @@ export async function mockedFetch(input, init) {
         return result;
     }
 
-    if (result instanceof Response) {
+    if (isInstanceOf(result, Response)) {
         // Actual fetch
         logResponse(() => "(go to network tab for request content)");
         return result;
@@ -201,7 +179,7 @@ export async function mockedFetch(input, init) {
         });
     }
 
-    if (result instanceof Blob) {
+    if (isInstanceOf(result, Blob)) {
         // Blob response
         logResponse(() => result);
         return new MockResponse(result, {
@@ -303,7 +281,7 @@ export class MockCookie {
     _jar = {};
 
     get() {
-        return $entries(this._jar)
+        return Object.entries(this._jar)
             .filter(([, value]) => value !== "kill")
             .map((entry) => entry.join("="))
             .join("; ");
@@ -331,7 +309,7 @@ export class MockDedicatedWorkerGlobalScope {
      * @param {SharedWorker | Worker} worker
      */
     constructor(worker) {
-        $assign(
+        Object.assign(
             this,
             {
                 cancelanimationframe: mockedCancelAnimationFrame,
@@ -380,21 +358,21 @@ export class MockHistory {
 
     /** @type {typeof History.prototype.back} */
     back() {
-        this._index = $max(0, this._index - 1);
+        this._index = Math.max(0, this._index - 1);
         this._loc.assign(this._stack[this._index][1]);
         this._dispatchPopState();
     }
 
     /** @type {typeof History.prototype.forward} */
     forward() {
-        this._index = $min(this._stack.length - 1, this._index + 1);
+        this._index = Math.min(this._stack.length - 1, this._index + 1);
         this._loc.assign(this._stack[this._index][1]);
         this._dispatchPopState();
     }
 
     /** @type {typeof History.prototype.go} */
     go(delta) {
-        this._index = $max(0, $min(this._stack.length - 1, this._index + delta));
+        this._index = Math.max(0, Math.min(this._stack.length - 1, this._index + delta));
         this._loc.assign(this._stack[this._index][1]);
         this._dispatchPopState();
     }
@@ -413,7 +391,7 @@ export class MockHistory {
     }
 
     _dispatchPopState() {
-        window.dispatchEvent(new PopStateEvent("popstate", { state: this.state }));
+        getTargetWindow().dispatchEvent(new PopStateEvent("popstate", { state: this.state }));
     }
 
     _clear() {
@@ -781,7 +759,7 @@ export class MockXMLHttpRequest extends EventTarget {
     /** @type {typeof XMLHttpRequest["prototype"]["send"]} */
     async send(body) {
         try {
-            const response = await window.fetch(this._url, {
+            const response = await mockedFetch(this._url, {
                 method: this._method,
                 body,
                 headers: this._headers,

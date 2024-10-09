@@ -440,33 +440,32 @@ This module provides the core of the Odoo Web Client.
         'web.assets_unit_tests_setup': [
             'web/static/src/module_loader.js',
 
+            'web/static/src/libs/fontawesome/css/font-awesome.css',
+
             'web/static/lib/owl/owl.js',
             'web/static/lib/owl/odoo_module.js',
 
-            'web/static/lib/jquery/jquery.js',
-
-            'web/static/lib/hoot/**/*',
             'web/static/lib/hoot-dom/**/*',
-            ('remove', 'web/static/lib/hoot/ui/hoot_style.css'),
+            'web/static/lib/hoot/**/*',
+
             ('remove', 'web/static/lib/hoot/tests/**/*'),
 
-            # Odoo mocks
-            # ! must be loaded before other @web assets
-            'web/static/tests/_framework/mock_module_loader.js',
-
-            # Assets for features to test (views, services, fields, ...)
-            # Typically includes most files in 'web.web.assets_backend'
-            ('include', 'web.assets_backend'),
-            ('include', 'web.assets_backend_lazy'),
-
-            'web/static/src/public/public_component_service.js',
-            'web/static/src/webclient/clickbot/clickbot.js',
+            'web/static/tests/_framework/start_tests.js',
         ],
         # Unit test files
         'web.assets_unit_tests': [
+            # ! must be loaded before other @web assets
+            'web/static/src/module_loader.js',
+            'web/static/lib/hoot-dom/**/*',
+
+            'web/static/tests/_framework/mock_module_loader.js',
+
+            ('include', 'web.assets_backend'),
+            ('include', 'web.assets_backend_lazy'),
+
+            'web/static/tests/_framework/**/*',
             'web/static/tests/**/*',
 
-            ('remove', 'web/static/tests/_framework/mock_module_loader.js'),
             ('remove', 'web/static/tests/tours/**/*'),
             ('remove', 'web/static/tests/legacy/**/*'), # to remove when all legacy tests are ported
         ],

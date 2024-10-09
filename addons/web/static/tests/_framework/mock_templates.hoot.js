@@ -44,8 +44,6 @@ const ATTRIBUTE_DEFAULT_VALUES = [
 ];
 const ATTRIBUTE_PREFIXES = ["", "t-att-", "t-attf-"];
 
-const { loader } = odoo;
-
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
@@ -54,19 +52,13 @@ const { loader } = odoo;
  * @param {string} name
  * @param {OdooModule} module
  */
-export function makeTemplateFactory(name, module) {
-    return () => {
-        if (!loader.modules.has(name)) {
-            const factory = module.fn;
-            module.fn = (...args) => {
-                const exports = factory(...args);
-
-                exports.registerTemplateProcessor(replaceAttributes);
-
-                return exports;
-            };
-            loader.startModule(name);
+export function makeTemplateFactory(name, { fn }) {
+    let moduleInstance;
+    return (...args) => {
+        if (!moduleInstance) {
+            moduleInstance = fn(...args);
+            moduleInstance.registerTemplateProcessor(replaceAttributes);
         }
-        return loader.modules.get(name);
+        return moduleInstance;
     };
 }

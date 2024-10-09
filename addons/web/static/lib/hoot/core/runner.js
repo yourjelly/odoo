@@ -19,6 +19,7 @@ import {
     formatTechnical,
     formatTime,
     getFuzzyScore,
+    isInstanceOf,
     normalize,
     stringify,
 } from "../hoot_utils";
@@ -29,7 +30,6 @@ import { cleanupNetwork } from "../mock/network";
 import { cleanupWindow, getViewPortHeight, getViewPortWidth, mockTouch } from "../mock/window";
 import { DEFAULT_CONFIG, FILTER_KEYS } from "./config";
 import { makeExpect } from "./expect";
-import { makeFixtureManager } from "./fixture";
 import { logLevels, logger } from "./logger";
 import { Suite, suiteError } from "./suite";
 import { Tag } from "./tag";
@@ -82,33 +82,6 @@ import { EXCLUDE_PREFIX, setParams, urlParams } from "./url";
  * @template T
  * @typedef {T | PromiseLike<T>} MaybePromise
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    clearTimeout,
-    console: { groupEnd: $groupEnd, log: $log, table: $table },
-    EventTarget,
-    Map,
-    Math: { floor: $floor },
-    Object: {
-        assign: $assign,
-        defineProperties: $defineProperties,
-        entries: $entries,
-        freeze: $freeze,
-        fromEntries: $fromEntries,
-    },
-    performance,
-    Promise,
-    removeEventListener,
-    Set,
-    setTimeout,
-    window,
-} = globalThis;
-/** @type {Performance["now"]} */
-const $now = performance.now.bind(performance);
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -202,7 +175,7 @@ const shuffle = (array) => {
     const copy = [...array];
     let randIndex;
     for (let i = 0; i < copy.length; i++) {
-        randIndex = $floor(internalRandom() * copy.length);
+        randIndex = Math.floor(internalRandom() * copy.length);
         [copy[i], copy[randIndex]] = [copy[randIndex], copy[i]];
     }
     return copy;
@@ -214,7 +187,7 @@ const shuffle = (array) => {
  */
 const handleConsoleIssues = (test, shouldSuppress) => {
     if (shouldSuppress && test.config.todo) {
-        const restoreConsole = () => $assign(globalThis.console, originalMethods);
+        const restoreConsole = () => Object.assign(globalThis.console, originalMethods);
 
         /**
          * @param {string} label
@@ -224,8 +197,8 @@ const handleConsoleIssues = (test, shouldSuppress) => {
             const groupName = [`%c[${label}]%c suppressed by "test.todo"`, `color: ${color}`, ""];
             return (...args) => {
                 logger.groupCollapsed(...groupName);
-                $log(...args);
-                $groupEnd();
+                console.log(...args);
+                console.groupEnd();
             };
         };
 
@@ -233,7 +206,7 @@ const handleConsoleIssues = (test, shouldSuppress) => {
             error: globalThis.console.error,
             warn: globalThis.console.warn,
         };
-        $assign(globalThis.console, {
+        Object.assign(globalThis.console, {
             error: suppressIssueLogger("ERROR", "#9f1239"),
             warn: suppressIssueLogger("WARNING", "#f59e0b"),
         });
@@ -347,6 +320,8 @@ export class Runner {
          * @type {Test[]}
          */
         tests: [],
+        /** @type {string | null} */
+        url: null,
     });
     /** @type {Map<string, Suite>} */
     suites = new Map();
@@ -396,14 +371,13 @@ export class Runner {
     constructor(config) {
         // Main test methods
         this.describe = this._addConfigurators(this.addSuite, () => this.suiteStack.at(-1));
-        this.fixture = makeFixtureManager(this);
         this.test = this._addConfigurators(this.addTest, false);
 
         const initialConfig = { ...DEFAULT_CONFIG, ...config };
         const reactiveConfig = reactive({ ...initialConfig, ...urlParams }, () => {
             setParams(
-                $fromEntries(
-                    $entries(this.config).map(([key, value]) => [
+                Object.fromEntries(
+                    Object.entries(this.config).map(([key, value]) => [
                         key,
                         deepEqual(value, initialConfig[key]) ? null : value,
                     ])
@@ -782,6 +756,16 @@ export class Runner {
     }
 
     /**
+     * @param {string} url
+     */
+    load(url) {
+        if (this.state.url) {
+            return;
+        }
+        this.state.url = url;
+    }
+
+    /**
      * Registers callbacks that will be executed when an error occurs during the
      * execution of the test runner.
      *
@@ -938,7 +922,7 @@ export class Runner {
             // ! keep the smallest stack trace possible:
             // !    Runner.start() > Test.run() > Error
             const testPromise = Promise.resolve(test.run());
-            const timeout = $floor(test.config.timeout || this.config.timeout);
+            const timeout = Math.floor(test.config.timeout || this.config.timeout);
             const timeoutPromise = new Promise((resolve, reject) => {
                 // Set abort signal
                 this._rejectCurrent = reject;
@@ -1057,7 +1041,7 @@ export class Runner {
     async stop() {
         this._currentJobs = [];
         this.state.status = "done";
-        this.totalTime = formatTime($now() - this._startTime);
+        this.totalTime = formatTime(performance.now() - this._startTime);
 
         if (this._resolveCurrent !== noop) {
             this._resolveCurrent();
@@ -1159,7 +1143,7 @@ export class Runner {
          *  test.config({ multi: 100 })("non-deterministic test", async () => { ... });
          */
         const configure = (...configs) => {
-            $assign(currentConfig, ...configs);
+            Object.assign(currentConfig, ...configs);
 
             return taggedFn;
         };
@@ -1172,7 +1156,7 @@ export class Runner {
         };
 
         let currentConfig = { tags: [] };
-        $defineProperties(taggedFn, {
+        Object.defineProperties(taggedFn, {
             config: { get: configure },
             debug: { get: () => addTags("debug") },
             multi: { get: () => (count) => configure({ multi: count }) },
@@ -1184,7 +1168,7 @@ export class Runner {
         });
 
         if (getCurrent) {
-            $defineProperties(taggedFn, {
+            Object.defineProperties(taggedFn, {
                 current: { get: () => this._createCurrentConfigurators(getCurrent) },
             });
         }
@@ -1287,7 +1271,7 @@ export class Runner {
         };
 
         /** @type {CurrentConfigurators} */
-        const currentConfigurators = $freeze({
+        const currentConfigurators = Object.freeze({
             config: configureCurrent,
             debug: () => addTagsToCurrent("debug"),
             multi: (count) => configureCurrent({ multi: count }),
@@ -1367,7 +1351,7 @@ export class Runner {
      */
     _isImplicitlyExcluded(job) {
         // By tag name
-        for (const [tagName, status] of $entries(this.state.includeSpecs.tags)) {
+        for (const [tagName, status] of Object.entries(this.state.includeSpecs.tags)) {
             if (status < 0 && job.tags.some((tag) => tag.name === tagName)) {
                 return true;
             }
@@ -1388,7 +1372,7 @@ export class Runner {
      */
     _isImplicitlyIncluded(job) {
         // By tag name
-        for (const [tagName, status] of $entries(this.state.includeSpecs.tags)) {
+        for (const [tagName, status] of Object.entries(this.state.includeSpecs.tags)) {
             if (status > 0 && job.tags.some((tag) => tag.name === tagName)) {
                 return true;
             }
@@ -1534,7 +1518,7 @@ export class Runner {
         }
         handledErrors.add(error);
 
-        if (!(ev instanceof Event)) {
+        if (!isInstanceOf(ev, Event)) {
             ev = new ErrorEvent("error", { error });
         }
 
@@ -1630,7 +1614,7 @@ export class Runner {
     }
 
     async _setupStart() {
-        this._startTime = $now();
+        this._startTime = performance.now();
         if (this.config.manual) {
             this._canStartPromise = new Deferred();
         }
@@ -1643,8 +1627,8 @@ export class Runner {
             }
         }
         logger.groupCollapsed("Configuration (click to expand)");
-        $table(table);
-        $groupEnd();
+        console.table(table);
+        console.groupEnd();
         logger.logRun("Starting test suites");
 
         // Adjust debug mode if more or less than 1 test will be run
@@ -1666,12 +1650,10 @@ export class Runner {
             !this.debug && on(window, "pointerdown", warnUserEvent),
             !this.debug && on(window, "keydown", warnUserEvent)
         );
-        this.beforeEach(this.fixture.setup);
         this.afterEach(
             cleanupWindow,
             cleanupNetwork,
             cleanupNavigator,
-            this.fixture.cleanup,
             cleanupDOM,
             cleanupTime,
             cleanupDate

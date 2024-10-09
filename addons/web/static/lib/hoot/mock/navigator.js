@@ -8,21 +8,6 @@ import { getSyncValue, setSyncValue } from "./sync_values";
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Blob,
-    ClipboardItem,
-    EventTarget,
-    navigator,
-    Object: { assign: $assign },
-    Set,
-    TypeError,
-} = globalThis;
-const { userAgent: $userAgent } = navigator;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -116,13 +101,13 @@ const getPermissions = () => ({
 });
 
 const getUserAgentBrowser = () => {
-    if (/Firefox/i.test($userAgent)) {
+    if (/Firefox/i.test(navigator.userAgent)) {
         return "Gecko/20100101 Firefox/1000.0"; // Firefox
     }
-    if (/Chrome/i.test($userAgent)) {
+    if (/Chrome/i.test(navigator.userAgent)) {
         return "AppleWebKit/1000.00 (KHTML, like Gecko) Chrome/1000.00 Safari/1000.00"; // Chrome
     }
-    if (/Safari/i.test($userAgent)) {
+    if (/Safari/i.test(navigator.userAgent)) {
         return "AppleWebKit/1000.00 (KHTML, like Gecko) Version/1000.00 Safari/1000.00"; // Safari
     }
 };
@@ -276,8 +261,8 @@ export const mockNavigator = createMock(navigator, {
 
 export function cleanupNavigator() {
     permissionStatuses.clear();
-    $assign(currentPermissions, getPermissions());
-    $assign(mockValues, getMockValues());
+    Object.assign(currentPermissions, getPermissions());
+    Object.assign(mockValues, getMockValues());
 }
 
 /**

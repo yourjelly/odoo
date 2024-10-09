@@ -1,4 +1,5 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
+import { queryAllTexts, queryFirst } from "@odoo/hoot-dom";
 import {
     contains,
     defineModels,
@@ -7,8 +8,7 @@ import {
     models,
     mountView,
     onRpc,
-} from "../../web_test_helpers";
-import { queryAllTexts, queryFirst } from "@odoo/hoot-dom";
+} from "@web/../tests/web_test_helpers";
 
 class Contact extends models.Model {
     email = fields.Char();
@@ -57,7 +57,7 @@ test("in editable list view", async () => {
     expect(cell.parentElement).toHaveClass("o_selected_row");
     expect(`.o_field_email input[type="email"]`).toHaveValue("john.doe@odoo.com");
     await fieldInput("email").edit("new@odoo.com");
-    await contains(getFixture()).click();
+    await contains("body").click();
     cell = queryFirst("tbody td:not(.o_list_record_selector)");
     expect(cell.parentElement).not.toHaveClass("o_selected_row");
     expect(queryAllTexts(`tbody td:not(.o_list_record_selector) a`)).toEqual([
@@ -93,7 +93,7 @@ test("trim user value", async () => {
     });
 
     await fieldInput("email").edit("   hello@gmail.com    ");
-    await contains(getFixture()).click();
+    await contains("body").click();
     expect(`.o_field_email input`).toHaveValue("hello@gmail.com");
 });
 

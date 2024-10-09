@@ -1,4 +1,4 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { queryAllTexts } from "@odoo/hoot-dom";
 import { animationFrame, runAllTimers } from "@odoo/hoot-mock";
 import { Component, useState, xml } from "@odoo/owl";
@@ -899,7 +899,7 @@ test("Modify path in popover debug input and click away", async () => {
     );
     expect(getModelFieldSelectorValues()).toEqual(["Foo"]);
 
-    await contains(getFixture()).click();
+    await contains("body").click();
     expect(getModelFieldSelectorValues()).toEqual(["foooooo"]);
     expect.verifySteps(["foooooo"]);
 });

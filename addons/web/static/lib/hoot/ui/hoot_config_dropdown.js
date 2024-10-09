@@ -3,7 +3,7 @@
 import { Component, useRef, useState, xml } from "@odoo/owl";
 import { logLevels } from "../core/logger";
 import { refresh } from "../core/url";
-import { useWindowListener } from "../hoot_utils";
+import { useTrustedListener } from "../hoot_utils";
 import { generateSeed, internalRandom } from "../mock/math";
 import { toggleColorScheme, useColorScheme } from "./hoot_colors";
 import { HootCopyButton } from "./hoot_copy_button";
@@ -14,14 +14,6 @@ import { HootCopyButton } from "./hoot_copy_button";
  * @typedef {{
  * }} HootConfigDropdownProps
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Object: { entries: $entries },
-} = globalThis;
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -223,7 +215,7 @@ export class HootConfigDropdown extends Component {
         { value: "lifo", title: "Last in, first out", icon: "fa-sort-numeric-desc" },
         { value: "random", title: "Random", icon: "fa-random" },
     ];
-    logLevels = $entries(logLevels)
+    logLevels = Object.entries(logLevels)
         .filter(([, value]) => value)
         .map(([label, value]) => ({ label, value }));
 
@@ -238,13 +230,13 @@ export class HootConfigDropdown extends Component {
         this.config = useState(this.env.runner.config);
         this.state = useState({ open: false });
 
-        useWindowListener("keydown", (ev) => {
+        useTrustedListener(window, "keydown", (ev) => {
             if (this.state.open && ev.key === "Escape") {
                 ev.preventDefault();
                 this.state.open = false;
             }
         });
-        useWindowListener("click", (ev) => {
+        useTrustedListener(window, "click", (ev) => {
             const path = ev.composedPath();
             if (!path.includes(this.rootRef.el)) {
                 this.state.open = false;

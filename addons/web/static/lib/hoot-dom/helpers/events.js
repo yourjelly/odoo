@@ -3,6 +3,7 @@
 import { HootDomError, getTag, isFirefox, isIterable } from "../hoot_dom_utils";
 import {
     getActiveElement,
+    getDefaultRootNode,
     getDocument,
     getNextFocusableElement,
     getNodeRect,
@@ -15,11 +16,10 @@ import {
     isNode,
     isNodeFocusable,
     isNodeVisible,
-    parseDimensions,
     parsePosition,
     queryAll,
     queryFirst,
-    setDimensions,
+    setStyle,
     toSelector,
 } from "./dom";
 
@@ -97,26 +97,6 @@ import {
  * @template [T=Node]
  * @typedef {import("./dom").Target<T>} Target
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    console: { dir: $dir, groupCollapsed: $groupCollapsed, groupEnd: $groupEnd, log: $log },
-    DataTransfer,
-    document,
-    Math: { ceil: $ceil, max: $max, min: $min },
-    Number: { isInteger: $isInteger, isNaN: $isNaN, parseFloat: $parseFloat },
-    Object: { assign: $assign, values: $values },
-    String,
-    Touch,
-    TypeError,
-} = globalThis;
-/** @type {Document["createRange"]} */
-const $createRange = document.createRange.bind(document);
-/** @type {Document["hasFocus"]} */
-const $hasFocus = document.hasFocus.bind(document);
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -447,7 +427,7 @@ const getPosition = (element, options) => {
         if (positions.includes("left")) {
             clientX -= 1;
         } else if (positions.includes("right")) {
-            clientX += $ceil(width) + 1;
+            clientX += Math.ceil(width) + 1;
         } else {
             clientX += width / 2;
         }
@@ -456,7 +436,7 @@ const getPosition = (element, options) => {
         if (positions.includes("top")) {
             clientY -= 1;
         } else if (positions.includes("bottom")) {
-            clientY += $ceil(height) + 1;
+            clientY += Math.ceil(height) + 1;
         } else {
             clientY += height / 2;
         }
@@ -501,8 +481,7 @@ const getStringSelection = (target) =>
  */
 const hasTagName = (node, ...tagNames) => tagNames.includes(getTag(node));
 
-const hasTouch = () =>
-    globalThis.ontouchstart !== undefined || globalThis.matchMedia("(pointer:coarse)").matches;
+const hasTouch = () => window.ontouchstart !== undefined || matchMedia("(pointer:coarse)").matches;
 
 /**
  * @param {EventTarget | EventPosition} target
@@ -816,12 +795,12 @@ const triggerFocus = async (target) => {
         return;
     }
     if (previous !== target.ownerDocument.body) {
-        if ($hasFocus() && isNodeVisible(previous)) {
+        if (document.hasFocus() && isNodeVisible(previous)) {
             catchNextEvent(previous, "focusout");
         }
         // If document is focused, this will trigger a trusted "blur" event
         previous.blur();
-        if (!$hasFocus()) {
+        if (!document.hasFocus()) {
             // When document is not focused: manually trigger a "blur" event
             const eventInit = { relatedTarget: target };
             await dispatch(previous, "blur", eventInit);
@@ -832,11 +811,11 @@ const triggerFocus = async (target) => {
         const previousSelection = getStringSelection(target);
 
         // If document is focused, this will trigger a trusted "focus" event
-        if ($hasFocus() && isNodeVisible(target)) {
+        if (document.hasFocus() && isNodeVisible(target)) {
             catchNextEvent(target, "focusin");
         }
         target.focus();
-        if (!$hasFocus()) {
+        if (!document.hasFocus()) {
             // When document is not focused: manually trigger a "focus" event
             const eventInit = { relatedTarget: previous };
             await dispatch(target, "focus", eventInit);
@@ -926,7 +905,7 @@ const _fill = async (target, value, options) => {
 
     if (options?.instantly) {
         // Simulates filling the clipboard with the value (can be from external source)
-        globalThis.navigator.clipboard.writeText(value).catch();
+        navigator.clipboard?.writeText(value).catch();
         await _press(target, { ctrlKey: true, key: "v" });
     } else {
         if (options?.composition) {
@@ -1094,8 +1073,8 @@ const _keyDown = async (target, eventInit) => {
                     // Move the cursor left or right
                     selectionTarget = start ? selectionStart - 1 : selectionEnd + 1;
                 }
-                target.selectionStart = target.selectionEnd = $max(
-                    $min(selectionTarget, value.length),
+                target.selectionStart = target.selectionEnd = Math.max(
+                    Math.min(selectionTarget, value.length),
                     0
                 );
                 break;
@@ -1167,8 +1146,8 @@ const _keyDown = async (target, eventInit) => {
                         target.selectionEnd = target.value.length;
                     }
                 } else {
-                    const selection = globalThis.getSelection();
-                    const range = $createRange();
+                    const selection = getSelection();
+                    const range = document.createRange();
                     range.selectNodeContents(target);
                     selection.removeAllRanges();
                     selection.addRange(range);
@@ -1184,8 +1163,8 @@ const _keyDown = async (target, eventInit) => {
         case "c": {
             if (ctrlKey) {
                 // Get selection from window
-                const text = globalThis.getSelection().toString();
-                globalThis.navigator.clipboard.writeText(text).catch();
+                const text = getSelection().toString();
+                navigator.clipboard.writeText(text).catch();
 
                 await dispatch(target, "copy", {
                     clipboardData: eventInit.dataTransfer || new DataTransfer(),
@@ -1244,7 +1223,7 @@ const _keyDown = async (target, eventInit) => {
             if (ctrlKey && isEditable(target)) {
                 // Set target value (if possible)
                 try {
-                    nextValue = await globalThis.navigator.clipboard.readText();
+                    nextValue = await navigator.clipboard?.readText();
                 } catch (err) {}
                 inputType = "insertFromPaste";
 
@@ -1262,8 +1241,8 @@ const _keyDown = async (target, eventInit) => {
         case "x": {
             if (ctrlKey && isEditable(target)) {
                 // Get selection from window
-                const text = globalThis.getSelection().toString();
-                globalThis.navigator.clipboard.writeText(text).catch();
+                const text = getSelection().toString();
+                navigator.clipboard?.writeText(text).catch();
 
                 nextValue = deleteSelection(target);
                 inputType = "deleteByCut";
@@ -1422,10 +1401,10 @@ const _pointerUp = async (target, options) => {
 
     setPointerDownTarget(null);
     if (runTime.pointerDownTimeout) {
-        globalThis.clearTimeout(runTime.pointerDownTimeout);
+        clearTimeout(runTime.pointerDownTimeout);
     }
-    runTime.pointerDownTimeout = globalThis.setTimeout(() => {
-        // Use `globalThis.setTimeout` to potentially make use of the mock timeouts
+    runTime.pointerDownTimeout = setTimeout(() => {
+        // Use `setTimeout` to potentially make use of the mock timeouts
         // since the events run in the same temporal context as the tests
         runTime.clickCount = 0;
         runTime.pointerDownTimeout = 0;
@@ -2271,13 +2250,16 @@ export async function press(keyStrokes, options) {
  * @example
  *  resize("body", { width: 1000, height: 500 }); // Resizes <body> to 1000x500
  */
-export async function resize(dimensions, options) {
+export async function resize(dimensions) {
     const finalizeEvents = setupEvents("resize");
-    const [width, height] = parseDimensions(dimensions);
+    const container = window.frameElement || getDefaultRootNode();
 
-    setDimensions(width, height);
-
-    await dispatch(getWindow(), "resize");
+    // This will trigger a trusted "resize" event
+    setStyle(container, dimensions);
+    const promise = catchNextEvent(getWindow(), "resize");
+    if (container.querySelector("body")) {
+        await promise;
+    }
 
     return finalizeEvents(options);
 }
@@ -2404,22 +2386,22 @@ export async function setInputRange(target, value, options) {
 }
 
 /**
- * @param {HTMLElement} fixture
+ * @param {EventTarget} target
  */
-export function setupEventActions(fixture) {
+export function setupEventActions(target) {
     if (runTime.pointerDownTimeout) {
-        globalThis.clearTimeout(runTime.pointerDownTimeout);
+        clearTimeout(runTime.pointerDownTimeout);
     }
 
     removeChangeTargetListeners();
 
-    fixture.addEventListener("click", registerFileInput, { capture: true });
+    target.addEventListener("click", registerFileInput, { capture: true });
 
     // Runtime global variables
-    $assign(runTime, getDefaultRunTimeValue());
+    Object.assign(runTime, getDefaultRunTimeValue());
 
     // Special keys
-    $assign(specialKeys, getDefaultSpecialKeysValue());
+    Object.assign(specialKeys, getDefaultSpecialKeysValue());
 }
 
 /**

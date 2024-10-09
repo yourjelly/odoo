@@ -2,24 +2,23 @@
 
 import { HootDomError } from "../hoot_dom_utils";
 
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    cancelAnimationFrame,
-    clearInterval,
-    clearTimeout,
-    Error,
-    Math: { ceil: $ceil, floor: $floor, max: $max, min: $min },
-    performance,
-    Promise,
-    requestAnimationFrame,
-    setInterval,
-    setTimeout,
-} = globalThis;
-/** @type {Performance["now"]} */
-const $performanceNow = performance.now.bind(performance);
+/**
+ * @typedef DateSpecs
+ * @property {number} [year]
+ * @property {number} [month] // 1-12
+ * @property {number} [day] // 1-31
+ * @property {number} [hour] // 0-23
+ * @property {number} [minute] // 0-59
+ * @property {number} [second] // 0-59
+ * @property {number} [millisecond] // 0-999
+ *
+ * @typedef {{
+ *  handler: () => any;
+ *  cancel: () => any;
+ *  init: number;
+ *  delay: number;
+ * }} TimerValues
+ */
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -33,36 +32,21 @@ const animationToId = (id) => ID_PREFIX.animation + String(id);
 const getNextTimerValues = () => {
     /** @type {[number, () => any, string] | null} */
     let timerValues = null;
-    for (const [internalId, [callback, init, delay]] of timers.entries()) {
+    for (const [internalId, { handler, init, delay }] of timers.entries()) {
         const timeout = init + delay;
         if (!timerValues || timeout < timerValues[0]) {
-            timerValues = [timeout, callback, internalId];
+            timerValues = [timeout, handler, internalId];
         }
     }
     return timerValues;
 };
 
 /**
- * @param {string} id
- */
-const idToAnimation = (id) => Number(id.slice(ID_PREFIX.animation.length));
-
-/**
- * @param {string} id
- */
-const idToInterval = (id) => Number(id.slice(ID_PREFIX.interval.length));
-
-/**
- * @param {string} id
- */
-const idToTimeout = (id) => Number(id.slice(ID_PREFIX.timeout.length));
-
-/**
  * @param {number} id
  */
 const intervalToId = (id) => ID_PREFIX.interval + String(id);
 
-const now = () => $performanceNow() + timeOffset;
+const now = () => performance.now() + timeOffset;
 
 /**
  * @param {number} id
@@ -75,13 +59,12 @@ const ID_PREFIX = {
     timeout: "t_",
 };
 
-/** @type {Map<string, [() => any, number, number]>} */
+/** @type {Map<string, TimerValues>} */
 const timers = new Map();
 
 let allowTimers = true;
 let freezed = false;
 let frameDelay = 1000 / 60;
-let nextDummyId = 1;
 let timeOffset = 0;
 
 //-----------------------------------------------------------------------------
@@ -113,8 +96,8 @@ export function advanceTime(ms) {
         const [timeout, handler, id] = timerValues;
         const diff = timeout - now();
         if (diff > 0) {
-            timeOffset += $min(remaining, diff);
-            remaining = $max(remaining - diff, 0);
+            timeOffset += Math.min(remaining, diff);
+            remaining = Math.max(remaining - diff, 0);
         }
         if (timers.has(id)) {
             handler(timeout);
@@ -143,14 +126,8 @@ export function animationFrame() {
  * Cancels all current timeouts, intervals and animations.
  */
 export function cancelAllTimers() {
-    for (const id of timers.keys()) {
-        if (id.startsWith(ID_PREFIX.animation)) {
-            globalThis.cancelAnimationFrame(idToAnimation(id));
-        } else if (id.startsWith(ID_PREFIX.interval)) {
-            globalThis.clearInterval(idToInterval(id));
-        } else if (id.startsWith(ID_PREFIX.timeout)) {
-            globalThis.clearTimeout(idToTimeout(id));
-        }
+    for (const { cancel } of timers.values()) {
+        cancel();
     }
 }
 
@@ -196,97 +173,128 @@ export function microTick() {
     return Deferred.resolve();
 }
 
-/** @type {typeof cancelAnimationFrame} */
-export function mockedCancelAnimationFrame(handle) {
-    if (!freezed) {
-        cancelAnimationFrame(handle);
-    }
-    timers.delete(animationToId(handle));
+/**
+ * @param {Window} window
+ * @returns {typeof cancelAnimationFrame}
+ */
+export function mockedCancelAnimationFrame(window) {
+    return function (handle) {
+        window.cancelAnimationFrame(handle);
+        timers.delete(animationToId(handle));
+    };
 }
 
-/** @type {typeof clearInterval} */
-export function mockedClearInterval(intervalId) {
-    if (!freezed) {
+/**
+ * @param {Window} window
+ * @returns {typeof clearInterval}
+ */
+export function mockedClearInterval({ clearInterval }) {
+    return function (intervalId) {
         clearInterval(intervalId);
-    }
-    timers.delete(intervalToId(intervalId));
+        timers.delete(intervalToId(intervalId));
+    };
 }
 
-/** @type {typeof clearTimeout} */
-export function mockedClearTimeout(timeoutId) {
-    if (!freezed) {
+/**
+ * @param {Window} window
+ * @returns {typeof clearTimeout}
+ */
+export function mockedClearTimeout({ clearTimeout }) {
+    return function (timeoutId) {
         clearTimeout(timeoutId);
-    }
-    timers.delete(timeoutToId(timeoutId));
-}
-
-/** @type {typeof requestAnimationFrame} */
-export function mockedRequestAnimationFrame(callback) {
-    if (!allowTimers) {
-        return 0;
-    }
-
-    const handler = () => {
-        mockedCancelAnimationFrame(handle);
-        return callback(now());
+        timers.delete(timeoutToId(timeoutId));
     };
-
-    const animationValues = [handler, now(), frameDelay];
-    const handle = freezed ? nextDummyId++ : requestAnimationFrame(handler);
-    const internalId = animationToId(handle);
-    timers.set(internalId, animationValues);
-
-    return handle;
 }
 
-/** @type {typeof setInterval} */
-export function mockedSetInterval(callback, ms, ...args) {
-    if (!allowTimers) {
-        return 0;
-    }
-
-    if (isNaN(ms) || !ms || ms < 0) {
-        ms = 0;
-    }
-
-    const handler = () => {
-        if (allowTimers) {
-            intervalValues[1] = Math.max(now(), intervalValues[1] + ms);
-        } else {
-            mockedClearInterval(intervalId);
+/**
+ * @param {Window} window
+ * @returns {typeof requestAnimationFrame}
+ */
+export function mockedRequestAnimationFrame({ cancelAnimationFrame, requestAnimationFrame }) {
+    return function (callback) {
+        if (!allowTimers) {
+            return 0;
         }
-        return callback(...args);
+
+        const cancel = () => cancelAnimationFrame(handle);
+
+        const handler = () => {
+            cancel();
+            return callback(now());
+        };
+
+        const init = now();
+        const handle = requestAnimationFrame(handler);
+        const internalId = animationToId(handle);
+        timers.set(internalId, { handler, cancel, init, delay: frameDelay });
+
+        return handle;
     };
-
-    const intervalValues = [handler, now(), ms];
-    const intervalId = freezed ? nextDummyId++ : setInterval(handler, ms);
-    const internalId = intervalToId(intervalId);
-    timers.set(internalId, intervalValues);
-
-    return intervalId;
 }
 
-/** @type {typeof setTimeout} */
-export function mockedSetTimeout(callback, ms, ...args) {
-    if (!allowTimers) {
-        return 0;
-    }
+/**
+ * @param {Window} window
+ * @returns {typeof setInterval}
+ */
+export function mockedSetInterval({ clearInterval, setInterval }) {
+    return function (callback, ms, ...args) {
+        if (!allowTimers) {
+            return 0;
+        }
 
-    if (isNaN(ms) || !ms || ms < 0) {
-        ms = 0;
-    }
+        if (isNaN(ms) || !ms || ms < 0) {
+            ms = 0;
+        }
 
-    const handler = () => {
-        mockedClearTimeout(timeoutId);
-        return callback(...args);
+        const cancel = () => clearInterval(intervalId);
+
+        const handler = () => {
+            if (allowTimers) {
+                intervalValues.init = Math.max(now(), intervalValues.init + ms);
+            } else {
+                cancel();
+            }
+            return callback(...args);
+        };
+
+        const init = now();
+        const intervalValues = { handler, cancel, init, delay: ms };
+        const intervalId = setInterval(handler, ms);
+        const internalId = intervalToId(intervalId);
+        timers.set(internalId, intervalValues);
+
+        return intervalId;
     };
+}
 
-    const timeoutValues = [handler, now(), ms];
-    const timeoutId = freezed ? nextDummyId++ : setTimeout(handler, ms);
-    const internalId = timeoutToId(timeoutId);
-    timers.set(internalId, timeoutValues);
+/**
+ * @param {Window} window
+ * @returns {typeof setTimeout}
+ */
+export function mockedSetTimeout({ clearTimeout, setTimeout }) {
+    return function (callback, ms, ...args) {
+        if (!allowTimers) {
+            return 0;
+        }
 
-    return timeoutId;
+        if (isNaN(ms) || !ms || ms < 0) {
+            ms = 0;
+        }
+
+        const cancel = () => clearTimeout(timeoutId);
+
+        const handler = () => {
+            cancel();
+            return callback(...args);
+        };
+
+        const init = now();
+        const timeoutId = setTimeout(handler, ms);
+        const internalId = timeoutToId(timeoutId);
+        timers.set(internalId, { handler, cancel, init, delay: ms });
+
+        return timeoutId;
+    };
 }
 
 export function resetTimeOffset() {
@@ -310,8 +318,8 @@ export async function runAllTimers(preventTimers = false) {
         allowTimers = false;
     }
 
-    const endts = $max(...[...timers.values()].map(([, init, delay]) => init + delay));
-    const ms = await advanceTime($ceil(endts - now()));
+    const endts = Math.max(...[...timers.values()].map(({ init, delay }) => init + delay));
+    const ms = await advanceTime(Math.ceil(endts - now()));
 
     if (preventTimers) {
         allowTimers = true;

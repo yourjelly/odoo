@@ -1,10 +1,10 @@
-import { after, expect, getFixture } from "@odoo/hoot";
+import { after, expect } from "@odoo/hoot";
 import { click, formatXml, queryAll, queryAllTexts } from "@odoo/hoot-dom";
 import { animationFrame, Deferred, tick } from "@odoo/hoot-mock";
 import { Component, onMounted, useSubEnv, xml } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { MainComponentsContainer } from "@web/core/main_components_container";
-import { View, getDefaultConfig } from "@web/views/view";
+import { getDefaultConfig, View } from "@web/views/view";
 import { mountWithCleanup } from "./component_test_helpers";
 import { contains } from "./dom_test_helpers";
 import { getMockEnv, getService, makeMockEnv } from "./env_test_helpers";
@@ -225,7 +225,7 @@ export async function mountViewInDialog(params) {
 export async function mountView(params, target = null) {
     const actionManagerEl = document.createElement("div");
     actionManagerEl.classList.add("o_action_manager");
-    (target ?? getFixture()).append(actionManagerEl);
+    (target ?? document.body).append(actionManagerEl);
     after(() => actionManagerEl.remove());
     const config = { ...getDefaultConfig(), ...params.config };
     return mountWithCleanup(View, {

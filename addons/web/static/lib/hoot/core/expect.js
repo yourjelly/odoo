@@ -26,6 +26,7 @@ import {
     ensureArguments,
     ensureArray,
     formatHumanReadable,
+    isInstanceOf,
     isNil,
     isOfType,
     match,
@@ -49,7 +50,6 @@ import { Test } from "./test";
  *  message?: string;
  * }} ExpectOptions
  *
- * @typedef {import("@odoo/hoot-dom").Dimensions} Dimensions
  * @typedef {import("@odoo/hoot-dom").FormatXmlOptions} FormatXmlOptions
  * @typedef {import("@odoo/hoot-dom").QueryRectOptions} QueryRectOptions
  * @typedef {import("@odoo/hoot-dom").QueryTextOptions} QueryTextOptions
@@ -81,23 +81,6 @@ import { Test } from "./test";
  * @template T
  * @typedef {T | Iterable<T>} MaybeIterable
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Array: { isArray: $isArray },
-    Boolean,
-    Error,
-    Math: { floor: $floor },
-    Object: { assign: $assign, fromEntries: $fromEntries, entries: $entries, keys: $keys },
-    Promise,
-    TypeError,
-    performance,
-} = globalThis;
-/** @type {Performance["now"]} */
-const $now = performance.now.bind(performance);
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -181,13 +164,13 @@ const formatStack = (stack) => {
  * @param {Iterable<any> | Record<any, any>} object
  */
 const getLength = (object) => {
-    if (typeof object === "string" || $isArray(object)) {
+    if (typeof object === "string" || Array.isArray(object)) {
         return object.length;
     }
     if (isIterable(object)) {
         return [...object].length;
     }
-    return $keys(object).length;
+    return Object.keys(object).length;
 };
 
 /**
@@ -200,7 +183,7 @@ const getStyleValues = (node, keys) => {
     if (!nodeStyle) {
         return {};
     }
-    return $fromEntries(
+    return Object.fromEntries(
         keys.map((key) => [
             key,
             key.includes("-") ? nodeStyle.getPropertyValue(key) : nodeStyle[key],
@@ -217,7 +200,7 @@ const includes = (object, item) => {
     if (typeof object === "string") {
         return object.includes(item);
     }
-    if ($isArray(object)) {
+    if (Array.isArray(object)) {
         // Standard case: array
         return object.some((i) => deepEqual(i, item));
     }
@@ -225,10 +208,10 @@ const includes = (object, item) => {
         // Iterables: cast to array
         return includes([...object], item);
     }
-    if ($isArray(item) && item.length === 2) {
-        return includes($entries(object), item);
+    if (Array.isArray(item) && item.length === 2) {
+        return includes(Object.entries(object), item);
     }
-    return includes($keys(object), item);
+    return includes(Object.keys(object), item);
 };
 
 /**
@@ -270,7 +253,7 @@ const matcherModifierError = (modifier, message) =>
  * @returns {Record<string, string>}
  */
 const parseStyle = (styleString) =>
-    $fromEntries(styleString.split(";").map((prop) => prop.split(":").map((v) => v.trim())));
+    Object.fromEntries(styleString.split(";").map((prop) => prop.split(":").map((v) => v.trim())));
 
 /** @type {StringConstructor["raw"]} */
 const r = (template, ...substitutions) =>
@@ -281,7 +264,7 @@ const r = (template, ...substitutions) =>
  * @param {string | RegExp} matcher
  */
 const regexMatchOrStrictEqual = (value, matcher) =>
-    matcher instanceof RegExp ? matcher.test(value) : strictEqual(value, matcher);
+    isInstanceOf(matcher, RegExp) ? matcher.test(value) : strictEqual(value, matcher);
 
 /**
  * @param {TestResult} result
@@ -298,7 +281,7 @@ const registerAssertion = (result, assertion) => {
  */
 const roundTo = (value, digits) => {
     const divisor = 10 ** digits;
-    return $floor(value * divisor) / divisor;
+    return Math.floor(value * divisor) / divisor;
 };
 
 /**
@@ -331,7 +314,7 @@ export function makeExpect(params) {
     function afterTest(options) {
         const { test } = currentResult;
 
-        currentResult.duration = $now() - currentResult.ts;
+        currentResult.duration = performance.now() - currentResult.ts;
 
         // Expect without matchers
         if (unconsumedMatchers.size) {
@@ -656,7 +639,7 @@ export function makeExpect(params) {
         return new Matcher(currentResult, received, {}, params.headless);
     }
 
-    const enrichedExpect = $assign(expect, {
+    const enrichedExpect = Object.assign(expect, {
         assertions,
         errors,
         step,
@@ -686,7 +669,7 @@ export class Assertion {
     /** @type {Modifiers<false>} */
     modifiers = { not: false, rejects: false, resolves: false };
     pass = false;
-    ts = $now();
+    ts = performance.now();
 
     /**
      * @param {Partial<Assertion & { message: string | string[] | ((pass: boolean) => (string | string[])) }>} values
@@ -695,7 +678,7 @@ export class Assertion {
         let { message } = values;
         delete values.message;
 
-        $assign(this, values);
+        Object.assign(this, values);
 
         if (typeof message === "function") {
             message = message(this.pass);
@@ -703,7 +686,7 @@ export class Assertion {
 
         const parts = Array.isArray(message) ? message : [r`${message}`];
         for (const part of parts) {
-            if (part instanceof ElementMap) {
+            if (isInstanceOf(part, ElementMap)) {
                 if (typeof part.selector === "string") {
                     this.messageParts.push(r`elements matching`, new TaggedString(part.selector));
                 } else {
@@ -712,7 +695,7 @@ export class Assertion {
                         new TaggedString(elements.length === 1 ? elements[0] : elements)
                     );
                 }
-            } else if (part instanceof TaggedString) {
+            } else if (isInstanceOf(part, TaggedString)) {
                 this.messageParts.push(
                     new TaggedString(formatMessage(part.toString(), this.modifiers.not), part.tag)
                 );
@@ -978,7 +961,7 @@ export class Matcher {
         return this._resolve((received) => ({
             name: "toBeInstanceOf",
             acceptedType: "any",
-            predicate: () => received instanceof cls,
+            predicate: () => isInstanceOf(received, cls),
             message: (pass) =>
                 options?.message ||
                 (pass
@@ -1729,7 +1712,7 @@ export class Matcher {
             refRect = rect;
         }
 
-        const entries = $entries(refRect);
+        const entries = Object.entries(refRect);
 
         return this._resolve((received) => {
             const elMap = new ElementMap(received, (el) => getNodeRect(el, options));
@@ -1747,7 +1730,7 @@ export class Matcher {
                 failedDetails: () =>
                     detailsFromValuesWithDiff(
                         rect,
-                        $fromEntries(entries.map(([key]) => [key, elMap.first[key]]))
+                        Object.fromEntries(entries.map(([key]) => [key, elMap.first[key]]))
                     ),
             };
         });
@@ -1769,10 +1752,12 @@ export class Matcher {
         ensureArguments(arguments, ["string", "object"], ["object", null]);
 
         const styleDef = typeof style === "string" ? parseStyle(style) : style;
-        const entries = $entries(styleDef);
+        const entries = Object.entries(styleDef);
 
         return this._resolve((received) => {
-            const elMap = new ElementMap(received, (el) => getStyleValues(el, $keys(styleDef)));
+            const elMap = new ElementMap(received, (el) =>
+                getStyleValues(el, Object.eys(styleDef))
+            );
             return {
                 name: "toHaveStyle",
                 acceptedType: ["string", "node", "node[]"],
@@ -1784,7 +1769,10 @@ export class Matcher {
                     (pass
                         ? [
                               elMap,
-                              r`have the expected style values for ${join("and", $keys(styleDef))}`,
+                              r`have the expected style values for ${join(
+                                  "and",
+                                  Object.eys(styleDef)
+                              )}`,
                           ]
                         : [
                               r`expected`,
@@ -1794,7 +1782,7 @@ export class Matcher {
                 failedDetails: () =>
                     detailsFromValuesWithDiff(
                         styleDef,
-                        $fromEntries(entries.map(([key]) => [key, elMap.first[key]]))
+                        Object.fromEntries(entries.map(([key]) => [key, elMap.first[key]]))
                     ),
             };
         });
@@ -2033,7 +2021,7 @@ export class Matcher {
         ensureArguments(arguments, "string", "string", ["string", "regex"], ["object", null]);
 
         options = { type: "html", ...options };
-        if (!(expected instanceof RegExp)) {
+        if (!isInstanceOf(expected, RegExp)) {
             expected = formatXml(expected, options);
         }
 
@@ -2070,7 +2058,7 @@ export class TestResult {
     steps = [];
     /** @type {Test | null} */
     test = null;
-    ts = $now();
+    ts = performance.now();
 
     /**
      * @param {Test | null} [test]

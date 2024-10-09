@@ -89,6 +89,10 @@ class WebClient(http.Controller):
         return odoo.service.common.exp_version()
 
     @http.route('/web/tests', type='http', auth='user', readonly=True)
+    def unit_tests_runner(self, mod=None, **kwargs):
+        return request.render('web.unit_tests_runner')
+
+    @http.route('/web/tests/suite', type='http', auth='user', readonly=True)
     def unit_tests_suite(self, mod=None, **kwargs):
         return request.render('web.unit_tests_suite', {'session_info': {'view_info': request.env['ir.ui.view'].get_view_info()}})
 

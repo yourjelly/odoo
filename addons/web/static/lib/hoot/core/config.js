@@ -3,15 +3,6 @@
 import { generateSeed } from "../mock/math";
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Number: { parseFloat: $parseFloat },
-    Object: { entries: $entries, fromEntries: $fromEntries, keys: $keys },
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -21,14 +12,14 @@ const {
  * @returns {{ [key in keyof T]: ReturnType<T[key]["parse"]> }}
  */
 const getSchemaDefaults = (schema) =>
-    $fromEntries($entries(schema).map(([key, value]) => [key, value.default]));
+    Object.fromEntries(Object.entries(schema).map(([key, value]) => [key, value.default]));
 
 /**
  * @template {Record<string, any>} T
  * @param {T} schema
  * @returns {(keyof T)[]}
  */
-const getSchemaKeys = (schema) => $keys(schema);
+const getSchemaKeys = (schema) => Object.keys(schema);
 
 /**
  * @template T
@@ -40,7 +31,7 @@ const makeParser = (parse) => (valueIfEmpty) => (values) =>
 
 const parseBoolean = makeParser(([value]) => value === "true");
 
-const parseNumber = makeParser(([value]) => $parseFloat(value) || 0);
+const parseNumber = makeParser(([value]) => Number.parseFloat(value) || 0);
 
 /** @type {ReturnType<typeof makeParser<"first-fail" | "failed" | false>>} */
 const parseShowDetail = makeParser(([value]) => (value === "false" ? false : value));

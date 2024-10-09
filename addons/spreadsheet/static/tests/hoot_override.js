@@ -1,4 +1,4 @@
-import { getRunner } from "@web/../lib/hoot/main_runner";
+import { getRunner } from "@web/../lib/hoot/hoot_globals";
 import { patch } from "@web/core/utils/patch";
 import { stores } from "@odoo/o-spreadsheet";
 

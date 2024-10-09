@@ -7,16 +7,6 @@ import { reactive, useState } from "@odoo/owl";
  */
 
 //-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    localStorage,
-    matchMedia,
-    Object: { entries: $entries },
-} = globalThis;
-
-//-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
 
@@ -170,9 +160,9 @@ export function getColors() {
 export function generateStyleSheets() {
     /** @type {Record<string, string>} */
     const styles = {};
-    for (const [scheme, values] of $entries(COLOR_VALUES)) {
+    for (const [scheme, values] of Object.entries(COLOR_VALUES)) {
         const content = [];
-        for (const [key, value] of $entries(values)) {
+        for (const [key, value] of Object.entries(values)) {
             content.push(`--${key}:${value};`);
         }
         styles[scheme] = content.join("");

@@ -30,6 +30,7 @@ import { defineModels } from "./_framework/mock_server/mock_server";
  */
 
 export {
+    destroy,
     findComponent,
     getDropdownMenu,
     mountWithCleanup,

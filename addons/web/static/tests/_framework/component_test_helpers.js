@@ -1,12 +1,35 @@
-import { after, getFixture, mountOnFixture } from "@odoo/hoot";
+import { after } from "@odoo/hoot";
 import { queryFirst } from "@odoo/hoot-dom";
-import { App } from "@odoo/owl";
+import { App, Component, xml } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { getPopoverForTarget } from "@web/core/popover/popover";
 import { getTemplate } from "@web/core/templates";
 import { patch } from "@web/core/utils/patch";
 import { getMockEnv, makeMockEnv } from "./env_test_helpers";
+
+/**
+ * @template {Parameters<typeof import("@odoo/owl").mount>[0]} C
+ * @param {C} ComponentClass
+ * @param {Parameters<typeof import("@odoo/owl").mount>[1]} target
+ * @param {import("@web/env").OdooEnv} env
+ * @param {C["prototype"]["props"]} props
+ */
+const mountOnTarget = (ComponentClass, target, env, props) => {
+    const app = new App(ComponentClass, {
+        env,
+        getTemplate,
+        name: `TEST: ${ComponentClass.name}`,
+        props,
+        test: true,
+        translateFn: _t,
+        warnIfNoStaticProps: true,
+    });
+
+    after(() => destroy(app));
+
+    return app.mount(target);
+};
 
 /**
  * @typedef {import("@odoo/owl").Component} Component
@@ -21,11 +44,24 @@ patch(MainComponentsContainer.prototype, {
     },
 });
 
+const destroyed = new WeakSet();
 let hasMainComponent = false;
 
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
+
+/**
+ * @param {App | Component} target
+ */
+export function destroy(target) {
+    const app = target instanceof App ? target : target.__owl__.app;
+    if (destroyed.has(app)) {
+        return;
+    }
+    destroyed.add(app);
+    app.destroy();
+}
 
 /**
  * @param {App | Component} parent
@@ -82,19 +118,21 @@ export function getDropdownMenu(togglerSelector) {
  * }} [options]
  */
 export async function mountWithCleanup(ComponentClass, options) {
-    const config = {
-        env: options?.env || getMockEnv() || (await makeMockEnv()),
-        getTemplate,
-        props: options?.props || {},
-        translateFn: _t,
-    };
+    if (typeof ComponentClass === "string") {
+        ComponentClass = class TestComponent extends Component {
+            static props = {};
+            static template = xml`${ComponentClass}`;
+        };
+    }
 
-    getFixture().classList.add("o_web_client");
+    const env = options?.env || getMockEnv() || (await makeMockEnv());
+    const target = options?.target || document.body;
+    target.classList?.add("o_web_client");
 
     /** @type {InstanceType<C>} */
-    const component = await mountOnFixture(ComponentClass, config, options?.target);
+    const component = await mountOnTarget(ComponentClass, target, env, options?.props);
     if (!options?.noMainContainer && !hasMainComponent) {
-        await mountOnFixture(MainComponentsContainer, { ...config, props: {} });
+        await mountOnTarget(MainComponentsContainer, target, env, {});
     }
 
     return component;

@@ -1,10 +1,20 @@
-// ! WARNING: THIS MODULE CANNOT HAVE ANY DEPENDENCY !
+/** @odoo-module ignore */
 
-export const CONFIG_SUFFIX = ".hoot";
-export const TEST_SUFFIX = ".test";
+(() => {
+    const { factories, modules } = window.top.odoo.loader;
+    for (const moduleName of ["@odoo/hoot", "@odoo/hoot-mock"]) {
+        const module = modules.get(moduleName);
+        odoo.loader.factories.set(moduleName, factories.get(moduleName));
+        odoo.loader.modules.set(moduleName, module);
+    }
 
-odoo.define = {
-    ["define (mocked)"](name, dependencies, factory) {
-        return odoo.loader.define(name, dependencies, factory, !name.endsWith(CONFIG_SUFFIX));
-    },
-}["define (mocked)"];
+    modules.get("@odoo/hoot-mock").patchWindow(window);
+
+    odoo.define = {
+        ["define (mocked)"](name, dependencies, factory) {
+            const lazy =
+                !name.endsWith(".hoot") && !name.startsWith("@odoo") && !name.includes("/../lib/");
+            return odoo.loader.define(name, dependencies, factory, lazy);
+        },
+    }["define (mocked)"];
+})();

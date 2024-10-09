@@ -4,8 +4,8 @@ import { queryAll } from "@odoo/hoot-dom";
 import { reactive, useExternalListener } from "@odoo/owl";
 import { isNode } from "@web/../lib/hoot-dom/helpers/dom";
 import { isIterable, toSelector } from "@web/../lib/hoot-dom/hoot_dom_utils";
+import { getRunner } from "./hoot_globals";
 import { DiffMatchPatch } from "./lib/diff_match_patch";
-import { getRunner } from "./main_runner";
 
 /**
  * @typedef {ArgumentPrimitive | `${ArgumentPrimitive}[]` | null} ArgumentType
@@ -50,46 +50,6 @@ import { getRunner } from "./main_runner";
  * @template T
  * @typedef {T | PromiseLike<T>} MaybePromise
  */
-
-//-----------------------------------------------------------------------------
-// Global
-//-----------------------------------------------------------------------------
-
-const {
-    Array: { isArray: $isArray },
-    Boolean,
-    clearTimeout,
-    console: { debug: $debug },
-    Date,
-    Error,
-    ErrorEvent,
-    Map,
-    Math: { floor },
-    Number: { isInteger: $isInteger, isNaN: $isNaN, parseFloat: $parseFloat },
-    navigator: { clipboard: $clipboard },
-    Object: {
-        assign: $assign,
-        create: $create,
-        defineProperty: $defineProperty,
-        entries: $entries,
-        fromEntries: $fromEntries,
-        getPrototypeOf: $getPrototypeOf,
-        keys: $keys,
-    },
-    Promise,
-    PromiseRejectionEvent,
-    Reflect: { ownKeys: $ownKeys },
-    RegExp,
-    Set,
-    setTimeout,
-    String,
-    TypeError,
-    window,
-} = globalThis;
-/** @type {Clipboard["readText"]} */
-const $readText = $clipboard?.readText.bind($clipboard);
-/** @type {Clipboard["writeText"]} */
-const $writeText = $clipboard?.writeText.bind($clipboard);
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -157,11 +117,6 @@ const R_OBJECT = /^\[object \w+\]$/;
 const dmp = new DiffMatchPatch();
 const { DIFF_INSERT, DIFF_DELETE } = DiffMatchPatch;
 
-const windowTarget = {
-    addEventListener: window.addEventListener.bind(window),
-    removeEventListener: window.removeEventListener.bind(window),
-};
-
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
@@ -186,8 +141,8 @@ export function consumeCallbackList(callbacks, method, ...args) {
  */
 export async function copy(text) {
     try {
-        await $writeText(text);
-        $debug(`Copied to clipboard: ${stringify(text)}`);
+        await navigator.clipboard?.writeText(text);
+        console.debug(`Copied to clipboard: ${stringify(text)}`);
     } catch (error) {
         console.warn("Could not copy to clipboard:", error);
     }
@@ -246,7 +201,7 @@ export function createReporting(parentReporting) {
      * @param {Partial<Reporting>} values
      */
     const add = (values) => {
-        for (const [key, value] of $entries(values)) {
+        for (const [key, value] of Object.entries(values)) {
             reporting[key] += value;
         }
 
@@ -274,18 +229,18 @@ export function createReporting(parentReporting) {
  * @returns {T}
  */
 export function createMock(target, descriptors) {
-    const mock = $assign($create($getPrototypeOf(target)), target);
+    const mock = Object.assign(Object.create(Object.getPrototypeOf(target)), target);
     let owner = target;
     let keys;
 
     while (!keys?.length) {
-        keys = $ownKeys(owner);
-        owner = $getPrototypeOf(owner);
+        keys = Reflect.ownKeys(owner);
+        owner = Object.getPrototypeOf(owner);
     }
 
     // Copy original descriptors
     for (const property of keys) {
-        $defineProperty(mock, property, {
+        Object.defineProperty(mock, property, {
             get() {
                 return target[property];
             },
@@ -297,8 +252,8 @@ export function createMock(target, descriptors) {
     }
 
     // Apply new descriptors
-    for (const [property, descriptor] of $entries(descriptors)) {
-        $defineProperty(mock, property, descriptor);
+    for (const [property, descriptor] of Object.entries(descriptors)) {
+        Object.defineProperty(mock, property, descriptor);
     }
 
     return mock;
@@ -330,17 +285,19 @@ export function deepCopy(value) {
         } else if (isIterable(value)) {
             // Iterables
             const copy = [...value].map(deepCopy);
-            if (value instanceof Set || value instanceof Map) {
+            if (isInstanceOf(value, Set) || isInstanceOf(value, Map)) {
                 return new value.constructor(copy);
             } else {
                 return copy;
             }
-        } else if (value instanceof Date) {
+        } else if (isInstanceOf(value, Date)) {
             // Dates
             return new value.constructor(value);
         } else {
             // Other objects
-            return $fromEntries($entries(value).map(([key, value]) => [key, deepCopy(value)]));
+            return Object.fromEntries(
+                Object.entries(value).map(([key, value]) => [key, deepCopy(value)])
+            );
         }
     }
     return value;
@@ -420,11 +377,11 @@ export function deepEqual(a, b, cache = new Set()) {
     if (isNode(a)) {
         return isNode(b) && a.isEqualNode(b);
     }
-    if (a instanceof File) {
+    if (isInstanceOf(a, File)) {
         // Files
         return a.name === b.name && a.size === b.size && a.type === b.type;
     }
-    if (a instanceof Date || a instanceof RegExp) {
+    if (isInstanceOf(a, Date) || isInstanceOf(a, RegExp)) {
         // Dates & regular expressions
         return strictEqual(String(a), String(b));
     }
@@ -435,16 +392,16 @@ export function deepEqual(a, b, cache = new Set()) {
     }
     if (!aIsIterable) {
         // All non-iterable objects
-        const aKeys = $ownKeys(a);
+        const aKeys = Reflect.ownKeys(a);
         return (
-            aKeys.length === $ownKeys(b).length &&
+            aKeys.length === Reflect.ownKeys(b).length &&
             aKeys.every((key) => deepEqual(a[key], b[key], cache))
         );
     }
 
     // Iterables
-    const aIsArray = $isArray(a);
-    if (aIsArray !== $isArray(b)) {
+    const aIsArray = Array.isArray(a);
+    if (aIsArray !== Array.isArray(b)) {
         return false;
     }
     if (!aIsArray) {
@@ -494,13 +451,13 @@ export function ensureArray(value) {
  * @returns {Error}
  */
 export function ensureError(value) {
-    if (value instanceof Error) {
+    if (isInstanceOf(value, Error)) {
         return value;
     }
-    if (value instanceof ErrorEvent) {
+    if (isInstanceOf(value, ErrorEvent)) {
         return ensureError(value.error || value.message);
     }
-    if (value instanceof PromiseRejectionEvent) {
+    if (isInstanceOf(value, PromiseRejectionEvent)) {
         return ensureError(value.reason || value.message);
     }
     return new Error(String(value || "unknown error"));
@@ -533,9 +490,9 @@ export function formatHumanReadable(value, seen) {
             return "…";
         }
         seen.add(value);
-        if (value instanceof RegExp) {
+        if (isInstanceOf(value, RegExp)) {
             return truncate(value);
-        } else if (value instanceof Date) {
+        } else if (isInstanceOf(value, Date)) {
             return value.toISOString();
         } else if (isNode(value)) {
             return `<${value.nodeName.toLowerCase()}>`;
@@ -553,7 +510,7 @@ export function formatHumanReadable(value, seen) {
             }
             return `${constructorPrefix}[${truncate(content)}]`;
         } else {
-            const keys = $keys(value);
+            const keys = Object.keys(value);
             const constructorPrefix =
                 value.constructor.name === "Object" ? "" : `${value.constructor.name} `;
             let content = "";
@@ -589,14 +546,14 @@ export function formatTechnical(
         return `${baseIndent}${getFunctionString(value)}`;
     } else if (value && typeof value === "object") {
         if (cache.has(value)) {
-            return `${baseIndent}${$isArray(value) ? "[…]" : "{ … }"}`;
+            return `${baseIndent}${Array.isArray(value) ? "[…]" : "{ … }"}`;
         } else {
             cache.add(value);
             const startIndent = " ".repeat((depth + 1) * 2);
             const endIndent = " ".repeat(depth * 2);
-            if (value instanceof RegExp || value instanceof Error) {
+            if (isInstanceOf(value, RegExp) || isInstanceOf(value, Error)) {
                 return `${baseIndent}${value.toString()}`;
-            } else if (value instanceof Date) {
+            } else if (isInstanceOf(value, Date)) {
                 return `${baseIndent}${value.toISOString()}`;
             } else if (isNode(value)) {
                 return `<${toSelector(value)} />`;
@@ -617,7 +574,7 @@ export function formatTechnical(
             } else {
                 const proto =
                     value.constructor.name === "Object" ? "" : `${value.constructor.name} `;
-                const content = $entries(value)
+                const content = Object.entries(value)
                     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
                     .map(
                         ([k, v]) =>
@@ -647,19 +604,19 @@ export function formatTime(value, unit) {
             value /= 1_000;
         }
         if (value < 10) {
-            value = $parseFloat(value.toFixed(3));
+            value = Number.parseFloat(value.toFixed(3));
         } else if (value < 100) {
-            value = $parseFloat(value.toFixed(2));
+            value = Number.parseFloat(value.toFixed(2));
         } else if (value < 1_000) {
-            value = $parseFloat(value.toFixed(1));
+            value = Number.parseFloat(value.toFixed(1));
         } else {
-            const str = String(floor(value));
+            const str = String(Math.floor(value));
             return `${str.slice(0, -3) + "," + str.slice(-3)}${unit}`;
         }
         return value + unit;
     }
 
-    value = floor(value / 1_000);
+    value = Math.floor(value / 1_000);
 
     const seconds = value % 60;
     value -= seconds;
@@ -735,7 +692,7 @@ export function getTypeOf(value) {
     const type = typeof value;
     switch (type) {
         case "number": {
-            return $isInteger(value) ? "integer" : "number";
+            return Number.isInteger(value) ? "integer" : "number";
         }
         case "object": {
             if (value === null) {
@@ -771,7 +728,28 @@ export function getTypeOf(value) {
 }
 
 export function hasClipboard() {
-    return Boolean($clipboard);
+    return Boolean(navigator.clipboard);
+}
+
+/**
+ * @param {any} value
+ * @param {string | Function} name
+ * @returns
+ */
+export function isInstanceOf(value, name) {
+    if (typeof name === "function") {
+        name = name.name;
+    }
+    if (value) {
+        let constr = value.constructor;
+        while (constr) {
+            if (constr.name === name) {
+                return true;
+            }
+            constr = Object.getPrototypeOf(constr);
+        }
+    }
+    return false;
 }
 
 /**
@@ -805,13 +783,13 @@ export function isOfType(value, type) {
         case "date":
             return value instanceof Date;
         case "error":
-            return value instanceof Error;
+            return isInstanceOf(value, Error);
         case "integer":
-            return $isInteger(value);
+            return Number.isInteger(value);
         case "node":
             return isNode(value);
         case "regex":
-            return value instanceof RegExp;
+            return isInstanceOf(value, RegExp);
         default:
             return typeof value === type;
     }
@@ -831,7 +809,7 @@ export function isOfType(value, type) {
 export function lookup(pattern, items, property = "key") {
     /** @type {T[]} */
     const result = [];
-    if (pattern instanceof RegExp) {
+    if (isInstanceOf(pattern, RegExp)) {
         // Regex lookup
         for (const item of items) {
             if (pattern.test(item[property])) {
@@ -864,7 +842,7 @@ export function lookup(pattern, items, property = "key") {
 export function makePublicListeners(target, types) {
     for (const type of types) {
         let listener = null;
-        $defineProperty(target, `on${type}`, {
+        Object.defineProperty(target, `on${type}`, {
             get() {
                 return listener;
             },
@@ -915,7 +893,7 @@ export function match(value, ...matchers) {
     }
     return matchers.some((matcher) => {
         if (typeof matcher === "function") {
-            if (value instanceof matcher) {
+            if (isInstanceOf(value, matcher)) {
                 return true;
             }
             matcher = new RegExp(matcher.name);
@@ -924,7 +902,7 @@ export function match(value, ...matchers) {
         if (R_OBJECT.test(strValue)) {
             strValue = value.constructor.name;
         }
-        if (matcher instanceof RegExp) {
+        if (isInstanceOf(matcher, RegExp)) {
             return matcher.test(strValue);
         } else {
             return strValue.includes(String(matcher));
@@ -970,7 +948,7 @@ export function ordinal(number) {
 
 export async function paste() {
     try {
-        await $readText();
+        await navigator.clipboard?.readText();
     } catch (error) {
         console.warn("Could not paste from clipboard:", error);
     }
@@ -982,7 +960,7 @@ export async function paste() {
  * @returns {boolean}
  */
 export function strictEqual(a, b) {
-    return $isNaN(a) ? $isNaN(b) : a === b;
+    return Number.isNaN(a) ? Number.isNaN(b) : a === b;
 }
 
 /**
@@ -1006,7 +984,7 @@ export function stringToNumber(string) {
     for (let i = 0; i < string.length; i++) {
         result += string.charCodeAt(i);
     }
-    return $parseFloat(result);
+    return Number.parseFloat(result);
 }
 
 /**
@@ -1037,9 +1015,14 @@ export function toExplicitString(value) {
     );
 }
 
-/** @type {EventTarget["addEventListener"]} */
-export function useWindowListener(type, callback, options) {
-    return useExternalListener(windowTarget, type, (ev) => ev.isTrusted && callback(ev), options);
+/**
+ * @param {EventTarget} target
+ * @param {string} type
+ * @param {EventListenerOrEventListenerObject | null} callback
+ * @param {AddEventListenerOptions | boolean} [options]
+ */
+export function useTrustedListener(target, type, callback, options) {
+    return useExternalListener(target, type, (ev) => ev.isTrusted && callback(ev), options);
 }
 
 export class Callbacks {
@@ -1053,7 +1036,7 @@ export class Callbacks {
      * @param {boolean} [once]
      */
     add(type, callback, once) {
-        if (callback instanceof Promise) {
+        if (isInstanceOf(callback, Promise)) {
             callback = () =>
                 Promise.resolve(callback).then((result) => {
                     if (typeof result === "function") {
@@ -1074,7 +1057,7 @@ export class Callbacks {
                 );
                 return originalCallback(...args);
             };
-            $assign(callback, { original: originalCallback });
+            Object.assign(callback, { original: originalCallback });
         }
 
         if (!this._callbacks.has(type)) {
