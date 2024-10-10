@@ -29,6 +29,11 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
     padding: 0;
 }
 
+// Prevent the website snippets sidebar from overlapping the template
+.wysiwyg_iframe.o_iframe.has_snippets_sidebar {
+    padding-right: $o-we-sidebar-width !important;
+}
+
 // Colorpicker - Generic rules shared among backend & frontend
 .colorpicker {
 

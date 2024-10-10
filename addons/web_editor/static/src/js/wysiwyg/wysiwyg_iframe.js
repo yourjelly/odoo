@@ -4,6 +4,7 @@ import { Wysiwyg } from '@web_editor/js/wysiwyg/wysiwyg';
 import { patch } from "@web/core/utils/patch";
 import { getBundle } from "@web/core/assets";
 import { isMobileOS } from "@web/core/browser/feature_detection";
+import { useEffect } from '@odoo/owl';
 
 var promiseJsAssets;
 
@@ -12,6 +13,23 @@ var promiseJsAssets;
  **/
 
 patch(Wysiwyg.prototype, {
+    setup() {
+        super.setup();
+        useEffect(
+            () => {
+                const iframe = this.$iframe?.get(0);
+                if (!iframe) {
+                    return;
+                }
+                if (this.state.showSnippetsMenu && !this.state.snippetsMenuFolded) {
+                    iframe.classList.add("has_snippets_sidebar");
+                } else {
+                    iframe.classList.remove("has_snippets_sidebar");
+                }
+            },
+            () => [this.state.showSnippetsMenu, this.state.snippetsMenuFolded]
+        );
+    },
     /**
      * Add options to load Wysiwyg in an iframe.
      *
