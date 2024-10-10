@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import models, api, _
 from odoo.osv import expression
-from odoo.tools import date_utils
+from odoo.tools import date_utils, OrderedSet
 
 
 class AccountMove(models.Model):
@@ -121,16 +121,16 @@ class AccountMove(models.Model):
     @api.model
     def get_account_group(self, args_list):
         results = []
-        breakpoint()
         for args in args_list:
-            print("******************")
-            # company_id = args.get("company_id") or self.env.company.id
-            accounts = self.with_company(args.get("company_id")).search(
+            companies = self.env["res.company"].browse(args["company_id"]) if args.get("company_id") else self.env.companies
+            accounts = self.with_company(companies[0]).search(
                 [
-                    *self._check_company_domain(args.get("company_id") or self.env.companies),
+                    *self._check_company_domain(companies),
                     ("account_type", "=", args["account_type"]),
                 ]
             )
-            results.append(accounts.filtered("code").mapped("code"))
-        print("******************")
+            codes = OrderedSet()
+            for company in companies:
+                # code is a company dependent field.
+                codes.update(accounts.with_company(company).filtered("code").mapped("code"))
         return results
