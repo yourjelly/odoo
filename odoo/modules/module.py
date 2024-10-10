@@ -6,6 +6,7 @@ import collections.abc
 import copy
 import functools
 import importlib
+import importlib.metadata
 import logging
 import os
 import pkg_resources
