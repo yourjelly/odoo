@@ -207,7 +207,7 @@ export class MassMailingHtmlField extends HtmlField {
      * @private
      */
     _updateIframe() {
-        const iframe = this.wysiwyg.$iframe[0];
+        const iframe = this.wysiwyg?.$iframe[0];
         if (!iframe || !iframe.contentDocument) {
             return;
         }
@@ -271,18 +271,44 @@ export class MassMailingHtmlField extends HtmlField {
         const sidebar = document.querySelector("#oe_snippets");
         if (!sidebar) {
             return;
-        } else if (!this._isFullScreen()) {
-            const scrollableY = closestScrollableY(sidebar);
-            const top = scrollableY
-                ? `${-1 * (parseInt(getComputedStyle(scrollableY).paddingTop) || 0)}px`
-                : "0";
-            const maxHeight = this.iframe.parentNode.getBoundingClientRect().height;
-            const offsetHeight = window.innerHeight - document.querySelector(".o_content").getBoundingClientRect().y;
-            sidebar.style.height = `${Math.min(maxHeight, offsetHeight)}px`;
-            sidebar.style.top = top;
-        } else {
+        } else if (this._isFullScreen()) {
             sidebar.style.height = "";
             sidebar.style.top = "0";
+        } else if (this.env.inDialog) {
+            const scrollableY = closestScrollableY(sidebar);
+            if (scrollableY) {
+                const rect = scrollableY.getBoundingClientRect();
+                sidebar.style.height = `${rect.height}px`;
+            }
+        } else {
+            const scrollableY = closestScrollableY(sidebar);
+            let stickyHeight = 0;
+            let stickyZindex = 0;
+            if (scrollableY) {
+                const statusBar = scrollableY.querySelector(".o_form_statusbar");
+                if (statusBar) {
+                    const statusBarStyle = getComputedStyle(statusBar);
+                    if (statusBarStyle.position === "sticky") {
+                        stickyHeight += statusBar.getBoundingClientRect().height;
+                    }
+                    stickyZindex = parseInt(statusBarStyle.zIndex) || 0;
+                }
+            }
+            const top = scrollableY
+                ? `${
+                      -1 * (parseInt(getComputedStyle(scrollableY).paddingTop) || 0) + stickyHeight
+                  }px`
+                : `${stickyHeight}px`;
+            const maxHeight = this.iframe.parentNode.getBoundingClientRect().height;
+            const offsetHeight =
+                window.innerHeight -
+                stickyHeight -
+                document.querySelector(".o_content").getBoundingClientRect().y;
+            sidebar.style.height = `${Math.min(maxHeight, offsetHeight)}px`;
+            sidebar.style.top = top;
+            if (stickyZindex > 0) {
+                sidebar.style.zIndex = `${stickyZindex - 1}`;
+            }
         }
     }
 
@@ -440,8 +466,6 @@ export class MassMailingHtmlField extends HtmlField {
 
             const isSnippetsFolded = uiUtils.isSmall() || themeName === 'basic';
             this.wysiwyg.setSnippetsMenuFolded(isSnippetsFolded);
-            // Inform the iframe content of the snippets menu visibility
-            this.wysiwyg.$iframeBody.closest('body').toggleClass("has_snippets_sidebar", !isSnippetsFolded);
 
             const $editable = this.wysiwyg.$editable.find('.o_editable');
             this.$editorMessageElements = $editable
