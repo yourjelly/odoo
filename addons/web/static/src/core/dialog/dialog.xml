@@ -15,6 +15,7 @@
                                 <t t-call="web.Dialog.header">
                                     <t t-set="fullscreen" t-value="isFullscreen"/>
                                     <t t-set="onExpand" t-value="props.onExpand"/>
+                                    <t t-set="hideCloseButton" t-value="props.hideCloseButton"/>
                                 </t>
                             </t>
                         </header>
@@ -44,7 +45,7 @@
         <t t-if="!isFullscreen and onExpand">
             <button type="button" class="fa fa-expand btn o_expand_button" aria-label="Expand" tabindex="-1" t-on-click="onExpand"/>
         </t>
-        <t t-if="!fullscreen">
+        <t t-if="!fullscreen and !hideCloseButton">
             <button type="button" class="btn-close" aria-label="Close" tabindex="-1" t-on-click="dismiss"></button>
         </t>
     </t>

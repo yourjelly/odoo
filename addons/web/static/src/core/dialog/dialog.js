@@ -55,6 +55,7 @@ export class Dialog extends Component {
         },
         withBodyPadding: { type: Boolean, optional: true },
         onExpand: { type: Function, optional: true },
+        hideCloseButton: { type: Boolean, optional: true },
     };
     static defaultProps = {
         contentClass: "",
@@ -66,6 +67,7 @@ export class Dialog extends Component {
         technical: true,
         title: "Odoo",
         withBodyPadding: true,
+        hideCloseButton: false,
     };
 
     setup() {

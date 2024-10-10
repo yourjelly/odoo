@@ -292,6 +292,7 @@ export class ClosePosPopup extends Component {
                     this.closeSession();
                 }
             },
+            hideCloseButton: true,
         });
 
         if (response.redirect) {
