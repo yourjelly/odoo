@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="account.AccountTaxJson">
+        <div class="o_field_tags d-inline-flex flex-wrap mw-100" t-att-class="{'o_tags_input o_input': !props.readonly}" t-ref="accountTax" t-on-keydown="onWidgetKeydown">
+            <!-- <TagsList tags="planSummaryTags()"/> -->
+            <div t-if="!props.readonly" class="o_input_dropdown d-inline-flex w-100" tabindex="0" t-ref="mainTaxElement" t-on-click="onMainTaxElementFocus" t-on-focus="onMainTaxElementFocus">
+                <span class="account_tax_placeholder"/>
+                <span class="o_dropdown_button" />
+                <t t-call="account.AccountTaxbuttonPopup"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="account.AccountTaxbuttonPopup">
+        <div class="popover account_tax_popup dropdown-menu o-dropdown--menu show rounded py-0 overflow-x-hidden" t-if="state.showDropdown" t-ref="accountTaxDropdown">
+            <div class="popover-header sticky-top">
+                <div class="d-flex">
+                    <div class="h5 mt-2 me-auto">
+                        Taxes
+                        <span t-if="allowSave" class="btn btn-link" t-on-click="onSaveNew" title="Save as new analytic distribution model">New Model</span>
+                    </div>
+                    <div class="popupButtons">
+                        <span class="btn o_button" t-on-click.stop="() => this.closeAnalyticEditor()" title="Close"><span class="fa fa-close"/></span>
+                    </div>
+                </div>
+            </div>
+            <div class="popover-body p-2 table-responsive">
+                <table class="o_list_table table table-sm table-hover o_analytic_table mb-2 table-striped">
+                    <thead>
+                        <tr class="border-bottom">
+                            <th t-out="'Tax'"/>
+                            <th t-out="'Tax Base'"/>
+                            <th t-out="'Tax Amount'"/>
+                            <th t-out="'Tags'"/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="Object.values(allTaxes)" t-as="taxes" t-key="taxes.tax_id">
+                            <tr>
+                                <td><t t-out="taxes.tax_name"/></td>
+                                <td><t t-out="taxes.base"/></td>
+                                <td><t t-out="taxes.amount"/></td>
+                                <td><t t-out="taxes.tags[0]"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+
+</templates>
