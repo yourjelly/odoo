@@ -64,7 +64,7 @@ registerWebsitePreviewTour('rte_translator', {
     run: "click",
 }, {
     content: "click on new page",
-    trigger: '.o_new_content_element a',
+    trigger: ".o_new_content_element button",
     run: "click",
 }, {
     content: "click on Use this template",
@@ -96,7 +96,7 @@ registerWebsitePreviewTour('rte_translator', {
     run: "click",
 }, {
     content: "click on new page",
-    trigger: '.o_new_content_element a',
+    trigger: ".o_new_content_element button",
     run: "click",
 }, {
     content: "click on Use this template",
