@@ -52,6 +52,7 @@ export class ProductScreen extends Component {
         this.state = useState({
             previousSearchWord: "",
             currentOffset: 0,
+            quantityByProductTmplId: {},
         });
         onMounted(() => {
             this.pos.openOpeningControl();
@@ -66,6 +67,15 @@ export class ProductScreen extends Component {
             // If its a shared order it can be paid from another POS
             if (this.currentOrder?.state !== "draft") {
                 this.pos.add_new_order();
+            }
+
+            if (!this.pos.data.network.loading) {
+                this.state.quantityByProductTmplId = this.currentOrder?.lines?.reduce((acc, ol) => {
+                    acc[ol.product_id.product_tmpl_id.id]
+                        ? (acc[ol.product_id.product_tmpl_id.id] += ol.qty)
+                        : (acc[ol.product_id.product_tmpl_id.id] = ol.qty);
+                    return acc;
+                }, {});
             }
         });
 
