@@ -2251,7 +2251,7 @@ options.registry.CarouselItem = options.Class.extend({
         this.$targetCarousel = this.$target.closest(".carousel");
         this.$indicators = this.$carousel.find('.carousel-indicators');
         this.$controls = this.$carousel.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
-        this.carouselOptionName = this.$carousel[0].classList.contains("s_carousel_intro") ? "CarouselIntro" : "Carousel";
+        this.carouselOptionName = this.$carousel[0].dataset.optionName || "Carousel";
 
         var leftPanelEl = this.$overlay.data('$optionsSection')[0];
         var titleTextEl = leftPanelEl.querySelector('we-title > span');
@@ -4411,7 +4411,7 @@ options.registry.GalleryElement = options.Class.extend({
      * @see this.selectClass for parameters
      */
     position(previewMode, widgetValue, params) {
-        const carouselOptionName = this.$target[0].parentNode.parentNode.classList.contains("s_carousel_intro") ? "CarouselIntro" : "Carousel";
+        const carouselOptionName = this.$target[0].parentNode.parentNode.dataset.optionName || "Carousel";
         const optionName = this.$target[0].classList.contains("carousel-item") ? carouselOptionName
             : "GalleryImageList";
         const itemEl = this.$target[0];
