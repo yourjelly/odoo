@@ -929,7 +929,7 @@ export class PosStore extends Reactive {
             }
         }
 
-        return this.data.localDeleteCascade(order, removeFromServer);
+        return typeof record.id === "number" && this.data.localDeleteCascade(order, removeFromServer);
     }
 
     /**
