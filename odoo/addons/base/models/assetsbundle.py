@@ -287,6 +287,7 @@ class AssetsBundle(object):
             unique=unique,
             extension=extension,
         )
+        _logger.runbot("save_attachment(%s) = %s bytes", self.name, len(content))
         values = {
             'name': fname,
             'mimetype': mimetype,
