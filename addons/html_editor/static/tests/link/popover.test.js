@@ -342,6 +342,28 @@ describe("Link creation", () => {
             await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
             expect(cleanLinkArtifacts(getContent(el))).toBe('<p><a href="#">Hello[]</a></p>');
         });
+        test("should convert all selected text to link and keep style", async () => {
+            const { el } = await setupEditor(
+                '<p>Hello this is [a <b>new</b> <u>link</u> <span style="color:red">keeping</span> style]!</p>'
+            );
+            await waitFor(".o-we-toolbar");
+            click(".o-we-toolbar .fa-link");
+            await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                '<p>Hello this is <a href="#">a <b>new</b> <u>link</u> <span style="color:red">keeping</span> style[]</a>!</p>'
+            );
+        });
+        test("should convert all selected text to link and keep style (2)", async () => {
+            const { el } = await setupEditor(
+                '<p>Hello this is a <b>ne[w</b> <u>link</u> <span style="color:red">keep]ing</span> style!</p>'
+            );
+            await waitFor(".o-we-toolbar");
+            click(".o-we-toolbar .fa-link");
+            await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                '<p>Hello this is a <b>ne</b><a href="#"><b>w</b> <u>link</u> <span style="color:red">keep[]</span></a><span style="color:red">ing</span> style!</p>'
+            );
+        });
         test("should set the link on two existing characters", async () => {
             const { el } = await setupEditor("<p>H[el]lo</p>");
             await waitFor(".o-we-toolbar");
