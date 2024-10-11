@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="account.AccountTaxInfo">
+        <div>
+            <span class="fa fa-info-circle text-info me-2" t-on-click="openTaxJsonComponent"></span>
+            <!-- <TagsList tags="accountTaxTags()"/> -->
+        </div>
+    </t>
+</templates>

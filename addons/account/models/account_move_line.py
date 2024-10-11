@@ -1100,6 +1100,29 @@ class AccountMoveLine(models.Model):
             'type': 'ir.actions.act_window',
         }
 
+    @api.model
+    def get_account_tax_json(self, **kwargs):
+        record = self.browse(kwargs.get('id'))
+        account_tax_json = {}
+        if record.tax_ids:
+            if not any(isinstance(value.id, models.NewId) for value in record.tax_ids):
+                tax_results = record.tax_ids._get_tax_details(
+                    record.price_unit,
+                    record.quantity,
+                    rounding_method='round_per_line',
+                    product=record.product_id,
+                )
+                account_tax_json = {'tax_ids': tuple(record.tax_ids.mapped('name'))}
+                for tax_data in tax_results.get('taxes_data'):
+                    account_tax_json[tax_data['tax'].id] = {
+                        'tax_id': tax_data['tax'].id,
+                        'tax_name': tax_data['tax'].name,
+                        'base': tax_data['base_amount'],
+                        'amount': tax_data['tax_amount'],
+                        'tags': tax_data['tax'].invoice_repartition_line_ids.filtered(lambda r: r.repartition_type == 'tax' and r.tag_ids).tag_ids.mapped('name')
+                    }
+        return account_tax_json
+
     # -------------------------------------------------------------------------
     # SEARCH METHODS
     # -------------------------------------------------------------------------
