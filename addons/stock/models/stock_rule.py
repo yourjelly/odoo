@@ -2,7 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+<<<<<<< saas-17.2
 from collections import defaultdict, namedtuple
+||||||| 3104075a5504f3227b5014873b6ee408420776e7
+from collections import defaultdict, namedtuple
+
+=======
+from collections import defaultdict, namedtuple, OrderedDict
+>>>>>>> 9098715aecbeec197bd2d508ae42198f023d2255
 from dateutil.relativedelta import relativedelta
 
 from odoo import SUPERUSER_ID, _, api, fields, models, registry
@@ -511,6 +518,31 @@ class ProcurementGroup(models.Model):
         return True
 
     @api.model
+    def _search_rule_for_warehouses(self, route_ids, packaging_id, product_id, warehouse_ids, domain):
+        if warehouse_ids:
+            domain = expression.AND([['|', ('warehouse_id', 'in', warehouse_ids.ids), ('warehouse_id', '=', False)], domain])
+        valid_route_ids = set()
+        if route_ids:
+            valid_route_ids |= set(route_ids.ids)
+        if packaging_id:
+            packaging_routes = packaging_id.route_ids
+            valid_route_ids |= set(packaging_routes.ids)
+        valid_route_ids |= set((product_id.route_ids | product_id.categ_id.total_route_ids).ids)
+        if warehouse_ids:
+            valid_route_ids |= set(warehouse_ids.route_ids.ids)
+        if valid_route_ids:
+            domain = expression.AND([[('route_id', 'in', list(valid_route_ids))], domain])
+        res = self.env["stock.rule"]._read_group(
+            domain,
+            groupby=["location_dest_id", "warehouse_id", "route_id"],
+            aggregates=["id:recordset"],
+            order="route_sequence:min, sequence:min",
+        )
+        rule_dict = defaultdict(OrderedDict)
+        for group in res:
+            rule_dict[group[0].id, group[2].id][group[1].id] = group[3].sorted(lambda rule: (rule.route_sequence, rule.sequence))[0]
+        return rule_dict
+
     def _search_rule(self, route_ids, packaging_id, product_id, warehouse_id, domain):
         """ First find a rule among the ones defined on the procurement
         group, then try on the routes defined for the product, finally fallback
@@ -542,14 +574,64 @@ class ProcurementGroup(models.Model):
         locations if it could not be found.
         """
         result = self.env['stock.rule']
+        locations = location_id
+        # Get the location hierarchy, starting from location_id up to its root location.
+        while locations[-1].location_id:
+            locations |= locations[-1].location_id
+        domain = self._get_rule_domain(locations, values)
+        # Get a mapping (location_id, route_id) -> warehouse_id -> rule_id
+        rule_dict = self._search_rule_for_warehouses(
+            values.get("route_ids", False),
+            values.get("product_packaging_id", False),
+            product_id,
+            values.get("warehouse_id", locations.warehouse_id),
+            domain,
+        )
+
+        def extract_rule(rule_dict, route_ids, warehouse_id, location_dest_id):
+            rule = self.env['stock.rule']
+            for route_id in route_ids:
+                sub_dict = rule_dict.get((location_dest_id.id, route_id.id))
+                if not sub_dict:
+                    continue
+                if not warehouse_id:
+                    rule = sub_dict[next(iter(sub_dict))]
+                else:
+                    rule = sub_dict.get(warehouse_id.id)
+                    rule = rule or sub_dict[False]
+                if rule:
+                    break
+            return rule
+
+        def get_rule_for_routes(rule_dict, route_ids, packaging_id, product_id, warehouse_id, location_dest_id):
+            res = self.env['stock.rule']
+            if route_ids:
+                res = extract_rule(rule_dict, route_ids, warehouse_id, location_dest_id)
+            if not res and packaging_id:
+                res = extract_rule(rule_dict, packaging_id.route_ids, warehouse_id, location_dest_id)
+            if not res:
+                res = extract_rule(rule_dict, product_id.route_ids | product_id.categ_id.total_route_ids, warehouse_id, location_dest_id)
+            if not res and warehouse_id:
+                res = extract_rule(rule_dict, warehouse_id.route_ids, warehouse_id, location_dest_id)
+            return res
+
         location = location_id
+        # Go through the location hierarchy again, this time breaking at the first valid stock.rule found
+        # in rules_by_location.
         while (not result) and location:
-            domain = self._get_rule_domain(location, values)
-            result = self._search_rule(values.get('route_ids', False), values.get('product_packaging_id', False), product_id, values.get('warehouse_id', location.warehouse_id), domain)
+            result = get_rule_for_routes(
+                rule_dict,
+                values.get("route_ids", self.env['stock.route']),
+                values.get("product_packaging_id", self.env['product.packaging']),
+                product_id,
+                values.get("warehouse_id", location.warehouse_id),
+                location,
+            )
             location = location.location_id
         return result
 
     @api.model
+<<<<<<< saas-17.2
     def _get_rule_domain(self, location, values):
         domain = ['&', ('location_dest_id', '=', location.id), ('action', '!=', 'push')]
         # If the method is called to find rules towards the Inter-company location, also add the 'Customer' location in the domain.
@@ -559,6 +641,14 @@ class ProcurementGroup(models.Model):
             if inter_comp_location and location.id == inter_comp_location.id:
                 customers_location = self.env.ref('stock.stock_location_customers', raise_if_not_found=False)
                 domain = expression.OR([domain, ['&', ('location_dest_id', '=', customers_location.id), ('action', '!=', 'push')]])
+||||||| 3104075a5504f3227b5014873b6ee408420776e7
+    def _get_rule_domain(self, location, values):
+        domain = ['&', ('location_dest_id', '=', location.id), ('action', '!=', 'push')]
+=======
+    def _get_rule_domain(self, locations, values):
+        location_ids = locations.ids
+        domain = ['&', ('location_dest_id', 'in', location_ids), ('action', '!=', 'push')]
+>>>>>>> 9098715aecbeec197bd2d508ae42198f023d2255
         # In case the method is called by the superuser, we need to restrict the rules to the
         # ones of the company. This is not useful as a regular user since there is a record
         # rule to filter out the rules based on the company.

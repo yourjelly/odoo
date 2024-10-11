@@ -26,11 +26,27 @@ class ProcurementGroup(models.Model):
     _inherit = "procurement.group"
 
     @api.model
+<<<<<<< saas-17.2
     def _get_rule_domain(self, location, values):
         domain = super()._get_rule_domain(location, values)
+||||||| 3104075a5504f3227b5014873b6ee408420776e7
+    def _get_rule_domain(self, location, values):
+=======
+    def _get_rule_domain(self, locations, values):
+>>>>>>> 9098715aecbeec197bd2d508ae42198f023d2255
         if 'sale_line_id' in values and values.get('company_id'):
+<<<<<<< saas-17.2
             domain = expression.AND([domain, [('company_id', '=', values['company_id'].id)]])
         return domain
+||||||| 3104075a5504f3227b5014873b6ee408420776e7
+            return [('location_dest_id', '=', location.id), ('action', '!=', 'push'), ('company_id', '=', values['company_id'].id)]
+        else:
+            return super(ProcurementGroup, self)._get_rule_domain(location, values)
+=======
+            return [('location_dest_id', 'in', locations.ids), ('action', '!=', 'push'), ('company_id', '=', values['company_id'].id)]
+        else:
+            return super()._get_rule_domain(locations, values)
+>>>>>>> 9098715aecbeec197bd2d508ae42198f023d2255
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
