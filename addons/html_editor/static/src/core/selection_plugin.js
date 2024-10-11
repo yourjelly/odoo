@@ -111,6 +111,7 @@ export class SelectionPlugin extends Plugin {
         "setSelection",
         "setCursorStart",
         "setCursorEnd",
+        "forceCursorAfterElement",
         "extractContent",
         "preserveSelection",
         "resetSelection",
@@ -413,6 +414,7 @@ export class SelectionPlugin extends Plugin {
         { anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset },
         { normalize = true } = {}
     ) {
+        console.warn("setSelection");
         if (!this.isSelectionInEditable({ anchorNode, focusNode })) {
             throw new Error("Selection is not in editor");
         }
@@ -487,6 +489,36 @@ export class SelectionPlugin extends Plugin {
     }
 
     /**
+     * Set the cursor after the given node.
+     * @param { EditorSelection } selection
+     */
+    forceCursorAfterElement(selection) {
+        console.log("**************************************");
+        console.log("**************************************");
+        console.log("**************************************");
+        console.log("selection.anchornode", selection.anchorNode);
+        console.log("selection.anchorOffset", selection.anchorOffset);
+        console.log("node.childNodes.length", selection.anchorNode.textContent.length);
+        const node = closestElement(selection.anchorNode);
+        // Ensure we only move the cursor after the end of an element,
+        // if the current selection is a the very end of that same element.
+        if (
+            !selection.isCollapsed ||
+            selection.anchorOffset !== selection.anchorNode.textContent.length ||
+            node.lastChild !== selection.anchorNode
+        ) {
+            return;
+        }
+        console.log("node", node, node.outerHTML);
+        const parentElement = node.parentElement;
+        const nodeIndex = Array.from(parentElement.childNodes).indexOf(node);
+        return this.setSelection(
+            { anchorNode: parentElement, anchorOffset: nodeIndex + 1 },
+            { normalize: false }
+        );
+    }
+
+    /**
      * Stores the current selection and returns an object with methods to:
      * - update the cursors (anchor and focus) node and offset after DOM
      * manipulations that migh affect them. Such methods are chainable.
@@ -543,7 +575,8 @@ export class SelectionPlugin extends Plugin {
     }
 
     /**
-     * Returns an array containing all the nodes fully contained in the selection.
+     * Returns an array containing all the nodes fully contained in the
+     * selection.
      *
      * @returns {Node[]}
      */

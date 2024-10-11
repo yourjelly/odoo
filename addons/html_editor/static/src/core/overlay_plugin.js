@@ -78,6 +78,9 @@ export class Overlay {
      * @param {any} [options.props] overlay component props
      */
     open({ target, props }) {
+        if (this.C.name === "LinkPopover" || this.C.name === "Toolbar") {
+            console.warn("overlay " + this.C.name + ":: Open");
+        }
         if (this.isOpen) {
             this.updatePosition();
         } else {
@@ -113,6 +116,9 @@ export class Overlay {
     }
 
     close() {
+        if (this.C.name === "LinkPopover" || this.C.name === "Toolbar") {
+            console.warn("overlay " + this.C.name + ":: close");
+        }
         this.isOpen = false;
         if (this._remove) {
             this._remove();

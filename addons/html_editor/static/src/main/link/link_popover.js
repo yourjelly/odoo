@@ -7,7 +7,7 @@ import { cleanZWChars, deduceURLfromText } from "./utils";
 export class LinkPopover extends Component {
     static template = "html_editor.linkPopover";
     static props = {
-        linkEl: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
+        linkElement: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
         onApply: Function,
         onRemove: Function,
         onCopy: Function,
@@ -46,9 +46,9 @@ export class LinkPopover extends Component {
         this.http = useService("http");
 
         this.state = useState({
-            editing: this.props.linkEl.href ? false : true,
-            url: this.props.linkEl.href || "",
-            label: cleanZWChars(this.props.linkEl.textContent),
+            editing: this.props.linkElement.href ? false : true,
+            url: this.props.linkElement.href || "",
+            label: cleanZWChars(this.props.linkElement.textContent),
             previewIcon: false,
             faIcon: "fa-globe",
             urlTitle: "",
@@ -56,12 +56,13 @@ export class LinkPopover extends Component {
             linkPreviewName: "",
             imgSrc: "",
             iconSrc: "",
-            classes: this.props.linkEl.className || "",
+            classes: this.props.linkElement.className || "",
             type:
-                this.props.linkEl.className.match(/btn(-[a-z0-9_-]*)(primary|secondary)/)?.pop() ||
-                "",
-            buttonSize: this.props.linkEl.className.match(/btn-(sm|lg)/)?.[1] || "",
-            buttonStyle: this.initButtonStyle(this.props.linkEl.className),
+                this.props.linkElement.className
+                    .match(/btn(-[a-z0-9_-]*)(primary|secondary)/)
+                    ?.pop() || "",
+            buttonSize: this.props.linkElement.className.match(/btn-(sm|lg)/)?.[1] || "",
+            buttonStyle: this.initButtonStyle(this.props.linkElement.className),
             isImage: this.props.isImage,
         });
 
@@ -71,6 +72,7 @@ export class LinkPopover extends Component {
             mobile: true,
         });
         onMounted(() => {
+            console.warn("onMounted", !this.state.editing);
             if (!this.state.editing) {
                 this.loadAsyncLinkPreview();
             }
@@ -100,12 +102,12 @@ export class LinkPopover extends Component {
     }
     onClickEdit() {
         this.state.editing = true;
-        this.state.url = this.props.linkEl.href;
-        this.state.label = cleanZWChars(this.props.linkEl.textContent);
+        this.state.url = this.props.linkElement.href;
+        this.state.label = cleanZWChars(this.props.linkElement.textContent);
     }
     async onClickCopy(ev) {
         ev.preventDefault();
-        await browser.navigator.clipboard.writeText(this.props.linkEl.href || "");
+        await browser.navigator.clipboard.writeText(this.props.linkElement.href || "");
         this.notificationService.add(_t("Link copied to clipboard."), {
             type: "success",
         });
@@ -118,7 +120,7 @@ export class LinkPopover extends Component {
         if (
             this.editingWrapper?.el &&
             !this.editingWrapper?.el.contains(ev.target) &&
-            !this.props.linkEl.contains(ev.target)
+            !this.props?.linkEl?.contains(ev.target)
         ) {
             this.props.onClose();
         }
@@ -158,7 +160,7 @@ export class LinkPopover extends Component {
             // Text begins with a known protocol, accept it as valid URL.
             return text;
         } else {
-            return deduceURLfromText(text, this.props.linkEl) || "";
+            return deduceURLfromText(text, this.props.linkElement) || "";
         }
     }
     /**
@@ -172,6 +174,7 @@ export class LinkPopover extends Component {
         this.state.linkPreviewName = "";
     }
     async loadAsyncLinkPreview() {
+        console.warn("loadAsyncLinkPreview");
         let url;
         if (this.state.url === "") {
             this.resetPreview();

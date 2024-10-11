@@ -166,7 +166,7 @@ export class LinkPlugin extends Plugin {
                     category: "navigation",
                     fontawesome: "fa-link",
                     action(dispatch) {
-                        dispatch("TOGGLE_LINK");
+                        dispatch("EDIT_LINK");
                     },
                 },
                 {
@@ -175,7 +175,7 @@ export class LinkPlugin extends Plugin {
                     category: "navigation",
                     fontawesome: "fa-link",
                     action(dispatch) {
-                        dispatch("TOGGLE_LINK");
+                        dispatch("EDIT_LINK");
                     },
                 },
             ],
@@ -191,7 +191,7 @@ export class LinkPlugin extends Plugin {
         this.addDomListener(this.editable, "click", (ev) => {
             if (ev.target.tagName === "A" && ev.target.isContentEditable) {
                 ev.preventDefault();
-                this.toggleLinkTools({ link: ev.target });
+                this.openLinkTools({ link: ev.target });
             }
         });
         // link creation is added to the command service because of a shortcut conflict,
@@ -199,7 +199,7 @@ export class LinkPlugin extends Plugin {
         this.removeLinkShortcut = this.services.command.add(
             "Create link",
             () => {
-                this.toggleLinkTools();
+                this.openLinkTools();
             },
             {
                 hotkey: "control+k",
@@ -220,18 +220,23 @@ export class LinkPlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "CREATE_LINK_ON_SELECTION":
-                this.toggleLinkTools(payload.options);
+                console.log(command + " command", payload);
+                this.openLinkTools(payload.options);
                 break;
-            case "TOGGLE_LINK":
-                this.toggleLinkTools(payload.options);
+            case "EDIT_LINK":
+                console.log(command + " command", payload);
+                this.openLinkTools(payload.options);
                 break;
             case "NORMALIZE":
+                console.log(command + " command", payload);
                 this.normalizeLink();
                 break;
             case "CLEAN_FOR_SAVE":
+                console.log(command + " command", payload);
                 this.removeEmptyLinks(payload.root);
                 break;
             case "REMOVE_LINK_FROM_SELECTION":
+                console.log(command + " command", payload);
                 this.removeLinkFromSelection();
                 break;
         }
@@ -245,7 +250,7 @@ export class LinkPlugin extends Plugin {
      * @param {string} url
      * @param {string} label
      */
-    createLink(url, label) {
+    createLink(url, label = "") {
         const link = this.document.createElement("a");
         link.setAttribute("href", url);
         for (const [param, value] of Object.entries(this.config.defaultLinkAttributes || {})) {
@@ -259,22 +264,23 @@ export class LinkPlugin extends Plugin {
      * @param {string} label
      */
     insertLink(url, label) {
-        const selection = this.shared.getEditableSelection();
-        let link = closestElement(selection.anchorNode, "a");
-        if (link) {
-            link.setAttribute("href", url);
-            link.innerText = label;
-        } else {
-            link = this.createLink(url, label);
-            this.shared.domInsert(link);
-        }
-        this.dispatch("ADD_STEP");
-        const linkParent = link.parentElement;
-        const linkOffset = Array.from(linkParent.childNodes).indexOf(link);
-        this.shared.setSelection(
-            { anchorNode: linkParent, anchorOffset: linkOffset + 1 },
-            { normalize: false }
-        );
+        this.record(() => {
+            const selection = this.shared.getEditableSelection();
+            let link = closestElement(selection.anchorNode, "a");
+            if (link) {
+                link.setAttribute("href", url);
+                link.innerText = label;
+            } else {
+                link = this.createLink(url, label);
+                this.shared.domInsert(link);
+            }
+            const linkParent = link.parentElement;
+            const linkOffset = Array.from(linkParent.childNodes).indexOf(link);
+            this.shared.setSelection(
+                { anchorNode: linkParent, anchorOffset: linkOffset + 1 },
+                { normalize: false }
+            );
+        });
     }
     /**
      * @param {string} text
@@ -287,22 +293,32 @@ export class LinkPlugin extends Plugin {
             fontawesome: "fa-link",
             action: () => {
                 this.shared.domInsert(this.createLink(url, text));
-                this.dispatch("ADD_STEP");
             },
         };
         return pasteAsURLCommand;
     }
     /**
-     * Toggle the Link popover to edit links
+     * Open the Link popover to edit links
      *
      * @param {Object} options
      * @param {HTMLElement} options.link
      */
-    toggleLinkTools({ link } = {}) {
-        if (!link) {
-            link = this.getOrCreateLink();
+    openLinkTools({ link } = {}) {
+        console.log("openLinkTool : ", arguments);
+        const selection = this.shared.getEditableSelection();
+        link = link || this.getLinkInSelection(selection);
+        if (link) {
+            this.linkElement = link;
+            return;
         }
-        this.linkElement = link;
+        const isImage = !!findInSelection(selection, "img");
+        // create a new link element
+        link = this.document.createElement("a");
+        if (!selection.isCollapsed) {
+            link.append(selection.textContent());
+        }
+        this.linkElement = null;
+        this.openLinkOverlay(link, selection, isImage);
     }
 
     normalizeLink() {
@@ -319,21 +335,20 @@ export class LinkPlugin extends Plugin {
 
     handleSelectionChange(selectionData) {
         const selection = selectionData.editableSelection;
-        const props = {
-            onRemove: () => {
-                this.removeLink();
-                this.overlay.close();
-                this.dispatch("ADD_STEP");
-            },
-            onCopy: () => {
-                this.overlay.close();
-            },
-            onClose: () => {
-                this.overlay.close();
-            },
-            getInternalMetaData: this.getInternalMetaData,
-            getExternalMetaData: this.getExternalMetaData,
-        };
+        // const props = {
+        //     onRemove: () => {
+        //         this.record(() => this.removeLink());
+        //         this.overlay.close();
+        //     },
+        //     onCopy: () => {
+        //         this.overlay.close();
+        //     },
+        //     onClose: () => {
+        //         this.overlay.close();
+        //     },
+        //     getInternalMetaData: this.getInternalMetaData,
+        //     getExternalMetaData: this.getExternalMetaData,
+        // };
         if (!selectionData.documentSelectionIsInEditable) {
             // note that data-prevent-closing-overlay also used in color picker but link popover
             // and color picker don't open at the same time so it's ok to query like this
@@ -341,45 +356,44 @@ export class LinkPlugin extends Plugin {
             if (popoverEl?.contains(selectionData.documentSelection.anchorNode)) {
                 return;
             }
+            console.warn("handleSelectionChange :: case 1");
             this.overlay.close();
         } else if (!selection.isCollapsed) {
             const selectedNodes = this.shared.getSelectedNodes();
+            console.warn(
+                "******************* SELECTION changed Inside the editable",
+                selectedNodes
+            );
             const imageNode = selectedNodes.find((node) => node.tagName === "IMG");
             if (imageNode && imageNode.parentNode.tagName === "A") {
+                console.warn("handleSelectionChange :: case 2.1");
                 if (this.linkElement !== imageNode.parentElement) {
                     this.overlay.close();
                     this.removeCurrentLinkIfEmtpy();
                 }
                 this.linkElement = imageNode.parentElement;
 
-                const imageLinkProps = {
-                    ...props,
-                    isImage: true,
-                    linkEl: this.linkElement,
-                    onApply: (url, _) => {
-                        this.linkElement.href = url;
-                        this.shared.setCursorEnd(this.linkElement);
-                        this.removeCurrentLinkIfEmtpy();
-                        this.dispatch("ADD_STEP");
-                    },
-                };
-
                 // close the overlay to always position the popover to the bottom of selected image
                 if (this.overlay.isOpen) {
                     this.overlay.close();
                 }
-                this.overlay.open({ target: imageNode, props: imageLinkProps });
+                this.overlay.open({ target: imageNode });
+                // this.overlay.open({ target: imageNode, props: imageLinkProps }); // todo imageLinkProps ???
+                this.openLinkOverlay(this.linkElement, true);
             } else {
-                this.overlay.close();
+                console.warn("handleSelectionChange :: case 2.2 !! DISABLED");
+                //this.overlay.close();
             }
         } else {
             const linkEl = closestElement(selection.anchorNode, "A");
             if (!linkEl) {
+                console.warn("handleSelectionChange :: case 3.1");
                 this.overlay.close();
                 this.removeCurrentLinkIfEmtpy();
                 return;
             }
             if (linkEl !== this.linkElement) {
+                console.warn("handleSelectionChange :: case 3.2");
                 this.removeCurrentLinkIfEmtpy();
                 this.overlay.close();
                 this.linkElement = linkEl;
@@ -388,56 +402,215 @@ export class LinkPlugin extends Plugin {
             // if the link includes an inline image, we close the previous opened popover to reposition it
             const imageNode = linkEl.querySelector("img");
             if (imageNode) {
+                console.warn("handleSelectionChange :: case 3.3");
                 this.removeCurrentLinkIfEmtpy();
                 this.overlay.close();
             }
-
-            const linkProps = {
-                ...props,
-                isImage: false,
-                linkEl: this.linkElement,
-                onApply: (url, label, classes) => {
-                    this.linkElement.href = url;
-                    if (cleanZWChars(this.linkElement.innerText) === label) {
-                        this.overlay.close();
-                        this.shared.setSelection(this.shared.getEditableSelection());
-                    } else {
-                        const restore = prepareUpdate(...leftPos(this.linkElement));
-                        this.linkElement.innerText = label;
-                        restore();
-                        this.overlay.close();
-                        this.shared.setCursorEnd(this.linkElement);
-                    }
-                    if (classes) {
-                        this.linkElement.className = classes;
-                    } else {
-                        this.linkElement.removeAttribute("class");
-                    }
-                    this.removeCurrentLinkIfEmtpy();
-                    this.dispatch("ADD_STEP");
-                },
-            };
-
-            if (linkEl.isConnected) {
-                // pass the link element to overlay to prevent position change
-                this.overlay.open({ target: this.linkElement, props: linkProps });
+            if (!this.overlay.isOpen) {
+                console.warn("handleSelectionChange :: case 3.4 => REOPEN");
+                this.openLinkOverlay(linkEl);
             }
         }
     }
+    /**
+     * open the Link popover to edit links
+     *
+     * @param {HTMLElement} linkElement
+     * @param {EditorSelection} selection
+     * @param {Boolean} isImage
+     */
+    openLinkOverlay(linkElement, selection, isImage = false) {
+        const selectionTextContent = selection?.textContent();
+        const rand = Math.floor(Math.random() * 1000);
+        console.log(" ==> openLinkOverlay : ID#" + rand);
+        console.log("      * linkElement : ", linkElement);
+        console.log("      * selection : ", selection);
+        console.log("      * isImage : " + isImage);
+        console.log("      -> selection.textContent() : " + selectionTextContent);
+        /*-----
+
+        const linkProps = {
+            ...props,
+            isImage: false,
+            linkEl: this.linkElement,
+            onApply: (url, label, classes) => {
+                this.linkElement.href = url;
+                if (cleanZWChars(this.linkElement.innerText) === label) {
+                    this.overlay.close();
+                    this.shared.setSelection(this.shared.getEditableSelection());
+                } else {
+                    const restore = prepareUpdate(...leftPos(this.linkElement));
+                    this.linkElement.innerText = label;
+                    restore();
+                    this.overlay.close();
+                    this.shared.setCursorEnd(this.linkElement);
+                }
+                if (classes) {
+                    this.linkElement.className = classes;
+                } else {
+                    this.linkElement.removeAttribute("class");
+                }
+                this.removeCurrentLinkIfEmtpy();
+                this.dispatch("ADD_STEP");
+            },
+        };
+
+        if (linkEl.isConnected) {
+            // pass the link element to overlay to prevent position change
+            this.overlay.open({ target: this.linkElement, props: linkProps });
+        }
+
+        //-----*/
+
+        // const imageLinkProps = {
+        //     ...props,
+        //     isImage: true,
+        //     linkEl: this.linkElement,
+        //     onApply: (url, _) => {
+        //         this.linkElement.href = url;
+        //         this.shared.setCursorEnd(this.linkElement);
+        //         this.removeCurrentLinkIfEmtpy();
+        //         this.dispatch("ADD_STEP");
+        //     },
+        // };
+
+        const props = {
+            linkElement,
+            isImage: isImage,
+            onApply: (url, label, classes) => {
+                console.warn("OnApply link ", this.shared.getEditableSelection());
+                this.record(() => {
+                    if (this.linkElement) {
+                        this.linkElement.href = url;
+                        if (cleanZWChars(this.linkElement.innerText) === label) {
+                            this.overlay.close();
+                            this.shared.setSelection(this.shared.getEditableSelection());
+                        } else {
+                            const restore = prepareUpdate(...leftPos(this.linkElement));
+                            this.linkElement.innerText = label;
+                            restore();
+                            this.overlay.close();
+                            this.shared.setCursorEnd(this.linkElement);
+                        }
+                        if (classes) {
+                            this.linkElement.className = classes;
+                        } else {
+                            this.linkElement.removeAttribute("class");
+                        }
+                    } else {
+                        console.log("========= ID#" + rand + "==============\n");
+                        console.log(
+                            selection && selectionTextContent && selectionTextContent === label
+                        );
+                        console.log(selection, selectionTextContent, label);
+                        console.log("\n=======================");
+                        if (
+                            selection &&
+                            ((selectionTextContent && selectionTextContent === label) || isImage)
+                        ) {
+                            this.shared.setSelection(selection);
+                            const selectedNodes = this.shared.getSelectedNodes();
+                            const imageNode = selectedNodes.find((node) => node.tagName === "IMG");
+
+                            const link = this.createLink(url);
+                            const content = this.shared.extractContent(selection);
+                            console.log(this.editable.innerHTML + "");
+                            console.log("\n=======================\n");
+                            link.append(content);
+                            if (classes) {
+                                link.className = classes;
+                            }
+                            link.normalize();
+                            selection = this.shared.getEditableSelection();
+
+                            console.log(this.editable.innerHTML + "");
+                            console.log("\n=======================\n");
+                            console.log("selection.anchorNode", selection.anchorNode);
+                            console.log(
+                                "selection.anchorNode closest el",
+                                closestElement(selection.anchorNode)
+                            );
+                            // selection.anchorNode.after(link);
+                            this.shared.forceCursorAfterElement(selection);
+                            this.shared.domInsert(link);
+                            console.log(this.editable.innerHTML + "");
+                            console.log("\n=======================\n");
+                            if (!imageNode) {
+                                this.shared.setCursorEnd(link);
+                            } else {
+                                this.shared.setSelection({
+                                    anchorNode: link,
+                                    anchorOffset: 0,
+                                    focusNode: link,
+                                    focusOffset: nodeSize(link),
+                                });
+                            }
+                        } else {
+                            const link = this.createLink(url, label);
+                            if (classes) {
+                                link.className = classes;
+                            }
+                            this.shared.domInsert(link);
+                            this.shared.setCursorEnd(link);
+                        }
+                        // let newLink;
+                        // if (selection && selectionTextContent && selectionTextContent === label) {
+                        //     this.shared.setSelection(selection);
+                        //     const splittedSelection = this.shared.splitSelection();
+                        //     console.log(this.editable.innerHTML + "");
+                        //     console.log("\n=======================\n");
+                        //     newLink = this.createLink(url);
+                        //     newLink.appendChild(this.shared.extractContent(splittedSelection));
+                        //     console.log(this.editable.innerHTML + "");
+                        //     console.log("\n=======================\n");
+                        // } else {
+                        //     newLink = this.createLink(url, label);
+                        // }
+                        //
+                        // if (classes) {
+                        //     newLink.className = classes;
+                        // }
+                        this.overlay.close();
+                    }
+                });
+                this.removeCurrentLinkIfEmtpy();
+            },
+            onRemove: () => {
+                this.record(() => this.removeLink());
+                this.overlay.close();
+            },
+            onCopy: () => {
+                this.overlay.close();
+            },
+            onClose: () => {
+                console.warn("onClose");
+                this.overlay.close();
+            },
+            getInternalMetaData: this.getInternalMetaData,
+            getExternalMetaData: this.getExternalMetaData,
+        };
+        console.warn("openLinkOverlay :");
+        this.overlay.open({ props });
+    }
 
     /**
-     * get the link from the selection or create one if there is none
+     * get the link from the selection
      *
-     * @return {HTMLElement}
+     * @param {EditorSelection} selection
+     * @return {HTMLLinkElement}
      */
-    getOrCreateLink() {
-        const selection = this.shared.getEditableSelection();
+    getLinkInSelection(selection) {
+        console.warn("getLinkInSelection");
         const linkElement = findInSelection(selection, "a");
-        if (linkElement) {
-            if (
-                !linkElement.contains(selection.anchorNode) ||
-                !linkElement.contains(selection.focusNode)
-            ) {
+        console.warn("linkElement = ", linkElement);
+        if (!linkElement) {
+            return false;
+        }
+        if (
+            !linkElement.contains(selection.anchorNode) ||
+            !linkElement.contains(selection.focusNode)
+        ) {
+            this.record(() => {
                 this.shared.splitSelection();
                 const selectedNodes = this.shared.getSelectedNodes();
                 let before = linkElement.previousSibling;
@@ -451,33 +624,9 @@ export class LinkPlugin extends Plugin {
                     after = linkElement.nextSibling;
                 }
                 this.shared.setCursorEnd(linkElement);
-                this.dispatch("ADD_STEP");
-            }
-            return linkElement;
-        } else {
-            // create a new link element
-            const selectedNodes = this.shared.getSelectedNodes();
-            const imageNode = selectedNodes.find((node) => node.tagName === "IMG");
-
-            const link = this.document.createElement("a");
-            if (!selection.isCollapsed) {
-                const content = this.shared.extractContent(selection);
-                link.append(content);
-                link.normalize();
-            }
-            this.shared.domInsert(link);
-            if (!imageNode) {
-                this.shared.setCursorEnd(link);
-            } else {
-                this.shared.setSelection({
-                    anchorNode: link,
-                    anchorOffset: 0,
-                    focusNode: link,
-                    focusOffset: nodeSize(link),
-                });
-            }
-            return link;
+            });
         }
+        return linkElement;
     }
 
     removeCurrentLinkIfEmtpy() {
@@ -514,78 +663,79 @@ export class LinkPlugin extends Plugin {
     }
 
     removeLinkFromSelection() {
-        const selection = this.shared.splitSelection();
-        const cursors = this.shared.preserveSelection();
+        this.record(() => {
+            const selection = this.shared.splitSelection();
+            const cursors = this.shared.preserveSelection();
 
-        // If not, unlink only the part(s) of the link(s) that are selected:
-        // `<a>a[b</a>c<a>d</a>e<a>f]g</a>` => `<a>a</a>[bcdef]<a>g</a>`.
-        let { anchorNode, focusNode, anchorOffset, focusOffset } = selection;
-        const direction = selection.direction;
-        // Split the links around the selection.
-        let [startLink, endLink] = [
-            closestElement(anchorNode, "a"),
-            closestElement(focusNode, "a"),
-        ];
-        // to remove link from selected images
-        const selectedNodes = this.shared.getSelectedNodes();
-        const selectedImageNodes = selectedNodes.filter((node) => node.tagName === "IMG");
-        if (selectedImageNodes && startLink && endLink && startLink === endLink) {
-            for (const imageNode of selectedImageNodes) {
-                let imageLink;
-                if (direction === DIRECTIONS.RIGHT) {
-                    imageLink = this.shared.splitAroundUntil(imageNode, endLink);
-                } else {
-                    imageLink = this.shared.splitAroundUntil(imageNode, startLink);
+            // If not, unlink only the part(s) of the link(s) that are selected:
+            // `<a>a[b</a>c<a>d</a>e<a>f]g</a>` => `<a>a</a>[bcdef]<a>g</a>`.
+            let { anchorNode, focusNode, anchorOffset, focusOffset } = selection;
+            const direction = selection.direction;
+            // Split the links around the selection.
+            let [startLink, endLink] = [
+                closestElement(anchorNode, "a"),
+                closestElement(focusNode, "a"),
+            ];
+            // to remove link from selected images
+            const selectedNodes = this.shared.getSelectedNodes();
+            const selectedImageNodes = selectedNodes.filter((node) => node.tagName === "IMG");
+            if (selectedImageNodes && startLink && endLink && startLink === endLink) {
+                for (const imageNode of selectedImageNodes) {
+                    let imageLink;
+                    if (direction === DIRECTIONS.RIGHT) {
+                        imageLink = this.shared.splitAroundUntil(imageNode, endLink);
+                    } else {
+                        imageLink = this.shared.splitAroundUntil(imageNode, startLink);
+                    }
+                    cursors.update(callbacksForCursorUpdate.unwrap(imageLink));
+                    unwrapContents(imageLink);
+                    // update the links at the selection
+                    [startLink, endLink] = [
+                        closestElement(anchorNode, "a"),
+                        closestElement(focusNode, "a"),
+                    ];
                 }
-                cursors.update(callbacksForCursorUpdate.unwrap(imageLink));
-                unwrapContents(imageLink);
-                // update the links at the selection
-                [startLink, endLink] = [
-                    closestElement(anchorNode, "a"),
-                    closestElement(focusNode, "a"),
-                ];
+                cursors.restore();
+                // when only unlink an inline image, add step after the unwrapping
+                if (
+                    selectedImageNodes.length === 1 &&
+                    selectedImageNodes.length === selectedNodes.length
+                ) {
+                    this.dispatch("ADD_STEP");
+                    return;
+                }
             }
-            cursors.restore();
-            // when only unlink an inline image, add step after the unwrapping
-            if (
-                selectedImageNodes.length === 1 &&
-                selectedImageNodes.length === selectedNodes.length
-            ) {
-                this.dispatch("ADD_STEP");
-                return;
+            if (startLink && startLink.isConnected) {
+                anchorNode = this.shared.splitAroundUntil(anchorNode, startLink);
+                anchorOffset = direction === DIRECTIONS.RIGHT ? 0 : nodeSize(anchorNode);
+                this.shared.setSelection(
+                    { anchorNode, anchorOffset, focusNode, focusOffset },
+                    { normalize: true }
+                );
             }
-        }
-        if (startLink && startLink.isConnected) {
-            anchorNode = this.shared.splitAroundUntil(anchorNode, startLink);
-            anchorOffset = direction === DIRECTIONS.RIGHT ? 0 : nodeSize(anchorNode);
-            this.shared.setSelection(
-                { anchorNode, anchorOffset, focusNode, focusOffset },
-                { normalize: true }
+            // Only split the end link if it was not already done above.
+            if (endLink && endLink.isConnected) {
+                focusNode = this.shared.splitAroundUntil(focusNode, endLink);
+                focusOffset = direction === DIRECTIONS.RIGHT ? nodeSize(focusNode) : 0;
+                this.shared.setSelection(
+                    { anchorNode, anchorOffset, focusNode, focusOffset },
+                    { normalize: true }
+                );
+            }
+            const targetedNodes = this.shared.getSelectedNodes();
+            const links = new Set(
+                targetedNodes
+                    .map((node) => closestElement(node, "a"))
+                    .filter((a) => a && a.isContentEditable)
             );
-        }
-        // Only split the end link if it was not already done above.
-        if (endLink && endLink.isConnected) {
-            focusNode = this.shared.splitAroundUntil(focusNode, endLink);
-            focusOffset = direction === DIRECTIONS.RIGHT ? nodeSize(focusNode) : 0;
-            this.shared.setSelection(
-                { anchorNode, anchorOffset, focusNode, focusOffset },
-                { normalize: true }
-            );
-        }
-        const targetedNodes = this.shared.getSelectedNodes();
-        const links = new Set(
-            targetedNodes
-                .map((node) => closestElement(node, "a"))
-                .filter((a) => a && a.isContentEditable)
-        );
-        if (links.size) {
-            for (const link of links) {
-                cursors.update(callbacksForCursorUpdate.unwrap(link));
-                unwrapContents(link);
+            if (links.size) {
+                for (const link of links) {
+                    cursors.update(callbacksForCursorUpdate.unwrap(link));
+                    unwrapContents(link);
+                }
+                cursors.restore();
             }
-            cursors.restore();
-        }
-        this.dispatch("ADD_STEP");
+        });
     }
 
     removeEmptyLinks(root) {
@@ -632,22 +782,23 @@ export class LinkPlugin extends Plugin {
             const match = [...potentialUrl.matchAll(new RegExp(URL_REGEX, "g"))].pop();
 
             if (match && !EMAIL_REGEX.test(match[0])) {
-                const nodeForSelectionRestore = selection.anchorNode.splitText(
-                    selection.anchorOffset
-                );
-                const url = match[2] ? match[0] : "http://" + match[0];
-                const startOffset = selection.anchorOffset - potentialUrl.length + match.index;
-                const text = selection.anchorNode.textContent.slice(
-                    startOffset,
-                    startOffset + match[0].length
-                );
-                const link = this.createLink(url, text);
-                // split the text node and replace the url text with the link
-                const textNodeToReplace = selection.anchorNode.splitText(startOffset);
-                textNodeToReplace.splitText(match[0].length);
-                selection.anchorNode.parentElement.replaceChild(link, textNodeToReplace);
-                this.shared.setCursorStart(nodeForSelectionRestore);
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    const nodeForSelectionRestore = selection.anchorNode.splitText(
+                        selection.anchorOffset
+                    );
+                    const url = match[2] ? match[0] : "http://" + match[0];
+                    const startOffset = selection.anchorOffset - potentialUrl.length + match.index;
+                    const text = selection.anchorNode.textContent.slice(
+                        startOffset,
+                        startOffset + match[0].length
+                    );
+                    const link = this.createLink(url, text);
+                    // split the text node and replace the url text with the link
+                    const textNodeToReplace = selection.anchorNode.splitText(startOffset);
+                    textNodeToReplace.splitText(match[0].length);
+                    selection.anchorNode.parentElement.replaceChild(link, textNodeToReplace);
+                    this.shared.setCursorStart(nodeForSelectionRestore);
+                });
             }
         }
     }

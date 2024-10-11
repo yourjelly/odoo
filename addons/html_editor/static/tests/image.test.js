@@ -358,9 +358,10 @@ test("can add link on an image", async () => {
     await waitFor(".o-we-toolbar");
     click("button[name='link']");
     await animationFrame();
-
+    console.log("img : ", img);
     await contains(".o-we-linkpopover input.o_we_href_input_link").fill("http://odoo.com/");
     await animationFrame();
+    console.log("img 2: ", img);
     expect(img.parentElement.tagName).toBe("A");
     expect(img.parentElement).toHaveAttribute("href", "http://odoo.com/");
 });
