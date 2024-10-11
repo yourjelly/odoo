@@ -380,6 +380,7 @@ def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=Fals
 
     ns_to_ms = 1_000_000
     if max(t, tt) > 10 * ns_to_ms:
+        ammoniazed = ammoniazed.replace('<tbody>', '').replace('</tbody>', '')
         if ammoniazed == sanitized:
             _logger.runbot(
                 "%d bytes: %d ms -> %d ms",
