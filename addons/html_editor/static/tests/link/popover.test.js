@@ -342,12 +342,41 @@ describe("Link creation", () => {
             await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
             expect(cleanLinkArtifacts(getContent(el))).toBe('<p><a href="#">Hello[]</a></p>');
         });
+        test("should convert all selected text to link and keep style", async () => {
+            const { el } = await setupEditor(
+                '<p>Hello this is [a <b>new</b> <u>link</u> <span style="color:red">keeping</span> style]!</p>'
+            );
+            await waitFor(".o-we-toolbar");
+            click(".o-we-toolbar .fa-link");
+            await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                '<p>Hello this is <a href="#">a <b>new</b> <u>link</u> <span style="color:red">keeping</span> style[]</a>!</p>'
+            );
+        });
+        test("should convert all selected text to link and keep style (2)", async () => {
+            const { el } = await setupEditor(
+                '<p>Hello this is a <b>ne[w</b> <u>link</u> <span style="color:red">keep]ing</span> style!</p>'
+            );
+            await waitFor(".o-we-toolbar");
+            click(".o-we-toolbar .fa-link");
+            await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                '<p>Hello this is a <b>ne</b><a href="#"><b>w</b> <u>link</u> <span style="color:red">keep[]</span></a><span style="color:red">ing</span> style!</p>'
+            );
+        });
         test("should set the link on two existing characters", async () => {
             const { el } = await setupEditor("<p>H[el]lo</p>");
             await waitFor(".o-we-toolbar");
             await click(".o-we-toolbar .fa-link");
             await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
             expect(cleanLinkArtifacts(getContent(el))).toBe('<p>H<a href="#">el[]</a>lo</p>');
+        });
+        test("should not allow to create a link if selection span multiple block", async () => {
+            const { el } = await setupEditor("<p>H[ello</p><p>wor]ld</p>");
+            await waitFor(".o-we-toolbar");
+            expect(".o-we-toolbar .fa-link").toHaveClass("disabled"); // link button should be disabled
+            await click(".o-we-toolbar .fa-link");
+            expect(getContent(el)).toBe("<p>H[ello</p><p>wor]ld</p>");
         });
         test("when you open link popover with a label, url input should be focus by default ", async () => {
             const { el } = await setupEditor("<p>[Hello]</p>");
@@ -444,15 +473,30 @@ describe("Link creation", () => {
             expect(".o_we_label_link").toHaveValue("st m");
             expect(".o_we_href_input_link").toHaveValue("");
         });
-        test("create a link and undo it", async () => {
+        test("create a link and undo it (1)", async () => {
             const { el, editor } = await setupEditor("<p>[Hello]</p>");
             await waitFor(".o-we-toolbar");
             await click(".o-we-toolbar .fa-link");
+            // not validated link shouldn't affect the DOM yet
+            expect(cleanLinkArtifacts(getContent(el))).toBe("<p>[Hello]</p>");
             await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
             expect(cleanLinkArtifacts(getContent(el))).toBe('<p><a href="#">Hello[]</a></p>');
 
             undo(editor);
             expect(cleanLinkArtifacts(getContent(el))).toBe("<p>[Hello]</p>");
+        });
+        test("create a link and undo it (2)", async () => {
+            const { el, editor } = await setupEditor("<p><b>[Hello]</b></p>");
+            await waitFor(".o-we-toolbar");
+            await click(".o-we-toolbar .fa-link");
+            // not validated link shouldn't affect the DOM yet
+            expect(cleanLinkArtifacts(getContent(el))).toBe("<p><b>[Hello]</b></p>");
+            await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                '<p><b><a href="#">Hello[]</a></b></p>'
+            );
+            undo(editor);
+            expect(cleanLinkArtifacts(getContent(el))).toBe("<p><b>[Hello]</b></p>");
         });
         test("extend a link on selection and undo it", async () => {
             const { el, editor } = await setupEditor(
