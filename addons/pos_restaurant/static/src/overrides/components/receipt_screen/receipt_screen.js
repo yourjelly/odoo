@@ -8,7 +8,11 @@ patch(ReceiptScreen.prototype, {
         super.setup(...arguments);
         onWillUnmount(() => {
             // When leaving the receipt screen to the floor screen the order is paid and can be removed
-            if (this.pos.mainScreen.component === FloorScreen && this.currentOrder.finalized) {
+            if (
+                this.pos.mainScreen.component === FloorScreen &&
+                this.currentOrder.finalized &&
+                typeof this.currentOrder.id === "number"
+            ) {
                 this.pos.removeOrder(this.currentOrder, false);
             }
         });
