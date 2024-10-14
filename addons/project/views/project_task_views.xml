@@ -190,11 +190,7 @@
         <field name="act_window_id" ref="project.act_project_project_2_project_task_all"/>
     </record>
 
-    <record id="project_all_task_calendar_action_view" model="ir.actions.act_window.view">
-        <field name="sequence" eval="40"/>
-        <field name="view_mode">calendar</field>
-        <field name="act_window_id" ref="project.act_project_project_2_project_task_all"/>
-    </record>
+
 
     <record id="project_all_task_pivot_action_view" model="ir.actions.act_window.view">
         <field name="sequence" eval="70"/>
@@ -764,6 +760,12 @@
                     <field name="task_properties"/>
                 </calendar>
             </field>
+        </record>
+
+        <record id="project_all_task_calendar_action_view" model="ir.actions.act_window.view">
+            <field name="sequence" eval="40"/>
+            <field name="view_mode">calendar</field>
+            <field name="act_window_id" ref="project.act_project_project_2_project_task_all"/>
         </record>
 
         <record id="view_task_all_calendar" model="ir.ui.view">

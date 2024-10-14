@@ -362,6 +362,15 @@ class IrActionsActWindowView(models.Model):
     _order = 'sequence,id'
     _allow_sudo_commands = False
 
+    @api.constrains('view_mode')
+    def _check_view_mode(self):
+        for rec in self:
+            if rec.view_mode in ['activity', 'form', 'list', 'graph', 'pivot' , 'kanban', 'tree']:
+                return
+            default_view = rec.env['ir.ui.view'].search([('type', '=', rec.view_mode), ('model', '=', rec.act_window_id.res_model)])
+            if not rec.view_id and not default_view:
+                raise UserError(_("No default view of type '%s' could be found!", rec.view_mode))
+
     sequence = fields.Integer()
     view_id = fields.Many2one('ir.ui.view', string='View')
     view_mode = fields.Selection(VIEW_TYPES, string='View Type', required=True)
