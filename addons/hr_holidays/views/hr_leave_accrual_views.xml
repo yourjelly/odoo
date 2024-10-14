@@ -159,7 +159,7 @@
                     <span class="oe_grey" invisible="1">
                     </span>
                     <div class="o_hr_holidays_hierarchy">
-                        <div class="o_hr_holidays_title">Rules</div>
+                        <h4 class="my-3">Rules for <field name="name"/></h4>
                         <div class="o_hr_holidays_hierarchy_readonly" invisible="level_ids">
                             <p>
                                 No rule has been set up for this accrual plan.
@@ -179,14 +179,6 @@
                                 <templates>
                                     <div t-name="card" class="bg-transparent border-0">
                                         <div class="o_hr_holidays_body">
-                                            <div class="o_hr_holidays_timeline text-center">
-                                                <t t-if="record.start_count.raw_value > 0">
-                                                    after <field name="start_count"/> <field name="start_type"/>
-                                                </t>
-                                                <t t-else="">
-                                                    initially
-                                                </t>
-                                            </div>
                                             <t t-if="!read_only_mode">
                                                 <a type="edit" t-attf-class="oe_kanban_action text-black">
                                                     <t t-call="level_content"/>
@@ -198,15 +190,23 @@
                                         </div>
                                     </div>
                                     <t t-name="level_content">
-                                        <div class="o_hr_holidays_card">
-                                            <div class="content container" style="width: 560px;">
-                                                <div class="row w-100">
-                                                    <div class="pe-0 me-0" style="width: 6rem;">
+                                        <div>
+                                            <div class="o_hr_holidays_card">
+                                                <h5 class="mb-3">
+                                                    <t t-if="record.start_count.raw_value > 0">
+                                                        After <field name="start_count"/> <field name="start_type"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        Initially
+                                                    </t>
+                                                </h5>
+                                                <div class="o_hr_holidays_card_inner o_inner_group position-relative grid pb-5 rounded bg-opacity-100 mb-0">
+                                                    <div class="fw-medium">
                                                         <field name="added_value" invisible="1"/>
-                                                        <span t-out="record.added_value.raw_value"/> <field name="added_value_type"/>,
+                                                        <span t-out="record.added_value.raw_value"/> <field name="added_value_type"/>:
                                                     </div>
-                                                    <div class="col-auto m-0 p-0">
-                                                        <field name="frequency" class="ms-1"/>
+                                                    <div>
+                                                        <field name="frequency"/>
                                                         <t t-if="record.frequency.raw_value === 'weekly'">
                                                             on <field name="week_day"/>
                                                         </t>
@@ -223,25 +223,21 @@
                                                             on <field name="yearly_day"/> <field name="yearly_month"/>
                                                         </t>
                                                     </div>
-                                                </div>
-                                                <div class="row text-muted">
-                                                    <div class="pe-0 me-0" style="width: 6rem;">
+                                                    <div class="fw-medium">
                                                         Cap:
                                                     </div>
-                                                    <div class="col-3 m-0 ps-1 d-flex">
+                                                    <div>
                                                         <t t-if="record.cap_accrued_time.raw_value and record.maximum_leave.raw_value > 0">
-                                                            <field name="maximum_leave" widget="FloatWithoutTrailingZeros"/> <field class="ms-1" name="added_value_type"/>
+                                                            <field name="maximum_leave" widget="FloatWithoutTrailingZeros" class="d-contents"/> <field name="added_value_type"/>
                                                         </t>
                                                         <t t-else="">
                                                             Unlimited
                                                         </t>
                                                     </div>
-                                                </div>
-                                                <div class="row text-muted">
-                                                    <div class="pe-0 me-0" style="width: 6rem;">
+                                                    <div class="fw-medium">
                                                         Carry over:
                                                     </div>
-                                                    <div class="col-6 m-0 ps-1">
+                                                    <div>
                                                         <t t-if="record.action_with_unused_accruals.raw_value === 'all'">all - Valid for <field name="accrual_validity_count"/> <field name="accrual_validity_type"/></t>
                                                         <t t-elif="record.action_with_unused_accruals.raw_value === 'maximum'">up to <field name="postpone_max_days" /> <t t-esc="record.added_value_type.raw_value" />
                                                         - Valid for <field name="accrual_validity_count"/> <field name="accrual_validity_type"/></t>
