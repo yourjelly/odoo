@@ -18,7 +18,7 @@
                             <hr />
                             <div class="receipt-options d-flex flex-column gap-2">
                                 <div class="d-flex gap-1">
-                                    <button class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="() => doFullPrint.call()">
+                                    <button class="button print btn btn-lg btn-secondary w-100 py-3 full-receipt" t-on-click="() => doFullPrint.call()">
                                         <i t-attf-class="fa {{doFullPrint.status === 'loading' ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-print'}} me-1" />Print Full Receipt
                                     </button>
                                     <button t-if="pos.config.basic_receipt" class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="() => doBasicPrint.call()">

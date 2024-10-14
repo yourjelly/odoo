@@ -13,6 +13,8 @@ _logger = logging.getLogger(__name__)
 class PosConfig(models.Model):
     _inherit = ['pos.config']
 
+    simplified_receipt = fields.Boolean(string='Simplified Receipt', help="Print basic ticket without items ordered.")
+
     def open_ui(self):
         for config in self:
             if not config.company_id.country_id:
@@ -51,6 +53,7 @@ class PosOrder(models.Model):
     l10n_fr_string_to_hash = fields.Char(compute='_compute_string_to_hash', readonly=True, store=False)
     previous_order_id = fields.Many2one('pos.order', string='Previous Order', readonly=True, compute='_compute_previous_order', store=True, copy=False)
     pos_version = fields.Char(help="Version of Odoo that created the order", readonly=True, copy=False)
+
 
     @api.depends('l10n_fr_secure_sequence_number')
     def _compute_previous_order(self):
@@ -154,6 +157,12 @@ class PosOrder(models.Model):
             if order.company_id._is_accounting_unalterable():
                 raise UserError(_("According to French law, you cannot delete a point of sale order."))
 
+    def action_send_receipt(self, email, ticket_image, basic_image, simplified_image):
+        if not simplified_image:
+            super().action_send_receipt(self, email, ticket_image, basic_image)
+        else:
+            self.env['mail.mail'].sudo().create(self._prepare_mail_values(email, ticket_image, basic_image, simplified_image)).send()
+            self.email = email
 
 class PosOrderLine(models.Model):
     _inherit = ["pos.order.line"]

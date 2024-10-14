@@ -11,6 +11,11 @@
             <xpath expr="//field[@name='point_of_sale_use_ticket_qr_code']/.." position="attributes">
                 <attribute name="invisible">country_code in ['FR', 'MF', 'MQ', 'NC', 'PF', 'RE', 'GF', 'GP', 'TF']</attribute>
             </xpath>
+            <xpath expr="//block[@id='pos_bills_and_receipts_section']" position="inside">
+                <setting help="Print receipt with no details about the items bought according to the amount of guest" invisible="not pos_module_pos_restaurant and country_code not in ['FR', 'MF', 'MQ', 'NC', 'PF', 'RE', 'GF', 'GP', 'TF']">
+                    <field name="pos_simplified_receipt"/>
+                </setting>
+            </xpath>
         </field>
     </record>
 </odoo>

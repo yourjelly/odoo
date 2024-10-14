@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="l10n_fr_pos_cert.ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension">
+		<xpath expr="//button[hasclass('full-receipt')]" position="after" >
+            <button class="button print btn btn-lg btn-secondary w-100 py-3" t-if="pos.config.simplified_receipt" t-on-click="() => doSimplifiedPrint.call()">
+                <i t-attf-class="fa {{doFullPrint.status === 'loading' ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-print'}} me-1" />Print Simplified Receipt
+            </button>
+        </xpath>
+    </t>
+</templates>

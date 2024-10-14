@@ -3,6 +3,7 @@
 import { PosStore } from "@point_of_sale/app/store/pos_store";
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
+import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 patch(PosStore.prototype, {
@@ -16,5 +17,20 @@ patch(PosStore.prototype, {
             return false;
         }
         return french_countries.includes(this.company.country_id?.code);
+    },
+    async printReceipt({ basic = false, order = this.get_order(), simplified = false } = {}) {
+        await this.printer.print(
+            OrderReceipt,
+            {
+                data: this.orderExportForPrinting(order),
+                formatCurrency: this.env.utils.formatCurrency,
+                basic_receipt: basic,
+                simplified_receipt: simplified,
+            },
+            { webPrintFallback: true }
+        );
+        const nbrPrint = order.nb_print;
+        await this.data.write("pos.order", [order.id], { nb_print: nbrPrint + 1 });
+        return true;
     },
 });

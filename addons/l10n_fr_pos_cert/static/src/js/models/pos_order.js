@@ -14,6 +14,10 @@ patch(PosOrder.prototype, {
         result.l10n_fr_hash = this.l10n_fr_hash;
         if (this.is_french_country()) {
             result.pos_qr_code = false;
+            result.currency_details = {
+                suffix: this.company_id.currency_id.position === "after",
+                symbol: this.company_id.currency_id.symbol,
+            };
         }
         return result;
     },
