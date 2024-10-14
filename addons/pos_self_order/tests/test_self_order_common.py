@@ -54,9 +54,35 @@ class TestSelfOrderCommon(SelfOrderCommonTest):
             self.pos_config.write({"self_ordering_mode": mode})
             self.start_tour(self_route, "self_order_pos_is_closed")
 
+<<<<<<< saas-17.2
     def test_self_order_config_default_user(self):
         self.pos_config.payment_method_ids = self.pos_config.payment_method_ids.filtered(lambda pm: not pm.is_cash_count)
         for mode in ("mobile", "consultation", "kiosk"):
             self.pos_config.write({"self_ordering_mode": mode})
             with self.assertRaises(UserError):
                 self.pos_config.write({"self_ordering_default_user_id": False})
+||||||| 51559a47c10d93cbe40646b2aa5b170566bc3ecb
+=======
+    def test_self_order_preparation_disabling_preparation_display(self):
+        """
+        This test ensures that the preparation display option can be disabled when the self_ordering_mode is set to 'nothing'.
+        It also tests that the preparation display option is enabled automatically when the self_ordering_mode is set to 'kiosk'.
+        """
+        self.pos_config.self_ordering_pay_after = 'each'
+
+        with odoo.tests.Form(self.env['res.config.settings']) as form:
+            with self.assertLogs(level="WARNING"):
+                form.module_pos_preparation_display = False
+
+            self.pos_config.write({
+                'self_ordering_mode': 'nothing',
+            })
+            form.pos_config_id = self.pos_config
+            self.assertEqual(form.module_pos_preparation_display, False)
+
+            self.pos_config.write({
+                'self_ordering_mode': 'kiosk',
+            })
+            form.pos_config_id = self.pos_config
+            self.assertEqual(form.module_pos_preparation_display, True)
+>>>>>>> cf0fcd4c0959abad2861cc5e966fbe5004dbc05f
