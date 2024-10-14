@@ -406,7 +406,7 @@ class AccountMove(models.Model):
         Produce the Facturae XML file for the invoice.
 
         :return: rendered xml file string.
-        :rtype:  str
+        :rtype:  tuple[str, list]
         """
         self.ensure_one()
         company = self.company_id

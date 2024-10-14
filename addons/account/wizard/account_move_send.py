@@ -354,7 +354,7 @@ class AccountMoveSend(models.TransientModel):
     @api.model
     def _need_invoice_document(self, invoice):
         """ Determine if we need to generate the documents for the invoice passed as parameter.
-        :param invoice:         An account.move record.
+        :param account.move invoice: An account.move record.
         :return: True if the PDF / electronic documents must be generated, False otherwise.
         """
         return not invoice.invoice_pdf_report_id and invoice.state == 'posted'
@@ -363,16 +363,16 @@ class AccountMoveSend(models.TransientModel):
     def _hook_invoice_document_before_pdf_report_render(self, invoice, invoice_data):
         """ Hook allowing to add some extra data for the invoice passed as parameter before the rendering of the pdf
         report.
-        :param invoice:         An account.move record.
-        :param invoice_data:    The collected data for the invoice so far.
+        :param account.move      invoice:    An account.move record.
+        :param dict         invoice_data:    The collected data for the invoice so far.
         """
         return
 
     @api.model
     def _prepare_invoice_pdf_report(self, invoice, invoice_data):
         """ Prepare the pdf report for the invoice passed as parameter.
-        :param invoice:         An account.move record.
-        :param invoice_data:    The collected data for the invoice so far.
+        :param account.move      invoice:    An account.move record.
+        :param dict         invoice_data:    The collected data for the invoice so far.
         """
         if invoice.invoice_pdf_report_id:
             return
@@ -391,8 +391,8 @@ class AccountMoveSend(models.TransientModel):
     @api.model
     def _prepare_invoice_proforma_pdf_report(self, invoice, invoice_data):
         """ Prepare the proforma pdf report for the invoice passed as parameter.
-        :param invoice:         An account.move record.
-        :param invoice_data:    The collected data for the invoice so far.
+        :param account.move      invoice:    An account.move record.
+        :param dict         invoice_data:    The collected data for the invoice so far.
         """
         content, _report_format = self.env['ir.actions.report'].with_company(invoice.company_id)._render('account.account_invoices', invoice.ids, data={'proforma': True})
 
@@ -408,16 +408,16 @@ class AccountMoveSend(models.TransientModel):
     def _hook_invoice_document_after_pdf_report_render(self, invoice, invoice_data):
         """ Hook allowing to add some extra data for the invoice passed as parameter after the rendering of the
         (proforma) pdf report.
-        :param invoice:         An account.move record.
-        :param invoice_data:    The collected data for the invoice so far.
+        :param account.move      invoice:    An account.move record.
+        :param dict         invoice_data:    The collected data for the invoice so far.
         """
         return
 
     @api.model
     def _link_invoice_documents(self, invoice, invoice_data):
         """ Create the attachments containing the pdf/electronic documents for the invoice passed as parameter.
-        :param invoice:         An account.move record.
-        :param invoice_data:    The collected data for the invoice so far.
+        :param account.move      invoice:    An account.move record.
+        :param dict         invoice_data:    The collected data for the invoice so far.
         """
         # create an attachment that will become 'invoice_pdf_report_file'
         # note: Binary is used for security reason
@@ -648,8 +648,8 @@ class AccountMoveSend(models.TransientModel):
     @api.model
     def _process_send_and_print(self, moves, wizard=None, allow_fallback_pdf=False, **kwargs):
         """ Process the moves given their individual configuration set on move.send_and_print_values.
-        :param moves: account.move to process
-        :param wizard: account.move.send wizard if exists. If not we avoid raising any error.
+        :param account.move moves: account.move to process
+        :param account.move.send wizard: account.move.send wizard if exists. If not we avoid raising any error.
         :param allow_fallback_pdf:  In case of error when generating the documents for invoices, generate a proforma PDF report instead.
         """
         from_cron = not wizard
