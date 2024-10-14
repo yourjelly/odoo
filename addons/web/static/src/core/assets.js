@@ -26,7 +26,7 @@ class AssetsLoadingError extends Error {}
  * @param {string} url the url of the script
  * @returns {Promise<true>} resolved when the script has been loaded
  */
-export const _loadJS = (assets.loadJS = memoize(function loadJS(url) {
+export const _loadJS = (assets.loadJS = memoize(function loadJS(url, type = "text/javascript") {
     if (document.querySelector(`script[src="${url}"]`)) {
         // Already in the DOM and wasn't loaded through this function
         // Unfortunately there is no way to check whether a script has loaded
@@ -36,7 +36,7 @@ export const _loadJS = (assets.loadJS = memoize(function loadJS(url) {
     }
 
     const scriptEl = document.createElement("script");
-    scriptEl.type = "text/javascript";
+    scriptEl.type = type;
     scriptEl.src = url;
     document.head.appendChild(scriptEl);
     return new Promise((resolve, reject) => {
@@ -247,8 +247,8 @@ export const _loadBundle = (assets.loadBundle = async function loadBundle(desc) 
     }
 });
 
-export const loadJS = function (url) {
-    return assets.loadJS(url);
+export const loadJS = function (url, type) {
+    return assets.loadJS(url, type);
 };
 export const loadCSS = function (url) {
     return assets.loadCSS(url);
