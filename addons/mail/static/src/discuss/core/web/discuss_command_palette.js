@@ -5,8 +5,8 @@ import { Component, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { ImStatus } from "@mail/core/common/im_status";
-import { CreateThreadDialog } from "../public_web/create_thread_dialog";
 import { useService } from "@web/core/utils/hooks";
+import { Dialog } from "@web/core/dialog/dialog";
 
 const commandCategoryRegistry = registry.category("command_categories");
 const commandSetupRegistry = registry.category("command_setup");
@@ -14,10 +14,48 @@ const commandProviderRegistry = registry.category("command_provider");
 
 const DISCUSS_MENTIONED = "DISCUSS_MENTIONED";
 const DISCUSS_RECENT = "DISCUSS_RECENT";
+const NEW_CHANNEL = "NEW_CHANNEL";
+const NEW_GROUP_CHAT = "NEW_GROUP_CHAT";
 
 commandCategoryRegistry
     .add(DISCUSS_MENTIONED, { namespace: "@", name: _t("Mentions") }, { sequence: 10 })
     .add(DISCUSS_RECENT, { namespace: "@", name: _t("Recent") }, { sequence: 20 });
+
+class CreateGroupDialog extends Component {
+    static components = { Dialog };
+    static props = ["close", "name?"];
+    static template = "mail.CreateChannelDialog";
+}
+
+class CreateChannelDialog extends Component {
+    static components = { Dialog };
+    static props = ["close", "name?"];
+    static template = "mail.CreateChannelDialog";
+
+    setup() {
+        super.setup();
+        this.store = useState(useService("mail.store"));
+        this.orm = useService("orm");
+        this.state = useState({
+            name: this.props.name,
+            triedSubmitting: false,
+        });
+    }
+
+    get title() {
+        return _t("New Channel");
+    }
+
+    async onClickConfirm() {
+        this.state.triedSubmitting = true;
+        const name = this.state.name.trim();
+        if (!name) {
+            return;
+        }
+        await makeNewChannel(name, this.orm, this.store);
+        this.props.close();
+    }
+}
 
 class DiscussCommand extends Component {
     static components = { ImStatus };
@@ -25,12 +63,11 @@ class DiscussCommand extends Component {
     static props = {
         counter: { type: Number, optional: true },
         executeCommand: Function,
-        icon: { String, optional: true },
         imgUrl: { String, optional: true },
         name: String,
         persona: { type: Object, optional: true },
         channel: { type: Object, optional: true },
-        isAction: { type: Boolean, optional: true },
+        action: { type: Object, optional: true },
         searchValue: String,
         slots: Object,
     };
@@ -52,6 +89,16 @@ commandSetupRegistry.add("@", {
     placeholder: _t("Search a conversation"),
 });
 
+async function makeNewChannel(name, orm, store) {
+    const data = await orm.call("discuss.channel", "channel_create", [
+        name,
+        store.internalUserGroupId,
+    ]);
+    const { Thread } = store.insert(data);
+    const [channel] = Thread;
+    channel.open();
+}
+
 export class DiscussCommandPalette {
     /**
      * @param {import("@web/env").OdooEnv} env
@@ -63,6 +110,7 @@ export class DiscussCommandPalette {
         this.dialog = env.services.dialog;
         /** @type {import("models").Store} */
         this.store = env.services["mail.store"];
+        this.orm = env.services.orm;
         this.suggestion = env.services["mail.suggestion"];
         this.ui = env.services.ui;
         this.commands = [];
@@ -202,14 +250,31 @@ export class DiscussCommandPalette {
                 },
             };
         }
+        if (threadOrPersona === NEW_CHANNEL) {
+            return {
+                Component: DiscussCommand,
+                action: async () => {
+                    const name = this.options.searchValue.trim();
+                    if (name) {
+                        makeNewChannel(name, this.orm, this.store);
+                    } else {
+                        this.dialog.add(CreateChannelDialog);
+                    }
+                },
+                name: _t("Create Channel"),
+                className: "d-flex",
+                props: { action: { icon: "fa fa-fw fa-hashtag", searchValueSuffix: true } },
+            };
+        }
+        // NEW_GROUP_CHAT
         return {
             Component: DiscussCommand,
             action: () => {
-                this.dialog.add(CreateThreadDialog, { name: this.options.searchValue });
+                this.dialog.add(CreateGroupDialog, { name: this.options.searchValue });
             },
-            name: _t("Create a new conversation"),
-            className: "d-flex justify-content-center",
-            props: { icon: "fa fa-fw fa-pencil", isAction: true },
+            name: _t("Create Group"),
+            className: "d-flex",
+            props: { action: { icon: "fa fa-fw fa-users" } },
         };
     }
 }
@@ -222,7 +287,8 @@ commandProviderRegistry.add("find_or_start_conversation", {
         palette.buildResults();
         palette.commands.slice(0, 8);
         if (!palette.store.inPublicPage) {
-            palette.commands.push(palette.makeDiscussCommand("NEW"));
+            palette.commands.push(palette.makeDiscussCommand(NEW_CHANNEL));
+            palette.commands.push(palette.makeDiscussCommand(NEW_GROUP_CHAT));
         }
         return palette.commands;
     },

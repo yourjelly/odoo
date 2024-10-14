@@ -20,7 +20,7 @@
                     <input type="text" class="form-control lh-1" t-att-class="{'is-invalid': state.triedSubmitting and !state.name}" placeholder="Conversation name" t-model.trim="state.name" tabindex="1"/>
                     <div class="invalid-feedback">
                         Conversation must have a name
-                    </div>                    
+                    </div>
                 </div>
                 <div class="smaller text-muted px-3 text-end" t-esc="threadTypeDescription"/>
                 <div class="d-flex flex-column flex-grow-1 bg-inherit w-100">
