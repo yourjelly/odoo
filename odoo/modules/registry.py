@@ -564,6 +564,18 @@ class Registry(Mapping):
             else:
                 _schema.info(*e.args)
                 self._constraint_queue.append((func, args, kwargs))
+        else:
+            # If a module successfully applies a constraint, we remove all queued constraints with
+            # same name ignoring the definition. In effect, if module A defines a constraint that is
+            # overridden by module B (loaded after) with a different definition, whenever we load A,
+            # the original constraint may fail to be applied, hence it is queued. The issue is that
+            # later when we post process the queue the constraint still fails to be added. The
+            # solution is to clean the pending constraint re-definitions.
+            key = (func, args[:3], dict(kwargs, definition=None))
+            same = [f"args={a[1:]}, kwargs={kw}" for (f, a, kw) in self._constraint_queue if (f, a[:3], dict(kw, definition=None)) == key]
+            if same:
+                _logger.info("Skipping already applied constraints: %s", ", ".join(same))
+            self._constraint_queue = deque((f, a, kw) for (f, a, kw) in self._constraint_queue if (f, a[:3], dict(kw, definition=None)) != key)
 
     def finalize_constraints(self):
         """ Call the delayed functions from above. """
