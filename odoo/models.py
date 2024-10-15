@@ -2970,23 +2970,18 @@ class BaseModel(metaclass=MetaModel):
             return SQL("COALESCE(%s)", SQL(", ").join(sql_field_langs))
 
         if field.company_dependent:
-            sql_field = SQL(
-                "%(column)s->%(company_id)s",
-                column=sql_field,
-                company_id=str(self.env.company.id),
-            )
             fallback = field.get_company_dependent_fallback(self)
             fallback = field.convert_to_column(field.convert_to_write(fallback, self), self)
-            if fallback is not None:
-                # in _read_group_orderby the result of field to sql will be mogrified and split to
-                # e.g SQL('COALESCE(%s->%s') and SQL('to_jsonb(%s))::boolean') as 2 orderby values
-                # and concatenated by SQL(',') in the final result, which works in an unexpected way
-                sql_field = SQL(
-                    "COALESCE(%(field)s,to_jsonb(%(fallback)s::%(column_type)s))",
-                    field=sql_field,
-                    fallback=fallback,
-                    column_type=SQL(field._column_type[1]),
-                )
+            # in _read_group_orderby the result of field to sql will be mogrified and split to
+            # e.g SQL('COALESCE(%s->%s') and SQL('to_jsonb(%s))::boolean') as 2 orderby values
+            # and concatenated by SQL(',') in the final result, which works in an unexpected way
+            sql_field = SQL(
+                "COALESCE(%(column)s->%(company_id)s, to_jsonb(%(fallback)s::%(column_type)s))",
+                column=sql_field,
+                company_id=str(self.env.company.id),
+                fallback=fallback,
+                column_type=SQL(field._column_type[1]),
+            )
             if field.type in ('boolean', 'integer', 'float', 'monetary'):
                 return SQL('(%s)::%s', sql_field, SQL(field._column_type[1]))
             # here the specified value for a company might be NULL e.g. '{"1": null}'::jsonb
