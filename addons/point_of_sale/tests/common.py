@@ -10,6 +10,8 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+# Just a comment to generate a runbot
+
 def archive_products(env):
     # Archive all existing product to avoid noise during the tours
     all_pos_product = env['product.product'].search([('available_in_pos', '=', True)])
