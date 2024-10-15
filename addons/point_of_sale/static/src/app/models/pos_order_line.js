@@ -621,6 +621,34 @@ export class PosOrderline extends Base {
             : formatCurrency(this.get_display_price(), this.currency);
     }
 
+    getPrintingPrice() {
+        return {
+            price:
+                this.combo_line_ids.length > 0
+                    ? formatCurrency(
+                          this.combo_line_ids.reduce(
+                              (acc, cl) => acc + cl.get_display_price(),
+                              0.0
+                          ),
+                          this.currency
+                      )
+                    : this.combo_parent_id
+                    ? ""
+                    : this.getPriceString(),
+
+            unitPrice:
+                this.combo_line_ids.length > 0
+                    ? formatCurrency(
+                          this.combo_line_ids.reduce(
+                              (acc, cl) => acc + cl.get_unit_display_price(),
+                              0.0
+                          ),
+                          this.currency
+                      )
+                    : formatCurrency(this.get_unit_display_price(), this.currency),
+        };
+    }
+
     getDisplayData() {
         return {
             productName: this.get_full_product_name(),
