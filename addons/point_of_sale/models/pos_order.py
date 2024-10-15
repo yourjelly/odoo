@@ -326,6 +326,16 @@ class PosOrder(models.Model):
     to_invoice = fields.Boolean('To invoice', copy=False)
     shipping_date = fields.Date('Shipping Date')
     is_invoiced = fields.Boolean('Is Invoiced', compute='_compute_is_invoiced')
+    invoice_status = fields.Selection(
+        selection=[
+            ('invoiced', 'Fully Invoiced'),
+            ('to_invoice', 'To Invoice')
+        ],
+        string="Invoice Status",
+        compute="_compute_invoice_status",
+        default="to_invoice",
+        store=True
+    )
     is_tipped = fields.Boolean('Is this already tipped?', readonly=True)
     tip_amount = fields.Float(string='Tip Amount', digits=0, readonly=True)
     refund_orders_count = fields.Integer('Number of Refund Orders', compute='_compute_refund_related_fields', help="Number of orders where items from this order were refunded")
@@ -426,6 +436,17 @@ class PosOrder(models.Model):
             else:
                 order.margin = 0
                 order.margin_percent = 0
+
+    @api.depends('state')
+    def _compute_invoice_status(self):
+        """
+        Compute the invoice status of a pos order. Possible statuses:
+        - to_invoice: if pos order is not invoiced.
+        - invoiced: if pos order is invoiced.
+        """
+        for order in self:
+            if order.state == 'invoiced':
+                order.invoice_status = 'invoiced'
 
     @api.onchange('payment_ids', 'lines')
     def _onchange_amount_all(self):
@@ -634,6 +655,16 @@ class PosOrder(models.Model):
             'res_model': 'pos.order',
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', self.mapped('lines.refund_orderline_ids.order_id').ids)],
+        }
+
+    def action_create_invoices(self):
+        return {
+            'name': _('Create Invoice(s)'),
+            'view_mode': 'form',
+            'view_id': self.env.ref('point_of_sale.view_pos_make_invoice').id,
+            'res_model': 'pos.make.invoice',
+            'target': 'new',
+            'type': 'ir.actions.act_window',
         }
 
     def _is_pos_order_paid(self):
@@ -951,15 +982,15 @@ class PosOrder(models.Model):
         for line in lines_to_reconcile.values():
             line.filtered(lambda l: not l.reconciled).reconcile()
 
-    def action_pos_order_invoice(self):
+    def action_pos_order_invoice(self, multi_invoice=False):
         if len(self.company_id) > 1:
             raise UserError(_("You cannot invoice orders belonging to different companies."))
         self.write({'to_invoice': True})
         if self.company_id.anglo_saxon_accounting and self.session_id.update_stock_at_closing and self.session_id.state != 'closed':
             self._create_order_picking()
-        return self._generate_pos_order_invoice()
+        return self._generate_pos_order_invoice(multi_invoice)
 
-    def _generate_pos_order_invoice(self):
+    def _generate_pos_order_invoice(self, multi_invoice=False):
         moves = self.env['account.move']
 
         for order in self:
@@ -990,6 +1021,9 @@ class PosOrder(models.Model):
 
         if not moves:
             return {}
+
+        if multi_invoice:
+            return moves
 
         return {
             'name': _('Customer Invoice'),
