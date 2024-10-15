@@ -1,48 +1,17 @@
 import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { makeContext } from "@web/core/context";
-import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useChildRef, useOwnedDialogs, useService } from "@web/core/utils/hooks";
-import { escape, sprintf } from "@web/core/utils/strings";
 import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
 import * as BarcodeScanner from "@web/core/barcode/barcode_dialog";
 import { isBarcodeScannerSupported } from "@web/core/barcode/barcode_video_scanner";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, markup, onWillUpdateProps, useState } from "@odoo/owl";
+import { Component, onWillUpdateProps, useState } from "@odoo/owl";
 import { getFieldDomain } from "@web/model/relational_model/utils";
-
-class CreateConfirmationDialog extends Component {
-    static template = "web.Many2OneField.CreateConfirmationDialog";
-    static components = { Dialog };
-    static props = {
-        name: String,
-        value: String,
-        create: Function,
-        close: Function,
-    };
-
-    get title() {
-        return _t("New: %s", this.props.name);
-    }
-
-    get dialogContent() {
-        return markup(
-            sprintf(escape(_t("Create %(value)s as a new %(field)s?")), {
-                value: `<strong>${escape(this.props.value)}</strong>`,
-                field: escape(this.props.name),
-            })
-        );
-    }
-
-    async onCreate() {
-        await this.props.create();
-        this.props.close();
-    }
-}
 
 export function m2oTupleFromData(data) {
     const id = data.id;
@@ -100,7 +69,6 @@ export class Many2OneField extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.autocompleteContainerRef = useChildRef();
         this.addDialog = useOwnedDialogs();
@@ -254,23 +222,6 @@ export class Many2OneField extends Component {
     }
     async openDialog(resId) {
         return this.openMany2X({ resId, context: this.context });
-    }
-
-    async openConfirmationDialog(request) {
-        return new Promise((resolve, reject) => {
-            this.addDialog(CreateConfirmationDialog, {
-                value: request,
-                name: this.string,
-                create: async () => {
-                    try {
-                        await this.quickCreate(request);
-                        resolve();
-                    } catch (e) {
-                        reject(e);
-                    }
-                },
-            });
-        });
     }
 
     onClick(ev) {
