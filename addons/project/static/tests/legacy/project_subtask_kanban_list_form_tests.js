@@ -188,7 +188,7 @@ QUnit.module('Subtask Kanban List tests', {
 
         assert.strictEqual(
             document.activeElement,
-            target.querySelector(".o_data_row > td[name='name'] > div > input"),
+            target.querySelector(".o_data_row > td[name='name'] > div > div > input"),
             "Upon clicking on 'Add a line', the new subtask's name should be focused."
         );
     });
