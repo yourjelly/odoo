@@ -2,17 +2,13 @@ import csv
 import functools
 import io
 import logging
-import optparse
 import re
 from ast import literal_eval
 from collections import defaultdict, namedtuple
-from pathlib import Path
 from typing import Iterator
 
 from lxml import etree
 
-from . import Command
-import odoo.modules
 from odoo.addons.base.models.ir_model import model_xmlid
 from odoo.models import MetaModel
 from odoo.tools import config
@@ -50,42 +46,27 @@ the module and its dependencies.
 """
 
 
-class MakeIrAccess(Command):
-    """ Generate ir.access.csv for modules. """
-    def run(self, args):
-        parser = optparse.OptionParser(
-            usage=f"%prog {self.name} [options] [modules]",
-            description=(
-                "For each module, generate some ir.access.csv file based on "
-                "existing ir.model.access and ir.rule records in data files. "
-                "The modules are given by positional arguments (separated by commas or spaces). "
-                "If none are given, the command uses all modules in addons-path."
-            ),
-        )
-        parser.add_option(
-            "--addons-path", dest="addons_path",
-            help="specify additional addons paths (separated by commas).",
-        )
-        options, args = parser.parse_args(args)
+#
+# upgrade(file_manager) creates an object that performs the upgrade at creation
+#
+class upgrade:
+    def __init__(self, file_manager):
+        self.file_manager = file_manager
 
-        # set up addons_path, and other things
-        config.parse_config([f'--addons-path={options.addons_path}'] if options.addons_path else [])
+        modules = {file.addon.name: None for file in file_manager}
+        if not modules:
+            return
+
+        # set up addons_path, in order to enable importing modules
+        addons_path = ','.join(file_manager.addons_path)
+        config.parse_config([f'--addons-path={addons_path}'])
 
         print(WELCOME_MESSAGE)
 
-        modules = [mod for arg in args for mod in arg.split(",")] or odoo.modules.get_modules()
-        IrAccessGenerator(modules)
-
-
-class IrAccessGenerator:
-    def __init__(self, modules: list[str]):
-        self.module_paths = {
-            module: Path(odoo.modules.get_module_path(module))
-            for module in modules
-        }
-
-        for module in self.module_paths:
+        file_manager.print_progress(0, len(modules))
+        for index, module in enumerate(modules):
             self.generate(module)
+            file_manager.print_progress(index + 1, len(modules))
 
     def generate(self, module: str):
         """ Generate a file ``ir.access.csv`` for the given module. """
@@ -196,22 +177,13 @@ class IrAccessGenerator:
         self.set_file_content(module, file_name, content)
         self.add_to_manifest(module, file_name)
 
-    def get_path(self, module: str, file_name: str = "") -> Path:
-        """ Return the path of a given module. """
-        path = self.module_paths.get(module) or Path(odoo.modules.get_module_path(module))
-        return path / file_name
-
     def get_file_content(self, module: str, file_name: str) -> str:
         """ Return the content of the given file. """
-        with self.get_path(module, file_name).open() as file:
-            return file.read()
+        return self.file_manager.get_file(module, file_name).content
 
     def set_file_content(self, module: str, file_name: str, content: str | None):
         """ Update the content of the given file; set it to ``None`` to delete it. """
-        if content is None:
-            return self.get_path(module, file_name).unlink()
-        with self.get_path(module, file_name).open('w') as file:
-            file.write(content)
+        self.file_manager.get_file(module, file_name).content = content
 
     @functools.cache
     def get_manifest(self, module: str) -> dict:
@@ -498,7 +470,7 @@ class IrAccessGenerator:
     def get_model_xids(self) -> dict[str, str]:
         """ Return a mapping from model external ids to model names. """
         _logger.info("Building mapping for model xids")
-        for module in odoo.modules.get_modules():
+        for module in self.file_manager.get_modules():
             try:
                 __import__(f'odoo.addons.{module}')
             except Exception:
@@ -514,7 +486,7 @@ class IrAccessGenerator:
     def get_group_definitions(self) -> dict[str, list[str]]:
         """ Return a mapping from groups to their implied groups. """
         group_implied = defaultdict(list)
-        for module in odoo.modules.get_modules():
+        for module in self.file_manager.get_modules():
             manifest = self.get_manifest(module)
             for file_name in manifest['data']:
                 if 'security' in file_name and file_name.endswith('.xml'):
