@@ -50,7 +50,7 @@ export class SplitPlugin extends Plugin {
     // commands
     // --------------------------------------------------------------------------
     splitBlock() {
-        let selection = this.shared.getEditableSelection();
+        let selection = this.shared.getSelectionData().deepEditableSelection;
         if (!selection.isCollapsed) {
             // @todo @phoenix collapseIfZWS is not tested
             // this.shared.collapseIfZWS();
