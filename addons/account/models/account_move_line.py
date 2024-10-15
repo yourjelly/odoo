@@ -190,6 +190,9 @@ class AccountMoveLine(models.Model):
         check_company=True,
         tracking=True,
     )
+    tax_ids_info = fields.Json(
+        compute="_compute_tax_ids_info", store=True
+    )
     group_tax_id = fields.Many2one(
         comodel_name='account.tax',
         string="Originator Group of Taxes",
@@ -862,6 +865,23 @@ class AccountMoveLine(models.Model):
             # /!\ Don't remove existing taxes if there is no explicit taxes set on the account.
             if (line.product_id or line.account_id.tax_ids or not line.tax_ids) and not line.is_imported:
                 line.tax_ids = line._get_computed_taxes()
+
+    @api.depends('tax_ids')
+    def _compute_tax_ids_info(self):
+        for record in self:
+            tax_dict = {}
+            all_taxes = record.tax_ids.compute_all(record.price_unit)
+            for tax in all_taxes.get('taxes'):
+                tax_dict[tax['id']] = {
+                    'tax_id': tax['id'],
+                    'name': tax['name'],
+                    'base': tax['base'],
+                    'amount': tax['amount'],
+                    'tax_repartition_line_id': tax['tax_repartition_line_id'],
+                    'group': tax['group'].id,
+                    'tag_ids': self.env['account.account.tag'].browse(tax['tag_ids']).mapped('name')
+                }
+            record.tax_ids_info = tax_dict
 
     def _get_computed_taxes(self):
         self.ensure_one()
