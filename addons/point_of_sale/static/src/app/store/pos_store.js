@@ -1138,14 +1138,17 @@ export class PosStore extends Reactive {
             const missingRecords = await this.data.missingRecursive(data);
             const newData = this.models.loadData(missingRecords);
 
-            for (const line of newData["pos.order.line"]) {
-                const refundedOrderLine = line.refunded_orderline_id;
+            const refunddata = newData["pos.order.line"]
+                .filter((line) => line.refunded_orderline_id)
+                .reduce((acc, line) => {
+                    const uuid = line.refunded_orderline_id.uuid;
+                    acc[uuid] = (acc[uuid] || 0) + line.qty;
+                    return acc;
+                }, {});
 
-                if (refundedOrderLine) {
-                    const order = refundedOrderLine.order_id;
-                    delete order.uiState.lineToRefund[refundedOrderLine.uuid];
-                    refundedOrderLine.refunded_qty += Math.abs(line.qty);
-                }
+            for (const lineuuid of Object.keys(refunddata)) {
+                const line = newData["pos.order.line"].filter((l) => l.uuid == lineuuid);
+                line.refunded_qty = refunddata[lineuuid];
             }
 
             this.postSyncAllOrders(newData["pos.order"]);
