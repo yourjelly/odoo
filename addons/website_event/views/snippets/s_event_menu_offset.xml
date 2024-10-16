@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
 
-<template id="s_events" name="Events">
+<template id="s_event_menu_offset" name="Event Menu Offset">
     <t t-call="website.s_dynamic_snippet_template">
-        <t t-set="snippet_name" t-value="'s_events'"/>
-        <t t-set="snippet_classes" t-value="'s_event_upcoming_snippet s_event_event_picture'"/>
+        <t t-set="snippet_name" t-value="'s_event_menu_offset'"/>
+        <t t-set="snippet_classes" t-value="'s_event_menu_offset'"/>
         <t t-set="custom_template_data" t-valuef='{"events_event_time_active":true}'/>
-        <t t-call="website_event.s_event_upcoming_snippet_preview_data"/>
+        <t t-call="website_event.s_event_menu_offset_preview_data"/>
     </t>
 </template>
 
 <!--TEMPLATES-->
 
-<template id="dynamic_filter_template_event_event_picture" name="Picture Layout" priority="5">
+<template id="dynamic_filter_template_event_menu_offset" name="Menu Offset" priority="5">
+    oui non
     <div t-foreach="records" t-as="data" class="s_events_event w-100" data-extra-classes="g-3" data-column-classes="col-12 col-sm-6 col-lg-4">
         <t t-set="record" t-value="data['_record']._set_tz_context()"/>
         <a class="s_events_event_cover position-relative d-flex align-items-center rounded overflow-hidden text-decoration-none ratio ratio-1x1"
@@ -27,7 +28,6 @@
 
             <div class="text-center w-100 h-100 px-3 d-flex flex-column justify-content-center flex-grow-1">
                 <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
-                <div  class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                 <h3 class="text-white" t-field="record.name"/>
                 <time t-att-datetime="record.date_begin" class="text-white">
                     <span t-out="record.date_begin"
@@ -42,7 +42,7 @@
     </div>
 </template>
 
-<template id="dynamic_filter_template_event_event_card" name="Card Layout" priority="10">
+<!-- <template id="dynamic_filter_template_event_event_card" name="Card Layout" priority="10">
     <t t-foreach="records" t-as="data" data-extra-classes="g-3" data-column-classes="col-12 col-sm-6 col-lg-4 col-xxl-3">
         <t t-set="record" t-value="data['_record']._set_tz_context()"/>
         <a t-att-href="data['call_to_action_url']" class="s_events_event card h-100 text-decoration-none">
@@ -74,21 +74,21 @@
             </div>
         </a>
     </t>
-</template>
+</template> -->
 
 <!--SNIPPET OPTIONS -->
 
-<template id="s_events_options" inherit_id="website.snippet_options">
+<template id="s_event_menu_offset_options" inherit_id="website.snippet_options">
     <xpath expr="." position="inside">
         <t t-call="website_event.s_dynamic_snippet_options_template">
-            <t t-set="snippet_name" t-value="'event_upcoming_snippet'"/>
-            <t t-set="snippet_selector" t-value="'.s_event_upcoming_snippet'"/>
+            <t t-set="snippet_name" t-value="'event_menu_offset'"/>
+            <t t-set="snippet_selector" t-value="'.s_event_menu_offset'"/>
         </t>
     </xpath>
 </template>
 
-<template id="s_dynamic_snippet_options_template" inherit_id="website.s_dynamic_snippet_options_template">
-    <xpath expr="//we-select[@data-name='filter_opt']" position="after">
+<template id="s_dynamic_snippet_event_menu_offset_options_template" inherit_id="website.s_dynamic_snippet_options_template">
+    <!-- <xpath expr="//we-select[@data-name='filter_opt']" position="after">
         <we-many2many t-if="snippet_name == 'event_upcoming_snippet'"
                       string="Event Tags"
                       data-name="event_tag_opt"
@@ -108,7 +108,7 @@
             data-no-preview="true"
             data-customize-template-key="events_event_time_active"
             data-customize-template-values="false|true"/>
-    </xpath>
+    </xpath> -->
 </template>
 
 <!--ASSETS-->
