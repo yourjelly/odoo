@@ -84,8 +84,8 @@ export class EventRegistrationSummaryDialog extends Component {
         if (this.props.model) {
             this.props.model.load();
         }
-        if (this.props.doNextScan) {
-            this.onScanNext();
+        if (this.props.doNextScan && this.props.source == "camera") {
+            this.onScanNext("camera");
         }
     }
 
@@ -111,8 +111,8 @@ export class EventRegistrationSummaryDialog extends Component {
                 report_name: `event.event_registration_report_template_badge/${this.registration.id}`,
             });
         }
-        if (this.props.doNextScan) {
-            this.onScanNext();
+        if (this.props.doNextScan && this.props.source == "camera") {
+            this.onScanNext("camera");
         } else {
             this.dialogState.isHidden = false;
         }
@@ -129,10 +129,10 @@ export class EventRegistrationSummaryDialog extends Component {
         this.props.close();
     }
 
-    async onScanNext() {
+    async onScanNext(source) {
         this.props.close();
         if (this.isBarcodeScannerSupported) {
-            this.props.doNextScan();
+            this.props.doNextScan(source);
         }
     }
 

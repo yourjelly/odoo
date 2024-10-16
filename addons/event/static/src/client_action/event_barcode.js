@@ -62,7 +62,7 @@ export class EventScanView extends Component {
      * formatted registration information, notably its status or event-related
      * information. Open a confirmation / choice Dialog to confirm attendee.
      */
-    async onBarcodeScanned(barcode) {
+    async onBarcodeScanned(barcode, source="reader") {
         const result = await this.orm.call("event.registration", "register_attendee", [], {
             barcode: barcode,
             event_id: this.eventId,
@@ -81,8 +81,9 @@ export class EventScanView extends Component {
                 EventRegistrationSummaryDialog,
                 {
                     playSound: (type) => this.playSound(type),
-                    doNextScan: () => this.doNextScan(),
-                    registration: result
+                    doNextScan: () => this.doNextScan(source),
+                    registration: result,
+                    source: source
                 }
             );
         }
@@ -93,7 +94,7 @@ export class EventScanView extends Component {
      * to avoid using the component in the template and to be able to call it directly
      * from the dialog.
      */
-    async doNextScan() {
+    async doNextScan(source) {
         let error = null;
         let barcode = null;
         try {
@@ -103,7 +104,7 @@ export class EventScanView extends Component {
         }
 
         if (barcode) {
-            await this.onBarcodeScanned(barcode);
+            await this.onBarcodeScanned(barcode, source);
             if ("vibrate" in window.navigator) {
                 window.navigator.vibrate(100);
             }
