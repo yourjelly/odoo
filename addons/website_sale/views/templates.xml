@@ -1872,7 +1872,16 @@
         </form>
         <div t-attf-class="card position-relative h-100 #{selected and 'bg-primary border border-primary' or is_invoice and 'js_change_billing' or 'js_change_shipping'}">
             <div class="card-body d-flex flex-column align-items-start">
-                <t t-esc="contact" t-options="dict(widget='contact', fields=['name', 'address'], no_marker=True)"/>
+                <t t-set="contact_info" t-value="contact.display_name.split('\n')"/>
+                <div id="o_contact_address_name">
+                   <span class="o_contact_address_name" t-out="contact_info[0]"/>
+                </div>
+                <span class="d-block w-100 lh-sm o_address_font_sm">
+                    <t t-foreach="contact_info[1:]" t-as="address_line">
+                        <t t-out="address_line"/>
+                        <br />
+                    </t>
+                </span>
                 <t t-if="contact._can_be_edited_by_current_customer(website_sale_order, mode)">
                     <t t-set="new_address_href" t-value="'/shop/address?mode=' + mode"/>
                     <a
