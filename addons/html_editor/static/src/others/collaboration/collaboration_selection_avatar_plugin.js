@@ -68,7 +68,7 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
         const { avatarUrl, peerName = _t("Anonymous") } = this.shared.getPeerMetadata(peerId);
         const anchorNode = this.shared.getNodeById(selection.anchorNodeId);
         const focusNode = this.shared.getNodeById(selection.focusNodeId);
-        if (!anchorNode || !focusNode) {
+        if (!anchorNode || !focusNode || !anchorNode.isConnected || !focusNode.isConnected) {
             return false;
         }
         const anchorBlock = closestBlock(anchorNode);
