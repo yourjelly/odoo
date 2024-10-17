@@ -1275,12 +1275,12 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
     const selectedNodes = getSelectedNodes(editor.editable)
         .filter(n => n.nodeType === Node.TEXT_NODE && closestElement(n).isContentEditable && (isVisibleTextNode(n) || isZWS(n)));
     const selectedTextNodes = selectedNodes.length ? selectedNodes : selectedNodesInTds;
-
     const selectedFieldNodes = new Set(getSelectedNodes(editor.editable)
             .map(n =>closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
             .filter(Boolean));
 
     const formatSpec = formatsSpecs[formatName];
+    debugger;
     for (const selectedTextNode of selectedTextNodes) {
         const inlineAncestors = [];
         let currentNode = selectedTextNode;

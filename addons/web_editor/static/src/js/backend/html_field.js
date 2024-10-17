@@ -305,8 +305,10 @@ export class HtmlField extends Component {
             this.wysiwyg.toolbarEl.append($codeviewButtonToolbar[0]);
             $codeviewButtonToolbar.click(this.toggleCodeView.bind(this));
         }
-        this.wysiwyg.odooEditor.addEventListener("historyStep", () =>
-            this.props.record.model.bus.trigger("FIELD_IS_DIRTY", this._isDirty())
+        this.wysiwyg.odooEditor.addEventListener("historyStep", () =>{
+            debugger;
+            return this.props.record.model.bus.trigger("FIELD_IS_DIRTY", this._isDirty());
+        }
         );
 
         if (this.props.isCollaborative) {
