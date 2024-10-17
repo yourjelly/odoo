@@ -259,22 +259,24 @@ export class LinkPlugin extends Plugin {
      * @param {string} label
      */
     insertLink(url, label) {
-        const selection = this.shared.getEditableSelection();
-        let link = closestElement(selection.anchorNode, "a");
-        if (link) {
-            link.setAttribute("href", url);
-            link.innerText = label;
-        } else {
-            link = this.createLink(url, label);
-            this.shared.domInsert(link);
-        }
-        this.dispatch("ADD_STEP");
-        const linkParent = link.parentElement;
-        const linkOffset = Array.from(linkParent.childNodes).indexOf(link);
-        this.shared.setSelection(
-            { anchorNode: linkParent, anchorOffset: linkOffset + 1 },
-            { normalize: false }
-        );
+        this.record(() => {
+            const selection = this.shared.getEditableSelection();
+            let link = closestElement(selection.anchorNode, "a");
+            if (link) {
+                link.setAttribute("href", url);
+                link.innerText = label;
+            } else {
+                link = this.createLink(url, label);
+                this.shared.domInsert(link);
+            }
+            this.dispatch("ADD_STEP");
+            const linkParent = link.parentElement;
+            const linkOffset = Array.from(linkParent.childNodes).indexOf(link);
+            this.shared.setSelection(
+                { anchorNode: linkParent, anchorOffset: linkOffset + 1 },
+                { normalize: false }
+            );
+        });
     }
     /**
      * @param {string} text
@@ -286,8 +288,9 @@ export class LinkPlugin extends Plugin {
             description: _t("Create an URL."),
             fontawesome: "fa-link",
             action: () => {
-                this.shared.domInsert(this.createLink(url, text));
-                this.dispatch("ADD_STEP");
+                this.record(() => {
+                    this.shared.domInsert(this.createLink(url, text));
+                });
             },
         };
         return pasteAsURLCommand;
@@ -397,24 +400,25 @@ export class LinkPlugin extends Plugin {
                 isImage: false,
                 linkEl: this.linkElement,
                 onApply: (url, label, classes) => {
-                    this.linkElement.href = url;
-                    if (cleanZWChars(this.linkElement.innerText) === label) {
-                        this.overlay.close();
-                        this.shared.setSelection(this.shared.getEditableSelection());
-                    } else {
-                        const restore = prepareUpdate(...leftPos(this.linkElement));
-                        this.linkElement.innerText = label;
-                        restore();
-                        this.overlay.close();
-                        this.shared.setCursorEnd(this.linkElement);
-                    }
-                    if (classes) {
-                        this.linkElement.className = classes;
-                    } else {
-                        this.linkElement.removeAttribute("class");
-                    }
-                    this.removeCurrentLinkIfEmtpy();
-                    this.dispatch("ADD_STEP");
+                    this.record(() => {
+                        this.linkElement.href = url;
+                        if (cleanZWChars(this.linkElement.innerText) === label) {
+                            this.overlay.close();
+                            this.shared.setSelection(this.shared.getEditableSelection());
+                        } else {
+                            const restore = prepareUpdate(...leftPos(this.linkElement));
+                            this.linkElement.innerText = label;
+                            restore();
+                            this.overlay.close();
+                            this.shared.setCursorEnd(this.linkElement);
+                        }
+                        if (classes) {
+                            this.linkElement.className = classes;
+                        } else {
+                            this.linkElement.removeAttribute("class");
+                        }
+                        this.removeCurrentLinkIfEmtpy();
+                    });
                 },
             };
 

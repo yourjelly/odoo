@@ -146,16 +146,17 @@ export class FormatPlugin extends Plugin {
     }
 
     removeFormat() {
-        for (const format of Object.keys(formatsSpecs)) {
-            if (!formatsSpecs[format].removeStyle || !this.hasSelectionFormat(format)) {
-                continue;
+        this.record(() => {
+            for (const format of Object.keys(formatsSpecs)) {
+                if (!formatsSpecs[format].removeStyle || !this.hasSelectionFormat(format)) {
+                    continue;
+                }
+                this._formatSelection(format, { applyStyle: false });
             }
-            this._formatSelection(format, { applyStyle: false });
-        }
-        for (const callback of this.resources["removeFormat"] || []) {
-            callback();
-        }
-        this.dispatch("ADD_STEP");
+            for (const callback of this.resources["removeFormat"] || []) {
+                callback();
+            }
+        });
     }
 
     /**
@@ -189,6 +190,9 @@ export class FormatPlugin extends Plugin {
 
     formatSelection(...args) {
         if (this._formatSelection(...args)) {
+            // the add_step is conditional :
+            // format affect existing content => we want a step
+            // format is done on a collapsed range and will only affect future content => we don't want a step
             this.dispatch("ADD_STEP");
         }
     }
@@ -196,6 +200,7 @@ export class FormatPlugin extends Plugin {
     // @todo phoenix: refactor this method.
     _formatSelection(formatName, { applyStyle, formatProps } = {}) {
         // note: does it work if selection is in opposite direction?
+        console.warn("_formatSelection", formatName, { applyStyle });
         const selection = this.shared.splitSelection();
         if (typeof applyStyle === "undefined") {
             applyStyle = !this.isSelectionFormat(formatName);
@@ -330,6 +335,7 @@ export class FormatPlugin extends Plugin {
 
         if (selectedTextNodes[0] && selectedTextNodes[0].textContent === "\u200B") {
             this.shared.setCursorStart(selectedTextNodes[0]);
+            return false;
         } else if (selectedTextNodes.length) {
             const firstNode = selectedTextNodes[0];
             const lastNode = selectedTextNodes[selectedTextNodes.length - 1];
@@ -473,9 +479,11 @@ export class FormatPlugin extends Plugin {
     }
 
     mergeAdjacentInlines(root, { preserveSelection = true } = {}) {
+        console.warn(" ===> mergeAdjacentInlines", root);
         let selectionToRestore = null;
         for (const node of descendants(root)) {
             if (this.shouldBeMergedWithPreviousSibling(node)) {
+                console.log(" ^  this was merged");
                 if (preserveSelection) {
                     selectionToRestore ??= this.shared.preserveSelection();
                     selectionToRestore.update(callbacksForCursorUpdate.merge(node));

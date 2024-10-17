@@ -606,6 +606,10 @@ export function areSimilarElements(node, node2) {
     if (![node, node2].every((n) => n?.nodeType === Node.ELEMENT_NODE)) {
         return false; // The nodes don't both exist or aren't both elements.
     }
+    console.group("aresimilarElements : ");
+    console.log(node.outerHTML);
+    console.log(node2.outerHTML);
+    console.groupEnd();
     if (node.nodeName !== node2.nodeName) {
         return false; // The nodes aren't the same type of element.
     }
