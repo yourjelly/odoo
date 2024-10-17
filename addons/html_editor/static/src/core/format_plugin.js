@@ -130,6 +130,7 @@ export class FormatPlugin extends Plugin {
                 break;
             case "FORMAT_FONT_SIZE_CLASSNAME":
                 this.formatSelection("setFontSizeClassName", {
+                    applyStyle: true,
                     formatProps: { className: payload.className },
                 });
                 break;
