@@ -1232,9 +1232,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         self.product.standard_price = 2.0
         unit_12 = self.env['uom.uom'].create({
             'name': 'Pack of 12 units',
-            'category_id': self.product.uom_id.category_id.id,
-            'uom_type': 'bigger',
-            'factor_inv': 12,
+            'factor': 12,
             'rounding': 1,
         })
 

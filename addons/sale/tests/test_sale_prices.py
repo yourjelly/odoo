@@ -313,10 +313,8 @@ class TestSalePrices(SaleCommon):
             ).unlink()
         new_uom = self.env['uom.uom'].create({
             'name': '10 units',
-            'factor_inv': 10,
-            'uom_type': 'bigger',
+            'factor': 10,
             'rounding': 1.0,
-            'category_id': self.uom_unit.category_id.id,
         })
 
         # This pricelist doesn't show the discount
