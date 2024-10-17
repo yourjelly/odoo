@@ -149,17 +149,25 @@ export class PosOrder extends Base {
     }
 
     // NOTE args added [unwatchedPrinter]
-    async printChanges(skipped = false, orderPreparationCategories, cancelled, unwatchedPrinter) {
+    async printChanges(
+        skipped = false,
+        orderPreparationCategories,
+        cancelled,
+        unwatchedPrinter,
+        diningModeUpdate = false
+    ) {
         const orderChange = changesToOrder(this, skipped, orderPreparationCategories, cancelled);
-        const d = new Date();
 
-        let isPrintSuccessful = true;
+        const unsuccedPrints = [];
 
-        let hours = "" + d.getHours();
-        hours = hours.length < 2 ? "0" + hours : hours;
+        let day, hours;
+        if (this.write_date) {
+            day = this.write_date?.split(" ")[0].split("-");
+            day = day[2] + "/" + day[1] + "/" + day[0] + " ";
 
-        let minutes = "" + d.getMinutes();
-        minutes = minutes.length < 2 ? "0" + minutes : minutes;
+            hours = this.write_date?.split(" ")[1].split(":");
+            hours = hours[0] + ":" + hours[1];
+        }
 
         orderChange.new.sort((a, b) => {
             const sequenceA = a.pos_categ_sequence;
@@ -176,30 +184,126 @@ export class PosOrder extends Base {
                 printer.config.product_categories_ids,
                 orderChange
             );
-            if (changes["new"].length > 0 || changes["cancelled"].length > 0) {
-                const printingChanges = {
-                    new: changes["new"],
-                    cancelled: changes["cancelled"],
-                    table_name: this.table_id?.name,
-                    floor_name: this.table_id?.floor_id?.name,
-                    name: this.pos_reference || "unknown order",
-                    time: {
-                        hours,
-                        minutes,
-                    },
-                    tracking_number: this.tracking_number,
-                };
-                const receipt = renderToElement("point_of_sale.OrderChangeReceipt", {
-                    changes: printingChanges,
-                });
-                const result = await printer.printReceipt(receipt);
-                if (!result.successful) {
-                    isPrintSuccessful = false;
+
+            const toPrintArray = this.preparePrintsData(changes);
+            const printingChanges = {
+                table_name: this.table_id ? "Table " + this.table_id.table_number : "",
+                floor_name: this.table_id?.floor_id?.name || "",
+                config_name: this.config_id.name,
+                time: this.write_date ? day + hours : "",
+                tracking_number: this.tracking_number,
+                takeaway: this.config_id.takeaway && this.takeaway,
+                employee_name: this.employee_id?.name || this.user_id?.name,
+                order_note: this.general_note,
+                diningModeUpdate: diningModeUpdate,
+            };
+            if (diningModeUpdate || !Object.keys(this.last_order_preparation_change.lines).length) {
+                // Prepare orderlines based on the dining mode update
+                const lines =
+                    diningModeUpdate && Object.keys(this.last_order_preparation_change.lines).length
+                        ? this.last_order_preparation_change.lines
+                        : this.lines;
+
+                const orderlines = Object.entries(lines).map(([key, value]) => ({
+                    basic_name: diningModeUpdate ? value.basic_name : value.product_id.name,
+                    quantity: diningModeUpdate ? value.quantity : value.qty,
+                    note: value.note,
+                    attribute_value_ids: value.attribute_value_ids,
+                }));
+
+                // Print detailed receipt
+                const printed = this.printReceipts(printer, "New", printingChanges, orderlines);
+                if (!printed) {
+                    unsuccedPrints.push("Detailed Receipt");
+                }
+            } else {
+                // Print all receipts related to line changes
+                const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+                for (const [key, value] of Object.entries(toPrintArray)) {
+                    const printed = this.printReceipts(printer, key, printingChanges, value);
+                    if (!printed) {
+                        unsuccedPrints.push(key);
+                    }
+                    await delay(1000); // Wait for 1 second before the next print
+                }
+                // Print Order Note if changed
+                if (orderChange.generalNote) {
+                    const printed = this.printReceipts(printer, "Note", printingChanges, [], true);
+                    if (!printed) {
+                        unsuccedPrints.push("General Note");
+                    }
                 }
             }
         }
+        return unsuccedPrints;
+    }
 
-        return isPrintSuccessful;
+    async printReceipts(
+        printer,
+        title,
+        printingChanges,
+        lines,
+        generalNoteChanged = false,
+        fullReceipt = false
+    ) {
+        const receipt = renderToElement("point_of_sale.OrderChangeReceipt", {
+            operational_title: title,
+            changes: printingChanges,
+            changedlines: lines,
+            noteChanged: generalNoteChanged,
+            fullReceipt: fullReceipt,
+        });
+        const result = await printer.printReceipt(receipt);
+        return result.successful;
+    }
+
+    preparePrintsData(changes) {
+        const order_modifications = {};
+        const pdisChangedLines = this.last_order_preparation_change.lines;
+
+        // Handle added lines
+        if (changes["new"].length) {
+            const newLines = [];
+            const onlyNoteUpdate = changes["new"].filter((line) => {
+                const key = Object.keys(pdisChangedLines).find((k) => k.startsWith(line.uuid));
+                if (!key || pdisChangedLines[key].quantity !== line.quantity) {
+                    newLines.push(line);
+                    return false; // Not a note update
+                }
+                return true; // It's a note update
+            });
+
+            if (newLines.length) {
+                order_modifications["New"] = newLines;
+            }
+            if (onlyNoteUpdate.length) {
+                order_modifications["Note"] = onlyNoteUpdate;
+            }
+        }
+
+        // Handle removed lines
+        if (changes["cancelled"].length) {
+            const allCancelled = changes["cancelled"].every((line) => {
+                const pdisLine = pdisChangedLines[line.uuid + " - " + line.note];
+                return !pdisLine || pdisLine.quantity <= line.quantity;
+            });
+            let title;
+            if (
+                !changes["new"].length &&
+                allCancelled &&
+                Object.keys(pdisChangedLines).length == changes["cancelled"].length
+            ) {
+                title = "Cancel";
+            } else {
+                title = "Cancelled";
+            }
+            order_modifications[title] =
+                !changes["new"].length && allCancelled
+                    ? changes["cancelled"]
+                    : changes["cancelled"];
+        }
+        return order_modifications;
     }
 
     get isBooked() {
@@ -244,12 +348,14 @@ export class PosOrder extends Base {
                         line.get_quantity();
                 } else {
                     this.last_order_preparation_change.lines[line.preparationKey] = {
-                        attribute_value_ids: line.attribute_value_ids.map((a) =>
-                            a.serialize({ orm: true })
-                        ),
+                        attribute_value_ids: line.attribute_value_ids.map((a) => ({
+                            ...a.serialize({ orm: true }),
+                            name: a.name,
+                        })),
                         uuid: line.uuid,
                         product_id: line.get_product().id,
                         name: line.get_full_product_name(),
+                        basic_name: line.get_product().name,
                         note: line.getNote(),
                         quantity: line.get_quantity(),
                     };

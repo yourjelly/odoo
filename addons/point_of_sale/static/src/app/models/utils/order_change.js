@@ -58,6 +58,7 @@ export const getOrderChanges = (order, skipped = false, orderPreparationCategori
                 changes[lineKey] = {
                     uuid: orderline.uuid,
                     name: orderline.get_full_product_name(),
+                    basic_name: orderline.product_id.name,
                     product_id: product.id,
                     attribute_value_ids: orderline.attribute_value_ids,
                     quantity: quantityDiff,
@@ -91,6 +92,7 @@ export const getOrderChanges = (order, skipped = false, orderPreparationCategori
                     uuid: lineResume["uuid"],
                     product_id: lineResume["product_id"],
                     name: lineResume["name"],
+                    basic_name: lineResume["basic_name"],
                     note: lineResume["note"],
                     attribute_value_ids: lineResume["attribute_value_ids"],
                     quantity: -lineResume["quantity"],
