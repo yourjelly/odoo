@@ -94,6 +94,15 @@ export class SelfOrder extends Reactive {
     }
 
     async addToCart(product, qty, customer_note, selectedValues, customValues) {
+        if(product.product_template_variant_value_ids.length > 0) {
+            product = this.products.find(
+                (prd) =>
+                    prd.product_tmpl_id === product.product_tmpl_id &&
+                    prd.product_template_variant_value_ids.every((ptav) =>
+                        Object.values(selectedValues).includes(String(ptav))
+                    )
+            );
+        }
         const lineToMerge =
             !product.pos_combo_ids.length &&
             (this.editedLine ||
@@ -259,6 +268,7 @@ export class SelfOrder extends Reactive {
             return combo;
         });
 
+        this._processSelfProductAttributes();
         this.productsGroupedByCategory = this.products.reduce((acc, product) => {
             product.pos_categ_ids.map((categ) => {
                 acc[categ.id] = acc[categ.id] || [];
@@ -292,6 +302,23 @@ export class SelfOrder extends Reactive {
                 this.kitchenPrinters.push(printer);
             }
         }
+    }
+
+    _processSelfProductAttributes() {
+        const productByTmplId = {};
+        this.products.forEach((product) => {
+            if (product.product_template_variant_value_ids.length > 0) {
+                if (!productByTmplId[product.product_tmpl_id]) {
+                    productByTmplId[product.product_tmpl_id] = [];
+                }
+                productByTmplId[product.product_tmpl_id].push(product);
+            }
+        });
+        Object.values(productByTmplId).forEach((products) => {
+            for (let i = 0; i < products.length - 1; i++) {
+                products[i].self_order_available = false;
+            }
+        });
     }
 
     create_printer(printer) {
@@ -385,6 +412,12 @@ export class SelfOrder extends Reactive {
 
     saveOrderToLocalStorage(orders) {
         Array.isArray(orders) && localStorage.setItem("orders", JSON.stringify(orders));
+    }
+
+    getProductsToDispaly(categoryId) {
+        return this.productsGroupedByCategory[categoryId]?.filter(
+            (product) => product.self_order_available
+        );
     }
 
     cancelOrder() {
@@ -539,6 +572,17 @@ export class SelfOrder extends Reactive {
         }
     }
 
+    isArchivedProductVariant(productId) {
+        const product = this.productByIds[productId];
+        const ptav = product.product_template_variant_value_ids;
+        for (const archivedCombination of product.archived_combinations) {
+            if (JSON.stringify(archivedCombination) === JSON.stringify(ptav)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     async getPricesFromServer() {
         try {
             if (!this.currentOrder) {
@@ -628,7 +672,7 @@ export class SelfOrder extends Reactive {
             const wrongChild = line.child_lines.find(
                 (l) => !this.productByIds[l.product_id]?.self_order_available
             );
-            if (wrongChild || !this.productByIds[line.product_id]?.self_order_available) {
+            if (wrongChild) {
                 if (alreadySent) {
                     line.qty = alreadySent.qty;
                     line.customer_note = alreadySent.customer_note;

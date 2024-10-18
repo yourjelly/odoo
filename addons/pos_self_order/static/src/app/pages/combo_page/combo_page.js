@@ -92,7 +92,7 @@ export class ComboPage extends Component {
             combo_line_id: this.env.currentComboLineId.value,
             product: {
                 id: this.state.selectedProduct.id,
-                name: this.state.selectedProduct.name,
+                name: this.state.selectedProduct.display_name,
                 variants: { ...this.env.selectedValues },
                 customValues: { ...this.env.customValues },
             },

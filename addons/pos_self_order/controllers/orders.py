@@ -225,6 +225,7 @@ class PosSelfOrderController(http.Controller):
             product = pos_config.env['product.product'].browse(int(line.get('product_id')))
             lst_price = pricelist._get_product_price(product, quantity=line_qty) if pricelist else product.lst_price
             selected_attributes = fetched_attributes.browse(line.get('attribute_value_ids', []))
+            selected_attributes = list(filter(lambda attr: attr.attribute_id.create_variant != "always", selected_attributes))
             price_extra = sum(attr.price_extra for attr in selected_attributes)
             lst_price += price_extra
 
@@ -245,6 +246,7 @@ class PosSelfOrderController(http.Controller):
                         price_unit += remaining_total
 
                     selected_attributes = fetched_attributes.browse(child.get('attribute_value_ids', []))
+                    selected_attributes = list(filter(lambda attr: attr.attribute_id.create_variant != "always", selected_attributes))
                     price_extra_child = sum(attr.price_extra for attr in selected_attributes)
                     price_unit += pos_combo_line.combo_price + price_extra_child
 
@@ -264,7 +266,7 @@ class PosSelfOrderController(http.Controller):
                         'product_id': child.get('product_id'),
                         'qty': child.get('qty'),
                         'customer_note': child.get('customer_note'),
-                        'attribute_value_ids': child.get('attribute_value_ids') or [],
+                        'attribute_value_ids': [attr.id for attr in selected_attributes],
                         'full_product_name': child.get('full_product_name'),
                         'combo_parent_uuid': child.get('combo_parent_uuid'),
                         'combo_id': child.get('combo_id'),
@@ -289,7 +291,7 @@ class PosSelfOrderController(http.Controller):
                 'product_id': line.get('product_id'),
                 'qty': line_qty,
                 'customer_note': line.get('customer_note'),
-                'attribute_value_ids': line.get('attribute_value_ids') or [],
+                'attribute_value_ids': [attr.id for attr in selected_attributes],
                 'custom_attribute_value_ids': [[0, 0, cAttr] for cAttr in line.get('custom_attribute_value_ids')] if line.get('custom_attribute_value_ids') else [],
                 'full_product_name': line.get('full_product_name'),
                 'combo_parent_uuid': line.get('combo_parent_uuid'),

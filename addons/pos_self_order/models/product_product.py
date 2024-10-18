@@ -72,7 +72,7 @@ class ProductProduct(models.Model):
         attributes = self.env.context.get("cached_attributes_by_ptal_id")
 
         if attributes is None:
-            attributes = self.env["pos.session"]._get_attributes_by_ptal_id()
+            attributes = self.env["pos.session"]._get_attributes_by_ptal_id(True)
             attributes = self._filter_applicable_attributes(attributes)
         else:
             # Performance trick to avoid unnecessary calls to _get_attributes_by_ptal_id()
@@ -200,10 +200,11 @@ class ProductProduct(models.Model):
     def _get_product_for_ui(self, pos_config):
         self.ensure_one()
         return {
-                "price_info": self._get_price_info(pos_config),
+                "price_info": self._get_price_info(pos_config, self.list_price),
                 "has_image": bool(self.product_tmpl_id.image_128 or self.image_variant_128),
                 "attributes": self._get_attributes(pos_config),
-                "name": self._get_name(),
+                "display_name": self._get_name(),
+                "name": self.with_context(display_default_code=False).name,
                 "id": self.id,
                 "description_self_order": self.description_self_order,
                 "pos_categ_ids": self.pos_categ_ids.read(["id", "name"]) or [{"id": 0, "name": "Uncategorised"}],
@@ -212,10 +213,13 @@ class ProductProduct(models.Model):
                 "write_date": self.write_date.timestamp(),
                 "self_order_available": self.self_order_available,
                 "barcode": self.barcode,
+                "product_template_variant_value_ids": self.product_template_variant_value_ids.ids,
+                "product_tmpl_id": self.product_tmpl_id.id,
+                "archived_combinations": self.product_tmpl_id._get_attribute_exclusions()['archived_combinations']
             }
 
     def _get_self_order_data(self, pos_config: PosConfig) -> List[Dict]:
-        attributes_by_ptal_id = self.env["pos.session"]._get_attributes_by_ptal_id()
+        attributes_by_ptal_id = self.env["pos.session"]._get_attributes_by_ptal_id(True)
         self = self.with_context(cached_attributes_by_ptal_id=attributes_by_ptal_id)
         return [
             product._get_product_for_ui(pos_config)

@@ -1613,10 +1613,13 @@ class PosSession(models.Model):
         self._pos_data_process(loaded_data)
         return loaded_data
 
-    def _get_attributes_by_ptal_id(self):
+    def _get_attributes_by_ptal_id(self, self_ordering_mode=False):
+        domain = [('create_variant', '=', 'no_variant')]
+        if self_ordering_mode:
+            domain = []
         # performance trick: prefetch fields with search_fetch() and fetch()
         product_attributes = self.env['product.attribute'].search_fetch(
-            [('create_variant', '=', 'no_variant')],
+            domain,
             ['name', 'display_type'],
         )
         product_template_attribute_values = self.env['product.template.attribute.value'].search_fetch(

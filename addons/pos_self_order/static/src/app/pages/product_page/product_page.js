@@ -52,6 +52,11 @@ export class ProductPage extends Component {
         );
     }
 
+    isArchivedCombination() {
+        const attrValuesIds = Object.values(this.state.selectedValues).flatMap(attr => attr ? [Number(attr)] : [])
+        return this.props.product._isArchivedCombination(attrValuesIds);
+    }
+
     initState() {
         const editedLine = this.selfOrder.editedLine;
 
