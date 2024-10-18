@@ -308,3 +308,9 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
             item.add_marker(skip_non_post)
         for tag in tags:
             item.add_marker(tag)
+
+    items.sort(key=lambda item: 0 if (
+        isinstance(item, pytest.Function)
+        and (mod := item.function.__module__).startswith('odoo.addons.')
+        and 'web' in mod.split('.')[2]
+    ) else 1)
