@@ -467,8 +467,7 @@ export class OdooEditor extends EventTarget {
             },
             beforeCommand: () => {
                 if (this._isPowerboxOpenOnInput) {
-                    this.historyRevertUntil(this._powerboxBeforeStepIndex);
-                    this.historyStep(true);
+                    this.historySavePointRestore ? this.historySavePointRestore() : null;
                     this._historyStepsStates.set(peek(this._historySteps).id, 'consumed');
                     ensureFocus(this.editable);
                     getDeepRange(this.editable, { select: true });
@@ -3359,6 +3358,23 @@ export class OdooEditor extends EventTarget {
     // Handlers
     //--------------------------------------------------------------------------
 
+    makeSavePoint() {
+        const draftMutations = [...this._currentStep.mutations];
+        let applied = false;
+        const restoreSelection = preserveCursor(this.document);
+        return () => {
+            if (applied) {
+                return;
+            }
+            applied=true;
+            const stepIndex=this._powerboxBeforeStepIndex;
+            this.historyRevertUntil(stepIndex);
+            this.historyStep(true);
+            this.historyApply(draftMutations);
+            restoreSelection();
+        }
+    }
+
     _onBeforeInput(ev) {
         this._lastBeforeInputType = ev.inputType;
     }
@@ -3370,6 +3386,9 @@ export class OdooEditor extends EventTarget {
      * @private
      */
     _onInput(ev) {
+        if(ev.data === "/") {
+            this.historySavePointRestore = this.makeSavePoint();
+        }
         // See if the Powerbox should be opened. If so, it will open at the end.
         const newSelection = this.document.getSelection();
         const shouldOpenPowerbox = newSelection.isCollapsed && newSelection.rangeCount &&
