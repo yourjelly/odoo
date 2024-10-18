@@ -13,26 +13,99 @@ class TestTaxesAdvancedHelpers(TestTaxCommon):
     def setUpClass(cls):
         super().setUpClass()
 
+        cls.env.company.tax_calculation_rounding_method = 'round_globally'
         cls.currency = cls.env.company.currency_id
         cls.foreign_currency = cls.setup_other_currency('EUR')
 
-    def _with_downpayment(self, document, document_params, amount_type, amount):
+    def _with_global_discount(self, document, document_params, amount_type, amount):
         AccountTax = self.env['account.tax']
         document_params = copy.deepcopy(document_params)
-        base_lines = AccountTax._prepare_downpayment_base_lines(
+        base_lines = AccountTax._prepare_global_discount_base_lines(
             base_lines=document['lines'],
             company=self.env.company,
             amount_type=amount_type,
             amount=amount,
+            computation_key='global_discount',
         )
         document_params['lines'] += [
             {
                 'price_unit': base_line['price_unit'],
                 'tax_ids': base_line['tax_ids'],
+                'computation_key': base_line['computation_key'],
             }
             for base_line in base_lines
         ]
         return self.populate_document(document_params)
+
+    def test_global_discount_simple_percent_tax(self):
+        tax1 = self.percent_tax(6)
+
+        document_params = self.init_document(
+            lines=[
+                {'price_unit': 15.89, 'tax_ids': tax1},
+                {'price_unit': 15.89, 'tax_ids': tax1},
+            ],
+        )
+        document = self.populate_document(document_params)
+        self.assert_tax_totals_summary(
+            document,
+            {
+                'base_amount_currency': 31.78,
+                'tax_amount_currency': 1.91,
+                'total_amount_currency': 33.69,
+            },
+            soft_checking=True,
+        )
+        for percent, delta in (
+            (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0), (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0), (10, 0.0),
+            (11, 0.0), (12, 0.0), (13, 0.0), (14, 0.0), (15, 0.0), (16, 0.0), (17, 0.0), (18, 0.0), (19, 0.0), (20, 0.0),
+        ):
+            with self.subTest(percent=percent, delta=delta):
+                percent_factor = percent / 100.0
+                sub_document = self._with_global_discount(document, document_params, 'percent', percent)
+                self.assert_tax_totals_summary(
+                    sub_document,
+                    {
+                        'total_amount_currency': self.foreign_currency.round(33.69 * (1 - percent_factor)) - delta,
+                    },
+                    soft_checking=True,
+                )
+
+    def test_global_discount_double_percent_taxes(self):
+        tax1 = self.percent_tax(6)
+        tax2 = self.percent_tax(6)
+        taxes = tax1 + tax2
+
+        document_params = self.init_document(
+            lines=[
+                {'price_unit': 15.89, 'tax_ids': taxes},
+                {'price_unit': 15.89, 'tax_ids': taxes},
+            ],
+        )
+        document = self.populate_document(document_params)
+        self.assert_tax_totals_summary(
+            document,
+            {
+                'base_amount_currency': 31.78,
+                'tax_amount_currency': 3.82,
+                'total_amount_currency': 35.6,
+            },
+            soft_checking=True,
+        )
+        for percent, delta in (
+            (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0), (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0), (10, 0.0),
+            (11, 0.0), (12, 0.0), (13, 0.0), (14, 0.0), (15, 0.0), (16, 0.0), (17, 0.0), (18, 0.0), (19, 0.0), (20, 0.0),
+        ):
+            with self.subTest(percent=percent, delta=delta):
+                percent_factor = percent / 100.0
+                sub_document = self._with_global_discount(document, document_params, 'percent', percent)
+                self.assert_tax_totals_summary(
+                    sub_document,
+                    {
+                        'total_amount_currency': self.foreign_currency.round(35.6 * (1 - percent_factor)) - delta,
+                    },
+                    soft_checking=True,
+                )
 
     def test_taxes_l10n_in(self):
         tax1 = self.percent_tax(6, include_base_amount=True)
@@ -62,14 +135,17 @@ class TestTaxesAdvancedHelpers(TestTaxCommon):
                 },
                 soft_checking=True,
             )
-            for percent in range(2, 3):
-                with self.subTest(percent=percent):
+            for percent, delta in (
+                (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0), (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0), (10, 0.0),
+                (11, 0.0), (12, 0.0), (13, 0.0), (14, 0.0), (15, 0.0), (16, 0.0), (17, 0.0), (18, 0.0), (19, 0.0), (20, 0.0),
+            ):
+                with self.subTest(percent=percent, delta=delta):
                     percent_factor = percent / 100.0
-                    sub_document = self._with_downpayment(document, document_params, 'percent', percent)
+                    sub_document = self._with_global_discount(document, document_params, 'percent', percent)
                     self.assert_tax_totals_summary(
                         sub_document,
                         {
-                            'total_amount_currency': self.foreign_currency.round(36.67 * (1 - percent_factor)),
+                            'total_amount_currency': self.foreign_currency.round(36.67 * (1 - percent_factor)) - delta,
                         },
                         soft_checking=True,
                     )

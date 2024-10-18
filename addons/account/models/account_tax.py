@@ -1197,6 +1197,8 @@ class AccountTax(models.Model):
             value = extra_values[field] or fallback
         elif isinstance(record, models.Model) and field in record._fields:
             value = record[field]
+        elif isinstance(record, dict):
+            value = record.get(field, fallback)
         else:
             value = fallback
         if need_origin:
@@ -1244,6 +1246,9 @@ class AccountTax(models.Model):
             # - early_payment if the base line represent an early payment in mixed mode.
             # - cash_rounding if the base line is a delta to round the business object for the cash rounding feature.
             'special_type': kwargs.get('special_type', False),
+
+            # TODO
+            'computation_key': kwargs.get('computation_key', False),
 
             # All computation are managing the foreign currency and the local one.
             # This is the rate to be applied when generating the tax details (see '_add_tax_details_in_base_line').
@@ -1439,6 +1444,7 @@ class AccountTax(models.Model):
 
         for base_line in base_lines:
             currency = base_line['currency_id']
+            computation_key = False if tax_lines else base_line['computation_key']
             tax_details = base_line['tax_details']
             tax_details['delta_base_amount_currency'] = 0.0
             tax_details['delta_base_amount'] = 0.0
@@ -1463,7 +1469,7 @@ class AccountTax(models.Model):
                 tax_data['raw_base_amount'] = tax_data['base_amount']
                 tax_data['base_amount'] = company.currency_id.round(tax_data['base_amount'])
 
-                key = (tax, currency, base_line['is_refund'])
+                key = (tax, currency, base_line['is_refund'], computation_key)
                 amounts = total_per_tax[key]
                 amounts['tax_amount_currency'] += tax_data['tax_amount_currency']
                 amounts['raw_tax_amount_currency'] += tax_data['raw_tax_amount_currency']
@@ -1477,7 +1483,7 @@ class AccountTax(models.Model):
                     amounts['base_lines'].append(base_line)
 
         # Round 'total_per_tax'.
-        for (tax, currency, _is_refund), amounts in total_per_tax.items():
+        for (tax, currency, _is_refund, _computation_key), amounts in total_per_tax.items():
             amounts['raw_tax_amount_currency'] = currency.round(amounts['raw_tax_amount_currency'])
             amounts['raw_tax_amount'] = company.currency_id.round(amounts['raw_tax_amount'])
             amounts['raw_base_amount_currency'] = currency.round(amounts['raw_base_amount_currency'])
@@ -1491,7 +1497,7 @@ class AccountTax(models.Model):
                 sign = tax_line['sign']
                 tax = tax_rep.tax_id
                 currency = tax_line['currency_id']
-                key = (tax, currency, tax_rep.document_type == 'refund')
+                key = (tax, currency, tax_rep.document_type == 'refund', False)
 
                 if key not in manually_edited_tax_key:
                     total_per_tax[key]['raw_tax_amount_currency'] = 0.0
@@ -1501,7 +1507,7 @@ class AccountTax(models.Model):
                 total_per_tax[key]['raw_tax_amount'] += sign * tax_line['balance']
 
         # Dispatch the delta accross the base lines.
-        for (tax, _currency, _is_refund), amounts in total_per_tax.items():
+        for (tax, _currency, _is_refund, _computation_key), amounts in total_per_tax.items():
             if not amounts['base_lines']:
                 continue
 
@@ -2220,30 +2226,24 @@ class AccountTax(models.Model):
                     if not new_base_lines:
                         new_base_lines.append(self._prepare_base_line_for_taxes_computation(
                             base_line,
-                            price_unit=base_line['quantity'] * base_line['price_unit'],
-                            quantity=1.0,
                             tax_ids=new_taxes,
                         ))
                     price_unit = tax_data['tax_amount_currency']
                     next_taxes_data = taxes_data[i + 1, i + 2 + len(tax_data['taxes'])]
                     new_base_lines.append(self._prepare_base_line_for_taxes_computation(
                         base_line,
-                        price_unit=tax_data['tax_amount_currency'] + sum(
-                            next_tax_data['tax_amount_currency']
-                            for next_tax_data in next_taxes_data
-                            if next_tax_data['tax'].price_include
-                        ),
-                        quantity=1.0,
+                        price_unit=(
+                            tax_data['tax_amount_currency'] + sum(
+                                next_tax_data['tax_amount_currency']
+                                for next_tax_data in next_taxes_data
+                                if next_tax_data['tax'].price_include
+                            )
+                        ) / base_line['quantity'],
                         tax_ids=tax_data['taxes'],
                     ))
                 new_taxes += tax
-            if not new_base_lines:
-                new_base_lines.append(self._prepare_base_line_for_taxes_computation(
-                    base_line,
-                    price_unit=base_line['quantity'] * base_line['price_unit'],
-                    quantity=1.0,
-                    tax_ids=new_taxes,
-                ))
+            if not new_base_lines or new_taxes:
+                new_base_lines.append(self._prepare_base_line_for_taxes_computation(base_line, tax_ids=new_taxes))
             all_new_base_lines += new_base_lines
 
         # Aggregate the base_lines at least by taxes.
@@ -2260,39 +2260,73 @@ class AccountTax(models.Model):
             else:
                 base_line_map[grouping_key] = base_line
 
-        base_lines = list(base_line_map.values())
-        # self._add_tax_details_in_base_lines(base_lines, company)
-        return base_lines
+        return list(base_line_map.values())
 
     # -------------------------------------------------------------------------
     # DOWNPAYMENT
     # -------------------------------------------------------------------------
 
     @api.model
-    def _prepare_downpayment_base_lines(self, base_lines, company, amount_type, amount, grouping_function=None):
+    def _prepare_global_discount_base_lines(
+        self,
+        base_lines,
+        company,
+        amount_type,
+        amount,
+        computation_key,
+        grouping_function=None,
+        special_type=False,
+    ):
+        def compute_total(base_lines):
+            self._add_tax_details_in_base_lines(linear_base_lines, company)
+            self._round_base_lines_tax_details(linear_base_lines, company)
+
+            total_included_currency = 0.0
+            for base_line in linear_base_lines:
+                tax_details = base_line['tax_details']
+                total_included_currency += tax_details['total_excluded_currency'] + tax_details['delta_base_amount_currency']
+                for tax_data in tax_details['taxes_data']:
+                    total_included_currency += tax_data['tax_amount_currency']
+            return total_included_currency
+
+        if not base_lines:
+            return []
+
+        currency = base_lines[0]['currency_id']
+
+        # Keep only the taxes that have a linear computation.
         linear_base_lines = self._turn_base_lines_to_others_for_linear_computation(
             base_lines=base_lines,
             company=company,
             grouping_function=grouping_function,
         )
+        total_included_currency = compute_total(linear_base_lines)
 
-        total_included_currency = sum(base_line['tax_details']['total_included_currency'] for base_line in base_lines)
-        raw_total_included_currency = sum(base_line['tax_details']['raw_total_included_currency'] for base_line in base_lines)
+        # Compute the total discount amount to reach.
         if amount_type == 'fixed':
             percentage = (amount / total_included_currency) if total_included_currency else 0.0
         else:  # if amount_type == 'percent':
             percentage = amount / 100.0
-        price_unit_factor = percentage
 
+        target_discount = currency.round(total_included_currency * -percentage)
+
+        # Apply the percentage to each line.
         for base_line in linear_base_lines:
-            base_line['special_type'] = 'downpayment'
-            # total_included_currency = base_line['tax_details']['raw_total_included_currency']
-            base_line['price_unit'] *= -price_unit_factor
-            self._add_tax_details_in_base_line(base_line, company)
-        rt = sum(base_line['tax_details']['raw_total_included_currency'] for base_line in base_lines)
-        nrt = sum(base_line['tax_details']['total_included_currency'] for base_line in linear_base_lines)
-        exp = rt + nrt == total_included_currency * (1 - percentage)
-        import pudb; pudb.set_trace()
+            base_line['computation_key'] = computation_key
+            base_line['special_type'] = special_type
+            base_line['price_unit'] *= -percentage
+
+        # Approximate until the target discount is reached.
+        max_retries = 3
+        for _i in range(max_retries):
+            total_included_currency = compute_total(linear_base_lines)
+            if currency.is_zero(total_included_currency - target_discount):
+                break
+
+            raw_total_included_currency = sum(x['tax_details']['raw_total_included_currency'] for x in linear_base_lines)
+            for base_line in linear_base_lines:
+                base_line['price_unit'] *= target_discount / raw_total_included_currency
+
         return linear_base_lines
 
     # -------------------------------------------------------------------------
