@@ -1365,6 +1365,11 @@ class PropertiesCase(TestPropertiesMixin):
         attributes_definition += [{'name': 'state', 'string': 'State', 'type': 'char'}]
         self.discussion_1.attributes_definition = attributes_definition
         self.message_1.attributes = [{'name': 'state', 'value': 'ready'}]
+        self.assertEqual(self.message_1.attributes, {
+            'discussion_color_code': False,
+            'moderator_partner_id': False,
+            'state': 'ready',
+        })
 
         self.env.invalidate_all()
 
@@ -2682,7 +2687,8 @@ class PropertiesGroupByCase(TestPropertiesMixin):
             [unexisting_record_id, self.message_3.id],
         )
 
-        with self.assertQueryCount(3):
+        self.env.invalidate_all()
+        with self.assertQueryCount(4):
             result = Model.read_group(
                 domain=[],
                 fields=['name', 'attributes', 'discussion'],
