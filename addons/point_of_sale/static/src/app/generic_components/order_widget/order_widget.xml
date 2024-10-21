@@ -8,11 +8,25 @@
                         <t t-if="props.slots?.default" t-slot="default" line="line"/>
                         <Orderline t-else="" line="line" />
                     </t>
-                    <div class="mt-1 bg-opacity-75" t-attf-class="{{ props.screenName == 'ReceiptScreen' ? 'p-0' : 'p-2 border-bottom border-top border-opacity-75'}}" t-if="props.generalNote">
-                        <b class="fw-bolder">General Note</b>
-                        <t t-foreach="props.generalNote.split('\n')" t-as="subNote" t-key="subNote_index">
-                            <br/>• <t t-esc="subNote"/>
-                        </t>
+                    <!-- <div class="mt-1 bg-opacity-75"
+                        t-attf-class="{{ props.screenName == 'ReceiptScreen' ? 'p-0' : 'p-2 border-bottom border-top border-opacity-75'}}"
+                        t-if="props.generalNote"> -->
+                        <!-- TODO-manv: ask mobt for bg color and line break -->
+                    <div t-if="props.generalNote"
+                        t-attf-class="{{ props.screenName == 'ReceiptScreen' ? 'mt-1 bg-opacity-75 p-0' : 'customer-note w-100 p-2 mt-2 overflow-hidden rounded text-break text-bg-warning bg-opacity-25 mt-0'}}">
+                        <div class="row flex-wrap">
+                            <div class="col-auto">
+                                <i class="fa fa-sticky-note me-1 fa-lg" role="img"
+                                    aria-label="Customer Note" title="Customer Note"/>
+                            </div>
+                            <div class="col ps-0">
+                                <t t-foreach="props.generalNote.split('\n')" t-as="subNote"
+                                    t-key="subNote_index">
+                                    <div class="d-inline text-break"> • <t t-esc="subNote"/><br/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div t-if="props.total or props.tax" class="order-summary d-flex flex-column gap-1 px-3 py-2 border-top fw-bolder lh-sm">

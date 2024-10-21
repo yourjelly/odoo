@@ -5,9 +5,9 @@ import { TextInputPopup } from "@point_of_sale/app/utils/input_popups/text_input
 import { useService } from "@web/core/utils/hooks";
 import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
 
-// TODO-manv: to remove
-export class OrderlineNoteButton extends Component {
-    static template = "point_of_sale.OrderlineNoteButton";
+export class NoteButton extends Component {
+    static template = "point_of_sale.NoteButton";
+    //Todo-manv: getter/setter not optional?
     static props = {
         icon: { type: String, optional: true },
         label: { type: String, optional: true },
@@ -15,26 +15,27 @@ export class OrderlineNoteButton extends Component {
         setter: { type: Function, optional: true },
         class: { type: String, optional: true },
     };
-    static defaultProps = {
-        label: _t("Customer Note"),
-        getter: (orderline) => orderline.get_customer_note(),
-        setter: (orderline, note) => orderline.set_customer_note(note),
-        class: "",
-    };
+    // static defaultProps = {
+    //     label: _t("Customer Note"),
+    //     getter: (orderline) => orderline.get_customer_note(),
+    //     setter: (orderline, note) => orderline.set_customer_note(note),
+    //     class: "",
+    // };
 
     setup() {
         this.pos = usePos();
         this.dialog = useService("dialog");
     }
     onClick() {
-        return this.props.label == _t("General Note") ? this.addGeneralNote() : this.addLineNotes();
+        return this.pos.get_order()?.get_selected_orderline()
+            ? this.addLineNotes()
+            : this.addGeneralNote();
     }
     async addLineNotes() {
         const selectedOrderline = this.pos.get_order().get_selected_orderline();
-        const selectedNote = this.props.getter(selectedOrderline);
+        const selectedNote = this.props.getter(selectedOrderline) || "";
         const oldNote = selectedOrderline.getNote();
         const payload = await this.openTextInput(selectedNote);
-
         var quantity_with_note = 0;
         const changes = this.pos.getOrderChanges();
         for (const key in changes.orderlines) {
@@ -54,18 +55,20 @@ export class OrderlineNoteButton extends Component {
         } else {
             this.props.setter(selectedOrderline, payload);
         }
-
+        this.props.setter(selectedOrderline, payload);
         return { confirmed: typeof payload === "string", inputNote: payload, oldNote };
     }
     async addGeneralNote() {
         const selectedOrder = this.pos.get_order();
         const selectedNote = selectedOrder.general_note || "";
         const payload = await this.openTextInput(selectedNote);
-        selectedOrder.general_note = payload;
+        // selectedOrder.general_note = payload;
+        this.props.setter(selectedOrder, payload);
         return { confirmed: typeof payload === "string", inputNote: payload };
     }
     async openTextInput(selectedNote) {
         let buttons = [];
+        //TODO-manv: ADD default notes only on global notes (if no ol is selected) ?
         if (this._isInternalNote() || this.props.label == _t("General Note")) {
             buttons = this.pos.models["pos.note"].getAll().map((note) => ({
                 label: note.name,

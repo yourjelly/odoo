@@ -1116,6 +1116,12 @@ export class PosOrder extends Base {
     getName() {
         return this.getFloatingOrderName() || "";
     }
+    setGeneralNote(note) {
+        this.general_note = note;
+    }
+    getGeneralNote() {
+        return this.general_note || "";
+    }
 }
 
 registry.category("pos_available_models").add(PosOrder.pythonModel, PosOrder);
