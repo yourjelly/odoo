@@ -6977,9 +6977,6 @@ class BaseModel(metaclass=MetaModel):
     def __hash__(self):
         return hash((self._name, frozenset(self._ids)))
 
-    def __copy__(self):
-        return self
-
     def __deepcopy__(self, memo):
         return self
 

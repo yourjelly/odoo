@@ -13,14 +13,18 @@ class TestTaxesAdvancedHelpers(TestTaxCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.env.company.tax_calculation_rounding_method = 'round_globally'
         cls.currency = cls.env.company.currency_id
         cls.foreign_currency = cls.setup_other_currency('EUR')
 
-    def _with_global_discount(self, document, document_params, amount_type, amount):
+        cls.tax_groups = cls.env['account.tax.group'].create([
+            {'name': str(i), 'sequence': str(i)}
+            for i in range(1, 6)
+        ])
+
+    def _with_reduced_base_lines(self, document, document_params, amount_type, amount):
         AccountTax = self.env['account.tax']
         document_params = copy.deepcopy(document_params)
-        base_lines = AccountTax._prepare_global_discount_base_lines(
+        base_lines = AccountTax._reduce_base_lines(
             base_lines=document['lines'],
             company=self.env.company,
             amount_type=amount_type,
@@ -32,6 +36,7 @@ class TestTaxesAdvancedHelpers(TestTaxCommon):
                 'price_unit': base_line['price_unit'],
                 'tax_ids': base_line['tax_ids'],
                 'computation_key': base_line['computation_key'],
+                'tax_computation_manual_amounts': base_line['tax_computation_manual_amounts'],
             }
             for base_line in base_lines
         ]
@@ -56,17 +61,14 @@ class TestTaxesAdvancedHelpers(TestTaxCommon):
             },
             soft_checking=True,
         )
-        for percent, delta in (
-            (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0), (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0), (10, 0.0),
-            (11, 0.0), (12, 0.0), (13, 0.0), (14, 0.0), (15, 0.0), (16, 0.0), (17, 0.0), (18, 0.0), (19, 0.0), (20, 0.0),
-        ):
-            with self.subTest(percent=percent, delta=delta):
+        for percent in range(1, 21):
+            with self.subTest(percent=percent):
                 percent_factor = percent / 100.0
-                sub_document = self._with_global_discount(document, document_params, 'percent', percent)
+                sub_document = self._with_reduced_base_lines(document, document_params, 'percent', percent)
                 self.assert_tax_totals_summary(
                     sub_document,
                     {
-                        'total_amount_currency': self.foreign_currency.round(33.69 * (1 - percent_factor)) - delta,
+                        'total_amount_currency': self.foreign_currency.round(33.69 * (1 - percent_factor)),
                     },
                     soft_checking=True,
                 )
@@ -92,25 +94,22 @@ class TestTaxesAdvancedHelpers(TestTaxCommon):
             },
             soft_checking=True,
         )
-        for percent, delta in (
-            (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0), (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0), (10, 0.0),
-            (11, 0.0), (12, 0.0), (13, 0.0), (14, 0.0), (15, 0.0), (16, 0.0), (17, 0.0), (18, 0.0), (19, 0.0), (20, 0.0),
-        ):
-            with self.subTest(percent=percent, delta=delta):
+        for percent in range(1, 21):
+            with self.subTest(percent=percent):
                 percent_factor = percent / 100.0
-                sub_document = self._with_global_discount(document, document_params, 'percent', percent)
+                sub_document = self._with_reduced_base_lines(document, document_params, 'percent', percent)
                 self.assert_tax_totals_summary(
                     sub_document,
                     {
-                        'total_amount_currency': self.foreign_currency.round(35.6 * (1 - percent_factor)) - delta,
+                        'total_amount_currency': self.foreign_currency.round(35.6 * (1 - percent_factor)),
                     },
                     soft_checking=True,
                 )
 
     def test_taxes_l10n_in(self):
-        tax1 = self.percent_tax(6, include_base_amount=True)
-        tax2 = self.percent_tax(6, include_base_amount=True, is_base_affected=False)
-        tax3 = self.percent_tax(3)
+        tax1 = self.percent_tax(6, include_base_amount=True, tax_group_id=self.tax_groups[0].id)
+        tax2 = self.percent_tax(6, include_base_amount=True, is_base_affected=False, tax_group_id=self.tax_groups[1].id)
+        tax3 = self.percent_tax(3, tax_group_id=self.tax_groups[2].id)
         taxes = tax1 + tax2 + tax3
 
         document_params = self.init_document(
@@ -123,70 +122,420 @@ class TestTaxesAdvancedHelpers(TestTaxCommon):
         )
         with self.with_tax_calculation_rounding_method('round_globally'):
             document = self.populate_document(document_params)
-            self.assert_tax_totals_summary(
-                document,
-                {
-                    'base_amount_currency': 31.78,
-                    'base_amount': 6.36,
-                    'tax_amount_currency': 4.89,
-                    'tax_amount': 0.97,
-                    'total_amount_currency': 36.67,
-                    'total_amount': 7.33,
-                },
-                soft_checking=True,
-            )
-            for percent, delta in (
-                (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0), (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0), (10, 0.0),
-                (11, 0.0), (12, 0.0), (13, 0.0), (14, 0.0), (15, 0.0), (16, 0.0), (17, 0.0), (18, 0.0), (19, 0.0), (20, 0.0),
-            ):
-                with self.subTest(percent=percent, delta=delta):
-                    percent_factor = percent / 100.0
-                    sub_document = self._with_global_discount(document, document_params, 'percent', percent)
-                    self.assert_tax_totals_summary(
-                        sub_document,
-                        {
-                            'total_amount_currency': self.foreign_currency.round(36.67 * (1 - percent_factor)) - delta,
-                        },
-                        soft_checking=True,
-                    )
+            self.assert_tax_totals_summary(document, {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 31.78,
+                'base_amount': 6.36,
+                'tax_amount_currency': 4.89,
+                'tax_amount': 0.97,
+                'total_amount_currency': 36.67,
+                'total_amount': 7.33,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 31.78,
+                        'base_amount': 6.36,
+                        'tax_amount_currency': 4.89,
+                        'tax_amount': 0.97,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 31.78,
+                                'base_amount': 6.36,
+                                'tax_amount_currency': 1.91,
+                                'tax_amount': 0.38,
+                                'display_base_amount_currency': 31.78,
+                                'display_base_amount': 6.36,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 31.78,
+                                'base_amount': 6.36,
+                                'tax_amount_currency': 1.91,
+                                'tax_amount': 0.38,
+                                'display_base_amount_currency': 31.78,
+                                'display_base_amount': 6.36,
+                            },
+                            {
+                                'id': self.tax_groups[2].id,
+                                'base_amount_currency': 35.59,
+                                'base_amount': 7.12,
+                                'tax_amount_currency': 1.07,
+                                'tax_amount': 0.21,
+                                'display_base_amount_currency': 35.59,
+                                'display_base_amount': 7.12,
+                            },
+                        ],
+                    },
+                ],
+            })
 
-        # with self.with_tax_calculation_rounding_method('round_globally'):
-        #     document = self.populate_document(document_params)
-        #     expected_values = {
-        #         'same_tax_base': True,
-        #         'currency_id': self.foreign_currency.id,
-        #         'company_currency_id': self.currency.id,
-        #         'base_amount_currency': 31.78,
-        #         'base_amount': 6.36,
-        #         'tax_amount_currency': 4.89,
-        #         'tax_amount': 0.97,
-        #         'total_amount_currency': 36.67,
-        #         'total_amount': 7.33,
-        #         'subtotals': [
-        #             {
-        #                 'name': "Untaxed Amount",
-        #                 'base_amount_currency': 31.78,
-        #                 'base_amount': 6.36,
-        #                 'tax_amount_currency': 4.89,
-        #                 'tax_amount': 0.97,
-        #                 'tax_groups': [
-        #                     {
-        #                         'id': self.tax_groups[0].id,
-        #                         'base_amount_currency': 31.78,
-        #                         'base_amount': 6.36,
-        #                         'tax_amount_currency': 4.89,
-        #                         'tax_amount': 0.97,
-        #                         'display_base_amount_currency': 31.78,
-        #                         'display_base_amount': 6.36,
-        #                     },
-        #                 ],
-        #             },
-        #         ],
-        #     }
-        #     self.assert_tax_totals_summary(document, expected_values)
-        #     invoice = self.convert_document_to_invoice(document)
-        #     self.assert_invoice_tax_totals_summary(invoice, expected_values)
-        #
+            # Discount 2%
+            sub_document = self._with_reduced_base_lines(document, document_params, 'percent', 2)
+            self.assert_tax_totals_summary(sub_document, {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 31.15,
+                'base_amount': 6.23,
+                'tax_amount_currency': 4.79,
+                'tax_amount': 0.95,
+                'total_amount_currency': 35.94,
+                'total_amount': 7.18,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 31.15,
+                        'base_amount': 6.23,
+                        'tax_amount_currency': 4.79,
+                        'tax_amount': 0.95,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 31.15,
+                                'base_amount': 6.23,
+                                'tax_amount_currency': 1.87,
+                                'tax_amount': 0.37,
+                                'display_base_amount_currency': 31.15,
+                                'display_base_amount': 6.23,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 31.15,
+                                'base_amount': 6.23,
+                                'tax_amount_currency': 1.87,
+                                'tax_amount': 0.37,
+                                'display_base_amount_currency': 31.15,
+                                'display_base_amount': 6.23,
+                            },
+                            {
+                                'id': self.tax_groups[2].id,
+                                'base_amount_currency': 34.89,
+                                'base_amount': 6.98,
+                                'tax_amount_currency': 1.05,
+                                'tax_amount': 0.21,
+                                'display_base_amount_currency': 34.89,
+                                'display_base_amount': 6.98,
+                            },
+                        ],
+                    },
+                ],
+            })
+
+            # Discount 7%
+            sub_document = self._with_reduced_base_lines(document, document_params, 'percent', 7)
+            self.assert_tax_totals_summary(sub_document, {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 29.54,
+                'base_amount': 5.91,
+                'tax_amount_currency': 4.56,
+                'tax_amount': 0.9,
+                'total_amount_currency': 34.1,
+                'total_amount': 6.81,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 29.54,
+                        'base_amount': 5.91,
+                        'tax_amount_currency': 4.56,
+                        'tax_amount': 0.9,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 29.54,
+                                'base_amount': 5.91,
+                                'tax_amount_currency': 1.78,
+                                'tax_amount': 0.35,
+                                'display_base_amount_currency': 29.54,
+                                'display_base_amount': 5.91,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 29.54,
+                                'base_amount': 5.91,
+                                'tax_amount_currency': 1.78,
+                                'tax_amount': 0.35,
+                                'display_base_amount_currency': 29.54,
+                                'display_base_amount': 5.91,
+                            },
+                            {
+                                'id': self.tax_groups[2].id,
+                                'base_amount_currency': 33.08,
+                                'base_amount': 6.62,
+                                'tax_amount_currency': 1.0,
+                                'tax_amount': 0.20,
+                                'display_base_amount_currency': 33.08,
+                                'display_base_amount': 6.62,
+                            },
+                        ],
+                    },
+                ],
+            })
+
+            # Discount 18%
+            sub_document = self._with_reduced_base_lines(document, document_params, 'percent', 18)
+            self.assert_tax_totals_summary(sub_document, {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 26.05,
+                'base_amount': 5.21,
+                'tax_amount_currency': 4.02,
+                'tax_amount': 0.79,
+                'total_amount_currency': 30.07,
+                'total_amount': 6.0,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 26.05,
+                        'base_amount': 5.21,
+                        'tax_amount_currency': 4.02,
+                        'tax_amount': 0.79,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 26.05,
+                                'base_amount': 5.21,
+                                'tax_amount_currency': 1.57,
+                                'tax_amount': 0.31,
+                                'display_base_amount_currency': 26.05,
+                                'display_base_amount': 5.21,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 26.05,
+                                'base_amount': 5.21,
+                                'tax_amount_currency': 1.57,
+                                'tax_amount': 0.31,
+                                'display_base_amount_currency': 26.05,
+                                'display_base_amount': 5.21,
+                            },
+                            {
+                                'id': self.tax_groups[2].id,
+                                'base_amount_currency': 29.17,
+                                'base_amount': 5.84,
+                                'tax_amount_currency': 0.88,
+                                'tax_amount': 0.17,
+                                'display_base_amount_currency': 29.17,
+                                'display_base_amount': 5.84,
+                            },
+                        ],
+                    },
+                ],
+            })
+
+        with self.with_tax_calculation_rounding_method('round_per_line'):
+            document = self.populate_document(document_params)
+            self.assert_tax_totals_summary(document, {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 31.78,
+                'base_amount': 6.36,
+                'tax_amount_currency': 4.86,
+                'tax_amount': 0.98,
+                'total_amount_currency': 36.64,
+                'total_amount': 7.34,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 31.78,
+                        'base_amount': 6.36,
+                        'tax_amount_currency': 4.86,
+                        'tax_amount': 0.98,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 31.78,
+                                'base_amount': 6.36,
+                                'tax_amount_currency': 1.9,
+                                'tax_amount': 0.38,
+                                'display_base_amount_currency': 31.78,
+                                'display_base_amount': 6.36,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 31.78,
+                                'base_amount': 6.36,
+                                'tax_amount_currency': 1.9,
+                                'tax_amount': 0.38,
+                                'display_base_amount_currency': 31.78,
+                                'display_base_amount': 6.36,
+                            },
+                            {
+                                'id': self.tax_groups[2].id,
+                                'base_amount_currency': 35.58,
+                                'base_amount': 7.12,
+                                'tax_amount_currency': 1.06,
+                                'tax_amount': 0.22,
+                                'display_base_amount_currency': 35.58,
+                                'display_base_amount': 7.12,
+                            },
+                        ],
+                    },
+                ],
+            })
+
+            # Discount 2%
+            sub_document = self._with_reduced_base_lines(document, document_params, 'percent', 2)
+            self.assert_tax_totals_summary(sub_document, {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 31.15,
+                'base_amount': 6.23,
+                'tax_amount_currency': 4.76,
+                'tax_amount': 0.96,
+                'total_amount_currency': 35.91,
+                'total_amount': 7.19,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 31.15,
+                        'base_amount': 6.23,
+                        'tax_amount_currency': 4.76,
+                        'tax_amount': 0.96,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 31.15,
+                                'base_amount': 6.23,
+                                'tax_amount_currency': 1.86,
+                                'tax_amount': 0.37,
+                                'display_base_amount_currency': 31.15,
+                                'display_base_amount': 6.23,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 31.15,
+                                'base_amount': 6.23,
+                                'tax_amount_currency': 1.86,
+                                'tax_amount': 0.37,
+                                'display_base_amount_currency': 31.15,
+                                'display_base_amount': 6.23,
+                            },
+                            {
+                                'id': self.tax_groups[2].id,
+                                'base_amount_currency': 34.87,
+                                'base_amount': 6.98,
+                                'tax_amount_currency': 1.04,
+                                'tax_amount': 0.22,
+                                'display_base_amount_currency': 34.87,
+                                'display_base_amount': 6.98,
+                            },
+                        ],
+                    },
+                ],
+            })
+
+            # Discount 7%
+            sub_document = self._with_reduced_base_lines(document, document_params, 'percent', 7)
+            self.assert_tax_totals_summary(sub_document, {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 29.55,
+                'base_amount': 5.91,
+                'tax_amount_currency': 4.53,
+                'tax_amount': 0.91,
+                'total_amount_currency': 34.08,
+                'total_amount': 6.82,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 29.55,
+                        'base_amount': 5.91,
+                        'tax_amount_currency': 4.53,
+                        'tax_amount': 0.91,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 29.55,
+                                'base_amount': 5.91,
+                                'tax_amount_currency': 1.77,
+                                'tax_amount': 0.35,
+                                'display_base_amount_currency': 29.55,
+                                'display_base_amount': 5.91,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 29.55,
+                                'base_amount': 5.91,
+                                'tax_amount_currency': 1.77,
+                                'tax_amount': 0.35,
+                                'display_base_amount_currency': 29.55,
+                                'display_base_amount': 5.91,
+                            },
+                            {
+                                'id': self.tax_groups[2].id,
+                                'base_amount_currency': 33.09,
+                                'base_amount': 6.62,
+                                'tax_amount_currency': 0.99,
+                                'tax_amount': 0.21,
+                                'display_base_amount_currency': 33.09,
+                                'display_base_amount': 6.62,
+                            },
+                        ],
+                    },
+                ],
+            })
+
+            # Discount 18%
+            sub_document = self._with_reduced_base_lines(document, document_params, 'percent', 18)
+            self.assert_tax_totals_summary(sub_document, {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 26.05,
+                'base_amount': 5.21,
+                'tax_amount_currency': 3.99,
+                'tax_amount': 0.80,
+                'total_amount_currency': 30.04,
+                'total_amount': 6.01,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 26.05,
+                        'base_amount': 5.21,
+                        'tax_amount_currency': 3.99,
+                        'tax_amount': 0.80,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 26.05,
+                                'base_amount': 5.21,
+                                'tax_amount_currency': 1.56,
+                                'tax_amount': 0.31,
+                                'display_base_amount_currency': 26.05,
+                                'display_base_amount': 5.21,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 26.05,
+                                'base_amount': 5.21,
+                                'tax_amount_currency': 1.56,
+                                'tax_amount': 0.31,
+                                'display_base_amount_currency': 26.05,
+                                'display_base_amount': 5.21,
+                            },
+                            {
+                                'id': self.tax_groups[2].id,
+                                'base_amount_currency': 29.17,
+                                'base_amount': 5.84,
+                                'tax_amount_currency': 0.87,
+                                'tax_amount': 0.18,
+                                'display_base_amount_currency': 29.17,
+                                'display_base_amount': 5.84,
+                            },
+                        ],
+                    },
+                ],
+            })
+
         # tax1.price_include_override = 'tax_included'
         # tax2.price_include_override = 'tax_included'
         # document_params = self.init_document(
