@@ -219,6 +219,26 @@ class AccountMove(models.Model):
         related="statement_line_id.statement_id"
     )
 
+    # === Adjusting Entries fields === #
+    adjusting_entries_origin_move_id = fields.Many2one(
+        comodel_name='account.move',
+        index='btree_not_null',
+        string="Adjusting Entries Origin",
+    )
+    adjusting_entries_origin_move_type = fields.Selection(
+        string="Adjusting Entries Origin Move Type",
+        related="adjusting_entries_origin_move_id.move_type",
+    )
+    adjusting_entries_move_ids = fields.One2many(
+        comodel_name='account.move',
+        inverse_name='adjusting_entries_origin_move_id',
+        string="Created Adjusting Entries",
+    )
+    adjusting_entries_count = fields.Integer(
+        string="Adjusting Entries Count",
+        compute='_compute_adjusting_entries_count',
+    )
+
     # === Cash basis feature fields === #
     # used to keep track of the tax cash basis reconciliation. This is needed
     # when cancelling the source: it will post the inverse journal entry to
@@ -1171,6 +1191,11 @@ class AccountMove(models.Model):
     def _compute_payment_count(self):
         for invoice in self:
             invoice.payment_count = len(invoice.matched_payment_ids)
+
+    @api.depends('adjusting_entries_move_ids')
+    def _compute_adjusting_entries_count(self):
+        for move in self:
+            move.adjusting_entries_count = len(move.adjusting_entries_move_ids)
 
     @api.depends('invoice_payment_term_id', 'invoice_date', 'currency_id', 'amount_total_in_currency_signed', 'invoice_date_due')
     def _compute_needed_terms(self):
@@ -4982,6 +5007,37 @@ class AccountMove(models.Model):
             'view_mode': 'form',
             'domain': [('id', 'in', self.tax_cash_basis_created_move_ids.ids)],
             'views': [(self.env.ref('account.view_move_tree').id, 'list'), (False, 'form')],
+        }
+
+    def open_adjusting_entries(self):
+        self.ensure_one()
+        return {
+            'name': _('Adjusting Entries'),
+            'domain': [('id', 'in', self.adjusting_entries_move_ids.ids)],
+            'res_model': 'account.move',
+            'view_mode': 'list,form',
+            'type': 'ir.actions.act_window',
+            'views': [(self.env.ref('account.view_move_tree').id, 'list'), (False, 'form')],
+        }
+
+    def open_adjusting_entry_origin_move(self):
+        self.ensure_one()
+        match self.adjusting_entries_origin_move_type:
+            case 'in_invoice':
+                move_name = 'Bill'
+            case 'out_refund':
+                move_name = 'Credit Note'
+            case 'in_refund':
+                move_name = 'Refund'
+            case _:
+                move_name = 'Invoice'
+        return {
+            'name': _('Related %s', move_name),
+            'res_model': 'account.move',
+            'res_id': self.adjusting_entries_origin_move_id.id,
+            'view_mode': 'form',
+            'type': 'ir.actions.act_window',
+            'views': [(False, 'form')],
         }
 
     def action_switch_move_type(self):
