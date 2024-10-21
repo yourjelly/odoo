@@ -33,10 +33,10 @@ patch(Navbar.prototype, {
         return true;
     },
     setFloatingOrder(floatingOrder) {
-        this.pos.set_order(floatingOrder);
+        this.pos.setOrder(floatingOrder);
 
         const props = {};
-        const screenName = floatingOrder.get_screen_data().name;
+        const screenName = floatingOrder.getScreenData().name;
         if (screenName === "PaymentScreen") {
             props.orderUuid = floatingOrder.uuid;
         }
@@ -63,7 +63,7 @@ patch(Navbar.prototype, {
                     return this.pos.setTableFromUi(table);
                 }
                 const floating_order = this.pos
-                    .get_open_orders()
+                    .getOpenOrders()
                     .find((o) => o.floatingOrderName === table_number);
                 if (floating_order) {
                     return this.setFloatingOrder(floating_order);
