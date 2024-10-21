@@ -10,6 +10,24 @@
                     <field name="group_l10n_in_reseller"/>
                 </setting>
             </block>
+            <xpath expr="//setting[@id='eu_service']" position="attributes">
+                <attribute name="invisible">country_code == 'IN'</attribute>
+            </xpath>
+            <xpath expr="//setting[@id='tax_exigibility']" position="attributes">
+                <attribute name="invisible">country_code == 'IN'</attribute>
+            </xpath>
+            <xpath expr="//setting[@id='vies_service_setting']" position="attributes">
+                <attribute name="invisible">country_code == 'IN'</attribute>
+            </xpath>
+            <xpath expr="//setting[@id='collect_customer_payment']" position="attributes">
+                <attribute name="invisible">country_code == 'IN'</attribute>
+            </xpath>
+            <xpath expr="//setting[@id='sepa_payments']" position="attributes">
+                <attribute name="invisible">country_code == 'IN'</attribute>
+            </xpath>
+            <xpath expr="//setting[@id='intrastat_statistics']" position="attributes">
+                <attribute name="invisible">country_code == 'IN'</attribute>
+            </xpath>
             <xpath expr="//app[@name='account']" position="inside">
                 <div id="india_integration_section">
                     <block title="Indian Integration" id="india_localization" invisible="country_code != 'IN'">
