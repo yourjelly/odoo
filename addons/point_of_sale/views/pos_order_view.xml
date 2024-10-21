@@ -199,7 +199,7 @@
                             </group>
                         </group>
                     </page>
-                    <page string="General Notes" name="notes">
+                    <page string="Customer Note" name="notes">
                         <field name="general_note" readonly="1"/>
                     </page>
                 </notebook>
