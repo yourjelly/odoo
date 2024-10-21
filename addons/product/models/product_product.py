@@ -305,13 +305,7 @@ class ProductProduct(models.Model):
 
     def _compute_variant_item_count(self):
         for product in self:
-            domain = [
-                ('pricelist_id.active', '=', True),
-                '|',
-                    '&', ('product_tmpl_id', '=', product.product_tmpl_id.id), ('applied_on', '=', '1_product'),
-                    '&', ('product_id', '=', product.id), ('applied_on', '=', '0_product_variant'),
-                ('compute_price', '=', 'fixed'),
-            ]
+            domain = product._get_pricelist_item_domain()
             product.pricelist_item_count = self.env['product.pricelist.item'].search_count(domain)
 
     def _compute_product_document_count(self):
@@ -613,11 +607,7 @@ class ProductProduct(models.Model):
 
     def open_pricelist_rules(self):
         self.ensure_one()
-        domain = ['|',
-            '&', ('product_tmpl_id', '=', self.product_tmpl_id.id), ('applied_on', '=', '1_product'),
-            '&', ('product_id', '=', self.id), ('applied_on', '=', '0_product_variant'),
-            ('compute_price', '=', 'fixed'),
-        ]
+        domain = self._get_pricelist_item_domain()
         return {
             'name': _('Price Rules'),
             'view_mode': 'list,form',
@@ -654,6 +644,15 @@ class ProductProduct(models.Model):
         return res
 
     #=== BUSINESS METHODS ===#
+
+    def _get_pricelist_item_domain(self):
+        return [
+            ('pricelist_id.active', '=', True),
+            '|',
+                '&', ('product_tmpl_id', '=', self.product_tmpl_id.id), ('applied_on', '=', '1_product'),
+                '&', ('product_id', '=', self.id), ('applied_on', '=', '0_product_variant'),
+            ('compute_price', '=', 'fixed'),
+        ]
 
     def _prepare_sellers(self, params=False):
         sellers = self.seller_ids.filtered(lambda s: s.partner_id.active and (not s.product_id or s.product_id == self))

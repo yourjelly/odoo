@@ -183,12 +183,8 @@ class ProductTemplate(models.Model):
     def _compute_item_count(self):
         for template in self:
             # Pricelist item count counts the rules applicable on current template or on its variants.
-            template.pricelist_item_count = template.env['product.pricelist.item'].search_count([
-                '&',
-                '|', ('product_tmpl_id', '=', template.id), ('product_id', 'in', template.product_variant_ids.ids),
-                ('pricelist_id.active', '=', True),
-                ('compute_price', '=', 'fixed'),
-            ])
+            domain = template._get_pricelist_item_domain()
+            template.pricelist_item_count = template.env['product.pricelist.item'].search_count(domain)
 
     def _compute_product_document_count(self):
         for template in self:
@@ -591,11 +587,7 @@ class ProductTemplate(models.Model):
 
     def open_pricelist_rules(self):
         self.ensure_one()
-        domain = ['|',
-            ('product_tmpl_id', '=', self.id),
-            ('product_id', 'in', self.product_variant_ids.ids),
-            ('compute_price', '=', 'fixed'),
-        ]
+        domain = self._get_pricelist_item_domain()
         return {
             'name': _('Price Rules'),
             'view_mode': 'list,form',
@@ -655,6 +647,15 @@ class ProductTemplate(models.Model):
         }
 
     #=== BUSINESS METHODS ===#
+
+    def _get_pricelist_item_domain(self):
+        return [
+            ('pricelist_id.active', '=', True),
+            ('compute_price', '=', 'fixed'),
+            '|',
+                ('product_tmpl_id', '=', self.id),
+                ('product_id', 'in', self.product_variant_ids.ids),
+        ]
 
     def _get_product_price_context(self, combination):
         self.ensure_one()
