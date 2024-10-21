@@ -317,3 +317,16 @@ registry.category("web_tour.tours").add("OrderChange", {
             TicketScreen.receiptChangeIs("7.80"),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("CrmTeamTour", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            FloorScreen.clickTable("5"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            ProductScreen.back(),
+            FloorScreen.clickTable("5"),
+            ProductScreen.back(),
+        ].flat(),
+});
