@@ -29,6 +29,16 @@ class WebsiteSaleCollect(WebsiteSale):
         """ Override of `website_sale` to include the unavailable products for the selected pickup
         location. """
         res = super()._prepare_checkout_page_values(order_sudo, **query_params)
+        available_dms = order_sudo._get_delivery_methods()
+
+        for delivery_method in available_dms:
+            if len(delivery_method.warehouse_ids) == 1:
+                order_sudo.carrier_id = delivery_method.id
+                order_sudo.pickup_location_data = order_sudo._get_pickup_locations(
+                    order_sudo.partner_shipping_id.zip,
+                    order_sudo.partner_shipping_id.country_id
+                )['pickup_locations'][0]
+
         if order_sudo.carrier_id.delivery_type == 'in_store' and order_sudo.pickup_location_data:
             res['unavailable_order_lines'] = order_sudo._get_unavailable_order_lines(
                 order_sudo.pickup_location_data.get('id')
