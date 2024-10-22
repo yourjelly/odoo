@@ -8,14 +8,10 @@
                         <t t-if="props.slots?.default" t-slot="default" line="line"/>
                         <Orderline t-else="" line="line" />
                     </t>
-                    <!-- <div class="mt-1 bg-opacity-75"
-                        t-attf-class="{{ props.screenName == 'ReceiptScreen' ? 'p-0' : 'p-2 border-bottom border-top border-opacity-75'}}"
-                        t-if="props.generalNote"> -->
-                        <!-- TODO-manv: ask mobt for bg color and line break -->
                     <div t-if="props.generalNote"
                         t-attf-class="{{ props.screenName == 'ReceiptScreen' ? 'mt-1 bg-opacity-75 p-0' : 'customer-note w-100 p-2 mt-2 overflow-hidden rounded text-break text-bg-warning bg-opacity-25 mt-0'}}">
-                        <div class="row flex-wrap">
-                            <div class="col-auto">
+                        <div class="row flex-wrap w-100 m-0"> <!-- Add w-100 and remove margins -->
+                            <div class="col-auto px-1">
                                 <i class="fa fa-sticky-note me-1 fa-lg" role="img"
                                     aria-label="Customer Note" title="Customer Note"/>
                             </div>

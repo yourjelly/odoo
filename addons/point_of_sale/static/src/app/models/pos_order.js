@@ -1117,7 +1117,8 @@ export class PosOrder extends Base {
         return this.getFloatingOrderName() || "";
     }
     setGeneralNote(note) {
-        this.general_note = note;
+        this.general_note = note || "";
+        this.setDirty();
     }
     getGeneralNote() {
         return this.general_note || "";

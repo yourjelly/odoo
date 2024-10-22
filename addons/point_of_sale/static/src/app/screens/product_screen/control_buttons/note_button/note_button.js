@@ -46,6 +46,7 @@ export class NoteButton extends Component {
         }
         const saved_quantity = selectedOrderline.qty - quantity_with_note;
         if (saved_quantity > 0 && quantity_with_note > 0) {
+            //TODO-manv: use setter to set note field?
             await this.pos.addLineToCurrentOrder({
                 product_id: selectedOrderline.product_id,
                 qty: quantity_with_note,
@@ -62,14 +63,15 @@ export class NoteButton extends Component {
         const selectedOrder = this.pos.get_order();
         const selectedNote = selectedOrder.general_note || "";
         const payload = await this.openTextInput(selectedNote);
-        // selectedOrder.general_note = payload;
         this.props.setter(selectedOrder, payload);
         return { confirmed: typeof payload === "string", inputNote: payload };
     }
     async openTextInput(selectedNote) {
         let buttons = [];
-        //TODO-manv: ADD default notes only on global notes (if no ol is selected) ?
-        if (this._isInternalNote() || this.props.label == _t("General Note")) {
+        if (
+            this._isInternalNote() ||
+            this.pos.get_order()?.get_selected_orderline() === undefined
+        ) {
             buttons = this.pos.models["pos.note"].getAll().map((note) => ({
                 label: note.name,
                 isSelected: selectedNote.split("\n").includes(note.name), // Check if the note is already selected
