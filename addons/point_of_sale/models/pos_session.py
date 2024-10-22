@@ -92,8 +92,6 @@ class PosSession(models.Model):
     update_stock_at_closing = fields.Boolean('Stock should be updated at closing')
     bank_payment_ids = fields.One2many('account.payment', 'pos_session_id', 'Bank Payments', help='Account payments representing aggregated and bank split payments.')
 
-    _sql_constraints = [('uniq_name', 'unique(name)', "The name of this POS Session must be unique!")]
-
     @api.model
     def _load_pos_data_relations(self, model, response):
         model_fields = self.env[model]._fields
@@ -362,12 +360,15 @@ class PosSession(models.Model):
             # installation we do the minimal configuration. Impossible to do in
             # the .xml files as the CoA is not yet installed.
             pos_config = self.env['pos.config'].browse(config_id)
-
+            session_counter = 0
             pos_name = self.env['ir.sequence'].with_context(
                 company_id=pos_config.company_id.id
             ).next_by_code('pos.session')
-            if vals.get('name'):
-                pos_name += ' ' + vals['name']
+            pos_name = pos_name.split("/")[0] + "/"
+            sessions = self.sudo().search_read([('name', 'ilike', pos_name)], ['name'], order='name desc', limit=1)
+            if sessions:
+                session_counter = int(sessions[0]['name'].split('/')[-1]) + 1
+            pos_name += str(session_counter).zfill(5)
 
             update_stock_at_closing = pos_config.company_id.point_of_sale_update_stock_quantities == "closing"
 
