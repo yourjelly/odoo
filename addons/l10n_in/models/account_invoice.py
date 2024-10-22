@@ -2,10 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import base64
 import re
+import markupsafe
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, RedirectWarning, UserError
 from odoo.tools.image import image_data_uri
+from odoo.addons.l10n_in.models.iap_account import IAP_SERVICE_NAME
 
 
 class AccountMove(models.Model):
@@ -197,3 +199,34 @@ class AccountMove(models.Model):
     def _l10n_in_get_bill_from_irn(self, irn):
         # TO OVERRIDE
         return False
+
+    # ----------------------------------------------------------
+    # Utils
+    # ----------------------------------------------------------
+
+    @api.model
+    def _l10n_in_extract_digits(self, string):
+        if not string:
+            return string
+        matches = re.findall(r"\d+", string)
+        result = "".join(matches)
+        return result
+
+    @api.model
+    def _l10n_in_round_value(self, amount, precision_digits=2):
+        """
+            This method is call for rounding.
+            If anything is wrong with rounding then we quick fix in method
+        """
+        value = round(amount, precision_digits)
+        # avoid -0.0
+        return value or 0.0
+
+    def _l10n_in_get_iap_buy_credits_message(self, company):
+        url = self.env["iap.account"].get_credits_url(service_name=IAP_SERVICE_NAME)
+        return markupsafe.Markup("""<p><b>%s</b></p><p>%s <a href="%s">%s</a></p>""") % (
+            _("You have insufficient credits to send this document!"),
+            _("Please buy more credits and retry: "),
+            url,
+            _("Buy Credits")
+        )

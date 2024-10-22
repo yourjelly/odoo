@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from stdnum.in_ import pan, gstin
 
 
@@ -36,6 +36,8 @@ class ResCompany(models.Model):
     )
     l10n_in_pan_type = fields.Char(string="PAN Type", compute="_compute_l10n_in_pan_type")
     l10n_in_gst_state_warning = fields.Char(related="partner_id.l10n_in_gst_state_warning")
+    l10n_in_tan = fields.Char(string="TAN", help="Tax Deduction and Collection Account Number")
+    l10n_in_is_gst_registered = fields.Boolean(string="Register Under GST")
 
     @api.depends('vat')
     def _compute_l10n_in_hsn_code_digit_and_l10n_in_pan(self):
@@ -81,6 +83,11 @@ class ResCompany(models.Model):
         for record in self:
             if record.l10n_in_pan and not pan.is_valid(record.l10n_in_pan):
                 raise ValidationError(_('The entered PAN seems invalid. Please enter a valid PAN.'))
+
+    @api.constrains('l10n_in_is_gst_registered')
+    def _check_l10n_in_is_gst_registered(self):
+        if not self.l10n_in_is_gst_registered:
+            raise UserError(_("Once GST is enabled, it cannot be disabled."))
 
     def action_update_state_as_per_gstin(self):
         self.ensure_one()

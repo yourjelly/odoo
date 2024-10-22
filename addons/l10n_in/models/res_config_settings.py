@@ -19,11 +19,15 @@ class ResConfigSettings(models.TransientModel):
     module_l10n_in_edi_ewaybill = fields.Boolean('Indian Electronic Waybill')
     module_l10n_in_gstin_status = fields.Boolean('Check GST Number Status')
     module_l10n_in_withholding = fields.Boolean('Indian TDS and TCS')
+    module_l10n_in_reports_gstr = fields.Boolean("GSTR India eFiling")
     l10n_in_hsn_code_digit = fields.Selection(related='company_id.l10n_in_hsn_code_digit', readonly=False)
     module_l10n_in_enet_batch_payment = fields.Boolean(string="Vendor Payment")
+    l10n_in_is_gst_registered = fields.Boolean(related='company_id.l10n_in_is_gst_registered', readonly=False)
+    l10n_in_gstin = fields.Char(related='company_id.vat', readonly=False)
+    l10n_in_tan = fields.Char(related='company_id.l10n_in_tan', readonly=False)
 
     def l10n_in_edi_buy_iap(self):
-        if not self.l10n_in_edi_production_env or not (self.module_l10n_in_edi or self.module_l10n_in_gstin_status):
+        if not self.l10n_in_edi_production_env or not (self.module_l10n_in_edi or self.module_l10n_in_gstin_status or self.module_l10n_in_reports_gstr):
             raise ValidationError(_(
                 "Please ensure that at least one Indian service and production environment is enabled,"
                 " and save the configuration to proceed with purchasing credits."
