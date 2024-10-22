@@ -57,14 +57,14 @@ class FileManager:
         self.glob = glob
         self._modules = {
             addon.name: addon
-            for addons in addons_path
-            for addon in Path(addons).iterdir()
+            for addons in map(Path, addons_path)
+            for addon in addons.iterdir()
             if (addon / '__manifest__.py').exists()
         }
         self._files = {
-            str(path): FileAccessor(path, addon)
-            for addon in self._modules.values()
-            for path in addon.glob(glob)
+            str(path): FileAccessor(path, addons / path.relative_to(addons).parts[0])
+            for addons in map(Path, addons_path)
+            for path in addons.glob(glob)
             if path.is_file() and path.name.endswith(AVAILABLE_EXT)
         }
 
@@ -84,7 +84,7 @@ class FileManager:
             file = self._files.get(str(path))
             if file is None:
                 # make the file editable if it matches the glob
-                editable = path.relative_to(addon).match(self.glob)
+                editable = path.relative_to(addon.parent).match(self.glob)
                 file = FileAccessor(path, addon, readonly=(not editable))
                 if editable:
                     self._files[str(file.path)] = file
