@@ -554,6 +554,7 @@ export class PosOrderline extends Base {
 
     set_customer_note(note) {
         this.customer_note = note || "";
+        //TODO-manv: when setting customer note in "Furniture shop" then going to backend and back to selling, the note is note set
         this.setDirty();
     }
 

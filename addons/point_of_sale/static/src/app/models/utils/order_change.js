@@ -21,7 +21,11 @@ export const changesToOrder = (
         }
     }
 
-    return { new: toAdd, cancelled: toRemove, generalNote: orderChanges.generalNote };
+    return {
+        new: toAdd,
+        cancelled: toRemove,
+        generalCustomerNote: orderChanges.generalCustomerNote,
+    };
 };
 
 /**
@@ -110,10 +114,10 @@ export const getOrderChanges = (order, skipped = false, orderPreparationCategori
         count: changesCount,
     };
 
-    // if `generalNote` key is present, then there is a change in the generalNote
-    const lastGeneralNote = order.last_order_preparation_change.generalNote;
-    if (lastGeneralNote !== order.general_note) {
-        result.generalNote = order.general_note;
+    // if `generalCustomerNote` key is present, then there is a change in the generalCustomerNote
+    const lastGeneralCustomerNote = order.last_order_preparation_change.generalCustomerNote;
+    if (lastGeneralCustomerNote !== order.general_customer_note) {
+        result.generalCustomerNote = order.general_customer_note;
     }
     return result;
 };

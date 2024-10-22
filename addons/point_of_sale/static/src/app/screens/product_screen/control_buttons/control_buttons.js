@@ -117,6 +117,7 @@ export class ControlButtons extends Component {
         });
     }
     internalNoteLabel(order) {
+        // TODO-manv: to remove?
         if (order) {
             return _t("General Note");
         }

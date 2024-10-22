@@ -27,8 +27,8 @@
                     icon="'fa fa-sticky-note'"/>
                 <NoteButton t-else=""
                     label.translate="Customer Note"
-                    getter="(order) => order.getGeneralNote()"
-                    setter="(order, note) => order.setGeneralNote(note)"
+                    getter="(order) => order.getGeneralCustomerNote()"
+                    setter="(order, note) => order.setGeneralCustomerNote(note)"
                     class="buttonClass"
                     t-key="1"
                     icon="'fa fa-sticky-note'"/>

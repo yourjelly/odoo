@@ -59,9 +59,9 @@ export class OrderlineNoteButton extends Component {
     }
     async addGeneralNote() {
         const selectedOrder = this.pos.get_order();
-        const selectedNote = selectedOrder.general_note || "";
+        const selectedNote = selectedOrder.general_customer_note || "";
         const payload = await this.openTextInput(selectedNote);
-        selectedOrder.general_note = payload;
+        selectedOrder.general_customer_note = payload;
         return { confirmed: typeof payload === "string", inputNote: payload };
     }
     async openTextInput(selectedNote) {

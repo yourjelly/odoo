@@ -8,7 +8,7 @@
                         <t t-if="props.slots?.default" t-slot="default" line="line"/>
                         <Orderline t-else="" line="line" />
                     </t>
-                    <div t-if="props.generalNote"
+                    <div t-if="props.generalCustomerNote"
                         t-attf-class="{{ props.screenName == 'ReceiptScreen' ? 'mt-1 bg-opacity-75 p-0' : 'customer-note w-100 p-2 mt-2 overflow-hidden rounded text-break text-bg-warning bg-opacity-25 mt-0'}}">
                         <div class="row flex-wrap w-100 m-0"> <!-- Add w-100 and remove margins -->
                             <div class="col-auto px-1">
@@ -16,7 +16,7 @@
                                     aria-label="Customer Note" title="Customer Note"/>
                             </div>
                             <div class="col ps-0">
-                                <t t-foreach="props.generalNote.split('\n')" t-as="subNote"
+                                <t t-foreach="props.generalCustomerNote.split('\n')" t-as="subNote"
                                     t-key="subNote_index">
                                     <div class="d-inline text-break"> • <t t-esc="subNote"/><br/>
                                     </div>
