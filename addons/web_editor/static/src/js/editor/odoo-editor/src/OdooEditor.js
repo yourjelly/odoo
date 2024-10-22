@@ -4184,7 +4184,7 @@ export class OdooEditor extends EventTarget {
     /**
      * @private
      */
-    _onSelectionChange() {
+    _onSelectionChange(ev) {
         const currentKeyPress = this._currentKeyPress;
         delete this._currentKeyPress;
         const selection = this.document.getSelection();
@@ -4195,6 +4195,58 @@ export class OdooEditor extends EventTarget {
             return;
         }
         const anchorNode = selection.anchorNode;
+        const isSelectionInEditable = this.isSelectionInEditable(selection);
+        if (this._isMouseUp && selection.isCollapsed && isSelectionInEditable) {
+            const range = getDeepRange(this.editable);
+            const { startContainer, startOffset, endContainer, endOffset } = range;
+            const linkElement = closestElement(startContainer, "a");
+            if (linkElement) {
+                const parentBlockElement = closestBlock(linkElement);
+                const linkIndex = [...parentBlockElement.childNodes].indexOf(linkElement);
+                const linkDescendants = descendants(linkElement).filter(
+                    (node) => !(node.nodeType === Node.TEXT_NODE && node.nodeValue === "\uFEFF")
+                );
+                const isZeroWidthSpace = (node) =>
+                    node.nodeType === Node.TEXT_NODE && node.nodeValue === "\uFEFF";
+
+                const atStart =
+                    linkDescendants.indexOf(startContainer) === 0 ||
+                    (isZeroWidthSpace(startContainer) && startContainer === linkElement.firstChild);
+                const atEnd =
+                    linkDescendants.indexOf(endContainer) === linkDescendants.length - 1 ||
+                    (isZeroWidthSpace(endContainer) && endContainer === linkElement.lastChild);
+                if (atStart) {
+                    let shouldPositionCursorAtStart = true;
+                    if (
+                        startContainer.nodeType === Node.TEXT_NODE &&
+                        startContainer.nodeValue !== "\uFEFF" &&
+                        startOffset !== 0
+                    ) {
+                        shouldPositionCursorAtStart = false;
+                    }
+                    if (shouldPositionCursorAtStart) {
+                        ev.preventDefault();
+                        delete this._isMouseUp;
+                        setSelection(parentBlockElement, linkIndex - 1);
+                    }
+                }
+                if (atEnd) {
+                    let shouldPositionCursorAtEnd = true;
+                    if (
+                        endContainer.nodeType === Node.TEXT_NODE &&
+                        endContainer.nodeValue !== "\uFEFF" &&
+                        endOffset !== nodeSize(endContainer)
+                    ) {
+                        shouldPositionCursorAtEnd = false;
+                    }
+                    if (shouldPositionCursorAtEnd) {
+                        ev.preventDefault();
+                        delete this._isMouseUp;
+                        setSelection(parentBlockElement, linkIndex + 2);
+                    }
+                }
+            }
+        }
         // Correct cursor if at editable root.
         if (
             selection.isCollapsed &&
@@ -4212,7 +4264,6 @@ export class OdooEditor extends EventTarget {
                 this.deselectTable();
             }
         }
-        const isSelectionInEditable = this.isSelectionInEditable(selection);
         if (!appliedCustomSelection) {
             this._updateToolbar(!selection.isCollapsed && isSelectionInEditable);
         }
@@ -4632,7 +4683,7 @@ export class OdooEditor extends EventTarget {
 
     _onMouseup(ev) {
         this._currentMouseState = ev.type;
-
+        this._isMouseUp = ev.type === "mouseup";
         this._fixFontAwesomeSelection();
     }
 
