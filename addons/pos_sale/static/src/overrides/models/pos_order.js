@@ -10,4 +10,7 @@ patch(PosOrder.prototype, {
         }
         return productIds;
     },
+    isSettleOrder() {
+        return this.lines.some((line) => !!line.sale_order_line_id);
+    },
 });
