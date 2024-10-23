@@ -2271,12 +2271,12 @@ class AccountTax(models.Model):
                         new_base_lines.append(self._prepare_base_line_for_taxes_computation(
                             base_line,
                             tax_ids=new_taxes,
-                            manual_tax_amounts = {
-                                (tax_data['tax'].id, tax_data['is_reverse_charge']): {
-                                    'tax_amount': tax_data['tax_amount_currency'],
-                                }
-                                for tax_data in new_taxes_data
-                            },
+                            # manual_tax_amounts = {
+                            #     (tax_data['tax'].id, tax_data['is_reverse_charge']): {
+                            #         'tax_amount': tax_data['tax_amount_currency'],
+                            #     }
+                            #     for tax_data in new_taxes_data
+                            # },
                         ))
                     price_unit = tax_data['tax_amount_currency']
                     next_taxes_data = taxes_data[i + 1, i + 2 + len(tax_data['taxes'])]
@@ -2290,13 +2290,13 @@ class AccountTax(models.Model):
                             )
                         ) / base_line['quantity'],
                         tax_ids=tax_data['taxes'],
-                        manual_tax_amounts = {
-                            (tax_data['tax'].id, tax_data['is_reverse_charge']): {
-                                'tax_amount': tax_data['tax_amount_currency'],
-                            }
-                            for tax_data in taxes_data
-                            if tax_data['tax'] in tax_data['taxes']
-                        },
+                        # manual_tax_amounts = {
+                        #     (tax_data['tax'].id, tax_data['is_reverse_charge']): {
+                        #         'tax_amount': tax_data['tax_amount_currency'],
+                        #     }
+                        #     for tax_data in taxes_data
+                        #     if tax_data['tax'] in tax_data['taxes']
+                        # },
                     ))
                 new_taxes += tax
                 new_taxes_data.append(tax_data)
@@ -2304,13 +2304,13 @@ class AccountTax(models.Model):
                 new_base_lines.append(self._prepare_base_line_for_taxes_computation(
                     base_line,
                     tax_ids=new_taxes,
-                    manual_tax_amounts = {
-                        (tax_data['tax'].id, tax_data['is_reverse_charge']): {
-                            'tax_amount': tax_data['tax_amount_currency'],
-                            'base_amount': tax_data['base_amount_currency'],
-                        }
-                        for tax_data in new_taxes_data
-                    },
+                    # manual_tax_amounts = {
+                    #     (tax_data['tax'].id, tax_data['is_reverse_charge']): {
+                    #         'tax_amount': tax_data['tax_amount_currency'],
+                    #         'base_amount': tax_data['base_amount_currency'],
+                    #     }
+                    #     for tax_data in new_taxes_data
+                    # },
                 ))
             all_new_base_lines += new_base_lines
 
@@ -2325,14 +2325,14 @@ class AccountTax(models.Model):
             target_base_line = base_line_map.get(grouping_key)
             if target_base_line:
                 target_base_line['price_unit'] += base_line['price_unit']
-                for manual_amounts_key, amounts in base_line['manual_tax_amounts'].items():
-                    target_amounts = target_base_line['manual_tax_amounts'][manual_amounts_key]
-                    for amount_key in amounts:
-                        target_amounts[amount_key] += amounts[amount_key]
+                # for manual_amounts_key, amounts in base_line['manual_tax_amounts'].items():
+                #     target_amounts = target_base_line['manual_tax_amounts'][manual_amounts_key]
+                #     for amount_key in amounts:
+                #         target_amounts[amount_key] += amounts[amount_key]
             else:
                 base_line_map[grouping_key] = self._prepare_base_line_for_taxes_computation(
                     base_line,
-                    manual_tax_amounts=dict(base_line['manual_tax_amounts']),
+                    # manual_tax_amounts=dict(base_line['manual_tax_amounts']),
                 )
 
         return list(base_line_map.values())
@@ -2363,16 +2363,16 @@ class AccountTax(models.Model):
         currency = base_lines[0]['currency_id']
 
         # Keep only the taxes that have a linear computation.
-        if amount == 18.0:
-            import pudb; pudb.set_trace()
+        # if amount == 2.0:
+        #     import pudb; pudb.set_trace()
         linear_base_lines = self._turn_base_lines_to_others_for_linear_computation(
             base_lines=base_lines,
             company=company,
             grouping_function=grouping_function,
         )
-        self._add_tax_details_in_base_lines(linear_base_lines, company)
-        self._round_base_lines_tax_details(linear_base_lines, company)
-        total_currency = compute_total(linear_base_lines)
+        # self._add_tax_details_in_base_lines(linear_base_lines, company)
+        # self._round_base_lines_tax_details(linear_base_lines, company)
+        total_currency = compute_total(base_lines)
 
         # Compute the total discount amount to reach.
         if amount_type == 'fixed':
@@ -2400,8 +2400,8 @@ class AccountTax(models.Model):
         for base_line in reduced_base_lines:
             base_line['manual_tax_amounts'] = {
                 (tax_data['tax'].id, tax_data['is_reverse_charge']): {
-                    'tax_amount_currency': tax_data['tax_amount_currency'],
-                    'tax_amount': tax_data['tax_amount'],
+                    'tax_amount': tax_data['tax_amount_currency'],
+                    'base_amount': tax_data['base_amount_currency'],
                 }
                 for tax_data in base_line['tax_details']['taxes_data']
             }
@@ -2415,6 +2415,11 @@ class AccountTax(models.Model):
             key=lambda base_line: -base_line['price_unit']
         )
         biggest_base_line['price_unit'] += delta_reduced_amount_currency
+        biggest_tax_details = biggest_base_line['tax_details']
+        biggest_taxes_data = biggest_tax_details['taxes_data']
+        if biggest_taxes_data:
+            for (tax_id, _is_reverse_charge), manual_amounts in biggest_base_line['manual_tax_amounts'].items():
+                manual_amounts['base_amount'] += delta_reduced_amount_currency
         return reduced_base_lines
 
     # -------------------------------------------------------------------------
