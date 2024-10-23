@@ -362,7 +362,8 @@ class PosSession(models.Model):
             pos_config = self.env['pos.config'].browse(config_id)
             session_counter = 1
             if not vals.get('rescue'):
-                vals['name'] = self.env['ir.sequence'].search([('code', '=', 'pos.session')]).prefix
+                pos_name = self.env['ir.sequence'].with_context(company_id=self.config_id.company_id.id).next_by_code('pos.session')
+                vals['name'] = pos_name.split('/')[0] + '/'
                 sessions = self.sudo().search_read([('name', 'ilike', vals['name'])], ['name'], order='name desc', limit=1)
                 if sessions:
                     session_counter = int(sessions[0]['name'].split('/')[-1]) + 1
@@ -1679,8 +1680,8 @@ class PosSession(models.Model):
 
     def set_opening_control(self, cashbox_value: int, notes: str):
         self.state = 'opened'
-        if not self.rescue:
-            self.name = self.env['ir.sequence'].with_context(company_id=self.config_id.company_id.id).next_by_code('pos.session')
+        # if not self.rescue:
+        #     self.name = self.env['ir.sequence'].with_context(company_id=self.config_id.company_id.id).next_by_code('pos.session')
         cash_payment_method_ids = self.config_id.payment_method_ids.filtered(lambda pm: pm.is_cash_count)
         if cash_payment_method_ids:
             self.opening_notes = notes
