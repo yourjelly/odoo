@@ -639,10 +639,10 @@ export function makeActionManager(env, router = _router) {
         if (typeof groupBy === "string") {
             groupBy = [groupBy];
         }
-        const openFormView = (resId, { activeIds, mode, force } = {}) => {
+        const openFormView = (resId, { activeIds, mode, force, newWindow } = {}) => {
             if (target !== "new") {
                 if (_getView("form")) {
-                    return switchView("form", { mode, resId, resIds: activeIds });
+                    return switchView("form", { mode, resId, resIds: activeIds }, { newWindow });
                 } else if (force || !resId) {
                     return doAction(
                         {
@@ -650,7 +650,7 @@ export function makeActionManager(env, router = _router) {
                             res_model: action.res_model,
                             views: [[false, "form"]],
                         },
-                        { props: { mode, resId, resIds: activeIds } }
+                        { newWindow, props: { mode, resId, resIds: activeIds } }
                     );
                 }
             }
@@ -805,6 +805,21 @@ export function makeActionManager(env, router = _router) {
         }
         const index = _computeStackIndex(options);
         const nextStack = [...controllerStack.slice(0, index), controller];
+        if (action.target !== "new" && options.newWindow) {
+            // Session storage is duplicated in the new window
+            // https://html.spec.whatwg.org/multipage/webstorage.html#webstorage
+            // "After creating a new auxiliary browsing context and document, the session storage is copied over."
+
+            // Store current action of the current window
+            const currentAction = browser.sessionStorage.getItem("current_action");
+            // Store on the session the action for the new window
+            browser.sessionStorage.setItem("current_action", action._originalAction || "{}");
+            const href = stateToUrl(makeState(nextStack));
+            _openURL(href);
+            // restore the current action from the current window
+            browser.sessionStorage.setItem("current_action", currentAction);
+            return;
+        }
         // Compute breadcrumbs
         controller.config.breadcrumbs = reactive(
             action.target === "new" ? [] : _getBreadcrumbs(nextStack)
@@ -1070,6 +1085,20 @@ export function makeActionManager(env, router = _router) {
     // ir.actions.act_url
     // ---------------------------------------------------------------------------
 
+    function _openURL(url) {
+        const w = browser.open(url, "_blank");
+        if (!w || w.closed || typeof w.closed === "undefined") {
+            const msg = _t(
+                "A popup window has been blocked. You may need to change your " +
+                    "browser settings to allow popup windows for this page."
+            );
+            env.services.notification.add(msg, {
+                sticky: true,
+                type: "warning",
+            });
+        }
+    }
+
     /**
      * Executes actions of type 'ir.actions.act_url', i.e. redirects to the
      * given url.
@@ -1086,17 +1115,7 @@ export function makeActionManager(env, router = _router) {
         if (action.target === "download" || action.target === "self") {
             browser.location.assign(url);
         } else {
-            const w = browser.open(url, "_blank");
-            if (!w || w.closed || typeof w.closed === "undefined") {
-                const msg = _t(
-                    "A popup window has been blocked. You may need to change your " +
-                        "browser settings to allow popup windows for this page."
-                );
-                env.services.notification.add(msg, {
-                    sticky: true,
-                    type: "warning",
-                });
-            }
+            _openURL(url);
             if (action.close) {
                 return doAction(
                     { type: "ir.actions.act_window_close" },
@@ -1177,7 +1196,6 @@ export function makeActionManager(env, router = _router) {
                 options.newStack.splice(-1);
             }
         }
-
         return _updateUI(controller, options);
     }
 
@@ -1409,7 +1427,7 @@ export function makeActionManager(env, router = _router) {
      * @param {DoActionButtonParams} params
      * @returns {Promise<void>}
      */
-    async function doActionButton(params) {
+    async function doActionButton(params, { newWindow } = {}) {
         // determine the action to execute according to the params
         let action;
         const context = makeContext([params.context, params.buttonContext]);
@@ -1523,8 +1541,12 @@ export function makeActionManager(env, router = _router) {
         // attribute on the button, the priority is given to the button attribute
         const effect = params.effect ? evaluateExpr(params.effect) : action.effect;
         const { onClose, stackPosition, viewType } = params;
-        const options = { onClose, stackPosition, viewType };
-        await doAction(action, options);
+        await doAction(action, {
+            newWindow,
+            onClose,
+            stackPosition,
+            viewType,
+        });
         if (params.close) {
             await _executeCloseAction();
         }
@@ -1545,7 +1567,7 @@ export function makeActionManager(env, router = _router) {
      * @throws {ViewNotFoundError} if the viewType is not found on the current action
      * @returns {Promise<Number>}
      */
-    async function switchView(viewType, props = {}) {
+    async function switchView(viewType, props = {}, { newWindow } = {}) {
         await keepLast.add(Promise.resolve());
         if (dialog) {
             // we don't want to switch view when there's a dialog open, as we would
@@ -1589,7 +1611,7 @@ export function makeActionManager(env, router = _router) {
             );
             index = index > -1 ? index : controllerStack.length;
         }
-        return _updateUI(newController, { index });
+        return _updateUI(newController, { newWindow, index });
     }
 
     /**
@@ -1660,10 +1682,7 @@ export function makeActionManager(env, router = _router) {
         }
     }
 
-    function pushState(cStack = controllerStack) {
-        if (!cStack.length) {
-            return;
-        }
+    function makeState(cStack) {
         const actions = cStack.map((controller) => {
             const { action, props, displayName } = controller;
             const actionState = { displayName };
@@ -1705,7 +1724,15 @@ export function makeActionManager(env, router = _router) {
         if (currentState) {
             stateKeys.push(...Object.keys(omit(currentState, ...PATH_KEYS)));
         }
-        Object.assign(newState, pick(newState.actionStack.at(-1), ...stateKeys));
+        return Object.assign(newState, pick(newState.actionStack.at(-1), ...stateKeys));
+    }
+
+    function pushState(cStack = controllerStack) {
+        if (!cStack.length) {
+            return;
+        }
+
+        const newState = makeState(cStack);
 
         cStack.at(-1).state = newState;
         router.pushState(newState, { replace: true });
