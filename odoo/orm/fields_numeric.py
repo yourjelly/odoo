@@ -24,6 +24,10 @@ class Integer(Field[int]):
     def convert_to_column(self, value, record, values=None, validate=True):
         return int(value or 0)
 
+    def convert_to_column_insert(self, value, record, values=None, validate=True):
+        value = super().convert_to_column_insert(value, record, values, validate)
+        return value if self.required else value or None
+
     def convert_to_cache(self, value, record, validate=True):
         if isinstance(value, dict):
             # special case, when an integer field is used as inverse for a one2many
@@ -130,6 +134,10 @@ class Float(Field[float]):
             return value_float
         return value
 
+    def convert_to_column_insert(self, value, record, values=None, validate=True):
+        value = super().convert_to_column_insert(value, record, values, validate)
+        return value if self.required else value or None
+
     def convert_to_cache(self, value, record, validate=True):
         # apply rounding here, otherwise value in cache may be wrong!
         value = float(value or 0.0)
@@ -193,6 +201,8 @@ class Monetary(Field[float]):
             "Field %s with unknown currency_field %r" % (self, self.get_currency_field(model))
 
     def convert_to_column_insert(self, value, record, values=None, validate=True):
+        if not value:
+            return 0.0 if self.required else None
         # retrieve currency from values or record
         currency_field_name = self.get_currency_field(record)
         currency_field = record._fields[currency_field_name]
@@ -211,7 +221,7 @@ class Monetary(Field[float]):
             currency = record[:1].with_context(prefetch_fields=False)[currency_field_name]
             currency = currency.with_env(record.env)
 
-        value = float(value or 0.0)
+        value = float(value)
         if currency:
             return float_repr(currency.round(value), currency.decimal_places)
         return value

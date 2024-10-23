@@ -20,6 +20,10 @@ class Boolean(Field[bool]):
     def convert_to_column(self, value, record, values=None, validate=True):
         return bool(value)
 
+    def convert_to_column_insert(self, value, record, values=None, validate=True):
+        value = super().convert_to_column_insert(value, record, values, validate)
+        return value if self.required else value or None
+
     def convert_to_cache(self, value, record, validate=True):
         return bool(value)
 
