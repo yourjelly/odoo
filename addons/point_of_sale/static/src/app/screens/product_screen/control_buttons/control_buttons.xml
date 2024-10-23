@@ -3,34 +3,38 @@
     <t t-name="point_of_sale.ControlButtons">
         <!-- All buttons always displayed -->
         <SelectPartnerButton partner="partner" t-if="!props.showRemainingButtons"/>
-        <!-- <t t-if="!props.showRemainingButtons || (ui.isSmall and props.showRemainingButtons)">
+        <!-- # TODO-manv: what is this condition ? <t t-if="!props.showRemainingButtons || (ui.isSmall and props.showRemainingButtons)">
+        # TODO-manv: chck that butto is big on mobi 
             <OrderlineNoteButton
                 label="internalNoteLabel()"
                 getter="(orderline) => orderline.getNote()"
                 class="buttonClass"
                 setter="(orderline, note) => orderline.setNote(note)" />
         </t> -->
+        <t t-if="!props.showRemainingButtons || (ui.isSmall and props.showRemainingButtons)">
+            <NoteButton t-if="currentOrder?.get_selected_orderline()"
+                label="internalNoteLabel()"
+                getter="(orderline) => orderline.getNote()"
+                setter="(orderline, note) => orderline.setNote(note)"
+                class="buttonClass"/>
+        </t>
         <button class="btn btn-light btn-lg flex-shrink-0 ms-auto" t-if="!props.showRemainingButtons and !ui.isSmall and props.onClickMore" t-on-click="props.onClickMore">
             Actions
         </button>
-        <!-- All these buttons will only be displayed in a dialog -->
+            <!-- All these buttons will only be displayed in a dialog -->
         <t t-if="props.showRemainingButtons">
             <div class="control-buttons control-buttons-modal d-grid gap-2 mt-2">
-                <!-- <OrderlineNoteButton class="buttonClass" icon="'fa fa-sticky-note'"/> -->
-                <!-- <NoteButton class="buttonClass" icon="'fa fa-sticky-note'"/> -->
                 <NoteButton t-if="currentOrder?.get_selected_orderline()"
                     label.translate="Customer Note"
                     getter="(orderline) => orderline.get_customer_note()"
                     setter="(orderline, note) => orderline.set_customer_note(note)"
                     class="buttonClass"
-                    t-key="2"
                     icon="'fa fa-sticky-note'"/>
                 <NoteButton t-else=""
                     label.translate="Customer Note"
                     getter="(order) => order.getGeneralCustomerNote()"
                     setter="(order, note) => order.setGeneralCustomerNote(note)"
                     class="buttonClass"
-                    t-key="1"
                     icon="'fa fa-sticky-note'"/>
 
                 <button class="o_pricelist_button btn btn-secondary btn-lg py-5" t-on-click="() => this.clickPricelist()">

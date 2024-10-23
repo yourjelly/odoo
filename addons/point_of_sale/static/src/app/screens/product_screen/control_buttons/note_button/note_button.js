@@ -7,20 +7,14 @@ import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
 
 export class NoteButton extends Component {
     static template = "point_of_sale.NoteButton";
-    //Todo-manv: getter/setter not optional?
+    //Todo-manv: actual(and previous) behavior: when clicking back arrow or discard in the model, it removes the note. Is it the expected behavior?
     static props = {
         icon: { type: String, optional: true },
-        label: { type: String, optional: true },
-        getter: { type: Function, optional: true },
-        setter: { type: Function, optional: true },
+        label: { type: String, optional: false },
+        getter: { type: Function, optional: false },
+        setter: { type: Function, optional: false },
         class: { type: String, optional: true },
     };
-    // static defaultProps = {
-    //     label: _t("Customer Note"),
-    //     getter: (orderline) => orderline.get_customer_note(),
-    //     setter: (orderline, note) => orderline.set_customer_note(note),
-    //     class: "",
-    // };
 
     setup() {
         this.pos = usePos();
@@ -46,7 +40,7 @@ export class NoteButton extends Component {
         }
         const saved_quantity = selectedOrderline.qty - quantity_with_note;
         if (saved_quantity > 0 && quantity_with_note > 0) {
-            //TODO-manv: use setter to set note field?
+            //TODO-manv: use setter to set note field? Can we trigger it for customer note?
             await this.pos.addLineToCurrentOrder({
                 product_id: selectedOrderline.product_id,
                 qty: quantity_with_note,

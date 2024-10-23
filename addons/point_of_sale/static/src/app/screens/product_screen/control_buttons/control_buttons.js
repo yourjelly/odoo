@@ -116,11 +116,8 @@ export class ControlButtons extends Component {
             },
         });
     }
-    internalNoteLabel(order) {
+    internalNoteLabel() {
         // TODO-manv: to remove?
-        if (order) {
-            return _t("General Note");
-        }
         return this.pos.config.module_pos_restaurant ? _t("Kitchen Note") : _t("Internal Note");
     }
 
