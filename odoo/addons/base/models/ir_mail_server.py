@@ -682,7 +682,7 @@ class IrMail_Server(models.Model):
         smtp_to_list = [
             address
             for base in [email_to, email_cc, email_bcc]
-            for address in extract_rfc2822_addresses(base)
+            for address in tools.misc.unique(extract_rfc2822_addresses(base))
             if address
         ]
         assert smtp_to_list, self.NO_VALID_RECIPIENT
