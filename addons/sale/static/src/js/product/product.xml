@@ -31,6 +31,7 @@
         <td
             t-if="env.showQuantityAndPrice"
             class="o_sale_product_configurator_qty py-3 px-0 text-end"
+            name="sale_product_configurator_quantity"
         >
             <t t-if="!this.props.optional">
                 <QuantityButtons
