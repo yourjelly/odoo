@@ -310,7 +310,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test("required selection widget should not have blank option", async function (assert) {
+    QUnit.debug("required selection widget should not have blank option", async function (assert) {
         serverData.models.partner.fields.feedback_value = {
             type: "selection",
             required: true,
@@ -340,10 +340,16 @@ QUnit.module("Fields", (hooks) => {
             ["", "", ""]
         );
         assert.deepEqual(
-            [...target.querySelectorAll(".o_field_widget[name='feedback_value'] option")].map(
-                (option) => option.style.display
+            [...target.querySelectorAll(".o_field_widget[name='color'] option")].map(
+                (option) => option.value
             ),
-            ["none", "", ""]
+            ['"red"', '"black"']
+        );
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_field_widget[name='feedback_value'] option")].map(
+                (option) => option.value
+            ),
+            ['"good"', '"bad"']
         );
 
         // change value to update widget modifier values
@@ -353,6 +359,12 @@ QUnit.module("Fields", (hooks) => {
                 (option) => option.style.display
             ),
             ["none", "", ""]
+        );
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_field_widget[name='color'] option")].map(
+                (option) => option.value
+            ),
+            ['"red"', '"black"']
         );
     });
 
@@ -400,6 +412,46 @@ QUnit.module("Fields", (hooks) => {
                     (option) => option.style.display
                 ),
                 ["none", "", ""]
+            );
+        }
+    );
+
+    QUnit.test(
+        "select a value in a required selection field without default value",
+        async function (assert) {
+            serverData.models.partner.fields.feedback_value = {
+                type: "selection",
+                required: true,
+                selection: [
+                    ["good", "Good"],
+                    ["bad", "Bad"],
+                ],
+                string: "Good",
+            };
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <form>
+                    <field name="feedback_value" />
+                </form>`,
+            });
+
+            assert.deepEqual(
+                [...target.querySelectorAll(".o_field_widget[name='feedback_value'] option")].map(
+                    (option) => option.value
+                ),
+                ["false", '"good"', '"bad"']
+            );
+
+            // select an option should remove the blank option
+            await editSelect(target, ".o_field_widget[name='feedback_value'] select", '"bad"');
+            assert.deepEqual(
+                [...target.querySelectorAll(".o_field_widget[name='feedback_value'] option")].map(
+                    (option) => option.value
+                ),
+                ['"good"', '"bad"']
             );
         }
     );
