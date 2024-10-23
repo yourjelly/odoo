@@ -152,6 +152,7 @@ patch(PosStore.prototype, {
      * it comes with the corresponding reward product line.
      */
     getPotentialFreeProductRewards() {
+        // debugger;
         const order = this.get_order();
         const allCouponPrograms = Object.values(order.couponPointChanges)
             .map((pe) => {
@@ -189,7 +190,9 @@ patch(PosStore.prototype, {
                 }
                 // Loyalty program (applies_on == 'both') should needs an orderline before it can apply a reward.
                 const considerTheReward =
-                    program.applies_on !== "both" || (program.applies_on == "both" && hasLine);
+                    program.applies_on !== "both" ||
+                    (program.applies_on == "both" && hasLine) ||
+                    true;
                 if (reward.reward_type === "product" && considerTheReward) {
                     let hasPotentialQty = true;
                     let potentialQty;
