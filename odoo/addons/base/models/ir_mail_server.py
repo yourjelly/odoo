@@ -659,6 +659,7 @@ class IrMail_Server(models.Model):
         :param message: the email.message.Message to send, information like the
             Return-Path, the From, etc... will be used to find the smtp_from and to smtp_to
         :param smtp_session: the opened SMTP session to use to authenticate the sender
+
         :return: smtp_from, smtp_to_list, message
             smtp_from: email to used during the authentication to the mail server
             smtp_to_list: list of email address which will receive the email
@@ -672,27 +673,8 @@ class IrMail_Server(models.Model):
 
         smtp_from = message['From'] or bounce_address
         assert smtp_from, self.NO_FOUND_SMTP_FROM
-
-        email_to = message['To']
-        email_cc = message['Cc']
-        email_bcc = message['Bcc']
-        del message['Bcc']
-
-        # All recipient addresses must only contain ASCII characters
-        smtp_to_list = [
-            address
-            for base in [email_to, email_cc, email_bcc]
-            for address in tools.misc.unique(extract_rfc2822_addresses(base))
-            if address
-        ]
+        smtp_to_list = self._prepare_smtp_to_list(message, smtp_session)
         assert smtp_to_list, self.NO_VALID_RECIPIENT
-
-        x_forge_to = message['X-Forge-To']
-        if x_forge_to:
-            # `To:` header forged, e.g. for posting on discuss.channels, to avoid confusion
-            del message['X-Forge-To']
-            del message['To']           # avoid multiple To: headers!
-            message['To'] = x_forge_to
 
         # Try to not spoof the mail from headers; fetch session-based or contextualized
         # values for encapsulation computation
@@ -704,9 +686,8 @@ class IrMail_Server(models.Model):
         if notifications_email and smtp_from == notifications_email and message['From'] != notifications_email:
             smtp_from = encapsulate_email(message['From'], notifications_email)
 
-        if message['From'] != smtp_from:
-            del message['From']
-            message['From'] = smtp_from
+        # alter message
+        self._alter_message(message, smtp_from, smtp_to_list)
 
         # Check if it's still possible to put the bounce address as smtp_from
         if self._match_from_filter(bounce_address, from_filter):
@@ -726,8 +707,36 @@ class IrMail_Server(models.Model):
 
         return smtp_from, smtp_to_list, message
 
+    def _prepare_smtp_to_list(self, message, smtp_session):
+        # All recipient addresses must only contain ASCII characters
+        email_to = message['To']
+        email_cc = message['Cc']
+        email_bcc = message['Bcc']
+        return [
+            address
+            for base in [email_to, email_cc, email_bcc]
+            for address in tools.misc.unique(extract_rfc2822_addresses(base))
+            if address
+        ]
+
+    def _alter_message(self, message, smtp_from, smtp_to_list):
+        x_forge_to = message['X-Forge-To']
+        if x_forge_to:
+            # `To:` header forged, e.g. for posting on discuss.channels, to avoid confusion
+            del message['X-Forge-To']
+            del message['To']           # avoid multiple To: headers!
+            message['To'] = x_forge_to
+
+        if message['From'] != smtp_from:
+            del message['From']
+            message['From'] = smtp_from
+
+        del message['Bcc']
+
     @api.model
-    def send_email(self, message, mail_server_id=None, smtp_server=None, smtp_port=None,
+    def send_email(self, message,
+                   mail_server_id=None,
+                   smtp_server=None, smtp_port=None,
                    smtp_user=None, smtp_password=None, smtp_encryption=None,
                    smtp_ssl_certificate=None, smtp_ssl_private_key=None,
                    smtp_debug=False, smtp_session=None):
