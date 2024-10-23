@@ -712,26 +712,41 @@ class IrMail_Server(models.Model):
         email_to = message['To']
         email_cc = message['Cc']
         email_bcc = message['Bcc']
+        skip_to_lst = tools.mail.email_split(message['X-SMTP-Skip-To'] or '')
         return [
             address
             for base in [email_to, email_cc, email_bcc]
             for address in tools.misc.unique(extract_rfc2822_addresses(base))
-            if address
+            if address and email_normalize(address) not in skip_to_lst
         ]
 
     def _alter_message(self, message, smtp_from, smtp_to_list):
         x_forge_to = message['X-Forge-To']
+        x_msg_add_to_lst = tools.mail.email_split_and_format(message['X-Msg-To-Add'] or '')
         if x_forge_to:
             # `To:` header forged, e.g. for posting on discuss.channels, to avoid confusion
-            del message['X-Forge-To']
-            del message['To']           # avoid multiple To: headers!
+            del message['To']  # avoid multiple To: headers!
             message['To'] = x_forge_to
+        elif x_msg_add_to_lst:
+            x_msg_add_to_lst_normalized = [tools.mail.email_normalize(address) for address in x_msg_add_to_lst]
+            to = message['To'] or ''
+            del message['To']  # avoid multiple To: headers!
+            # Add 'To' in msg without impacting SMTP to list (aka fake recipients)
+            message['To'] = [
+                address for address in tools.mail.email_split_and_format(to)
+                if tools.mail.email_normalize(address) not in x_msg_add_to_lst_normalized
+            ] + x_msg_add_to_lst
 
         if message['From'] != smtp_from:
             del message['From']
             message['From'] = smtp_from
 
-        del message['Bcc']
+        # cleanup unwanted headers
+        del message['Bcc']  # legacy, not sure why
+        del message['X-Forge-To']
+        del message['X-SMTP-Skip-To']
+        del message['X-Msg-To-Add']
+        del message['X-Msg-To-Consolidate']
 
     @api.model
     def send_email(self, message,
@@ -750,6 +765,10 @@ class IrMail_Server(models.Model):
         If mail_server_id is None and smtp_server is not None, use the provided smtp_* arguments.
         If both mail_server_id and smtp_server are None, look for an 'smtp_server' value in server config,
         and fails if not found.
+
+        Tweak notes:
+        :param skip_to_lst: optional comma-separated list of normalized emails to skip in SMTP
+            envelope. This allows to differentiate message headers from actual sending;
 
         :param message: the email.message.Message to send. The envelope sender will be extracted from the
                         ``Return-Path`` (if present), or will be set to the default bounce address.
