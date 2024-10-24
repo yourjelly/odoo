@@ -962,7 +962,7 @@ class Cache:
     def update_raw(self, records, field, values, dirty=False, check_dirty=True):
         # todo rename it
         assert field.translate
-        sellf.invalidate(records, field)  # remove fallback values
+        self.invalidate(records, field)  # remove fallback values
         field_cache = self._data[self]
         field_cache_langs = list(field_cache.values())
         for id_, new_translations in zip(records._ids, values):
