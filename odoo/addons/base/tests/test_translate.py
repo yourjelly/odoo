@@ -790,6 +790,7 @@ class TestTranslationWrite(TransactionCase):
         belgium.with_context(lang='fr_FR').write({'vat_label': 'TVA_FR3'})
         belgium.with_context(lang='en_US').write({'vat_label': ''})
         self.assertEqual(belgium.with_context(lang='en_US').vat_label, '')
+        belgium.with_context(lang='nl_NL').vat_label
         self.assertEqual(belgium.with_context(lang='nl_NL').vat_label, '')
 
     def test_create_empty_false(self):

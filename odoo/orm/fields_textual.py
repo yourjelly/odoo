@@ -70,7 +70,7 @@ class _String(Field[str | typing.Literal[False]]):
 
     def convert_to_column_update(self, value, record):
         if self.translate:
-            return PsycopgJson(value) if value else value
+            return None if any(v is None for v in value.values()) else PsycopgJson(value)
         return super().convert_to_column_update(value, record)
 
     def convert_to_cache(self, value, record, validate=True):
@@ -183,7 +183,7 @@ class _String(Field[str | typing.Literal[False]]):
         return lang, 'en_US'
 
     def write(self, records, value):
-        if not self.translate or value is False or value is None:
+        if not self.translate:
             super().write(records, value)
             return
         cache = records.env.cache
@@ -192,21 +192,18 @@ class _String(Field[str | typing.Literal[False]]):
         if not records:
             return
 
-        # flush dirty None values
-        dirty_records = records & cache.get_dirty_records(records, self)
-        if any(v is None for v in cache.get_values(dirty_records, self)):
-            dirty_records.flush_recordset([self.name])
-
         dirty = self.store and any(records._ids)
-        lang = (records.env.lang or 'en_US') if self.translate is True else records.env._lang
-
         # not dirty fields
-        if not dirty:
-            cache.update_raw(records, self, [{lang: cache_value} for _id in records._ids], dirty=False)
+        if not dirty or cache_value is None:
+            cache.invalidate(((self, records._ids),))
+            cache.update(records, self, itertools.repeat(cache_value), dirty=dirty)
             return
 
+        records.invalidate_recordset([self.name])
+        lang = (records.env.lang or 'en_US') if self.translate is True else records.env._lang
+
         # model translation
-        if not callable(self.translate):
+        if self.translate is True:
             # invalidate clean fields because them may contain fallback value
             clean_records = records - cache.get_dirty_records(records, self)
             clean_records.invalidate_recordset([self.name])
@@ -277,8 +274,13 @@ class _String(Field[str | typing.Literal[False]]):
                 new_store_translations['en_US'] = cache_value
                 new_store_translations.pop('_en_US', None)
             new_translations_list.append(new_store_translations)
-        # Maybe we can use Cache.update(records.with_context(cache_update_raw=True), self, new_translations_list, dirty=True)
-        cache.update_raw(records, self, new_translations_list, dirty=True)
+
+        field_cache = cache._data[self]
+        cache.invalidate(((self, records._ids),))
+        for id_, new_translations in zip(records._ids, new_translations_list):
+            for lang, value in new_translations.items():
+                field_cache.setdefault((lang,), {})[id_] = value
+        records.env.cache._dirty[self].update(records._ids)
 
 
 class Char(_String):

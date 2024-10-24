@@ -336,9 +336,7 @@ class HrEmployee(models.Model):
         # cache, and interpreted as an access error
         for fname in field_names:
             values = self.env.cache.get_values(public, public._fields[fname])
-            if self._fields[fname].translate:
-                values = [(value.copy() if value else None) for value in values]
-            self.env.cache.update_raw(self, self._fields[fname], values)
+            self.env.cache.update(self, self._fields[fname], values)
 
     @api.model
     def _cron_check_work_permit_validity(self):

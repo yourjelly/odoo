@@ -439,6 +439,8 @@ class Field(MetaField('DummyField', (object,), {}), typing.Generic[T]):
             attrs['index'] = attrs.get('index', 'btree_not_null')
             attrs['prefetch'] = attrs.get('prefetch', 'company_dependent')
             attrs['_depends_context'] = ('company',)
+        if attrs.get('translate'):
+            attrs['_depends_context'] = ('lang',)
         # parameters 'depends' and 'depends_context' are stored in attributes
         # '_depends' and '_depends_context', respectively
         if 'depends' in attrs:

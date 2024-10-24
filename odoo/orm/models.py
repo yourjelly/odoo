@@ -3830,7 +3830,12 @@ class BaseModel(metaclass=MetaModel):
                 _old_translations = {src: values[lang] for src, values in old_translation_dictionary.items() if lang in values}
                 _new_translations = {**_old_translations, **_translations}
                 new_values[lang] = field.translate(_new_translations.get, old_source_lang_value)
-            self.env.cache.update_raw(self, field, [new_values], dirty=True)
+
+            field_cache = self.env.cache._data[field]
+            self.env.cache.invalidate(((field, self._ids),))
+            for lang, value in new_values.items():
+                field_cache.setdefault((lang,), {})[self.id] = value
+            self.env.cache._dirty[field].update(self._ids)
 
         # the following write is incharge of
         # 1. mark field as modified
@@ -4065,7 +4070,8 @@ class BaseModel(metaclass=MetaModel):
                     sql = self._field_to_sql(self._table, field.name, query)
                     sql = SQL("pg_size_pretty(length(%s)::bigint)", sql)
                 elif field.translate and self.env.context.get('prefetch_langs'):
-                    sql = SQL.identifier(self._table, field.name, to_flush=field)
+                    # the '{}'::jsonb  makes insert_missing eaiser
+                    sql = SQL("COALESCE(%s, '{}'::jsonb)", SQL.identifier(self._table, field.name, to_flush=field))
                 else:
                     # flushing is necessary to retrieve the en_US value of fields without a translation
                     sql = self._field_to_sql(self._table, field.name, query, flush=field.translate)
@@ -6626,8 +6632,8 @@ class BaseModel(metaclass=MetaModel):
         dirty_field_cache = {
             field: (
                 self.env.cache._get_field_cache(model, field)
-                if not field.company_dependent else
-                self.env.cache._get_grouped_company_dependent_field_cache(field)
+                if not (field.company_dependent or field.translate) else
+                self.env.cache._get_grouped_context_dependent_field_cache(field)
             )
             for field in dirty_field_ids
         }
