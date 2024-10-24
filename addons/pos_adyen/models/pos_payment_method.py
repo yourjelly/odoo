@@ -237,11 +237,14 @@ class PosPaymentMethod(models.Model):
 
         environment = 'test' if self.sudo().adyen_test_mode else 'live'
         endpoint = self._get_adyen_endpoints()[operation] % environment
+        # endpoint = self._get_adyen_endpoints()[operation]
+        _logger.info("Request to Adyen to url " + endpoint )
         headers = {
             'x-api-key': self.sudo().adyen_api_key,
         }
         req = requests.post(endpoint, json=data, headers=headers, timeout=TIMEOUT)
-
+        print(req)
+        return True
         # Authentication error doesn't return JSON
         if req.status_code == 401:
             return {

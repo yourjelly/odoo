@@ -14,7 +14,19 @@ class PosAdyenController(http.Controller):
 
     @http.route('/pos_adyen/notification', type='jsonrpc', methods=['POST'], auth='public', csrf=False, save_session=False)
     def notification(self):
+        print("hello")
+        print("hello")
+        print("hello")
+        print("hello")
+        print("hello")
+        print("hello")
+        print("hello")
+        print("hello")
+        print("hello")
+        print("hello")
+        print("hello")
         data = json.loads(request.httprequest.data)
+        # print(data)
 
         # ignore if it's not a response to a sales request
         if not data.get('SaleToPOIResponse'):
