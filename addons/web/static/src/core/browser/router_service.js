@@ -142,6 +142,12 @@ function makeRouter(env) {
         current = getRoute(loc);
         bus.trigger("ROUTE_CHANGE");
     });
+    browser.addEventListener("pageshow", (ev) => {
+        if (ev.persisted) {
+            browser.clearTimeout(pushTimeout);
+            bus.trigger("ROUTE_CHANGE");
+        }
+    });
 
     /**
      * @param {string} mode
