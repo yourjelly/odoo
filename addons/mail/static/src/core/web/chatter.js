@@ -396,7 +396,9 @@ export class Chatter extends Component {
         if (this.attachments.length === 0) {
             return;
         }
-        this.state.isAttachmentBoxOpened = !this.state.isAttachmentBoxOpened;
+        this.state.isAttachmentBoxOpened =
+            this.state.isSearchOpen || !this.state.isAttachmentBoxOpened;
+        this.state.isSearchOpen = false;
         if (this.state.isAttachmentBoxOpened) {
             this.rootRef.el.scrollTop = 0;
             this.state.thread.scrollTop = "bottom";
@@ -413,6 +415,9 @@ export class Chatter extends Component {
     }
 
     async onClickAttachFile(ev) {
+        if (this.attachments.length === 0 && this.state.isSearchOpen) {
+            this.state.isSearchOpen = false;
+        }
         if (this.state.thread.id) {
             return;
         }
