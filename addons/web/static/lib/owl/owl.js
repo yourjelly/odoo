@@ -2272,7 +2272,322 @@
         });
     }
 
+    /**
+     * Owl QWeb Expression Parser
+     *
+     * Owl needs in various contexts to be able to understand the structure of a
+     * string representing a javascript expression.  The usual goal is to be able
+     * to rewrite some variables.  For example, if a template has
+     *
+     *  ```xml
+     *  <t t-if="computeSomething({val: state.val})">...</t>
+     * ```
+     *
+     * this needs to be translated in something like this:
+     *
+     * ```js
+     *   if (context["computeSomething"]({val: context["state"].val})) { ... }
+     * ```
+     *
+     * This file contains the implementation of an extremely naive tokenizer/parser
+     * and evaluator for javascript expressions.  The supported grammar is basically
+     * only expressive enough to understand the shape of objects, of arrays, and
+     * various operators.
+     */
+    //------------------------------------------------------------------------------
+    // Misc types, constants and helpers
+    //------------------------------------------------------------------------------
+    const RESERVED_WORDS = "true,false,NaN,null,undefined,debugger,console,window,in,instanceof,new,function,return,eval,void,Math,RegExp,Array,Object,Date".split(",");
+    const WORD_REPLACEMENT = Object.assign(Object.create(null), {
+        and: "&&",
+        or: "||",
+        gt: ">",
+        gte: ">=",
+        lt: "<",
+        lte: "<=",
+    });
+    const STATIC_TOKEN_MAP = Object.assign(Object.create(null), {
+        "{": "LEFT_BRACE",
+        "}": "RIGHT_BRACE",
+        "[": "LEFT_BRACKET",
+        "]": "RIGHT_BRACKET",
+        ":": "COLON",
+        ",": "COMMA",
+        "(": "LEFT_PAREN",
+        ")": "RIGHT_PAREN",
+    });
+    // note that the space after typeof is relevant. It makes sure that the formatted
+    // expression has a space after typeof. Currently we don't support delete and void
+    const OPERATORS = "...,.,===,==,+,!==,!=,!,||,&&,>=,>,<=,<,?,-,*,/,%,typeof ,=>,=,;,in ,new ,|,&,^,~".split(",");
+    let tokenizeString = function (expr) {
+        let s = expr[0];
+        let start = s;
+        if (s !== "'" && s !== '"' && s !== "`") {
+            return false;
+        }
+        let i = 1;
+        let cur;
+        while (expr[i] && expr[i] !== start) {
+            cur = expr[i];
+            s += cur;
+            if (cur === "\\") {
+                i++;
+                cur = expr[i];
+                if (!cur) {
+                    throw new OwlError("Invalid expression");
+                }
+                s += cur;
+            }
+            i++;
+        }
+        if (expr[i] !== start) {
+            throw new OwlError("Invalid expression");
+        }
+        s += start;
+        if (start === "`") {
+            return {
+                type: "TEMPLATE_STRING",
+                value: s,
+                replace(replacer) {
+                    return s.replace(/\$\{(.*?)\}/g, (match, group) => {
+                        return "${" + replacer(group) + "}";
+                    });
+                },
+            };
+        }
+        return { type: "VALUE", value: s };
+    };
+    let tokenizeNumber = function (expr) {
+        let s = expr[0];
+        if (s && s.match(/[0-9]/)) {
+            let i = 1;
+            while (expr[i] && expr[i].match(/[0-9]|\./)) {
+                s += expr[i];
+                i++;
+            }
+            return { type: "VALUE", value: s };
+        }
+        else {
+            return false;
+        }
+    };
+    let tokenizeSymbol = function (expr) {
+        let s = expr[0];
+        if (s && s.match(/[a-zA-Z_\$]/)) {
+            let i = 1;
+            while (expr[i] && expr[i].match(/\w/)) {
+                s += expr[i];
+                i++;
+            }
+            if (s in WORD_REPLACEMENT) {
+                return { type: "OPERATOR", value: WORD_REPLACEMENT[s], size: s.length };
+            }
+            return { type: "SYMBOL", value: s };
+        }
+        else {
+            return false;
+        }
+    };
+    const tokenizeStatic = function (expr) {
+        const char = expr[0];
+        if (char && char in STATIC_TOKEN_MAP) {
+            return { type: STATIC_TOKEN_MAP[char], value: char };
+        }
+        return false;
+    };
+    const tokenizeOperator = function (expr) {
+        for (let op of OPERATORS) {
+            if (expr.startsWith(op)) {
+                return { type: "OPERATOR", value: op };
+            }
+        }
+        return false;
+    };
+    const TOKENIZERS = [
+        tokenizeString,
+        tokenizeNumber,
+        tokenizeOperator,
+        tokenizeSymbol,
+        tokenizeStatic,
+    ];
+    /**
+     * Convert a javascript expression (as a string) into a list of tokens. For
+     * example: `tokenize("1 + b")` will return:
+     * ```js
+     *  [
+     *   {type: "VALUE", value: "1"},
+     *   {type: "OPERATOR", value: "+"},
+     *   {type: "SYMBOL", value: "b"}
+     * ]
+     * ```
+     */
+    function tokenize(expr) {
+        const result = [];
+        let token = true;
+        let error;
+        let current = expr;
+        try {
+            while (token) {
+                current = current.trim();
+                if (current) {
+                    for (let tokenizer of TOKENIZERS) {
+                        token = tokenizer(current);
+                        if (token) {
+                            result.push(token);
+                            current = current.slice(token.size || token.value.length);
+                            break;
+                        }
+                    }
+                }
+                else {
+                    token = false;
+                }
+            }
+        }
+        catch (e) {
+            error = e; // Silence all errors and throw a generic error below
+        }
+        if (current.length || error) {
+            throw new OwlError(`Tokenizer error: could not tokenize \`${expr}\``);
+        }
+        return result;
+    }
+    //------------------------------------------------------------------------------
+    // Expression "evaluator"
+    //------------------------------------------------------------------------------
+    const isLeftSeparator = (token) => token && (token.type === "LEFT_BRACE" || token.type === "COMMA");
+    const isRightSeparator = (token) => token && (token.type === "RIGHT_BRACE" || token.type === "COMMA");
+    /**
+     * This is the main function exported by this file. This is the code that will
+     * process an expression (given as a string) and returns another expression with
+     * proper lookups in the context.
+     *
+     * Usually, this kind of code would be very simple to do if we had an AST (so,
+     * if we had a javascript parser), since then, we would only need to find the
+     * variables and replace them.  However, a parser is more complicated, and there
+     * are no standard builtin parser API.
+     *
+     * Since this method is applied to simple javasript expressions, and the work to
+     * be done is actually quite simple, we actually can get away with not using a
+     * parser, which helps with the code size.
+     *
+     * Here is the heuristic used by this method to determine if a token is a
+     * variable:
+     * - by default, all symbols are considered a variable
+     * - unless the previous token is a dot (in that case, this is a property: `a.b`)
+     * - or if the previous token is a left brace or a comma, and the next token is
+     *   a colon (in that case, this is an object key: `{a: b}`)
+     *
+     * Some specific code is also required to support arrow functions. If we detect
+     * the arrow operator, then we add the current (or some previous tokens) token to
+     * the list of variables so it does not get replaced by a lookup in the context
+     */
+    function compileExprToArray(expr) {
+        const localVars = new Set();
+        const tokens = tokenize(expr);
+        let i = 0;
+        let stack = []; // to track last opening (, [ or {
+        while (i < tokens.length) {
+            let token = tokens[i];
+            let prevToken = tokens[i - 1];
+            let nextToken = tokens[i + 1];
+            let groupType = stack[stack.length - 1];
+            switch (token.type) {
+                case "LEFT_BRACE":
+                case "LEFT_BRACKET":
+                case "LEFT_PAREN":
+                    stack.push(token.type);
+                    break;
+                case "RIGHT_BRACE":
+                case "RIGHT_BRACKET":
+                case "RIGHT_PAREN":
+                    stack.pop();
+            }
+            let isVar = token.type === "SYMBOL" && !RESERVED_WORDS.includes(token.value);
+            if (token.type === "SYMBOL" && !RESERVED_WORDS.includes(token.value)) {
+                if (prevToken) {
+                    // normalize missing tokens: {a} should be equivalent to {a:a}
+                    if (groupType === "LEFT_BRACE" &&
+                        isLeftSeparator(prevToken) &&
+                        isRightSeparator(nextToken)) {
+                        tokens.splice(i + 1, 0, { type: "COLON", value: ":" }, { ...token });
+                        nextToken = tokens[i + 1];
+                    }
+                    if (prevToken.type === "OPERATOR" && prevToken.value === ".") {
+                        isVar = false;
+                    }
+                    else if (prevToken.type === "LEFT_BRACE" || prevToken.type === "COMMA") {
+                        if (nextToken && nextToken.type === "COLON") {
+                            isVar = false;
+                        }
+                    }
+                }
+            }
+            if (token.type === "TEMPLATE_STRING") {
+                token.value = token.replace((expr) => compileExpr(expr));
+            }
+            if (nextToken && nextToken.type === "OPERATOR" && nextToken.value === "=>") {
+                if (token.type === "RIGHT_PAREN") {
+                    let j = i - 1;
+                    while (j > 0 && tokens[j].type !== "LEFT_PAREN") {
+                        if (tokens[j].type === "SYMBOL" && tokens[j].originalValue) {
+                            tokens[j].value = tokens[j].originalValue;
+                            localVars.add(tokens[j].value); //] = { id: tokens[j].value, expr: tokens[j].value };
+                        }
+                        j--;
+                    }
+                }
+                else {
+                    localVars.add(token.value); //] = { id: token.value, expr: token.value };
+                }
+            }
+            if (isVar) {
+                token.varName = token.value;
+                if (!localVars.has(token.value)) {
+                    token.originalValue = token.value;
+                    token.value = `ctx['${token.value}']`;
+                }
+            }
+            i++;
+        }
+        // Mark all variables that have been used locally.
+        // This assumes the expression has only one scope (incorrect but "good enough for now")
+        for (const token of tokens) {
+            if (token.type === "SYMBOL" && token.varName && localVars.has(token.value)) {
+                token.originalValue = token.value;
+                token.value = `_${token.value}`;
+                token.isLocal = true;
+            }
+        }
+        return tokens;
+    }
+    // Leading spaces are trimmed during tokenization, so they need to be added back for some values
+    const paddedValues = new Map([["in ", " in "]]);
+    function compileExpr(expr) {
+        return compileExprToArray(expr)
+            .map((t) => paddedValues.get(t.value) || t.value)
+            .join("");
+    }
+    const INTERP_REGEXP = /\{\{.*?\}\}|\#\{.*?\}/g;
+    function replaceDynamicParts(s, replacer) {
+        let matches = s.match(INTERP_REGEXP);
+        if (matches && matches[0].length === s.length) {
+            return `(${replacer(s.slice(2, matches[0][0] === "{" ? -2 : -1))})`;
+        }
+        let r = s.replace(INTERP_REGEXP, (s) => "${" + replacer(s.slice(2, s[0] === "{" ? -2 : -1)) + "}");
+        return "`" + r + "`";
+    }
+    function interpolate(s) {
+        return replaceDynamicParts(s, compileExpr);
+    }
+
     let currentNode = null;
+    function saveCurrent() {
+        let n = currentNode;
+        return () => {
+            currentNode = n;
+        };
+    }
     function getCurrent() {
         if (!currentNode) {
             throw new OwlError("No active component (a hook function should only be called in 'setup')");
@@ -2353,9 +2668,136 @@
             }
             this.component = new C(props, env, this);
             const ctx = Object.assign(Object.create(this.component), { this: this.component });
-            this.renderFn = app.getTemplate(C.template).bind(this.component, ctx, this);
+            if (C.template) {
+                this.renderFn = app.getTemplate(C.template).bind(this.component, ctx, this);
+            }
+            else {
+                // component will be attached
+                this.renderFn = app.getTemplate(xml ``).bind(this.component, ctx, this);
+                if (C.dynamicContent) {
+                    this.prepareAttach(app._lastRootEl, C.dynamicContent, ctx);
+                }
+            }
             this.component.setup();
             currentNode = null;
+        }
+        prepareAttach(el, dynamicContent, ctx) {
+            const attrs = [];
+            const handlers = [];
+            const tOuts = [];
+            for (let key in dynamicContent) {
+                const value = dynamicContent[key];
+                const parts = key.split(":");
+                if (parts[1].startsWith("t-att-")) {
+                    const attr = parts[1].slice(6);
+                    const fn = new Function("ctx", `return ${compileExpr(value)};`);
+                    attrs.push({
+                        selector: parts[0],
+                        attr,
+                        fn,
+                    });
+                }
+                if (parts[1].startsWith("t-on-")) {
+                    const event = parts[1].slice(5);
+                    // const fn = new Function("ctx", "ev", `${compileExpr(value)}(ev);`);
+                    const fn = (ev) => this.component[value](ev);
+                    handlers.push({
+                        selector: parts[0],
+                        event,
+                        fn,
+                    });
+                }
+                if (parts[1] === "t-out") {
+                    const fn = new Function("ctx", `return ${compileExpr(value)};`);
+                    tOuts.push({ selector: parts[0], fn });
+                }
+            }
+            const handleAttrs = () => {
+                for (let attr of attrs) {
+                    const val = attr.fn.call(this.component, ctx);
+                    // todo: cache the queryselector result?
+                    const target = attr.selector === "root" ? el : el.querySelector(attr.selector);
+                    if (target) {
+                        target.setAttribute(attr.attr, val);
+                    }
+                }
+            };
+            const handleEvents = () => {
+                for (let handler of handlers) {
+                    // const val = attr.fn.call(this.component, ctx);
+                    // todo: cache the queryselector result?
+                    const target = handler.selector === "root" ? el : el.querySelector(handler.selector);
+                    if (target) {
+                        target.addEventListener(handler.event, handler.fn);
+                    }
+                }
+            };
+            const handleTOuts = () => {
+                for (let tOut of tOuts) {
+                    const val = tOut.fn.call(this.component, ctx);
+                    // todo: cache the queryselector result?
+                    const target = tOut.selector === "root" ? el : el.querySelector(tOut.selector);
+                    if (target) {
+                        if (val instanceof Markup) {
+                            target.innerHTML = val;
+                        }
+                        else {
+                            target.textContent = val;
+                        }
+                    }
+                }
+            };
+            if (attrs.length) {
+                this.mounted.push(handleAttrs);
+                this.patched.push(handleAttrs);
+            }
+            if (handlers.length) {
+                this.mounted.push(handleEvents);
+            }
+            if (tOuts.length) {
+                this.mounted.push(handleTOuts);
+                this.patched.push(handleTOuts);
+            }
+            // console.warn(attrs)
+            //   const handleAttr = () => {
+            //     const el = this.bdom.el.parentElement;
+            //     for (let elem in C.dynamicContent) {
+            //         const value = C.dynamicContent[elem];
+            //         const parts = elem.split(":");
+            //         if (parts[1].startsWith("t-att-")) {
+            //             const attr = parts[1].slice(6);
+            //             if (parts[0] === "root") {
+            //                 const fn = new Function("ctx", `return ${compileExpr(value)};`);
+            //                 const result = fn(this.component);
+            //                 el.setAttribute(attr, result);
+            //             }
+            //         }
+            //     }
+            // }
+            // onMounted(() => {
+            //     const el = this.bdom.el.parentElement;
+            //     for (let elem in C.dynamicContent) {
+            //         const value = C.dynamicContent[elem];
+            //         const parts = elem.split(":");
+            //         if (parts[1].startsWith("t-on-")) {
+            //             const event = parts[1].slice(5);
+            //             // todo: cleanup this
+            //             for (let target of el.querySelectorAll(parts[0])) {
+            //                 target.addEventListener(event, ev => {
+            //                     this.component[value](ev);
+            //                 });
+            //             }
+            //         }
+            //     }
+            //     handleAttr();
+            // });
+            // onPatched(() => {
+            //     handleAttr();
+            // })
+            // this.renderFn = function() {
+            //     // process here all dynamic
+            //     return renderFn(...arguments);
+            // }
         }
         mountComponent(target, options) {
             const fiber = new MountFiber(this, target, options);
@@ -3305,315 +3747,6 @@
     }
     xml.nextId = 1;
     TemplateSet.registerTemplate("__portal__", portalTemplate);
-
-    /**
-     * Owl QWeb Expression Parser
-     *
-     * Owl needs in various contexts to be able to understand the structure of a
-     * string representing a javascript expression.  The usual goal is to be able
-     * to rewrite some variables.  For example, if a template has
-     *
-     *  ```xml
-     *  <t t-if="computeSomething({val: state.val})">...</t>
-     * ```
-     *
-     * this needs to be translated in something like this:
-     *
-     * ```js
-     *   if (context["computeSomething"]({val: context["state"].val})) { ... }
-     * ```
-     *
-     * This file contains the implementation of an extremely naive tokenizer/parser
-     * and evaluator for javascript expressions.  The supported grammar is basically
-     * only expressive enough to understand the shape of objects, of arrays, and
-     * various operators.
-     */
-    //------------------------------------------------------------------------------
-    // Misc types, constants and helpers
-    //------------------------------------------------------------------------------
-    const RESERVED_WORDS = "true,false,NaN,null,undefined,debugger,console,window,in,instanceof,new,function,return,eval,void,Math,RegExp,Array,Object,Date".split(",");
-    const WORD_REPLACEMENT = Object.assign(Object.create(null), {
-        and: "&&",
-        or: "||",
-        gt: ">",
-        gte: ">=",
-        lt: "<",
-        lte: "<=",
-    });
-    const STATIC_TOKEN_MAP = Object.assign(Object.create(null), {
-        "{": "LEFT_BRACE",
-        "}": "RIGHT_BRACE",
-        "[": "LEFT_BRACKET",
-        "]": "RIGHT_BRACKET",
-        ":": "COLON",
-        ",": "COMMA",
-        "(": "LEFT_PAREN",
-        ")": "RIGHT_PAREN",
-    });
-    // note that the space after typeof is relevant. It makes sure that the formatted
-    // expression has a space after typeof. Currently we don't support delete and void
-    const OPERATORS = "...,.,===,==,+,!==,!=,!,||,&&,>=,>,<=,<,?,-,*,/,%,typeof ,=>,=,;,in ,new ,|,&,^,~".split(",");
-    let tokenizeString = function (expr) {
-        let s = expr[0];
-        let start = s;
-        if (s !== "'" && s !== '"' && s !== "`") {
-            return false;
-        }
-        let i = 1;
-        let cur;
-        while (expr[i] && expr[i] !== start) {
-            cur = expr[i];
-            s += cur;
-            if (cur === "\\") {
-                i++;
-                cur = expr[i];
-                if (!cur) {
-                    throw new OwlError("Invalid expression");
-                }
-                s += cur;
-            }
-            i++;
-        }
-        if (expr[i] !== start) {
-            throw new OwlError("Invalid expression");
-        }
-        s += start;
-        if (start === "`") {
-            return {
-                type: "TEMPLATE_STRING",
-                value: s,
-                replace(replacer) {
-                    return s.replace(/\$\{(.*?)\}/g, (match, group) => {
-                        return "${" + replacer(group) + "}";
-                    });
-                },
-            };
-        }
-        return { type: "VALUE", value: s };
-    };
-    let tokenizeNumber = function (expr) {
-        let s = expr[0];
-        if (s && s.match(/[0-9]/)) {
-            let i = 1;
-            while (expr[i] && expr[i].match(/[0-9]|\./)) {
-                s += expr[i];
-                i++;
-            }
-            return { type: "VALUE", value: s };
-        }
-        else {
-            return false;
-        }
-    };
-    let tokenizeSymbol = function (expr) {
-        let s = expr[0];
-        if (s && s.match(/[a-zA-Z_\$]/)) {
-            let i = 1;
-            while (expr[i] && expr[i].match(/\w/)) {
-                s += expr[i];
-                i++;
-            }
-            if (s in WORD_REPLACEMENT) {
-                return { type: "OPERATOR", value: WORD_REPLACEMENT[s], size: s.length };
-            }
-            return { type: "SYMBOL", value: s };
-        }
-        else {
-            return false;
-        }
-    };
-    const tokenizeStatic = function (expr) {
-        const char = expr[0];
-        if (char && char in STATIC_TOKEN_MAP) {
-            return { type: STATIC_TOKEN_MAP[char], value: char };
-        }
-        return false;
-    };
-    const tokenizeOperator = function (expr) {
-        for (let op of OPERATORS) {
-            if (expr.startsWith(op)) {
-                return { type: "OPERATOR", value: op };
-            }
-        }
-        return false;
-    };
-    const TOKENIZERS = [
-        tokenizeString,
-        tokenizeNumber,
-        tokenizeOperator,
-        tokenizeSymbol,
-        tokenizeStatic,
-    ];
-    /**
-     * Convert a javascript expression (as a string) into a list of tokens. For
-     * example: `tokenize("1 + b")` will return:
-     * ```js
-     *  [
-     *   {type: "VALUE", value: "1"},
-     *   {type: "OPERATOR", value: "+"},
-     *   {type: "SYMBOL", value: "b"}
-     * ]
-     * ```
-     */
-    function tokenize(expr) {
-        const result = [];
-        let token = true;
-        let error;
-        let current = expr;
-        try {
-            while (token) {
-                current = current.trim();
-                if (current) {
-                    for (let tokenizer of TOKENIZERS) {
-                        token = tokenizer(current);
-                        if (token) {
-                            result.push(token);
-                            current = current.slice(token.size || token.value.length);
-                            break;
-                        }
-                    }
-                }
-                else {
-                    token = false;
-                }
-            }
-        }
-        catch (e) {
-            error = e; // Silence all errors and throw a generic error below
-        }
-        if (current.length || error) {
-            throw new OwlError(`Tokenizer error: could not tokenize \`${expr}\``);
-        }
-        return result;
-    }
-    //------------------------------------------------------------------------------
-    // Expression "evaluator"
-    //------------------------------------------------------------------------------
-    const isLeftSeparator = (token) => token && (token.type === "LEFT_BRACE" || token.type === "COMMA");
-    const isRightSeparator = (token) => token && (token.type === "RIGHT_BRACE" || token.type === "COMMA");
-    /**
-     * This is the main function exported by this file. This is the code that will
-     * process an expression (given as a string) and returns another expression with
-     * proper lookups in the context.
-     *
-     * Usually, this kind of code would be very simple to do if we had an AST (so,
-     * if we had a javascript parser), since then, we would only need to find the
-     * variables and replace them.  However, a parser is more complicated, and there
-     * are no standard builtin parser API.
-     *
-     * Since this method is applied to simple javasript expressions, and the work to
-     * be done is actually quite simple, we actually can get away with not using a
-     * parser, which helps with the code size.
-     *
-     * Here is the heuristic used by this method to determine if a token is a
-     * variable:
-     * - by default, all symbols are considered a variable
-     * - unless the previous token is a dot (in that case, this is a property: `a.b`)
-     * - or if the previous token is a left brace or a comma, and the next token is
-     *   a colon (in that case, this is an object key: `{a: b}`)
-     *
-     * Some specific code is also required to support arrow functions. If we detect
-     * the arrow operator, then we add the current (or some previous tokens) token to
-     * the list of variables so it does not get replaced by a lookup in the context
-     */
-    function compileExprToArray(expr) {
-        const localVars = new Set();
-        const tokens = tokenize(expr);
-        let i = 0;
-        let stack = []; // to track last opening (, [ or {
-        while (i < tokens.length) {
-            let token = tokens[i];
-            let prevToken = tokens[i - 1];
-            let nextToken = tokens[i + 1];
-            let groupType = stack[stack.length - 1];
-            switch (token.type) {
-                case "LEFT_BRACE":
-                case "LEFT_BRACKET":
-                case "LEFT_PAREN":
-                    stack.push(token.type);
-                    break;
-                case "RIGHT_BRACE":
-                case "RIGHT_BRACKET":
-                case "RIGHT_PAREN":
-                    stack.pop();
-            }
-            let isVar = token.type === "SYMBOL" && !RESERVED_WORDS.includes(token.value);
-            if (token.type === "SYMBOL" && !RESERVED_WORDS.includes(token.value)) {
-                if (prevToken) {
-                    // normalize missing tokens: {a} should be equivalent to {a:a}
-                    if (groupType === "LEFT_BRACE" &&
-                        isLeftSeparator(prevToken) &&
-                        isRightSeparator(nextToken)) {
-                        tokens.splice(i + 1, 0, { type: "COLON", value: ":" }, { ...token });
-                        nextToken = tokens[i + 1];
-                    }
-                    if (prevToken.type === "OPERATOR" && prevToken.value === ".") {
-                        isVar = false;
-                    }
-                    else if (prevToken.type === "LEFT_BRACE" || prevToken.type === "COMMA") {
-                        if (nextToken && nextToken.type === "COLON") {
-                            isVar = false;
-                        }
-                    }
-                }
-            }
-            if (token.type === "TEMPLATE_STRING") {
-                token.value = token.replace((expr) => compileExpr(expr));
-            }
-            if (nextToken && nextToken.type === "OPERATOR" && nextToken.value === "=>") {
-                if (token.type === "RIGHT_PAREN") {
-                    let j = i - 1;
-                    while (j > 0 && tokens[j].type !== "LEFT_PAREN") {
-                        if (tokens[j].type === "SYMBOL" && tokens[j].originalValue) {
-                            tokens[j].value = tokens[j].originalValue;
-                            localVars.add(tokens[j].value); //] = { id: tokens[j].value, expr: tokens[j].value };
-                        }
-                        j--;
-                    }
-                }
-                else {
-                    localVars.add(token.value); //] = { id: token.value, expr: token.value };
-                }
-            }
-            if (isVar) {
-                token.varName = token.value;
-                if (!localVars.has(token.value)) {
-                    token.originalValue = token.value;
-                    token.value = `ctx['${token.value}']`;
-                }
-            }
-            i++;
-        }
-        // Mark all variables that have been used locally.
-        // This assumes the expression has only one scope (incorrect but "good enough for now")
-        for (const token of tokens) {
-            if (token.type === "SYMBOL" && token.varName && localVars.has(token.value)) {
-                token.originalValue = token.value;
-                token.value = `_${token.value}`;
-                token.isLocal = true;
-            }
-        }
-        return tokens;
-    }
-    // Leading spaces are trimmed during tokenization, so they need to be added back for some values
-    const paddedValues = new Map([["in ", " in "]]);
-    function compileExpr(expr) {
-        return compileExprToArray(expr)
-            .map((t) => paddedValues.get(t.value) || t.value)
-            .join("");
-    }
-    const INTERP_REGEXP = /\{\{.*?\}\}|\#\{.*?\}/g;
-    function replaceDynamicParts(s, replacer) {
-        let matches = s.match(INTERP_REGEXP);
-        if (matches && matches[0].length === s.length) {
-            return `(${replacer(s.slice(2, matches[0][0] === "{" ? -2 : -1))})`;
-        }
-        let r = s.replace(INTERP_REGEXP, (s) => "${" + replacer(s.slice(2, s[0] === "{" ? -2 : -1)) + "}");
-        return "`" + r + "`";
-    }
-    function interpolate(s) {
-        return replaceDynamicParts(s, compileExpr);
-    }
 
     const whitespaceRE = /\s+/g;
     // using a non-html document so that <inner/outer>HTML serializes as XML instead
@@ -5571,6 +5704,7 @@
             this.frame = 0;
             this.delayedRenders = [];
             this.cancelledNodes = new Set();
+            this.processing = false;
             this.requestAnimationFrame = Scheduler.requestAnimationFrame;
         }
         addFiber(fiber) {
@@ -5601,6 +5735,10 @@
             }
         }
         processTasks() {
+            if (this.processing) {
+                return;
+            }
+            this.processing = true;
             this.frame = 0;
             for (let node of this.cancelledNodes) {
                 node._destroy();
@@ -5614,6 +5752,7 @@
                     this.tasks.delete(task);
                 }
             }
+            this.processing = false;
         }
         processFiber(fiber) {
             if (fiber.root !== fiber) {
@@ -5657,6 +5796,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
             this.scheduler = new Scheduler();
             this.subRoots = new Set();
             this.root = null;
+            this._lastRootEl = null; // temporary ref to propagate to roots
             this.name = config.name || "";
             this.Root = Root;
             apps.add(this);
@@ -5674,30 +5814,42 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
             this.props = config.props || {};
         }
         mount(target, options) {
-            const root = this.createRoot(this.Root, { props: this.props });
-            this.root = root.node;
-            this.subRoots.delete(root.node);
-            return root.mount(target, options);
+            this.root = this.createRoot(this.Root, { props: this.props });
+            return this.root.mount(target, options);
         }
         createRoot(Root, config = {}) {
             const props = config.props || {};
-            // hack to make sure the sub root get the sub env if necessary. for owl 3,
-            // would be nice to rethink the initialization process to make sure that
-            // we can create a ComponentNode and give it explicitely the env, instead
-            // of looking it up in the app
             const env = this.env;
-            if (config.env) {
-                this.env = config.env;
-            }
-            const node = this.makeNode(Root, props);
-            if (config.env) {
-                this.env = env;
-            }
-            this.subRoots.add(node);
-            return {
-                node,
+            const root = {
+                node: null,
                 mount: (target, options) => {
                     App.validateTarget(target);
+                    // hack to make sure the sub root get the sub env if necessary. for owl 3,
+                    // would be nice to rethink the initialization process to make sure that
+                    // we can create a ComponentNode and give it explicitely the env, instead
+                    // of looking it up in the app
+                    if (config.env) {
+                        this.env = config.env;
+                    }
+                    const restore = saveCurrent();
+                    if ((options === null || options === void 0 ? void 0 : options.position) === "attach") {
+                        if (Root.template) {
+                            throw new Error("Cannot attach a component with a template");
+                        }
+                    }
+                    else {
+                        if (!Root.template) {
+                            // no template => trigger an error
+                            this.getTemplate("");
+                        }
+                    }
+                    this._lastRootEl = target;
+                    const node = this.makeNode(Root, props);
+                    root.node = node;
+                    restore();
+                    if (config.env) {
+                        this.env = env;
+                    }
                     if (this.dev) {
                         validateProps(Root, props, { __owl__: { app: this } });
                     }
@@ -5705,11 +5857,16 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
                     return prom;
                 },
                 destroy: () => {
-                    this.subRoots.delete(node);
-                    node.destroy();
-                    this.scheduler.processTasks();
+                    var _a;
+                    this.subRoots.delete(root);
+                    if (root.node) {
+                        (_a = root.node) === null || _a === void 0 ? void 0 : _a.destroy();
+                        this.scheduler.processTasks();
+                    }
                 },
             };
+            this.subRoots.add(root);
+            return root;
         }
         makeNode(Component, props) {
             return new ComponentNode(Component, props, this, null, null);
@@ -5740,13 +5897,17 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
             return promise;
         }
         destroy() {
-            if (this.root) {
-                for (let subroot of this.subRoots) {
-                    subroot.destroy();
-                }
-                this.root.destroy();
-                this.scheduler.processTasks();
+            const roots = [...this.subRoots].reverse();
+            for (let root of roots) {
+                root.destroy();
             }
+            // if (this.root) {
+            //   for (let subroot of this.subRoots) {
+            //     subroot.destroy();
+            //   }
+            //   this.root.destroy();
+            this.scheduler.processTasks();
+            // }
             apps.delete(this);
         }
         createComponent(name, isStatic, hasSlotsProp, hasDynamicPropList, propList) {
@@ -6058,8 +6219,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2024-09-30T08:49:29.420Z';
-    __info__.hash = 'eb2b32a';
+    __info__.date = '2024-10-30T14:01:00.198Z';
+    __info__.hash = 'c2502a8';
     __info__.url = 'https://github.com/odoo/owl';
 
 
