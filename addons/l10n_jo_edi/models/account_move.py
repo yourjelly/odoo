@@ -96,7 +96,7 @@ class AccountMove(models.Model):
             'Content-Type': 'application/json',
         }
 
-    def submit_to_jofotara(self):
+    def _submit_to_jofotara(self):
         self.ensure_one()
         headers = self._build_jofotara_headers()
         params = '{"invoice": "%s"}' % self.l10n_jo_edi_xml_attachment_id.datas.decode('ascii')
@@ -106,7 +106,7 @@ class AccountMove(models.Model):
         except (requests.exceptions.Timeout, requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
             raise UserError("Invalid request: %s" % e)
 
-        response_text = response.content.decode('utf-8')
+        response_text = response.content.decode()
         if not response.ok:
             raise UserError("Request failed: %s" % response_text)
         dict_response = json.loads(response_text)
@@ -135,7 +135,7 @@ class AccountMove(models.Model):
             )
 
             try:
-                invoice.submit_to_jofotara()
+                invoice._submit_to_jofotara()
                 invoice.l10n_jo_edi_error = False
                 invoice.with_context(no_new_invoice=True).message_post(
                     body=_("E-invoice (JoFotara) submitted successfully."),
