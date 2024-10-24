@@ -47,6 +47,16 @@ class ProjectTask(models.Model):
 
     def action_convert_to_task(self):
         self.ensure_one()
+        if not self.project_id:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'danger',
+                    'sticky': False,
+                    'message': self.env._('The project should be set to be able to convert the todo into a task.'),
+                }
+            }
         self.company_id = self.project_id.company_id
         return {
             'type': 'ir.actions.act_url',
