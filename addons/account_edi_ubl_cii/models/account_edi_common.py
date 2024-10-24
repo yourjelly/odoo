@@ -129,6 +129,16 @@ class AccountEdiCommon(models.AbstractModel):
             if val:
                 return val
 
+    def _get_customer_supplier(self, record):
+        if record._name == 'account.move':
+            return record.commercial_partner_id, record.company_id.partner_id.commercial_partner_id
+        elif record._name == 'sale.order':
+            return record.partner_id, record.company_id.partner_id.commercial_partner_id
+        elif record._name == 'purchase.order':
+            return record.company_id.partner_id.commercial_partner_id, record.partner_id
+        else:
+            raise ValidationError(_("Unhandled type of business object."))
+
     # -------------------------------------------------------------------------
     # TAXES
     # -------------------------------------------------------------------------
@@ -142,7 +152,7 @@ class AccountEdiCommon(models.AbstractModel):
                 error_msg = _("Tax '%(tax_name)s' is invalid: %(error_message)s", tax_name=tax.name, error_message=e.args[0])  # args[0] gives the error message
                 raise ValidationError(error_msg)
 
-    def _get_tax_unece_codes(self, customer, supplier, tax):
+    def _get_tax_unece_codes(self, record, tax):
         """
         Source: doc of Peppol (but the CEF norm is also used by factur-x, yet not detailed)
         https://docs.peppol.eu/poacc/billing/3.0/syntax/ubl-invoice/cac-TaxTotal/cac-TaxSubtotal/cac-TaxCategory/cbc-TaxExemptionReasonCode/
@@ -161,6 +171,8 @@ class AccountEdiCommon(models.AbstractModel):
                 'tax_exemption_reason_code': tax_exemption_reason_code,
                 'tax_exemption_reason': tax_exemption_reason,
             }
+
+        customer, supplier = self._get_customer_supplier(record)
 
         # add Norway, Iceland, Liechtenstein
         european_economic_area = self.env.ref('base.europe').country_ids.mapped('code') + ['NO', 'IS', 'LI']
@@ -202,7 +214,7 @@ class AccountEdiCommon(models.AbstractModel):
         else:
             return create_dict(tax_category_code='E', tax_exemption_reason=_('Articles 226 items 11 to 15 Directive 2006/112/EN'))
 
-    def _get_tax_category_list(self, customer, supplier, taxes):
+    def _get_tax_category_list(self, record, taxes):
         """ Full list: https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred5305.htm
         Subset: https://docs.peppol.eu/poacc/billing/3.0/codelist/UNCL5305/
 
@@ -211,7 +223,7 @@ class AccountEdiCommon(models.AbstractModel):
         """
         res = []
         for tax in taxes:
-            tax_unece_codes = self._get_tax_unece_codes(customer, supplier, tax)
+            tax_unece_codes = self._get_tax_unece_codes(record, tax)
             res.append({
                 'id': tax_unece_codes.get('tax_category_code'),
                 'percent': tax.amount if tax.amount_type == 'percent' else False,

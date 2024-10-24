@@ -65,12 +65,13 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
 
         return tax_scheme_vals_list
 
-    def _get_tax_unece_codes(self, customer, supplier, tax):
+    def _get_tax_unece_codes(self, record, tax):
         """
         In malaysia, only the following codes can be used: T, E, O
         https://docs.peppol.eu/poac/my/pint-my/bis/#_tax_category_code
         """
         # OVERRIDE account_edi_ubl_cii
+        _customer, supplier = self._get_customer_supplier(record)
         codes = {
             'tax_category_code': False,
             'tax_exemption_reason_code': False,

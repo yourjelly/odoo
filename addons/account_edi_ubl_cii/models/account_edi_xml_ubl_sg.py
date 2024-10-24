@@ -53,7 +53,7 @@ class AccountEdiXmlUBLSG(models.AbstractModel):
             tax_category_code = 'ZR'
         return tax_category_code
 
-    def _get_tax_category_list(self, customer, supplier, taxes):
+    def _get_tax_category_list(self, record, taxes):
         # OVERRIDE
         res = []
         for tax in taxes:

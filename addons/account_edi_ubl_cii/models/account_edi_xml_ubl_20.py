@@ -222,9 +222,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         taxes = line.tax_ids.flatten_taxes_hierarchy()
         if self._context.get('convert_fixed_taxes'):
             taxes = taxes.filtered(lambda t: t.amount_type != 'fixed')
-        customer = line.move_id.commercial_partner_id
-        supplier = line.move_id.company_id.partner_id.commercial_partner_id
-        tax_category_vals_list = self._get_tax_category_list(customer, supplier, taxes)
+        tax_category_vals_list = self._get_tax_category_list(line.move_id, taxes)
         description = line.name and line.name.replace('\n', ', ')
         return {
             'description': description,
@@ -437,9 +435,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
     def _get_tax_grouping_key(self, base_line, tax_data):
         tax = tax_data['tax']
-        customer = base_line['record'].move_id.commercial_partner_id
-        supplier = base_line['record'].move_id.company_id.partner_id.commercial_partner_id
-        tax_category_vals = self._get_tax_category_list(customer, supplier, tax)[0]
+        tax_category_vals = self._get_tax_category_list(base_line['record'].move_id, tax)[0]
         grouping_key = {
             'tax_category_id': tax_category_vals['id'],
             'tax_category_percent': tax_category_vals['percent'],

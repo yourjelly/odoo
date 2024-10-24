@@ -80,9 +80,7 @@ class PurchaseEdiXmlUBLBIS3(models.AbstractModel):
         if not order_line.taxes_id:
             return None
         tax = order_line.taxes_id[0]
-        customer = order.company_id.partner_id.commercial_partner_id
-        supplier = order.partner_id
-        tax_unece_codes = self._get_tax_unece_codes(customer, supplier, tax)
+        tax_unece_codes = self._get_tax_unece_codes(order, tax)
         return {
             'id': tax_unece_codes.get('tax_category_code'),
             'percent': tax.amount if tax.amount_type == 'percent' else False,

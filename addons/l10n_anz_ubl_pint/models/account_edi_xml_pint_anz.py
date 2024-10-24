@@ -46,22 +46,23 @@ class AccountEdiXmlUBLPINTANZ(models.AbstractModel):
             vals_list.append(tax_totals_vals)
         return vals_list
 
-    def _get_tax_unece_codes(self, customer, supplier, tax):
+    def _get_tax_unece_codes(self, record, tax):
         """ The GST category must be provided in the file.
         See https://docs.peppol.eu/poac/aunz/pint-aunz/bis/#_tax_category_code
         """
         # OVERRIDE account_edi_ubl_cii
+        _customer, supplier = self._get_customer_supplier(record)
         if not supplier.vat:
             return {
                 'tax_category_code': 'O',
                 'tax_exemption_reason_code': False,
                 'tax_exemption_reason': False,
             }  # a business is not registered for GST, the business cannot issue tax invoices. In this case, the GST category code should be O (Outside scope of tax).
-        return super()._get_tax_unece_codes(customer, supplier, tax)
+        return super()._get_tax_unece_codes(record, tax)
 
-    def _get_tax_category_list(self, customer, supplier, taxes):
+    def _get_tax_category_list(self, record, taxes):
         # EXTENDS account_edi_ubl_cii
-        vals_list = super()._get_tax_category_list(customer, supplier, taxes)
+        vals_list = super()._get_tax_category_list(record, taxes)
         for vals in vals_list:
             vals['tax_scheme_vals'] = {'id': 'GST'}
         return vals_list

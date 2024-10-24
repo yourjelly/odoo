@@ -49,9 +49,9 @@ class AccountEdiXmlUBLPINTSG(models.AbstractModel):
             vals_list.append(tax_totals_vals)
         return vals_list
 
-    def _get_tax_category_list(self, customer, supplier, taxes):
+    def _get_tax_category_list(self, record, taxes):
         # EXTENDS account_edi_ubl_cii
-        vals_list = super()._get_tax_category_list(customer, supplier, taxes)
+        vals_list = super()._get_tax_category_list(record, taxes)
         for vals in vals_list:
             vals['tax_scheme_vals'] = {'id': 'GST'}
         return vals_list

@@ -133,10 +133,8 @@ class AccountEdiXmlCII(models.AbstractModel):
 
         def grouping_key_generator(base_line, tax_data):
             tax = tax_data['tax']
-            customer = invoice.commercial_partner_id
-            supplier = invoice.company_id.partner_id.commercial_partner_id
             grouping_key = {
-                **self._get_tax_unece_codes(customer, supplier, tax),
+                **self._get_tax_unece_codes(invoice, tax),
                 'amount': tax.amount,
                 'amount_type': tax.amount_type,
             }
