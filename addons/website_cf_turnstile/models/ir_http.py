@@ -31,10 +31,8 @@ class IrHttp(models.AbstractModel):
             is considered inactive and this method will return True.
         """
         res = super()._verify_request_recaptcha_token(action)
-
-        if not res:  # check result of google_recaptcha
+        if not res:
             return res
-
         ip_addr = request.httprequest.remote_addr
         token = request.params.pop('turnstile_captcha', False)
         turnstile_result = request.env['ir.http']._verify_turnstile_token(ip_addr, token, action)
