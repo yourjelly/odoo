@@ -2877,6 +2877,10 @@ class BaseModel(metaclass=MetaModel):
             # ('null'::jsonb)::text == 'null'
             # ('null'::jsonb->>0)::text IS NULL
             return SQL('(%s->>0)::%s', sql_field, SQL(field._column_type[1]))
+        elif field.type in ('integer', 'float', 'monetary') and field.name != 'id':
+            return SQL('COALESCE(%s, 0)', sql_field)
+        elif field.type == 'boolean':
+            return SQL('COALESCE(%s, FALSE)', sql_field)
 
         return sql_field
 

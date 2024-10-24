@@ -1495,7 +1495,7 @@ class IrModelFieldsSelection(models.Model):
             SELECT value, name->>'en_US'
             FROM ir_model_fields_selection
             WHERE field_id=%s
-            ORDER BY sequence, id
+            ORDER BY COALESCE(sequence, 0), id
         """, (field_id,))
         return self._cr.fetchall()
 

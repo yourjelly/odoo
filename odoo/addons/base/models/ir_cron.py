@@ -220,7 +220,7 @@ class IrCron(models.Model):
                     WHERE call_at <= (now() at time zone 'UTC')
                 )
               )
-            ORDER BY failure_count, priority, id
+            ORDER BY failure_count, COALESCE(priority, 0), id
         """)
         return cr.dictfetchall()
 
