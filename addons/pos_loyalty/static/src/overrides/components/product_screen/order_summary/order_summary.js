@@ -100,24 +100,7 @@ patch(OrderSummary.prototype, {
             super._setValue(val);
         }
         if (!selectedLine.is_reward_line || (selectedLine.is_reward_line && val === "remove")) {
-            this.pos.setAllowedPrograms();
             this.pos.updateRewards();
-        }
-        if (
-            !selectedLine.is_reward_line &&
-            !selectedLine.uiState.isRewardLineProduct &&
-            val === "remove"
-        ) {
-            const res = this.currentOrder
-                .getLoyaltyPoints()
-                ?.reduce((acc, loyalty) => (loyalty.points.total < 0 ? (acc = false) : true), true);
-            if (!res) {
-                this.notification.add(
-                    _t("Loyalty points cannot be negative"),
-                    { type: "danger" },
-                    4000
-                );
-            }
         }
     },
 

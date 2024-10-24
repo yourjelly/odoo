@@ -58,16 +58,8 @@ patch(PosStore.prototype, {
         order?.lines?.length;
         await this.orderUpdateLoyaltyPrograms();
     },
-    setAllowedPrograms() {
-        const order = this.get_order();
-        const programs = this.models["loyalty.program"].filter((program) =>
-            order?._programIsApplicable(program)
-        );
-        programs.forEach((program) => order?.allowedPrograms.push(program.id));
-    },
     async selectPartner(partner) {
         const res = await super.selectPartner(partner);
-        this.setAllowedPrograms();
         await this.updateRewards();
         return res;
     },
@@ -86,7 +78,7 @@ patch(PosStore.prototype, {
             return;
         }
         await this.checkMissingCoupons();
-        await this.updatePrograms(this.get_order()?.allowedPrograms);
+        await this.updatePrograms();
     },
     updateRewards() {
         // Calls are not expected to take some time besides on the first load + when loyalty programs are made applicable
@@ -119,6 +111,19 @@ patch(PosStore.prototype, {
                     await this.orderUpdateLoyaltyPrograms();
                 }
                 order._updateRewardLines();
+                const res = order
+                    ?.getLoyaltyPoints()
+                    ?.reduce(
+                        (acc, loyalty) => (loyalty.points.total < 0 ? (acc = false) : true),
+                        true
+                    );
+                if (!res) {
+                    this.notification.add(
+                        _t("Loyalty points cannot be negative"),
+                        { type: "danger" },
+                        4000
+                    );
+                }
             });
         });
     },
@@ -139,7 +144,7 @@ patch(PosStore.prototype, {
     /**
      * Update our couponPointChanges, meaning the points/coupons each program give etc.
      */
-    async updatePrograms(allowedPrograms = []) {
+    async updatePrograms() {
         const order = this.get_order();
         if (!order) {
             return;
@@ -166,10 +171,11 @@ patch(PosStore.prototype, {
             this.models["loyalty.program"].get(programId)
         );
         const pointsAddedPerProgram = order.pointsForPrograms(programs);
+        this.setAllowedPrograms();
         for (const program of this.models["loyalty.program"].getAll()) {
             // Future programs may split their points per unit paid (gift cards for example), consider a non applicable program to give no points
             const pointsAdded =
-                order._programIsApplicable(program) && allowedPrograms.includes(program.id)
+                order._programIsApplicable(program) && order.allowedPrograms.includes(program.id)
                     ? pointsAddedPerProgram[program.id]
                     : changesPerProgram[program.id]
                     ? changesPerProgram[program.id]
@@ -367,8 +373,12 @@ patch(PosStore.prototype, {
             );
         });
     },
-    getPointAppliedOnLine(selectedLine) {
+    /**
+     * Used to set allowed programs before updating programs in order
+     */
+    setAllowedPrograms() {
         const order = this.get_order();
+        order.allowedPrograms = [];
         const programsToCheck = new Set();
         for (const program of this.models["loyalty.program"].getAll()) {
             if (order._programIsApplicable(program)) {
@@ -392,7 +402,6 @@ patch(PosStore.prototype, {
                 }
             }
         }
-        let rewardPoints = 0;
         for (const program of programs) {
             if (Array.isArray(program.rule_ids)) {
                 for (const rule of program.rule_ids) {
@@ -417,7 +426,8 @@ patch(PosStore.prototype, {
                         roundPrecision(amountWithoutTax, 0.001);
                     if (
                         rule.minimum_amount > amountCheck &&
-                        !selectedLine.uiState.isRewardLineProduct
+                        (!order.get_selected_orderline()?.uiState.isRewardLineProduct ||
+                            program.program_type !== "loyalty")
                     ) {
                         continue;
                     }
@@ -433,7 +443,6 @@ patch(PosStore.prototype, {
                                         rule.validProductIds.has(line._reward_product_id?.id)))) &&
                             !line.ignoreLoyaltyPoints({ program })
                         ) {
-                            // We only count reward products from the same program to avoid unwanted feedback loops
                             if (line.is_reward_line) {
                                 const reward = line.reward_id;
                                 if (
@@ -461,27 +470,17 @@ patch(PosStore.prototype, {
                             }
                         }
                     }
-                    if (totalProductQty < rule.minimum_qty) {
+                    if (
+                        totalProductQty < rule.minimum_qty &&
+                        (!order.get_selected_orderline()?.uiState.isRewardLineProduct ||
+                            program.program_type !== "loyalty")
+                    ) {
                         continue;
                     }
-                    if (rule.reward_point_mode === "money") {
-                        const amountCount =
-                            (rule.minimum_amount_tax_mode === "incl" &&
-                                roundPrecision(selectedLine.get_price_with_tax(), 0.001)) ||
-                            roundPrecision(selectedLine.get_price_without_tax(), 0.001);
-                        rewardPoints += rule.reward_point_amount * amountCount;
-                        order.allowedPrograms.push(program.id);
-                    } else if (rule.reward_point_mode === "unit") {
-                        rewardPoints += rule.reward_point_amount * selectedLine.qty;
-                        order.allowedPrograms.push(program.id);
-                    } else if (rule.reward_point_mode === "order") {
-                        rewardPoints += rule.reward_point_amount;
-                        order.allowedPrograms.push(program.id);
-                    }
+                    order.allowedPrograms.push(program.id);
                 }
             }
         }
-        return rewardPoints;
     },
     async addLineToCurrentOrder(vals, opt = {}, configure = true) {
         if (!vals.product_tmpl_id && vals.product_id) {
@@ -549,13 +548,7 @@ patch(PosStore.prototype, {
 
         vals.isRewardLineProduct = opt?.isRewardLineProduct;
         const result = await super.addLineToCurrentOrder(vals, opt, configure);
-        const selectedLine = order.get_selected_orderline();
-        if (selectedLine) {
-            selectedLine.uiState.pointsApplied = this.getPointAppliedOnLine(
-                order.get_selected_orderline()
-            );
-        }
-        await this.updatePrograms(this.get_order().allowedPrograms);
+        await this.updatePrograms();
         this.orderUpdateLoyaltyPrograms();
         if (rewardsToApply.length == 1 && opt?.isRewardLineProduct) {
             const reward = rewardsToApply[0];
@@ -564,9 +557,7 @@ patch(PosStore.prototype, {
                 order._applyReward(reward.reward, reward.coupon_id, { product });
             }
         }
-        if (selectedLine?.uiState.pointsApplied > 0 || selectedLine?.uiState.isRewardLineProduct) {
-            this.updateRewards();
-        }
+        this.updateRewards();
 
         return result;
     },
