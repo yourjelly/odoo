@@ -194,11 +194,17 @@ export class Chatter extends Component {
                 } else {
                     this.state.showAttachmentLoading = false;
                     this.state.isAttachmentBoxOpened =
-                        this.props.isAttachmentBoxVisibleInitially && this.attachments.length > 0;
+                        this.attachments.length > 0 &&
+                        (this.props.isAttachmentBoxVisibleInitially ||
+                            this.state.isAttachmentBoxOpened);
                 }
                 return () => browser.clearTimeout(this.loadingAttachmentTimeout);
             },
-            () => [this.state.thread, this.state.thread?.isLoadingAttachments]
+            () => [
+                this.state.thread,
+                this.state.thread?.isLoadingAttachments,
+                this.attachments.length,
+            ]
         );
     }
 
