@@ -249,8 +249,11 @@
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Ready to recruit more efficiently?
-            </p><p>
-                Let's create a job position.
+            </p>
+            <p>
+                <a name="%(hr.action_create_job_position)d" class="btn btn-link" type="action">
+                    Let's create a job position
+                </a>
             </p>
         </field>
     </record>
