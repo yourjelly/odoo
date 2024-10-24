@@ -468,6 +468,7 @@ export function addOrderline(productName, quantity = 1, unitPrice, expectedTotal
         }
         return key;
     };
+    // Press +/- to get a negative quantity. Sending "-1" will result in "-11".
     const numpadWrite = (val) =>
         val
             .toString()
