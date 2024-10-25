@@ -73,5 +73,10 @@
         <field name="perm_read" eval="False"/>
     </record>
 
+    <record id="ir_rule_hr_employee_departure_multi_company" model="ir.rule">
+        <field name="name">HR Employee Departure: Multi Company</field>
+        <field name="model_id" ref="model_hr_employee_departure"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
 </data>
 </odoo>
