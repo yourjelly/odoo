@@ -544,12 +544,11 @@ export class FloorScreen extends Component {
     }
     _getNewTableNumber() {
         let firstNum = 1;
-        const tablesNumber = this.activeTables
+        const tablesNumber = this.allActiveTables
             .map((table) => table.table_number)
             .sort(function (a, b) {
                 return a - b;
             });
-
         for (let i = 0; i < tablesNumber.length; i++) {
             if (tablesNumber[i] == firstNum) {
                 firstNum += 1;
@@ -566,6 +565,13 @@ export class FloorScreen extends Component {
     }
     get activeTables() {
         return this.activeFloor?.table_ids;
+    }
+    get allActiveTables() {
+        return this.pos.models["restaurant.floor"]
+            .getBy("pos_config_ids", this.pos.config.id)
+            .flatMap((floor) => {
+                return floor.table_ids;
+            });
     }
     get selectedTables() {
         return this.state.selectedTableIds.map((id) => this.pos.models["restaurant.table"].get(id));
@@ -679,6 +685,7 @@ export class FloorScreen extends Component {
         for (const table of tables) {
             const tableSerialized = table.serialize({ orm: true });
             tableSerialized.floor_id = copyFloor[0].id;
+            tableSerialized.table_number = this._getNewTableNumber();
             await this.createTableFromRaw(tableSerialized);
         }
     }

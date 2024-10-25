@@ -47,6 +47,7 @@ export class DataServiceOptions {
             "loyalty.program": ["trigger_product_ids"],
             "calendar.event": ["appointment_resource_ids"],
             "res.partner": ["barcode"],
+            "restaurant.floor": ["pos_config_ids"],
         };
 
         for (const model in databaseTable) {
