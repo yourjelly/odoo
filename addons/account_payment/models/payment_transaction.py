@@ -169,9 +169,9 @@ class PaymentTransaction(models.Model):
             **extra_create_values,
         }
 
-        if self.invoice_ids:
-            next_payment_values = self.invoice_ids._get_invoice_next_payment_values()
-            if next_payment_values['installment_state'] == 'epd' and self.amount == next_payment_values['amount_due']:
+        for invoice in self.invoice_ids:
+            next_payment_values = invoice._get_invoice_next_payment_values()
+            if next_payment_values['installment_state'] == 'epd' and invoice.amount == next_payment_values['amount_due']:
                 aml = next_payment_values['epd_line']
                 epd_aml_values_list = [({
                     'aml': aml,
@@ -183,7 +183,7 @@ class PaymentTransaction(models.Model):
                 for aml_values_list in early_payment_values.values():
                     if (aml_values_list):
                         aml_vl = aml_values_list[0]
-                        aml_vl['partner_id'] = self.partner_id.id
+                        aml_vl['partner_id'] = invoice.partner_id.id
                         payment_values['write_off_line_vals'] += [aml_vl]
 
         payment = self.env['account.payment'].create(payment_values)
