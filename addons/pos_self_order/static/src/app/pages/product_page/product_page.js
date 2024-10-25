@@ -88,4 +88,14 @@ export class ProductPage extends Component {
     isEveryValueSelected() {
         return Object.values(this.state.selectedValues).find((value) => !value) == false;
     }
+
+    isArchivedCombination() {
+        const variantAttributeValueIds = Object.values(this.state.selectedValues)
+            .filter((attr) => typeof att_component !== "object")
+            .map((attr) => Number(attr));
+        if (variantAttributeValueIds.length === 0) {
+            return false;
+        }
+        return this.props.product._isArchivedCombination(variantAttributeValueIds);
+    }
 }
