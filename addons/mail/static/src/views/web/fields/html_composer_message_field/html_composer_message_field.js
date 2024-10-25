@@ -2,6 +2,7 @@ import { DYNAMIC_PLACEHOLDER_PLUGINS } from "@html_editor/plugin_sets";
 import { registry } from "@web/core/registry";
 import { HtmlMailField, htmlMailField } from "../html_mail_field/html_mail_field";
 import { MentionPlugin } from "./mention_plugin";
+import { markup } from "@odoo/owl";
 
 export class HtmlComposerMessageField extends HtmlMailField {
     getConfig() {
@@ -24,6 +25,9 @@ export class HtmlComposerMessageField extends HtmlMailField {
             }
             this.props.record.data.attachment_ids.linkTo(attachment.id, attachment);
         };
+        if (!config.content.toString()) {
+            config.content = markup("<p class='oe-no-interline'><br></p>");
+        }
         return config;
     }
 }
