@@ -186,6 +186,11 @@ class HrEmployeePrivate(models.Model):
             permit_no = '_' + employee.permit_no if employee.permit_no else ''
             employee.work_permit_name = "%swork_permit%s" % (name, permit_no)
 
+    @api.onchange('resource_calendar_id')
+    def _onchange_resource_calendar_id(self):
+        if not self.resource_calendar_id:
+            self.resource_calendar_id = self._get_calendar()
+
     def action_create_user(self):
         self.ensure_one()
         if self.user_id:
