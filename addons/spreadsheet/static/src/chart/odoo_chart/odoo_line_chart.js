@@ -25,7 +25,7 @@ export class OdooLineChart extends OdooChart {
         this.cumulative = definition.cumulative;
         this.axesDesign = definition.axesDesign;
         this.fillArea = definition.fillArea;
-        this.trend = definition.trend;
+        // this.trend = definition.trend; ADRM TODO: migrate ? how ?
     }
 
     getDefinition() {
@@ -36,7 +36,6 @@ export class OdooLineChart extends OdooChart {
             cumulative: this.cumulative,
             axesDesign: this.axesDesign,
             fillArea: this.fillArea,
-            trend: this.trend,
         };
     }
 }
@@ -58,7 +57,6 @@ function createOdooChartRuntime(chart, getters) {
     datasets = computeCumulatedDatasets(chart, datasets);
 
     const definition = chart.getDefinition();
-    definition.dataSets = datasets.map(() => ({ trend: definition.trend }));
     const locale = getters.getLocale();
 
     const trendDataSetsValues = definition.dataSets.map((dataset, index) => {
