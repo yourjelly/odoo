@@ -77,25 +77,44 @@ import { childNodes, descendants, getCommonAncestor } from "../utils/dom_travers
  * @property { Function } revert
  */
 
+/**
+ * @typedef { Object } HistoryShared
+ * @property { HistoryPlugin['addExternalStep'] } addExternalStep
+ * @property { HistoryPlugin['addStep'] } addStep
+ * @property { HistoryPlugin['canRedo'] } canRedo
+ * @property { HistoryPlugin['canUndo'] } canUndo
+ * @property { HistoryPlugin['disableObserver'] } disableObserver
+ * @property { HistoryPlugin['enableObserver'] } enableObserver
+ * @property { HistoryPlugin['getHistorySteps'] } getHistorySteps
+ * @property { HistoryPlugin['getNodeById'] } getNodeById
+ * @property { HistoryPlugin['makePreviewableOperation'] } makePreviewableOperation
+ * @property { HistoryPlugin['makeSavePoint'] } makeSavePoint
+ * @property { HistoryPlugin['makeSnapshotStep'] } makeSnapshotStep
+ * @property { HistoryPlugin['reset'] } reset
+ * @property { HistoryPlugin['resetFromSteps'] } resetFromSteps
+ * @property { HistoryPlugin['serializeSelection'] } serializeSelection
+ * @property { HistoryPlugin['stageSelection'] } stageSelection
+ */
+
 export class HistoryPlugin extends Plugin {
-    static name = "history";
+    static id = "history";
     static dependencies = ["selection", "sanitize"];
     static shared = [
-        "reset",
-        "canUndo",
+        "addExternalStep",
+        "addStep",
         "canRedo",
-        "makeSavePoint",
-        "makePreviewableOperation",
-        "makeSnapshotStep",
+        "canUndo",
         "disableObserver",
         "enableObserver",
-        "addExternalStep",
         "getHistorySteps",
-        "historyResetFromSteps",
-        "serializeSelection",
         "getNodeById",
+        "makePreviewableOperation",
+        "makeSavePoint",
+        "makeSnapshotStep",
+        "reset",
+        "resetFromSteps",
+        "serializeSelection",
         "stageSelection",
-        "addStep",
     ];
     resources = {
         user_commands: [
@@ -124,6 +143,7 @@ export class HistoryPlugin extends Plugin {
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
         this._cleanups.push(() => this.observer.disconnect());
         this.clean();
+        window.HistoryPlugin = this;
     }
 
     clean() {
@@ -144,6 +164,10 @@ export class HistoryPlugin extends Plugin {
         this.setNodeId(this.editable);
         this.dispatchTo("history_cleaned_handlers");
     }
+    /**
+     * @param {string} id
+     * @returns {Node}
+     */
     getNodeById(id) {
         return this.idToNodeMap.get(id);
     }
@@ -161,7 +185,7 @@ export class HistoryPlugin extends Plugin {
     /**
      * @param { HistoryStep[] } steps
      */
-    historyResetFromSteps(steps) {
+    resetFromSteps(steps) {
         this.disableObserver();
         this.editable.replaceChildren();
         this.clean();
@@ -359,7 +383,7 @@ export class HistoryPlugin extends Plugin {
      * when reverting the step.
      */
     stageSelection() {
-        const selection = this.shared.getEditableSelection();
+        const selection = this.dependencies.selection.getEditableSelection();
         if (
             this.currentStep.mutations.find((m) =>
                 ["characterData", "remove", "add"].includes(m.type)
@@ -607,7 +631,7 @@ export class HistoryPlugin extends Plugin {
             newSelection.focusNode = focusNode;
             newSelection.focusOffset = selection.focusOffset;
         }
-        this.shared.setSelection(newSelection, { normalize: false });
+        this.dependencies.selection.setSelection(newSelection, { normalize: false });
         // @todo @phoenix add this in the selection or table plugin.
         // // If a table must be selected, ensure it's in the same tick.
         // this._handleSelectionInTable();
@@ -878,7 +902,7 @@ export class HistoryPlugin extends Plugin {
         const step = this.steps.at(-1);
         let applied = false;
         // TODO ABD TODO @phoenix: selection may become obsolete, it should evolve with mutations.
-        const selectionToRestore = this.shared.preserveSelection();
+        const selectionToRestore = this.dependencies.selection.preserveSelection();
         return () => {
             if (applied) {
                 return;
@@ -1015,7 +1039,7 @@ export class HistoryPlugin extends Plugin {
         let [unserializedNode, nodeMap] = this._unserializeNode(node, this.idToNodeMap);
         const fakeNode = this.document.createElement("fake-el");
         fakeNode.appendChild(unserializedNode);
-        this.shared.sanitize(fakeNode, { IN_PLACE: true });
+        this.dependencies.sanitize.sanitize(fakeNode, { IN_PLACE: true });
         unserializedNode = fakeNode.firstChild;
 
         if (unserializedNode) {
