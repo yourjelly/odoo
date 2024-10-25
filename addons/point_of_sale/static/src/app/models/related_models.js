@@ -311,41 +311,77 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
         }
     }
 
+    let processedFieldsCache = new Map();
+
     function connect(field, ownerRecord, recordToConnect) {
         const inverse = inverseMap.get(field);
-
+        const model = field.model;
+    
+        // Check and initialize processedFieldsCache for this model
+        if (!processedFieldsCache.has(model)) {
+            processedFieldsCache.set(model, new Set());
+        }
+    
+        const processedFields = processedFieldsCache.get(model);
+    
+        // Skip processing if the field has already been processed for this model
+        if (processedFields.has(field.name)) {
+            return;
+        }
+    
+        console.log(`Processing field ${field.name} for model ${model}.`);
+    
+        // Ensure ownerRecord is an object or retrieve it from the cache
         if (typeof ownerRecord !== "object") {
-            const model = field.model;
-            ownerRecord = records[model][ownerRecord];
+            ownerRecord = records[model][ownerRecord] || ownerRecord;
+            if (!ownerRecord) {
+                return;
+            }
         }
-
+    
+        // Ensure recordToConnect is an object or retrieve it from the cache
         if (typeof recordToConnect !== "object") {
-            const model = field.relation;
-            recordToConnect = records[model][recordToConnect];
+            const relationModel = field.relation;
+            if (!records[relationModel]) {
+                return;
+            }
+            recordToConnect = records[relationModel][recordToConnect] || recordToConnect;
+            if (!recordToConnect) {
+                return;
+            }
         }
-
+    
+        // Proceed with connecting logic based on field types
         if (field.type === "many2one") {
             const prevConnectedRecord = ownerRecord[field.name];
             if (toRaw(prevConnectedRecord) === toRaw(recordToConnect)) {
                 return;
             }
-            if (recordToConnect && inverse.name in recordToConnect) {
+    
+            if (recordToConnect && inverse.name in recordToConnect && recordToConnect[inverse.name] !== ownerRecord) {
                 addItem(recordToConnect, inverse.name, ownerRecord);
             }
+    
             if (prevConnectedRecord) {
                 removeItem(prevConnectedRecord, inverse.name, ownerRecord);
             }
+    
             ownerRecord[field.name] = recordToConnect;
         } else if (field.type === "one2many") {
-            // It's necessary to remove the previous connected in one2many but it would cause issue for inherited one2many field.
-            // Also, we don't do modification in PoS and we can ignore the removing part to prevent issue.
-            recordToConnect[inverse.name] = ownerRecord;
+            if (!recordToConnect[inverse.name] || recordToConnect[inverse.name] !== ownerRecord) {
+                recordToConnect[inverse.name] = ownerRecord;
+            }
             addItem(ownerRecord, field.name, recordToConnect);
         } else if (field.type === "many2many") {
             addItem(ownerRecord, field.name, recordToConnect);
             addItem(recordToConnect, inverse.name, ownerRecord);
         }
+    
+        // Mark this field as processed for the model
+        processedFields.add(field.name);
     }
+    
+    processedFieldsCache.clear();
 
     function disconnect(field, ownerRecord, recordToDisconnect) {
         if (!recordToDisconnect) {
