@@ -2,13 +2,12 @@
 <odoo>
     <data>
 
-        <record id="view_account_journal_tree" model="ir.ui.view">
-            <field name="name">account.journal.list</field>
+        <record id="view_account_journal_tree_without_handle" model="ir.ui.view">
+            <field name="name">account.journal.list.without.handle</field>
             <field name="model">account.journal</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
                 <list string="Account Journal">
-                    <field name='sequence' widget='handle'/>
                     <field name="name"/>
                     <field name="type"/>
                     <field name="journal_group_ids" widget="many2many_tags" readonly="1" optional="hide"/>
@@ -20,6 +19,19 @@
                     <field name="company_id" groups="base.group_multi_company" optional="hide"/>
                     <field name="company_id" groups="!base.group_multi_company" column_invisible="True"/>
                 </list>
+            </field>
+        </record>
+
+        <record id="view_account_journal_tree" model="ir.ui.view">
+            <field name="name">account.journal.list</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="view_account_journal_tree_without_handle"/>
+            <field name="mode">primary</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="before">
+                    <field name="sequence" widget="handle"/>
+                </xpath>
             </field>
         </record>
 
