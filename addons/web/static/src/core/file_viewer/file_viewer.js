@@ -1,5 +1,6 @@
-import { Component, useRef, useState } from "@odoo/owl";
+import { Component, useEffect, useRef, useState } from "@odoo/owl";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { hidePDFJSButtons } from "@web/libs/pdfjs";
 
 /**
  * @typedef {Object} File
@@ -32,6 +33,7 @@ export class FileViewer extends Component {
         useAutofocus();
         this.imageRef = useRef("image");
         this.zoomerRef = useRef("zoomer");
+        this.iframeViewerPdfRef = useRef("iframeViewerPdf");
 
         this.isDragging = false;
         this.dragStartX = 0;
@@ -55,6 +57,11 @@ export class FileViewer extends Component {
             angle: 0,
         });
         this.ui = useState(useService("ui"));
+        useEffect(() => {
+            if (this.iframeViewerPdfRef.el) {
+                hidePDFJSButtons(this.iframeViewerPdfRef.el);
+            }
+        });
     }
 
     onImageLoaded() {
