@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 import pytz
 
 from odoo import _, api, fields, models
+from odoo.addons.resource.models.utils import HOURS_PER_DAY
 
 
 class HrEmployee(models.Model):
@@ -220,6 +221,8 @@ class HrEmployee(models.Model):
             future_leaves = 0
             if allocation.allocation_type == 'accrual':
                 future_leaves = allocation._get_future_leaves_on(target_date)
+                if allocation.type_request_unit == 'hour' and allocation.holiday_status_id.request_unit != 'hour':
+                    future_leaves /= allocation.employee_id.sudo().resource_id.calendar_id.hours_per_day or HOURS_PER_DAY
             max_leaves = allocation.number_of_hours_display\
                 if allocation.type_request_unit in ['hour']\
                 else allocation.number_of_days_display
