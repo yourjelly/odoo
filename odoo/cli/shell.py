@@ -6,7 +6,7 @@ import signal
 import sys
 from pathlib import Path
 
-import odoo
+import odoo.api
 from odoo.modules.registry import Registry
 from odoo.service import server
 from odoo.tools import config

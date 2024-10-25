@@ -20,10 +20,8 @@ from operator import attrgetter
 
 import psycopg2
 
-import odoo
-from odoo import SUPERUSER_ID
+from odoo import SUPERUSER_ID, sql_db
 from odoo.modules.db import FunctionStatus
-from odoo.sql_db import TestCursor
 from odoo.tools import (
     SQL,
     OrderedSet,
@@ -175,10 +173,10 @@ class Registry(Mapping):
         self.loaded_xmlids = set()
 
         self.db_name = db_name
-        self._db = odoo.sql_db.db_connect(db_name, readonly=False)
+        self._db = sql_db.db_connect(db_name, readonly=False)
         self._db_readonly = None
         if config['db_replica_host'] is not False or config['test_enable']:  # by default, only use readonly pool if we have a db_replica_host defined. Allows to have an empty replica host for testing
-            self._db_readonly = odoo.sql_db.db_connect(db_name, readonly=True)
+            self._db_readonly = sql_db.db_connect(db_name, readonly=True)
 
         # cursor for test mode; None means "normal" mode
         self.test_cr = None
@@ -211,9 +209,10 @@ class Registry(Mapping):
         # Flags indicating invalidation of the registry or the cache.
         self._invalidation_flags = threading.local()
 
+        from odoo.modules import db  # noqa: PLC0415
         with closing(self.cursor()) as cr:
-            self.has_unaccent = odoo.modules.db.has_unaccent(cr)
-            self.has_trigram = odoo.modules.db.has_trigram(cr)
+            self.has_unaccent = db.has_unaccent(cr)
+            self.has_trigram = db.has_trigram(cr)
 
         self.unaccent = _unaccent if self.has_unaccent else lambda x: x
         self.unaccent_python = remove_accents if self.has_unaccent else lambda x: x
@@ -313,7 +312,8 @@ class Registry(Mapping):
         """ Complete the setup of models.
             This must be called after loading modules and before using the ORM.
         """
-        env = odoo.api.Environment(cr, SUPERUSER_ID, {})
+        from odoo import api  # noqa: PLC0415
+        env = api.Environment(cr, SUPERUSER_ID, {})
         env.invalidate_all()
 
         # Uninstall registry hooks. Because of the condition, this only happens
@@ -600,7 +600,8 @@ class Registry(Mapping):
         elif context.get('models_to_check', False):
             _logger.info("verifying fields for every extended model")
 
-        env = odoo.api.Environment(cr, SUPERUSER_ID, context)
+        from odoo import api  # noqa: PLC0415
+        env = api.Environment(cr, SUPERUSER_ID, context)
         models = [env[model_name] for model_name in model_names]
 
         try:
@@ -749,7 +750,8 @@ class Registry(Mapping):
         """
         Verify that all tables are present and try to initialize those that are missing.
         """
-        env = odoo.api.Environment(cr, SUPERUSER_ID, {})
+        from odoo import api  # noqa: PLC0415
+        env = api.Environment(cr, SUPERUSER_ID, {})
         table2model = {
             model._table: name
             for name, model in env.registry.items()
@@ -998,7 +1000,7 @@ class Registry(Mapping):
             # in test mode we use a proxy object that uses 'self.test_cr' underneath
             if readonly and not self.test_readonly_enabled:
                 _logger.info('Explicitly ignoring readonly flag when generating a cursor')
-            return TestCursor(self.test_cr, self.test_lock, readonly and self.test_readonly_enabled)
+            return sql_db.TestCursor(self.test_cr, self.test_lock, readonly and self.test_readonly_enabled)
 
         connection = self._db
         if readonly and self._db_readonly is not None:

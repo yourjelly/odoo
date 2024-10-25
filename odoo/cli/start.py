@@ -6,11 +6,11 @@ import os
 import sys
 from pathlib import Path
 
-import odoo
 from . import Command
 from .server import main
 from odoo.modules.module import get_module_root, MANIFEST_NAMES
 from odoo.service.db import _create_empty_database, DatabaseExists
+from odoo.tools import config
 
 
 class Start(Command):
@@ -24,7 +24,7 @@ class Start(Command):
         return [mod.split(os.path.sep)[-2] for mod in mods]
 
     def run(self, cmdargs):
-        odoo.tools.config.parser.prog = f'{Path(sys.argv[0]).name} {self.name}'
+        config.parser.prog = f'{Path(sys.argv[0]).name} {self.name}'
         parser = argparse.ArgumentParser(
             prog=f'{Path(sys.argv[0]).name} {self.name}',
             description=self.__doc__.strip(),
@@ -61,7 +61,7 @@ class Start(Command):
         # TODO: forbid some database names ? eg template1, ...
         try:
             _create_empty_database(args.db_name)
-            odoo.tools.config['init']['base'] = True
+            config['init']['base'] = True
         except DatabaseExists as e:
             pass
         except Exception as e:
