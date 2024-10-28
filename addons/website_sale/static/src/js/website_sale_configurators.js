@@ -193,8 +193,8 @@ WebsiteSale.include({
         return serializedProduct;
     },
 
-    _trackProducts: function (products) {
-        const productsTrackingInfo = []
+    _trackProducts(products) {
+        const productsTrackingInfo = [];
         for (const product of products) {
             productsTrackingInfo.push({
                 'item_id': product.id,

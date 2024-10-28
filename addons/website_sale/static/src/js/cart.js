@@ -17,7 +17,7 @@ publicWidget.registry.websiteSaleCart = publicWidget.Widget.extend({
     /**
      * @constructor
      */
-    init: function () {
+    init() {
         this._super.apply(this, arguments);
 
         this._changeCartQuantity = debounce(this._changeCartQuantity.bind(this), 500);
@@ -31,72 +31,61 @@ publicWidget.registry.websiteSaleCart = publicWidget.Widget.extend({
      * @private
      * @param {Event} ev
      */
-    _onChangeCartQuantity: function (ev) {
-        var $input = $(ev.currentTarget);
-        if ($input.data('update_change')) {
-            return;
-        }
-        var value = parseInt($input.val() || 0, 10);
-        if (isNaN(value)) {
-            value = 1;
-        }
-        var $dom = $input.closest('tr');
-        var $dom_optional = $dom.nextUntil(':not(.optional_product.info)');
-        var line_id = parseInt($input.data('line-id'), 10);
-        var productIDs = [parseInt($input.data('product-id'), 10)];
-        this._changeCartQuantity($input, value, $dom_optional, line_id, productIDs);
+    _onChangeCartQuantity(ev) {
+        return this._changeCartQuantity(ev.currentTarget);
     },
+
     /**
      * @private
      * @param {Event} ev
      */
-    _onClickDeleteProduct: function (ev) {
+    _onClickDeleteProduct(ev) {
         ev.preventDefault();
-        $(ev.currentTarget).closest('.o_cart_product').find('.js_quantity').val(0).trigger('change');
+        const input = document.querySelector(`input.js_quantity[data-line-id='${ev.currentTarget.dataset.lineId}']`)
+        input.value = 0;
+        this._changeCartQuantity(input);
     },
+
     /**
      * @private
      * @param {Event} ev
      */
-    _onClickSuggestedProduct: function (ev) {
+    _onClickSuggestedProduct(ev) {
         $(ev.currentTarget).prev('input').val(1).trigger('change');
     },
+
     /**
      * @private
      */
-    _changeCartQuantity: function ($input, value, $dom_optional, line_id, productIDs) {
-        $($dom_optional).toArray().forEach((elem) => {
-            $(elem).find('.js_quantity').text(value);
-            productIDs.push($(elem).find('span[data-product-id]').data('product-id'));
-        });
-        $input.data('update_change', true);
+    async _changeCartQuantity(input) {
+        const value = parseInt(input.value || 0, 10);
+        const line_id = parseInt(input.dataset.lineId, 10);
+        const productId = parseInt(input.dataset.productId, 10);
 
-        rpc('/shop/cart/update_json', {
+        const data = await rpc('/shop/cart/update_json', {
             line_id: line_id,
-            product_id: parseInt($input.data('product-id'), 10),
+            product_id: productId,
             set_qty: value,
             display: true,
-        }).then((data) => {
-            $input.data('update_change', false);
-            var check_value = parseInt($input.val() || 0, 10);
-            if (isNaN(check_value)) {
-                check_value = 1;
-            }
-            if (value !== check_value) {
-                $input.trigger('change');
-                return;
-            }
-            if (!data.cart_quantity) {
-                return window.location = '/shop/cart';
-            }
-            $input.val(data.quantity);
-            $('.js_quantity[data-line-id='+line_id+']').val(data.quantity).text(data.quantity);
+        })
+        if (!data.cart_quantity) {
+            // refresh the page to display the empty cart message
+            return window.location = '/shop/cart';
+        }
 
-            wSaleUtils.updateCartNavBar(data);
-            wSaleUtils.showWarning(data.notification_info.warning);
-            // Propagating the change to the express checkout forms
-            Component.env.bus.trigger('cart_amount_changed', [data.amount, data.minor_amount]);
-        });
+        const check_value = parseInt(input.value || 0, 10);
+        if (value !== check_value) {
+            this._changeCartQuantity(input);
+            return;
+        }
+
+        input.value = data.quantity;
+
+        wSaleUtils.updateCartNavBar(data);
+        wSaleUtils.showWarning(data.notification_info.warning);
+
+        // Propagating the change to the express checkout forms
+        Component.env.bus.trigger('cart_amount_changed', [data.amount, data.minor_amount]);
     },
 });
 

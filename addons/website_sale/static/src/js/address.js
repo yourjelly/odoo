@@ -14,7 +14,7 @@ publicWidget.registry.websiteSaleAddress = publicWidget.Widget.extend({
     /**
      * @constructor
      */
-    init: function () {
+    init() {
         this._super.apply(this, arguments);
 
         this.http = this.bindService('http');
