@@ -3,7 +3,8 @@
 
 <t t-name="mysterious_egg.SectionToolbox">
     <ElementToolboxContainer title="'Section'">
-        mytool
+        <LayoutOption editingElement="props.editingElement" />
+        <BackgroundOption editingElement="props.editingElement" />
     </ElementToolboxContainer>
 </t>
 
