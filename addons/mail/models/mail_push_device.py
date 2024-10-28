@@ -12,6 +12,8 @@ _logger = logger.getLogger(__name__)
 
 class MailPushDevice(models.Model):
     _description = "Push Notification Device"
+    _order = 'id DESC'
+    _rec_name = 'partner_id'
 
     partner_id = fields.Many2one(
         'res.partner', string='Partner', index=True, required=True,

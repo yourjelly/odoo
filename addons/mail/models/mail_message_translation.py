@@ -7,6 +7,7 @@ from odoo import api, fields, models
 
 class MailMessageTranslation(models.Model):
     _description = "Message Translation"
+    _order = 'id DESC'
 
     message_id = fields.Many2one("mail.message", "Message", required=True, ondelete="cascade")
     source_lang = fields.Char(

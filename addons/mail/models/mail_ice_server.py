@@ -8,6 +8,8 @@ import requests
 
 class MailIceServer(models.Model):
     _description = 'ICE server'
+    _order = 'id DESC'
+    _rec_name = 'username'
 
     server_type = fields.Selection([('stun', 'stun:'), ('turn', 'turn:')], string='Type', required=True, default='stun')
     uri = fields.Char('URI', required=True)
