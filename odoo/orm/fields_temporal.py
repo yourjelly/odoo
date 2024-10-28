@@ -25,11 +25,13 @@ class Date(Field[date | typing.Literal[False]]):
     subtract = staticmethod(date_utils.subtract)
 
     @staticmethod
-    def today(*args):
+    def today(record=None) -> date:
         """Return the current day in the format expected by the ORM.
 
         .. note:: This function may be used to compute default values.
         """
+        if record is not None:
+            return record.env.cr.now().date()
         return date.today()
 
     @staticmethod
@@ -45,9 +47,9 @@ class Date(Field[date | typing.Literal[False]]):
             can't be converted between timezones).
         :rtype: date
         """
-        today = timestamp or datetime.now()
+        today = timestamp or Datetime.now(record)
         context_today = None
-        tz_name = record._context.get('tz') or record.env.user.tz
+        tz_name = record.env.context.get('tz') or record.env.user.tz
         if tz_name:
             try:
                 today_utc = pytz.timezone('UTC').localize(today, is_dst=False)  # UTC = no DST
@@ -131,18 +133,20 @@ class Datetime(Field[datetime | typing.Literal[False]]):
     subtract = staticmethod(date_utils.subtract)
 
     @staticmethod
-    def now(*args):
+    def now(record=None):
         """Return the current day and time in the format expected by the ORM.
 
         .. note:: This function may be used to compute default values.
         """
-        # microseconds must be annihilated as they don't comply with the server datetime format
+        if record is not None:
+            return record.env.cr.now()
+        # microseconds must be annihilated as they don't comply with the server datetime forma
         return datetime.now().replace(microsecond=0)
 
     @staticmethod
-    def today(*args):
+    def today(record=None):
         """Return the current day, at midnight (00:00:00)."""
-        return Datetime.now().replace(hour=0, minute=0, second=0)
+        return Datetime.now(record).replace(hour=0, minute=0, second=0)
 
     @staticmethod
     def context_timestamp(record, timestamp):
@@ -160,7 +164,7 @@ class Datetime(Field[datetime | typing.Literal[False]]):
         :rtype: datetime
         """
         assert isinstance(timestamp, datetime), 'Datetime instance expected'
-        tz_name = record._context.get('tz') or record.env.user.tz
+        tz_name = record.env.context.get('tz') or record.env.user.tz
         utc_timestamp = pytz.utc.localize(timestamp, is_dst=False)  # UTC = no DST
         if tz_name:
             try:

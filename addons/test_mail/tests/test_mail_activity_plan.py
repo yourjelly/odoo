@@ -3,12 +3,11 @@
 
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from freezegun import freeze_time
 
 from odoo import Command, fields
 from odoo.addons.mail.tests.test_mail_activity import ActivityScheduleCase
 from odoo.exceptions import ValidationError
-from odoo.tests import Form, tagged, users
+from odoo.tests import Form, freeze_time, tagged, users
 from odoo.tools.misc import format_date
 
 

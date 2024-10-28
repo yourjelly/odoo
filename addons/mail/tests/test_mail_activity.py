@@ -1,12 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from contextlib import contextmanager
-from freezegun import freeze_time
 from unittest.mock import patch
 
 from odoo.addons.mail.models.mail_activity import MailActivity
 from odoo.addons.mail.tests.common import MailCommon
-from odoo.tests import Form, tagged, HttpCase
+from odoo.tests import Form, freeze_time, tagged, HttpCase
 from odoo.tools.misc import format_date
 
 

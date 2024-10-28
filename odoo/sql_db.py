@@ -244,6 +244,9 @@ class BaseCursor(_CursorProtocol):
 
     def now(self) -> datetime:
         """ Return the transaction's timestamp ``NOW() AT TIME ZONE 'UTC'``. """
+        if hasattr(datetime, '_date_to_freeze'):
+            # XXX uglyness, real cursors used during testing
+            return datetime.now().replace(microsecond=0)
         if self._now is None:
             self.execute("SELECT (now() AT TIME ZONE 'UTC')")
             row = self.fetchone()
@@ -606,6 +609,8 @@ class TestCursor(BaseCursor):
             if self.readonly:
                 # this will simulate a readonly connection
                 self._cursor._obj.execute('SET TRANSACTION READ ONLY')  # use _obj to avoid impacting query count and profiler.
+            # new transaction, reset time
+            self._now = None
 
     def execute(self, *args, **kwargs) -> None:
         assert not self._closed, "Cannot use a closed cursor"
@@ -631,6 +636,7 @@ class TestCursor(BaseCursor):
             self._savepoint.close(rollback=self.readonly)
             self._savepoint = None
         self.clear()
+        self._now = None
         self.prerollback.clear()
         self.postrollback.clear()
         self.postcommit.clear()         # TestCursor ignores post-commit hooks by default
@@ -643,15 +649,24 @@ class TestCursor(BaseCursor):
         if self._savepoint:
             self._savepoint.close(rollback=True)
             self._savepoint = None
+        self._now = None
         self.postrollback.run()
 
     def __getattr__(self, name):
         return getattr(self._cursor, name)
 
     def now(self) -> datetime:
-        """ Return the transaction's timestamp ``datetime.now()``. """
+        """ Return the transaction's timestamp ``datetime.now()``.
+
+        Caching the value inside the transaction. Since this is a cursor for
+        testing, it shares the same real cr with other cursors, so we use the
+        ``datetime`` function to get a different time here.
+        We need to also check if the time is already frozen.
+        """
+        if hasattr(datetime, '_date_to_freeze'):
+            return datetime.now().replace(microsecond=0)
         if self._now is None:
-            self._now = datetime.now()
+            self._now = datetime.now().replace(microsecond=0)
         return self._now
 
 

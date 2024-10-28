@@ -2222,12 +2222,12 @@ class freeze_time:
     def __call__(self, func):
         if isinstance(func, MetaCase):
             func.freeze_time = self.time_to_freeze
-            return func
         else:
             if freezegun:
                 return freezegun.freeze_time(self.time_to_freeze)(func)
             else:
                 _logger.warning("freezegun package missing")
+        return func
 
     def __enter__(self):
         if freezegun:
