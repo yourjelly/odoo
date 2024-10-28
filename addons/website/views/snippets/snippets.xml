@@ -204,6 +204,9 @@
                 <t t-snippet="website.s_tabs" string="Tabs" group="content">
                     <keywords>navigation, sections, multi-tab, panel, toggle</keywords>
                 </t>
+                <t t-snippet="website.s_tabs_images" string="Tabs Images" group="content">
+                    <keywords>image, picture, photo, illustration, media, visual, slider, tabs, switch, tabbed, sections, navigation</keywords>
+                </t>
                 <t t-snippet="website.s_timeline" string="Timeline" group="content">
                     <keywords>history, story, events, milestones, chronology, sequence, progression, achievements</keywords>
                 </t>
