@@ -65,6 +65,9 @@ export class RadioProductAttribute extends BaseProductAttribute {
         // We then manually select the first input of each radio attribute.
         this.root.el.querySelector("input[type=radio]").checked = true;
     }
+    updateAttributeValue(event) {
+        this.state.attribute_value_ids = [event.target.value];
+    }
 }
 
 export class PillsProductAttribute extends BaseProductAttribute {
