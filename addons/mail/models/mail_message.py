@@ -1102,7 +1102,7 @@ class MailMessage(models.Model):
             domain = expression.AND([domain, [('id', '<', before)]])
         if after:
             domain = expression.AND([domain, [('id', '>', after)]])
-        res["messages"] = self.search(domain, limit=limit, order='id ASC' if after else 'id DESC')
+        res["messages"] = self.search(domain, limit=limit, order='id ASC' if after else 'date DESC')
         if after:
             res["messages"] = res["messages"].sorted('id', reverse=True)
         return res
