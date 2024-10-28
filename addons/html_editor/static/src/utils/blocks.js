@@ -65,6 +65,14 @@ export function isBlock(node) {
         // block.
         return false;
     }
+    if (
+        tagName === "T" &&
+        node.getAttribute("t-esc") === null &&
+        node.getAttribute("t-out") === null &&
+        node.getAttribute("t-raw") === null
+    ) {
+        return true;
+    }
     // The node might not be in the DOM, in which case it has no CSS values.
     if (!node.isConnected) {
         return blockTagNames.includes(tagName);
