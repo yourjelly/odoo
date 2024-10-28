@@ -170,4 +170,18 @@ odoo.define('pos_sale.tour', function (require) {
     ProductScreen.check.selectedOrderlineHas('Test service product', '1.00', '50.00');
 
     Tour.register('PosSettleDraftOrder', { test: true, url: '/pos/ui' }, getSteps());
+
+    startSteps();
+
+    ProductScreen.do.confirmOpeningPopup();
+    ProductScreen.do.clickQuotationButton();
+    ProductScreen.do.selectFirstOrder();
+    ProductScreen.do.clickPayButton();
+    PaymentScreen.do.clickShipLaterButton()
+    PaymentScreen.do.clickPaymentMethod('Bank');
+    PaymentScreen.check.remainingIs('0.0');
+    PaymentScreen.do.clickValidate();
+    ReceiptScreen.check.isShown();
+
+    Tour.register('PosSettleOrderShipLater', { test: true, url: '/pos/ui' }, getSteps());
 });
