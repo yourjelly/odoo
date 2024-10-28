@@ -6,7 +6,7 @@ from unittest.mock import patch
 from unittest.mock import DEFAULT
 import base64
 
-from odoo import exceptions
+from odoo import exceptions, tools
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.addons.test_mail.models.test_mail_models import MailTestSimple
 from odoo.addons.test_mail.tests.common import TestRecipients
@@ -15,7 +15,7 @@ from odoo.tests import Form, tagged, users
 from odoo.tools import mute_logger
 
 
-@tagged('mail_thread')
+@tagged('mail_thread', 'mail_thread_api')
 class TestAPI(MailCommon, TestRecipients):
 
     @classmethod
@@ -97,6 +97,44 @@ class TestAPI(MailCommon, TestRecipients):
         self.assertEqual(message.body, expected)
         ticket_record._message_update_content(message, "Hello <R&D/>")
         self.assertEqual(message.body, Markup('<p>Hello &lt;R&amp;D/&gt;<span class="o-mail-Message-edited"></span></p>'))
+
+    @users('employee')
+    def test_message_compute_recipients(self):
+        test_cc_tuples = [('Test CC', 'test.cc@test.example.com')]
+        test_to_tuples = [('Test To', 'test.to@test.example.com')]
+        test_emails = [x[1] for x in test_cc_tuples] + [x[1] for x in test_to_tuples]
+        self.assertFalse(self.env['res.partner'].search([('email_normalized', 'in', test_emails)]))
+
+        test_record = self.env['mail.test.recipients'].create({
+            'name': 'Test Recipients',
+        })
+        messages = self.env['mail.message']
+        for user, post_values in [
+            (self.user_root, {
+                'body': 'First incoming email',
+                'email_cc': tools.mail.formataddr(test_cc_tuples[0]),
+                'email_to': tools.mail.formataddr(test_to_tuples[0]),
+                'message_type': 'email',
+            }),
+            (self.user_employee, {
+                'body': 'Salesman reply by email',
+                'email_cc': tools.mail.formataddr(test_cc_tuples[0]),
+                'email_to': tools.mail.formataddr(test_to_tuples[0]),
+                'message_type': 'email',
+            }),
+        ]:
+            messages += test_record.with_user(user).message_post(**post_values)
+        self.assertEqual(test_record.message_partner_ids, self.user_employee.partner_id)
+
+        recipients = test_record._message_compute_recipients(reply_message=messages[0], find_or_create_partners=False)
+        self.assertEqual(recipients, {
+            'email_to': ['"Test CC" <test.cc@test.example.com>', '"Test To" <test.to@test.example.com>'],
+            'partner_ids': []})
+
+        recipients = test_record._message_compute_recipients(reply_message=messages[0], find_or_create_partners=True)
+        new_partners = self.env['res.partner'].search([('email_normalized', 'in', test_emails)])
+        self.assertFalse(recipients['email_to'])
+        self.assertEqual(sorted(recipients['partner_ids']), sorted(new_partners.ids))
 
     @users('employee')
     def test_message_get_default_recipients(self):

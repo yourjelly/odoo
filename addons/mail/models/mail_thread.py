@@ -1846,6 +1846,45 @@ class MailThread(models.AbstractModel):
     # RECIPIENTS MANAGEMENT TOOLS
     # ------------------------------------------------------
 
+    def _message_compute_recipients(self, reply_message=None, find_or_create_partners=False):
+        self.ensure_one()
+        email_to_lst, partners = False, self.env['res.partner']
+
+        # find last relevant message
+        if reply_message is None:
+            messages = self.message_ids.sorted(
+                lambda msg: (
+                    msg.date,
+                    msg.id,
+                ), reverse=True,
+            )
+            reply_message = next(
+                (msg for msg in messages if msg.message_type in ('comment', 'email')),
+                self.env['mail.message']
+            )
+
+        # fetch recipients
+        if reply_message:
+            # remove people being already followers
+            followers = self.message_partner_ids
+            partners = reply_message.partner_ids.filtered(lambda p: p not in followers)
+            email_to_lst = [
+                email for email in email_split_and_format(
+                    ','.join((reply_message.email_cc or '', reply_message.email_to or ''))
+                ) if email_normalize(email, strict=False) not in (followers + partners).mapped('email_normalized')
+            ]
+
+        # transform emails into partners if requested; use sudo as this should be
+        # done independently from partner creation rights
+        if find_or_create_partners:
+            partners = self.sudo()._yet_another_method_single(email_to_lst)
+            email_to_lst = []
+
+        return {
+            'email_to': email_to_lst,
+            'partner_ids': partners.ids,
+        }
+
     def _yet_another_method_single(self, emails):
         self.ensure_one()
         return self._yet_another_method({self: emails})[self.id]
