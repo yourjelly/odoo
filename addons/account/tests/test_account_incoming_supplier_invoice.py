@@ -128,9 +128,10 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
         with patch.object(type(self.env['ir.attachment']), '_decode_edi_pdf', decode_edi_pdf):
             yield xml_filename
 
-    def _get_raw_mail_message_str(self, attachments, message_id=None):
+    def _get_raw_mail_message_str(self, attachments, email_to, message_id=None):
         """
         :param attachments: Odoo recordset of ir.attachment.
+        :param email_to: string that will fill email_to field in the email, probably you'll want to use some journal alias here.
         :param message_id: Optional. Custom message ID for the email. If not provided, a UUID will be generated.
 
         Returns:
@@ -139,12 +140,6 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
         if not message_id:
             message_id = str(uuid.uuid4())
 
-        journal_with_alias = self.env['account.journal'].search(
-            [('company_id', '=', self.env.user.company_id.id), ('type', '=', 'purchase')],
-            limit=1,
-        )
-        alias = journal_with_alias.alias_id
-
         attachment_parts = []
         for attachment in attachments:
             encoded_attachment = base64.b64encode(attachment['datas']).decode()
@@ -152,6 +147,7 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
                 --000000000000a47519057e029630
                 Content-Type: {attachment['mimetype']}
                 Content-Transfer-Encoding: base64
+                Content-Disposition: attachment; filename="{attachment['name']}"
 
                 {encoded_attachment}
             """)
@@ -163,7 +159,7 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
             Message-ID: {message_id}
             Subject: Incoming bill
             From: Someone <someone@some.company.com>
-            To: {alias.display_name}
+            To: {email_to}
             Content-Type: multipart/alternative; boundary="000000000000a47519057e029630"
 
             --000000000000a47519057e029630
@@ -180,24 +176,30 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
             expected_values = input_values
         attachments = self.env['ir.attachment'].browse([x.id for x in input_values])
         nb_moves_before = self.env['account.move'].search_count([('company_id', '=', self.env.company.id)])
-        email_raw = self._get_raw_mail_message_str(attachments=attachments)
-        results = self.env['account.move']\
-            .with_context(**context, default_move_type='out_invoice', default_journal_id=self.company_data['default_journal_sale'].id)\
-            .browse(self.env['mail.thread'].message_process('account.move', email_raw))
+        journal_with_alias = self.env['account.journal'].search([('company_id', '=', self.env.user.company_id.id), ('type', '=', 'purchase')], limit=1)
+        email_raw = self._get_raw_mail_message_str(attachments=attachments, email_to=journal_with_alias.alias_id.display_name)
 
-        # Previously results were a dict with attachmnets per invoice, not sure how to approch it here
-        # results = self.env['account.move']\
-        #     .with_context(**context, default_move_type='out_invoice', default_journal_id=self.company_data['default_journal_sale'].id)\
-        #     ._extend_with_attachments(attachments, new=new)
+        # Patching to obtain moves created while processing the email message
+        created_moves = []
+        AccountMove = type(self.env['account.move'])
+        _create = AccountMove.create
+        def _save_create(self, vals_list):
+            res = _create(self, vals_list)
+            created_moves.append(res.id)
+            return res
+        with patch.object(AccountMove, 'create', _save_create):
+            self.env['mail.thread'].message_process('account.move', email_raw)
+        attachments = self.env['ir.attachment'].search_read([('res_model', '=', 'account.move'), ('res_id', '=', created_moves)], ['name', 'res_id'])
+
         invoice_number = 0
         previous_invoice = None
         current_values = {}
-        for attachment, invoice in results.items():
-            if previous_invoice != invoice:
+        for att in attachments:
+            if previous_invoice != att['res_id']:
                 invoice_number += 1
-                previous_invoice = invoice
+                previous_invoice = att['res_id']
 
-            current_values[attachment.name] = invoice_number
+            current_values[att['name']] = invoice_number
 
         self.assertEqual(current_values, {k.name: v for k, v in expected_values.items()})
 
