@@ -4,8 +4,9 @@ import * as spreadsheet from "@odoo/o-spreadsheet";
 import { OdooCorePlugin } from "@spreadsheet/plugins";
 const { tokenize, parse, convertAstNodes, astToFormula } = spreadsheet;
 const { corePluginRegistry, migrationStepRegistry } = spreadsheet.registries;
+import { deepCopy } from "@web/core/utils/objects";
 
-export const ODOO_VERSION = 12;
+export const ODOO_VERSION = 13;
 
 const MAP_V1 = {
     PIVOT: "ODOO.PIVOT",
@@ -68,6 +69,9 @@ function migrateOdooData(data) {
     }
     if (version < 12) {
         data = migrate11to12(data);
+    }
+    if (version < 13) {
+        data = migrate12to13(data);
     }
     return data;
 }
@@ -371,6 +375,38 @@ function migrate11to12(data) {
                         tokens[i] = order;
                         cell.content = tokensToString(tokens);
                     }
+                }
+            }
+        }
+    }
+    return data;
+}
+
+function migrate12to13(data) {
+    // ODOO.CREDIT, ODOO.DEBIT, ODOO.BALANCE now have a dateFrom, dateTo
+    // parameters instead of a single dateRange
+    for (const sheet of data.sheets || []) {
+        for (const xc in sheet.cells || []) {
+            const cell = sheet.cells[xc];
+            if (
+                cell.content &&
+                cell.content.startsWith("=") &&
+                (
+                    cell.content.includes("ODOO.CREDIT") ||
+                    cell.content.includes("ODOO.DEBIT") ||
+                    cell.content.includes("ODOO.BALANCE")
+                )
+            ) {
+                const tokens = tokenize(cell.content);
+                const parameters = tokens.filter(t => ["STRING", "NUMBER"].includes(t.type));
+                const separators = tokens.filter(t => t.type == "ARG_SEPARATOR");
+                if ( parameters.length >=2 && separators.length >= 2 ) {
+                    // Formula is then at least =ODOO.CREDIT("114, 115", 2023,[...])
+                    const dateFrom = parameters[1];  // The date from parameter is always the second in the list
+                    const dateFromIndex = tokens.indexOf(dateFrom);
+                    // Add a separator to have =ODOO.CREDIT("114, 115", 2023,,[...])
+                    tokens.splice(dateFromIndex + 1, 0, deepCopy(separators[0]));
+                    cell.content = tokensToString(tokens);
                 }
             }
         }

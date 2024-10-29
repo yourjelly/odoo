@@ -48,7 +48,12 @@ test("evaluation with reference to a month period", async () => {
                     {
                         codes: ["100"],
                         company_id: null,
-                        date_range: {
+                        date_from: {
+                            month: 2,
+                            range_type: "month",
+                            year: 2022,
+                        },
+                        date_to: {
                             month: 2,
                             range_type: "month",
                             year: 2022,
@@ -104,7 +109,7 @@ test("formula with invalid date", async () => {
     setCellContent(model, "A3", `=ODOO.BALANCE("100", -1)`);
     setCellContent(model, "A4", `=ODOO.BALANCE("100", "not a valid period")`);
     setCellContent(model, "A5", `=ODOO.BALANCE("100", 1900)`); // this should be ok
-    setCellContent(model, "A6", `=ODOO.BALANCE("100", 1900, -1)`);
+    setCellContent(model, "A6", `=ODOO.BALANCE("100", 1900,, -1)`);
     setCellContent(model, "A7", `=ODOO.DEBIT("100", 1899)`);
     await waitForDataLoaded(model);
     const errorMessage = `'%s' is not a valid period. Supported formats are "21/12/2022", "Q1/2022", "12/2022", and "2022".`;
@@ -177,18 +182,20 @@ test("Server requests", async () => {
     setCellContent(model, "A2", `=ODOO.CREDIT("100", "01/2022")`);
     setCellContent(model, "A3", `=ODOO.DEBIT("100","Q2/2022")`);
     setCellContent(model, "A4", `=ODOO.BALANCE("10", "2021")`);
-    setCellContent(model, "A5", `=ODOO.CREDIT("10", "2022", -1)`); // same payload as A4: should only be called once
-    setCellContent(model, "A6", `=ODOO.DEBIT("5", "2021", 0, 2)`);
-    setCellContent(model, "A7", `=ODOO.DEBIT("5", "05/04/2021", 1)`);
-    setCellContent(model, "A8", `=ODOO.BALANCE("5", "2022",,,FALSE)`);
-    setCellContent(model, "A9", `=ODOO.BALANCE("100", "05/05/2022",,,TRUE)`);
-    setCellContent(model, "A10", `=ODOO.BALANCE(33,2021,-2)`);
+    setCellContent(model, "A5", `=ODOO.CREDIT("10", "2022",, -1)`); // same payload as A4: should only be called once
+    setCellContent(model, "A6", `=ODOO.DEBIT("5", "2021",, 0, 2)`);
+    setCellContent(model, "A7", `=ODOO.DEBIT("5", "05/04/2021",, 1)`);
+    setCellContent(model, "A8", `=ODOO.BALANCE("5", "2022",,,,FALSE)`);
+    setCellContent(model, "A9", `=ODOO.BALANCE("100", "05/05/2022",,,,TRUE)`);
+    setCellContent(model, "A10", `=ODOO.BALANCE(33,2021,,-2)`);
+    setCellContent(model, "A11", `=ODOO.BALANCE("101", 2021, "Q2/2022")`);
     await waitForDataLoaded(model);
 
     expect.verifySteps([
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "2022" }, locale),
+                dateFrom: parseAccountingDate({ value: "2022"}, locale),
+                dateTo: parseAccountingDate({ value: "2022"}, locale),
                 codes: ["100"],
                 companyId: null,
                 includeUnposted: false,
@@ -196,7 +203,8 @@ test("Server requests", async () => {
         ),
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "01/2022" }, locale),
+                dateFrom: parseAccountingDate({ value: "01/2022"}, locale),
+                dateTo: parseAccountingDate({ value: "01/2022"}, locale),
                 codes: ["100"],
                 companyId: null,
                 includeUnposted: false,
@@ -204,7 +212,8 @@ test("Server requests", async () => {
         ),
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "Q2/2022" }, locale),
+                dateFrom: parseAccountingDate({ value: "Q2/2022"}, locale),
+                dateTo: parseAccountingDate({ value: "Q2/2022"}, locale),
                 codes: ["100"],
                 companyId: null,
                 includeUnposted: false,
@@ -212,7 +221,8 @@ test("Server requests", async () => {
         ),
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "2021" }, locale),
+                dateFrom: parseAccountingDate({ value: "2021"}, locale),
+                dateTo: parseAccountingDate({ value: "2021"}, locale),
                 codes: ["10"],
                 companyId: null,
                 includeUnposted: false,
@@ -220,7 +230,8 @@ test("Server requests", async () => {
         ),
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "2021" }, locale),
+                dateFrom: parseAccountingDate({ value: "2021"}, locale),
+                dateTo: parseAccountingDate({ value: "2021"}, locale),
                 codes: ["5"],
                 companyId: 2,
                 includeUnposted: false,
@@ -228,7 +239,8 @@ test("Server requests", async () => {
         ),
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "05/04/2022" }, locale),
+                dateFrom: parseAccountingDate({ value: "05/04/2022"}, locale),
+                dateTo: parseAccountingDate({ value: "05/04/2022"}, locale),
                 codes: ["5"],
                 companyId: null,
                 includeUnposted: false,
@@ -236,7 +248,8 @@ test("Server requests", async () => {
         ),
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "2022" }, locale),
+                dateFrom: parseAccountingDate({ value: "2022"}, locale),
+                dateTo: parseAccountingDate({ value: "2022"}, locale),
                 codes: ["5"],
                 companyId: null,
                 includeUnposted: false,
@@ -244,7 +257,8 @@ test("Server requests", async () => {
         ),
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "05/05/2022" }, locale),
+                dateFrom: parseAccountingDate({ value: "05/05/2022"}, locale),
+                dateTo: parseAccountingDate({ value: "05/05/2022"}, locale),
                 codes: ["100"],
                 companyId: null,
                 includeUnposted: true,
@@ -252,8 +266,18 @@ test("Server requests", async () => {
         ),
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "2019" }, locale),
+                dateFrom: parseAccountingDate({ value: "2019" }, locale),
+                dateTo: parseAccountingDate({ value: "2019" }, locale),
                 codes: ["33"],
+                companyId: null,
+                includeUnposted: false,
+            })
+        ),
+        JSON.stringify(
+            camelToSnakeObject({
+                dateFrom: parseAccountingDate({ value: "2021" }, locale),
+                dateTo: parseAccountingDate({ value: "Q2/2022"}, locale),
+                codes: ["101"],
                 companyId: null,
                 includeUnposted: false,
             })
@@ -282,7 +306,8 @@ test("Server requests with multiple account codes", async () => {
         "spreadsheet_fetch_debit_credit",
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "2022"}, locale),
+                dateFrom: parseAccountingDate({ value: "2022"}, locale),
+                dateTo: parseAccountingDate({ value: "2022"}, locale),
                 codes: ["100", "200"],
                 companyId: null,
                 includeUnposted: false,
@@ -315,7 +340,8 @@ test("account group formula as input to balance formula", async () => {
         "spreadsheet_fetch_debit_credit",
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "2022"}, locale),
+                dateFrom: parseAccountingDate({ value: "2022"}, locale),
+                dateTo: parseAccountingDate({ value: "2022"}, locale),
                 codes: ["100104", "200104"],
                 companyId: null,
                 includeUnposted: false,
@@ -355,7 +381,8 @@ test("two concurrent requests on different accounts", async () => {
         "spreadsheet_fetch_debit_credit",
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "2022" }, locale),
+                dateFrom: parseAccountingDate({ value: "2022"}, locale),
+                dateTo: parseAccountingDate({ value: "2022"}, locale),
                 codes: ["100"],
                 companyId: null,
                 includeUnposted: false,
@@ -364,7 +391,8 @@ test("two concurrent requests on different accounts", async () => {
         "spreadsheet_fetch_debit_credit",
         JSON.stringify(
             camelToSnakeObject({
-                dateRange: parseAccountingDate({ value: "2022" }, locale),
+                dateFrom: parseAccountingDate({ value: "2022"}, locale),
+                dateTo: parseAccountingDate({ value: "2022"}, locale),
                 codes: ["100104", "200104"],
                 companyId: null,
                 includeUnposted: false,
@@ -383,7 +411,13 @@ test("date with non-standard locale", async () => {
                         {
                             codes: ["100"],
                             company_id: null,
-                            date_range: {
+                            date_from: {
+                                range_type: "day",
+                                year: 2002,
+                                month: 2,
+                                day: 1,
+                            },
+                            date_to: {
                                 range_type: "day",
                                 year: 2002,
                                 month: 2,
