@@ -101,3 +101,6 @@ class ProductProduct(models.Model):
                 config._notify('PRODUCT_CHANGED', {
                     'product.product': self.read(self._load_pos_self_data_fields(config.id), load=False)
                 })
+
+    def _can_elevate_access(self, access_token, field):
+        return super()._can_elevate_access(access_token, field) or field == "image_512"

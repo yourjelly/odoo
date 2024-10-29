@@ -89,3 +89,21 @@ class ResPartner(models.Model):
             ]
         )
         return Store(members, fields={"channel": [], "persona": []}).add(partners).get_result()
+
+    def _can_elevate_access(self, access_token, field):
+        has_access = False
+        if field == "avatar_128":
+            current_partner, current_guest = self.env["res.partner"]._get_current_persona()
+            if current_partner or current_guest:
+                domain = [("channel_member_ids", "any", [("partner_id", "=", self.id)])]
+                if current_partner:
+                    domain.append(
+                        ("channel_member_ids", "any", [("partner_id", "=", current_partner.id)])
+                    )
+                else:
+                    domain.append(
+                        ("channel_member_ids", "any", [("guest_id", "=", current_guest.id)])
+                    )
+                if self.env["discuss.channel"].search_count(domain, limit=1):
+                    has_access = True
+        return super()._can_elevate_access(access_token, field) or has_access

@@ -10,7 +10,6 @@ from odoo import _, api, fields, models
 from odoo.http import request
 from odoo.addons.base.models.res_partner import _tz_get
 from odoo.exceptions import UserError
-from odoo.addons.bus.models.bus_presence import AWAY_TIMER, DISCONNECTION_TIMER
 from odoo.addons.bus.websocket import wsrequest
 from odoo.addons.mail.tools.discuss import Store
 
@@ -140,3 +139,25 @@ class MailGuest(models.Model):
         """
         self.ensure_one()
         return f"{self.id}{self._cookie_separator}{self.access_token}"
+
+    def _can_elevate_access(self, access_token, field):
+        has_access = False
+        if field == "avatar_128":
+            current_partner, current_guest = self.env["res.partner"]._get_current_persona()
+            if current_partner or current_guest:
+                domain = [("channel_member_ids", "any", [("guest_id", "=", self.id)])]
+                if current_partner:
+                    domain.append(
+                        ("channel_member_ids", "any", [("partner_id", "=", current_partner.id)])
+                    )
+                else:
+                    domain.append(
+                        ("channel_member_ids", "any", [("guest_id", "=", current_guest.id)])
+                    )
+                # access to the avatar is allowed if there is a common channel
+                if self.env["discuss.channel"].search_count(domain, limit=1):
+                    has_access = True
+            # access to the avatar is allowed if there is access to the messages
+            if not has_access and self.env["mail.message"].search_count([("author_guest_id", "=", self.id)], limit=1):
+                has_access = True
+        return super()._can_elevate_access(access_token, field) or has_access

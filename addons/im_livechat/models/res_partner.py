@@ -60,3 +60,21 @@ class ResPartner(models.Model):
                 )
             )
         self._bus_send_transient_message(channel, message_body)
+
+    def _can_elevate_access(self, access_token, field):
+        """Custom access check allowing to retrieve an operator's avatar.
+
+        Here, we assume that if you are a member of at least one
+        im_livechat.channel, then it's ok to make your avatar publicly
+        available.
+
+        We also make the chatbot operator avatars publicly available."""
+        has_access = False
+        if field == "avatar_128":
+            domain = [("user_ids.partner_id", "=", self.id)]
+            if self.env["im_livechat.channel"].sudo().search_count(domain, limit=1):
+                has_access = True
+            domain = [("operator_partner_id", "=", self.id)]
+            if self.env["chatbot.script"].sudo().search_count(domain, limit=1):
+                has_access = True
+        return super()._can_elevate_access(access_token, field) or has_access

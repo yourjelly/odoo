@@ -23,3 +23,6 @@ class ProductProduct(models.Model):
                     "To delete a product, make sure all point of sale sessions are closed.\n\n"
                     "Deleting a product available in a session would be like attempting to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!",
                 ))
+
+    def _can_elevate_access(self, access_token, field):
+        return super()._can_elevate_access(access_token, field) or field == "image_128"
