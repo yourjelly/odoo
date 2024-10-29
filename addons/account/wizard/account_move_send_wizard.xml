@@ -78,12 +78,11 @@
                             invisible="not is_download_only"
                             class="print btn-primary o_mail_send">
                     </button>
-                    <button string="Cancel"
+                    <button string="Discard"
                             data-hotkey="x"
                             special="cancel"
                             class="btn-secondary"/>
                 </footer>
-
             </form>
         </field>
     </record>
