@@ -400,6 +400,7 @@
         <t t-set="_navbar_classes" t-valuef="o_header_mobile d-block d-lg-none shadow-sm"/>
         <t t-set="_navbar_expand_class" t-valuef=""/>
         <t t-set="_navbar_name" t-valuef="Mobile"/>
+        <t t-set="_side" t-valuef="offcanvas-end"></t>
 
         <div class="o_main_nav container flex-wrap justify-content-between">
             <!-- Brand -->
@@ -419,7 +420,7 @@
                     </button>
                 </li>
             </ul>
-            <div t-attf-class="offcanvas offcanvas-end o_navbar_mobile" id="top_menu_collapse_mobile">
+            <div t-attf-class="offcanvas #{_side} o_navbar_mobile" id="top_menu_collapse_mobile">
                 <div class="offcanvas-header justify-content-end o_not_editable">
                     <button type="button" class="nav-link btn-close" data-bs-dismiss="offcanvas" aria-label="Close"/>
                 </div>
@@ -487,6 +488,15 @@
             </div>
         </div>
     </t>
+</template>
+
+<template id="template_header_mobile_position_left" inherit_id="website.template_header_mobile" active="False">
+    <xpath expr="//t[@t-set='_side']" position="replace">
+        <t t-set="_side" t-valuef="offcanvas-start"/>
+    </xpath>
+    <xpath expr="//div[hasclass('o_main_nav')]" position="attributes">
+        <attribute name="class" add="flex-row-reverse" separator=" "/>
+    </xpath>
 </template>
 
 <template id="template_header_mobile_align_center" inherit_id="website.template_header_mobile" active="False">
