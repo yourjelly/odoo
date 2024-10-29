@@ -215,10 +215,12 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
     def test_price_difference_exchange_difference_accounting_date(self):
         self.stock_account_product_categ.property_account_creditor_price_difference_categ = self.company_data['default_account_stock_price_diff']
         test_product = self.test_product_delivery
-        test_product.categ_id.write({"property_cost_method": "standard"})
+        test_product.categ_id.write({"property_cost_method": "fifo"})
         test_product.write({'standard_price': 100.0})
         date_po_receipt = '2021-01-02'
         rate_po_receipt = 25.0
+        date_pick_receipt = '2021-01-04'
+        rate_pick_receipt = 24.0
         date_bill = '2021-01-01'
         rate_bill = 30.0
         date_accounting = '2021-01-03'
@@ -228,6 +230,11 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         company_currency = self.env.company.currency_id
         self.env['res.currency.rate'].create([
         {
+            'name': date_pick_receipt,
+            'rate': rate_pick_receipt,
+            'currency_id': foreign_currency.id,
+            'company_id': self.env.company.id,
+        }, {
             'name': date_po_receipt,
             'rate': rate_po_receipt,
             'currency_id': foreign_currency.id,
@@ -241,6 +248,11 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
             'name': date_accounting,
             'rate': rate_accounting,
             'currency_id': foreign_currency.id,
+            'company_id': self.env.company.id,
+        }, {
+            'name': date_pick_receipt,
+            'rate': 1.0,
+            'currency_id': company_currency.id,
             'company_id': self.env.company.id,
         }, {
             'name': date_po_receipt,
@@ -261,7 +273,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
 
         #purchase order created in foreign currency
         purchase_order = self._create_purchase(test_product, date_po_receipt, quantity=10, price_unit=3000)
-        with freeze_time(date_po_receipt):
+        with freeze_time(date_pick_receipt):
             self._process_pickings(purchase_order.picking_ids)
         invoice = self._create_invoice_for_po(purchase_order, date_bill)
         with Form(invoice) as move_form:
