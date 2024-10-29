@@ -17,7 +17,12 @@ export class HtmlMailField extends HtmlField {
         }
         const cssRules = cssRulesByElement.get(editor.editable);
         el.classList.remove("odoo-editor-editable");
+        const div = document.createElement('div');
+        div.style.visibility = 'hidden';
+        div.appendChild(el);
+        document.body.append(div);
         await toInline(el, cssRules);
+        div.remove();
     }
 
     async getEditorContent() {
