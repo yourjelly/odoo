@@ -67,12 +67,24 @@ class AccountMove(models.Model):
         other_so_lines = downpayment_lines.order_id.order_line - downpayment_lines
         real_invoices = set(other_so_lines.invoice_lines.move_id)
         for so_dpl in downpayment_lines:
+<<<<<<< master
             so_dpl.price_unit = sum(
                 l.price_unit if l.move_id.move_type == 'out_invoice' else -l.price_unit
                 for l in so_dpl.invoice_lines
                 if l.move_id.state == 'posted' and l.move_id not in real_invoices  # don't recompute with the final invoice
             )
             so_dpl.tax_ids = so_dpl.invoice_lines.tax_ids
+||||||| 239fd1fb1111be6ea1816dcc94f7d9ceba9ae49d
+            so_dpl.price_unit = sum(
+                l.price_unit if l.move_id.move_type == 'out_invoice' else -l.price_unit
+                for l in so_dpl.invoice_lines
+                if l.move_id.state == 'posted' and l.move_id not in real_invoices  # don't recompute with the final invoice
+            )
+            so_dpl.tax_id = so_dpl.invoice_lines.tax_ids
+=======
+            so_dpl.price_unit = so_dpl._get_downpayment_line_price_unit(real_invoices)
+            so_dpl.tax_id = so_dpl.invoice_lines.tax_ids
+>>>>>>> ecb5eb8fb99eb5d16c33e82ff4d8e70a7abdf6ec
 
         return res
 
