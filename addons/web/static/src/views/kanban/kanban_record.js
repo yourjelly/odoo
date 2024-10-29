@@ -12,7 +12,7 @@ import { fileTypeMagicWordMap } from "@web/views/fields/image/image_field";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useViewCompiler } from "@web/views/view_compiler";
 import { Widget } from "@web/views/widgets/widget";
-import { getFormattedValue } from "../utils";
+import { getFormattedValue, isMiddleClick } from "../utils";
 import { KANBAN_CARD_ATTRIBUTE, KANBAN_MENU_ATTRIBUTE } from "./kanban_arch_parser";
 import { KanbanCompiler } from "./kanban_compiler";
 import { KanbanCoverImageDialog } from "./kanban_cover_image_dialog";
@@ -276,19 +276,24 @@ export class KanbanRecord extends Component {
         }
         const { archInfo, forceGlobalClick, openRecord, record } = this.props;
         if (!forceGlobalClick && archInfo.openAction) {
-            this.action.doActionButton({
-                name: archInfo.openAction.action,
-                type: archInfo.openAction.type,
-                resModel: record.resModel,
-                resId: record.resId,
-                resIds: record.resIds,
-                context: record.context,
-                onClose: async () => {
-                    await record.model.root.load();
+            this.action.doActionButton(
+                {
+                    name: archInfo.openAction.action,
+                    type: archInfo.openAction.type,
+                    resModel: record.resModel,
+                    resId: record.resId,
+                    resIds: record.resIds,
+                    context: record.context,
+                    onClose: async () => {
+                        await record.model.root.load();
+                    },
                 },
-            });
+                {
+                    newWindow: isMiddleClick(ev),
+                }
+            );
         } else if (forceGlobalClick || this.props.archInfo.canOpenRecords) {
-            openRecord(record);
+            openRecord(record, { newWindow: isMiddleClick(ev) });
         }
     }
 
@@ -301,7 +306,7 @@ export class KanbanRecord extends Component {
         switch (type) {
             // deprecated, records are always in edit mode in form views now, use "open" instead
             case "edit": {
-                return openRecord(record, "edit");
+                return openRecord(record, { mode: "edit" });
             }
             case "open": {
                 return openRecord(record);
