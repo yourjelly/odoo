@@ -4,6 +4,9 @@ from odoo.tests import tagged
 
 from contextlib import contextmanager
 from unittest.mock import patch
+import base64
+import textwrap
+import uuid
 
 
 @tagged('post_install', '-at_install')
@@ -125,14 +128,67 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
         with patch.object(type(self.env['ir.attachment']), '_decode_edi_pdf', decode_edi_pdf):
             yield xml_filename
 
+    def _get_raw_mail_message_str(self, attachments, message_id=None):
+        """
+        :param attachments: Odoo recordset of ir.attachment.
+        :param message_id: Optional. Custom message ID for the email. If not provided, a UUID will be generated.
+
+        Returns:
+            Formatted email string.
+        """
+        if not message_id:
+            message_id = str(uuid.uuid4())
+
+        journal_with_alias = self.env['account.journal'].search(
+            [('company_id', '=', self.env.user.company_id.id), ('type', '=', 'purchase')],
+            limit=1,
+        )
+        alias = journal_with_alias.alias_id
+
+        attachment_parts = []
+        for attachment in attachments:
+            encoded_attachment = base64.b64encode(attachment['datas']).decode()
+            attachment_part = textwrap.dedent(f"""\
+                --000000000000a47519057e029630
+                Content-Type: {attachment['mimetype']}
+                Content-Transfer-Encoding: base64
+
+                {encoded_attachment}
+            """)
+            attachment_parts.append(attachment_part)
+
+        email_raw = textwrap.dedent(f"""\
+            MIME-Version: 1.0
+            Date: Fri, 26 Nov 2021 16:27:45 +0100
+            Message-ID: {message_id}
+            Subject: Incoming bill
+            From: Someone <someone@some.company.com>
+            To: {alias.display_name}
+            Content-Type: multipart/alternative; boundary="000000000000a47519057e029630"
+
+            --000000000000a47519057e029630
+            Content-Type: text/plain; charset="UTF-8"
+
+            Here is your requested document(s).
+        """)
+        email_raw += "\n".join(attachment_parts)
+        email_raw += "\n--000000000000a47519057e029630--"
+        return email_raw
+
     def _assert_extend_with_attachments(self, input_values, expected_values=None, new=False, **context):
         if not expected_values:
             expected_values = input_values
         attachments = self.env['ir.attachment'].browse([x.id for x in input_values])
         nb_moves_before = self.env['account.move'].search_count([('company_id', '=', self.env.company.id)])
+        email_raw = self._get_raw_mail_message_str(attachments=attachments)
         results = self.env['account.move']\
             .with_context(**context, default_move_type='out_invoice', default_journal_id=self.company_data['default_journal_sale'].id)\
-            ._extend_with_attachments(attachments, new=new)
+            .browse(self.env['mail.thread'].message_process('account.move', email_raw))
+
+        # Previously results were a dict with attachmnets per invoice, not sure how to approch it here
+        # results = self.env['account.move']\
+        #     .with_context(**context, default_move_type='out_invoice', default_journal_id=self.company_data['default_journal_sale'].id)\
+        #     ._extend_with_attachments(attachments, new=new)
         invoice_number = 0
         previous_invoice = None
         current_values = {}
