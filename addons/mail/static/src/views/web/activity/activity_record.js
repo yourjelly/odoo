@@ -11,6 +11,7 @@ import {
     isHtmlEmpty,
 } from "@web/views/kanban/kanban_record";
 import { useViewCompiler } from "@web/views/view_compiler";
+import { isMiddleClick } from "@web/views/utils";
 
 export class ActivityRecord extends Component {
     static components = {
@@ -33,6 +34,7 @@ export class ActivityRecord extends Component {
         const { templateDocs } = this.props.archInfo;
         const templates = useViewCompiler(ActivityCompiler, templateDocs);
         this.recordTemplate = templates["activity-box"];
+        this.isMiddleClick = isMiddleClick;
     }
 
     getRenderingContext() {
