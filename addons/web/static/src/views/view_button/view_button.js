@@ -2,6 +2,7 @@ import { Component } from "@odoo/owl";
 import { useDropdownCloser } from "@web/core/dropdown/dropdown_hooks";
 import { pick } from "@web/core/utils/objects";
 import { debounce as debounceFn } from "@web/core/utils/timing";
+import { isMiddleClick } from "@web/views/utils";
 
 const explicitRankClasses = [
     "btn-primary",
@@ -131,6 +132,7 @@ export class ViewButton extends Component {
                     "resIds"
                 ),
             beforeExecute: () => this.dropdownControl.close(),
+            newWindow: isMiddleClick(ev),
         });
     }
 
