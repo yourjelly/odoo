@@ -16246,3 +16246,47 @@ test("Pass context when duplicating data in list view", async () => {
     await toggleMenuItem("Duplicate");
     expect.verifySteps(["copy"]);
 });
+
+test("Open record in new tab on ctrl+click and middleclick", async () => {
+    await mountView({
+        type: "list",
+        resModel: "res.partner",
+        actionMenus: {},
+        arch: `
+            <list>
+                <field name="name" />
+            </list>`,
+        selectRecord(resId, options) {
+            expect.step(`open record - newWindow: ${options.newWindow}`);
+        },
+    });
+    await contains(".o_data_cell").click({ ctrlKey: true });
+    expect.verifySteps(["open record - newWindow: true"]);
+    getFixture()
+        .querySelector(".o_data_cell")
+        .dispatchEvent(new PointerEvent("auxclick", { button: 1 }));
+    await animationFrame();
+    expect.verifySteps(["open record - newWindow: true"]);
+});
+
+test("Open record in new tab on ctrl+click and middleclick for an editable list", async () => {
+    await mountView({
+        type: "list",
+        resModel: "res.partner",
+        actionMenus: {},
+        arch: `
+            <list editable="bottom" open_form_view="true">
+                <field name="name" />
+            </list>`,
+        selectRecord(resId, options) {
+            expect.step(`open record - newWindow: ${options.newWindow}`);
+        },
+    });
+    await contains(".o_list_record_open_form_view").click({ ctrlKey: true });
+    expect.verifySteps(["open record - newWindow: true"]);
+    getFixture()
+        .querySelector(".o_list_record_open_form_view")
+        .dispatchEvent(new PointerEvent("auxclick", { button: 1 }));
+    await animationFrame();
+    expect.verifySteps(["open record - newWindow: true"]);
+});

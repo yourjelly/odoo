@@ -1,3 +1,4 @@
+import { isMacOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { exprToBoolean } from "@web/core/utils/strings";
@@ -294,4 +295,13 @@ export function uuid() {
     window.crypto.getRandomValues(array);
     // Uint8Array to hex
     return [...array].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * @param {Event} clickEvent
+ * @returns {boolean}
+ */
+export function isMiddleClick(ev) {
+    const ctrlKey = isMacOS() ? ev.metaKey : ev.ctrlKey;
+    return (ctrlKey && ev.button === 0) || ev.button === 1;
 }

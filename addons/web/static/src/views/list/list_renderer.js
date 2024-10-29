@@ -11,7 +11,7 @@ import { useSortable } from "@web/core/utils/sortable_owl";
 import { getTabableElements } from "@web/core/utils/ui";
 import { Field, getPropertyFieldInfo } from "@web/views/fields/field";
 import { getTooltipInfo } from "@web/views/fields/field_tooltip";
-import { getClassNameFromDecoration } from "@web/views/utils";
+import { getClassNameFromDecoration, isMiddleClick } from "@web/views/utils";
 import { combineModifiers } from "@web/model/relational_model/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useBounceButton } from "@web/views/view_hook";
@@ -96,6 +96,7 @@ export class ListRenderer extends Component {
         this.groupByButtons = this.props.archInfo.groupBy.buttons;
         useExternalListener(document, "click", this.onGlobalClick.bind(this));
         this.tableRef = useRef("table");
+        this.isMiddleClick = isMiddleClick;
 
         this.longTouchTimer = null;
         this.touchStartMs = 0;
@@ -1030,7 +1031,7 @@ export class ListRenderer extends Component {
         } else if (this.props.list.editedRecord && this.props.list.editedRecord !== record) {
             this.props.list.leaveEditMode();
         } else if (!this.props.archInfo.noOpen) {
-            this.props.openRecord(record);
+            this.props.openRecord(record, false, isMiddleClick(ev));
         }
     }
 
