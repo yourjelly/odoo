@@ -311,9 +311,19 @@ class SaleAdvancePaymentInv(models.TransientModel):
         if self.advance_payment_method == 'percentage':
             percentage = self.amount / 100
         else:
-            percentage = self.fixed_amount / order.amount_total if order.amount_total else 1
+            invoice_lines = order.order_line.invoice_lines.filtered(
+                lambda aml: aml.invoice_status == 'invoiced'
+            )
+            invoiced_total = sum(invoice_lines.mapped('price_total'))
+            amount = order.amount_total - invoiced_total
+            percentage = 1 if order.currency_id.is_zero(amount) else self.fixed_amount / amount
 
-        order_lines = order.order_line.filtered(lambda l: not l.display_type and not l.is_downpayment)
+        order_lines = order.order_line.filtered(
+            lambda sol:
+                not sol.display_type
+                and not sol.is_downpayment
+                and sol.invoice_status != 'invoiced'
+        )
         base_downpayment_lines_values = self._prepare_base_downpayment_line_values(order)
 
         tax_base_line_dicts = [
