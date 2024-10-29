@@ -216,7 +216,7 @@ class MailController(http.Controller):
                 raise Unauthorized()
 
         if message.model == 'discuss.channel':
-            url = f'/odoo/action-mail.action_discuss?active_id={message.res_id}&highlight_message_id={message_id}'
+            url = f'/odoo/discuss?active_id=discuss.channel_{message.res_id}&highlight_message_id={message_id}'
         else:
             url = f'/odoo/{message.model}/{message.res_id}?highlight_message_id={message_id}'
         return request.redirect(url)

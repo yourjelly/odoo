@@ -1,6 +1,6 @@
 import { Discuss } from "@mail/core/public_web/discuss";
 
-import { Component, onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, useEffect, useState } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -30,6 +30,19 @@ export class DiscussClientAction extends Component {
             // bracket to avoid blocking rendering with restore promise
             this.restoreDiscussThread(nextProps);
         });
+        useEffect(
+            (thread) => {
+                if (thread) {
+                    const activeId =
+                        typeof thread.id === "string"
+                            ? `mail.box_${thread.id}`
+                            : `discuss.channel_${thread.id}`;
+                    this.props.updateActionState({ active_id: activeId });
+                    this.props.action.context.active_id = activeId;
+                }
+            },
+            () => [this.store.discuss.thread]
+        );
     }
 
     getActiveId(props) {
