@@ -8,6 +8,7 @@ import email
 import email.policy
 import hashlib
 import hmac
+import itertools
 import json
 import lxml
 import logging
@@ -1844,6 +1845,61 @@ class MailThread(models.AbstractModel):
     # ------------------------------------------------------
     # RECIPIENTS MANAGEMENT TOOLS
     # ------------------------------------------------------
+
+    def _yet_another_method_single(self, emails):
+        self.ensure_one()
+        return self._yet_another_method({self: emails})[self.id]
+
+    def _yet_another_method(self, records_emails, emails_normalized_info=None):
+        """
+
+        :param dict records_emails: for each record in self, list of emails linked
+            to this record e.g. {<crm.lead, 4>: ['"Customer" <customer@test.example.com>']}
+        :param dict emails_normalized_info: for each normalized email, optional
+            additional values to give to ResPartner.create() if not existing, in
+            order to populate the record with relevant business data e.g.
+            {'customer@test.example.com': {'country_id': <res.country, 1>}}
+        """
+        # fetch company information
+        records_company = self._mail_get_companies()
+        emails_all = []
+        emails_normalized_all = []
+        emails_normalized_company = {}
+        emails_normalized_res_ids = {}
+
+        # classify email / company and email / record IDs
+        for record in self:
+            mails = records_emails.get(record, [])
+            record_company = records_company[record.id]
+            for mail in mails:
+                mail_normalized = email_normalize(mail, strict=False)
+                emails_normalized_res_ids.setdefault(mail_normalized, []).append(record.id)
+                if record_company:
+                    emails_normalized_company[mail_normalized] = record_company
+                emails_all.append(mail)
+                emails_normalized_all.append(mail_normalized)
+
+        # fetch model-related additional information
+        if emails_normalized_info is None:
+            emails_normalized_info = self._get_customer_information()
+
+        partners = self.env['res.partner']._find_or_create_from_emails(
+            emails_all,
+            additional_values={
+                mail: {
+                    'company_id': emails_normalized_company.get(mail_normalized),
+                    **emails_normalized_info.get(mail_normalized, {}),
+                }
+                for mail, mail_normalized in zip(
+                    itertools.chain(emails_all, [False]), emails_normalized_all
+                )
+            })
+
+        records_partners = dict.fromkeys(self.ids, self.env['res.partner'])
+        for mail_normalized, partner in zip(emails_normalized_all, partners):
+            for res_id in emails_normalized_res_ids[mail_normalized]:
+                records_partners[res_id] |= partner
+        return records_partners
 
     def _message_add_suggested_recipient(self, result, partner=None, email=None, lang=None, reason=''):
         """ Called by _message_get_suggested_recipients, to add a suggested
