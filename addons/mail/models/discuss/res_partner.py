@@ -89,3 +89,12 @@ class ResPartner(models.Model):
             ]
         )
         return Store(members, fields={"channel": [], "persona": []}).add(partners).get_result()
+
+    def _can_elevate_access(self, access_token, field):
+        if field == "avatar_128":
+            # access to the avatar is allowed if there is access to a channel
+            if self.env["discuss.channel"].search_count(
+                [("channel_member_ids", "any", [("partner_id", "=", self.id)])], limit=1
+            ):
+                return True
+        return super()._can_elevate_access(access_token, field)

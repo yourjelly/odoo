@@ -6033,6 +6033,9 @@ class BaseModel(metaclass=MetaModel):
             return (self.company_ids & self.env.user.company_ids)[:1]
         return False
 
+    def _can_elevate_access(self, access_token, field):
+        return False
+
     #
     # Instance creation
     #
