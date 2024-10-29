@@ -117,7 +117,7 @@ class MrpBatchProduct(models.TransientModel):
 
         if mark_done:
             return productions.with_context(from_wizard=True).button_mark_done()
-        return
+        return productions.action_view_mrp_production_backorders()
 
     def _process_components(self, production, components_line):
         lot_names = []

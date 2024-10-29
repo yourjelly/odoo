@@ -2304,6 +2304,7 @@ class MrpProduction(models.Model):
         action = self.env["ir.actions.actions"]._for_xml_id("mrp.action_mrp_batch_produce")
         action['context'] = {
             'default_production_id': self.id,
+            'check_ids': self.workorder_ids.check_ids if self.workorder_ids.check_ids else False,
         }
         return action
 
