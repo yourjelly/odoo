@@ -1,5 +1,6 @@
 from odoo import api, fields, models
 from odoo.tools.misc import get_lang
+from odoo.addons.mail.tools.parser import parse_res_ids
 
 
 class AccountMoveSendWizard(models.TransientModel):
@@ -80,6 +81,10 @@ class AccountMoveSendWizard(models.TransientModel):
         store=True,
         readonly=False,
     )
+
+    model = fields.Char('Related Document Model', compute='_compute_model', readonly=False, store=True)
+    model_is_thread = fields.Boolean('Thread-Enabled', compute='_compute_model_is_thread')
+    res_ids = fields.Text('Related Document IDs', compute='_compute_res_ids', readonly=False, store=True)
 
     # -------------------------------------------------------------------------
     # DEFAULTS
@@ -206,6 +211,29 @@ class AccountMoveSendWizard(models.TransientModel):
                     self._get_default_mail_attachments_widget(wizard.move_id, wizard.mail_template_id, extra_edis=wizard.extra_edis or {})
                     + manual_attachments_data
             )
+
+    @api.depends('mail_template_id')
+    def _compute_res_ids(self):
+        for wizard in self.filtered(lambda wizard: not wizard.res_ids):
+            context = self.env.context
+            active_res_ids = parse_res_ids(context.get('active_ids'), self.env)
+
+            if active_res_ids and len(active_res_ids) <= 500:
+                wizard.res_ids = f"{context['active_ids']}"
+            elif not active_res_ids and context.get('active_id'):
+                wizard.res_ids = f"{[context['active_id']]}"
+
+    @api.depends('mail_template_id')
+    def _compute_model(self):
+        for wizard in self:
+            wizard.model = self.env.context.get('active_model')
+
+    @api.depends('model')
+    def _compute_model_is_thread(self):
+        """ Determine if model is thread enabled. """
+        for wizard in self:
+            model = self.env['ir.model']._get(wizard.model)
+            wizard.model_is_thread = model.is_mail_thread
 
     # -------------------------------------------------------------------------
     # CONSTRAINS
