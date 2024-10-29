@@ -1,4 +1,5 @@
 import { useService } from "@web/core/utils/hooks";
+import { isMiddleClick } from "@web/views/utils";
 import { Component, onWillStart } from "@odoo/owl";
 import { useOpenChat } from "@mail/core/web/open_chat_hook";
 
@@ -11,6 +12,7 @@ export class AvatarCardPopover extends Component {
     };
 
     setup() {
+        this.isMiddleClick = isMiddleClick;
         this.actionService = useService("action");
         this.orm = useService("orm");
         this.openChat = useOpenChat("res.users");
@@ -53,8 +55,8 @@ export class AvatarCardPopover extends Component {
         this.props.close();
     }
 
-    async onClickViewProfile() {
+    async onClickViewProfile(newWindow) {
         const action = await this.getProfileAction();
-        this.actionService.doAction(action);
+        this.actionService.doAction(action, { newWindow });
     }
 }
