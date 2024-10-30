@@ -3,7 +3,7 @@ import { Record } from "./record";
 
 export class ChatHub extends Record {
     BUBBLE = 56; // same value as $o-mail-ChatHub-bubblesWidth
-    BUBBLE_START = 15; // same value as $o-mail-ChatHub-bubblesStart
+    BUBBLE_START = 25; // same value as $o-mail-ChatHub-bubblesStart
     BUBBLE_LIMIT = 7;
     BUBBLE_OUTER = 10; // same value as $o-mail-ChatHub-bubblesMargin
     WINDOW_GAP = 10; // for a single end, multiply by 2 for left and right together.

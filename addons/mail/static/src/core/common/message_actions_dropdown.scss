@@ -1,0 +1,26 @@
+@mixin overlayBackgroundMixin($color, $percent) {
+    $overlay-color: mix($o-view-background-color, $color, $percent);
+    background: radial-gradient(at top right, $overlay-color 60%, rgba($overlay-color, 0) 80%);
+}
+
+.o-mail-MessageActionsDropdown-overlay {
+    &.o-blue {
+        @include overlayBackgroundMixin($info, 87.5%);
+    }
+
+    &.o-green {
+        @include overlayBackgroundMixin($success, 87.5%);
+    }
+
+    &.o-orange {
+        @include overlayBackgroundMixin($warning, 75%);
+
+    }
+    margin: 1px;
+    width: 25px;
+    max-width: 90%;
+}
+
+.o-mail-MessageActionsDropdown-icon {
+    font-weight: 100;
+}

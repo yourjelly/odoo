@@ -41,6 +41,8 @@ import { rpc } from "@web/core/network/rpc";
 import { escape } from "@web/core/utils/strings";
 import { MessageActionMenuMobile } from "./message_action_menu_mobile";
 import { discussComponentRegistry } from "./discuss_component_registry";
+import { AddReactionMenu } from "./add_reaction_menu";
+import { MessageActionsDropdown } from "./message_actions_dropdown";
 
 /**
  * @typedef {Object} Props
@@ -64,6 +66,8 @@ export class Message extends Component {
         ActionSwiper,
         AttachmentList,
         Composer,
+        AddReactionMenu,
+        MessageActionsDropdown,
         Dropdown,
         DropdownItem,
         LinkPreviewList,
@@ -329,6 +333,12 @@ export class Message extends Component {
 
     get translationFailureText() {
         return _t("(Translation Failure: %(error)s)", { error: this.message.translationErrors });
+    }
+
+    onClickReply() {
+        const message = toRaw(this.props.message);
+        const thread = toRaw(this.props.thread);
+        this.props.messageToReplyTo.toggle(thread, message);
     }
 
     onMouseenter() {

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.MessageActionsDropdown">
+        <div t-if="props.messageActive or dropdownState.isOpen" class="o-mail-MessageActionsDropdown-overlay d-flex justify-content-end mt-1 me-2" t-attf-class="{{ props.class }}" t-att-class="{
+            'o-blue': props.message.bubbleColor === 'blue',
+            'o-green': props.message.bubbleColor === 'green',
+            'o-orange': props.message.bubbleColor === 'orange',
+        }">
+            <Dropdown state="dropdownState" position="props.message.threadAsNewest  ? 'top-start' : 'bottom-start'" menuClass="'d-flex flex-column  my-0 o-mail-Message-moreMenu'">
+                <button class="btn btn-link opacity-75 p-0 o-mail-MessageActionsDropdown-toggle">
+                    <i class="fa fa-chevron-down text-muted o-mail-MessageActionsDropdown-icon"/>
+                </button>
+                <t t-set-slot="content">
+                    <t t-foreach="messageActions.actions" t-as="action" t-key="action.id">
+                        <DropdownItem class="'px-2 py-1 d-flex align-items-center rounded-0'" onSelected="action.onClick" attrs="{ title: action.title}" >
+                            <i class="fa-fw" t-att-class="action.icon"/>
+                            <span class="mx-2" t-esc="action.title"/>
+                        </DropdownItem>
+                    </t>
+                </t>
+            </Dropdown>
+        </div>
+    </t>
+</templates>

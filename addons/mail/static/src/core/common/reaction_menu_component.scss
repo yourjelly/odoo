@@ -1,0 +1,47 @@
+$reaction-menu-total-buttons: 7;
+$reaction-menu-emoji-delay-increment: 0.05s;
+$reaction-menu-emoji-pop-out-duration: 0.15s;
+$reaction-menu-slide-in-duration: 0.25s;
+
+@keyframes reactionButton-fadeIn {
+    0% {
+        transform: scale(0);
+    }
+
+    60% {
+        transform: scale(1.15);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes reactionMenu-slideIn {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+.o-mail-ReactionMenu-button {
+    height: 28px;
+    width: 28px;
+}
+
+.o-mail-ReactionMenu-button-popIn {
+    opacity: 0;
+    animation: reactionButton-fadeIn $reaction-menu-emoji-pop-out-duration cubic-bezier(.215, .610, .355, 1) forwards;
+}
+
+@for $i from 0 through $reaction-menu-total-buttons {
+    .o-mail-ReactionMenu-button-popIn:nth-child(#{$i + 1}) {
+        animation-delay: #{$reaction-menu-slide-in-duration / 3 + $i * $reaction-menu-emoji-delay-increment};
+    }
+}
+
+.o-mail-ReactionMenu {
+    transform: scaleX(0.2);
+    transform-origin: left;
+    animation: reactionMenu-slideIn $reaction-menu-slide-in-duration cubic-bezier(0.6, 0, 0.4, 1) forwards;
+}

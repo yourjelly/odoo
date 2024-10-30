@@ -55,7 +55,7 @@ export function makePopover(addFn, component, options) {
 export function usePopover(component, options = {}) {
     const popoverService = useService("popover");
     const owner = useComponent();
-    const newOptions = Object.create(options);
+    const newOptions = { ...options };
     newOptions.onClose = () => {
         if (status(owner) !== "destroyed") {
             options.onClose?.();

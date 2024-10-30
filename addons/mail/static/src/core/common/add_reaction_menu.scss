@@ -1,0 +1,45 @@
+$add-reaction-menu-picker-expand-duration: 0.3s;
+
+@keyframes reactionMenu-pickerExpand {
+    to {
+        transform: scale(1);
+    }
+}
+
+.o-mail-AddReactionMenu-pickerPopover {
+    background-color: unset;
+    border: none;
+
+    & *:first-child {
+        transform: scale(0);
+    }
+
+    &[class*="o-popover--"] {
+        --fromY: top;
+        --fromX: unset;
+
+        &[class*="o-popover--t"] {
+            --fromY: bottom;
+        }
+
+        &.o-popover--te,
+        &.o-popover--be {
+            --fromX: right;
+        }
+
+        &.o-popover--ts,
+        &.o-popover--bs {
+            --fromX: left;
+        }
+
+        & *:first-child {
+            transform-origin: var(--fromY) var(--fromX);
+            animation: reactionMenu-pickerExpand $add-reaction-menu-picker-expand-duration cubic-bezier(0.6, 0, 0.4, 1) forwards;
+        }
+    }
+}
+
+.o-mail-AddReactionMenu-quickActionsPopover {
+    background-color: unset;
+    border: none;
+}

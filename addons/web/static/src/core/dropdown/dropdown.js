@@ -115,7 +115,6 @@ export class Dropdown extends Component {
 
     setup() {
         this.menuRef = this.props.menuRef || useChildRef();
-
         this.state = this.props.state || useDropdownState();
         this.nesting = useDropdownNesting(this.state);
         this.group = useDropdownGroup();

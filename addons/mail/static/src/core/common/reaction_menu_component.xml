@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.ReactionMenu">
+        <div class="o-mail-ReactionMenu bg-view border rounded-pill p-1 px-2 ps-3 shadow gap-1 d-flex flex-row align-items-center gap-1">
+            <div t-foreach="frequentEmojiService.getMostFrequent(6)" t-as="emoji" t-key="emoji" class="o-mail-ReactionMenu-button-popIn d-flex align-items-center py-1" t-att-class="{ 'bg-secondary-light px-1 rounded': reactedBySelf(emoji) }">
+                <button class="o-mail-ReactionMenu-button btn lh-1 p-0 fs-2" t-esc="emoji" t-on-click="() => props.toggleReaction(emoji)"/>
+            </div>
+            <button class="o-mail-ReactionMenu-button-popIn o-mail-ReactionMenu-button btn p-0 fs-2 bg-200 rounded-circle d-flex align-items-center justify-content-center" t-on-click="props.openEmojiPicker">+</button>
+        </div>
+    </t>
+</templates>

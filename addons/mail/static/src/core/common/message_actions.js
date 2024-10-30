@@ -1,92 +1,92 @@
-import { Component, toRaw, useComponent, useState, xml } from "@odoo/owl";
+import { toRaw, useComponent, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { download } from "@web/core/network/download";
 import { registry } from "@web/core/registry";
-import { MessageReactionButton } from "./message_reaction_button";
+// import { MessageReactionButton } from "./message_reaction_button";
 import { useService } from "@web/core/utils/hooks";
 import { discussComponentRegistry } from "./discuss_component_registry";
 import { Deferred } from "@web/core/utils/concurrency";
-import { EMOJI_PICKER_PROPS, EmojiPicker } from "@web/core/emoji_picker/emoji_picker";
-import { Dialog } from "@web/core/dialog/dialog";
-import { onExternalClick } from "@mail/utils/common/hooks";
+// import { EMOJI_PICKER_PROPS, EmojiPicker } from "@web/core/emoji_picker/emoji_picker";
+// import { Dialog } from "@web/core/dialog/dialog";
+// import { onExternalClick } from "@mail/utils/common/hooks";
 import { convertBrToLineBreak } from "@mail/utils/common/format";
 
 const { DateTime } = luxon;
 
 export const messageActionsRegistry = registry.category("mail.message/actions");
 
-class EmojiPickerMobile extends Component {
-    static components = { Dialog, EmojiPicker };
-    static props = [...EMOJI_PICKER_PROPS, "onClose?"];
-    static template = xml`
-        <Dialog size="'lg'" header="false" footer="false" contentClass="'o-discuss-mobileContextMenu d-flex position-absolute bottom-0 rounded-0 h-50 bg-100'">
-            <div t-ref="root">
-                <EmojiPicker t-props="emojiPickerProps"/>
-            </div>
-        </Dialog>
-    `;
+// class EmojiPickerMobile extends Component {
+//     static components = { Dialog, EmojiPicker };
+//     static props = [...EMOJI_PICKER_PROPS, "onClose?"];
+//     static template = xml`
+//         <Dialog size="'lg'" header="false" footer="false" contentClass="'o-discuss-mobileContextMenu d-flex position-absolute bottom-0 rounded-0 h-50 bg-100'">
+//             <div t-ref="root">
+//                 <EmojiPicker t-props="emojiPickerProps"/>
+//             </div>
+//         </Dialog>
+//     `;
 
-    get emojiPickerProps() {
-        return {
-            ...this.props,
-            onSelect: (...args) => {
-                this.props.onSelect(...args);
-                this.props.close?.();
-            },
-        };
-    }
+//     get emojiPickerProps() {
+//         return {
+//             ...this.props,
+//             onSelect: (...args) => {
+//                 this.props.onSelect(...args);
+//                 this.props.close?.();
+//             },
+//         };
+//     }
 
-    setup() {
-        super.setup();
-        onExternalClick("root", () => this.props.close?.());
-    }
-}
+//     setup() {
+//         super.setup();
+//         onExternalClick("root", () => this.props.close?.());
+//     }
+// }
 
 messageActionsRegistry
-    .add("reaction", {
-        callComponent: MessageReactionButton,
-        props: (component) => ({
-            message: component.props.message,
-            action: messageActionsRegistry.get("reaction"),
-        }),
-        condition: (component) => component.props.message.canAddReaction(component.props.thread),
-        icon: "oi oi-smile-add",
-        title: _t("Add a Reaction"),
-        onClick: async (component) => {
-            const def = new Deferred();
-            component.dialog.add(
-                EmojiPickerMobile,
-                {
-                    onSelect: (emoji) => {
-                        const reaction = component.props.message.reactions.find(
-                            ({ content, personas }) =>
-                                content === emoji &&
-                                personas.find((persona) => persona.eq(component.store.self))
-                        );
-                        if (!reaction) {
-                            component.props.message.react(emoji);
-                        }
-                        def.resolve(true);
-                    },
-                },
-                { context: component, onClose: () => def.resolve(false) }
-            );
-            return def;
-        },
-        sequence: 10,
-    })
-    .add("reply-to", {
-        condition: (component) => component.props.message.canReplyTo(component.props.thread),
-        icon: "fa fa-reply",
-        title: _t("Reply"),
-        onClick: (component) => {
-            const message = toRaw(component.props.message);
-            const thread = toRaw(component.props.thread);
-            component.props.messageToReplyTo.toggle(thread, message);
-        },
-        sequence: (component) => (component.props.thread?.eq(component.store.inbox) ? 55 : 20),
-    })
+    // .add("reaction", {
+    //     callComponent: MessageReactionButton,
+    //     props: (component) => ({
+    //         message: component.props.message,
+    //         action: messageActionsRegistry.get("reaction"),
+    //     }),
+    //     condition: (component) => component.props.message.canAddReaction(component.props.thread),
+    //     icon: "oi oi-smile-add",
+    //     title: _t("Add a Reaction"),
+    //     onClick: async (component) => {
+    //         const def = new Deferred();
+    //         component.dialog.add(
+    //             EmojiPickerMobile,
+    //             {
+    //                 onSelect: (emoji) => {
+    //                     const reaction = component.props.message.reactions.find(
+    //                         ({ content, personas }) =>
+    //                             content === emoji &&
+    //                             personas.find((persona) => persona.eq(component.store.self))
+    //                     );
+    //                     if (!reaction) {
+    //                         component.props.message.react(emoji);
+    //                     }
+    //                     def.resolve(true);
+    //                 },
+    //             },
+    //             { context: component, onClose: () => def.resolve(false) }
+    //         );
+    //         return def;
+    //     },
+    //     sequence: 10,
+    // })
+    // .add("reply-to", {
+    //     condition: (component) => component.props.message.canReplyTo(component.props.thread),
+    //     icon: "fa fa-reply",
+    //     title: _t("Reply"),
+    //     onClick: (component) => {
+    //         const message = toRaw(component.props.message);
+    //         const thread = toRaw(component.props.thread);
+    //         component.props.messageToReplyTo.toggle(thread, message);
+    //     },
+    //     sequence: (component) => (component.props.thread?.eq(component.store.inbox) ? 55 : 20),
+    // })
     .add("toggle-star", {
         condition: (component) => component.props.message.canToggleStar,
         icon: (component) =>
@@ -143,7 +143,7 @@ messageActionsRegistry
                     direction: "none",
                 },
             };
-            component.state.isEditing = true;
+            component.props.setIsEditing(true);
         },
         sequence: 80,
     })

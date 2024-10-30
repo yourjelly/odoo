@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.AddReactionMenu">
+        <button class="btn btn-link p-0 m-0 rounded-circle" title="Add a Reaction" t-att-class="{
+            'invisible': !props.messageActive and !popover.isOpen and !picker.isOpen,
+        }" t-on-click="onClick" t-ref="toggle">
+            <i class="fa-lg oi oi-smile-add"/>
+        </button>
+    </t>
+</templates>

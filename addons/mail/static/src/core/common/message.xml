@@ -54,7 +54,6 @@
                                 </span>
                             </div>
                             <t t-if="isAlignedRight" t-call="mail.Message.notification"/>
-                            <t t-if="message.is_note and !message.isPending" t-call="mail.Message.actions"/>
                         </div>
                         <div
                             class="o-mail-Message-contentContainer position-relative d-flex"
@@ -110,10 +109,11 @@
                                                         thread="props.thread"
                                                     />
                                                 </div>
+                                                <MessageActionsDropdown t-if="!state.isEditing" class="`position-absolute top-0 ${isAlignedRight? 'start-0' : 'end-0'}`" messageActive="isActive" setIsEditing="(value) => state.isEditing = value" message="props.message"/>
                                             </div>
                                         </t>
                                     </t>
-                                    <t t-if="!message.is_note and !message.isPending and message.hasTextContent and !env.inChatWindow" t-call="mail.Message.actions"/>
+                                    <t t-if="!message.isPending" t-call="mail.Message.actions"/>
                                 </div>
                                 <AttachmentList
                                     t-if="message.attachment_ids.length > 0"
@@ -123,7 +123,6 @@
                                     messageSearch="props.messageSearch"/>
                                 <LinkPreviewList t-if="message.link_preview_ids.length > 0 and store.hasLinkPreviewFeature and !message.linkPreviewSquash" linkPreviews="message.link_preview_ids" deletable="props.message.editable"/>
                             </div>
-                            <t t-if="!message.is_note and !message.isPending and (!message.hasTextContent or env.inChatWindow)" t-call="mail.Message.actions"/>
                         </div>
                         <MessageReactions message="message" openReactionMenu="openReactionMenu" t-if="message.reactions.length"/>
                     </div>
@@ -133,49 +132,55 @@
     </t>
 
 <t t-name="mail.Message.actions">
-    <div t-if="props.hasActions and message.hasActions and !state.isEditing" class="o-mail-Message-actions d-print-none"
+    <div t-if="props.hasActions and message.hasActions and !state.isEditing" class="o-mail-Message-actions d-print-none d-flex align-items-center"
         t-att-class="{
             'start-0': isAlignedRight,
             'mx-1': !isMobileOS,
             'mt-1': !message.is_note,
             'my-n2': message.is_note,
-            'invisible': !isActive and !isMobileOS,
             'o-expanded': optionsDropdown.isOpen
         }"
     >
+        <!-- 'invisible': !isActive and !isMobileOS, -->
         <t t-if="isMobileOS and !mobileExpanded" t-call="mail.Message.expandAction"/>
         <t t-else="">
-            <t t-set="isReverse" t-value="env.inChatWindow and isAlignedRight"/>
-            <div class="d-flex rounded-1 overflow-hidden" t-att-class="{ 'flex-row-reverse': isReverse }">
-                <t t-set="quickActions" t-value="messageActions.actions.slice(0, messageActions.actions.length gt quickActionCount ? quickActionCount - 1 : quickActionCount)"/>
-                <t t-foreach="quickActions" t-as="action" t-key="action.id">
-                    <t t-set="isStart" t-value="(!isReverse and action.isFirst) or (isReverse and action.isLast)"/>
-                    <t t-set="isEnd" t-value="(!isReverse and action.isLast) or (isReverse and action.isFirst)"/>
-                    <t t-if="action.callComponent" t-component="action.callComponent" t-props="action.props" classNames="{
-                        'rounded-start-1': isStart,
-                        'rounded-end-1': isEnd,
-                    }"/>
-                    <button t-else="" class="btn px-1 py-0 rounded-0" t-att-title="action.title" t-att-name="action.id" t-on-click.stop="action.onClick" t-att-class="{
-                        'rounded-start-1': isStart,
-                        'rounded-end-1': isEnd,
-                    }">
-                        <i class="fa-lg" t-att-class="action.icon"/>
-                    </button>
-                </t>
-                <div t-if="messageActions.actions.length gt quickActionCount" class="d-flex rounded-0">
-                    <Dropdown state="optionsDropdown" position="props.message.threadAsNewest  ? 'top-start' : 'bottom-start'" menuClass="'d-flex flex-column py-0 o-mail-Message-moreMenu'" >
-                        <t t-call="mail.Message.expandAction"/>
-                        <t t-set-slot="content">
-                            <t t-foreach="messageActions.actions.slice(quickActionCount - 1)" t-as="action" t-key="action.id">
-                                <DropdownItem class="'px-2 py-1 d-flex align-items-center rounded-0'" onSelected="action.onClick" attrs="{ title: action.title}">
-                                    <i class="fa-fw" t-att-class="action.icon"/>
-                                    <span class="mx-2" t-esc="action.title"/>
-                                </DropdownItem>
-                            </t>
-                        </t>
-                    </Dropdown>
-                </div>
+            <div class="d-flex ms-1" t-att-class="{'gap-1': env.inChatWindow, 'gap-2': !env.inChatWindow }">
+                <button class="btn btn-link p-0 m-0 rounded-circle" t-att-class="{'order-0': !isAlignedRight, 'order-1': isAlignedRight }" title="Reply" t-on-click="onClickReply">
+                    <i class="fa fa-lg fa-reply"/>
+                </button>
+                <AddReactionMenu t-if="!isMobileOS" messageActive="isActive" message="props.message"/>
             </div>
+            <!-- <t t-set="isReverse" t-value="env.inChatWindow and isAlignedRight"/> -->
+            <!-- <div class="d-flex rounded-1 overflow-hidden" t-att-class="{ 'flex-row-reverse': isReverse }"> -->
+                <!-- <t t-set="quickActions" t-value="messageActions.actions.slice(0, messageActions.actions.length gt quickActionCount ? quickActionCount - 1 : quickActionCount)"/> -->
+                <!-- <t t-foreach="quickActions" t-as="action" t-key="action.id"> -->
+                    <!-- <t t-set="isStart" t-value="(!isReverse and action.isFirst) or (isReverse and action.isLast)"/> -->
+                    <!-- <t t-set="isEnd" t-value="(!isReverse and action.isLast) or (isReverse and action.isFirst)"/> -->
+                    <!-- <t t-if="action.callComponent" t-component="action.callComponent" t-props="action.props" classNames="{ -->
+                        <!-- 'rounded-start-1': isStart, -->
+                        <!-- 'rounded-end-1': isEnd, -->
+                    <!-- }"/> -->
+                    <!-- <button t-else="" class="btn px-1 py-0 rounded-0" t-att-title="action.title" t-att-name="action.id" t-on-click.stop="action.onClick" t-att-class="{ -->
+                        <!-- 'rounded-start-1': isStart, -->
+                        <!-- 'rounded-end-1': isEnd, -->
+                    <!-- }"> -->
+                        <!-- <i class="fa-lg" t-att-class="action.icon"/> -->
+                    <!-- </button> -->
+                <!-- </t> -->
+                <!-- <div t-if="messageActions.actions.length gt quickActionCount" class="d-flex rounded-0"> -->
+                    <!-- <Dropdown state="optionsDropdown" position="props.message.threadAsNewest  ? 'top-start' : 'bottom-start'" menuClass="'d-flex flex-column py-0 o-mail-Message-moreMenu'" > -->
+                        <!-- <t t-call="mail.Message.expandAction"/> -->
+                        <!-- <t t-set-slot="content"> -->
+                            <!-- <t t-foreach="messageActions.actions.slice(quickActionCount - 1)" t-as="action" t-key="action.id"> -->
+                                <!-- <DropdownItem class="'px-2 py-1 d-flex align-items-center rounded-0'" onSelected="action.onClick" attrs="{ title: action.title}"> -->
+                                    <!-- <i class="fa-fw" t-att-class="action.icon"/> -->
+                                    <!-- <span class="mx-2" t-esc="action.title"/> -->
+                                <!-- </DropdownItem> -->
+                            <!-- </t> -->
+                        <!-- </t> -->
+                    <!-- </Dropdown> -->
+                <!-- </div> -->
+            <!-- </div> -->
         </t>
     </div>
 </t>
