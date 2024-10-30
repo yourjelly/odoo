@@ -70,24 +70,26 @@
     <div t-if="email_add_signature and not is_html_empty(signature)" t-out="signature" style="font-size: 13px;"/>
 </t>
 <!-- FOOTER -->
-<div style="margin-top:16px;">
-    <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 4px 0px;"/>
-    <b t-out="company.name" style="font-size:11px;"/><br/>
-    <p style="color: #999999; margin-top:2px; font-size:11px;">
-        <t t-out="company.phone"/>
-        <t t-if="company.email and company.phone"> |</t>
-        <a t-if="company.email" t-att-href="'mailto:%s' % company.email" style="text-decoration:none; color: #999999;" t-out="company.email"/>
-        <t t-if="company.website and (company.phone or company.email)"> |</t>
-        <a t-if="company.website" t-att-href="'%s' % company.website" style="text-decoration:none; color: #999999;" t-out="company.website"/>
-    </p>
-</div>
-<div style="color: #555555; font-size:11px;">
-    Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=email"
-                  t-att-style="'color: ' + (company.email_secondary_color or '#875A7B') + ';'">Odoo</a>
-    <span id="mail_unfollow">
-        | <a href="/mail/unfollow" style="text-decoration:none; color:#555555;">Unfollow</a>
-    </span>
-</div>
+<t t-if="email_add_footer">
+    <div style="margin-top:16px;">
+        <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 4px 0px;"/>
+        <b t-out="company.name" style="font-size:11px;"/><br/>
+        <p style="color: #999999; margin-top:2px; font-size:11px;">
+            <t t-out="company.phone"/>
+            <t t-if="company.email and company.phone"> |</t>
+            <a t-if="company.email" t-att-href="'mailto:%s' % company.email" style="text-decoration:none; color: #999999;" t-out="company.email"/>
+            <t t-if="company.website and (company.phone or company.email)"> |</t>
+            <a t-if="company.website" t-att-href="'%s' % company.website" style="text-decoration:none; color: #999999;" t-out="company.website"/>
+        </p>
+    </div>
+    <div style="color: #555555; font-size:11px;">
+        Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=email"
+                      t-att-style="'color: ' + (company.email_secondary_color or '#875A7B') + ';'">Odoo</a>
+        <span id="mail_unfollow">
+            | <a href="/mail/unfollow" style="text-decoration:none; color:#555555;">Unfollow</a>
+        </span>
+    </div>
+</t>
 </div>
 </body></html>
         </template>
