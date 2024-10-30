@@ -22,7 +22,7 @@ class TestHasGroup(TransactionCase):
             'partner_id': self.env['res.partner'].create({
                 'name': "Strawman Test User"
             }).id,
-            'groups_id': [Command.set([group0.id])]
+            'group_ids': [Command.set([group0.id])]
         })
 
         self.grp_internal_xml_id = 'base.group_user'
@@ -54,7 +54,7 @@ class TestHasGroup(TransactionCase):
         )
 
     def test_other_user(self):
-        internal_user = self.test_user.copy({'groups_id': self.grp_internal})
+        internal_user = self.test_user.copy({'group_ids': self.grp_internal})
         internal_user = internal_user.with_user(internal_user)
         test_user = self.env['res.users'].with_user(self.test_user).browse(self.test_user.id)
 
@@ -133,7 +133,7 @@ class TestHasGroup(TransactionCase):
         portal_user = self.env['res.users'].create({
             'login': 'portalTest2',
             'name': 'Portal test 2',
-            'groups_id': [Command.set([self.grp_portal.id])],
+            'group_ids': [Command.set([self.grp_portal.id])],
             })
 
         self.assertEqual(portal_user.group_ids, self.grp_portal)
@@ -146,7 +146,7 @@ class TestHasGroup(TransactionCase):
             {"name": "fail", "implied_ids": [Command.set([self.grp_internal.id])]})
 
         with self.assertRaises(ValidationError):
-            portal_user.write({'groups_id': [Command.link(grp_fail.id)]})
+            portal_user.write({'group_ids': [Command.link(grp_fail.id)]})
 
     def test_two_user_types(self):
         #Create a user with two groups of user types kind (Internal and Portal)
@@ -160,14 +160,14 @@ class TestHasGroup(TransactionCase):
             self.env['res.users'].create({
                 'login': 'test_two_user_types',
                 'name': "Test User with two user types",
-                'groups_id': [Command.set([grp_test.id])]
+                'group_ids': [Command.set([grp_test.id])]
             })
 
         #Add a user with portal to the group Internal
         test_user = self.env['res.users'].create({
                 'login': 'test_user_portal',
                 'name': "Test User with two user types",
-                'groups_id': [Command.set([self.grp_portal.id])]
+                'group_ids': [Command.set([self.grp_portal.id])]
              })
         with self.assertRaises(ValidationError):
             self.grp_internal.users = [Command.link(test_user.id)]
@@ -184,7 +184,7 @@ class TestHasGroup(TransactionCase):
         self.env['res.users'].create({
             'login': 'test_user_portal',
             'name': "Test User with one user types",
-            'groups_id': [Command.set([grp_test.id])]
+            'group_ids': [Command.set([grp_test.id])]
         })
 
         with self.assertRaises(ValidationError):
@@ -281,7 +281,7 @@ class TestHasGroup(TransactionCase):
         self.assertEqual(user_a.group_ids, (group_AA + group_BB + group_C + group_user))
 
         with self.assertRaises(ValidationError):
-            user_b.write({"groups_id": [Command.link(group_C.id)]})
+            user_b.write({"group_ids": [Command.link(group_C.id)]})
 
     def test_has_group_cleared_cache_on_write(self):
         self.env.registry.clear_cache()

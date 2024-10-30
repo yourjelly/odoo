@@ -91,7 +91,7 @@ class IrRule(models.Model):
 
         # first check if the group rules fail for any record (aka if
         # searching on (records, group_rules) filters out some of the records)
-        group_rules = all_rules.filtered(lambda r: r.groups and r.groups & self.env.user.groups_id)
+        group_rules = all_rules.filtered(lambda r: r.groups and r.groups & self.env.user.group_ids)
         group_domains = expression.OR([
             safe_eval(r.domain_force, eval_context) if r.domain_force else []
             for r in group_rules

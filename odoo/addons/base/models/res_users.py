@@ -417,7 +417,7 @@ class ResUsers(models.Model):
         return [
             'signature', 'company_id', 'login', 'email', 'name', 'image_1920',
             'image_1024', 'image_512', 'image_256', 'image_128', 'lang', 'tz',
-            'tz_offset', 'groups_id', 'partner_id', 'write_date', 'action_id',
+            'tz_offset', 'group_ids', 'partner_id', 'write_date', 'action_id',
             'avatar_1920', 'avatar_1024', 'avatar_512', 'avatar_256', 'avatar_128',
             'share', 'device_ids',
         ]
@@ -435,7 +435,7 @@ class ResUsers(models.Model):
         All the groups of the Template User
         """
         default_user = self.env.ref('base.default_user', raise_if_not_found=False)
-        return default_user.sudo().groups_id if default_user else []
+        return default_user.sudo().group_ids if default_user else []
 
     partner_id = fields.Many2one('res.partner', required=True, ondelete='restrict', auto_join=True, index=True,
         string='Related Partner', help='Partner-related data of the user')
@@ -620,7 +620,7 @@ class ResUsers(models.Model):
     @api.depends('group_ids.all_implied_ids')
     def _compute_share(self):
         user_group_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user')
-        internal_users = self.filtered_domain([('groups_id', 'in', [user_group_id])])
+        internal_users = self.filtered_domain([('group_ids.all_implied_ids', 'in', [user_group_id])])
         internal_users.share = False
         (self - internal_users).share = True
 
@@ -955,7 +955,7 @@ class ResUsers(models.Model):
     @api.model
     def _get_invalidation_fields(self):
         return {
-            'groups_id', 'active', 'lang', 'tz', 'company_id', 'company_ids',
+            'group_ids', 'active', 'lang', 'tz', 'company_id', 'company_ids',
             *USER_PRIVATE_FIELDS,
             *self._get_session_token_fields()
         }
@@ -1271,7 +1271,7 @@ class ResUsers(models.Model):
         """
         group_id = self.env['res.groups']._get_group_definitions().get_id(group_ext_id)
         # for new record don't fill the ormcache
-        return group_id in (self._get_group_ids() if self.id else self.groups_id._origin._ids)
+        return group_id in (self._get_group_ids() if self.id else self.group_ids.all_implied_ids._origin._ids)
 
     @tools.ormcache('self.id')
     def _get_group_ids(self):
@@ -1322,7 +1322,7 @@ class ResUsers(models.Model):
             'res_model': 'ir.model.access',
             'type': 'ir.actions.act_window',
             'context': {'create': False, 'delete': False},
-            'domain': [('id', 'in', self.groups_id.model_access.ids)],
+            'domain': [('id', 'in', self.group_ids.all_implied_ids.model_access.ids)],
             'target': 'current',
         }
 
@@ -1334,7 +1334,7 @@ class ResUsers(models.Model):
             'res_model': 'ir.rule',
             'type': 'ir.actions.act_window',
             'context': {'create': False, 'delete': False},
-            'domain': [('id', 'in', self.groups_id.rule_groups.ids)],
+            'domain': [('id', 'in', self.group_ids.all_implied_ids.rule_groups.ids)],
             'target': 'current',
         }
 
@@ -1800,7 +1800,7 @@ class ResUsersApikeys(models.Model):
             return
         if not date:
             raise ValidationError(_("The API key must have an expiration date"))
-        max_duration = max(group.api_key_duration for group in self.env.user.groups_id) or 1.0
+        max_duration = max(group.api_key_duration for group in self.env.user.group_ids.all_implied_ids) or 1.0
         if date > datetime.datetime.now() + datetime.timedelta(days=max_duration):
             raise ValidationError(_("You cannot exceed %(duration)s days.", duration=max_duration))
 
@@ -1860,7 +1860,7 @@ class ResUsersApikeysDescription(models.TransientModel):
         custom_duration = ('-1', 'Custom Date')  # Will force the user to enter a date manually
         if self.env.is_system():
             return durations + [persistent_duration, custom_duration]
-        max_duration = max(group.api_key_duration for group in self.env.user.groups_id) or 1.0
+        max_duration = max(group.api_key_duration for group in self.env.user.group_ids.all_implied_ids) or 1.0
         return list(filter(
             lambda duration: int(duration[0]) <= max_duration, durations
         )) + [custom_duration]
