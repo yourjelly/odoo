@@ -1,41 +1,27 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import argparse
-import glob
-import itertools
 import os
 import sys
-from pathlib import Path
 
 import odoo
 from . import Command
 from .server import main
-from odoo.modules.module import get_module_root, MANIFEST_NAMES
+from odoo.modules.module import get_module_root
 from odoo.service.db import _create_empty_database, DatabaseExists
 
 
 class Start(Command):
     """ Quickly start the odoo server with default options """
 
-    def get_module_list(self, path):
-        mods = itertools.chain.from_iterable(
-            glob.glob(os.path.join(path, '*/%s' % mname))
-            for mname in MANIFEST_NAMES
-        )
-        return [mod.split(os.path.sep)[-2] for mod in mods]
-
     def run(self, cmdargs):
-        odoo.tools.config.parser.prog = f'{Path(sys.argv[0]).name} {self.name}'
-        parser = argparse.ArgumentParser(
-            prog=f'{Path(sys.argv[0]).name} {self.name}',
-            description=self.__doc__.strip(),
-        )
-        parser.add_argument('--path', default=".",
-            help="Directory where your project's modules are stored (will autodetect from current dir)")
-        parser.add_argument("-d", "--database", dest="db_name", default=None,
-                         help="Specify the database name (default to project's directory name")
-
-
-        args, unknown = parser.parse_known_args(args=cmdargs)
+        parser = self.parser
+        parser.add_argument(
+            '--path', default=".",
+            help="Directory where your project's modules are stored "
+                 "(will autodetect from current dir)")
+        parser.add_argument(
+            "-d", "--database", dest="db_name", default=None,
+            help="Specify the database name (default to project's directory name")
+        args, _unknown = parser.parse_known_args(args=cmdargs)
 
         # When in a virtualenv, by default use it's path rather than the cwd
         if args.path == '.' and os.environ.get('VIRTUAL_ENV'):
@@ -62,7 +48,7 @@ class Start(Command):
         try:
             _create_empty_database(args.db_name)
             odoo.tools.config['init']['base'] = True
-        except DatabaseExists as e:
+        except DatabaseExists:
             pass
         except Exception as e:
             die("Could not create database `%s`. (%s)" % (args.db_name, e))
@@ -73,7 +59,7 @@ class Start(Command):
         # Remove --path /-p options from the command arguments
         def to_remove(i, l):
             return l[i] == '-p' or l[i].startswith('--path') or \
-                (i > 0 and l[i-1] in ['-p', '--path'])
+                (i > 0 and l[i - 1] in ['-p', '--path'])
         cmdargs = [v for i, v in enumerate(cmdargs)
                    if not to_remove(i, cmdargs)]
 

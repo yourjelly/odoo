@@ -54,7 +54,7 @@ import odoo
 from odoo.modules import get_modules
 from odoo.modules.registry import Registry
 from odoo.release import nt_service_name
-from odoo.tools import config, osutil
+from odoo.tools import config, osutil, TestCounters
 from odoo.tools.cache import log_ormcache_stats
 from odoo.tools.misc import stripped_sys_argv, dumpstacks
 
@@ -1273,9 +1273,17 @@ def _reexec(updated_modules=None):
 
 
 def load_test_file_py(registry, test_file):
-    # pylint: disable=import-outside-toplevel
+    if not os.path.isfile(test_file):
+        _logger.warning('test file %s cannot be found', test_file)
+        return
+    elif not test_file.endswith('py'):
+        _logger.warning('test file %s is not a python file', test_file)
+        return
+
     from odoo.tests import loader  # noqa: PLC0415
     from odoo.tests.suite import OdooSuite  # noqa: PLC0415
+
+    _logger.info('Loading test file %s', test_file)
     threading.current_thread().testing = True
     try:
         test_path, _ = os.path.splitext(os.path.abspath(test_file))
@@ -1297,52 +1305,44 @@ def load_test_file_py(registry, test_file):
 def preload_registries(dbnames):
     """ Preload a registries, possibly run a test file."""
     # TODO: move all config checks to args dont check tools.config here
-    dbnames = dbnames or []
     rc = 0
-    for dbname in dbnames:
+    for dbname in (dbnames or []):
         try:
             update_module = config['init'] or config['update']
             registry = Registry.new(dbname, update_module=update_module)
 
-            # run test_file if provided
-            if config['test_file']:
-                test_file = config['test_file']
-                if not os.path.isfile(test_file):
-                    _logger.warning('test file %s cannot be found', test_file)
-                elif not test_file.endswith('py'):
-                    _logger.warning('test file %s is not a python file', test_file)
-                else:
-                    _logger.info('loading test file %s', test_file)
-                    load_test_file_py(registry, test_file)
+            if test_file := config.get('test_file'):
+                test_file(registry, test_file)
 
-            # run post-install tests
             if config['test_enable']:
-                from odoo.tests import loader  # noqa: PLC0415
-                t0 = time.time()
-                t0_sql = odoo.sql_db.sql_counter
-                module_names = (registry.updated_modules if update_module else
-                                sorted(registry._init_modules))
-                _logger.info("Starting post tests")
-                tests_before = registry._assertion_report.testsRun
-                post_install_suite = loader.make_suite(module_names, 'post_install')
-                if post_install_suite.has_http_case():
-                    with registry.cursor() as cr:
-                        env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
-                        env['ir.qweb']._pregenerate_assets_bundles()
-                result = loader.run_suite(post_install_suite)
-                registry._assertion_report.update(result)
-                _logger.info("%d post-tests in %.2fs, %s queries",
-                             registry._assertion_report.testsRun - tests_before,
-                             time.time() - t0,
-                             odoo.sql_db.sql_counter - t0_sql)
+                modules = registry.updated_modules if update_module else sorted(registry._init_modules)
+                post_install_tests(registry, modules)
 
-                registry._assertion_report.log_stats()
             if registry._assertion_report and not registry._assertion_report.wasSuccessful():
                 rc += 1
         except Exception:
             _logger.critical('Failed to initialize database `%s`.', dbname, exc_info=True)
             return -1
     return rc
+
+
+def post_install_tests(registry, modules):
+    from odoo.tests import loader  # noqa: PLC0415
+
+    threading.current_thread().testing = True
+    try:
+        with TestCounters(registry, 'Post-tests', _logger):
+            suite = loader.make_suite(modules, 'post_install')
+            if suite.has_http_case():
+                with registry.cursor() as cr:
+                    env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
+                    env['ir.qweb']._pregenerate_assets_bundles()
+            result = loader.run_suite(suite)
+            registry._assertion_report.update(result)
+        registry._assertion_report.log_stats()
+    finally:
+        threading.current_thread().testing = False
+
 
 def start(preload=None, stop=False):
     """ Start the odoo http server and cron processor.

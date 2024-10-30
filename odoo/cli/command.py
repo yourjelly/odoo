@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import argparse
 import contextlib
 import logging
 import sys
@@ -13,36 +14,57 @@ commands = {}
 
 class Command:
     name = None
+    _parser = None
+
+    def __init__(self, *args, **kwargs):
+        self.all_commands = commands
+
+    @classmethod
+    def prog_name(cls):
+        return Path(sys.argv[0]).name.lower()
+
+    @classmethod
+    def title(cls):
+        return f'{cls.prog_name()} {cls.name.lower()}'
+
+    @classmethod
+    def description(cls):
+        return cls.__doc__.strip() or ''
+
+    @classmethod
+    def epilog(cls):
+        return None
+
+    @property
+    def parser(self):
+        if not self._parser:
+            self._parser = argparse.ArgumentParser(
+                prog=self.title(),
+                description=self.description(),
+                epilog=self.epilog(),
+            )
+        return self._parser
+
+    def get_module_list(self, path):
+        from odoo.modules.module import MANIFEST_NAMES  # noqa: PLC0415
+        return sorted(
+           Path(module_path).parts[-2]
+           for pattern in (str(Path('*') / m) for m in MANIFEST_NAMES)
+           for module_path in Path(path).glob(pattern)
+        )
 
     def __init_subclass__(cls):
         cls.name = cls.name or cls.__name__.lower()
         commands[cls.name] = cls
 
-
-ODOO_HELP = """\
-Odoo CLI, use '{odoo_bin} --help' for regular server options.
-
-Available commands:
-    {command_list}
-
-Use '{odoo_bin} <command> --help' for individual command help."""
-
-
-class Help(Command):
-    """ Display the list of available commands """
-    def run(self, args):
+    def load_internal_commands(self):
         load_internal_commands()
+
+    def load_addons_commands(self):
         load_addons_commands()
-        padding = max(len(cmd) for cmd in commands) + 2
-        command_list = "\n    ".join([
-            "    {}{}".format(name.ljust(padding), (command.__doc__ or "").strip())
-            for name in sorted(commands)
-            if (command := find_command(name))
-        ])
-        print(ODOO_HELP.format(  # pylint: disable=bad-builtin  # noqa: T201
-            odoo_bin=Path(sys.argv[0]).name,
-            command_list=command_list
-        ))
+
+    def find_command(self, name):
+        return find_command(name)
 
 
 def load_internal_commands():

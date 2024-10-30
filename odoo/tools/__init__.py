@@ -22,3 +22,4 @@ from .convert import convert_csv_import, convert_file, convert_sql_import, conve
 from .js_transpiler import transpile_javascript, is_odoo_module, URL_RE, ODOO_MODULE_RE
 from .sourcemap_generator import SourceMapGenerator
 from .set_expression import SetDefinitions
+from .test_counters import TestCounters
