@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data>
+        <template id="email_template_mail_group_closed">
+<p>
+    Hi,
+    <br/><br/>
+    This mailing list is closed, and no message can be sent to it.
+</p>
+        </template>
+    </data>
+</odoo>
