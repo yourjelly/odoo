@@ -601,31 +601,6 @@ export class SearchModel extends EventBus {
     }
 
     /**
-     * Delete a filter of type 'favorite' with given this.nextId server side and
-     * in control panel model. Of course the filter is also removed
-     * from the search query.
-     */
-    async deleteFavorite(favoriteId) {
-        const searchItem = this.searchItems[favoriteId];
-        if (searchItem.type !== "favorite") {
-            return;
-        }
-        await this._deleteIrFilters(searchItem);
-        const index = this.query.findIndex((queryElem) => queryElem.searchItemId === favoriteId);
-        delete this.searchItems[favoriteId];
-        if (index >= 0) {
-            this.query.splice(index, 1);
-        }
-        this._notify();
-    }
-
-    async _deleteIrFilters(searchItem) {
-        const { serverSideId } = searchItem;
-        await this.orm.unlink("ir.filters", [serverSideId]);
-        this.env.bus.trigger("CLEAR-CACHES");
-    }
-
-    /**
      * @returns {Object}
      */
     exportState() {
