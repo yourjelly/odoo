@@ -4795,11 +4795,6 @@ class BaseModel(metaclass=MetaModel):
         # determine records that require updating parent_path
         parent_records = self._parent_store_update_prepare(vals_list)
 
-        if self._log_access:
-            # set magic fields (already done by write(), but not for computed fields)
-            log_vals = {'write_uid': self.env.uid, 'write_date': self.env.cr.now()}
-            vals_list = [(log_vals | vals) for vals in vals_list]
-
         # determine SQL updates, grouped by set of updated fields:
         # {(col1, col2, col3): [(id, val1, val2, val3)]}
         updates = defaultdict(list)
@@ -6706,6 +6701,19 @@ class BaseModel(metaclass=MetaModel):
         # if any field is context-dependent, the values to flush should
         # be found with a context where the context keys are all None
         model = self.with_context({})
+
+        if self._log_access:
+            # add log_access fields where necessary (dirty records with recomputed fields only)
+            dirty_records = model.union(*(
+                self.env.cache.get_dirty_records(model, field)
+                for field in self._fields.values()
+                if field in dirty_fields
+            ))
+            log_vals = {'write_uid': self.env.uid, 'write_date': self.env.cr.now()}
+            for fname, value in log_vals.items():
+                field = self._fields[fname]
+                if records := dirty_records - self.env.cache.get_dirty_records(model, field):
+                    field.write(records, value)
 
         # pop dirty fields and their corresponding record ids from cache
         dirty_field_ids = {
