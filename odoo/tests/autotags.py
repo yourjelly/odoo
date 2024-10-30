@@ -1,4 +1,3 @@
-import io
 import re
 import urllib.error
 import urllib.request
@@ -17,6 +16,8 @@ tag_re = re.compile(r"""
     (:?:(?P<class>\w+))?
     (:?\.(?P<method>\w+))?
 """ , re.VERBOSE)
+
+pytest_plugins = ["odoo.tests.pytest"]
 
 
 def pytest_configure(config: pytest.Config):
@@ -51,7 +52,7 @@ def pytest_configure(config: pytest.Config):
             if pred:
                 predicates.append(" and ".join(pred))
                 tags.append("".join(filter(None, [
-                    m['module'] and f"odoo/addons/{m['module']}",
+                    m['module'] and f"odoo/addons/{m['module']}/*",
                     m['class'] and f"::{m['class']}",
                     m['method'] and f"::{m['method']}",
                 ])))
