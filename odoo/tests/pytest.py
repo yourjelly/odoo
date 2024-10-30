@@ -53,10 +53,8 @@ SKIP_INHERITED = pytest.mark.skip(
            "is set on the class also they're bad and should be fixed"
 )
 
-pytest_plugins = [
-    # pytest does not implement TestCase.subTest by default
-    "pytest_subtests",
-]
+# pytest does not implement TestCase.subTest by default
+pytest_plugins = ["pytest_subtests"]
 
 collect_ignore = [
     "__*__",
