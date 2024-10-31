@@ -156,7 +156,13 @@ class PaymentTransaction(models.Model):
         }
 
         # Make the payment request to Worldline.
-        response_content = self.provider_id._worldline_make_request('payments', payload=payload)
+        response_content = self.provider_id._worldline_make_request(
+            endpoint='payments',
+            payload=payload,
+            idempotency_key= "unique_idempotence_key", # payment_utils.generate_idempotency_key(self, scope='payment_request_token_worldline')
+        )
+
+
 
         # Handle the payment request response.
         _logger.info(

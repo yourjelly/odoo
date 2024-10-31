@@ -47,13 +47,14 @@ class PaymentProvider(models.Model):
 
     # === BUSINESS METHODS === #
 
-    def _worldline_make_request(self, endpoint, payload=None, method='POST'):
+    def _worldline_make_request(self, endpoint, payload=None, idempotency_key=None, method='POST'):
         """ Make a request to Worldline API at the specified endpoint.
 
         Note: self.ensure_one()
 
         :param str endpoint: The endpoint to be reached by the request.
         :param dict payload: The payload of the request.
+        :param str idempotency_key: The idempotency key to pass in the request.
         :param str method: The HTTP method of the request.
         :return: The JSON-formatted content of the response.
         :rtype: dict
@@ -73,6 +74,8 @@ class PaymentProvider(models.Model):
             'Date': dt,
             'Content-Type': content_type,
         }
+        # if method == 'POST' and idempotency_key:
+        #     headers['X-GCS-Idempotence-Key'] = idempotency_key
         try:
             response = requests.request(method, url, json=payload, headers=headers, timeout=10)
             try:
