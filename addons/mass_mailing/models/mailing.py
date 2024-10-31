@@ -1082,7 +1082,7 @@ class MailingMailing(models.Model):
             context_user = mailing.user_id or mailing.write_uid or self.env.user
             mailing = mailing.with_context(
                 **self.env['res.users'].with_user(context_user).context_get()
-            )
+            ).with_user(context_user)
             mailing_res_ids = res_ids or mailing._get_remaining_recipients()
             if not mailing_res_ids:
                 raise UserError(_('There are no recipients selected.'))

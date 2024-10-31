@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.test_mass_mailing.data.mail_test_data import MAIL_TEMPLATE
 from odoo.addons.test_mass_mailing.tests.common import TestMassMailCommon
 from odoo.tests import tagged
@@ -14,6 +15,40 @@ class TestMassMailing(TestMassMailCommon):
     @classmethod
     def setUpClass(cls):
         super(TestMassMailing, cls).setUpClass()
+
+    @users('user_marketing')
+    @mute_logger('odoo.addons.mail.models.mail_thread')
+    def test_mailing_gateway_mc(self):
+        customers = self.env['res.partner']
+        for x in range(0, 3):
+            customers |= self.env['res.partner'].create({
+                'name': 'Customer_%02d' % x,
+                'email': '"Customer_%02d" <customer_%02d@test.example.com' % (x, x),
+            })
+
+        other_customer = self.env["res.partner"].sudo().create([{
+            'name': "Other User",
+            'company_id': self.company_2.id,
+        }])
+
+        mailing = self.env['mailing.mailing'].create({
+            'name': 'TestName',
+            'subject': 'TestSubject',
+            'body_html': 'Hello <t t-out="object.name" />',
+            'reply_to_mode': 'new',
+            'reply_to': '%s@%s' % (self.test_alias.alias_name, self.test_alias.alias_domain),
+            'keep_archives': True,
+            'mailing_model_id': self.env['ir.model']._get('res.partner').id,
+            'mailing_domain': '%s' % [('id', 'in', (customers + other_customer).ids)],
+        })
+
+        mailing.action_put_in_queue()
+        with self.mock_mail_gateway(mail_unlink_sent=False):
+            self.env.ref("mass_mailing.ir_cron_mass_mailing_queue").sudo().method_direct_trigger()
+
+        mailing.flush_recordset()
+        traces = self.env['mailing.trace'].search([('model', '=', customers._name), ('res_id', 'in', (customers + other_customer).ids)])
+        self.assertEqual(len(traces), len(customers))
 
     @users('user_marketing')
     @mute_logger('odoo.addons.mail.models.mail_thread')
