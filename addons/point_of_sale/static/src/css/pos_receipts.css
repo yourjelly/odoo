@@ -94,3 +94,7 @@
     /*rtl:ignore*/
     direction: ltr;
 }
+
+.pos-receipt-print  .pos-receipt {
+    padding: 15px; padding-bottom: 30px;
+}
