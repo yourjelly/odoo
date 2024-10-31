@@ -360,7 +360,7 @@ class DiscussChannel(models.Model):
         """ Return new members per channel ID """
         return dict(
             (channel.id,
-             ((channel.group_ids.users.partner_id.filtered(lambda p: p.active) - channel.channel_partner_ids).ids))
+             ((channel.group_ids.user_ids.partner_id.filtered(lambda p: p.active) - channel.channel_partner_ids).ids))
                 for channel in self
             )
 

@@ -13,7 +13,7 @@ class TestGamificationCommon(TransactionCaseGamification):
     def setUp(self):
         super(TestGamificationCommon, self).setUp()
         employees_group = self.env.ref('base.group_user')
-        self.user_ids = employees_group.users
+        self.user_ids = employees_group.user_ids
 
         # Push demo user into the challenge before creating a new one
         self.env.ref('gamification.challenge_base_discover')._update_all()
@@ -77,7 +77,7 @@ class test_challenge(TestGamificationCommon):
                 'email': f'{kind}_{age}',
                 'group_ids': [(6, 0, group_ids)],
             }
-            for kind, group_ids.all_implied_ids in (
+            for kind, group_ids in (
                 ('Portal', []),
                 ('Internal', [self.env.ref('base.group_user').id]),
             )

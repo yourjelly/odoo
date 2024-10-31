@@ -19,7 +19,7 @@
     <record id="group_product_manager" model="res.groups">
         <field name="name">Product Creation</field>
         <field name="implied_by_ids" eval="[Command.link(ref('base.group_system'))]"/>
-        <field name="users" eval="[Command.link(ref('base.user_root'))]"/>
+        <field name="user_ids" eval="[Command.link(ref('base.user_root'))]"/>
         <field name="category_id" ref="base.module_category_usability"/>
     </record>
 
