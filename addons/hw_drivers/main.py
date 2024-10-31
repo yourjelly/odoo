@@ -4,12 +4,13 @@ from traceback import format_exc
 import json
 import platform
 import logging
+import requests
 from threading import Thread
 import time
-import urllib3
 
 from odoo.addons.hw_drivers.tools import helpers
 from odoo.addons.hw_drivers.websocket_client import WebsocketClient
+from odoo.tools import iot_cryptography
 
 _logger = logging.getLogger(__name__)
 
@@ -62,32 +63,31 @@ class Manager(Thread):
                 }
             devices_list_to_send = {
                 key: value for key, value in devices_list.items() if key != 'distant_display'
-            }
+            }  # Don't send distant_display to the db
             data = {
                 'params': {
                     'iot_box': iot_box,
                     'devices': devices_list_to_send,
-                }  # Don't send distant_display to the db
+                    'iot_public_key': iot_cryptography.get_storable_key(helpers.get_iot_keypair()[1]),
+                }
             }
-            # disable certifiacte verification
-            urllib3.disable_warnings()
-            http = urllib3.PoolManager(cert_reqs='CERT_NONE')
             try:
-                resp = http.request(
-                    'POST',
+                response = requests.post(
                     self.server_url + "/iot/setup",
-                    body=json.dumps(data).encode('utf8'),
+                    data=json.dumps(data),
                     headers={
                         'Content-type': 'application/json',
-                        'Accept': 'text/plain',
+                        'Accept': 'application/json',
                     },
                 )
+                response.raise_for_status()
+                data = response.json().get('result', {})
+
                 if iot_client:
-                    iot_client.iot_channel = json.loads(resp.data).get('result', '')
-            except json.decoder.JSONDecodeError:
-                _logger.exception('Could not load JSON data: Received data is not in valid JSON format\ncontent:\n%s', resp.data)
-            except Exception:
-                _logger.exception('Could not reach configured server')
+                    iot_client.iot_channel = data.get('iot_channel', '')
+                helpers.update_conf({'db_public_key': data.get('db_public_key', '')}, 'iot.security')
+            except requests.exceptions.HTTPError:
+                _logger.exception('Could not reach configured server.')
         else:
             _logger.info('Ignoring sending the devices to the database: no associated database')
 

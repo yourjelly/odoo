@@ -4,14 +4,14 @@
 import collections
 import odoo.http
 
-from odoo.http import JsonRPCDispatcher, serialize_exception, SessionExpiredException
-from werkzeug.exceptions import NotFound, Forbidden, BadRequest
+from odoo.http import JsonRPCDispatcher, serialize_exception
+from werkzeug.exceptions import Forbidden
 
 
 class JsonRPCDispatcherPatch(JsonRPCDispatcher):
     def handle_error(self, exc: Exception) -> collections.abc.Callable:
         """
-        Monkey patch the handle_error method to add HTTP 401 Unauthorized error handling.
+        Monkey patch the handle_error method to add HTTP 403 Forbidden error handling.
 
         :param exc: the exception that occurred.
         :returns: a WSGI application
@@ -24,19 +24,9 @@ class JsonRPCDispatcherPatch(JsonRPCDispatcher):
             'message': "Odoo Server Error",
             'data': serialize_exception(exc),
         }
-        if isinstance(exc, NotFound):
-            error['code'] = 404
-            error['message'] = "404: Not Found"
-        elif isinstance(exc, SessionExpiredException):
-            error['code'] = 100
-            error['message'] = "Odoo Session Expired"
-        elif isinstance(exc, Forbidden):
+        if isinstance(exc, Forbidden):
             error['code'] = 403
             error['message'] = "403: Forbidden"
-            error['data'] = {"message": error['data']["message"]}  # only keep the message, not the traceback
-        elif isinstance(exc, BadRequest):
-            error['code'] = 400
-            error['message'] = "400: Bad Request"
             error['data'] = {"message": error['data']["message"]}  # only keep the message, not the traceback
 
         return self._response(error=error)

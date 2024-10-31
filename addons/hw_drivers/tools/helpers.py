@@ -26,6 +26,7 @@ import time
 import zipfile
 
 from odoo import http, release, service
+from odoo.tools import iot_cryptography
 from odoo.tools.func import lazy_property
 from odoo.tools.misc import file_path
 
@@ -652,3 +653,26 @@ def parse_url(url):
         "url": f"{url.scheme}://{url.netloc}",
         **search_params,
     }
+
+
+@cache
+def get_iot_keypair():
+    """Get the RSA key pair from configuration file and return it
+    or generate a new one if it doesn't exist (or if the token has changed).
+
+    :return: The RSA key pair (Private key, Public key)
+    :rtype: tuple
+    """
+    stored_private_key = get_conf('private_key', section='iot.security')
+    if stored_private_key:
+        private_key = iot_cryptography.load_stored_key(stored_private_key, secret=get_token(), is_private=True)
+        if private_key:
+            # If token hasn't changed, return the stored key pair
+            return private_key, private_key.public_key()
+
+    private_key, public_key = iot_cryptography.generate_keypair()
+    update_conf({
+        'private_key': iot_cryptography.get_storable_key(rsa_key=private_key, secret=get_token()),
+    }, section='iot.security')
+
+    return private_key, public_key
