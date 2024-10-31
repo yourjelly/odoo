@@ -566,7 +566,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
-                "memberCount": len(self.group_user.users),
+                "memberCount": len(self.group_user.all_user_ids),
                 "create_uid": self.user_root.id,
                 "defaultDisplayMode": False,
                 "description": "General announcements for all employees.",
