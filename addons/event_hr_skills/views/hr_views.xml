@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="hr_employee_view_form" model="ir.ui.view">
+        <field name="name">hr.employee.view.form.inherit.event.hr.skills</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr_skills.hr_employee_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='resume_line_ids']" position="attributes">
+                <attribute name='widget'>event_resume_one2many</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="view_event_tree_resume_select" model="ir.ui.view">
+        <field name="name">event.event.list.resume.action</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="event.view_event_tree"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="/list/field[1]" position="before">
+                <header>
+                    <button string="Mark as attended" type="object" name="action_register_employee"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_resume_select_event">
+       <field name="name">Select Event</field>
+       <field name="res_model">event.event</field>
+       <field name="view_mode">list</field>
+       <field name="view_id" ref="event_hr_skills.view_event_tree_resume_select"/>
+       <field name="target">new</field>
+       <field name="domain">[
+           ('tag_ids', 'any', [('category_id.show_on_resume', '=', True)]),
+           ('date_end', '&lt;=', context_today().strftime('%Y-%m-%d')),
+           ('is_active_employee_registered', '=', False),
+       ]</field>
+    </record>
+
+</odoo>
