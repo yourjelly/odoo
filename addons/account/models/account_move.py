@@ -1151,8 +1151,7 @@ class AccountMove(models.Model):
                 reconciliation_vals = [x for x in reconciliation_vals if x['source_line_account_type'] in ('asset_receivable', 'liability_payable')]
 
             new_pmt_state = 'not_paid' if invoice.payment_state != 'blocked' else 'blocked'
-            if invoice.state == 'posted':
-
+            if invoice.state in ('draft', 'posted'):
                 # Posted invoice/expense entry.
                 if payment_state_matters:
 
@@ -1192,7 +1191,7 @@ class AccountMove(models.Model):
     @api.depends('payment_state', 'state')
     def _compute_status_in_payment(self):
         for move in self:
-            move.status_in_payment = move.state if move.state in ('draft', 'cancel') else move.payment_state
+            move.status_in_payment = move.state if move.state == 'cancel' or (move.state == 'draft' and move.payment_state == 'not_paid') else move.payment_state
 
     @api.depends('matched_payment_ids')
     def _compute_payment_count(self):
