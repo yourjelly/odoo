@@ -3408,9 +3408,48 @@ class TestHtmlField(common.TransactionCase):
 class TestMagicFields(common.TransactionCase):
 
     def test_write_date(self):
-        record = self.env['test_new_api.discussion'].create({'name': 'Booba'})
-        self.assertEqual(record.create_uid, self.env.user)
-        self.assertEqual(record.write_uid, self.env.user)
+        date0 = self.env.cr.now()
+        move = self.env['test_new_api.move'].create({
+            'line_ids': [Command.create({'quantity': 1})] * 2,
+        })
+        line1, line2 = move.line_ids
+
+        self.env.flush_all()
+        self.assertEqual(move.create_uid, self.env.user)
+        self.assertEqual(move.write_uid, self.env.user)
+        self.assertEqual(move.create_date, date0)
+        self.assertEqual(move.write_date, date0)
+        for line in move.line_ids:
+            self.assertEqual(line.create_uid, self.env.user)
+            self.assertEqual(line.write_uid, self.env.user)
+            self.assertEqual(line.create_date, date0)
+            self.assertEqual(line.write_date, date0)
+
+        date1 = add(date0, days=1)
+        with patch.object(self.env.cr, 'now', return_value=date1):
+            line1.quantity = 2
+
+            # check the values in cache before flush
+            self.assertEqual(line1.write_date, date1)
+            self.assertEqual(line2.write_date, date0)
+            self.assertEqual(move.write_date, date0)
+
+            # check the values in cache after flush
+            self.env.flush_all()
+            self.assertEqual(line1.write_date, date1)
+            self.assertEqual(line2.write_date, date0)
+            self.assertEqual(move.write_date, date0)    # this is not correct
+
+            # check the values in database
+            self.env.invalidate_all()
+            self.assertEqual(line1.write_date, date1)
+            self.assertEqual(line2.write_date, date0)
+            self.assertEqual(move.write_date, date1)
+
+            # those values shouldn't have changed
+            self.assertEqual(line1.create_date, date0)
+            self.assertEqual(line2.create_date, date0)
+            self.assertEqual(move.create_date, date0)
 
     def test_mro_mixin(self):
         #                               Mixin
