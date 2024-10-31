@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import warnings
+
+from collections import Counter
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from operator import itemgetter
@@ -26,7 +28,8 @@ class WebsiteHrRecruitment(WebsiteForm):
         '/jobs/page/<int:page>',
     ], type='http', auth="public", website=True, sitemap=sitemap_jobs)
     def jobs(self, country_id=None, department_id=None, office_id=None, contract_type_id=None,
-             is_remote=False, is_other_department=False, is_untyped=None, page=1, search=None, **kwargs):
+             is_remote=False, is_other_department=False, is_untyped=None, page=1, search=None,
+             industry_id=None, is_industry_untyped=False, **kwargs):
         env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
 
         Country = env['res.country']
@@ -36,6 +39,7 @@ class WebsiteHrRecruitment(WebsiteForm):
         country = Country.browse(int(country_id)) if country_id else None
         department = Department.browse(int(department_id)) if department_id else None
         office_id = int(office_id) if office_id else None
+        industry_id = int(industry_id) if industry_id else None
         contract_type_id = int(contract_type_id) if contract_type_id else None
 
         # Default search by user country
@@ -57,10 +61,12 @@ class WebsiteHrRecruitment(WebsiteForm):
             'country_id': country.id if country else None,
             'department_id': department.id if department else None,
             'office_id': office_id,
+            'industry_id': industry_id,
             'contract_type_id': contract_type_id,
             'is_remote': is_remote,
             'is_other_department': is_other_department,
             'is_untyped': is_untyped,
+            'is_industry_untyped': is_industry_untyped,
         }
         total, details, fuzzy_search_term = request.website._search_with_fuzzy("jobs", search,
             limit=1000, order="is_published desc, sequence, no_of_recruitment desc", options=options)
@@ -176,6 +182,15 @@ class WebsiteHrRecruitment(WebsiteForm):
         if count_untyped:
             count_per_employment_type[None] = count_untyped
 
+        #industries filter
+        count_per_industry = dict(Counter(job.industry_id or None for job in jobs))
+        count_per_industry['all'] = total
+        industries = jobs.industry_id
+        if industry_id:
+            jobs = jobs.filtered(lambda job: job.industry_id.id == industry_id)
+        elif is_industry_untyped:
+            jobs = jobs.filtered(lambda job: not job.industry_id)
+
         pager = request.website.pager(
             url=request.httprequest.path.partition('/page/')[0],
             url_args=request.httprequest.args,
@@ -196,13 +211,16 @@ class WebsiteHrRecruitment(WebsiteForm):
             'departments': departments,
             'offices': offices,
             'employment_types': employment_types,
+            'industries':  industries,
             'country_id': country,
             'department_id': department,
             'office_id': office,
             'contract_type_id': contract_type,
+            'industry_id': industry_id,
             'is_remote': is_remote,
             'is_other_department': is_other_department,
             'is_untyped': is_untyped,
+            'is_industry_untyped': is_industry_untyped,
             'pager': pager,
             'search': fuzzy_search_term or search,
             'search_count': total,
@@ -211,6 +229,7 @@ class WebsiteHrRecruitment(WebsiteForm):
             'count_per_department': count_per_department,
             'count_per_office': count_per_office,
             'count_per_employment_type': count_per_employment_type,
+            'count_per_industry': count_per_industry,
         })
 
     @http.route('/jobs/add', type='json', auth="user", website=True)
