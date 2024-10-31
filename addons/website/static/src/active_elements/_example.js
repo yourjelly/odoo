@@ -23,7 +23,7 @@ class TogglableBackgroundSection extends Component {
     }
 }
 
-registry.category("website.active_elements").add("website.togglebackground", TogglableBackgroundSection);
+//registry.category("website.active_elements").add("website.togglebackground", TogglableBackgroundSection);
 
 // -----------------------------------------------------------------------------
 // Example of attached component, simple interaction
@@ -44,7 +44,7 @@ class FunNotificationThing extends Component {
     }
 }
 
-registry.category("website.active_elements").add("funnotification", FunNotificationThing);
+//registry.category("website.active_elements").add("funnotification", FunNotificationThing);
 
 
 // -----------------------------------------------------------------------------
@@ -69,4 +69,4 @@ class Counter extends Component {
     }
 }
 
-registry.category("website.active_elements").add("website.Counter", Counter);
+//registry.category("website.active_elements").add("website.Counter", Counter);

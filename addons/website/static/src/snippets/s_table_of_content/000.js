@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { registry } from "@web/core/registry";
+import { patch } from "@web/core/utils/patch";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import {extraMenuUpdateCallbacks} from "@website/js/content/menu";
 import { closestScrollable } from "@web_editor/js/common/scrolling";
@@ -224,25 +226,19 @@ const TableOfContent = publicWidget.Widget.extend({
     },
 });
 
-publicWidget.registry.anchorSlide.include({
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
+patch(registry.category("website.active_elements").get("website.anchorSlide").prototype, {
     /**
      * Overridden to add the height of the horizontal sticky navbar at the scroll value
      * when the link is from the table of content navbar
      *
      * @override
-     * @private
      */
-    _computeExtraOffset() {
-        let extraOffset = this._super(...arguments);
-        if (this.$el.hasClass('table_of_content_link')) {
-            const tableOfContentNavbarEl = this.$el.closest('.s_table_of_content_navbar_sticky.s_table_of_content_horizontal_navbar');
-            if (tableOfContentNavbarEl.length > 0) {
-                extraOffset += $(tableOfContentNavbarEl).outerHeight();
+    computeExtraOffset() {
+        let extraOffset = super.computeExtraOffset(...arguments);
+        if (this.el.classList.contains("table_of_content_link")) {
+            const tableOfContentNavbarEl = this.el.closest(".s_table_of_content_navbar_sticky.s_table_of_content_horizontal_navbar");
+            if (tableOfContentNavbarEl) {
+                extraOffset += tableOfContentNavbarEl.getBoundingClientRect().height;
             }
         }
         return extraOffset;
