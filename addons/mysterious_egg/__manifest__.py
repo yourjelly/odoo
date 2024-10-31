@@ -52,5 +52,9 @@
             'web/static/src/scss/bootstrap_overridden.scss',
             'mysterious_egg/static/src/builder/**/*.inside.scss',
         ],
+        'web.assets_unit_tests': [
+            'mysterious_egg/static/tests/**/*',
+            ('include', 'website.assets_builder'),
+        ],
     },
 }
