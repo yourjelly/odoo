@@ -211,6 +211,10 @@ class AccountMove(models.Model):
         internal_types += ['all']
         return [('internal_type', 'in', internal_types), ('country_id', '=', self.company_id.account_fiscal_country_id.id)]
 
+    @api.model
+    def _is_applicable_move_latam_document_type(self, move):
+        return move.state == 'draft' and (not move.posted_before if move.move_type in ['out_invoice', 'out_refund'] else True)
+
     @api.depends('journal_id', 'partner_id', 'company_id', 'move_type', 'debit_origin_id')
     def _compute_l10n_latam_available_document_types(self):
         self.l10n_latam_available_document_type_ids = False
@@ -219,7 +223,7 @@ class AccountMove(models.Model):
 
     @api.depends('l10n_latam_available_document_type_ids')
     def _compute_l10n_latam_document_type(self):
-        for rec in self.filtered(lambda x: x.state == 'draft' and (not x.posted_before if x.move_type in ['out_invoice', 'out_refund'] else True)):
+        for rec in self.filtered(lambda m: self._is_applicable_move_latam_document_type(m)):
             document_types = rec.l10n_latam_available_document_type_ids._origin
             rec.l10n_latam_document_type_id = document_types and document_types[0].id
 
