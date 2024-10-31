@@ -2272,6 +2272,382 @@
         });
     }
 
+    // -----------------------------------------------------------------------------
+    // helpers
+    // -----------------------------------------------------------------------------
+    const isUnionType = (t) => Array.isArray(t);
+    const isBaseType = (t) => typeof t !== "object";
+    const isValueType = (t) => typeof t === "object" && t && "value" in t;
+    function isOptional(t) {
+        return typeof t === "object" && "optional" in t ? t.optional || false : false;
+    }
+    function describeType(type) {
+        return type === "*" || type === true ? "value" : type.name.toLowerCase();
+    }
+    function describe(info) {
+        if (isBaseType(info)) {
+            return describeType(info);
+        }
+        else if (isUnionType(info)) {
+            return info.map(describe).join(" or ");
+        }
+        else if (isValueType(info)) {
+            return String(info.value);
+        }
+        if ("element" in info) {
+            return `list of ${describe({ type: info.element, optional: false })}s`;
+        }
+        if ("shape" in info) {
+            return `object`;
+        }
+        return describe(info.type || "*");
+    }
+    function toSchema(spec) {
+        return Object.fromEntries(spec.map((e) => e.endsWith("?") ? [e.slice(0, -1), { optional: true }] : [e, { type: "*", optional: false }]));
+    }
+    /**
+     * Main validate function
+     */
+    function validate(obj, spec) {
+        let errors = validateSchema(obj, spec);
+        if (errors.length) {
+            throw new OwlError("Invalid object: " + errors.join(", "));
+        }
+    }
+    /**
+     * Helper validate function, to get the list of errors. useful if one want to
+     * manipulate the errors without parsing an error object
+     */
+    function validateSchema(obj, schema) {
+        if (Array.isArray(schema)) {
+            schema = toSchema(schema);
+        }
+        obj = toRaw(obj);
+        let errors = [];
+        // check if each value in obj has correct shape
+        for (let key in obj) {
+            if (key in schema) {
+                let result = validateType(key, obj[key], schema[key]);
+                if (result) {
+                    errors.push(result);
+                }
+            }
+            else if (!("*" in schema)) {
+                errors.push(`unknown key '${key}'`);
+            }
+        }
+        // check that all specified keys are defined in obj
+        for (let key in schema) {
+            const spec = schema[key];
+            if (key !== "*" && !isOptional(spec) && !(key in obj)) {
+                const isObj = typeof spec === "object" && !Array.isArray(spec);
+                const isAny = spec === "*" || (isObj && "type" in spec ? spec.type === "*" : isObj);
+                let detail = isAny ? "" : ` (should be a ${describe(spec)})`;
+                errors.push(`'${key}' is missing${detail}`);
+            }
+        }
+        return errors;
+    }
+    function validateBaseType(key, value, type) {
+        if (typeof type === "function") {
+            if (typeof value === "object") {
+                if (!(value instanceof type)) {
+                    return `'${key}' is not a ${describeType(type)}`;
+                }
+            }
+            else if (typeof value !== type.name.toLowerCase()) {
+                return `'${key}' is not a ${describeType(type)}`;
+            }
+        }
+        return null;
+    }
+    function validateArrayType(key, value, descr) {
+        if (!Array.isArray(value)) {
+            return `'${key}' is not a list of ${describe(descr)}s`;
+        }
+        for (let i = 0; i < value.length; i++) {
+            const error = validateType(`${key}[${i}]`, value[i], descr);
+            if (error) {
+                return error;
+            }
+        }
+        return null;
+    }
+    function validateType(key, value, descr) {
+        if (value === undefined) {
+            return isOptional(descr) ? null : `'${key}' is undefined (should be a ${describe(descr)})`;
+        }
+        else if (isBaseType(descr)) {
+            return validateBaseType(key, value, descr);
+        }
+        else if (isValueType(descr)) {
+            return value === descr.value ? null : `'${key}' is not equal to '${descr.value}'`;
+        }
+        else if (isUnionType(descr)) {
+            let validDescr = descr.find((p) => !validateType(key, value, p));
+            return validDescr ? null : `'${key}' is not a ${describe(descr)}`;
+        }
+        let result = null;
+        if ("element" in descr) {
+            result = validateArrayType(key, value, descr.element);
+        }
+        else if ("shape" in descr) {
+            if (typeof value !== "object" || Array.isArray(value)) {
+                result = `'${key}' is not an object`;
+            }
+            else {
+                const errors = validateSchema(value, descr.shape);
+                if (errors.length) {
+                    result = `'${key}' doesn't have the correct shape (${errors.join(", ")})`;
+                }
+            }
+        }
+        else if ("values" in descr) {
+            if (typeof value !== "object" || Array.isArray(value)) {
+                result = `'${key}' is not an object`;
+            }
+            else {
+                const errors = Object.entries(value)
+                    .map(([key, value]) => validateType(key, value, descr.values))
+                    .filter(Boolean);
+                if (errors.length) {
+                    result = `some of the values in '${key}' are invalid (${errors.join(", ")})`;
+                }
+            }
+        }
+        if ("type" in descr && !result) {
+            result = validateType(key, value, descr.type);
+        }
+        if ("validate" in descr && !result) {
+            result = !descr.validate(value) ? `'${key}' is not valid` : null;
+        }
+        return result;
+    }
+
+    const ObjectCreate = Object.create;
+    /**
+     * This file contains utility functions that will be injected in each template,
+     * to perform various useful tasks in the compiled code.
+     */
+    function withDefault(value, defaultValue) {
+        return value === undefined || value === null || value === false ? defaultValue : value;
+    }
+    function callSlot(ctx, parent, key, name, dynamic, extra, defaultContent) {
+        key = key + "__slot_" + name;
+        const slots = ctx.props.slots || {};
+        const { __render, __ctx, __scope } = slots[name] || {};
+        const slotScope = ObjectCreate(__ctx || {});
+        if (__scope) {
+            slotScope[__scope] = extra;
+        }
+        const slotBDom = __render ? __render(slotScope, parent, key) : null;
+        if (defaultContent) {
+            let child1 = undefined;
+            let child2 = undefined;
+            if (slotBDom) {
+                child1 = dynamic ? toggler(name, slotBDom) : slotBDom;
+            }
+            else {
+                child2 = defaultContent(ctx, parent, key);
+            }
+            return multi([child1, child2]);
+        }
+        return slotBDom || text("");
+    }
+    function capture(ctx) {
+        const result = ObjectCreate(ctx);
+        for (let k in ctx) {
+            result[k] = ctx[k];
+        }
+        return result;
+    }
+    function withKey(elem, k) {
+        elem.key = k;
+        return elem;
+    }
+    function prepareList(collection) {
+        let keys;
+        let values;
+        if (Array.isArray(collection)) {
+            keys = collection;
+            values = collection;
+        }
+        else if (collection instanceof Map) {
+            keys = [...collection.keys()];
+            values = [...collection.values()];
+        }
+        else if (Symbol.iterator in Object(collection)) {
+            keys = [...collection];
+            values = keys;
+        }
+        else if (collection && typeof collection === "object") {
+            values = Object.values(collection);
+            keys = Object.keys(collection);
+        }
+        else {
+            throw new OwlError(`Invalid loop expression: "${collection}" is not iterable`);
+        }
+        const n = values.length;
+        return [keys, values, n, new Array(n)];
+    }
+    const isBoundary = Symbol("isBoundary");
+    function setContextValue(ctx, key, value) {
+        const ctx0 = ctx;
+        while (!ctx.hasOwnProperty(key) && !ctx.hasOwnProperty(isBoundary)) {
+            const newCtx = ctx.__proto__;
+            if (!newCtx) {
+                ctx = ctx0;
+                break;
+            }
+            ctx = newCtx;
+        }
+        ctx[key] = value;
+    }
+    function toNumber(val) {
+        const n = parseFloat(val);
+        return isNaN(n) ? val : n;
+    }
+    function shallowEqual(l1, l2) {
+        for (let i = 0, l = l1.length; i < l; i++) {
+            if (l1[i] !== l2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    class LazyValue {
+        constructor(fn, ctx, component, node, key) {
+            this.fn = fn;
+            this.ctx = capture(ctx);
+            this.component = component;
+            this.node = node;
+            this.key = key;
+        }
+        evaluate() {
+            return this.fn.call(this.component, this.ctx, this.node, this.key);
+        }
+        toString() {
+            return this.evaluate().toString();
+        }
+    }
+    /*
+     * Safely outputs `value` as a block depending on the nature of `value`
+     */
+    function safeOutput(value, defaultValue) {
+        if (value === undefined || value === null) {
+            return defaultValue ? toggler("default", defaultValue) : toggler("undefined", text(""));
+        }
+        let safeKey;
+        let block;
+        switch (typeof value) {
+            case "object":
+                if (value instanceof Markup) {
+                    safeKey = `string_safe`;
+                    block = html(value);
+                }
+                else if (value instanceof LazyValue) {
+                    safeKey = `lazy_value`;
+                    block = value.evaluate();
+                }
+                else if (value instanceof String) {
+                    safeKey = "string_unsafe";
+                    block = text(value);
+                }
+                else {
+                    // Assuming it is a block
+                    safeKey = "block_safe";
+                    block = value;
+                }
+                break;
+            case "string":
+                safeKey = "string_unsafe";
+                block = text(value);
+                break;
+            default:
+                safeKey = "string_unsafe";
+                block = text(String(value));
+        }
+        return toggler(safeKey, block);
+    }
+    /**
+     * Validate the component props (or next props) against the (static) props
+     * description.  This is potentially an expensive operation: it may needs to
+     * visit recursively the props and all the children to check if they are valid.
+     * This is why it is only done in 'dev' mode.
+     */
+    function validateProps(name, props, comp) {
+        const ComponentClass = typeof name !== "string"
+            ? name
+            : comp.constructor.components[name];
+        if (!ComponentClass) {
+            // this is an error, wrong component. We silently return here instead so the
+            // error is triggered by the usual path ('component' function)
+            return;
+        }
+        const schema = ComponentClass.props;
+        if (!schema) {
+            if (comp.__owl__.app.warnIfNoStaticProps) {
+                console.warn(`Component '${ComponentClass.name}' does not have a static props description`);
+            }
+            return;
+        }
+        const defaultProps = ComponentClass.defaultProps;
+        if (defaultProps) {
+            let isMandatory = (name) => Array.isArray(schema)
+                ? schema.includes(name)
+                : name in schema && !("*" in schema) && !isOptional(schema[name]);
+            for (let p in defaultProps) {
+                if (isMandatory(p)) {
+                    throw new OwlError(`A default value cannot be defined for a mandatory prop (name: '${p}', component: ${ComponentClass.name})`);
+                }
+            }
+        }
+        const errors = validateSchema(props, schema);
+        if (errors.length) {
+            throw new OwlError(`Invalid props for component '${ComponentClass.name}': ` + errors.join(", "));
+        }
+    }
+    function makeRefWrapper(node) {
+        let refNames = new Set();
+        return (name, fn) => {
+            if (refNames.has(name)) {
+                throw new OwlError(`Cannot set the same ref more than once in the same component, ref "${name}" was set multiple times in ${node.name}`);
+            }
+            refNames.add(name);
+            return fn;
+        };
+    }
+    const helpers = {
+        withDefault,
+        zero: Symbol("zero"),
+        isBoundary,
+        callSlot,
+        capture,
+        withKey,
+        prepareList,
+        setContextValue,
+        shallowEqual,
+        toNumber,
+        validateProps,
+        LazyValue,
+        safeOutput,
+        createCatcher,
+        markRaw,
+        OwlError,
+        makeRefWrapper,
+    };
+    // -----------------------------------------------------------------------------
+    //  xml tag helper
+    // -----------------------------------------------------------------------------
+    const globalTemplates = {};
+    function xml(...args) {
+        const name = `__template__${xml.nextId++}`;
+        const value = String.raw(...args);
+        globalTemplates[name] = value;
+        return name;
+    }
+    xml.nextId = 1;
+
     /**
      * Owl QWeb Expression Parser
      *
@@ -2675,16 +3051,17 @@
                 // component will be attached
                 this.renderFn = app.getTemplate(xml ``).bind(this.component, ctx, this);
                 if (C.dynamicContent) {
-                    this.prepareAttach(app._lastRootEl, C.dynamicContent, ctx);
+                    this.applyDynamicContent(app._lastRootEl, C.dynamicContent, ctx);
                 }
             }
             this.component.setup();
             currentNode = null;
         }
-        prepareAttach(el, dynamicContent, ctx) {
+        applyDynamicContent(el, dynamicContent, ctx) {
             const attrs = [];
             const handlers = [];
             const tOuts = [];
+            const cleanups = [];
             for (let key in dynamicContent) {
                 const value = dynamicContent[key];
                 const parts = key.split(":");
@@ -2728,7 +3105,9 @@
                     // todo: cache the queryselector result?
                     const target = handler.selector === "root" ? el : el.querySelector(handler.selector);
                     if (target) {
-                        target.addEventListener(handler.event, handler.fn);
+                        const fn = handler.fn;
+                        target.addEventListener(handler.event, fn);
+                        cleanups.push(() => target.removeEventListener(handler.event, fn));
                     }
                 }
             };
@@ -2758,46 +3137,11 @@
                 this.mounted.push(handleTOuts);
                 this.patched.push(handleTOuts);
             }
-            // console.warn(attrs)
-            //   const handleAttr = () => {
-            //     const el = this.bdom.el.parentElement;
-            //     for (let elem in C.dynamicContent) {
-            //         const value = C.dynamicContent[elem];
-            //         const parts = elem.split(":");
-            //         if (parts[1].startsWith("t-att-")) {
-            //             const attr = parts[1].slice(6);
-            //             if (parts[0] === "root") {
-            //                 const fn = new Function("ctx", `return ${compileExpr(value)};`);
-            //                 const result = fn(this.component);
-            //                 el.setAttribute(attr, result);
-            //             }
-            //         }
-            //     }
-            // }
-            // onMounted(() => {
-            //     const el = this.bdom.el.parentElement;
-            //     for (let elem in C.dynamicContent) {
-            //         const value = C.dynamicContent[elem];
-            //         const parts = elem.split(":");
-            //         if (parts[1].startsWith("t-on-")) {
-            //             const event = parts[1].slice(5);
-            //             // todo: cleanup this
-            //             for (let target of el.querySelectorAll(parts[0])) {
-            //                 target.addEventListener(event, ev => {
-            //                     this.component[value](ev);
-            //                 });
-            //             }
-            //         }
-            //     }
-            //     handleAttr();
-            // });
-            // onPatched(() => {
-            //     handleAttr();
-            // })
-            // this.renderFn = function() {
-            //     // process here all dynamic
-            //     return renderFn(...arguments);
-            // }
+            this.willUnmount.push(() => {
+                for (let cleanup of cleanups) {
+                    cleanup();
+                }
+            });
         }
         mountComponent(target, options) {
             const fiber = new MountFiber(this, target, options);
@@ -3245,371 +3589,6 @@
         slots: true,
     };
 
-    // -----------------------------------------------------------------------------
-    // helpers
-    // -----------------------------------------------------------------------------
-    const isUnionType = (t) => Array.isArray(t);
-    const isBaseType = (t) => typeof t !== "object";
-    const isValueType = (t) => typeof t === "object" && t && "value" in t;
-    function isOptional(t) {
-        return typeof t === "object" && "optional" in t ? t.optional || false : false;
-    }
-    function describeType(type) {
-        return type === "*" || type === true ? "value" : type.name.toLowerCase();
-    }
-    function describe(info) {
-        if (isBaseType(info)) {
-            return describeType(info);
-        }
-        else if (isUnionType(info)) {
-            return info.map(describe).join(" or ");
-        }
-        else if (isValueType(info)) {
-            return String(info.value);
-        }
-        if ("element" in info) {
-            return `list of ${describe({ type: info.element, optional: false })}s`;
-        }
-        if ("shape" in info) {
-            return `object`;
-        }
-        return describe(info.type || "*");
-    }
-    function toSchema(spec) {
-        return Object.fromEntries(spec.map((e) => e.endsWith("?") ? [e.slice(0, -1), { optional: true }] : [e, { type: "*", optional: false }]));
-    }
-    /**
-     * Main validate function
-     */
-    function validate(obj, spec) {
-        let errors = validateSchema(obj, spec);
-        if (errors.length) {
-            throw new OwlError("Invalid object: " + errors.join(", "));
-        }
-    }
-    /**
-     * Helper validate function, to get the list of errors. useful if one want to
-     * manipulate the errors without parsing an error object
-     */
-    function validateSchema(obj, schema) {
-        if (Array.isArray(schema)) {
-            schema = toSchema(schema);
-        }
-        obj = toRaw(obj);
-        let errors = [];
-        // check if each value in obj has correct shape
-        for (let key in obj) {
-            if (key in schema) {
-                let result = validateType(key, obj[key], schema[key]);
-                if (result) {
-                    errors.push(result);
-                }
-            }
-            else if (!("*" in schema)) {
-                errors.push(`unknown key '${key}'`);
-            }
-        }
-        // check that all specified keys are defined in obj
-        for (let key in schema) {
-            const spec = schema[key];
-            if (key !== "*" && !isOptional(spec) && !(key in obj)) {
-                const isObj = typeof spec === "object" && !Array.isArray(spec);
-                const isAny = spec === "*" || (isObj && "type" in spec ? spec.type === "*" : isObj);
-                let detail = isAny ? "" : ` (should be a ${describe(spec)})`;
-                errors.push(`'${key}' is missing${detail}`);
-            }
-        }
-        return errors;
-    }
-    function validateBaseType(key, value, type) {
-        if (typeof type === "function") {
-            if (typeof value === "object") {
-                if (!(value instanceof type)) {
-                    return `'${key}' is not a ${describeType(type)}`;
-                }
-            }
-            else if (typeof value !== type.name.toLowerCase()) {
-                return `'${key}' is not a ${describeType(type)}`;
-            }
-        }
-        return null;
-    }
-    function validateArrayType(key, value, descr) {
-        if (!Array.isArray(value)) {
-            return `'${key}' is not a list of ${describe(descr)}s`;
-        }
-        for (let i = 0; i < value.length; i++) {
-            const error = validateType(`${key}[${i}]`, value[i], descr);
-            if (error) {
-                return error;
-            }
-        }
-        return null;
-    }
-    function validateType(key, value, descr) {
-        if (value === undefined) {
-            return isOptional(descr) ? null : `'${key}' is undefined (should be a ${describe(descr)})`;
-        }
-        else if (isBaseType(descr)) {
-            return validateBaseType(key, value, descr);
-        }
-        else if (isValueType(descr)) {
-            return value === descr.value ? null : `'${key}' is not equal to '${descr.value}'`;
-        }
-        else if (isUnionType(descr)) {
-            let validDescr = descr.find((p) => !validateType(key, value, p));
-            return validDescr ? null : `'${key}' is not a ${describe(descr)}`;
-        }
-        let result = null;
-        if ("element" in descr) {
-            result = validateArrayType(key, value, descr.element);
-        }
-        else if ("shape" in descr) {
-            if (typeof value !== "object" || Array.isArray(value)) {
-                result = `'${key}' is not an object`;
-            }
-            else {
-                const errors = validateSchema(value, descr.shape);
-                if (errors.length) {
-                    result = `'${key}' doesn't have the correct shape (${errors.join(", ")})`;
-                }
-            }
-        }
-        else if ("values" in descr) {
-            if (typeof value !== "object" || Array.isArray(value)) {
-                result = `'${key}' is not an object`;
-            }
-            else {
-                const errors = Object.entries(value)
-                    .map(([key, value]) => validateType(key, value, descr.values))
-                    .filter(Boolean);
-                if (errors.length) {
-                    result = `some of the values in '${key}' are invalid (${errors.join(", ")})`;
-                }
-            }
-        }
-        if ("type" in descr && !result) {
-            result = validateType(key, value, descr.type);
-        }
-        if ("validate" in descr && !result) {
-            result = !descr.validate(value) ? `'${key}' is not valid` : null;
-        }
-        return result;
-    }
-
-    const ObjectCreate = Object.create;
-    /**
-     * This file contains utility functions that will be injected in each template,
-     * to perform various useful tasks in the compiled code.
-     */
-    function withDefault(value, defaultValue) {
-        return value === undefined || value === null || value === false ? defaultValue : value;
-    }
-    function callSlot(ctx, parent, key, name, dynamic, extra, defaultContent) {
-        key = key + "__slot_" + name;
-        const slots = ctx.props.slots || {};
-        const { __render, __ctx, __scope } = slots[name] || {};
-        const slotScope = ObjectCreate(__ctx || {});
-        if (__scope) {
-            slotScope[__scope] = extra;
-        }
-        const slotBDom = __render ? __render(slotScope, parent, key) : null;
-        if (defaultContent) {
-            let child1 = undefined;
-            let child2 = undefined;
-            if (slotBDom) {
-                child1 = dynamic ? toggler(name, slotBDom) : slotBDom;
-            }
-            else {
-                child2 = defaultContent(ctx, parent, key);
-            }
-            return multi([child1, child2]);
-        }
-        return slotBDom || text("");
-    }
-    function capture(ctx) {
-        const result = ObjectCreate(ctx);
-        for (let k in ctx) {
-            result[k] = ctx[k];
-        }
-        return result;
-    }
-    function withKey(elem, k) {
-        elem.key = k;
-        return elem;
-    }
-    function prepareList(collection) {
-        let keys;
-        let values;
-        if (Array.isArray(collection)) {
-            keys = collection;
-            values = collection;
-        }
-        else if (collection instanceof Map) {
-            keys = [...collection.keys()];
-            values = [...collection.values()];
-        }
-        else if (Symbol.iterator in Object(collection)) {
-            keys = [...collection];
-            values = keys;
-        }
-        else if (collection && typeof collection === "object") {
-            values = Object.values(collection);
-            keys = Object.keys(collection);
-        }
-        else {
-            throw new OwlError(`Invalid loop expression: "${collection}" is not iterable`);
-        }
-        const n = values.length;
-        return [keys, values, n, new Array(n)];
-    }
-    const isBoundary = Symbol("isBoundary");
-    function setContextValue(ctx, key, value) {
-        const ctx0 = ctx;
-        while (!ctx.hasOwnProperty(key) && !ctx.hasOwnProperty(isBoundary)) {
-            const newCtx = ctx.__proto__;
-            if (!newCtx) {
-                ctx = ctx0;
-                break;
-            }
-            ctx = newCtx;
-        }
-        ctx[key] = value;
-    }
-    function toNumber(val) {
-        const n = parseFloat(val);
-        return isNaN(n) ? val : n;
-    }
-    function shallowEqual(l1, l2) {
-        for (let i = 0, l = l1.length; i < l; i++) {
-            if (l1[i] !== l2[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-    class LazyValue {
-        constructor(fn, ctx, component, node, key) {
-            this.fn = fn;
-            this.ctx = capture(ctx);
-            this.component = component;
-            this.node = node;
-            this.key = key;
-        }
-        evaluate() {
-            return this.fn.call(this.component, this.ctx, this.node, this.key);
-        }
-        toString() {
-            return this.evaluate().toString();
-        }
-    }
-    /*
-     * Safely outputs `value` as a block depending on the nature of `value`
-     */
-    function safeOutput(value, defaultValue) {
-        if (value === undefined || value === null) {
-            return defaultValue ? toggler("default", defaultValue) : toggler("undefined", text(""));
-        }
-        let safeKey;
-        let block;
-        switch (typeof value) {
-            case "object":
-                if (value instanceof Markup) {
-                    safeKey = `string_safe`;
-                    block = html(value);
-                }
-                else if (value instanceof LazyValue) {
-                    safeKey = `lazy_value`;
-                    block = value.evaluate();
-                }
-                else if (value instanceof String) {
-                    safeKey = "string_unsafe";
-                    block = text(value);
-                }
-                else {
-                    // Assuming it is a block
-                    safeKey = "block_safe";
-                    block = value;
-                }
-                break;
-            case "string":
-                safeKey = "string_unsafe";
-                block = text(value);
-                break;
-            default:
-                safeKey = "string_unsafe";
-                block = text(String(value));
-        }
-        return toggler(safeKey, block);
-    }
-    /**
-     * Validate the component props (or next props) against the (static) props
-     * description.  This is potentially an expensive operation: it may needs to
-     * visit recursively the props and all the children to check if they are valid.
-     * This is why it is only done in 'dev' mode.
-     */
-    function validateProps(name, props, comp) {
-        const ComponentClass = typeof name !== "string"
-            ? name
-            : comp.constructor.components[name];
-        if (!ComponentClass) {
-            // this is an error, wrong component. We silently return here instead so the
-            // error is triggered by the usual path ('component' function)
-            return;
-        }
-        const schema = ComponentClass.props;
-        if (!schema) {
-            if (comp.__owl__.app.warnIfNoStaticProps) {
-                console.warn(`Component '${ComponentClass.name}' does not have a static props description`);
-            }
-            return;
-        }
-        const defaultProps = ComponentClass.defaultProps;
-        if (defaultProps) {
-            let isMandatory = (name) => Array.isArray(schema)
-                ? schema.includes(name)
-                : name in schema && !("*" in schema) && !isOptional(schema[name]);
-            for (let p in defaultProps) {
-                if (isMandatory(p)) {
-                    throw new OwlError(`A default value cannot be defined for a mandatory prop (name: '${p}', component: ${ComponentClass.name})`);
-                }
-            }
-        }
-        const errors = validateSchema(props, schema);
-        if (errors.length) {
-            throw new OwlError(`Invalid props for component '${ComponentClass.name}': ` + errors.join(", "));
-        }
-    }
-    function makeRefWrapper(node) {
-        let refNames = new Set();
-        return (name, fn) => {
-            if (refNames.has(name)) {
-                throw new OwlError(`Cannot set the same ref more than once in the same component, ref "${name}" was set multiple times in ${node.name}`);
-            }
-            refNames.add(name);
-            return fn;
-        };
-    }
-    const helpers = {
-        withDefault,
-        zero: Symbol("zero"),
-        isBoundary,
-        callSlot,
-        capture,
-        withKey,
-        prepareList,
-        setContextValue,
-        shallowEqual,
-        toNumber,
-        validateProps,
-        LazyValue,
-        safeOutput,
-        createCatcher,
-        markRaw,
-        OwlError,
-        makeRefWrapper,
-    };
-
     /**
      * Parses an XML string into an XML document, throwing errors on parser errors
      * instead of returning an XML document containing the parseerror.
@@ -3735,17 +3714,6 @@
             return toggler(subTemplate, template.call(owner, ctx, parent, key + subTemplate));
         }
     }
-    // -----------------------------------------------------------------------------
-    //  xml tag helper
-    // -----------------------------------------------------------------------------
-    const globalTemplates = {};
-    function xml(...args) {
-        const name = `__template__${xml.nextId++}`;
-        const value = String.raw(...args);
-        globalTemplates[name] = value;
-        return name;
-    }
-    xml.nextId = 1;
     TemplateSet.registerTemplate("__portal__", portalTemplate);
 
     const whitespaceRE = /\s+/g;
@@ -5836,6 +5804,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
                         if (Root.template) {
                             throw new Error("Cannot attach a component with a template");
                         }
+                        this._lastRootEl = target;
                     }
                     else {
                         if (!Root.template) {
@@ -5843,9 +5812,9 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
                             this.getTemplate("");
                         }
                     }
-                    this._lastRootEl = target;
                     const node = this.makeNode(Root, props);
                     root.node = node;
+                    this._lastRootEl = null;
                     restore();
                     if (config.env) {
                         this.env = env;
@@ -6219,8 +6188,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2024-10-30T14:01:00.198Z';
-    __info__.hash = 'c2502a8';
+    __info__.date = '2024-10-31T08:58:58.999Z';
+    __info__.hash = '2a4c7a2';
     __info__.url = 'https://github.com/odoo/owl';
 
 
