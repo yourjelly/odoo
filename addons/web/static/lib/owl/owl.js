@@ -2957,6 +2957,97 @@
         return replaceDynamicParts(s, compileExpr);
     }
 
+    function* generateEntries(content) {
+        for (let key in content) {
+            const value = content[key];
+            if (typeof value === "string") {
+                const [selector, directive] = key.split(":");
+                yield [selector, directive, value];
+            }
+            else {
+                for (let directive in value) {
+                    yield [key, directive, value[directive]];
+                }
+            }
+        }
+    }
+    function applyDynamicContent(node, el, dynamicContent, ctx) {
+        const attrs = [];
+        const handlers = [];
+        const tOuts = [];
+        const cleanups = [];
+        for (let [selector, directive, value] of generateEntries(dynamicContent)) {
+            if (directive.startsWith("t-att-")) {
+                const attr = directive.slice(6);
+                const fn = new Function("ctx", `return ${compileExpr(value)};`);
+                attrs.push({ selector, attr, fn });
+            }
+            if (directive.startsWith("t-on-")) {
+                const event = directive.slice(5);
+                // const fn = new Function("ctx", "ev", `${compileExpr(value)}(ev);`);
+                const fn = (ev) => node.component[value](ev);
+                handlers.push({ selector, event, fn });
+            }
+            if (directive === "t-out") {
+                const fn = new Function("ctx", `return ${compileExpr(value)};`);
+                tOuts.push({ selector, fn });
+            }
+        }
+        const handleAttrs = () => {
+            for (let attr of attrs) {
+                const val = attr.fn.call(node.component, ctx);
+                // todo: cache the queryselector result?
+                const target = attr.selector === "root" ? el : el.querySelector(attr.selector);
+                if (target) {
+                    target.setAttribute(attr.attr, val);
+                }
+            }
+        };
+        const handleEvents = () => {
+            for (let handler of handlers) {
+                // const val = attr.fn.call(node.component, ctx);
+                // todo: cache the queryselector result?
+                const target = handler.selector === "root" ? el : el.querySelector(handler.selector);
+                if (target) {
+                    const fn = handler.fn;
+                    target.addEventListener(handler.event, fn);
+                    cleanups.push(() => target.removeEventListener(handler.event, fn));
+                }
+            }
+        };
+        const handleTOuts = () => {
+            for (let tOut of tOuts) {
+                const val = tOut.fn.call(node.component, ctx);
+                // todo: cache the queryselector result?
+                const target = tOut.selector === "root" ? el : el.querySelector(tOut.selector);
+                if (target) {
+                    if (val instanceof Markup) {
+                        target.innerHTML = val;
+                    }
+                    else {
+                        target.textContent = val;
+                    }
+                }
+            }
+        };
+        if (attrs.length) {
+            node.mounted.push(handleAttrs);
+            node.patched.push(handleAttrs);
+        }
+        if (handlers.length) {
+            node.mounted.push(handleEvents);
+        }
+        if (tOuts.length) {
+            node.mounted.push(handleTOuts);
+            node.patched.push(handleTOuts);
+        }
+        node.willUnmount.push(() => {
+            for (let cleanup of cleanups) {
+                cleanup();
+            }
+        });
+    }
+
     let currentNode = null;
     function saveCurrent() {
         let n = currentNode;
@@ -3051,97 +3142,11 @@
                 // component will be attached
                 this.renderFn = app.getTemplate(xml ``).bind(this.component, ctx, this);
                 if (C.dynamicContent) {
-                    this.applyDynamicContent(app._lastRootEl, C.dynamicContent, ctx);
+                    applyDynamicContent(this, app._lastRootEl, C.dynamicContent, ctx);
                 }
             }
             this.component.setup();
             currentNode = null;
-        }
-        applyDynamicContent(el, dynamicContent, ctx) {
-            const attrs = [];
-            const handlers = [];
-            const tOuts = [];
-            const cleanups = [];
-            for (let key in dynamicContent) {
-                const value = dynamicContent[key];
-                const parts = key.split(":");
-                if (parts[1].startsWith("t-att-")) {
-                    const attr = parts[1].slice(6);
-                    const fn = new Function("ctx", `return ${compileExpr(value)};`);
-                    attrs.push({
-                        selector: parts[0],
-                        attr,
-                        fn,
-                    });
-                }
-                if (parts[1].startsWith("t-on-")) {
-                    const event = parts[1].slice(5);
-                    // const fn = new Function("ctx", "ev", `${compileExpr(value)}(ev);`);
-                    const fn = (ev) => this.component[value](ev);
-                    handlers.push({
-                        selector: parts[0],
-                        event,
-                        fn,
-                    });
-                }
-                if (parts[1] === "t-out") {
-                    const fn = new Function("ctx", `return ${compileExpr(value)};`);
-                    tOuts.push({ selector: parts[0], fn });
-                }
-            }
-            const handleAttrs = () => {
-                for (let attr of attrs) {
-                    const val = attr.fn.call(this.component, ctx);
-                    // todo: cache the queryselector result?
-                    const target = attr.selector === "root" ? el : el.querySelector(attr.selector);
-                    if (target) {
-                        target.setAttribute(attr.attr, val);
-                    }
-                }
-            };
-            const handleEvents = () => {
-                for (let handler of handlers) {
-                    // const val = attr.fn.call(this.component, ctx);
-                    // todo: cache the queryselector result?
-                    const target = handler.selector === "root" ? el : el.querySelector(handler.selector);
-                    if (target) {
-                        const fn = handler.fn;
-                        target.addEventListener(handler.event, fn);
-                        cleanups.push(() => target.removeEventListener(handler.event, fn));
-                    }
-                }
-            };
-            const handleTOuts = () => {
-                for (let tOut of tOuts) {
-                    const val = tOut.fn.call(this.component, ctx);
-                    // todo: cache the queryselector result?
-                    const target = tOut.selector === "root" ? el : el.querySelector(tOut.selector);
-                    if (target) {
-                        if (val instanceof Markup) {
-                            target.innerHTML = val;
-                        }
-                        else {
-                            target.textContent = val;
-                        }
-                    }
-                }
-            };
-            if (attrs.length) {
-                this.mounted.push(handleAttrs);
-                this.patched.push(handleAttrs);
-            }
-            if (handlers.length) {
-                this.mounted.push(handleEvents);
-            }
-            if (tOuts.length) {
-                this.mounted.push(handleTOuts);
-                this.patched.push(handleTOuts);
-            }
-            this.willUnmount.push(() => {
-                for (let cleanup of cleanups) {
-                    cleanup();
-                }
-            });
         }
         mountComponent(target, options) {
             const fiber = new MountFiber(this, target, options);
@@ -6204,8 +6209,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2024-10-31T09:01:01.443Z';
-    __info__.hash = '6dafe23';
+    __info__.date = '2024-10-31T13:49:40.891Z';
+    __info__.hash = '71760c8';
     __info__.url = 'https://github.com/odoo/owl';
 
 
