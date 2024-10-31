@@ -1135,6 +1135,7 @@ class AccountMove(models.Model):
         else:
             payment_data = {}
 
+        invoice_paid = self.env['account.move']
         for invoice in self:
             if invoice.payment_state == 'invoicing_legacy':
                 # invoicing_legacy state is set via SQL when setting field
@@ -1189,7 +1190,13 @@ class AccountMove(models.Model):
                         new_pmt_state = 'partial'
                     elif invoice.matched_payment_ids.filtered(lambda p: not p.move_id and p.state == 'paid'):
                         new_pmt_state = invoice._get_invoice_in_payment_state()
+
+            if new_pmt_state == 'paid' and invoice.payment_state != 'paid':
+                invoice_paid += invoice
             invoice.payment_state = new_pmt_state
+
+        if invoice_paid:
+            invoice_paid._invoice_paid_hook()
 
     @api.depends('payment_state', 'state')
     def _compute_status_in_payment(self):
