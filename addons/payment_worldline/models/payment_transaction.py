@@ -209,7 +209,8 @@ class PaymentTransaction(models.Model):
 
         # Update the provider reference.
         payment_data = notification_data['payment']
-        self.provider_reference = payment_data['hostedCheckoutSpecificOutput']['hostedCheckoutId']
+        payment_reference = payment_data.get('id', '')
+        self.provider_reference = payment_reference.rstrip('_0') if payment_reference else ''
 
         # Update the payment method.
         payment_output = payment_data.get('paymentOutput', {})
