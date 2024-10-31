@@ -6117,6 +6117,21 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
         onMounted(() => target.addEventListener(eventName, boundHandler, eventParams));
         onWillUnmount(() => target.removeEventListener(eventName, boundHandler, eventParams));
     }
+    // -----------------------------------------------------------------------------
+    // useAttachedEl
+    // -----------------------------------------------------------------------------
+    /**
+     * The purpose of this hook is to allow attached components to get a reference to
+     * the element they have been attached on.
+     */
+    function useAttachedEl() {
+        const node = getCurrent();
+        const el = node.app._lastRootEl;
+        if (!el) {
+            throw new Error("useAttachedEl can only be called with component that are attached");
+        }
+        return el;
+    }
 
     config.shouldNormalizeDom = false;
     config.mainEventHandler = mainEventHandler;
@@ -6172,6 +6187,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     exports.reactive = reactive;
     exports.status = status;
     exports.toRaw = toRaw;
+    exports.useAttachedEl = useAttachedEl;
     exports.useChildSubEnv = useChildSubEnv;
     exports.useComponent = useComponent;
     exports.useEffect = useEffect;
@@ -6188,8 +6204,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2024-10-31T08:58:58.999Z';
-    __info__.hash = '2a4c7a2';
+    __info__.date = '2024-10-31T09:01:01.443Z';
+    __info__.hash = '6dafe23';
     __info__.url = 'https://github.com/odoo/owl';
 
 
