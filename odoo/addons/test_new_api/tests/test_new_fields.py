@@ -3438,7 +3438,7 @@ class TestMagicFields(common.TransactionCase):
             self.env.flush_all()
             self.assertEqual(line1.write_date, date1)
             self.assertEqual(line2.write_date, date0)
-            self.assertEqual(move.write_date, date0)    # this is not correct
+            self.assertEqual(move.write_date, date1)
 
             # check the values in database
             self.env.invalidate_all()

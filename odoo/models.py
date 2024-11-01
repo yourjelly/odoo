@@ -3847,11 +3847,17 @@ class BaseModel(metaclass=MetaModel):
         # determine records that require updating parent_path
         parent_records = self._parent_store_update_prepare(vals)
 
-        if self._log_access:
+        if self._log_access and not ('write_uid' in vals and 'write_date' in vals):
             # set magic fields (already done by write(), but not for computed fields)
             vals = dict(vals)
-            vals.setdefault('write_uid', self.env.uid)
-            vals.setdefault('write_date', self.env.cr.now())
+            log_vals = {'write_uid': self.env.uid, 'write_date': self.env.cr.now()}
+            for fname, value in log_vals.items():
+                if fname in vals:
+                    continue
+                vals[fname] = value
+                field = self._fields[fname]
+                value = field.convert_to_cache(value, self)
+                self.env.cache.update(self, field, itertools.repeat(value))
 
         # determine SQL values
         columns = []
