@@ -191,6 +191,7 @@
     'assets': {
         'web.assets_frontend': [
             'website/static/src/active_elements/*',
+            'website/static/src/base/*',
             ('replace', 'web/static/src/legacy/js/public/public_root_instance.js', 'website/static/src/js/content/website_root_instance.js'),
             'website/static/src/libs/zoomodoo/zoomodoo.scss',
             'website/static/src/scss/website.scss',
@@ -280,6 +281,14 @@
         ],
         'web.qunit_suite_tests': [
             'website/static/tests/redirect_field_tests.js',
+        ],
+        'web.assets_unit_tests': [
+            'website/static/tests/active_elements/**/*',
+            'website/static/tests/base/**/*',
+        ],
+        'web.assets_unit_tests_setup': [
+            'website/static/src/active_elements/*',
+            'website/static/src/base/*',
         ],
         'web.tests_assets': [
             'website/static/tests/website_service_mock.js',
