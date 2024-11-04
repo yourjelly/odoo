@@ -7,7 +7,7 @@ import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/n
 import { ask, makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { enhancedButtons } from "@point_of_sale/app/generic_components/numpad/numpad";
 import { patch } from "@web/core/utils/patch";
-import { PosStore } from "@point_of_sale/app/store/pos_store";
+import { PosStore } from "@point_of_sale/app/services/pos_store";
 import { compute_price_force_price_include } from "@point_of_sale/app/models/utils/tax_utils";
 
 patch(PosStore.prototype, {

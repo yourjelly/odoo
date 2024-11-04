@@ -1,5 +1,5 @@
 import { patch } from "@web/core/utils/patch";
-import { PosStore } from "@point_of_sale/app/store/pos_store";
+import { PosStore } from "@point_of_sale/app/services/pos_store";
 import { _t } from "@web/core/l10n/translation";
 import { SelectionPopup } from "@point_of_sale/app/components/popups/selection_popup/selection_popup";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";

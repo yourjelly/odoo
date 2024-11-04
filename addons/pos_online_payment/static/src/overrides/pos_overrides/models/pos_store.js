@@ -1,5 +1,5 @@
 import { patch } from "@web/core/utils/patch";
-import { PosStore } from "@point_of_sale/app/store/pos_store";
+import { PosStore } from "@point_of_sale/app/services/pos_store";
 import { floatIsZero } from "@web/core/utils/numbers";
 
 patch(PosStore.prototype, {
