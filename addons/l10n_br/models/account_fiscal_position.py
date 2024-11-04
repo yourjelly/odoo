@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import api, fields, models
+from odoo import fields, models
 
 SOUTH_SOUTHEAST = {"PR", "RS", "SC", "SP", "ES", "MG", "RJ"}
 NORTH_NORTHEAST_MIDWEST = {
@@ -21,22 +21,23 @@ class AccountFiscalPosition(models.Model):
         string='Interstate Fiscal Position Type',
     )
 
-    @api.model
-    def _get_fiscal_position(self, partner, delivery=None):
-        if not delivery:
-            delivery = partner
+    def _get_fpos_ranking_functions(self, partner):
+        def ranking_function(fpos):
+            company = fpos.company_id
+            company_in_sse = company.state_id.code in SOUTH_SOUTHEAST
+            partner_in_sse = partner.state_id.code in SOUTH_SOUTHEAST
+            include_fp = True  # by default, include this fp without preference
 
-        if self.env.company.country_id.code != "BR" or delivery.country_id.code != 'BR':
-            return super()._get_fiscal_position(partner, delivery=delivery)
+            if (fpos.l10n_br_fp_type == 'internal' and company.state_id != partner.state_id) or (
+                fpos.l10n_br_fp_type == 'ss_nnm' and (not company_in_sse or partner_in_sse)
+            ):
+                include_fp = False
 
-        # manually set fiscal position on partner has a higher priority
-        manual_fiscal_position = delivery.property_account_position_id or partner.property_account_position_id
-        if manual_fiscal_position:
-            return manual_fiscal_position
+            return include_fp
 
-        # Taxation in Brazil depends on both the state of the partner and the state of the company
-        if self.env.company.state_id == delivery.state_id:
-            return self.search([('l10n_br_fp_type', '=', 'internal'), ('company_id', '=', self.env.company.id)], limit=1)
-        if self.env.company.state_id.code in SOUTH_SOUTHEAST and delivery.state_id.code in NORTH_NORTHEAST_MIDWEST:
-            return self.search([('l10n_br_fp_type', '=', 'ss_nnm'), ('company_id', '=', self.env.company.id)], limit=1)
-        return self.search([('l10n_br_fp_type', '=', 'interstate'), ('company_id', '=', self.env.company.id)], limit=1)
+        return [
+            (
+                'l10n_br_fp_type',
+                ranking_function,
+            )
+        ] + super()._get_fpos_ranking_functions(partner)
