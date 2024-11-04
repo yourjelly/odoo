@@ -52,6 +52,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 'base_event_id': base_event.id,
             })
             recurrence._apply_recurrence()
+            self.env.flush_all()
         return recurrence
 
     def google_respond_to_recurrent_event_with_option_this_event(self, recurrence, event_index, response_status):
