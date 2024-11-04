@@ -26,13 +26,13 @@ class Crawler(HttpCaseWithUserDemo):
     def setUp(self):
         super(Crawler, self).setUp()
         self.env.ref('website.default_website').write({
-            'social_facebook': "https://www.facebook.com/Odoo",
-            'social_twitter': 'https://twitter.com/Odoo',
-            'social_linkedin': 'https://www.linkedin.com/company/odoo',
-            'social_youtube': 'https://www.youtube.com/user/OpenERPonline',
-            'social_github': 'https://github.com/odoo',
-            'social_instagram': 'https://www.instagram.com/explore/tags/odoo/',
-            'social_tiktok': 'https://www.tiktok.com/@odoo',
+            "social_facebook": "https://www.facebook.com",
+            "social_twitter": "https://twitter.com",
+            "social_linkedin": "https://www.linkedin.com",
+            "social_youtube": "https://www.youtube.com",
+            "social_github": "https://github.com",
+            "social_instagram": "https://www.instagram.com",
+            "social_tiktok": "https://www.tiktok.com",
         })
 
         if hasattr(self.env['res.partner'], 'grade_id'):

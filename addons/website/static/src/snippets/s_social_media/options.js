@@ -38,6 +38,7 @@ options.registry.SocialMedia = options.Class.extend({
     async onBuilt() {
         await this._fetchSocialMedia();
         for (const anchorEl of this.$target[0].querySelectorAll(':scope > a')) {
+            // SHSA- check for this
             const mediaName = anchorEl.href.split('/website/social/').pop();
             if (mediaName && !dbSocialValues[`social_${mediaName}`]) {
                 // Delete social media without value in DB.
@@ -159,6 +160,7 @@ options.registry.SocialMedia = options.Class.extend({
                         iEl.classList.add(faIcon);
                     }
                     if (isDbField) {
+                        // SHSA- check for this
                         anchorEl.href = `/website/social/${encodeURIComponent(entry.media)}`;
                         anchorEl.classList.add(`s_social_media_${entry.media}`);
                     }
@@ -227,6 +229,7 @@ options.registry.SocialMedia = options.Class.extend({
         let domPosition = 0;
         // Check the DOM to compute the state of the ListUserValueWidget.
         let entries = [...this.$target[0].querySelectorAll(':scope > a')].map(el => {
+            // SHSA- check for this
             const media = el.href.split('/website/social/')[1];
             // Avoid a DOM entry and a non-dom entry having the same position.
             while (this.entriesNotInDom.find(entry => entry.listPosition === listPosition)) {
@@ -247,6 +250,7 @@ options.registry.SocialMedia = options.Class.extend({
         // Adds the DB social media links that are not in the DOM.
         for (let [media, link] of Object.entries(dbSocialValues)) {
             media = media.split('social_').pop();
+            // SHSA- check for this
             if (!this.$target[0].querySelector(`:scope > a[href="/website/social/${encodeURIComponent(media)}"]`)) {
                 const entryNotInDom = this.entriesNotInDom.find(entry => entry.media === media);
                 if (!entryNotInDom) {

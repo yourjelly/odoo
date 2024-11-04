@@ -348,7 +348,7 @@ class Website(Home):
         if step > 1:
             action_url += '&step=' + str(step)
         return request.redirect(action_url)
-
+    # dont need now
     @http.route(['/website/social/<string:social>'], type='http', auth="public", website=True, sitemap=False)
     def social(self, social, **kwargs):
         url = getattr(request.website, 'social_%s' % social, False)
