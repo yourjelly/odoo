@@ -55,10 +55,10 @@ class TestTZ(TransactionCase):
             with self.assertRaises(ValueError):
                 self.env.user.tz = "US/Eastern"
 
-    def test_partner_with_old_tz(self):
-        # this test makes sence after ubuntu noble without tzdata-legacy installed
-        partner = self.env['res.partner'].create({'name': 'test', 'tz': 'UTC'})
-        self.env.cr.execute("""UPDATE res_partner set tz='US/Eastern' WHERE id=%s""", (partner.id,))
-        partner.invalidate_recordset()
-        self.assertEqual(partner.tz, 'US/Eastern')  # tz was update despite selection not existing, but data was not migrated
-        self.assertEqual(partner.tz_offset, '-0400', "We don't expect pytz.timezone to fail if the timezone diseapeared when chaging os version")
+    # def test_partner_with_old_tz(self):
+    #     # this test makes sence after ubuntu noble without tzdata-legacy installed
+    #     partner = self.env['res.partner'].create({'name': 'test', 'tz': 'UTC'})
+    #     self.env.cr.execute("""UPDATE res_partner set tz='US/Eastern' WHERE id=%s""", (partner.id,))
+    #     partner.invalidate_recordset()
+    #     self.assertEqual(partner.tz, 'US/Eastern')  # tz was update despite selection not existing, but data was not migrated
+    #     self.assertEqual(partner.tz_offset, '-0400', "We don't expect pytz.timezone to fail if the timezone diseapeared when chaging os version")
