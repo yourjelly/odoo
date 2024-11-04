@@ -1170,7 +1170,7 @@ class expression(object):
                     if len(path) > 1:
                         right = comodel._search([(path[1], operator, right)])
                         operator = 'in'
-                    domain = field.determine_domain(model, operator, right)
+                    domain = field.search(model, operator, right)
 
                 for elem in domain_combine_anies(domain, model):
                     push(elem, model, alias)
