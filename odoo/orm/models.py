@@ -1507,7 +1507,7 @@ class BaseModel(metaclass=MetaModel):
             return
         # run constrains just as sudoed computed-stored fields
         # see Field.compute_value()
-        records = self.sudo()
+        records = self.with_env(self.env.transaction.default_env).sudo()
         field_names = set(field_names)
         excluded_names = set(excluded_names)
         for check in methods:
@@ -7235,6 +7235,8 @@ class BaseModel(metaclass=MetaModel):
         # do not force recomputation on new records; those will be
         # recomputed by accessing the field on the records
         records = self.browse(tuple(id_ for id_ in ids if id_))
+        assert field.store, "only computed-stored fields can be recomputed"
+        records = records.with_env(records.env.transaction.default_env)
         field.recompute(records)
 
     #
