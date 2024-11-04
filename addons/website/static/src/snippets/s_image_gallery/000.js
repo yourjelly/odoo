@@ -1,24 +1,23 @@
 /** @odoo-module **/
 
+import { Component, onWillDestroy, useAttachedEl } from "@odoo/owl";
+import { registry } from "@web/core/registry";
 import { uniqueId } from "@web/core/utils/functions";
-import publicWidget from "@web/legacy/js/public/public_widget";
 import { renderToElement } from "@web/core/utils/render";
 
 
-const GalleryWidget = publicWidget.Widget.extend({
+export class GalleryWidget extends Component {
+    static selector = ".s_image_gallery:not(.o_slideshow)";
+    static dynamicContent = {
+        "img": {
+            "t-on-click": "clickImg",
+        },
+    };
 
-    selector: '.s_image_gallery:not(.o_slideshow)',
-    events: {
-        'click img': '_onClickImg',
-    },
-
-    /**
-     * @override
-     */
-    start() {
-        this._super(...arguments);
+    setup() {
+        this.el = useAttachedEl();
         this.originalSources = [...this.el.querySelectorAll("img")].map(img => img.getAttribute("src"));
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -28,15 +27,13 @@ const GalleryWidget = publicWidget.Widget.extend({
      * Called when an image is clicked. Opens a dialog to browse all the images
      * with a bigger size.
      *
-     * @private
      * @param {Event} ev
      */
-    _onClickImg: function (ev) {
+    clickImg(ev) {
         const clickedEl = ev.currentTarget;
-        if (this.$modal || clickedEl.matches("a > img")) {
+        if (this.modalEl || clickedEl.matches("a > img")) {
             return;
         }
-        var self = this;
 
         let imageEls = this.el.querySelectorAll("img");
         const currentImageEl = clickedEl.closest("img");
@@ -60,149 +57,167 @@ const GalleryWidget = publicWidget.Widget.extend({
         };
 
         const milliseconds = this.el.dataset.interval || false;
-        const lightboxTemplate = this.$target[0].dataset.vcss === "002" ?
+        const lightboxTemplate = this.el.dataset.vcss === "002" ?
             "website.gallery.s_image_gallery_mirror.lightbox" :
             "website.gallery.slideshow.lightbox";
-        this.$modal = $(renderToElement(lightboxTemplate, {
+        this.modalEl = renderToElement(lightboxTemplate, {
             images: imageEls,
             index: currentImageIndex,
             dim: dimensions,
             interval: milliseconds || 0,
             ride: !milliseconds ? "false" : "carousel",
             id: uniqueId("slideshow_"),
-        }));
+        });
         this.__onModalKeydown = this._onModalKeydown.bind(this);
-        this.$modal.on('hidden.bs.modal', function () {
-            $(this).hide();
-            $(this).siblings().filter('.modal-backdrop').remove(); // bootstrap leaves a modal-backdrop
-            this.removeEventListener("keydown", self.__onModalKeydown);
-            $(this).remove();
-            self.$modal = undefined;
+        this.modalEl.addEventListener("hidden.bs.modal", () => {
+            this.modalEl.classList.add("d-none");
+            for (const backdropEl of this.modalEl.querySelectorAll(".modal-backdrop")) {
+                backdropEl.remove(); // bootstrap leaves a modal-backdrop
+            }
+            this.modalEl.removeEventListener("keydown", this.__onModalKeydown);
+            this.modalEl.remove();
+            this.modalEl = undefined;
         });
-        this.$modal.one('shown.bs.modal', function () {
-            self.trigger_up('widgets_start_request', {
+        this.modalEl.addEventListener("shown.bs.modal", () => {
+            // TODO Find out what was the purpose of that event.
+            /*
+            this.trigger_up("widgets_start_request", {
                 editableMode: false,
-                $target: self.$modal.find('.modal-body.o_slideshow'),
+                target: this.modalEl.querySelector(".modal-body.o_slideshow"),
             });
-            this.addEventListener("keydown", self.__onModalKeydown);
-        });
-        this.$modal.appendTo(document.body);
-        const modalBS = new Modal(this.$modal[0], {keyboard: true, backdrop: true});
+            */
+            this.modalEl.addEventListener("keydown", this.__onModalKeydown);
+        }, { once: true });
+        document.body.append(this.modalEl);
+        const modalBS = new Modal(this.modalEl, {keyboard: true, backdrop: true});
         modalBS.show();
-    },
+    }
     _onModalKeydown(ev) {
         if (ev.key === "ArrowLeft" || ev.key === "ArrowRight") {
             const side = ev.key === "ArrowLeft" ? "prev" : "next";
-            this.$modal[0].querySelector(`.carousel-control-${side}`).click();
+            this.modalEl.querySelector(`.carousel-control-${side}`).click();
         }
         if (ev.key === "Escape") {
             // If the user is connected as an editor, prevent the backend header
             // from collapsing.
             ev.stopPropagation();
         }
-    },
-});
+    }
+}
 
-const GallerySliderWidget = publicWidget.Widget.extend({
-    selector: '.o_slideshow',
-    disabledInEditableMode: false,
+export class GallerySliderWidget extends Component {
+    static selector = ".o_slideshow";
+    // TODO Support edit-mode enabled.
+    static disabledInEditableMode = false;
 
-    /**
-     * @override
-     */
-    start: function () {
+    setup() {
+        this.el = useAttachedEl();
+        onWillDestroy(this.destroy);
+        // TODO Remove self.
         var self = this;
-        this.$carousel = this.$el.is('.carousel') ? this.$el : this.$('.carousel');
-        this.$indicator = this.$carousel.find('.carousel-indicators');
-        this.$prev = this.$indicator.find('li.o_indicators_left').css('visibility', ''); // force visibility as some databases have it hidden
-        this.$next = this.$indicator.find('li.o_indicators_right').css('visibility', '');
-        var $lis = this.$indicator.find('li[data-bs-slide-to]');
-        let indicatorWidth = this.$indicator.width();
+        this.carouselEl = this.el.classList.contains(".carousel") ? this.el : this.el.querySelector(".carousel");
+        this.indicatorEl = this.carouselEl.querySelector(".carousel-indicators");
+        this.prevEl = this.indicatorEl.querySelector("li.o_indicators_left");
+        this.nextEl = this.indicatorEl.querySelector("li.o_indicators_right");
+        this.prevEl.style.visibility = ""; // force visibility as some databases have it hidden
+        this.nextEl.style.visibility = "";
+        this.liEls = this.indicatorEl.querySelectorAll("li[data-bs-slide-to]");
+        let indicatorWidth = this.indicatorEl.getBoundincClientRect().width;
         if (indicatorWidth === 0) {
             // An ancestor may be hidden so we try to find it and make it
             // visible just to take the correct width.
-            const $indicatorParent = this.$indicator.parents().not(':visible').last();
-            if (!$indicatorParent[0].style.display) {
-                $indicatorParent[0].style.display = 'block';
-                indicatorWidth = this.$indicator.width();
-                $indicatorParent[0].style.display = '';
+            let indicatorParentEl = this.indicatorEl.parentElement;
+            while (indicatorParentEl) {
+                if (!isVisible(indicatorParentEl)) {
+                    if (!indicatorParentEl.style.display) {
+                        indicatorParentEl.style.display = "block";
+                        indicatorWidth = this.indicatorEl.getBoundingClientRect().width;
+                        indicatorParentEl.style.display = "";
+                    }
+                    break;
+                }
+                indicatorParentEl = indicatorParentEl.parentElement;
             }
         }
-        let nbPerPage = Math.floor(indicatorWidth / $lis.first().outerWidth(true)) - 3; // - navigator - 1 to leave some space
-        var realNbPerPage = nbPerPage || 1;
-        var nbPages = Math.ceil($lis.length / realNbPerPage);
+        const nbPerPage = Math.floor(indicatorWidth / this.liEls[0].getBoundingClientRect().width) - 3; // - navigator - 1 to leave some space
+        const realNbPerPage = nbPerPage || 1;
+        const nbPages = Math.ceil(this.liEls.length / realNbPerPage);
 
-        var index;
-        var page;
-        update();
+        let index;
+        let page;
+        this.update();
 
-        function hide() {
-            $lis.each(function (i) {
-                $(this).toggleClass('d-none', i < page * nbPerPage || i >= (page + 1) * nbPerPage);
-            });
-            if (page <= 0) {
-                self.$prev.detach();
-            } else {
-                self.$prev.removeClass('d-none');
-                self.$prev.prependTo(self.$indicator);
-            }
-            if (page >= nbPages - 1) {
-                self.$next.detach();
-            } else {
-                self.$next.removeClass('d-none');
-                self.$next.appendTo(self.$indicator);
-            }
+        this.boundSlide = this.slide.bind(this);
+        this.boundClickIndicator = this.clickIndicator.bind(this);
+        this.boundUpdate = this.update.bind(this);
+        this.carouselEl.addEventListener("slide.bs.carousel.gallery_slider", this.boundSlide);
+        for (const liEl of this.indicatorEl.querySelectorAll(":scope > li:not([data-bs-slide-to])")) {
+            liEl.addEventListener("click.gallery_slider", this.boundClickIndicator);
         }
-
-        function update() {
-            const active = $lis.filter('.active');
-            index = active.length ? $lis.index(active) : 0;
-            page = Math.floor(index / realNbPerPage);
-            hide();
-        }
-
-        this.$carousel.on('slide.bs.carousel.gallery_slider', function () {
-            setTimeout(function () {
-                var $item = self.$carousel.find('.carousel-inner .carousel-item-prev, .carousel-inner .carousel-item-next');
-                var index = $item.index();
-                $lis.removeClass('active')
-                    .filter('[data-bs-slide-to="' + index + '"]')
-                    .addClass('active');
-            }, 0);
-        });
-        this.$indicator.on('click.gallery_slider', '> li:not([data-bs-slide-to])', function () {
-            page += ($(this).hasClass('o_indicators_left') ? -1 : 1);
-            page = Math.max(0, Math.min(nbPages - 1, page)); // should not be necessary
-            self.$carousel.carousel(page * realNbPerPage);
-            // We dont use hide() before the slide animation in the editor because there is a traceback
-            // TO DO: fix this traceback
-            if (!self.editableMode) {
-                hide();
+        this.carouselEl.addEventListener("slid.bs.carousel.gallery_slider", this.boundUpdate);
+    }
+    slide() {
+        setTimeout(() => {
+            const itemEl = this.carouselEl.querySelector(".carousel-inner .carousel-item-prev, .carousel-inner .carousel-item-next");
+            const index = [...itemEl.parentElement.children].indexOf(itemEl);
+            for (const liEl of this.liEls) {
+                liEl.classList.remove("active");
             }
-        });
-        this.$carousel.on('slid.bs.carousel.gallery_slider', update);
+            const selectedLiEl = this.liEls.querySelector(`[data-bs-slide-to="${index}"]`);
+            selectedLiEl?.classList.add("active");
+        }, 0);
+    }
+    clickIndicator() {
+        page += this.el.classList.contains("o_indicators_left") ? -1 : 1;
+        page = Math.max(0, Math.min(nbPages - 1, page)); // should not be necessary
+        Carousel.getOrCreateInstance(this.carouselEl).carousel(page * realNbPerPage);
+        // We dont use hide() before the slide animation in the editor because there is a traceback
+        // TO DO: fix this traceback
+        if (!this.editableMode) {
+            this.hide();
+        }
+    }
+    hide() {
+        for (let i = 0; i < this.liEls.length; i++) {
+            this.liEls[i].classList.toggle("d-none", i < page * nbPerPage || i >= (page + 1) * nbPerPage);
+        }
+        if (page <= 0) {
+            this.prevEl.remove();
+        } else {
+            this.prevEl.classList.remove("d-none");
+            this.indicatorEl.insertAdjacentElement("afterbegin", this.prevEl);
+        }
+        if (page >= nbPages - 1) {
+            this.nextEl.remove();
+        } else {
+            this.nextEl.classList.remove("d-none");
+            this.indicatorEl.appendChild(this.nextEl);
+        }
+    }
 
-        return this._super.apply(this, arguments);
-    },
-    /**
-     * @override
-     */
-    destroy: function () {
-        this._super.apply(this, arguments);
-
-        if (!this.$indicator) {
+    update() {
+        const active = this.liEls.filter(".active");
+        index = active.length ? this.liels.index(active) : 0;
+        page = Math.floor(index / realNbPerPage);
+        this.hide();
+    }
+    destroy() {
+        if (!this.indicatorEl) {
             return;
         }
 
-        this.$prev.prependTo(this.$indicator);
-        this.$next.appendTo(this.$indicator);
-        this.$carousel.off('.gallery_slider');
-        this.$indicator.off('.gallery_slider');
-    },
-});
+        this.prevEl.prependTo(this.indicatorEl);
+        this.nextEl.appendTo(this.indicatorEl);
+        this.carouselEl.removeEventListener("slide.bs.carousel.gallery_slider", this.boundSlide);
+        for (const liEl of this.indicatorEl.querySelectorAll(":scope > li:not([data-bs-slide-to])")) {
+            liEl.removeEventListener("click.gallery_slider", this.boundClickIndicator);
+        }
+        this.carouselEl.removeEventListener("slid.bs.carousel.gallery_slider", this.boundUpdate);
+    }
+}
 
-publicWidget.registry.gallery = GalleryWidget;
-publicWidget.registry.gallerySlider = GallerySliderWidget;
+registry.category("website.active_elements").add("website.gallery", GalleryWidget);
+registry.category("website.active_elements").add("website.gallerySlider", GallerySliderWidget);
 
 export default {
     GalleryWidget: GalleryWidget,
