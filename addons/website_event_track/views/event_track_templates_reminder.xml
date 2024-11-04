@@ -3,7 +3,7 @@
 
 <!-- Options
     * reminder_light: no text displayed
-    * reminder_small: text displayed as small
+    * reminder_small: text displayed as smallF
     * light_theme: bell is white/gold if set; otherwse bell is gray / white
  -->
 <template id="track_widget_reminder">

@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import { session } from "@web/session";
 
 /**
  * TALKS STEPS
@@ -47,6 +48,18 @@ var discoverTalkSteps = function (talkName, fromList, reminderOn, toggleReminder
                 content: `Check Favorite for ${talkName} is now on`,
                 trigger: 'div.o_wetrack_js_reminder i.fa-bell',
             }]);
+            if (session.is_public){
+                steps = steps.concat([{
+                    content: 'The form of the email reminder modal is filled',
+                    trigger: "#email_reminder_form input[name='email']",
+                    run: 'fill visitor@odoo.com',
+                },
+                {
+                    content: 'The form is submit',
+                    trigger: '#email_reminder_form button[type="submit"]',
+                    run: 'click',
+                }]);
+            }
         }
     }
     return steps;
