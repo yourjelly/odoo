@@ -1,4 +1,5 @@
 import calendar
+import re
 from collections import defaultdict
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -173,10 +174,13 @@ class AccountAccount(models.Model):
         ]
         lines_in_period = self.env['account.move.line'].with_context(allowed_company_ids=company_ids)._read_group(
             domain=domain,
-            groupby=['company_id', 'parent_state', 'account_id'],
+            groupby=['company_id', 'parent_state', 'account_id', 'partner_id'],
             aggregates=aggregates,
         )
-        all_lines.update({(period, company.id, state, account.id): dict(zip(fields, val)) for company, state, account, *val in lines_in_period})
+        all_lines.update({
+            str((period, company.id, state, account.id, partner.id)): dict(zip(fields, val))
+            for company, state, account, partner, *val in lines_in_period
+        })
 
         # Get all the lines from the rest of the timeline
         for period in timeline[1:]:
@@ -201,10 +205,13 @@ class AccountAccount(models.Model):
 
             lines_in_period = self.env['account.move.line'].with_context(allowed_company_ids=company_ids)._read_group(
                 domain=domain,
-                groupby=['company_id', 'parent_state', 'account_id'],
+                groupby=['company_id', 'parent_state', 'account_id', 'partner_id'],
                 aggregates=aggregates,
             )
-            all_lines.update({(period, company.id, state, account.id): dict(zip(fields, val)) for company, state, account, *val in lines_in_period})
+            all_lines.update({
+                str((period, company.id, state, account.id, partner.id)): dict(zip(fields, val))
+                for company, state, account, partner, *val in lines_in_period
+            })
         return all_lines
 
     # ------------------------ #
@@ -266,6 +273,27 @@ class AccountAccount(models.Model):
         return self._spreadsheet_fetch_data(args_list, ['amount_residual'], default_accounts=True)
 
     @api.model
+    def spreadsheet_fetch_partner_balance(self, args_list):
+        """Fetch data for ODOO.PARTNER.BALANCE formulas
+        The input list looks like this:
+        [{
+            date_from: {
+                range_type: "year"
+                year: int
+            },
+            date_to: {
+                range_type: "year"
+                year: int
+            },
+            company_id: int
+            codes: str[]
+            include_unposted: bool
+            partner_ids: str[]
+        }]
+        """
+        return self._spreadsheet_fetch_data(args_list, ['balance'], default_accounts=True)
+
+    @api.model
     def _spreadsheet_fetch_data(self, args_list, fields, default_accounts=False):
         if not args_list:
             return []
@@ -290,8 +318,10 @@ class AccountAccount(models.Model):
                 accounts = all_accounts[company_id].filtered(lambda account: account.with_company(company_id).code.startswith(subcodes))
             else:
                 accounts = all_accounts[company_id].filtered(lambda account: account.with_company(company_id).account_type in ['liability_payable', 'asset_receivable'])
+            partner_ids = args.get('partner_ids')
+            partner_ids_regex = "(" + ("|".join(partner_ids) if partner_ids else r"\d+|False") + ")"
 
-            cell_data = {field: 0.0 for field in fields}
+            matching_keys = set()
             for account in accounts:
                 # Initial balanced accounts are cumulated over the periods due to their nature. For that reason,
                 # we need to add all previous period values for that account as well.
@@ -300,8 +330,12 @@ class AccountAccount(models.Model):
                     past_periods = timeline[0:timeline.index(periods[0])]
                 for state in states:
                     for period in past_periods + periods:
-                        data = all_lines.get((period, company_id, state, account.id), {field: 0.0 for field in fields})
-                        cell_data = {field: cell_data.get(field, 0.0) + data.get(field, 0.0) for field in fields}
+                        key_regex = rf"\({re.escape(str(period))}, {company_id}, '{state}', {account.id}, " + partner_ids_regex + r"\)"
+                        matching_keys.update(set(filter(re.compile(key_regex).match, all_lines.keys())))
+
+            cell_data = {field: 0.0 for field in fields}
+            for matching_key in matching_keys:
+                cell_data = {field: cell_data.get(field, 0.0) + all_lines[matching_key].get(field, 0.0) for field in fields}
 
             results.append(cell_data)
         return results
