@@ -49,6 +49,10 @@
                                  string="Check GST Number Status"
                                  help="Enable this to check the GST Number status">
                             <field name="module_l10n_in_gstin_status" class="oe_inline"/>
+                            <div class="row ml16" invisible="not module_l10n_in_gstin_status">
+                                <field name="module_l10n_in_website_sale" class="col-1 col-lg-1"/>
+                                <label for="module_l10n_in_website_sale" class="col o_light_label"/>
+                            </div>
                         </setting>
                     </block>
 

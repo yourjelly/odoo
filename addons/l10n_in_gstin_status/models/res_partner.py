@@ -22,6 +22,19 @@ class ResPartner(models.Model):
         tracking=True,
     )
 
+    @api.model
+    def _fetch_l10n_in_gstin_details(self, is_production, params):
+        try:
+            response = self.env['iap.account']._l10n_in_connect_to_server(
+                is_production,
+                params,
+                '/iap/l10n_in_reports/1/public/search',
+                'l10n_in_gstin_status.endpoint'
+            )
+        except AccessError:
+            raise UserError(_("Unable to connect with GST network"))
+        return response
+
     @api.onchange('vat')
     def _onchange_l10n_in_gst_status(self):
         """
@@ -40,15 +53,7 @@ class ResPartner(models.Model):
         params = {
             "gstin_to_search": self.vat,
         }
-        try:
-            response = self.env['iap.account']._l10n_in_connect_to_server(
-                is_production,
-                params,
-                '/iap/l10n_in_reports/1/public/search',
-                "l10n_in_gstin_status.endpoint"
-            )
-        except AccessError:
-            raise UserError(_("Unable to connect with GST network"))
+        response = self._fetch_l10n_in_gstin_details(is_production, params)
         if response.get('error') and any(e.get('code') == 'no-credit' for e in response['error']):
             return self.env["bus.bus"]._sendone(self.env.user.partner_id, "iap_notification",
                 {
