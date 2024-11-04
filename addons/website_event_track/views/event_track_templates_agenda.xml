@@ -181,7 +181,7 @@
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <div class="modal-content">
                     <div class="modal-header align-items-center">
-                        <h4 class="modal-title">Attendees</h4>
+                        <h4 class="modal-title">Email reminder</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
                     </div>
                     <div class="modal-body">
@@ -191,7 +191,7 @@
                                 <span>*</span>
                                 <input class="form-control" t-att-type="email" t-attf-name="email"
                                        t-att-required="True"
-                                       t-att-value=""/>
+                                       t-att-value="user_id.email"/>
                             </div>
                         </div>
                     </div>
