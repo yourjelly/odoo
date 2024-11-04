@@ -3,6 +3,13 @@ import { browser } from "../browser/browser";
 
 export const rpcBus = new EventBus();
 
+function uuid() {
+    const array = new Uint8Array(8);
+    window.crypto.getRandomValues(array);
+    // Uint8Array to hex
+    return [...array].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 // -----------------------------------------------------------------------------
 // Errors
 // -----------------------------------------------------------------------------
@@ -50,19 +57,26 @@ export function rpc(url, params = {}, settings = {}) {
 // such that it can be overriden in tests
 rpc._rpc = function (url, params, settings) {
     const XHR = browser.XMLHttpRequest;
+    const callback_id = uuid();
     const data = {
         id: rpcId++,
         jsonrpc: "2.0",
+        callback_id,
         method: "call",
         params: params,
     };
     const request = settings.xhr || new XHR();
     let rejectFn;
     const promise = new Promise((resolve, reject) => {
+        const cancelRequest = setTimeout(() => {
+            request.removeEventListener("error", failureCallback);
+            rpc("/abort", { callback_id });
+        }, 1000);
         rejectFn = reject;
         rpcBus.trigger("RPC:REQUEST", { data, url, settings });
         // handle success
         request.addEventListener("load", () => {
+            clearTimeout(cancelRequest);
             if (request.status === 502) {
                 // If Odoo is behind another server (eg.: nginx)
                 const error = new ConnectionLostError(url);
@@ -92,16 +106,17 @@ rpc._rpc = function (url, params, settings) {
             reject(error);
         });
         // handle failure
-        request.addEventListener("error", () => {
+        const failureCallback = () => {
             const error = new ConnectionLostError(url);
             rpcBus.trigger("RPC:RESPONSE", { data, settings, error });
             reject(error);
-        });
+        };
+        request.addEventListener("error", failureCallback);
         // configure and send request
         request.open("POST", url);
         const headers = settings.headers || {};
         headers["Content-Type"] = "application/json";
-        for (let [header, value] of Object.entries(headers)) {
+        for (const [header, value] of Object.entries(headers)) {
             request.setRequestHeader(header, value);
         }
         request.send(JSON.stringify(data));

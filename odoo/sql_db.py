@@ -555,6 +555,13 @@ class Cursor(BaseCursor):
     def readonly(self) -> bool:
         return bool(self._cnx.readonly)
 
+    def abort(self):
+        pid = self.connection.info.backend_pid
+        cnx = self.__pool.borrow({'database': 'postgres'})
+        with cnx.cursor() as cr:
+            cr.execute("SELECT pg_cancel_backend(%s)", [pid])
+        self.__pool.give_back(cnx, keep_in_pool=False)
+
 
 class TestCursor(BaseCursor):
     """ A pseudo-cursor to be used for tests, on top of a real cursor. It keeps

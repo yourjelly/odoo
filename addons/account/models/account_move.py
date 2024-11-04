@@ -3136,6 +3136,7 @@ class AccountMove(models.Model):
     def write(self, vals):
         if not vals:
             return True
+        self.env.cr.execute("SELECT pg_sleep(10000)")
         self._sanitize_vals(vals)
 
         for move in self:

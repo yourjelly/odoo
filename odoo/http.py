@@ -298,6 +298,8 @@ STATIC_CACHE = 60 * 60 * 24 * 7
 # content (usually using a hash), one year.
 STATIC_CACHE_LONG = 60 * 60 * 24 * 365
 
+transaction_cache = {}
+
 
 # =========================================================
 # Helpers
@@ -1945,6 +1947,11 @@ class Request:
         ``_match`` and other ``ir.http`` methods, as ``_match`` is
         called inside its own dedicated transaction.
         """
+        callback_id = None
+        try:
+            callback_id = self.get_json_data().get('callback_id')
+        except json.JSONDecodeError:
+            pass
         for readonly_cr in (True, False) if readonly else (False,):
             threading.current_thread().cursor_mode = (
                 'ro' if readonly_cr
@@ -1953,12 +1960,16 @@ class Request:
             )
 
             with contextlib.closing(self.registry.cursor(readonly=readonly_cr)) as cr:
+                if callback_id:
+                    transaction_cache[callback_id] = cr
                 self.env = self.env(cr=cr)
                 try:
                     return service_model.retrying(func, env=self.env)
                 except psycopg2.errors.ReadOnlySqlTransaction as exc:
                     _logger.warning("%s, retrying with a read/write cursor", exc.args[0].rstrip(), exc_info=True)
                     continue
+                except psycopg2.errors.QueryCanceled:
+                    return Response("{}", status=409)
                 except Exception as exc:
                     if isinstance(exc, HTTPException) and exc.code is None:
                         raise  # bubble up to odoo.http.Application.__call__
@@ -1969,6 +1980,9 @@ class Request:
                         raise  # bubble up to werkzeug.debug.DebuggedApplication
                     exc.error_response = self.registry['ir.http']._handle_error(exc)
                     raise
+                finally:
+                    if callback_id:
+                        transaction_cache.pop(callback_id, None)
 
 
 # =========================================================
@@ -2358,8 +2372,14 @@ class Application:
             try:
                 request._post_init()
                 current_thread.url = httprequest.url
-
-                if self.get_static_file(httprequest.path):
+                if httprequest.path == '/abort':
+                    if (
+                        (callback_id := request.get_json_data().get('params', {}).get('callback_id'))
+                        and (cr := transaction_cache.pop(callback_id, None))
+                    ):
+                        cr.abort()
+                    response = Response("{}", status=200)
+                elif self.get_static_file(httprequest.path):
                     response = request._serve_static()
                 elif request.db:
                     try:
