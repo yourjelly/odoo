@@ -55,10 +55,10 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
                 var reminderText = self.reminderOn ? _t('Favorite On') : _t('Set Favorite');
                 self.$('.o_wetrack_js_reminder_text').text(reminderText);
                 self._updateDisplay();
-                var message = self.reminderOn ? _t('Talk added to your Favorites') : _t('Talk removed from your Favorites');
-                self.notification.add(message, {
-                    type: 'info',
-                });
+//                var message = self.reminderOn ? _t('talk added to your Favorites') : _t('Talk removed from your Favorites');
+//                self.notification.add(message, {
+//                    type: 'info',
+//                });
                 if (self.reminderOn) {
                     Component.env.bus.trigger('open_notification_request', [
                         'add_track_to_favorite',
