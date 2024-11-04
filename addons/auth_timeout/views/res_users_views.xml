@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.ui.view" id="auth_passkey_users_form">
+        <field name="name">auth.passkey.users.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <page name="account_security" position="inside">
+                <group string="Session Lock">
+                    <field name="lock_timeout_inactivity"/>
+                    <field name="lock_timeout"/>
+                </group>
+            </page>
+        </field>
+    </record>
+</odoo>
