@@ -7,7 +7,7 @@
             <list string="Units of Measure" create="false">
                 <field name="name"/>
                 <field name="category_id"/>
-                <field name="uom_type"/>
+                <field name="factor"/>
             </list>
         </field>
     </record>
@@ -22,31 +22,11 @@
                          <group name="uom_details">
                              <field name="name"/>
                              <field name="category_id"/>
-                             <field name="uom_type" readonly="1"/>
-                             <label for="factor"
-                                invisible="uom_type != 'smaller'"/>
-                            <div invisible="uom_type != 'smaller'">
-                                <field name="factor"
-                                    digits="[42,5]"
-                                    readonly="uom_type == 'bigger'"/>
-                                <span class="oe_grey oe_inline">
-                                    e.g: 1*(reference unit)=ratio*(this unit)
-                                </span>
-                            </div>
-                            <label for="factor_inv"
-                                invisible="uom_type != 'bigger'"/>
-                            <div invisible="uom_type != 'bigger'">
-                                <field name="factor_inv"
-                                    digits="[42,5]"
-                                    readonly="uom_type != 'bigger'"/>
-                                <span class="oe_grey oe_inline">
-                                    e.g: 1*(this unit)=ratio*(reference unit)
-                                </span>
-                            </div>
+                             <field name="factor"/>
                          </group>
                          <group name="active_rounding">
-                             <field name="active" widget="boolean_toggle"/>
-                             <field name="rounding" digits="[42, 5]"/>
+                             <field name="active" widget="boolean_toggle" optional="hide"/>
+                             <field name="rounding"/>
                          </group>
                      </group>
                 </sheet>
@@ -92,19 +72,13 @@
                 <sheet>
                     <group>
                         <field name="name"/>
-                        <field name="reference_uom_id" invisible="1"/>
                     </group>
                     <notebook>
                         <page string="Units of Measure" name="uom_lines">
-                            <field name="uom_ids" force_save="1" context="{'default_uom_type': 'smaller', 'default_category_id': id}">
+                            <field name="uom_ids" force_save="1" context="{'default_category_id': id}">
                                 <list editable="bottom">
-                                    <field name="name" decoration-bf="uom_type == 'reference'"/>
-                                    <field name="uom_type" decoration-bf="uom_type == 'reference'"/>
-                                    <field name="factor" column_invisible="True"/>
-                                    <field name="factor_inv" column_invisible="True"/>
-                                    <field name="ratio" string="Ratio" readonly="uom_type == 'reference'" digits="[42,5]"/>
-                                    <field name="active"/>
-                                    <field name="rounding" digits="[42, 5]"/>
+                                    <field name="name" decoration-bf="factor == 1"/>
+                                    <field name="factor" string="Contained Quantity"/>
                                 </list>
                             </field>
                         </page>
