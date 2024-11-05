@@ -21,7 +21,7 @@ export class BuilderOverlayPlugin extends Plugin {
     }
 
     openBuilderOverlay(toolboxes) {
-        const toolbox = toolboxes[0];
+        const toolbox = toolboxes[toolboxes.length - 1];
         this.removeCurrentOverlay?.();
         if (!toolbox) {
             return;
