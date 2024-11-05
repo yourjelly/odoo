@@ -6,8 +6,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
+<<<<<<< 18.0
 "POT-Creation-Date: 2024-10-25 08:16+0000\n"
 "PO-Revision-Date: 2024-10-25 08:16+0000\n"
+||||||| 6eac4c5aaa985bd5dc2225b39b469a3b306a64ab
+"POT-Creation-Date: 2024-09-17 13:58+0000\n"
+"PO-Revision-Date: 2024-09-17 13:58+0000\n"
+=======
+"POT-Creation-Date: 2024-11-14 14:13+0000\n"
+"PO-Revision-Date: 2024-11-14 14:13+0000\n"
+>>>>>>> 54653fce6ae01fdd9b434a47a40b6df4df8e5f94
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -4579,11 +4587,15 @@ msgid "Create Automatic Entries"
 msgstr ""
 
 #. module: account
+<<<<<<< 18.0
 #: model:account.reconcile.model,name:account.1_reconcile_bill
 msgid "Create Bill"
 msgstr ""
 
 #. module: account
+||||||| 6eac4c5aaa985bd5dc2225b39b469a3b306a64ab
+=======
+>>>>>>> 54653fce6ae01fdd9b434a47a40b6df4df8e5f94
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "Create Entries upon Emails"
 msgstr ""
@@ -5280,11 +5292,6 @@ msgstr ""
 #. module: account
 #: model:account.incoterms,name:account.incoterm_DDP
 msgid "DELIVERED DUTY PAID"
-msgstr ""
-
-#. module: account
-#: model:ir.model.fields.selection,name:account.selection__account_cash_rounding__rounding_method__down
-msgid "DOWN"
 msgstr ""
 
 #. module: account
@@ -6123,6 +6130,7 @@ msgid "Domestic country of your accounting"
 msgstr ""
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_cash_rounding__rounding_method__down
 #: model:ir.model.fields.selection,name:account.selection__account_report__integer_rounding__down
 msgid "Down"
 msgstr ""
@@ -7445,6 +7453,7 @@ msgid "Growth Comparison"
 msgstr ""
 
 #. module: account
+<<<<<<< 18.0
 #: model:ir.model.fields.selection,name:account.selection__account_cash_rounding__rounding_method__half-up
 msgid "HALF-UP"
 msgstr ""
@@ -7460,6 +7469,24 @@ msgid "Hard Lock Date"
 msgstr ""
 
 #. module: account
+||||||| 6eac4c5aaa985bd5dc2225b39b469a3b306a64ab
+#: model:ir.model.fields.selection,name:account.selection__account_cash_rounding__rounding_method__half-up
+msgid "HALF-UP"
+msgstr ""
+
+#. module: account
+#: model:ir.model,name:account.model_ir_http
+msgid "HTTP Routing"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_report__integer_rounding__half-up
+msgid "Half-up (away from 0)"
+msgstr ""
+
+#. module: account
+=======
+>>>>>>> 54653fce6ae01fdd9b434a47a40b6df4df8e5f94
 #: model:ir.model.fields,field_description:account.field_res_config_settings__has_accounting_entries
 msgid "Has Accounting Entries"
 msgstr ""
@@ -9640,6 +9667,7 @@ msgid ""
 msgstr ""
 
 #. module: account
+<<<<<<< 18.0
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
 msgid "Mapping"
 msgstr ""
@@ -9651,6 +9679,10 @@ msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
+||||||| 6eac4c5aaa985bd5dc2225b39b469a3b306a64ab
+#: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
+=======
+>>>>>>> 54653fce6ae01fdd9b434a47a40b6df4df8e5f94
 #: model_terms:ir.ui.view,arch_db:account.report_statement
 msgid "Marc Demo"
 msgstr ""
@@ -10075,6 +10107,12 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Navigate easily through reports and see what is behind the numbers"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_cash_rounding__rounding_method__half-up
+#: model:ir.model.fields.selection,name:account.selection__account_report__integer_rounding__half-up
+msgid "Nearest"
 msgstr ""
 
 #. module: account
@@ -11396,11 +11434,6 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__payment_receipt_title
 msgid "Payment Receipt Title"
-msgstr ""
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
-msgid "Payment Ref"
 msgstr ""
 
 #. module: account
@@ -12777,6 +12810,11 @@ msgid "STANDARD TERMS AND CONDITIONS OF SALE"
 msgstr ""
 
 #. module: account
+#: model:account.journal,name:account.1_hr_payroll_account_journal
+msgid "Salaries"
+msgstr ""
+
+#. module: account
 #: model:account.account,name:account.1_expense_salary
 msgid "Salary Expenses"
 msgstr ""
@@ -12881,11 +12919,6 @@ msgid "Sample Memo"
 msgstr ""
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
-msgid "Sample Ref"
-msgstr ""
-
-#. module: account
 #. odoo-python
 #: code:addons/account/models/account_journal_dashboard.py:0
 msgid "Sample data"
@@ -12916,6 +12949,7 @@ msgstr ""
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_payment.py:0
+#: code:addons/account/wizard/account_payment_register.py:0
 msgid "Scan me with your banking app."
 msgstr ""
 
@@ -13164,6 +13198,13 @@ msgstr ""
 #. module: account
 #: model:ir.actions.server,name:account.ir_cron_account_move_send_ir_actions_server
 msgid "Send invoices automatically"
+msgstr ""
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/js/tours/account.js:0
+msgid ""
+"Send invoices to your customers in no time with the <b>Invoicing app</b>."
 msgstr ""
 
 #. module: account
@@ -13632,6 +13673,11 @@ msgstr ""
 msgid ""
 "Specify which way will be used to round the invoice amount to the rounding "
 "precision"
+msgstr ""
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_form
+msgid "Standard communication"
 msgstr ""
 
 #. module: account
@@ -15560,8 +15606,19 @@ msgstr ""
 
 #. module: account
 #. odoo-python
+<<<<<<< 18.0
 #: code:addons/account/wizard/account_payment_register.py:0
 msgid "This is the full amount."
+||||||| 6eac4c5aaa985bd5dc2225b39b469a3b306a64ab
+#: code:addons/account/models/account_journal.py:0
+#, python-format
+msgid ""
+"This journal is associated with a payment method. You cannot archive it"
+=======
+#: code:addons/account/models/account_journal.py:0
+msgid ""
+"This journal is associated with a payment method. You cannot archive it"
+>>>>>>> 54653fce6ae01fdd9b434a47a40b6df4df8e5f94
 msgstr ""
 
 #. module: account
@@ -15570,6 +15627,7 @@ msgstr ""
 msgid "This is the next unreconciled installment."
 msgstr ""
 
+<<<<<<< 18.0
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_payment_register.py:0
@@ -15589,6 +15647,10 @@ msgid ""
 "This journal is associated with a payment method. You cannot archive it"
 msgstr ""
 
+||||||| 6eac4c5aaa985bd5dc2225b39b469a3b306a64ab
+
+=======
+>>>>>>> 54653fce6ae01fdd9b434a47a40b6df4df8e5f94
 #. module: account
 #: model:ir.model.fields,help:account.field_account_report_line__hide_if_zero
 msgid ""
@@ -16105,11 +16167,6 @@ msgid "Type of the exception activity on record."
 msgstr ""
 
 #. module: account
-#: model:ir.model.fields.selection,name:account.selection__account_cash_rounding__rounding_method__up
-msgid "UP"
-msgstr ""
-
-#. module: account
 #. odoo-python
 #: code:addons/account/models/account_bank_statement.py:0
 msgid ""
@@ -16304,6 +16361,7 @@ msgid "UoM"
 msgstr ""
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_cash_rounding__rounding_method__up
 #: model:ir.model.fields.selection,name:account.selection__account_report__integer_rounding__up
 msgid "Up"
 msgstr ""

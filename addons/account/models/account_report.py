@@ -55,8 +55,16 @@ class AccountReport(models.Model):
     )
     load_more_limit = fields.Integer(string="Load More Limit")
     search_bar = fields.Boolean(string="Search Bar")
+<<<<<<< 18.0
     prefix_groups_threshold = fields.Integer(string="Prefix Groups Threshold", default=4000)
     integer_rounding = fields.Selection(string="Integer Rounding", selection=[('HALF-UP', "Half-up (away from 0)"), ('UP', "Up"), ('DOWN', "Down")])
+||||||| 6eac4c5aaa985bd5dc2225b39b469a3b306a64ab
+    prefix_groups_threshold = fields.Integer(string="Prefix Groups Threshold")
+    integer_rounding = fields.Selection(string="Integer Rounding", selection=[('HALF-UP', "Half-up (away from 0)"), ('UP', "Up"), ('DOWN', "Down")])
+=======
+    prefix_groups_threshold = fields.Integer(string="Prefix Groups Threshold")
+    integer_rounding = fields.Selection(string="Integer Rounding", selection=[('HALF-UP', "Nearest"), ('UP', "Up"), ('DOWN', "Down")])
+>>>>>>> 54653fce6ae01fdd9b434a47a40b6df4df8e5f94
 
     default_opening_date_filter = fields.Selection(
         string="Default Opening",
