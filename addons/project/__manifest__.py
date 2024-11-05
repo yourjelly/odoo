@@ -199,6 +199,11 @@
 
             'bus/static/src/**/*.js',
 
+            # To be able to launch tour js in project sharing
+            'web_tour/static/src/tour_pointer/**/*',
+            'web_tour/static/src/tour_service/**/*',
+            'web/static/lib/hoot-dom/**/*',
+
             'html_editor/static/src/**/*',
 
             'mail/static/src/scss/variables/*.scss',
