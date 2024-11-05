@@ -534,6 +534,7 @@ class EventTrackController(http.Controller):
         ]
 
     @http.route('/event/post-event-track-email-reminder', type='http', auth='public', methods=['POST'], website=True, sitemap=False, readonly=True)
-    def post_event_track_email_reminder(self):
-        print(request)
+    def post_event_track_email_reminder(self, **kwargs):
+        user = request.env['res.users'].browse(request.uid)
+        user.event_track_email_reminder = kwargs.get("email")
 
