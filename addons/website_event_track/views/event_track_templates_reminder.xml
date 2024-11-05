@@ -9,8 +9,8 @@
 <template id="track_widget_reminder">
     <t t-set="_btn_style" t-value="'btn-link' if reminder_light else (track.is_reminder_on and '') or ''"/>
     <t t-set="_btn_size" t-value="'btn-sm' if reminder_small else ''"/>
-    <div t-att-class="'o_wetrack_js_reminder %s %s' % (_btn_style, _btn_size)" role="button" data-bs-toggle="modal"
-        data-bs-target="#modal_email_reminder">
+    <div t-att-class="'o_wetrack_js_reminder %s %s' % (_btn_style, _btn_size)" role="button" t-att="{'data-bs-toggle': 'modal', 'data-bs-target':'#modal_email_reminder'} if not track.is_reminder_on else ''">
+<!--        <t t-if="not track.is_reminder_on" data-bs-toggle="modal" data-bs-target="#modal_email_reminder"/>-->
         <t t-if="track.is_reminder_on" t-set="title">Favorite On</t>
         <t t-else="track.is_reminder_on" t-set="title">Set Favorite</t>
         <i t-att-class="'fa fa-bell%s %s' % ('' if track.is_reminder_on else '-o', 'text-white' if reminder_light and not light_theme else 'text-dark')"
