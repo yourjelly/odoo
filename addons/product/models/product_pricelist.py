@@ -47,12 +47,16 @@ class ProductPricelist(models.Model):
         comodel_name='product.pricelist.item',
         inverse_name='pricelist_id',
         string="Pricelist Rules",
-        domain=[
+        domain=lambda self: self._compute_item_ids(),
+        copy=True)
+
+    def _compute_item_ids(self):
+        domain = [
             '&',
             '|', ('product_tmpl_id', '=', None), ('product_tmpl_id.active', '=', True),
             '|', ('product_id', '=', None), ('product_id.active', '=', True),
-        ],
-        copy=True)
+        ]
+        return domain
 
     @api.depends('currency_id')
     def _compute_display_name(self):
