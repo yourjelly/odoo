@@ -187,8 +187,13 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
             res = _create(self, vals_list)
             created_moves.append(res.id)
             return res
+        context = context or {}
+        context.update({
+            'default_move_type': 'out_invoice',
+            'default_journal_id': self.company_data['default_journal_sale'].id
+        })
         with patch.object(AccountMove, 'create', _save_create):
-            self.env['mail.thread'].message_process('account.move', email_raw)
+            self.env['mail.thread'].with_context(context).message_process('account.move', email_raw)
         attachments = self.env['ir.attachment'].search_read([('res_model', '=', 'account.move'), ('res_id', '=', created_moves)], ['name', 'res_id'])
 
         invoice_number = 0
