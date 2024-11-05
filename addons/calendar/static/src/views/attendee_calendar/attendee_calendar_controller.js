@@ -87,6 +87,11 @@ export class AttendeeCalendarController extends CalendarController {
         ) {
             if (record.rawRecord.recurrency) {
                 this.openRecurringDeletionWizard(record);
+            } else if (
+                user.partnerId === record.attendeeId &&
+                record.rawRecord.attendees_count == 1
+            ) {
+                super.deleteRecord(...arguments);
             } else {
                 const action = this.orm.call("calendar.event", "action_unlink_event", [
                     record.id,

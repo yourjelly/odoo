@@ -174,7 +174,8 @@ class ResUsers(models.Model):
 
     def _has_any_active_synchronization(self):
         """
-            Overridable method for checking if user has any synchronization active in inherited modules.
-            :return: boolean indicating if any synchronization is active.
+        Overridable method for checking if user has any synchronization active in inherited modules.
+
+        :return: boolean indicating if any synchronization is active.
         """
         return False

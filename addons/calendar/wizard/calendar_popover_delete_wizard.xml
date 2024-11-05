@@ -40,8 +40,8 @@
                             name="action_send_mail_and_delete"
                             type="object"
                             class="btn-primary o_cw_send_notify_delete"/>
-                    <button string="Cancel"
-                            name="action_cancel"
+                    <button string="Delete"
+                            name="action_delete"
                             type="object"
                             class="btn-primary mx-1"/>
                     <button string="Discard"

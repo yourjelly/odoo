@@ -41,11 +41,18 @@ export class CalendarFormController extends FormController {
     }
 
     async deleteRecord() {
-        const action = await this.orm.call("calendar.event", "action_unlink_event", [
-            this.model.root.resId,
-            this.model.root.data.partner_ids.resIds,
-            this.model.root.data.recurrence_update,
-        ]);
-        this.actionService.doAction(action);
+        if (
+            this.model.root._values.attendees_count == 1 &&
+            this.model.root._values.user_id[0] !== this.model.root._values.partner_ids._currentIds[0]
+        ){
+            super.deleteRecord(...arguments);
+        } else {
+            const action = await this.orm.call("calendar.event", "action_unlink_event", [
+                this.model.root.resId,
+                this.model.root.data.partner_ids.resIds,
+                this.model.root.data.recurrence_update,
+            ]);
+            this.actionService.doAction(action);
+        }
     }
 }

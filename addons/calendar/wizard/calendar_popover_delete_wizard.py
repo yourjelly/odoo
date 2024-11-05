@@ -20,7 +20,19 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
     )
 
     def close(self):
-        return self.record.action_unlink_event(self.record.partner_id.id, self.delete)
+        if self.record.attendees_count == 1 and self.record.user_id.partner_id == self.record.partner_ids:
+            if not self.record or not self.delete:
+                pass
+            elif self.delete == 'one':
+                self.record.unlink()
+            else:
+                switch = {
+                    'next': 'future_events',
+                    'all': 'all_events'
+                }
+                self.record.action_mass_deletion(switch.get(self.delete, ''))
+        else:
+            return self.record.action_unlink_event(self.record.partner_id.id, self.delete)
 
     @api.depends('record')
     def _compute_recipient_ids(self):
@@ -47,23 +59,14 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
                 options={'post_process': True},
             )[wizard.record.id]
 
-    def action_cancel(self):
-        return {'type': 'ir.actions.act_window_close'}
-
-    def action_send_mail_and_delete(self):
-        """
-        Send email notification and delete the event based on the specified deletion type.
+    def action_delete(self):
+        """ Delete the event based on the specified deletion type.
 
         :return: Action URL to redirect to the calendar view
         """
         self.ensure_one()
         event = self.record
         deletion_type = self._context.get('default_recurrence')
-
-        # Send email notification.
-        self.env.ref('calendar.calendar_template_delete_event').send_mail(
-            event.id, email_layout_xmlid='mail.mail_notification_light', force_send=True
-        )
 
         # Unlink recurrent events.
         if event.recurrency:
@@ -79,3 +82,13 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
             'target': 'self',
             'url': '/odoo/calendar'
         }
+
+    def action_send_mail_and_delete(self):
+        """
+        Send email notification and delete the event based on the specified deletion type.
+        """
+        # Send email notification.
+        self.env.ref('calendar.calendar_template_delete_event').send_mail(
+            self.record.id, email_layout_xmlid='mail.mail_notification_light', force_send=True
+        )
+        return self.action_delete()
