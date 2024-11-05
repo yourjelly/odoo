@@ -2317,9 +2317,12 @@ const ListUserValueWidget = UserValueWidget.extend({
      */
     _addItemToTable(id, value = this.el.dataset.defaultValue || _t("Item"), recordData) {
         const trEl = document.createElement('tr');
+        const mediaMatchRegex = value.match(/^(?:https?:\/\/)?(?:www\.)?([^\/\.:]+)/);
+        const mediaEl =
+            mediaMatchRegex && mediaMatchRegex[1] !== "example" ? mediaMatchRegex[1] : "pencil";
         if (!this.el.dataset.unsortable) {
             const draggableEl = document.createElement('we-button');
-            draggableEl.classList.add('o_we_drag_handle', 'o_we_link', 'fa', 'fa-fw', 'fa-arrows');
+            draggableEl.classList.add('o_we_drag_handle', 'o_we_link', 'fa', 'fa-fw', `fa-${mediaEl}`);
             draggableEl.dataset.noPreview = 'true';
             const draggableTdEl = document.createElement('td');
             draggableTdEl.appendChild(draggableEl);
