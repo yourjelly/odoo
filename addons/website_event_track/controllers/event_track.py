@@ -533,8 +533,24 @@ class EventTrackController(http.Controller):
             for dt in datetimes
         ]
 
+    @http.route('/event/has_email_reminder', type="json", auth="public", website=True)
+    def has_email_reminder(self):
+        result = {'hasEmailReminder': True if request.env['res.users'].browse(request.uid).event_track_email_reminder else False}
+        return result
+
+    @http.route('/event/get_email_reminder_modal', type="http", auth="public", method=["POST"], csrf=False, website=True)
+    def get_email_reminder_modal(self):
+        print("passe ici.")
+        print(http.request.render("website_event_track.modal_email_reminder"))
+        return http.request.render("website_event_track.modal_email_reminder")
+        # return {"modal": http.request.render("website_event_track.modal_email_reminder")}
+
     @http.route('/event/post-event-track-email-reminder', type='http', auth='public', methods=['POST'], website=True, sitemap=False, readonly=True)
     def post_event_track_email_reminder(self, **kwargs):
         user = request.env['res.users'].browse(request.uid)
         user.event_track_email_reminder = kwargs.get("email")
 
+    @http.route('/event/send_email_reminder', type="json", auth="public", website=True)
+    def send_email_reminder(self):
+        template = request.env.ref("website_event_track.email_reminder").sudo()
+        template.send_mail(1)

@@ -55,6 +55,7 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
                 var reminderText = self.reminderOn ? _t('Favorite On') : _t('Set Favorite');
                 self.$('.o_wetrack_js_reminder_text').text(reminderText);
                 self._updateDisplay();
+                self._sendReminderMail();
 //                var message = self.reminderOn ? _t('talk added to your Favorites') : _t('Talk removed from your Favorites');
 //                self.notification.add(message, {
 //                    type: 'info',
@@ -84,6 +85,22 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
         }
     },
 
+    _sendReminderMail: function(){
+        rpc('/event/has_email_reminder').then( function (result){
+            if (result.hasEmailReminder){
+                console.log("ici dans hasEmailReminder" + " " + result.hasEmailReminder)
+                rpc('/event/send_email_reminder');
+            }
+            else {
+                console.log("Inside get mail reminder modal");
+                rpc('/event/get_email_reminder_modal', {'method': 'search_read'}).then(function (result) {
+                console.log(result.modal)
+                   $("#modal_email_reminder_container").append(result.modal)
+                })
+                console.log("Inside get mail reminder modal");
+            }
+        })
+    },
 });
 
 export default publicWidget.registry.websiteEventTrackReminder;
