@@ -70,6 +70,7 @@ class TestEventNotifications(TransactionCase, MailCase, CronMixinCase):
         )
 
     def test_message_invite_self(self):
+        self.event.user_id = self.user
         with self.assertNoNotifications():
             self.event.with_user(self.user).partner_ids = self.partner
 

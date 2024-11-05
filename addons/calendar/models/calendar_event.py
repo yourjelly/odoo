@@ -286,11 +286,11 @@ class CalendarEvent(models.Model):
     @api.depends('partner_ids')
     @api.depends_context('uid')
     def _compute_user_can_edit(self):
+        self.user_can_edit = False
         new_events = self.filtered(lambda ev: isinstance(ev.id, models.NewId))
         new_events.user_can_edit = True
         edit_events = (self - new_events)._filtered_access('write')
         edit_events.user_can_edit = True
-        (self - edit_events - new_events).user_can_edit = False
 
     @api.depends('partner_ids')
     def _compute_invalid_email_partner_ids(self):
