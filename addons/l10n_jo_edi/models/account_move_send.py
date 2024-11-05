@@ -5,13 +5,13 @@ class AccountMoveSend(models.AbstractModel):
     _inherit = "account.move.send"
 
     @api.model
-    def _is_jo_edi_applicable(self, move):
+    def _l10n_jo_is_edi_applicable(self, move):
         return move.l10n_jo_edi_is_needed and move.l10n_jo_edi_state == 'to_send'
 
     def _get_all_extra_edis(self) -> dict:
         # EXTENDS 'account'
         res = super()._get_all_extra_edis()
-        res.update({'jo_edi': {'label': _("JoFotara (Jordan EDI)"), 'is_applicable': self._is_jo_edi_applicable}})
+        res.update({'jo_edi': {'label': _("JoFotara (Jordan EDI)"), 'is_applicable': self._l10n_jo_is_edi_applicable}})
         return res
 
     # -------------------------------------------------------------------------
@@ -21,7 +21,7 @@ class AccountMoveSend(models.AbstractModel):
     def _get_alerts(self, moves, moves_data):
         # EXTENDS 'account'
         alerts = super()._get_alerts(moves, moves_data)
-        if non_eligible_jo_moves := moves.filtered(lambda m: 'jo_edi' in moves_data[m]['extra_edis'] and not self._is_jo_edi_applicable(m)):
+        if non_eligible_jo_moves := moves.filtered(lambda m: 'jo_edi' in moves_data[m]['extra_edis'] and not self._l10n_jo_is_edi_applicable(m)):
             alerts['l10n_jo_edi_non_eligible_moves'] = {
                 'message': _(
                     "JoFotara e-invoicing was enabled but the following invoices cannot be e-invoiced:\n%(moves)s\n",
@@ -65,16 +65,12 @@ class AccountMoveSend(models.AbstractModel):
         super()._call_web_service_before_invoice_pdf_render(invoices_data)
 
         for invoice, invoice_data in invoices_data.items():
-            # Not all invoices may need EDI.
             if 'jo_edi' in invoice_data['extra_edis']:
-                if error := invoice.with_company(invoice.company_id)._l10n_jo_edi_send():
-                    invoice.l10n_jo_edi_error = error
+                if error_message := invoice.with_company(invoice.company_id)._l10n_jo_edi_send():
                     invoice_data["error"] = {
                         "error_title": _("Errors when submitting the JoFotara e-invoice:"),
-                        "errors": [error.args[0]],
+                        "errors": [error_message],
                     }
-                else:
-                    invoice.l10n_jo_edi_error = False
 
                 if self._can_commit():
                     self._cr.commit()

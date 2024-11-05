@@ -323,7 +323,7 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
 
     def _get_tax_category_list(self, customer, supplier, tax):
         def get_tax_jo_ubl_code(tax):
-            if tax._is_exempt_jo_tax():
+            if tax._l10n_jo_is_exempt_tax():
                 return "Z"
             if tax.amount:
                 return "S"

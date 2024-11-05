@@ -64,7 +64,7 @@
 	</cac:SellerSupplierParty>
 	<cac:PaymentMeans>
 		<cbc:PaymentMeansCode listID="UN/ECE 4461">10</cbc:PaymentMeansCode>
-		<cbc:InstructionNote>change price</cbc:InstructionNote>
+		<cbc:InstructionNote>Reversal of: EIN00017, change price</cbc:InstructionNote>
 	</cac:PaymentMeans>
 	<cac:AllowanceCharge>
 		<cbc:ChargeIndicator>false</cbc:ChargeIndicator>

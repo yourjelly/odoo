@@ -63,7 +63,7 @@
 	</cac:SellerSupplierParty>
 	<cac:PaymentMeans>
 		<cbc:PaymentMeansCode listID="UN/ECE 4461">10</cbc:PaymentMeansCode>
-		<cbc:InstructionNote>Test Return</cbc:InstructionNote>
+		<cbc:InstructionNote>Reversal of: TestEIN013, Test Return</cbc:InstructionNote>
 	</cac:PaymentMeans>
 	<cac:AllowanceCharge>
 		<cbc:ChargeIndicator>false</cbc:ChargeIndicator>
