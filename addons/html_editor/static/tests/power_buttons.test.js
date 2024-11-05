@@ -15,6 +15,16 @@ describe.tags("desktop")("visibility", () => {
         expect(".o_we_power_buttons").not.toBeVisible();
     });
 
+    test("should show power buttons on undo if have empty P tag", async () => {
+        const { editor } = await setupEditor("<p>[]<br></p>");
+        expect(".o_we_power_buttons").toBeVisible();
+        insertText(editor, "a");
+        await animationFrame();
+        expect(".o_we_power_buttons").not.toBeVisible();
+        await press(["ctrl", "z"]);
+        expect(".o_we_power_buttons").toBeVisible();
+    });
+
     test("should not show power buttons on heading tags", async () => {
         await setupEditor("<h1>[]<br></h1>");
         expect(".o_we_power_buttons").not.toBeVisible();

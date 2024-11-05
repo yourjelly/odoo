@@ -580,6 +580,7 @@ export class HistoryPlugin extends Plugin {
             this.revertMutations(this.steps[pos].mutations, { forNewStep: true });
             this.setSerializedSelection(this.steps[pos].selection);
             this.addStep({ stepState: "undo" });
+            this.dispatch("ADD_STEP");
             // Consider the last position of the history as an undo.
         }
     }
