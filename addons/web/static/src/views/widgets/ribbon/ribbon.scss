@@ -43,7 +43,7 @@
         --Ribbon-gap-right-default: -#{$border-width};
 
         pointer-events: none;
-        margin-top: var(--Ribbon-gap-top, var(--Ribbon-gap-top-default));
+        top: var(--Ribbon-gap-top, var(--Ribbon-gap-top-default));
         right: var(--Ribbon-gap-right, var(--Ribbon-gap-right-default));
 
         & span {
