@@ -895,10 +895,8 @@ class TestFlushSearch(TransactionCase):
 
         with self.assertQueries(['''
             UPDATE "test_new_api_payment"
-            SET "move_id" = "__tmp"."move_id"::int4,
-                "write_date" = "__tmp"."write_date"::timestamp,
-                "write_uid" = "__tmp"."write_uid"::int4
-            FROM (VALUES %s) AS "__tmp"("id", "move_id", "write_date", "write_uid")
+            SET "move_id" = "__tmp"."move_id"::int4
+            FROM (VALUES %s) AS "__tmp"("id", "move_id")
             WHERE "test_new_api_payment"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_new_api_payment"."id"
@@ -913,10 +911,8 @@ class TestFlushSearch(TransactionCase):
 
         with self.assertQueries(['''
             UPDATE "test_new_api_move"
-            SET "tag_repeat" = "__tmp"."tag_repeat"::int4,
-                "write_date" = "__tmp"."write_date"::timestamp,
-                "write_uid" = "__tmp"."write_uid"::int4
-            FROM (VALUES %s) AS "__tmp"("id", "tag_repeat", "write_date", "write_uid")
+            SET "tag_repeat" = "__tmp"."tag_repeat"::int4
+            FROM (VALUES %s) AS "__tmp"("id", "tag_repeat")
             WHERE "test_new_api_move"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_new_api_payment"."id"
@@ -994,10 +990,8 @@ class TestFlushSearch(TransactionCase):
 
         with self.assertQueries(['''
             UPDATE "test_new_api_city"
-            SET "country_id" = "__tmp"."country_id"::int4,
-                "write_date" = "__tmp"."write_date"::timestamp,
-                "write_uid" = "__tmp"."write_uid"::int4
-            FROM (VALUES %s) AS "__tmp"("id", "country_id", "write_date", "write_uid")
+            SET "country_id" = "__tmp"."country_id"::int4
+            FROM (VALUES %s) AS "__tmp"("id", "country_id")
             WHERE "test_new_api_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_new_api_city"."id"
@@ -1041,10 +1035,8 @@ class TestFlushSearch(TransactionCase):
 
         with self.assertQueries(['''
             UPDATE "test_new_api_city"
-            SET "name" = "__tmp"."name"::VARCHAR,
-                "write_date" = "__tmp"."write_date"::timestamp,
-                "write_uid" = "__tmp"."write_uid"::int4
-            FROM (VALUES %s) AS "__tmp"("id", "name", "write_date", "write_uid")
+            SET "name" = "__tmp"."name"::VARCHAR
+            FROM (VALUES %s) AS "__tmp"("id", "name")
             WHERE "test_new_api_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_new_api_city"."id", "test_new_api_city"."name"

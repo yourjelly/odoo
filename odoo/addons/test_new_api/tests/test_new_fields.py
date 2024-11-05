@@ -4468,7 +4468,9 @@ def insert(model, *fnames, rowcount=1):
 def update(model, *fnames):
     """ Return the expected query string to UPDATE the given columns. """
     table = f'"{model._table}"'
-    fnames = sorted(fnames + ('write_uid', 'write_date'))
+    # we don't necessarily add fields 'write_uid' and 'write_date' because they
+    # only appear here when their value actually changes
+    fnames = sorted(fnames)
     columns = ", ".join(f'"{column}"' for column in fnames)
     assignments = ", ".join(
         f'"{fname}" = "__tmp"."{fname}"::{model._fields[fname].column_type[1]}'
