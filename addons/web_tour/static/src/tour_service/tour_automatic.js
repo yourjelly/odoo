@@ -1,7 +1,7 @@
 import { tourState } from "./tour_state";
 import { config as transitionConfig } from "@web/core/transition";
 import { TourStepAutomatic } from "./tour_step_automatic";
-import { MacroEngine } from "@web/core/macro";
+import { Macro } from "@web/core/macro";
 import { browser } from "@web/core/browser/browser";
 import { setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
 
@@ -12,10 +12,6 @@ export class TourAutomatic {
     constructor(data) {
         Object.assign(this, data);
         this.steps = this.steps.map((step, index) => new TourStepAutomatic(step, this, index));
-        this.macroEngine = new MacroEngine({
-            target: document,
-            defaultCheckDelay: 500,
-        });
         const tourConfig = tourState.getCurrentConfig();
         this.stepDelay = tourConfig.stepDelay;
     }
@@ -56,12 +52,17 @@ export class TourAutomatic {
                             // This delay is important for making the current set of tour tests pass.
                             // IMPROVEMENT: Find a way to remove this delay.
                             await new Promise((resolve) => requestAnimationFrame(resolve));
-                            await new Promise((resolve) =>
-                                browser.setTimeout(resolve, this.stepDelay)
-                            );
+                            if (this.stepDelay > 0) {
+                                await new Promise((resolve) =>
+                                    browser.setTimeout(resolve, this.stepDelay)
+                                );
+                            }
                         },
                     },
                     {
+                        initialDelay: () => {
+                            return this.previousStepIsJustACheck ? 0 : null;
+                        },
                         trigger: () => step.findTrigger(),
                         timeout,
                         onTimeout: () => {
@@ -70,6 +71,7 @@ export class TourAutomatic {
                             );
                         },
                         action: async () => {
+                            this.previousStepIsJustACheck = !this.currentStep.hasAction;
                             if (this.debugMode) {
                                 this.paused = step.pause;
                                 if (!step.skipped && this.showPointerDuration > 0 && step.element) {
@@ -96,7 +98,7 @@ export class TourAutomatic {
                 ];
             });
 
-        const macro = {
+        this.macro = new Macro({
             name: this.name,
             checkDelay: this.checkDelay,
             steps: macroSteps,
@@ -109,11 +111,11 @@ export class TourAutomatic {
                 transitionConfig.disabled = false;
                 callback();
             },
-        };
+        });
 
         transitionConfig.disabled = true;
         //Activate macro in exclusive mode (only one macro per MacroEngine)
-        this.macroEngine.activate(macro, true);
+        this.macro.start();
     }
 
     get describeWhereIFailed() {

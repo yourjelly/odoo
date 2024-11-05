@@ -58,7 +58,7 @@ export const ACTION_HELPERS = {
 
 const mutex = new Mutex();
 
-class Macro {
+export class Macro {
     currentIndex = 0;
     isComplete = false;
     errored = false;
@@ -75,32 +75,44 @@ class Macro {
         this.onComplete = this.onComplete || (() => {});
         this.onStep = this.onStep || (() => {});
         this.stepElFound = new Array(this.steps.length).fill(false);
+        this.stepHasStarted = new Array(this.steps.length).fill(false);
+        this.observer = new MacroMutationObserver(() => this.advance("mutation"));
     }
 
-    async advance() {
+    async advance(from) {
         //Only one case, when browser refresh just after the last step.
         if (!this.currentStep && this.currentIndex === 0) {
             await delay(300);
             this.stop();
         }
-        if (this.isComplete) {
+        // Make sure to take the only possible path.
+        // A step always starts with "next".
+        // A step can only be continued with "mutation".
+        // We abort when the macro is finished or if a mutex occurs afterwards.
+        if (
+            this.isComplete ||
+            (from === "next" && this.stepHasStarted[this.currentIndex]) ||
+            (from === "mutation" && !this.stepHasStarted[this.currentIndex]) ||
+            (from === "mutation" && this.currentElement)
+        ) {
             return;
         }
-        this.setTimer();
-        let proceedToAction = true;
-        if (this.currentStep.trigger) {
-            proceedToAction = this.findTrigger();
-        }
-        if (proceedToAction) {
-            this.safeCall(this.onStep, this.currentElement, this.currentStep);
-            const actionResult = await this.performAction();
-            this.clearTimer();
-            if (!actionResult) {
-                // If falsy action result, it means the action worked properly.
-                // So we can proceed to the next step.
-                this.increment();
-                await this.advance();
+        let debounceDelay = this.debounceDelay;
+        // Called only once per step.
+        if (!this.stepHasStarted[this.currentIndex]) {
+            this.setTimer();
+            this.stepHasStarted[this.currentIndex] = true;
+            if (!this.currentStep.trigger) {
+                await this.doAction();
             }
+            debounceDelay = 150;
+            if (this.currentStep?.initialDelay) {
+                const initialDelay = parseFloat(this.currentStep.initialDelay());
+                debounceDelay = initialDelay >= 0 ? initialDelay : debounceDelay;
+            }
+        }
+        if (this.currentStep?.trigger && !this.currentElement) {
+            this.debounceFindTrigger(debounceDelay);
         }
     }
 
@@ -108,7 +120,7 @@ class Macro {
      * Find the trigger and assess whether it can continue on performing the actions.
      * @returns {boolean}
      */
-    findTrigger() {
+    async findTrigger() {
         if (this.isComplete) {
             return;
         }
@@ -125,14 +137,18 @@ class Macro {
         } catch (error) {
             this.stop(`Error when trying to find trigger: ${error.message}`);
         }
-        return !!this.currentElement;
+        // RUN ACTION
+        if (this.currentElement) {
+            await this.doAction();
+        }
     }
 
     /**
      * Calls the `step.action` expecting no return to be successful.
      */
-    async performAction() {
-        let actionResult;
+    async doAction() {
+        this.clearTimer();
+        let actionResult = false;
         try {
             const action = this.currentStep.action;
             if (action in ACTION_HELPERS) {
@@ -141,9 +157,12 @@ class Macro {
                 actionResult = await this.safeCall(action, this.currentElement);
             }
         } catch (error) {
-            this.stop(`ERROR IN ACTION: ${error.message}`);
+            this.stop(`Step failed when try to run action : ${error.message}`);
         }
-        return actionResult;
+        this.increment();
+        if (!actionResult) {
+            await this.advance("next");
+        }
     }
 
     get currentStep() {
@@ -194,25 +213,49 @@ class Macro {
     }
 
     clearTimer() {
+        this.resetDebounce();
         if (this.timer) {
             browser.clearTimeout(this.timer);
         }
     }
 
+    debounceFindTrigger(delay) {
+        this.resetDebounce();
+        this.debouncedFindTrigger = browser.setTimeout(
+            () => mutex.exec(() => this.findTrigger()),
+            delay
+        );
+    }
+
+    resetDebounce() {
+        if (this.debouncedFindTrigger) {
+            browser.clearTimeout(this.debouncedFindTrigger);
+        }
+    }
+
+    start(target = document) {
+        this.observer.observe(target);
+        this.advance("next");
+    }
+
     stop(error) {
         this.clearTimer();
         this.isComplete = true;
-        if (error) {
-            this.errored = true;
-            if (this.onError) {
-                this.onError(error, this.currentStep, this.currentIndex);
-            } else {
-                console.error(error);
+        this.observer.disconnect();
+        if (!this.callbacked) {
+            this.callbacked = true;
+            if (error) {
+                this.errored = true;
+                if (this.onError) {
+                    this.onError(error, this.currentStep, this.currentIndex);
+                } else {
+                    console.error(error);
+                }
+            } else if (this.currentIndex === this.steps.length && !this.errored) {
+                mutex.getUnlockedDef().then(() => {
+                    this.onComplete();
+                });
             }
-        } else if (this.currentIndex === this.steps.length && !this.errored) {
-            mutex.getUnlockedDef().then(() => {
-                this.onComplete();
-            });
         }
         return;
     }
