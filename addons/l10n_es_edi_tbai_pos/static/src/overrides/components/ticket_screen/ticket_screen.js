@@ -5,7 +5,7 @@ import { AddTbaiRefundReasonPopup } from "@l10n_es_edi_tbai_pos/app/add_tbai_ref
 
 patch(TicketScreen.prototype, {
     async addAdditionalRefundInfo(order, destinationOrder) {
-        if (this.pos.company.l10n_es_tbai_is_enabled && order.state == "invoiced") {
+        if (this.pos.company.l10n_es_tbai_is_enabled && order.account_move != false) {
             const payload = await makeAwaitable(this.dialog, AddTbaiRefundReasonPopup, {
                 order: destinationOrder,
             });

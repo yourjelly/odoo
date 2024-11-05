@@ -225,7 +225,7 @@ class TestPoSBasicConfig(TestPoSCommon):
             self.assertEqual(1, len(invoiced_order), 'Only one order is invoiced in this test.')
 
             # check state of orders before validating the session.
-            self.assertEqual('invoiced', invoiced_order.state, msg="state should be 'invoiced' for invoiced orders.")
+            self.assertEqual('done', invoiced_order.state, msg="state should be 'done' for invoiced orders.")
             uninvoiced_orders = self.pos_session.order_ids - invoiced_order
             self.assertTrue(
                 all([order.state == 'paid' for order in uninvoiced_orders]),

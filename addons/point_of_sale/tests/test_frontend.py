@@ -583,7 +583,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ChromeTour', login="pos_user")
-        n_invoiced = self.env['pos.order'].search_count([('state', '=', 'invoiced')])
+        n_invoiced = self.env['pos.order'].search_count([('account_move', '!=', False)])
         n_paid = self.env['pos.order'].search_count([('state', '=', 'paid')])
         self.assertEqual(n_invoiced, 1, 'There should be 1 invoiced order.')
         self.assertEqual(n_paid, 2, 'There should be 2 paid order.')
@@ -809,7 +809,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenRoundingHalfUpCashAndBank', login="pos_user")
 
-        invoiced_orders = self.env['pos.order'].search([('state', '=', 'invoiced')])
+        invoiced_orders = self.env['pos.order'].search([('account_move', '!=', False)])
         self.assertEqual(len(invoiced_orders), 2, 'There should be 2 invoiced orders.')
 
         for order in invoiced_orders:

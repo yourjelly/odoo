@@ -131,5 +131,5 @@ class TestPosEdi(TestEsEdiTbaiCommonGipuzkoa, TestPointOfSaleCommon):
         pos_refund.to_invoice = True
         self.pay_pos_order(pos_refund)
 
-        self.assertEqual(pos_refund.state, 'invoiced')
+        self.assertEqual(pos_refund.state, 'paid')
         self.assertFalse(pos_refund.l10n_es_tbai_state)
