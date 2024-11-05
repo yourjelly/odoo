@@ -8,8 +8,8 @@ import { TagsList } from "@web/core/tags_list/tags_list";
 const patchAvatarCardResourcePopover = {
     setup() {
         super.setup();
-        (this.userInfoTemplate = "hr.avatarCardResourceInfos"),
-            (this.actionService = useService("action"));
+        this.userInfoTemplate = "hr.avatarCardResourceInfos";
+        this.actionService = useService("action");
     },
     get fieldNames() {
         return [...super.fieldNames, "show_hr_icon_display", "hr_icon_display"];
