@@ -176,8 +176,7 @@
          tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <form id="email_reminder_form"
-                  t-attf-action="" method="post"
-                  itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/AggregateOffer">
+                  t-attf-action="/event/post-event-track-email-reminder" method="post" class="js_website_submit_form">
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <div class="modal-content">
                     <div class="modal-header align-items-center">

@@ -532,3 +532,8 @@ class EventTrackController(http.Controller):
             utc.localize(dt, is_dst=False).astimezone(timezone(tz_name))
             for dt in datetimes
         ]
+
+    @http.route('/event/post-event-track-email-reminder', type='http', auth='public', methods=['POST'], website=True, sitemap=False, readonly=True)
+    def post_event_track_email_reminder(self):
+        print(request)
+
