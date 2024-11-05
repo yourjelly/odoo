@@ -71,6 +71,36 @@ export class AccountingPlugin extends OdooUIPlugin {
     }
 
     /**
+     * Gets the total balance for given account tag
+     * @param {string[]} tags of the accounts
+     * @param {DateRange} dateFrom start date of the period to look
+     * @param {DateRange} dateTo end date of the period to look
+     * @param {number} offset year offset of the period to look
+     * @param {number | null} companyId specific company to target
+     * @param {boolean} includeUnposted wether or not select unposted entries
+     * @returns {number}
+     */
+    getAccountTagCredit(tags, dateFrom, dateTo, offset, companyId, includeUnposted) {
+        const data = this._fetchAccountData(codes, dateFrom, dateTo, offset, companyId, includeUnposted);
+        return data.credit;
+    }
+
+    /**
+     * Gets the total balance for a given account tag
+     * @param {string[]} tags of the accounts
+     * @param {DateRange} dateFrom start date of the period to look
+     * @param {DateRange} dateTo end date of the period to look
+     * @param {number} offset year offset of the period to look
+     * @param {number | null} companyId specific company to target
+     * @param {boolean} includeUnposted wether or not select unposted entries
+     * @returns {number}
+     */
+    getAccountTagDebit(tags, dateFrom, dateTo, offset, companyId, includeUnposted) {
+        const data = this._fetchAccountData(codes, dateFrom, dateTo, offset, companyId, includeUnposted);
+        return data.debit;
+    }
+
+    /**
      * @param {Date} date Date included in the fiscal year
      * @param {number | undefined} companyId specific company to target
      * @returns {string | undefined}
@@ -126,6 +156,39 @@ export class AccountingPlugin extends OdooUIPlugin {
             "account.account",
             "spreadsheet_fetch_debit_credit",
             camelToSnakeObject({ dateFrom, dateTo, codes, companyId, includeUnposted })
+        );
+    }
+
+    /**
+     * Fetch the account information (credit/debit) for a given account code
+     * @private
+     * @param {string[]} codes prefix of the accounts' codes
+     * @param {DateRange} dateFrom start date of the period to look
+     * @param {DateRange} dateTo end date of the period to look
+     * @param {number} offset year offset of the period to look
+     * @param {number | null} companyId specific companyId to target
+     * @param {boolean} includeUnposted wether or not select unposted entries
+     * @returns {{ debit: number, credit: number }}
+     */
+    _fetchAccountTagData(tags, dateFrom, dateTo, offset, companyId, includeUnposted) {
+        dateFrom = deepCopy(dateFrom);
+        dateTo = deepCopy(dateTo);
+        dateFrom.year += offset;
+        dateTo.year += offset;
+        // Excel dates start at 1899-12-30, we should not support date ranges
+        // that do not cover dates prior to it.
+        // Unfortunately, this check needs to be done right before the server
+        // call as a date to low (year <= 1) can raise an error server side.
+        if (dateFrom.year < 1900) {
+            throw new EvaluationError(_t("%s is not a valid year.", dateFrom.year));
+        }
+        if (dateTo.year < 1900) {
+            throw new EvaluationError(_t("%s is not a valid year.", dateTo.year));
+        }
+        return this.serverData.batch.get(
+            "account.account",
+            "spreadsheet_fetch_debit_credit_tags",
+            camelToSnakeObject({ dateFrom, dateTo, tags, companyId, includeUnposted })
         );
     }
 
