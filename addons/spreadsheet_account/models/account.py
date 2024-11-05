@@ -253,26 +253,6 @@ class AccountAccount(models.Model):
         return self._spreadsheet_fetch_data(args_list, ['debit', 'credit'])
 
     @api.model
-    def spreadsheet_fetch_debit_credit_tags(self, args_list):
-        """Fetch data for ODOO.CREDIT, ODOO.DEBIT and ODOO.BALANCE formulas
-        The input list looks like this:
-        [{
-            date_from: {
-                range_type: "year"
-                year: int
-            },
-            date_to: {
-                range_type: "year"
-                year: int
-            },
-            company_id: int
-            codes: str[]
-            include_unposted: bool
-        }]
-        """
-        return self._spreadsheet_fetch_data_tags(args_list, ['debit', 'credit'])
-
-    @api.model
     def spreadsheet_fetch_residual_amount(self, args_list):
         """Fetch data for ODOO.RESIDUAL formulas
         The input list looks like this:

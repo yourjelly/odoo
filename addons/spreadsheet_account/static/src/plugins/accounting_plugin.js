@@ -187,7 +187,7 @@ export class AccountingPlugin extends OdooUIPlugin {
         }
         return this.serverData.batch.get(
             "account.account",
-            "spreadsheet_fetch_debit_credit_tags",
+            "spreadsheet_fetch_debit_credit",
             camelToSnakeObject({ dateFrom, dateTo, tags, companyId, includeUnposted })
         );
     }
