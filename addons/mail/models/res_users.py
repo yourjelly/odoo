@@ -16,6 +16,7 @@ class ResUsers(models.Model):
     """
     _inherit = ['res.users']
 
+    mail_role_ids = fields.Many2many("mail.role", string="Roles")
     notification_type = fields.Selection([
         ('email', 'Handle by Emails'),
         ('inbox', 'Handle in Odoo')],
