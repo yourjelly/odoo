@@ -25,7 +25,7 @@ export class WeButton extends Component {
             useBus(this.env.buttonGroupBus, "BEFORE_CALL_ACTIONS", () => {
                 for (const [actionId, actionParams] of Object.entries(this.props.actions)) {
                     actionsRegistry.get(actionId).clean({
-                        editingElement: this.getEditedElement(),
+                        editingElement: this.getEditingElement(),
                         params: actionParams,
                     });
                 }
@@ -37,7 +37,7 @@ export class WeButton extends Component {
         this.env.buttonGroupBus?.trigger("BEFORE_CALL_ACTIONS");
         for (const [actionId, actionParams] of Object.entries(this.props.actions)) {
             actionsRegistry.get(actionId).apply({
-                editingElement: this.getEditedElement(),
+                editingElement: this.getEditingElement(),
                 params: actionParams,
             });
         }
@@ -54,12 +54,12 @@ export class WeButton extends Component {
     isActive() {
         return Object.entries(this.props.actions).every(([actionId, actionParams]) => {
             return actionsRegistry.get(actionId).isActive({
-                editingElement: this.getEditedElement(),
+                editingElement: this.getEditingElement(),
                 params: actionParams,
             });
         });
     }
-    getEditedElement() {
+    getEditingElement() {
         return this.props.applyTo
             ? this.env.editingElement.querySelector(this.props.applyTo)
             : this.env.editingElement;

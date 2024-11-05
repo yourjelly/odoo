@@ -1,11 +1,13 @@
 import { registry } from "@web/core/registry";
 import { ElementToolboxContainer } from "../../components/ElementToolboxContainer";
 import { Component } from "@odoo/owl";
+import { BorderOption } from "../../components/options/BorderOption";
 
 class RowDivElementToolbox extends Component {
     static template = "mysterious_egg.RowDivElementToolbox";
     static components = {
         ElementToolboxContainer,
+        BorderOption,
     };
 }
 
