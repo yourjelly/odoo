@@ -88,8 +88,20 @@ export class PosOrder extends Base {
     get isUnsyncedPaid() {
         return this.finalized && typeof this.id === "string";
     }
+
+    get presetTime() {
+        const dateTime = DateTime.fromSQL(this.preset_time);
+        return dateTime.toFormat("HH:mm");
+    }
+
     getEmailItems() {
         return [_t("the receipt")].concat(this.is_to_invoice() ? [_t("the invoice")] : []);
+    }
+
+    setPreset(preset) {
+        this.set_pricelist(preset.pricelist_id);
+        this.fiscal_position_id = preset.fiscal_position_id;
+        this.preset_id = preset;
     }
 
     export_for_printing(baseUrl, headerData) {
@@ -976,8 +988,13 @@ export class PosOrder extends Base {
             newPartnerPricelist = this.config.pricelist_id;
         }
 
-        this.set_pricelist(newPartnerPricelist);
-        this.fiscal_position_id = newPartnerFiscalPosition;
+        if (!this.config.use_presets || !this.preset_id.fiscal_position_id) {
+            this.fiscal_position_id = newPartnerFiscalPosition;
+        }
+
+        if (!this.config.use_presets || !this.preset_id.pricelist_id) {
+            this.set_pricelist(newPartnerPricelist);
+        }
     }
 
     /* ---- Ship later --- */

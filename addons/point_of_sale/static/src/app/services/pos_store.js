@@ -33,6 +33,7 @@ import { ActionScreen } from "@point_of_sale/app/screens/action_screen";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { CashMovePopup } from "@point_of_sale/app/components/popups/cash_move_popup/cash_move_popup";
 import { ClosePosPopup } from "@point_of_sale/app/components/popups/closing_popup/closing_popup";
+import { SelectionPopup } from "../components/popups/selection_popup/selection_popup";
 
 export class PosStore extends Reactive {
     loadingSkipButtonIsShown = false;
@@ -951,6 +952,10 @@ export class PosStore extends Reactive {
             ...data,
         });
 
+        if (this.config.use_presets) {
+            this.selectPreset(this.config.default_preset_id, order);
+        }
+
         this.getNextOrderRefs(order);
         order.set_pricelist(this.config.pricelist_id);
         order.recomputeOrderData();
@@ -1614,6 +1619,72 @@ export class PosStore extends Reactive {
     async selectPricelist(pricelist) {
         await this.get_order().set_pricelist(pricelist);
     }
+    async selectPreset(preset = false, order = this.get_order()) {
+        if (!preset) {
+            const selectionList = this.models["pos.preset"].map((preset) => ({
+                id: preset.id,
+                label: preset.name,
+                isSelected: order.preset_id && preset.id === order.preset_id.id,
+                item: preset,
+            }));
+
+            preset = await makeAwaitable(this.dialog, SelectionPopup, {
+                title: _t("Select preset"),
+                list: selectionList,
+            });
+        }
+
+        if (preset) {
+            if (preset.address_on_ticket && !order.partner_id) {
+                const partner = await this.selectPartner();
+
+                if (!partner) {
+                    this.notification.add("Please select a customer first", { type: "warning" });
+                    return;
+                }
+            }
+
+            order.setPreset(preset);
+
+            if (preset.use_timing && !order.preset_time) {
+                await this.syncPresetSlotAvaibility(preset);
+                order.preset_time = preset.nextSlot.sql_datetime;
+            } else if (!preset.use_timing) {
+                order.preset_time = false;
+            }
+        }
+    }
+    async syncPresetSlotAvaibility(preset) {
+        try {
+            const presetAvailabilities = await this.data.call("pos.preset", "get_available_slots", [
+                preset.id,
+            ]);
+
+            preset.generateSlots();
+            const slotByDateTime = presetAvailabilities.reduce((acc, slot) => {
+                slot.order_ids = new Set(slot.order_ids || []);
+                acc[slot.sql_datetime] = slot;
+                return acc;
+            }, {});
+
+            for (const slot of Object.values(preset.uiState.availabilities)) {
+                const serverSlot = slotByDateTime[slot.sql_datetime];
+
+                slot.order_ids.forEach((orderId) => {
+                    if (
+                        !serverSlot.order_ids.has(orderId) &&
+                        !this.models["pos.order"].get(orderId)
+                    ) {
+                        slot.order_ids.delete(orderId);
+                    }
+                });
+
+                slot.order_ids.add(...(serverSlot.order_ids || []));
+            }
+        } catch {
+            console.info("Offline mode, cannot update the slot avaibility");
+        }
+    }
     async selectPartner() {
         // FIXME, find order to refund when we are in the ticketscreen.
         const currentOrder = this.get_order();
@@ -1642,7 +1713,7 @@ export class PosStore extends Reactive {
             currentOrder.set_partner(false);
         }
 
-        return currentPartner;
+        return payload;
     }
     async editLots(product, packLotLinesToEdit) {
         const isAllowOnlyOneLot = product.isAllowOnlyOneLot();
@@ -1787,6 +1858,8 @@ export class PosStore extends Reactive {
             company: this.company,
             cashier: _t("Served by %s", order?.getCashierName() || this.get_cashier()?.name),
             header: this.config.receipt_header,
+            addressOnTicket:
+                this.config.use_presets && order.preset_id?.address_on_ticket && order.partner_id,
         };
     }
 
