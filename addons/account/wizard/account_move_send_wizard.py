@@ -5,7 +5,7 @@ from odoo.addons.mail.tools.parser import parse_res_ids
 
 class AccountMoveSendWizard(models.TransientModel):
     """Wizard that handles the sending a single invoice."""
-    _inherit = ['account.move.send']
+    _inherit = ['account.move.send', 'mail.composer.mixin']
     _description = "Account Move Send Wizard"
 
     move_id = fields.Many2one(comodel_name='account.move', required=True)
@@ -234,6 +234,16 @@ class AccountMoveSendWizard(models.TransientModel):
         for wizard in self:
             model = self.env['ir.model']._get(wizard.model)
             wizard.model_is_thread = model.is_mail_thread
+
+    @api.depends('sending_methods')
+    def _compute_can_edit_body(self):
+        for record in self:
+            record.can_edit_body = 'email' in record.sending_methods
+
+    # Overrides of mail.composer.mixin
+    @api.depends('model')  # Fake trigger otherwise not computed in new mode
+    def _compute_render_model(self):
+        self.render_model = 'account.move'
 
     # -------------------------------------------------------------------------
     # CONSTRAINS
