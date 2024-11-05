@@ -1,3 +1,5 @@
+// TODO TEMPORARY UNUSED FILE: kept to copy when reimplementing the sizing.
+
 import { Component, useRef, useState } from "@odoo/owl";
 import { usePosition } from "@web/core/position/position_hook";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
@@ -17,6 +19,7 @@ const useDraggableWithoutFollow = makeDraggableHook({
 
 export class BuilderOverlay extends Component {
     static template = "html_builder.BuilderOverlay";
+
     setup() {
         this.overlay = useRef("overlay");
         this.target = this.props.target;
