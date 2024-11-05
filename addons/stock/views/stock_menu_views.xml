@@ -31,7 +31,11 @@
 
     <menuitem
         action="uom.product_uom_categ_form_action" id="menu_stock_uom_categ_form_action"
-        name="UoM Categories"
+        name="Units / Packagings"
+        parent="product_uom_menu" sequence="5"/>
+    <menuitem
+        action="uom.product_uom_categ_form_action_2" id="menu_stock_uom_categ_form_action_2"
+        name="Units / Packagings 2"
         parent="product_uom_menu" sequence="5"/>
     <menuitem
         id="menu_stock_unit_measure_stock" name="Units of Measure"

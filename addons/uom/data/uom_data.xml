@@ -31,7 +31,7 @@
 
     <record id="product_uom_dozen" model="uom.uom">
         <field name="category_id" ref="uom.product_uom_categ_unit"/>
-        <field name="name">Dozens</field>
+        <field name="name">Pack of 12</field>
         <field name="factor" eval="12"/>
     </record>
 

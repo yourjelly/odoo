@@ -4,7 +4,7 @@
         <field name="name">uom.uom.list</field>
         <field name="model">uom.uom</field>
         <field name="arch" type="xml">
-            <list string="Units of Measure" create="false">
+            <list string="Units of Measure" create="false" decoration-info="factor == 1">
                 <field name="name"/>
                 <field name="category_id"/>
                 <field name="factor"/>
@@ -111,10 +111,26 @@
     </record>
 
     <record id="product_uom_categ_form_action" model="ir.actions.act_window">
-        <field name="name">Units of Measure Categories</field>
+        <field name="name">Units of Measure</field>
         <field name="res_model">uom.category</field>
         <field name="view_mode">list,form</field>
-        <field name="context">{'allow_to_change_reference': 1}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add a new unit of measure category
+          </p><p>
+            Units of measure belonging to the same category can be
+            converted between each others. For example, in the category
+            <i>'Time'</i>, you will have the following units of measure:
+            Hours, Days.
+          </p>
+        </field>
+    </record>
+
+    <record id="product_uom_categ_form_action_2" model="ir.actions.act_window">
+        <field name="name">Units of Measure</field>
+        <field name="res_model">uom.uom</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_group_by_category': 1}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
             Add a new unit of measure category

@@ -15,7 +15,7 @@ class UomCategory(models.Model):
 
 class UomUom(models.Model):
     _description = 'Product Unit of Measure'
-    _order = "factor DESC, id"
+    _order = "factor, id"
 
     def _unprotected_uom_xml_ids(self):
         return [
@@ -45,7 +45,7 @@ class UomUom(models.Model):
     @api.depends('factor')
     def _compute_color(self):
         for uom in self:
-            if fields.Float.compare(uom.factor, 1, uom.rounding) == 0:
+            if fields.Float.compare(uom.factor, 1, precision_rounding=uom.rounding) == 0:
                 uom.color = 7
             else:
                 uom.color = 0

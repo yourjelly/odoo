@@ -246,7 +246,6 @@
             <field name="sequence">323</field>
             <field name="encoding">gs1-128</field>
             <field name="pattern">(322[0-5])(\d{6})</field>
-            <field name="associated_uom_id" ref="uom.product_uom_yard"/>
             <field name="type">quantity</field>
             <field name="gs1_content_type">measure</field>
             <field name="gs1_decimal_usage">True</field>
@@ -258,7 +257,6 @@
             <field name="sequence">351</field>
             <field name="encoding">gs1-128</field>
             <field name="pattern">(351[0-5])(\d{6})</field>
-            <field name="associated_uom_id" ref="uom.uom_square_foot"/>
             <field name="type">quantity</field>
             <field name="gs1_content_type">measure</field>
             <field name="gs1_decimal_usage">True</field>
@@ -270,7 +268,6 @@
             <field name="sequence">357</field>
             <field name="encoding">gs1-128</field>
             <field name="pattern">(357[0-5])(\d{6})</field>
-            <field name="associated_uom_id" ref="uom.product_uom_oz"/>
             <field name="type">quantity</field>
             <field name="gs1_content_type">measure</field>
             <field name="gs1_decimal_usage">True</field>
@@ -282,7 +279,6 @@
             <field name="sequence">360</field>
             <field name="encoding">gs1-128</field>
             <field name="pattern">(360[0-5])(\d{6})</field>
-            <field name="associated_uom_id" ref="uom.product_uom_qt"/>
             <field name="type">quantity</field>
             <field name="gs1_content_type">measure</field>
             <field name="gs1_decimal_usage">True</field>
@@ -294,7 +290,6 @@
             <field name="sequence">361</field>
             <field name="encoding">gs1-128</field>
             <field name="pattern">(361[0-5])(\d{6})</field>
-            <field name="associated_uom_id" ref="uom.product_uom_gal"/>
             <field name="type">quantity</field>
             <field name="gs1_content_type">measure</field>
             <field name="gs1_decimal_usage">True</field>
