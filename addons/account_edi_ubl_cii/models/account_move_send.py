@@ -219,7 +219,7 @@ class AccountMoveSend(models.AbstractModel):
 
     def _link_invoice_documents(self, invoices_data):
         # EXTENDS 'account'
-        super()._link_invoice_documents(invoices_data)
+        attachments = super()._link_invoice_documents(invoices_data)
 
         attachments_vals = [
             invoice_data.get('ubl_cii_xml_attachment_values')
@@ -230,3 +230,5 @@ class AccountMoveSend(models.AbstractModel):
             attachments = self.env['ir.attachment'].with_user(SUPERUSER_ID).create(attachments_vals)
             res_ids = attachments.mapped('res_id')
             self.env['account.move'].browse(res_ids).invalidate_recordset(fnames=['ubl_cii_xml_id', 'ubl_cii_xml_file'])
+
+        return attachments
