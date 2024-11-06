@@ -1,7 +1,10 @@
-import { Component, useRef } from "@odoo/owl";
-import { Message } from "./message_model";
-import { usePopover } from "@web/core/popover/popover_hook";
+import { Component, useState } from "@odoo/owl";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { EmojiPicker } from "@web/core/emoji_picker/emoji_picker";
+import { usePopover } from "@web/core/popover/popover_hook";
+import { useService } from "@web/core/utils/hooks";
+import { Message } from "./message_model";
 import { ReactionMenu } from "./reaction_menu_component";
 
 /**
@@ -14,10 +17,11 @@ export class AddReactionMenu extends Component {
         messageActive: { type: Boolean, optionnal: true },
         message: Message,
     };
-    static components = {};
+    static components = { Dropdown };
 
     setup() {
-        this.toggle = useRef("toggle");
+        this.frequentEmojiService = useState(useService("mail.frequent.emoji"));
+        this.dropdown = useState(useDropdownState());
         this.popover = usePopover(ReactionMenu, {
             arrow: false,
             popoverClass: "o-mail-AddReactionMenu-quickActionsPopover",
@@ -39,21 +43,27 @@ export class AddReactionMenu extends Component {
     }
 
     onClick() {
-        if (this.picker.isOpen) {
-            this.picker.close();
-            return;
-        }
-        this.popover.isOpen
-            ? this.popover.close()
-            : this.popover.open(this.toggle.el, {
-                  message: this.props.message,
-                  openEmojiPicker: this.openEmojiPicker.bind(this),
-                  toggleReaction: this.toggleReaction.bind(this),
-              });
+        // if (this.picker.isOpen) {
+        //     this.picker.close();
+        //     return;
+        // }
+        // this.popover.isOpen
+        //     ? this.popover.close()
+        //     : this.popover.open(this.toggle.el, {
+        //           message: this.props.message,
+        //           openEmojiPicker: this.openEmojiPicker.bind(this),
+        //           toggleReaction: this.toggleReaction.bind(this),
+        //       });
     }
 
     toggleReaction(emoji) {
         this.props.message.toggleReaction(emoji);
         this.popover.close();
+    }
+
+    reactedBySelf(emoji) {
+        return this.props.message.reactions.some(
+            (reaction) => reaction.content === emoji && this.store.self.in(reaction.personas)
+        );
     }
 }

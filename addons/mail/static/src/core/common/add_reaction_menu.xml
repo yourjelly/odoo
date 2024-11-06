@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="mail.AddReactionMenu">
-        <button class="btn btn-link p-0 m-0 rounded-circle" title="Add a Reaction" t-att-class="{
-            'invisible': !props.messageActive and !popover.isOpen and !picker.isOpen,
-        }" t-on-click="onClick" t-ref="toggle">
-            <i class="fa-lg oi oi-smile-add"/>
-        </button>
+        <Dropdown state="dropdown" menuClass="'o-mail-AddReactionMenu-quickActionsPopover'" position="'top-middle'">
+            <button class="btn btn-link p-0 m-0 rounded-circle" t-att-class="{'invisible': !props.messageActive and !dropdown.isOpen and !picker.isOpen }" title="Add a Reaction"><i class="fa-lg oi oi-smile-add"/></button>
+            <t t-set-slot="content">
+                <div class="o-mail-ReactionMenu bg-view border rounded-pill p-1 px-2 ps-3 shadow-sm gap-1 d-flex flex-row align-items-center gap-1">
+                    <div t-foreach="frequentEmojiService.getMostFrequent(6)" t-as="emoji" t-key="emoji" class="o-mail-ReactionMenu-button-popIn d-flex align-items-center py-1" t-att-class="{ 'bg-secondary-light px-1 rounded': reactedBySelf(emoji) }">
+                        <button class="o-mail-ReactionMenu-button btn lh-1 p-0 fs-2" t-esc="emoji" t-on-click="() => props.toggleReaction(emoji)"/>
+                    </div>
+                    <button class="o-mail-ReactionMenu-button-popIn o-mail-ReactionMenu-button btn p-0 fs-2 bg-200 rounded-circle d-flex align-items-center justify-content-center" t-on-click="props.openEmojiPicker">+</button>
+                </div>
+            </t>
+        </Dropdown>
     </t>
 </templates>
