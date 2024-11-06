@@ -21,6 +21,7 @@ class WebsiteVisitor(models.Model):
         string="# Wishlisted",
         compute="_compute_event_track_wishlisted_ids", compute_sudo=True,
         groups='event.group_event_user')
+    event_track_email_reminder = fields.Char("Email reminder")
 
     @api.depends('event_track_visitor_ids.track_id', 'event_track_visitor_ids.is_wishlisted')
     def _compute_event_track_wishlisted_ids(self):

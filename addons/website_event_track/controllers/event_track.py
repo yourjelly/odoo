@@ -535,20 +535,21 @@ class EventTrackController(http.Controller):
 
     @http.route('/event/has_email_reminder', type="json", auth="public", website=True)
     def has_email_reminder(self):
-        result = {'hasEmailReminder': True if request.env['res.users'].browse(request.uid).event_track_email_reminder else False}
-        return result
+        has_email_reminder = True
+        if (request.env.user._is_public()
+            and not request.env['website.visitor']._get_visitor_from_request().event_track_email_reminder):
+                has_email_reminder = False
+        return {'hasEmailReminder': has_email_reminder}
 
-    @http.route('/event/get_email_reminder_modal', type="http", auth="public", method=["POST"], csrf=False, website=True)
+    @http.route('/event/get_email_reminder_modal', type="json", auth="public", method=["POST"], csrf=False, website=True)
     def get_email_reminder_modal(self):
-        print("passe ici.")
-        print(http.request.render("website_event_track.modal_email_reminder"))
-        return http.request.render("website_event_track.modal_email_reminder")
-        # return {"modal": http.request.render("website_event_track.modal_email_reminder")}
+        return {"modal": http.request.render("website_event_track.modal_email_reminder").render()}
 
     @http.route('/event/post-event-track-email-reminder', type='http', auth='public', methods=['POST'], website=True, sitemap=False, readonly=True)
     def post_event_track_email_reminder(self, **kwargs):
-        user = request.env['res.users'].browse(request.uid)
-        user.event_track_email_reminder = kwargs.get("email")
+        print("passe dans post_event_track_email_reminder")
+        visitor = request.env['website.visitor']._get_visitor_from_request()
+        # visitor.event_track_email_reminder = kwargs.get("email")
 
     @http.route('/event/send_email_reminder', type="json", auth="public", website=True)
     def send_email_reminder(self):
