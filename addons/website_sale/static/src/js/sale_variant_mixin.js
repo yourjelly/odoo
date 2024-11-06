@@ -109,14 +109,13 @@ var VariantMixin = {
                 if ($variantContainer.find('.variant_custom_value').length === 0
                         || $variantContainer
                               .find('.variant_custom_value')
-                              .data('custom_product_template_attribute_value_id') !== parseInt(attributeValueId)) {
+                              .data('id') !== parseInt(attributeValueId)) {
                     $variantContainer.find('.variant_custom_value').remove();
 
                     const previousCustomValue = $customInput.attr("previous_custom_value");
                     var $input = $('<input>', {
                         type: 'text',
-                        'data-custom_product_template_attribute_value_id': attributeValueId,
-                        'data-attribute_value_name': attributeValueName,
+                        'data-id': attributeValueId,
                         class: 'variant_custom_value form-control mt-2'
                     });
 
@@ -135,7 +134,7 @@ var VariantMixin = {
 
     /**
      * Hack to add and remove from cart with json
-     *
+     * TODO VCR rename this weird thing
      * @param {MouseEvent} ev
      */
     onClickAddCartJSON: function (ev) {
@@ -180,73 +179,6 @@ var VariantMixin = {
     },
 
     /**
-     * Will look for user custom attribute values
-     * in the provided container
-     *
-     * @param {$.Element} $container
-     * @returns {Array} array of custom values with the following format
-     *   {integer} custom_product_template_attribute_value_id
-     *   {string} attribute_value_name
-     *   {string} custom_value
-     */
-    getCustomVariantValues: function ($container) {
-        var variantCustomValues = [];
-        $container.find('.variant_custom_value').each(function (){
-            var $variantCustomValueInput = $(this);
-            if ($variantCustomValueInput.length !== 0){
-                variantCustomValues.push({
-                    'custom_product_template_attribute_value_id': $variantCustomValueInput.data('custom_product_template_attribute_value_id'),
-                    'attribute_value_name': $variantCustomValueInput.data('attribute_value_name'),
-                    'custom_value': $variantCustomValueInput.val(),
-                });
-            }
-        });
-
-        return variantCustomValues;
-    },
-
-    /**
-     * Will look for attribute values that do not create product variant
-     * (see product_attribute.create_variant "dynamic")
-     *
-     * @param {$.Element} $container
-     * @returns {Array} array of attribute values with the following format
-     *   {integer} custom_product_template_attribute_value_id
-     *   {string} attribute_value_name
-     *   {integer} value
-     *   {string} attribute_name
-     *   {boolean} is_custom
-     */
-    getNoVariantAttributeValues: function ($container) {
-        var noVariantAttributeValues = [];
-        var variantsValuesSelectors = [
-            'input.no_variant.js_variant_change:checked',
-            'select.no_variant.js_variant_change'
-        ];
-
-        $container.find(variantsValuesSelectors.join(',')).each(function (){
-            var $variantValueInput = $(this);
-            var singleNoCustom = $variantValueInput.data('is_single') && !$variantValueInput.data('is_custom');
-
-            if ($variantValueInput.is('select')){
-                $variantValueInput = $variantValueInput.find('option[value=' + $variantValueInput.val() + ']');
-            }
-
-            if ($variantValueInput.length !== 0 && !singleNoCustom){
-                noVariantAttributeValues.push({
-                    'custom_product_template_attribute_value_id': $variantValueInput.data('value_id'),
-                    'attribute_value_name': $variantValueInput.data('value_name'),
-                    'value': $variantValueInput.val(),
-                    'attribute_name': $variantValueInput.data('attribute_name'),
-                    'is_custom': $variantValueInput.data('is_custom')
-                });
-            }
-        });
-
-        return noVariantAttributeValues;
-    },
-
-    /**
      * Will return the list of selected product.template.attribute.value ids
      *
      * @param {$.Element} $container the container to look into
@@ -263,38 +195,6 @@ var VariantMixin = {
         });
 
         return values;
-    },
-
-    /**
-     * Will return a promise:
-     *
-     * - If the product already exists, immediately resolves it with the product_id
-     * - If the product does not exist yet ("dynamic" variant creation), this method will
-     *   create the product first and then resolve the promise with the created product's id
-     *
-     * @param {$.Element} $container the container to look into
-     * @param {integer} productId the product id
-     * @param {integer} productTemplateId the corresponding product template id
-     * @returns {Promise} the promise that will be resolved with a {integer} productId
-     */
-    selectOrCreateProduct: function ($container, productId, productTemplateId) {
-        productId = parseInt(productId);
-        productTemplateId = parseInt(productTemplateId);
-        var productReady = Promise.resolve();
-        if (productId) {
-            productReady = Promise.resolve(productId);
-        } else {
-            var params = {
-                product_template_id: productTemplateId,
-                product_template_attribute_value_ids:
-                    JSON.stringify(VariantMixin.getSelectedVariantValues($container)),
-            };
-
-            var route = '/sale/create_product_variant';
-            productReady = rpc(route, params);
-        }
-
-        return productReady;
     },
 
     //--------------------------------------------------------------------------

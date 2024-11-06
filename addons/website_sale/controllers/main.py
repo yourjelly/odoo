@@ -789,72 +789,58 @@ class WebsiteSale(payment_portal.PaymentPortal):
         values.update(self._cart_values(**post))
         return request.render("website_sale.cart", values)
 
-    @route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True)
+    @route(
+        '/shop/cart/update',
+        type='jsonrpc',
+        auth="public",
+        methods=['POST'],
+        website=True,
+        sitemap=False
+    )
     def cart_update(
-        self, product_id, add_qty=1, set_qty=0, product_custom_attribute_values=None,
-        no_variant_attribute_value_ids=None, **kwargs
+        self,
+        product_template_id,
+        product_id=None,
+        # TODO VCR Add Combination
+        line_id=None,
+        add_qty=None,
+        set_qty=None,  # TODO VCR remove and split the route
+        product_custom_attribute_values=None,
+        no_variant_attribute_value_ids=None,
+        optional_products=None,
+        display=False,
+        **kwargs
     ):
-        """This route is called when adding a product to cart (no options)."""
-        sale_order = request.website.sale_get_order(force_create=True)
-        if sale_order.state != 'draft':
-            request.session['sale_order_id'] = None
-            sale_order = request.website.sale_get_order(force_create=True)
+        """_summary_
 
-        if product_custom_attribute_values:
-            product_custom_attribute_values = json_scriptsafe.loads(product_custom_attribute_values)
+        TODO VCR docstring
 
-        # old API, will be dropped soon with product configurator refactorings
-        no_variant_attribute_values = kwargs.pop('no_variant_attribute_values', None)
-        if no_variant_attribute_values and no_variant_attribute_value_ids is None:
-            no_variants_attribute_values_data = json_scriptsafe.loads(no_variant_attribute_values)
-            no_variant_attribute_value_ids = [
-                int(ptav_data['value']) for ptav_data in no_variants_attribute_values_data
-            ]
-
-        sale_order._cart_update(
-            product_id=int(product_id),
-            add_qty=add_qty,
-            set_qty=set_qty,
-            product_custom_attribute_values=product_custom_attribute_values,
-            no_variant_attribute_value_ids=no_variant_attribute_value_ids,
-            **kwargs
-        )
-
-        request.session['website_sale_cart_quantity'] = sale_order.cart_quantity
-
-        return request.redirect("/shop/cart")
-
-    @route(['/shop/cart/update_json'], type='jsonrpc', auth="public", methods=['POST'], website=True)
-    def cart_update_json(
-        self, product_id, line_id=None, add_qty=None, set_qty=None, display=True,
-        product_custom_attribute_values=None, no_variant_attribute_value_ids=None, **kwargs
-    ):
-        """
-        This route is called :
+         This route is called :
             - When changing quantity from the cart.
             - When adding a product from the wishlist.
             - When adding a product to cart on the same page (without redirection).
+
+        :param int product_id: The product, as a `product.product` id.
+        :param line_id: The sale order line, as a `sale.order.line` id.
+        :param add_qty: _description_, defaults to None
+        :param set_qty: _description_, defaults to None
+        :param bool display: Whether the cart is display or not.
+        :param product_custom_attribute_values: _description_, defaults to None
+        :param no_variant_attribute_value_ids: _description_, defaults to None
+        :return: _description_
+        :rtype: _type_
         """
-        order = request.website.sale_get_order(force_create=True)
-        if order.state != 'draft':
-            request.website.sale_reset()
+        order_sudo = request.website.sale_get_order(force_create=True)
+        if order_sudo.state != 'draft':
+            request.session['sale_order_id'] = None
             if kwargs.get('force_create'):
-                order = request.website.sale_get_order(force_create=True)
+                order_sudo = request.website.sale_get_order(force_create=True)
             else:
                 return {}
 
-        if product_custom_attribute_values:
-            product_custom_attribute_values = json_scriptsafe.loads(product_custom_attribute_values)
+        # TODO VCR
 
-        # old API, will be dropped soon with product configurator refactorings
-        no_variant_attribute_values = kwargs.pop('no_variant_attribute_values', None)
-        if no_variant_attribute_values and no_variant_attribute_value_ids is None:
-            no_variants_attribute_values_data = json_scriptsafe.loads(no_variant_attribute_values)
-            no_variant_attribute_value_ids = [
-                int(ptav_data['value']) for ptav_data in no_variants_attribute_values_data
-            ]
-
-        values = order._cart_update(
+        values = order_sudo._cart_update(
             product_id=product_id,
             line_id=line_id,
             add_qty=add_qty,
@@ -863,46 +849,64 @@ class WebsiteSale(payment_portal.PaymentPortal):
             no_variant_attribute_value_ids=no_variant_attribute_value_ids,
             **kwargs
         )
+        line_ids = {product_template_id: values['line_id']}
+
+        if optional_products and values['line_id']:
+            for option in optional_products:
+                option_values = order_sudo._cart_update(
+                    product_id=option['product_id'],
+                    add_qty=option['quantity'],
+                    product_custom_attribute_values=option['product_custom_attribute_values'],
+                    no_variant_attribute_value_ids=[
+                        int(value_id) for value_id in option['no_variant_attribute_value_ids']
+                    ],
+                    # Using `line_ids[...]` instead of `line_ids.get(...)` ensures that this throws
+                    # if an optional product contains bad data.
+                    linked_line_id=line_ids[option['parent_product_template_id']],
+                    **kwargs,
+                )
+                line_ids[option['product_template_id']] = option_values['line_id']
+
         # If the line is a combo product line, and it already has combo items, we need to update
         # the combo item quantities as well.
         line = request.env['sale.order.line'].browse(values['line_id'])
         if line.product_type == 'combo' and line.linked_line_ids:
             for linked_line_id in line.linked_line_ids:
                 if values['quantity'] != linked_line_id.product_uom_qty:
-                    order._cart_update(
+                    order_sudo._cart_update(
                         product_id=linked_line_id.product_id.id,
                         line_id=linked_line_id.id,
                         set_qty=values['quantity'],
                     )
 
-        values['notification_info'] = self._get_cart_notification_information(order, [values['line_id']])
+        values['notification_info'] = self._get_cart_notification_information(order_sudo, line_ids.values())
         values['notification_info']['warning'] = values.pop('warning', '')
-        request.session['website_sale_cart_quantity'] = order.cart_quantity
+        request.session['website_sale_cart_quantity'] = order_sudo.cart_quantity
 
-        if not order.cart_quantity:
+        if not order_sudo.cart_quantity:
             request.website.sale_reset()
             return values
 
-        values['cart_quantity'] = order.cart_quantity
-        values['minor_amount'] = payment_utils.to_minor_currency_units(
-            order.amount_total, order.currency_id
-        )
-        values['amount'] = order.amount_total
+        values['cart_quantity'] = order_sudo.cart_quantity
 
         if not display:
             return values
 
-        values['cart_ready'] = order._is_cart_ready()
+        values['cart_ready'] = order_sudo._is_cart_ready()
         values['website_sale.cart_lines'] = request.env['ir.ui.view']._render_template(
             "website_sale.cart_lines", {
-                'website_sale_order': order,
+                'website_sale_order': order_sudo,
                 'date': fields.Date.today(),
-                'suggested_products': order._cart_accessories()
+                'suggested_products': order_sudo._cart_accessories()
             }
         )
+        values['minor_amount'] = payment_utils.to_minor_currency_units(
+            order_sudo.amount_total, order_sudo.currency_id
+        )
+        values['amount'] = order_sudo.amount_total
         values['website_sale.total'] = request.env['ir.ui.view']._render_template(
             "website_sale.total", {
-                'website_sale_order': order,
+                'website_sale_order': order_sudo,
             }
         )
         return values

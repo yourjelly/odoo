@@ -40,11 +40,13 @@ registry.category("web_tour.tours").add("website_sale_cart_notification", {
         },
         {
             content: "change quantity",
+            // TODO VCR
             trigger: '#product_detail form[action^="/shop/cart/update"] input[name=add_qty]',
             run: "edit 3",
         },
         {
             content: "click on add to cart",
+            // TODO VCR
             trigger: '#product_detail form[action^="/shop/cart/update"] #add_to_cart',
             run: "click",
         },

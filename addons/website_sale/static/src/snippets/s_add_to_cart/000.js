@@ -45,7 +45,8 @@ publicWidget.registry.AddToCartSnippet = WebsiteSale.extend(cartHandlerMixin, {
                 return;
             }
             this.isBuyNow = action === 'buy_now';
-            this.stayOnPageOption = !this.isBuyNow;
+            // TODO VCR
+            // this.stayOnPageOption = !this.isBuyNow;
             this.addToCart({product_id: productId, add_qty: 1});
         }
     },

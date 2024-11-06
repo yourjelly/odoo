@@ -101,6 +101,7 @@
 
 <!-- TOOLS -->
 <template name="Buy Course Link" id="course_buy_course_link">
+    <!-- TODO VCR -->
     <a class="post_link" t-att-href="'/shop/cart/update?product_id=%s' % slide.channel_id.product_id.id">
         Join this Course</a><t t-if="for_resources"> to access resources</t>
 </template>
@@ -152,6 +153,7 @@
         </t>
         <div t-else="" class="oe_website_sale">
             <div class="add_to_cart_button">
+                <!-- TODO VCR -->
                 <form action="/shop/cart/update" method="POST">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
                     <input type="hidden" name="product_template_id" t-att-value="channel.product_id.product_tmpl_id.id"/>
@@ -176,6 +178,7 @@
 <template name="Display 'Buy Now'" id="course_option_buy_course_now" inherit_id="website_sale_slides.course_buy_course_button" active="False">
     <xpath expr="//div[hasclass('add_to_cart_button')]" position="before">
         <div class="mb-1">
+            <!-- TODO VCR -->
             <a role="button" class="post_link btn btn-primary d-block" t-attf-href="/shop/cart/update?product_id={{channel.product_id.id}}&amp;try_skip_step=true">
                 <i class="fa fa-bolt"></i> Buy Now
             </a>

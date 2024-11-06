@@ -225,7 +225,7 @@
                                                     <t t-call='website_sale.base_unit_price'/>
                                                 </small>
                                             </span>
-
+                                            <!-- TODO VCR -->
                                             <form action="/shop/cart/update" method="post" class="text-center o_add_cart_form_compare">
                                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                                 <input name="product_id"

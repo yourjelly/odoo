@@ -146,6 +146,7 @@ const DynamicSnippetProductsCard = WebsiteSale.extend({
         if (!button.dataset.productSelected || button.dataset.isCombo) {
             const dummy_form = document.createElement('form');
             dummy_form.setAttribute('method', 'post');
+            // TODO VCR
             dummy_form.setAttribute('action', '/shop/cart/update');
 
             const inputPT = document.createElement('input');
@@ -163,13 +164,13 @@ const DynamicSnippetProductsCard = WebsiteSale.extend({
             return this._handleAdd($(dummy_form));  // existing logic expects jquery form
         }
         else {
-            const data = await rpc("/shop/cart/update_json", {
+            const data = await rpc("/shop/cart/update", {
                 product_id: parseInt(ev.currentTarget.dataset.productId),
                 add_qty: 1,
-                display: false,
             });
             wSaleUtils.updateCartNavBar(data);
-            wSaleUtils.showCartNotification(this.call.bind(this), data.notification_info);
+            // TODO VCR
+            //wSaleUtils.showCartNotification(this.call.bind(this), data.notification_info);
         }
         if (this.add2cartRerender) {
             this.trigger_up('widgets_start_request', {

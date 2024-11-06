@@ -85,7 +85,7 @@ publicWidget.registry.ProductWishlist = publicWidget.Widget.extend(VariantMixin,
             templateId = $el.data('product-template-id');
         }
         $el.prop("disabled", true).addClass('disabled');
-        var productReady = this.selectOrCreateProduct(
+        var productReady = this.selectOrCreateProduct(// TODO VCR remove that
             $el.closest('form'),
             productID,
             templateId,
@@ -188,12 +188,12 @@ publicWidget.registry.ProductWishlist = publicWidget.Widget.extend(VariantMixin,
             $tr.trigger('add_to_cart_event', [productTrackingInfo]);
         }
         const callService = this.call.bind(this)
-        return rpc("/shop/cart/update_json", {
+        return rpc("/shop/cart/update", {
             ...this._getCartUpdateJsonParams(productID, qty),
-            display: false,
         }).then(function (data) {
             wSaleUtils.updateCartNavBar(data);
-            wSaleUtils.showCartNotification(callService, data.notification_info);
+            // TODO VCR
+            //wSaleUtils.showCartNotification(callService, data.notification_info);
         });
     },
     /**

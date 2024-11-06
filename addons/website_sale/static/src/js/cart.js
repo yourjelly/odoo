@@ -71,7 +71,7 @@ publicWidget.registry.websiteSaleCart = publicWidget.Widget.extend({
         });
         $input.data('update_change', true);
 
-        rpc('/shop/cart/update_json', {
+        rpc('/shop/cart/update', { // TODO VCR
             line_id: line_id,
             product_id: parseInt($input.data('product-id'), 10),
             set_qty: value,

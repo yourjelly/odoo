@@ -12,6 +12,7 @@ registry.category("web_tour.tours").add('shop_buy_product', {
         },
         {
             content: "click on add to cart",
+            // TODO VCR
             trigger: '#product_detail form[action^="/shop/cart/update"] #add_to_cart',
             run: "click",
         },

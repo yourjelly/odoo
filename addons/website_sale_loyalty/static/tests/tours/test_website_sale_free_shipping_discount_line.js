@@ -17,6 +17,7 @@ registry.category("web_tour.tours").add('check_shipping_discount', {
         },
         {
             content: "click on 'Add to Cart' button",
+            // TODO VCR
             trigger: '#product_detail form[action^="/shop/cart/update"] #add_to_cart',
             run: "click",
         },

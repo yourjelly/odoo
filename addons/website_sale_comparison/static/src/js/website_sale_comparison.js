@@ -101,7 +101,7 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
 
             let $form = $elem.closest('form');
             $form = $form.length ? $form : $('#product_details > form');
-            this.selectOrCreateProduct(
+            this.selectOrCreateProduct( // TODO VCR remove that
                 $form,
                 productId,
                 $form.find('.product_template_id').val(),
@@ -273,7 +273,6 @@ publicWidget.registry.ProductComparison = publicWidget.Widget.extend(cartHandler
     start: function () {
         var def = this._super.apply(this, arguments);
         this.productComparison = new ProductComparison(this);
-        this.getRedirectOption();
         return Promise.all([def, this.productComparison.appendTo(this.$el)]);
     },
 

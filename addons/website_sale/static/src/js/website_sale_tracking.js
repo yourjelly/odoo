@@ -3,6 +3,7 @@ import publicWidget from "@web/legacy/js/public/public_widget";
 publicWidget.registry.websiteSaleTracking = publicWidget.Widget.extend({
     selector: '.oe_website_sale',
     events: {
+        // TODO VCR
         'click form[action="/shop/cart/update"] a.a-submit': '_onAddProductIntoCart',
         'click a[href^="/shop/checkout"]': '_onCheckoutStart',
         'click a[href^="/web/login?redirect"][href*="/shop/checkout"]': '_onCustomerSignin',

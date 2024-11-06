@@ -152,12 +152,11 @@ export class ReorderDialog extends Component {
             if (!product.add_to_cart_allowed) {
                 continue;
             }
-            await rpc("/shop/cart/update_json", {
+            await rpc("/shop/cart/update", { // TODO VCR
                 product_id: product.product_id,
                 add_qty: product.qty,
                 no_variant_attribute_value_ids: product.no_variant_attribute_value_ids,
                 product_custom_attribute_values: JSON.stringify(product.product_custom_attribute_values),
-                display: false,
             });
         }
     }
