@@ -11,6 +11,7 @@
     'license': 'LGPL-3',
     'data': [
         'views/public_readonly_spreadsheet_templates.xml',
+        'security/ir.model.access.csv',
     ],
     'assets': {
         'spreadsheet.dependencies': [
