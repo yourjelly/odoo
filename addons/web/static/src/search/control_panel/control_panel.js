@@ -14,6 +14,7 @@ import { CheckBox } from "@web/core/checkbox/checkbox";
 import { makeContext } from "@web/core/context";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Transition } from "@web/core/transition";
+import { isMiddleClick } from "@web/views/utils";
 import { Breadcrumbs } from "../breadcrumbs/breadcrumbs";
 import { SearchBar } from "../search_bar/search_bar";
 
@@ -70,6 +71,7 @@ export class ControlPanel extends Component {
         this.newActionNameRef = useRef("newActionNameRef");
         this.isEmbeddedActionsOrderModifiable = false;
         this.defaultEmbeddedActions = this.env.config.embeddedActions;
+        this.isMiddleClick = isMiddleClick;
         if (this.env.config.embeddedActions?.length > 0 && !this.env.config.parentActionId) {
             const { parent_res_model, parent_action_id } = this.env.config.embeddedActions[0];
             this.defaultEmbeddedActions = [
@@ -349,9 +351,9 @@ export class ControlPanel extends Component {
      *
      * @param {ViewType} viewType
      */
-    switchView(viewType) {
+    switchView(viewType, newWindow) {
         this.resetSearchState();
-        this.actionService.switchView(viewType);
+        this.actionService.switchView(viewType, {}, { newWindow });
     }
 
     cycleThroughViews() {
