@@ -45,8 +45,8 @@ export class SMLX2ManyField extends X2ManyField {
                         if (!entry) {  // product not storable or has no quant yet
                             continue;
                         }
-                        ml.data.quant_id = [entry[0], entry[1]];
-                        usedByQuant[ml.data.quant_id[0]] = (usedByQuant[ml.data.quant_id[0]] || 0) + ml.data.quantity;
+                        ml.quant_id = [entry[0], entry[1]];
+                        usedByQuant[ml.quant_id[0]] = (usedByQuant[ml.quant_id[0]] || 0) + ml.data.quantity;
                     }
                     this.quantsData = quants.map(x => [x.id, x.available_quantity + (usedByQuant[x.id] || 0)]);
                 }
@@ -87,7 +87,7 @@ export class SMLX2ManyField extends X2ManyField {
             domain = [...domain, ...this.props.domain()];
         }
         const usedByQuant = this.props.record.data.move_line_ids.records.reduce((result, current) => {
-            const quant_id = current.data.quant_id[0];
+            const quant_id = current.quant_id[0];
             if (!quant_id)
                 return result;
             result[quant_id] = (result[quant_id] || 0) + current.data.quantity;
@@ -111,9 +111,9 @@ export class SMLX2ManyField extends X2ManyField {
             // Make it dirty to force the save of the record. addNewRecord make
             // the new record dirty === False by default to remove them at unfocus event
             record.dirty = true;
-            if (record.data.quant_id[0] && this.quantsData.every(a => a[0] != record.data.quant_id[0])) {
+            if (record.quant_id[0] && this.quantsData.every(a => a[0] != record.quant_id[0])) {
                 const orm = this.env.model.orm;
-                const quants = await orm.searchRead("stock.quant", [["id", "=", record.data.quant_id[0]]], ['available_quantity']);
+                const quants = await orm.searchRead("stock.quant", [["id", "=", record.quant_id[0]]], ['available_quantity']);
                 this.quantsData.push([quants[0].id, quants[0].available_quantity]);
             }
         });
