@@ -153,7 +153,11 @@ options.registry.SocialMedia = options.Class.extend({
                     }
                     const iEl = anchorEl.querySelector(ICON_SELECTOR);
                     if (iEl) {
-                        const faIcon = isDbField ? `fa-${entry.media}` : 'fa-pencil';
+                        const faIcon = isDbField
+                            ? entry.media === "youtube"
+                                ? `fa-${entry.media}-play`
+                                : `fa-${entry.media}`
+                            : "fa-pencil";
                         iEl.classList.add(faIcon);
                     }
                     if (isDbField) {
