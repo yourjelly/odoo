@@ -14,7 +14,10 @@ class Project(models.Model):
     def _compute_purchase_orders_count(self):
         purchase_orders_per_project = dict(
             self.env['purchase.order']._read_group(
-                domain=[('project_id', 'in', self.ids)],
+                domain=[
+                    ('project_id', 'in', self.ids),
+                    ('order_line', '!=', False),
+                ],
                 groupby=['project_id'],
                 aggregates=['id:array_agg'],
             )
