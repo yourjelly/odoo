@@ -18,7 +18,8 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
             picking_types_by_company = dict(self.env['stock.picking.type']._read_group(domain=[('code', '=', 'mrp_operation')], groupby=['company_id'], aggregates=['id:recordset']))
             for company, picking_types in picking_types_by_company.items():
                 picking_types.sequence_id = self.env['ir.sequence'].sudo().create({'name': 'fake_ir_sequence', 'company_id': company.id})
-            res = self.with_context(allow_simulation=True)._get_report_data(bom_id=bom_id, searchQty=searchQty, searchVariant=searchVariant)
+            self.env.cr.execute("CREATE SEQUENCE fake_sequence START WITH -1 INCREMENT BY -1")
+            res = self.with_context(allow_simulation=True, SQL_OVERRIDDEN_ID="nextval('fake_sequence')")._get_report_data(bom_id=bom_id, searchQty=searchQty, searchVariant=searchVariant)
             sp.close(rollback=True)
             self.env.invalidate_all(flush=False)
         res['has_attachments'] = self._has_attachments(res['lines'])

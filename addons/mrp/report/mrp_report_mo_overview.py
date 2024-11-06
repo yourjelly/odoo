@@ -19,7 +19,8 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
             picking_types_by_company = dict(self.env['stock.picking.type']._read_group(domain=[('code', '=', 'mrp_operation')], groupby=['company_id'], aggregates=['id:recordset']))
             for company, picking_types in picking_types_by_company.items():
                 picking_types.sequence_id = self.env['ir.sequence'].sudo().create({'name': 'fake_ir_sequence', 'company_id': company.id})
-            res = self._get_report_data(production_id)
+            self.env.cr.execute("CREATE SEQUENCE fake_sequence START WITH -1 INCREMENT BY -1")
+            res = self.with_context(SQL_OVERRIDDEN_ID="nextval('fake_sequence')")._get_report_data(production_id)
             sp.close(rollback=True)
             self.env.invalidate_all(flush=False)
         return {
@@ -35,8 +36,9 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
             picking_types_by_company = dict(self.env['stock.picking.type']._read_group(domain=[('code', '=', 'mrp_operation')], groupby=['company_id'], aggregates=['id:recordset']))
             for company, picking_types in picking_types_by_company.items():
                 picking_types.sequence_id = self.env['ir.sequence'].sudo().create({'name': 'fake_ir_sequence', 'company_id': company.id})
+            self.env.cr.execute("CREATE SEQUENCE fake_sequence START WITH -1 INCREMENT BY -1")
             for prod_id in docids:
-                doc = self._get_report_data(prod_id)
+                doc = self.with_context(SQL_OVERRIDDEN_ID="nextval('fake_sequence')")._get_report_data(prod_id)
                 docs.append(self._include_pdf_specifics(doc, data))
             sp.close(rollback=True)
             self.env.invalidate_all(flush=False)
