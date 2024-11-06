@@ -1,10 +1,8 @@
 import { formatCurrency } from "@web/core/currency";
 import { _t } from "@web/core/l10n/translation";
 import publicWidget from '@web/legacy/js/public/public_widget';
-import { rpc } from "@web/core/network/rpc";
 
 const CUSTOM_BUTTON_EXTRA_WIDTH = 10;
-let cachedCurrency;
 
 publicWidget.registry.DonationSnippet = publicWidget.Widget.extend({
     selector: '.s_donation',
@@ -82,37 +80,29 @@ publicWidget.registry.DonationSnippet = publicWidget.Widget.extend({
      * @private
      */
     _displayCurrencies() {
-        return this._getCachedCurrency().then((result) => {
-            // No need to recreate the elements if the currency is already set.
-            if (this.currency === result) {
-                return;
+        let result = {
+            'id': parseInt(this.el.dataset.currencyId),
+            'symbol': this.el.dataset.currencySymbol,
+            'position': this.el.dataset.currencyPosition,
+        };
+        // No need to recreate the elements if the currency is already set.
+        if (this.currency === result) {
+            return;
+        }
+        this.currency = result;
+        this.$('.s_donation_currency').remove();
+        const $prefilledButtons = this.$('.s_donation_btn, .s_range_bubble');
+        $prefilledButtons.toArray().forEach((button) => {
+            const before = result.position === "before";
+            const $currencySymbol = document.createElement('span');
+            $currencySymbol.innerText = result.symbol;
+            $currencySymbol.classList.add('s_donation_currency', before ? "pe-1" : "ps-1");
+            if (before) {
+                $(button).prepend($currencySymbol);
+            } else {
+                $(button).append($currencySymbol);
             }
-            this.currency = result;
-            this.$('.s_donation_currency').remove();
-            const $prefilledButtons = this.$('.s_donation_btn, .s_range_bubble');
-            $prefilledButtons.toArray().forEach((button) => {
-                const before = result.position === "before";
-                const $currencySymbol = document.createElement('span');
-                $currencySymbol.innerText = result.symbol;
-                $currencySymbol.classList.add('s_donation_currency', before ? "pe-1" : "ps-1");
-                if (before) {
-                    $(button).prepend($currencySymbol);
-                } else {
-                    $(button).append($currencySymbol);
-                }
-            });
         });
-    },
-    /**
-     * @private
-     */
-    _getCachedCurrency() {
-        return cachedCurrency
-            ? Promise.resolve(cachedCurrency)
-            : rpc("/website/get_current_currency").then((result) => {
-                cachedCurrency = result;
-                return result;
-            });
     },
 
     //--------------------------------------------------------------------------

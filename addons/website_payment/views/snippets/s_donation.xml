@@ -2,6 +2,7 @@
 <odoo>
 
 <template id="s_donation_button" name="Donation Button">
+    <t t-set="currency" t-value="request.env['website'].get_current_website().company_id.currency_id"/>
     <div class="s_donation"
             data-name="Donation Button"
             data-donation-email="info@yourcompany.example.com"
@@ -13,7 +14,10 @@
             data-minimum-amount="5"
             data-maximum-amount="100"
             data-slider-step="5"
-            data-default-amount="25">
+            data-default-amount="25"
+            t-att-data-currency-id="currency.id"
+            t-att-data-currency-symbol="currency.symbol"
+            t-att-data-currency-position="currency.position">
         <form class="s_donation_form" action="/donation/pay" method="post" enctype="multipart/form-data">
             <span id="s_donation_description_inputs">
                 <input type="hidden" class="o_translatable_input_hidden d-block mb-1 w-100" name="donation_descriptions" value="A year of cultural awakening."/>

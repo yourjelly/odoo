@@ -446,14 +446,6 @@ class Website(Home):
             t['thumb'] = attribs.get('data-thumb')
         return templates
 
-    @http.route('/website/get_current_currency', type='jsonrpc', auth="public", website=True)
-    def get_current_currency(self, **kwargs):
-        return {
-            'id': request.website.company_id.currency_id.id,
-            'symbol': request.website.company_id.currency_id.symbol,
-            'position': request.website.company_id.currency_id.position,
-        }
-
     # --------------------------------------------------------------------------
     # Search Bar
     # --------------------------------------------------------------------------
