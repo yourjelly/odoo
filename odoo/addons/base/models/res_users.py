@@ -17,6 +17,7 @@ from functools import wraps
 from hashlib import sha256
 from itertools import chain, repeat
 from markupsafe import Markup
+import networkx as nx
 
 import pytz
 from lxml import etree
