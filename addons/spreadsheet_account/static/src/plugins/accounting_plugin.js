@@ -20,6 +20,8 @@ export class AccountingPlugin extends OdooUIPlugin {
         "getFiscalEndDate",
         "getAccountResidual",
         "getAccountPartnerData",
+        "getAccountTagCredit",
+        "getAccountTagDebit",
     ]);
     constructor(config) {
         super(config);
@@ -81,7 +83,7 @@ export class AccountingPlugin extends OdooUIPlugin {
      * @returns {number}
      */
     getAccountTagCredit(tags, dateFrom, dateTo, offset, companyId, includeUnposted) {
-        const data = this._fetchAccountData(codes, dateFrom, dateTo, offset, companyId, includeUnposted);
+        const data = this._fetchAccountTagData(tags, dateFrom, dateTo, offset, companyId, includeUnposted);
         return data.credit;
     }
 
@@ -96,7 +98,7 @@ export class AccountingPlugin extends OdooUIPlugin {
      * @returns {number}
      */
     getAccountTagDebit(tags, dateFrom, dateTo, offset, companyId, includeUnposted) {
-        const data = this._fetchAccountData(codes, dateFrom, dateTo, offset, companyId, includeUnposted);
+        const data = this._fetchAccountTagData(tags, dateFrom, dateTo, offset, companyId, includeUnposted);
         return data.debit;
     }
 
