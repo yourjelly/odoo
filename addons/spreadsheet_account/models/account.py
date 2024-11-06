@@ -128,34 +128,6 @@ class AccountAccount(models.Model):
 
         return [(date(year=1900, month=1, day=1), timeline[0][0] + relativedelta(days=-1))] + timeline
 
-    def _get_accounts_by_codes(self, args_list, default_accounts=False):
-        company_to_codes = defaultdict(set)
-
-        for args in args_list:
-            codes = tuple({code for code in args["codes"] if code})
-            company_id = args.get('company_id') or self.env.company.id
-            company_to_codes[company_id].update(codes)
-
-        default_domain = [('account_type', 'in',
-                           ['liability_payable', 'asset_receivable'])] if default_accounts else expression.FALSE_DOMAIN
-
-        all_accounts = {}
-        for company_id, codes in company_to_codes.items():
-            # Define code-specific domain
-            code_domain = expression.OR(
-                [('code', '=like', f'{code}%') for code in codes]
-            )
-            # Combine with default domain and company-specific domain
-            domain = expression.AND([
-                expression.OR([code_domain, default_domain]),
-                self.env['account.account']._check_company_domain(company_id),
-            ])
-
-            accounts = self.env['account.account'].with_company(company_id).search(domain)
-            all_accounts[company_id] = accounts
-
-        return all_accounts
-
     def _get_all_accounts(self, args_list, default_accounts=False):
         company_to_codes = defaultdict(set)
         for args in args_list:
@@ -176,33 +148,6 @@ class AccountAccount(models.Model):
                 expression.OR([code_domain, default_domain]),
                 self.env['account.account']._check_company_domain(company_id),
             ])
-            accounts = self.env['account.account'].with_company(company_id).search(domain)
-            all_accounts[company_id] = accounts
-
-        return all_accounts
-
-    def _get_accounts_by_tags(self, args_list, default_accounts=False):
-        company_to_tags = defaultdict(set)
-
-        for args in args_list:
-            tags = tuple({tag for tag in args["tags"] if tag})
-            company_id = args.get('company_id') or self.env.company.id
-            company_to_tags[company_id].update(tags)
-
-        default_domain = [('account_type', 'in', ['liability_payable', 'asset_receivable'])] if default_accounts else expression.FALSE_DOMAIN
-
-        all_accounts = {}
-        for company_id, tags in company_to_tags.items():
-            # Define tag-specific domain
-            tag_domain = expression.OR(
-                [('tag_ids.name', '=', tag) for tag in tags]
-            )
-            # Combine with default domain and company-specific domain
-            domain = expression.AND([
-                expression.OR([tag_domain, default_domain]),
-                self.env['account.account']._check_company_domain(company_id),
-            ])
-
             accounts = self.env['account.account'].with_company(company_id).search(domain)
             all_accounts[company_id] = accounts
 
@@ -233,7 +178,14 @@ class AccountAccount(models.Model):
             aggregates=aggregates,
         )
         all_lines.update({
-            str((period, company.id, state, account.id, partner.id)): dict(zip(fields, val))
+            str((period, company.id, state, account.id, partner.id)): {
+                **dict(zip(fields, val)),
+                'period': period,
+                'company_id': company.id,
+                'state': state,
+                'account_id': account.id,
+                'partner_id': partner.id
+            }
             for company, state, account, partner, *val in lines_in_period
         })
 
@@ -264,7 +216,14 @@ class AccountAccount(models.Model):
                 aggregates=aggregates,
             )
             all_lines.update({
-                str((period, company.id, state, account.id, partner.id)): dict(zip(fields, val))
+                str((period, company.id, state, account.id, partner.id)): {
+                    **dict(zip(fields, val)),
+                    'period': period,
+                    'company_id': company.id,
+                    'state': state,
+                    'account_id': account.id,
+                    'partner_id': partner.id
+                }
                 for company, state, account, partner, *val in lines_in_period
             })
         return all_lines
