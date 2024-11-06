@@ -55,14 +55,16 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
                 var reminderText = self.reminderOn ? _t('Favorite On') : _t('Set Favorite');
                 self.$('.o_wetrack_js_reminder_text').text(reminderText);
                 self._updateDisplay();
-                console.log("value of the reminder " + self.reminderOn);
                 if (self.reminderOn) {
-                    self._sendReminderMail();
+                    self._sendReminderMail()
+                    var message = _t('Track successfully added to your favorites. Check your email to add them to your agenda.');
                 }
-//                var message = self.reminderOn ? _t('talk added to your Favorites') : _t('Talk removed from your Favorites');
-//                self.notification.add(message, {
-//                    type: 'info',
-//                });
+                else{
+                    message = _t('Talk removed from your Favorites');
+                }
+                self.notification.add(message, {
+                    type: 'info',
+                });
                 if (self.reminderOn) {
                     Component.env.bus.trigger('open_notification_request', [
                         'add_track_to_favorite',
@@ -91,16 +93,12 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
     _sendReminderMail: function(){
         rpc('/event/has_email_reminder').then( function (result){
             if (result.hasEmailReminder){
-                console.log("ici dans hasEmailReminder" + " " + result.hasEmailReminder)
                 rpc('/event/send_email_reminder');
             }
             else {
-                console.log("Inside get mail reminder modal");
                 rpc('/event/get_email_reminder_modal', {'method': 'search_read'}).then(function (result) {
-                console.log(result)
                    $("#modal_email_reminder_container").append(result.modal)
                 })
-                console.log("Inside get mail reminder modal");
             }
         })
     },
