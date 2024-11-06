@@ -499,8 +499,8 @@ class Message(models.Model):
             else:
                 check_operation = self.env['mail.thread']._get_mail_message_access(doc_ids, operation, model_name=model)
             records = DocumentModel.browse(doc_ids)
-            records.check_access_rights(check_operation)
-            mids = records.browse(doc_ids)._filter_access_rules(check_operation)
+            access = records.check_access_rights(check_operation, raise_exception=False)
+            mids = records._filter_access_rules(check_operation) if access else records.browse()
             document_related_ids += [
                 mid for mid, message in message_values.items()
                 if (
@@ -664,7 +664,11 @@ class Message(models.Model):
         return super(Message, self).read(fields=fields, load=load)
 
     def write(self, vals):
+        if {'partner_ids', 'notification_ids'} & set(vals.keys()) and not self.env.is_system():
+            raise AccessError(_("Only administrators can modify recipients fields."))
         record_changed = 'model' in vals or 'res_id' in vals
+        if record_changed and not self.env.is_system():
+            raise AccessError(_("Only administrators can modify 'model' and 'res_id' fields."))
         if record_changed or 'message_type' in vals:
             self._invalidate_documents()
         res = super(Message, self).write(vals)
@@ -687,6 +691,11 @@ class Message(models.Model):
             lambda attach: attach.res_model == self._name and (attach.res_id in self.ids or attach.res_id == 0)
         ).unlink()
         return super(Message, self).unlink()
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_granted(self):
+        if not self.env.su and not self.env.user._is_internal():
+            raise AccessError(_('You cannot remove messages directly. Consider using dedicated tools.'))
 
     @api.model
     def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
