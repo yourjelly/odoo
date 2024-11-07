@@ -44,9 +44,11 @@ export class SnippetsMenu extends Component {
                 disableFloatingToolbar: true,
                 Plugins: [...MAIN_PLUGINS, ...BUILDER_PLUGIN],
                 onChange: () => {
+                    console.warn("ONCHANGE");
                     this.state.canUndo = this.editor.shared.canUndo();
                     this.state.canRedo = this.editor.shared.canRedo();
                     editorBus.trigger("STEP_ADDED");
+                    this.editor.dispatch("UPDATE_BUILDER_OVERLAY");
                 },
                 resources: {
                     change_selected_toolboxes_listeners: (selectedToolboxes) => {

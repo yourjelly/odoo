@@ -231,6 +231,7 @@ export function reposition(popper, target, options) {
 
     // Compute positioning solution
     const solution = computePosition(popper, target, options);
+    console.warn("SOLU", solution);
 
     // Apply it
     const { top, left, direction, variant } = solution;

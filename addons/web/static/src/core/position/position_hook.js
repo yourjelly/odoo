@@ -116,6 +116,7 @@ export function usePosition(refName, getTarget, options = {}) {
             lock = true;
         },
         unlock: () => {
+            console.warn("unlock");
             lock = false;
             bus.trigger("update");
         },

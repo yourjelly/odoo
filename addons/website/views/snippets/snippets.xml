@@ -659,8 +659,8 @@
         <we-button class="o_we_bg_brand_primary o_grid" data-add-element="button" title="Button" data-name="button">Button</we-button>
     </we-button-group>
     <we-row t-att-class="indent and 'o_we_sublevel_1'" string="Spacing (Y, X)">
-        <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="row-gap" data-unit="px" data-prevent-important="true" data-apply-to=".row"/>
-        <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="column-gap" data-unit="px" data-max="60" data-prevent-important="true" data-apply-to=".row"/>
+        <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="row-gap" data-unit="px" data-prevent-important="true" data-apply-to=".row.o_grid_mode"/>
+        <we-input data-dependencies="grid_mode" data-select-style="" data-css-property="column-gap" data-unit="px" data-max="60" data-prevent-important="true" data-apply-to=".row.o_grid_mode"/>
     </we-row>
 </template>
 
@@ -868,7 +868,7 @@
 
     <!-- Grid and columns -->
     <div data-js="layout_column"
-        data-selector="section"
+        data-selector="section, section.s_carousel_wrapper .carousel-item, .s_carousel_intro_item"
         data-target="> *:has(> .row), > .s_allow_columns"
         data-exclude=".s_dynamic, .s_dynamic_snippet_content, .s_dynamic_snippet_title, .s_masonry_block, .s_framed_intro, .s_features_grid, .s_media_list, .s_table_of_content, .s_process_steps, .s_image_gallery, .s_timeline, .s_pricelist_boxed, .s_quadrant, .s_pricelist_cafe, .s_faq_horizontal, .s_image_frame, .s_card_offset, .s_contact_info">
         <we-row>
@@ -895,13 +895,13 @@
     </div>
 
     <!-- Move snippets around -->
-    <div data-js="SnippetMove" data-selector="section, .s_accordion .accordion-item, .s_showcase .row:not(.s_col_no_resize) > div, .s_hr" data-no-scroll=".s_accordion .accordion-item">
+    <div data-js="SnippetMove" data-selector="section, .s_accordion .accordion-item, .s_showcase .row .row:not(.s_col_no_resize) > div, .s_hr" data-no-scroll=".s_accordion .accordion-item">
         <we-button class="fa fa-fw fa-angle-up" data-move-snippet="prev" data-no-preview="true" data-name="move_up_opt"/>
         <we-button class="fa fa-fw fa-angle-down" data-move-snippet="next" data-no-preview="true" data-name="move_down_opt"/>
     </div>
     <div data-js="SnippetMove"
          data-selector=".row:not(.s_col_no_resize) > div, .nav-item"
-         data-exclude=".s_showcase .row > div"
+         data-exclude=".s_showcase .row .row > div"
          data-name="move_horizontally_opt">
         <we-button class="fa fa-fw fa-angle-left" data-move-snippet="prev" data-no-preview="true" data-name="move_left_opt"/>
         <we-button class="fa fa-fw fa-angle-right" data-move-snippet="next" data-no-preview="true" data-name="move_right_opt"/>
@@ -1336,7 +1336,7 @@
             </we-select>
         </we-row>
 
-        <we-select string="Links Style" data-variable="header-links-style" data-reload="/" data-dependencies="!header_stretch_opt">
+        <we-select string="Links Style" data-variable="header-links-style" data-reload="/" data-dependencies="header_default_opt, header_boxed_opt, header_vertical_opt, header_search_opt, header_sales_one_opt, header_sales_two_opt, header_sales_three_opt, header_sales_four_opt">
             <we-button data-name="option_header_navbar_links_default"
                        data-customize-website-views=""
                        data-customize-website-variable="'default'">Default</we-button>
@@ -1624,7 +1624,7 @@
     </div>
 
     <!-- Stretch section -->
-    <div data-js="ContainerWidth" data-selector="section"
+    <div data-js="ContainerWidth" data-selector="section, .s_carousel .carousel-item, .s_carousel_intro_item"
         data-exclude="[data-snippet] :not(.oe_structure) > [data-snippet]" data-target="> .container, > .container-fluid, > .o_container_small">
         <we-button-group string="Content Width">
             <we-button data-select-class="o_container_small"

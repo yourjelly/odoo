@@ -8,10 +8,23 @@ export class BuilderOverlayPlugin extends Plugin {
         change_selected_toolboxes_listeners: p.openBuilderOverlay.bind(p),
     });
 
+    handleCommand(command) {
+        switch (command) {
+            case "UPDATE_BUILDER_OVERLAY":
+                console.warn("COMMAND");
+                console.log(this.overlay);
+                console.log(this)
+                this.overlay.updatePosition();
+                break;
+        }
+    }
+
     setup() {
+        console.warn("SETUP");
+        console.log(this);
         this.overlay = this.shared.createOverlay(BuilderOverlay, {
             positionOptions: {
-                position: "center",
+                position: "bottom-fit",
             },
         });
     }
