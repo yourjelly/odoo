@@ -121,7 +121,8 @@ class AnalyticPlanFields(models.AbstractModel):
                             'optional': 'show',
                             **account_node.attrib,
                             'name': fname,
-                            'domain': repr(self._get_plan_domain(plan))
+                            'domain': repr(self._get_plan_domain(plan)),
+                            'context': repr({'default_plan_id': plan.id}),
                         }))
                     if account_filter_node is not None:
                         account_filter_node.addnext(E.filter(name=fname, context=f"{{'group_by': '{fname}'}}"))
