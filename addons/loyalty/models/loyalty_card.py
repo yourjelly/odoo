@@ -9,7 +9,7 @@ from odoo.tools import format_amount
 
 class LoyaltyCard(models.Model):
     _inherit = ['mail.thread']
-    _description = 'Loyalty Coupon'
+    _description = "Loyalty Coupon"
     _rec_name = 'code'
 
     @api.model
@@ -17,12 +17,12 @@ class LoyaltyCard(models.Model):
         """
         Barcode identifiable codes.
         """
-        return '044' + str(uuid4())[7:-18]
+        return "044" + str(uuid4())[7:-18]
 
     @api.depends('program_id', 'code')
     def _compute_display_name(self):
         for card in self:
-            card.display_name = f'{card.program_id.name}: {card.code}'
+            card.display_name = f"{card.program_id.name}: {card.code}"
 
     program_id = fields.Many2one('loyalty.program', ondelete='restrict', default=lambda self: self.env.context.get('active_id', None))
     program_type = fields.Selection(related='program_id.program_type')
@@ -46,14 +46,14 @@ class LoyaltyCard(models.Model):
     )
 
     _sql_constraints = [
-        ('card_code_unique', 'UNIQUE(code)', 'A coupon/loyalty card must have a unique code.')
+        ('card_code_unique', 'UNIQUE(code)', "A coupon/loyalty card must have a unique code.")
     ]
 
     @api.constrains('code')
     def _contrains_code(self):
         # Prevent a coupon from having the same code a program
         if self.env['loyalty.rule'].search_count([('mode', '=', 'with_code'), ('code', 'in', self.mapped('code'))]):
-            raise ValidationError(_('A trigger with the same code as one of your coupon already exists.'))
+            raise ValidationError(_("A trigger with the same code as one of your coupon already exists."))
 
     @api.depends('points', 'point_name')
     def _compute_points_display(self):
@@ -100,7 +100,7 @@ class LoyaltyCard(models.Model):
             force_email=True,
         )
         return {
-            'name': _('Compose Email'),
+            'name': _("Compose Email"),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'mail.compose.message',

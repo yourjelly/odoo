@@ -4,7 +4,7 @@ from odoo import fields, models
 
 
 class SaleOrderCouponPoints(models.Model):
-    _description = 'Sale Order Coupon Points - Keeps track of how a sale order impacts a coupon'
+    _description = "Sale Order Coupon Points - Keeps track of how a sale order impacts a coupon"
 
     order_id = fields.Many2one(comodel_name='sale.order', required=True, ondelete='cascade')
     coupon_id = fields.Many2one(comodel_name='loyalty.card', required=True, ondelete='cascade')
@@ -12,5 +12,5 @@ class SaleOrderCouponPoints(models.Model):
 
     _sql_constraints = [
         ('order_coupon_unique', 'UNIQUE (order_id, coupon_id)',
-        'The coupon points entry already exists.')
+        "The coupon points entry already exists.")
     ]
