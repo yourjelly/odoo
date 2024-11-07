@@ -5,4 +5,4 @@ from odoo import models
 
 
 class ResPartner(models.Model):
-    _inherit = ['mail.thread.phone', 'res.partner']
+    _inherit = ['res.partner', 'mail.thread.phone']
