@@ -125,7 +125,6 @@ export class DynamicList extends DataPoint {
                 }
             } else {
                 if (!this.model._urgentSave) {
-                    await this.editedRecord.checkValidity();
                     if (!this.editedRecord) {
                         return true;
                     }

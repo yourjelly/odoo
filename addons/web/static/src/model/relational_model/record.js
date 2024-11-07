@@ -440,7 +440,7 @@ export class Record extends DataPoint {
             this._setInvalidField(fieldName);
         }
         const isValid = !this._invalidFields.size;
-        if (!isValid && displayNotification) {
+        if (!isValid && (displayNotification || unsetRequiredFields.length)) {
             const items = [...this._invalidFields].map((fieldName) => {
                 return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
             }, this);
@@ -451,6 +451,7 @@ export class Record extends DataPoint {
                     type: "danger",
                 }
             );
+            return false;
         }
         return isValid;
     }
@@ -1128,9 +1129,14 @@ export class Record extends DataPoint {
             return;
         }
         if (this.selected && this.model.multiEdit && !this._invalidFields.has(fieldName)) {
+            this._invalidFields.add(fieldName);
             await this.model.dialog.add(AlertDialog, {
                 body: _t("No valid record to save"),
                 confirm: async () => {
+                    await this.discard();
+                    this.switchMode("readonly");
+                },
+                dismiss: async () => {
                     await this.discard();
                     this.switchMode("readonly");
                 },
