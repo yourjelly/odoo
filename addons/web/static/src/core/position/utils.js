@@ -195,7 +195,6 @@ function computePosition(popper, target, { container, margin, position }) {
         };
     }
 
-
     // Find best solution
     for (const d of directions) {
         for (const v of variants) {

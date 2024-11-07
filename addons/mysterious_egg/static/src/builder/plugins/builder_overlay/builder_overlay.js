@@ -1,4 +1,4 @@
-import { Component, useRef, useState } from "@odoo/owl";
+import { Component, useRef, useState, useExternalListener } from "@odoo/owl";
 import { usePosition } from "@web/core/position/position_hook";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { pick } from "@web/core/utils/objects";
@@ -20,17 +20,23 @@ export class BuilderOverlay extends Component {
     setup() {
         this.overlay = useRef("overlay");
         this.target = this.props.target;
+        console.log("component", this.target);
         this.size = useState({
             height: this.target.clientHeight,
             width: this.target.clientWidth,
         });
         this.spacingConfig = this.buildSpacingConfig();
 
-        usePosition("root", () => this.target, {
-            position: "center",
-            container: () => this.props.container,
-            onPositioned: this.updateOverlaySize.bind(this),
-        });
+        // const position = usePosition("root", () => this.target, {
+        //     position: "center-fit",
+        //     container: () => this.props.container,
+        //     onPositioned: this.updateOverlaySize.bind(this),
+        // });
+
+        // useExternalListener(this.props.bus, "updatePosition", () => {
+        //     console.warn("LISTENER"),
+        //     position.unlock();
+        // });
 
         useDraggableWithoutFollow({
             ref: { el: window.document.body },
