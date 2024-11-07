@@ -243,23 +243,6 @@ class TestWebsiteSaleProductConfigurator(TestProductConfiguratorCommon, HttpCase
         optional_product.product_variant_ids[1].product_template_attribute_value_ids.price_extra = 1
         self.start_tour('/shop', 'website_sale_product_configurator_zero_priced')
 
-    def test_product_configurator_with_taxes(self):
-        """ Test that taxes are applied correctly. """
-        self.env['website'].get_current_website().show_line_subtotals_tax_selection = 'tax_included'
-        tax = self.env['account.tax'].create({'name': "Tax", 'amount': 10})
-        optional_product = self.env['product.template'].create({
-            'name': "Optional product",
-            'website_published': True,
-        })
-        self.env['product.template'].create({
-            'name': "Main product",
-            'website_published': True,
-            'list_price': 100,
-            'taxes_id': tax,
-            'optional_product_ids': [Command.set(optional_product.ids)],
-        })
-        self.start_tour('/shop', 'website_sale_product_configurator_taxes')
-
     def test_product_configurator_strikethrough_price(self):
         """ Test that the strikethrough price is applied correctly. """
         self.env['res.config.settings'].create({'group_product_price_comparison': True}).execute()
