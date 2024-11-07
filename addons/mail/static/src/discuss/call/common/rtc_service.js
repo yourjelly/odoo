@@ -514,7 +514,7 @@ export class Rtc extends Record {
         // loading p2p in any case as we may need to receive peer-to-peer connections from users who failed to connect to the SFU.
         this.p2pService.connect(this.selfSession.id, this.state.channel.id, {
             info: this.formatInfo(),
-            iceServers: this.iceServers,
+            iceServers: DEFAULT_ICE_SERVERS,
         });
         this.network = new Network(this.p2pService);
         if (this.serverInfo) {
@@ -536,6 +536,7 @@ export class Rtc extends Record {
         this.network.addEventListener("update", this._handleNetworkUpdates);
         this.network.addEventListener("log", ({ detail: { id, level, message } }) => {
             const session = this.store["discuss.channel.rtc.session"].get(id);
+            console.log(id, level, message);
             if (session) {
                 this.log(session, message, { step: "p2p", level });
             }
