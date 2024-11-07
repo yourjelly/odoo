@@ -85,6 +85,7 @@ export class EditorOverlay extends Component {
                 this.updateVisibility(el, solution);
             },
         };
+        console.warn("here");
         position = usePosition("root", getTarget, positionOptions);
     }
 

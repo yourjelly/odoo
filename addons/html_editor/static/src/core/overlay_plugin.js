@@ -79,7 +79,6 @@ export class Overlay {
      * @param {any} [options.props] overlay component props
      */
     open({ target, props }) {
-        console.log("OVERLAY CLASS: OPEN");
         if (this.isOpen) {
             this.updatePosition();
         } else {
@@ -123,7 +122,6 @@ export class Overlay {
     }
 
     updatePosition() {
-        console.warn("updatePosition");
         this.bus.trigger("updatePosition");
     }
 }

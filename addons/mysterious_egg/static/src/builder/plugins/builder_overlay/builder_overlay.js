@@ -27,8 +27,6 @@ export class BuilderOverlay extends Component {
         });
         this.spacingConfig = this.buildSpacingConfig();
 
-        console.log(this);
-
         // const position = usePosition("root", () => this.target, {
         //     position: "center-fit",
         //     container: () => this.props.container,
@@ -101,8 +99,6 @@ export class BuilderOverlay extends Component {
     }
 
     updateOverlaySize() {
-        console.warn("UPDATEOVERLAYSIZE");
-        console.log(this.target);
         this.size.height = this.target.clientHeight;
         this.size.width = this.target.clientWidth;
         this.size.paddingBottom = window

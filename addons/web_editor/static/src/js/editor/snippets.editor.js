@@ -282,8 +282,6 @@ var SnippetEditor = publicWidget.Widget.extend({
         if (!this.isShown() || !this.$target.length) {
             return;
         }
-        console.warn("COVER");
-        console.log(this.$target[0]);
 
         const $modal = this.$target.find('.modal:visible');
         const $target = $modal.length ? $modal : this.$target;

@@ -67,6 +67,14 @@ function getIFrame(popperEl, targetEl) {
  *                                => can be applied to popper.style.(top|left)
  */
 function computePosition(popper, target, { container, margin, position }) {
+    console.warn(
+        `popper, target, container, margin, position:`,
+        popper,
+        target,
+        container,
+        margin,
+        position
+    );
     // Retrieve directions and variants
     let [direction, variant = "middle"] = position.split("-");
     if (localization.direction === "rtl") {
@@ -194,7 +202,6 @@ function computePosition(popper, target, { container, margin, position }) {
             variant: "middle",
         };
     }
-
 
     // Find best solution
     for (const d of directions) {
