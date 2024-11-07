@@ -1,12 +1,12 @@
 from odoo import Command
 from odoo.tests import tagged
 from odoo.tools import misc
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.account_reports.tests.common import TestAccountReportsCommon
+from odoo.addons.l10n_jo_edi.tests.test_jo_checks import JoEdiCommon
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
-class TestEdiJo(AccountTestInvoicingCommon):
+class TestEdiJo(JoEdiCommon):
     @classmethod
     @TestAccountReportsCommon.setup_country('jo')
     def setUpClass(cls):
@@ -374,9 +374,6 @@ class TestEdiJo(AccountTestInvoicingCommon):
         }
         invoice = self._create_invoice(invoice_values)
 
-        expected_file = self._read_xml_test_file('precision')
         generated_file = self.env['account.edi.xml.ubl_21.jo']._export_invoice(invoice)
-        self.assertXmlTreeEqual(
-            self.get_xml_tree_from_string(generated_file),
-            self.get_xml_tree_from_string(expected_file)
-        )
+        errors = self.validate_jo_edi_numbers(generated_file)
+        self.assertFalse(errors, errors)
