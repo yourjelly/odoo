@@ -277,7 +277,7 @@
                                     t-att-data-attribute_display_type="attribute.display_type"
                                 >
                                     <ul t-attf-class="list-inline o_wsale_product_attribute #{'d-none' if single_and_custom else ''}">
-                                        <li t-foreach="ptavs" t-as="ptav" class="list-inline-item me-1">
+                                        <li t-foreach="ptavs" t-as="ptav" class="list-inline-item mb-2">
                                             <t t-set="img_style"
                                                 t-value="'background:url(/web/image/product.template.attribute.value/%s/image); background-size:cover;' % ptav.id if ptav.image else ''"
                                             />
@@ -285,8 +285,9 @@
                                                 t-value="'background:' + str(ptav.html_color or ptav.name if not ptav.is_custom else '')"
                                             />
                                             <a t-att-href="product_href + '#attribute_values=' + str(ptav.product_attribute_value_id.id)">
-                                                <label t-attf-style="#{img_style or color_style}"
-                                                    t-attf-class="css_attribute_color_shop">
+                                                <label
+                                                    t-attf-style="#{img_style or color_style}"
+                                                    t-attf-class="css_attribute_color_shop"                                                >
                                                 </label>
                                             </a>
                                         </li>
@@ -302,10 +303,13 @@
                                 >
                                     <ul t-att-data-attribute_id="attribute.id" t-attf-class="list-inline list-unstyled o_wsale_product_attribute #{'d-none' if single_and_custom else ''}">
                                         <t t-foreach="ptavs" t-as="ptav">
-                                            <li class="list-inline-item js_attribute_value">
-                                                <a class="text-primary text-primary text-decoration-none attribute_value_shop"
+                                            <li class="list-inline-item mb-3">
+                                                <a class="text-decoration-none"
                                                     t-att-href="product_href + '#attribute_values=' + str(ptav.product_attribute_value_id.id)">
-                                                    <span style="font-size: 15px;" t-field="ptav.name"/>
+                                                    <label
+                                                        t-attf-class="btn btn-outline-primary"
+                                                        t-field="ptav.name"
+                                                    />
                                                 </a>
                                             </li>
                                         </t>

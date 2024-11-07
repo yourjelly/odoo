@@ -72,6 +72,14 @@
     &.active {
         border: 5px solid map-get($theme-colors, 'primary');
     }
+
+    &.custom_value {
+        background-image: linear-gradient(to bottom right, #FF0000, #FFF200, #1E9600);
+    }
+
+    &.transparent {
+        background-image: url(/web/static/img/transparent.png);
+    }
 }
 
 .css_not_available_msg {
@@ -206,12 +214,6 @@ label.css_attribute_color.css_not_available {
                     @include font-size(1.1rem);
                 }
             }
-        }
-    }
-
-    .attribute_value_shop {
-        &:hover {
-            background-color: rgba(0, 0, 0, 0.1);
         }
     }
 
