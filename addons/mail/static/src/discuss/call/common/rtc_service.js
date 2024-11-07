@@ -4,7 +4,7 @@ import { monitorAudio } from "@mail/utils/common/media_monitoring";
 import { rpc } from "@web/core/network/rpc";
 import { closeStream, onChange } from "@mail/utils/common/misc";
 
-import { reactive } from "@odoo/owl";
+import { reactive, toRaw } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
@@ -514,7 +514,7 @@ export class Rtc extends Record {
         // loading p2p in any case as we may need to receive peer-to-peer connections from users who failed to connect to the SFU.
         this.p2pService.connect(this.selfSession.id, this.state.channel.id, {
             info: this.formatInfo(),
-            iceServers: DEFAULT_ICE_SERVERS,
+            iceServers: toRaw(this.iceServers),
         });
         this.network = new Network(this.p2pService);
         if (this.serverInfo) {
