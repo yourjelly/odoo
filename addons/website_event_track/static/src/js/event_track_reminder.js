@@ -41,8 +41,10 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
 
         var reminderOnValue = !this.reminderOn;
 
+        var trackId = $trackLink.data('trackId')
+
         rpc('/event/track/toggle_reminder', {
-            track_id: $trackLink.data('trackId'),
+            track_id: trackId,
             set_reminder_on: reminderOnValue,
         }).then(function (result) {
             if (result.error && result.error === 'ignored') {
@@ -56,7 +58,7 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
                 self.$('.o_wetrack_js_reminder_text').text(reminderText);
                 self._updateDisplay();
                 if (self.reminderOn) {
-                    self._sendReminderMail()
+                    self._sendReminderMail(trackId)
                     var message = _t('Track successfully added to your favorites. Check your email to add them to your agenda.');
                 }
                 else{
@@ -90,13 +92,15 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
         }
     },
 
-    _sendReminderMail: function(){
+    _sendReminderMail: function(trackId){
         rpc('/event/has_email_reminder').then( function (result){
             if (result.hasEmailReminder){
-                rpc('/event/send_email_reminder');
+                rpc('/event/send_email_reminder',  {
+                    track_id: trackId,
+                });
             }
             else {
-                rpc('/event/get_email_reminder_modal', {'method': 'search_read'}).then(function (result) {
+                rpc('/event/get_email_reminder_modal').then(function (result) {
                    $("#modal_email_reminder_container").append(result.modal)
                 })
             }

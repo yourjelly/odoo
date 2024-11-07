@@ -553,6 +553,16 @@ class EventTrackController(http.Controller):
         template.send_mail(1)
 
     @http.route('/event/send_email_reminder', type="json", auth="public", website=True)
-    def send_email_reminder(self):
+    def send_email_reminder(self, track_id):
         template = request.env.ref("website_event_track.email_reminder").sudo()
-        template.send_mail(1)
+        visitor = request.env['website.visitor']._get_visitor_from_request()
+        email = visitor.event_track_email_reminder if visitor.event_track_email_reminder else request.env.user.email
+        track = request.env['event.track'].search([("id", "=", track_id)])
+        urls = track.event_id._get_event_resource_urls()
+        email_values = {
+            "email_to": email,
+            'google_url': urls.get('google_url'),
+            'iCal_url': urls.get('iCal_url')
+        }
+        # values = self._prepare_event_register_values(events)
+        template.send_mail(track_id, email_values=email_values)
