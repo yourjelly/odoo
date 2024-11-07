@@ -100,11 +100,17 @@ export class CustomContentKanbanLikeWidget extends Component {
                 quotation_document_ids: [
                     x2ManyCommands.link(docId),
                 ],
+                ignore_default_ids: [
+                    x2ManyCommands.unlink(docId),
+                ],
             });
         } else {
             await this.props.record.update({
                 quotation_document_ids: [
                     x2ManyCommands.unlink(docId),
+                ],
+                ignore_default_ids: [
+                    x2ManyCommands.link(docId),
                 ],
             });
         }

@@ -37,6 +37,7 @@
                                 options="{'no_create': True}"
                                 widget="many2many_tags"
                             />
+                            <field name="default"/>
                         </group>
                     </group>
                     <group string="Attached To" groups="base.group_no_one">
@@ -111,6 +112,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="document_type"/>
+                <field name="default" widget="boolean_toggle" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>
             </list>
         </field>
@@ -136,6 +138,7 @@
                     />
                     <filter name="all" string="All"/>
                     <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                    <filter name="default" string="Default" domain="[('default', '=', True)]"/>
                 </group>
             </search>
         </field>
