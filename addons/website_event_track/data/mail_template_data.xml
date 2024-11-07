@@ -30,17 +30,5 @@
         <field name="auto_delete" eval="True"/>
     </record>
 
-<record id="email_reminder" model="mail.template">
-    <field name="name">Event: test add tracker</field>
-        <field name="model_id" ref="website_event_track.model_event_track"/>
-        <field name="subject">Test</field>
-        <field name="email_from">alan@odoo.com</field>
-        <field name="email_to">alan@odoo.com</field>
-        <field name="description">The test description</field>
-        <field name="body_html" type="html">
-            <p>Test for 'Add'</p>
-    </field>
-</record>
-
 </data>
 </odoo>
