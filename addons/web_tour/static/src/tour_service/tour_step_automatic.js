@@ -79,18 +79,26 @@ export class TourStepAutomatic extends TourStep {
             this.skipped = true;
             return true;
         }
-        let nodes;
+        let warning;
         try {
-            nodes = hoot.queryAll(this.trigger);
-        } catch (error) {
-            this.error = `HOOT: ${error.message}`;
+            const visible = !this.trigger.includes(":visible");
+            this.element = hoot.queryOne(this.trigger, { visible });
+        } catch (warn) {
+            warning = warn.message;
+            try {
+                const nodes = hoot.queryAll(this.trigger);
+                this.element = this.trigger.includes(":visible")
+                    ? nodes.at(0)
+                    : nodes.find(_legacyIsVisible);
+            } catch (error) {
+                this.error = `HOOT: ${error.message}`;
+            }
         }
-        this.element = this.trigger.includes(":visible")
-            ? nodes.at(0)
-            : nodes.find(_legacyIsVisible);
-        return !this.isUIBlocked && this.elementIsEnabled && this.elementIsInModal
-            ? this.element
-            : false;
+        const canContinue = !this.isUIBlocked && this.elementIsEnabled && this.elementIsInModal;
+        if (canContinue && warning) {
+            console.warn(`Could you be more precise with trigger ${this.trigger} : ${warning}`);
+        }
+        return canContinue ? this.element : false;
     }
 
     get isUIBlocked() {
