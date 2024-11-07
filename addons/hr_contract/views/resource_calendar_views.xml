@@ -5,10 +5,20 @@
         <field name="model">resource.calendar</field>
         <field name="inherit_id" ref="resource.view_resource_calendar_tree"/>
         <field name="arch" type="xml">
-            <field name="company_id" position="after">
+            <field name="work_resources_count" position="before">
                 <field name="contracts_count"/>
-                <field name="full_time_required_hours" widget="float_time" optional="hide"/>
             </field>
+        </field>
+    </record>
+
+    <record id="view_resource_calendar_search_inherit_contract" model="ir.ui.view">
+        <field name="name">view.resource.calendar.search.inherit.hr.contract</field>
+        <field name="model">resource.calendar</field>
+        <field name="inherit_id" ref="resource.view_resource_calendar_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter string="No running contracts" name="no_running_contract" domain="[('running_contracts_count', '=', 0)]"/>
+            </xpath>
         </field>
     </record>
 
@@ -20,7 +30,12 @@
             <div name="button_box" position="inside">
                 <button class="oe_stat_button" name="action_open_contracts"
                         type="object" icon="fa-book" groups="hr_contract.group_hr_contract_manager">
-                    <field name="contracts_count" string="Contracts" widget="statinfo"/>
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_text">Contracts</span>
+                            <span class="o_stat_value">
+                                <field name="running_contracts_count"/> / <field name="contracts_count"/>
+                            </span>
+                        </div>
                 </button>
             </div>
         </field>
