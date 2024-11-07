@@ -47,6 +47,7 @@ class TestConfigManager(TransactionCase):
             'init': {},
             'update': {},
             'without_demo': False,
+            'with_demo': False,
             'demo': {},
             'import_partial': '',
             'pidfile': '',
@@ -164,6 +165,7 @@ class TestConfigManager(TransactionCase):
             'init': {},  # blacklist for save, ignored from the config file
             'update': {},  # blacklist for save, ignored from the config file
             'without_demo': True,
+            'with_demo': True,
             'demo': {},  # blacklist for save, ignored from the config file
             'import_partial': 'bob',
             'pidfile': '/binary/pg_pid',
@@ -338,6 +340,7 @@ class TestConfigManager(TransactionCase):
             'update': {},
             'upgrade_path': '',
             'without_demo': False,
+            'with_demo': False,
 
             # options that are not taken from the file (also in 14.0)
             'addons_path': f'{PROJECT_PATH}/odoo/addons,{PROJECT_PATH}/addons',

@@ -122,8 +122,10 @@ class configmanager:
         group.add_option("-u", "--update", dest="update", file_loadable=False,
                          help="update one or more modules (comma-separated list, use \"all\" for all modules). Requires -d.")
         group.add_option("--without-demo", dest="without_demo",
-                         help="disable loading demo data for modules to be installed (comma-separated, use \"all\" for all modules). Requires -d and -i. Default is %default",
+                         help="(DEPRECATED) Disable loading demo data for modules to be installed. Requires -d and -i. Default is %default",
                          my_default=False)
+        group.add_option("--with-demo", dest="with_demo", action="store_true", my_default=False,
+                         help="Enable loading demo data for modules to be installed. Requires -d and -i. Default is %default")
         group.add_option("-P", "--import-partial", dest="import_partial", my_default='',
                          help="Use this for big data importation, if it crashes you will be able to continue at the current state. Provide a filename to store intermediate importation states.")
         group.add_option("--pidfile", dest="pidfile", help="file where the server pid will be stored")
@@ -553,7 +555,7 @@ class configmanager:
 
         self.options['init'] = opt.init and dict.fromkeys(opt.init.split(','), 1) or {}
         self.options['demo'] = (dict(self.options['init'])
-                                if not self.options['without_demo'] else {})
+                                if self.options['with_demo'] else {})
         self.options['update'] = opt.update and dict.fromkeys(opt.update.split(','), 1) or {}
         self.options['translate_modules'] = [m.strip() for m in opt.translate_modules.split(',')]
         self.options['translate_modules'].sort()
@@ -614,6 +616,12 @@ class configmanager:
                         "to different values. Please remove the first "
                         "one and make sure the second is correct."
                     )
+        if self.options.get('without_demo'):
+            self._warn(
+                "The without-demo option has been deprecated. "
+                "The default behavior is to load without demo data. "
+                "Please use --with-demo to load with demo data."
+            )
 
     def _is_addons_path(self, path):
         from odoo.modules.module import MANIFEST_NAMES
