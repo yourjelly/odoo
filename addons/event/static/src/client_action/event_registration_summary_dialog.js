@@ -47,7 +47,7 @@ export class EventRegistrationSummaryDialog extends Component {
         this.willAutoPrint = 
             this.registration.status === 'confirmed_registration' &&
             this.printSettings.autoPrint && this.useIotPrinter &&
-            this.hasSelectedPrinter() && !this.registration.has_to_pay;
+            this.hasSelectedPrinter();
 
         this.dialogState = useState({ isHidden: this.willAutoPrint });
 
