@@ -56,7 +56,13 @@
             </xpath>
             <app name="account" position="inside">
                 <block title="Product" name="l10n_in_product_setting_container" invisible="country_code != 'IN'">
-                    <setting string="Enable HSN/SAC Validation" help="HSN/SAC Digit Validation for GST Compliance based on your Aggregate Annual Turnover (AATO).">
+                    <setting string="HSN/SAC Validation" help="HSN/SAC Validation for GST Compliance based on your Aggregate Annual Turnover (AATO):" company_dependent="1">
+                        <div class="text-muted">
+                            <ul>
+                                <li>4 Digits for turnover &lt; ₹5 Crores</li>
+                                <li>6 Digits for turnover &gt; ₹5 Crores</li>
+                            </ul>
+                        </div>
                         <field name="l10n_in_hsn_code_digit"/>
                     </setting>
                 </block>
