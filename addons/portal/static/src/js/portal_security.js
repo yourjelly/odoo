@@ -139,7 +139,7 @@ publicWidget.registry.RevokeSessionsButton = publicWidget.Widget.extend({
                 try {
                     await this.orm.call(
                         "res.users.identitycheck",
-                        "revoke_all_devices",
+                        "run_check",
                         [checkId]
                     );
                 } catch {
