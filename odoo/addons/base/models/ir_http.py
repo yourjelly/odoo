@@ -149,9 +149,17 @@ class IrHttp(models.AbstractModel):
                 return slugify_lib.slugify(value, max_length=max_length)
             except TypeError:
                 pass
-        uni = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
-        slug_str = re.sub(r'[\W_]+', '-', uni).strip('-').lower()
-        return slug_str[:max_length] if max_length > 0 else slug_str
+        uni = unicodedata.normalize('NFKD', value)
+        slugified_segments = []
+        for slug in re.split('-|_| ', uni):
+            slug = re.sub(r"[$&+,:;=?@#|'<>.^*()%!\-{}/\\\~]", '-', slug)
+            slug = re.sub(r'--+', '-', slug)
+            slug = re.sub(r'([^\w-])+', '', slug)
+            slug = slug.strip('-')
+            if (len(slug) > 0):
+                slugified_segments.append(slug.lower())
+        slugified_str = ("-").join(slugified_segments)
+        return slugified_str[:max_length] if max_length > 0 else slugified_str
 
     @classmethod
     def _slugify(cls, value: str, max_length: int = 0, path: bool = False) -> str:

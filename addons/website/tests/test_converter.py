@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import threading
+import unicodedata
 
 from odoo.tests.common import BaseCase
 from odoo.modules.registry import Registry
@@ -104,4 +105,10 @@ class TestTitleToSlug(BaseCase):
         self.assertEqual(
             "do-you-know-martine-a-la-plage",
             self._slugify("Do YOU know 'Martine à la plage' ?")
+        )
+
+    def test_non_ascii_chars(self):
+        self.assertEqual(
+            unicodedata.normalize('NFKD', "测试시험"),
+            self._slugify("测试시험")
         )
