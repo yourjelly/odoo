@@ -141,7 +141,7 @@
                     <field name="show_quant" invisible="1"/>
                     <field name="show_lots_text" invisible="1"/>
                     <field name="show_lots_m2o" invisible="1"/>
-                    <group>
+                    <group name="product_qty">
                         <group>
                             <field name="product_id" readonly="id or move_line_ids"/>
                             <label for="product_uom_qty"/>
