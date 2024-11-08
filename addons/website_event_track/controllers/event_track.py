@@ -558,7 +558,6 @@ class EventTrackController(http.Controller):
         visitor = request.env['website.visitor']._get_visitor_from_request()
         email = visitor.event_track_email_reminder if visitor.event_track_email_reminder else request.env.user.email
         track = request.env['event.track'].search([("id", "=", track_id)])
-        print("before _get_event_resource_urls")
         urls = track.event_id._get_event_resource_urls()
         external_calendars_context = {
             'google_url': urls.get('google_url'),

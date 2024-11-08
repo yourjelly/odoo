@@ -34,8 +34,7 @@
         <field name="name">Add reminder via email</field>
         <field name="model_id" ref="website_event_track.model_event_track"/>
         <field name="subject">Add reminder: {{ object.name }}</field>
-        <field name="email_from">alan@odoo.com</field>
-<!--        <field name="email_from">{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or user.email_formatted or '') }}</field>-->
+        <field name="email_from">{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or user.email_formatted or '') }}</field>
         <field name="description">The test description name</field>
 <!--        <field name="body_html" type="html">-->
 <!--            <t t-out="test_value"/>-->

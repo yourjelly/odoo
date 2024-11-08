@@ -603,3 +603,6 @@ class Track(models.Model):
         )
 
         return track_candidates[:limit]
+
+    def action_send_reminder_email(self):
+
