@@ -176,8 +176,6 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
             expected_values = input_values
         attachments = self.env['ir.attachment'].browse([x.id for x in input_values])
         nb_moves_before = self.env['account.move'].search_count([('company_id', '=', self.env.company.id)])
-        journal_with_alias = self.env['account.journal'].search([('company_id', '=', self.env.user.company_id.id), ('type', '=', 'purchase')], limit=1)
-        email_raw = self._get_raw_mail_message_str(attachments=attachments, email_to=journal_with_alias.alias_id.display_name)
 
         # Patching to obtain moves created while processing the email message
         created_moves = []
@@ -187,29 +185,34 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
             res = _create(self, vals_list)
             created_moves.append(res.id)
             return res
-        context = context or {}
-        context.update({
-            'default_move_type': 'out_invoice',
-            'default_journal_id': self.company_data['default_journal_sale'].id
-        })
         with patch.object(AccountMove, 'create', _save_create):
-            self.env['mail.thread'].with_context(context).message_process('account.move', email_raw)
-        attachments = self.env['ir.attachment'].search_read([('res_model', '=', 'account.move'), ('res_id', '=', created_moves)], ['name', 'res_id'])
+            if new:
+                c = {**(context or {}), 'from_alias': True}
+                move = self.env['account.move'].create({
+                    'move_type': 'out_invoice',
+                    'date': '2023-01-01',
+                })
+                mail_message = move.with_context(c).message_post(attachment_ids=attachments.ids)
+            else:
+                journal_with_alias = self.env['account.journal'].search([('company_id', '=', self.env.user.company_id.id), ('type', '=', 'purchase')], limit=1)
+                email_raw = self._get_raw_mail_message_str(attachments=attachments, email_to=journal_with_alias.alias_id.display_name)
+                self.env['mail.thread'].message_process('account.move', email_raw, custom_values={'move_type': 'in_invoice', 'journal_id': journal_with_alias.id})
 
-        invoice_number = 0
-        previous_invoice = None
-        current_values = {}
-        for att in attachments:
-            if previous_invoice != att['res_id']:
-                invoice_number += 1
-                previous_invoice = att['res_id']
+                attachments = self.env['ir.attachment'].search_read([('res_model', '=', 'account.move'), ('res_id', 'in', created_moves)], ['name', 'res_id'])
+                invoice_number = 0
+                previous_invoice = None
+                current_values = {}
+                for att in attachments:
+                    if previous_invoice != att['res_id']:
+                        invoice_number += 1
+                        previous_invoice = att['res_id']
 
-            current_values[att['name']] = invoice_number
+                    current_values[att['name']] = invoice_number
 
-        self.assertEqual(current_values, {k.name: v for k, v in expected_values.items()})
+                self.assertEqual(current_values, {k.name: v for k, v in expected_values.items()})
 
-        nb_moves_after = self.env['account.move'].search_count([('company_id', '=', self.env.company.id)])
-        self.assertEqual(nb_moves_before + invoice_number, nb_moves_after)
+                nb_moves_after = self.env['account.move'].search_count([('company_id', '=', self.env.company.id)])
+                self.assertEqual(nb_moves_before + invoice_number, nb_moves_after)
 
     def test_supplier_invoice_mailed_from_supplier(self):
         message_parsed = {
