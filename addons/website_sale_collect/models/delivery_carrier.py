@@ -47,6 +47,8 @@ class DeliveryCarrier(models.Model):
     def write(self, vals):
         if vals.get('delivery_type') == 'in_store':
             vals['integration_level'] = 'rate'
+            if not self.warehouse_ids:
+                vals['is_published'] = False
         return super().write(vals)
 
     # === BUSINESS METHODS ===#
