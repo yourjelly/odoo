@@ -18,6 +18,7 @@ declare module "models" {
         channel_type: "chat" | "channel" | "group" | "livechat" | "whatsapp",
         computeCorrespondent(): ChannelMember | undefined,
         correspondent: ChannelMember,
+        group_public_id: ResGroups,
         hasOtherMembersTyping: boolean,
         readonly hasMemberList: boolean,
         readonly hasSelfAsMember: boolean,

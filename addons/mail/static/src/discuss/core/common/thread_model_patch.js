@@ -26,6 +26,7 @@ const threadPatch = {
         this.fetchChannelMutex = new Mutex();
         this.fetchChannelInfoDeferred = undefined;
         this.fetchChannelInfoState = "not_fetched";
+        this.group_public_id = Record.one("res.groups");
         this.hasOtherMembersTyping = Record.attr(false, {
             /** @this {import("models").Thread} */
             compute() {

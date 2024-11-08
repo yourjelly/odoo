@@ -67,6 +67,8 @@ export class Store extends BaseStore {
     MessageReactions;
     /** @type {typeof import("@mail/core/common/persona_model").Persona} */
     Persona;
+    /** @type {typeof import("@mail/core/common/res_groups_model").ResGroups} */
+    ["res.groups"];
     /** @type {typeof import("@mail/core/common/settings_model").Settings} */
     Settings;
     /** @type {typeof import("@mail/core/common/thread_model").Thread} */

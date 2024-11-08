@@ -59,8 +59,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #                   - fetch hr_employee (_compute_im_status override)
     #                   - search hr_leave (out_of_office_date_end)
     #                   - fetch res_users (internal user)
-    #           - fetch res_groups (authorizedGroupFullName)
-    #           - fetch ir_module_category (authorizedGroupFullName)
+    #           - fetch res_groups (group_public_id)
+    #           - fetch ir_module_category (group_public_id.full_name)
     #           - search discuss_channel_member (is_member, channel ACL)
     #           - search ir_attachment (_compute_avatar_128)
     #           - search group_ids (group_based_subscription)
@@ -109,8 +109,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #               - fetch bus_presence (_compute_im_status)
     #               - fetch mail_guest
     #           - im_livechat_channel_rule (is_bot)
-    #       - fetch res_groups (authorizedGroupFullName)
-    #       - fetch ir_module_category (authorizedGroupFullName)
+    #       - fetch res_groups (group_public_id)
+    #       - fetch ir_module_category (group_public_id.full_name)
     #       - search discuss_channel_member (is_member, channel ACL)
     #       - search ir_attachment (_compute_avatar_128)
     #       - search group_ids (group_based_subscription)
@@ -206,11 +206,11 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         self.channel_channel_public_2.add_members((self.users[0] + self.users[2] + self.users[4] + self.users[7] + self.users[9]).partner_id.ids)
         # create group-restricted channels
         self.channel_channel_group_1 = Channel.channel_create(
-            name="group restricted channel 1", group_id=self.env.ref("base.group_user").id
+            name="group restricted channel 1", group_id=self.group_user.id
         )
         self.channel_channel_group_1.add_members((self.users[0] + self.users[2] + self.users[3] + self.users[6] + self.users[12]).partner_id.ids)
         self.channel_channel_group_2 = Channel.channel_create(
-            name="group restricted channel 2", group_id=self.env.ref("base.group_user").id
+            name="group restricted channel 2", group_id=self.group_user.id
         )
         self.channel_channel_group_2.add_members((self.users[0] + self.users[2] + self.users[6] + self.users[7] + self.users[13]).partner_id.ids)
         # create chats
@@ -393,7 +393,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "hasLinkPreviewFeature": True,
                 "has_access_livechat": False,
                 "hasMessageTranslationFeature": False,
-                "internalUserGroupId": self.env.ref("base.group_user").id,
+                "internalUserGroupId": self.group_user.id,
                 "mt_comment_id": xmlid_to_res_id("mail.mt_comment"),
                 "odoobot": {"id": self.user_root.partner_id.id, "type": "partner"},
                 "self": {"id": self.users[0].partner_id.id, "type": "partner"},
@@ -433,6 +433,9 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             ],
             "discuss.channel.rtc.session": [
                 self._expected_result_for_rtc_session(self.channel_channel_group_1, self.users[2]),
+            ],
+            "res.groups": [
+                self._expected_result_for_group(self.group_user),
             ],
             "res.partner": self._filter_partners_fields(
                 self._expected_result_for_persona(self.users[0]),
@@ -533,6 +536,9 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 *self._expected_result_for_message_reactions(self.channel_general),
                 *self._expected_result_for_message_reactions(self.channel_channel_public_1),
             ],
+            "res.groups": [
+                self._expected_result_for_group(self.group_user),
+            ],
             "res.partner": self._filter_partners_fields(
                 self._expected_result_for_persona(
                     self.users[0],
@@ -558,7 +564,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_general:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": self.group_user.full_name,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -567,6 +572,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": self.group_user.id,
                 "memberCount": len(self.group_user.users),
                 "create_uid": self.user_root.id,
                 "defaultDisplayMode": False,
@@ -589,7 +595,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_public_1:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -598,6 +603,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": False,
                 "memberCount": 5,
                 "create_uid": self.env.user.id,
                 "defaultDisplayMode": False,
@@ -620,7 +626,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_public_2:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -629,6 +634,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": False,
                 "memberCount": 5,
                 "create_uid": self.env.user.id,
                 "defaultDisplayMode": False,
@@ -651,7 +657,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_group_1:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": self.group_user.full_name,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -660,6 +665,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": self.group_user.id,
                 "memberCount": 5,
                 "create_uid": self.env.user.id,
                 "defaultDisplayMode": False,
@@ -685,7 +691,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_group_2:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": self.group_user.full_name,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -694,6 +699,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": self.group_user.id,
                 "memberCount": 5,
                 "create_uid": self.env.user.id,
                 "defaultDisplayMode": False,
@@ -716,7 +722,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_group_1:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -725,6 +730,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": False,
                 "memberCount": 2,
                 "create_uid": self.env.user.id,
                 "defaultDisplayMode": False,
@@ -747,7 +753,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_chat_1:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -756,6 +761,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": False,
                 "memberCount": 2,
                 "create_uid": self.env.user.id,
                 "defaultDisplayMode": False,
@@ -778,7 +784,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_chat_2:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -787,6 +792,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": False,
                 "memberCount": 2,
                 "create_uid": self.env.user.id,
                 "defaultDisplayMode": False,
@@ -809,7 +815,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_chat_3:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -818,6 +823,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": False,
                 "memberCount": 2,
                 "create_uid": self.env.user.id,
                 "defaultDisplayMode": False,
@@ -840,7 +846,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_chat_4:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "avatarCacheKey": channel.avatar_cache_key,
@@ -849,6 +854,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": False,
                 "memberCount": 2,
                 "create_uid": self.env.user.id,
                 "defaultDisplayMode": False,
@@ -871,7 +877,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_livechat_1:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": False,
                 "anonymous_country": {
                     "code": "IN",
                     "id": self.env.ref("base.in").id,
@@ -884,6 +889,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": False,
                 "memberCount": 2,
                 "create_uid": self.users[1].id,
                 "defaultDisplayMode": False,
@@ -908,7 +914,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_livechat_2:
             return {
                 "allow_public_upload": False,
-                "authorizedGroupFullName": False,
                 "anonymous_country": {
                     "id": self.env.ref("base.be").id,
                     "code": "BE",
@@ -921,6 +926,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "id": channel.id,
                 "from_message_id": False,
+                "group_public_id": False,
                 "memberCount": 2,
                 "create_uid": self.env.ref("base.public_user").id,
                 "defaultDisplayMode": False,
@@ -1675,6 +1681,14 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "im_status": "offline",
                 "name": "Visitor",
                 "write_date": fields.Datetime.to_string(self.guest.write_date),
+            }
+        return {}
+
+    def _expected_result_for_group(self, group):
+        if group == self.group_user:
+            return {
+                "id": group.id,
+                "full_name": group.full_name,
             }
         return {}
 

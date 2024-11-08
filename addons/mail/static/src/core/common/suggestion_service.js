@@ -138,7 +138,7 @@ export class SuggestionService {
             thread &&
             (thread.channel_type === "group" ||
                 thread.channel_type === "chat" ||
-                (thread.channel_type === "channel" && thread.authorizedGroupFullName));
+                (thread.channel_type === "channel" && thread.group_public_id));
         if (isNonPublicChannel) {
             // Only return the channel members when in the context of a
             // group restricted channel. Indeed, the message with the mention
@@ -235,8 +235,8 @@ export class SuggestionService {
                 cleanTerm(thread.displayName).includes(cleanedSearchTerm)
         );
         const sortFunc = (c1, c2) => {
-            const isPublicChannel1 = c1.channel_type === "channel" && !c2.authorizedGroupFullName;
-            const isPublicChannel2 = c2.channel_type === "channel" && !c2.authorizedGroupFullName;
+            const isPublicChannel1 = c1.channel_type === "channel" && !c2.group_public_id;
+            const isPublicChannel2 = c2.channel_type === "channel" && !c2.group_public_id;
             if (isPublicChannel1 && !isPublicChannel2) {
                 return -1;
             }
