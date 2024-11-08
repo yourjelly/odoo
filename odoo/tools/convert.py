@@ -371,6 +371,8 @@ form: module.record_id""" % (xml_id,)
         for field in rec.iterchildren('field'):
             #TODO: most of this code is duplicated above (in _eval_xml)...
             f_name = field.get("name")
+            if '@' in f_name:
+                continue  # used for translations
             f_model = field.get("model")
             if not f_model and f_name in model._fields:
                 f_model = model._fields[f_name].comodel_name

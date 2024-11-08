@@ -720,12 +720,14 @@ def unquote(str):
     """Returns unquoted PO term string, with special PO characters unescaped"""
     return re_escaped_char.sub(_sub_replacement, str[1:-1])
 
-def TranslationFileReader(source, fileformat='po'):
+def TranslationFileReader(source, fileformat='po', module=None):
     """ Iterate over translation file to return Odoo translation entries """
     if fileformat == 'csv':
         return CSVFileReader(source)
     if fileformat == 'po':
         return PoFileReader(source)
+    if fileformat == 'xml':
+        return XMLFileReader(source, module)
     _logger.info('Bad file format: %s', fileformat)
     raise Exception(_('Bad file format: %s', fileformat))
 
@@ -756,6 +758,43 @@ class CSVFileReader:
                 self.prev_code_src = entry["src"]
 
             yield entry
+
+
+class XMLFileReader:
+    def __init__(self, source, module):
+        try:
+            tree = etree.parse(source)
+        except etree.LxmlSyntaxError:
+            _logger.warning("Error parsing XML file %s", source)
+            tree = etree.fromstring('<data/>')
+        self.source = tree
+        self.module = module
+
+    def __iter__(self):
+        for record in self.source.xpath("//field[contains(@name, '@')]/.."):
+            translated_fnames = sorted({field.attrib['name'].split('@')[0] for field in record.xpath("field[contains(@name, '@')]")})
+            for fname in translated_fnames:
+                src = self._get_value(record.xpath(f"field[@name='{fname}']")[0])
+                for translation in sorted(
+                    record.xpath(f"field[starts-with(@name, '{fname}@')]"),
+                    key=lambda x: x.attrib['name']  # Put fallback languages first
+                ):
+                    yield {
+                        'type': 'model_terms' if translation.attrib.get('type') == 'xml' else 'model',
+                        'imd_model': record.attrib['model'],
+                        'imd_name': record.attrib['id'],
+                        'lang': translation.attrib['name'].split('@')[1],
+                        'value': self._get_value(translation),
+                        'src': src,
+                        'module': self.module,
+                        'name': f"{record.attrib['model']},{fname}",
+                    }
+
+    def _get_value(self, node):
+        if node.attrib.get('type') == 'xml':
+            return "".join(etree.tostring(n, encoding='unicode') for n in node)
+        return node.text
+
 
 class PoFileReader:
     """ Iterate over po file to return Odoo translation entries """
@@ -1316,6 +1355,13 @@ class TranslationModuleReader(TranslationReader):
 
     def _export_translatable_records(self):
         """ Export translations of all translated records having an external id """
+        modules = self._installed_modules if 'all' in self._modules else list(self._modules)
+        xml_defined = set()
+        for module in modules:
+            for path in get_xml_paths(module, self.env):
+                with file_open(path, mode='rb') as source:
+                    for entry in XMLFileReader(source, module=module):
+                        xml_defined.add((entry['imd_model'], entry['imd_name']))
 
         query = """SELECT min(name), model, res_id, module
                      FROM ir_model_data
@@ -1323,15 +1369,12 @@ class TranslationModuleReader(TranslationReader):
                  GROUP BY model, res_id, module
                  ORDER BY module, model, min(name)"""
 
-        if 'all' not in self._modules:
-            query_param = list(self._modules)
-        else:
-            query_param = self._installed_modules
-
-        self._cr.execute(query, (query_param,))
+        self._cr.execute(query, (modules,))
 
         records_per_model = defaultdict(dict)
         for (xml_name, model, res_id, module) in self._cr.fetchall():
+            if (model, xml_name) in xml_defined:
+                continue
             records_per_model[model][res_id] = ImdInfo(xml_name, model, res_id, module)
 
         for model, imd_per_id in records_per_model.items():
@@ -1449,7 +1492,7 @@ class TranslationImporter:
         # {model_name: {field_name: {xmlid: {src: {lang: value}}}}}
         self.model_terms_translations = DeepDefaultDict()
 
-    def load_file(self, filepath, lang, xmlids=None):
+    def load_file(self, filepath, lang, xmlids=None, module=None):
         """ Load translations from the given file path.
 
         :param filepath: file path to open
@@ -1460,13 +1503,13 @@ class TranslationImporter:
         with suppress(FileNotFoundError), file_open(filepath, mode='rb', env=self.env) as fileobj:
             _logger.info('loading base translation file %s for language %s', filepath, lang)
             fileformat = os.path.splitext(filepath)[-1][1:].lower()
-            self.load(fileobj, fileformat, lang, xmlids=xmlids)
+            self.load(fileobj, fileformat, lang, xmlids=xmlids, module=module)
 
-    def load(self, fileobj, fileformat, lang, xmlids=None):
+    def load(self, fileobj, fileformat, lang, xmlids=None, module=None):
         """Load translations from the given file object.
 
         :param fileobj: buffer open to a translation file
-        :param fileformat: format of the `fielobj` file, one of 'po' or 'csv'
+        :param fileformat: format of the `fielobj` file, one of 'po', 'csv', or 'xml'
         :param lang: language code of the translations contained in `fileobj`;
                      the language must be present and activated in the database
         :param xmlids: if given, only translations for records with xmlid in xmlids will be loaded
@@ -1478,7 +1521,7 @@ class TranslationImporter:
             return None
         try:
             fileobj.seek(0)
-            reader = TranslationFileReader(fileobj, fileformat=fileformat)
+            reader = TranslationFileReader(fileobj, fileformat=fileformat, module=module)
             self._load(reader, lang, xmlids)
         except IOError:
             iso_lang = get_iso_codes(lang)
@@ -1492,6 +1535,8 @@ class TranslationImporter:
             if not row.get('value') or not row.get('src'):  # ignore empty translations
                 continue
             if row.get('type') == 'code':  # ignore code translations
+                continue
+            if row.get('lang', lang)[:2] != lang[:2]:
                 continue
             model_name = row.get('imd_model')
             module_name = row['module']
@@ -1507,7 +1552,8 @@ class TranslationImporter:
             if row.get('type') == 'model' and field.translate is True:
                 self.model_translations[model_name][field_name][xmlid][lang] = row['value']
             elif row.get('type') == 'model_terms' and callable(field.translate):
-                self.model_terms_translations[model_name][field_name][xmlid][row['src']][lang] = row['value']
+                for src, translated in zip(field.get_trans_terms(row['src']), field.get_trans_terms(row['value'])):
+                    self.model_terms_translations[model_name][field_name][xmlid][src][lang] = translated
 
     def save(self, overwrite=False, force_overwrite=False):
         """ Save translations to the database.
@@ -1697,6 +1743,14 @@ def get_po_paths(module_name: str, lang: str, env: odoo.api.Environment | None =
     for path in po_paths:
         with suppress(FileNotFoundError):
             yield file_path(path, env=env)
+
+
+def get_xml_paths(module_name: str, env: odoo.api.Environment | None = None):
+    manifest = odoo.modules.get_manifest(module_name)
+    for data_type in ('data', 'demo'):
+        for path in manifest.get(data_type, ()):
+            if path.endswith('.xml'):
+                yield file_path(join(module_name, path), env=env)
 
 
 class CodeTranslations:

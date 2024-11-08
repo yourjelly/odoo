@@ -256,7 +256,7 @@ def load_module_graph(env, graph, status=None, perform_checks=True,
             concrete_models = [model for model in model_names if not registry[model]._abstract]
             if concrete_models:
                 env.cr.execute("""
-                    SELECT model FROM ir_model 
+                    SELECT model FROM ir_model
                     WHERE id NOT IN (SELECT DISTINCT model_id FROM ir_model_access) AND model IN %s
                 """, [tuple(concrete_models)])
                 models = [model for [model] in env.cr.fetchall()]
@@ -429,10 +429,6 @@ def load_modules(registry, force_demo=False, status=None, update_module=False):
             # some base models are used below, so make sure they are set up
             registry.setup_models(cr)
 
-        if load_lang:
-            for lang in load_lang.split(','):
-                tools.translate.load_language(cr, lang)
-
         # STEP 2: Mark other modules to be loaded/updated
         if update_module:
             Module = env['ir.module.module']
@@ -597,6 +593,10 @@ def load_modules(registry, force_demo=False, status=None, update_module=False):
 
         # STEP 8: save installed/updated modules for post-install tests and _register_hook
         registry.updated_modules += processed_modules
+
+        if load_lang:
+            for lang in load_lang.split(','):
+                tools.translate.load_language(cr, lang)
 
         # STEP 9: call _register_hook on every model
         # This is done *exactly once* when the registry is being loaded. See the
