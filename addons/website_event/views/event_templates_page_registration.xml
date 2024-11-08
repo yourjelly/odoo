@@ -178,14 +178,14 @@
 
 <template id="external_calendars">
     <a t-att-href="iCal_url" class="btn btn-light o_wevent_add_to_ical" title="Add to iCal">
-        <i role="img" class="fa fa-apple"/>
+        <img t-attf-src="{{ request.httprequest.host_url }}event/static/src/img/apple-calendar.svg" alt="Apple" loading="lazy"/>
     </a>
     <a t-att-href="iCal_url" class="btn btn-light o_wevent_add_to_outlook" title="Add to Outlook">
-        <img src="/event/static/src/img/outlook-calendar.svg" alt="Outlook" loading="lazy"/>
+        <img t-attf-src="{{ request.httprequest.host_url }}event/static/src/img/outlook-calendar.svg" alt="Outlook" loading="lazy"/>
     </a>
     <a t-att-href="google_url" class="btn btn-light o_wevent_add_to_google_calendar" title="Add to Google"
        target="_blank">
-        <img src="/event/static/src/img/google-calendar.svg" alt="Google Agenda" loading="lazy"/>
+        <img t-attf-src="{{ request.httprequest.host_url }}event/static/src/img/google-calendar.svg" alt="Google Agenda" loading="lazy"/>
     </a>
 </template>
 

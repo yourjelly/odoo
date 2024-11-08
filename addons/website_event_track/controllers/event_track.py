@@ -558,11 +558,14 @@ class EventTrackController(http.Controller):
         visitor = request.env['website.visitor']._get_visitor_from_request()
         email = visitor.event_track_email_reminder if visitor.event_track_email_reminder else request.env.user.email
         track = request.env['event.track'].search([("id", "=", track_id)])
+        print("before _get_event_resource_urls")
         urls = track.event_id._get_event_resource_urls()
-        email_values = {
-            "email_to": email,
+        external_calendars_context = {
             'google_url': urls.get('google_url'),
             'iCal_url': urls.get('iCal_url')
         }
-        # values = self._prepare_event_register_values(events)
+        email_values = {
+            "email_to": email,
+            "body_html": request.render("website_event_track.email_reminder_body_html", external_calendars_context).render(),
+        }
         template.send_mail(track_id, email_values=email_values)
