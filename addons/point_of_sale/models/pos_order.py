@@ -329,6 +329,16 @@ class PosOrder(models.Model):
         comodel_name='account.fiscal.position', string='Fiscal Position',
         readonly=False,
     )
+    invoice_status = fields.Selection(
+        selection=[
+            ('invoiced', 'Fully Invoiced'),
+            ('to_invoice', 'To Invoice')
+        ],
+        string="Invoice Status",
+        compute="_compute_invoice_status",
+        default="to_invoice",
+        store=True
+    )
     payment_ids = fields.One2many('pos.payment', 'pos_order_id', string='Payments')
     session_move_id = fields.Many2one('account.move', string='Session Journal Entry', related='session_id.move_id', readonly=True, copy=False)
     to_invoice = fields.Boolean('To invoice', copy=False)
@@ -422,6 +432,12 @@ class PosOrder(models.Model):
             else:
                 order.margin = 0
                 order.margin_percent = 0
+
+    @api.depends('state')
+    def _compute_invoice_status(self):
+        for order in self:
+            if order.state == 'invoiced':
+                order.invoice_status = 'invoiced'
 
     @api.onchange('payment_ids', 'lines')
     def _onchange_amount_all(self):
@@ -614,6 +630,36 @@ class PosOrder(models.Model):
             'context': "{'move_type':'out_invoice'}",
             'type': 'ir.actions.act_window',
             'res_id': self.account_move.id,
+        }
+
+    def action_view_multiple_invoice(self, invoices):
+        """Return the appropriate action for the created invoices (list view or form view)."""
+        action = self.env['ir.actions.actions']._for_xml_id('account.action_move_out_invoice_type')
+
+        if len(invoices) > 1:
+            action['domain'] = [('id', 'in', invoices.ids)]
+        elif len(invoices) == 1:
+            form_view = [(self.env.ref('account.view_move_form').id, 'form')]
+            if 'views' in action:
+                action['views'] = form_view + [(state, view) for state, view in action['views'] if view != 'form']
+            else:
+                action['views'] = form_view
+            action['res_id'] = invoices.id
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+
+        context = {'default_move_type': 'out_invoice'}
+        action['context'] = context
+        return action
+
+    def action_create_invoices(self):
+        return {
+            'name': _('Create Invoice(s)'),
+            'view_mode': 'form',
+            'view_id': self.env.ref('point_of_sale.view_pos_make_invoice').id,
+            'res_model': 'pos.make.invoice',
+            'target': 'new',
+            'type': 'ir.actions.act_window',
         }
 
     # the refunded order is the order from which the items were refunded in this order
@@ -954,15 +1000,15 @@ class PosOrder(models.Model):
         for line in lines_to_reconcile.values():
             line.filtered(lambda l: not l.reconciled).reconcile()
 
-    def action_pos_order_invoice(self):
+    def action_pos_order_invoice(self, multi_invoice=False):
         if len(self.company_id) > 1:
             raise UserError(_("You cannot invoice orders belonging to different companies."))
         self.write({'to_invoice': True})
         if self.company_id.anglo_saxon_accounting and self.session_id.update_stock_at_closing and self.session_id.state != 'closed':
             self._create_order_picking()
-        return self._generate_pos_order_invoice()
+        return self._generate_pos_order_invoice(multi_invoice)
 
-    def _generate_pos_order_invoice(self):
+    def _generate_pos_order_invoice(self, multi_invoice=False):
         moves = self.env['account.move']
 
         for order in self:
@@ -993,6 +1039,9 @@ class PosOrder(models.Model):
 
         if not moves:
             return {}
+
+        if multi_invoice:
+            return moves
 
         return {
             'name': _('Customer Invoice'),
