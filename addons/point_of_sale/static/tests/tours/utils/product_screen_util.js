@@ -17,6 +17,17 @@ export function clickLine(productName, quantity = "1.0") {
         ...Order.hasLine({ withClass: ".selected", productName, quantity }),
     ].flat();
 }
+export function clickSelectedLine(productName, quantity = "1.0") {
+    return [
+        ...Order.hasLine({
+            withClass: ".selected",
+            run: "click",
+            productName,
+            quantity,
+        }),
+        ...Order.hasLine({ withoutClass: ".selected", productName, quantity }),
+    ].flat();
+}
 export function clickReview() {
     return {
         isActive: ["mobile"],
@@ -202,7 +213,7 @@ export function clickControlButtonMore() {
     ];
 }
 
-export function clickInternalNoteButton() {
+export function clickInternalNoteButton(buttonLabel) {
     return [
         {
             isActive: ["mobile"],
@@ -212,13 +223,14 @@ export function clickInternalNoteButton() {
         },
         {
             isActive: ["mobile"],
-            trigger: controlButtonTrigger("Kitchen Note"),
+            content: "click Internal note button",
+            trigger: `.modal-body button:contains("${buttonLabel}")`,
             run: "click",
         },
         {
             isActive: ["desktop"],
             content: "click Internal Note button",
-            trigger: controlButtonTrigger("Kitchen Note"),
+            trigger: controlButtonTrigger(buttonLabel),
             run: "click",
         },
     ];
@@ -498,10 +510,12 @@ export function addCustomerNote(note) {
         Dialog.confirm(),
     ].flat();
 }
-export function addInternalNote(note) {
-    return inLeftSide(
-        [clickInternalNoteButton(), TextInputPopup.inputText(note), Dialog.confirm()].flat()
-    );
+export function addInternalNote(note, buttonLabel = "Internal Note") {
+    return [
+        clickInternalNoteButton(buttonLabel),
+        TextInputPopup.inputText(note),
+        Dialog.confirm(),
+    ].flat();
 }
 
 export function checkOrderlinesNumber(number) {
