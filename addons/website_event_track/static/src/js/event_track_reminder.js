@@ -30,6 +30,8 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
      * @param {Event} ev
      */
     _onReminderToggleClick: function (ev) {
+        var modalEmailReminder = new publicWidget.registry.websiteEventModalEmailReminder();
+        console.log(modalEmailReminder);
         ev.stopPropagation();
         ev.preventDefault();
         var self = this;

@@ -548,9 +548,9 @@ class EventTrackController(http.Controller):
     @http.route('/event/post-event-track-email-reminder', type='http', auth='public', methods=['POST'], website=True, sitemap=False, readonly=True)
     def post_event_track_email_reminder(self, **kwargs):
         visitor = request.env['website.visitor']._get_visitor_from_request()
-        visitor.event_track_email_reminder = kwargs.get("email")
-        template = request.env.ref("website_event_track.email_reminder").sudo()
-        template.send_mail(1)
+        # visitor.event_track_email_reminder = kwargs.get("email")
+        # template = request.env.ref("website_event_track.email_reminder").sudo()
+        # template.send_mail(1)
 
     @http.route('/event/send_email_reminder', type="json", auth="public", website=True)
     def send_email_reminder(self, track_id):
