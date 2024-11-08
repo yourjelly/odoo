@@ -22,7 +22,7 @@
 
 
     <template id="modal_email_reminder">
-        <div id="modal_email_reminder">
+        <div id="modal_email_reminder" class="o_wetrack_js_email_modal_reminder">
             <div class="modal fade modal_shown show" data-bs-backdrop="static" data-bs-keyboard="false"
                  tabindex="-1" aria-labelledby="staticBackdropLabel" style="display: block;" aria-modal="true"
                  role="dialog">
