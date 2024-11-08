@@ -1937,7 +1937,7 @@ test("composer state: attachments save and restore", async () => {
     await contains(".o-mail-AttachmentCard", { text: "text4.txt" });
 });
 
-test("sidebar: cannot unpin channel group_based_subscription: mandatorily pinned", async () => {
+test("sidebar: cannot unpin channel group_ids: mandatorily pinned", async () => {
     mockDate("2023-01-03 12:00:00"); // so that it's after last interest (mock server is in 2019 by default!)
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create({
@@ -1954,6 +1954,7 @@ test("sidebar: cannot unpin channel group_based_subscription: mandatorily pinned
     await start();
     await openDiscuss();
     await contains("button", { text: "General" });
+    // TODO only prevent if the user is actually part of the group
     await contains("[title='Leave Channel']", { count: 0 });
 });
 

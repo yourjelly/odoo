@@ -83,7 +83,8 @@ export class Thread extends Record {
         return (
             ["channel", "group"].includes(this.channel_type) &&
             !this.message_needaction_counter &&
-            !this.group_based_subscription &&
+            // TODO only prevent leave if the user is actually part of the group
+            !this.group_ids.length &&
             this.store.self?.type === "partner"
         );
     }
