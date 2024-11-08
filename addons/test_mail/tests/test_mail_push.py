@@ -90,7 +90,7 @@ class TestWebPushNotification(SMSCommon):
                     (4, self.user_inbox.partner_id.id),
                 ],
                 'channel_type': channel_type,
-                'name': f'{channel_type} Message',
+                'name': f'{channel_type} Message' if channel_type != 'group' else '',
             } for channel_type in ['chat', 'channel', 'group']
         ])
 
@@ -110,6 +110,9 @@ class TestWebPushNotification(SMSCommon):
                     payload_value = json.loads(push_to_end_point.call_args.kwargs['payload'])
                     if channel.channel_type == 'chat':
                         self.assertEqual(payload_value['title'], f'{self.user_email.name}')
+                    elif channel.channel_type == 'group':
+                        self.assertIn(self.user_email.name, payload_value['title'])
+                        self.assertIn(self.user_inbox.name, payload_value['title'])
                     else:
                         self.assertEqual(payload_value['title'], f'#{channel.name}')
                     self.assertEqual(
