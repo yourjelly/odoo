@@ -30,6 +30,7 @@ export class DocumentFileUploader extends Component {
     }
 
     async onFileUploaded(file) {
+        debugger;
         const att_data = {
             name: file.name,
             mimetype: file.type,
@@ -47,6 +48,7 @@ export class DocumentFileUploader extends Component {
     }
 
     async onUploadComplete() {
+        debugger;
         const resModal = this.getResModel();
         let action;
         try {
