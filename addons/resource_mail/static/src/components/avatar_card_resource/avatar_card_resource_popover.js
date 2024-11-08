@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import { onWillStart } from "@odoo/owl";
+import { user } from "@web/core/user";
+import { onWillStart, status } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { useOpenChat } from "@mail/core/web/open_chat_hook";
 import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
@@ -30,13 +31,17 @@ export class AvatarCardResourcePopover extends AvatarCardPopover {
     }
 
     async onWillStart() {
+        await this.fetchData();
         [this.record] = await this.orm.read(this.props.recordModel, [this.props.id], this.fieldNames);
         await Promise.all(this.loadAdditionalData());
     }
-
     loadAdditionalData() {
         // To use when overriden in other modules to load additional data, returns promise(s)
         return [];
+    }
+
+    async fetchData(){
+        this.hr_access = await user.hasGroup("hr.group_hr_user");
     }
 
     get fieldNames() {
