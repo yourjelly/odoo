@@ -54,8 +54,26 @@
                         <field name="pos_self_ordering_image_brand_name" invisible ="1"/>
                         <field name="pos_self_ordering_image_brand" class="w-100" filename="pos_self_ordering_image_brand_name"/>
                     </setting>
-                    <setting string="Allow takeout order" help="Allow self-order customers to set their order for takeout." invisible="not pos_self_ordering_mode in ['mobile', 'kiosk']">
+                    <setting string="Allow takeout order" help="Allow self-order customers to set their order for takeout." invisible="not pos_self_ordering_mode in ['mobile', 'kiosk'] or not pos_use_presets">
                         <field name="pos_self_ordering_takeaway"/>
+                        <field name="pos_available_preset_ids" invisible="1"/>
+                        <field name="pos_default_preset_id" invisible="1"/>
+                        <div class="content-group mt-3" invisible="not pos_self_ordering_takeaway">
+                            <div class="row">
+                                <label for="pos_self_ordering_takeaway_preset_in" class="col-lg-3" string="Eat In"/>
+                                <field name="pos_self_ordering_takeaway_preset_in"
+                                    required="pos_self_ordering_takeaway"
+                                    options="{'no_create': True}"
+                                    domain="['|', ('id', 'in', pos_available_preset_ids), ('id', '=', pos_default_preset_id)]" />
+                            </div>
+                            <div class="row">
+                                <label for="pos_self_ordering_takeaway_preset_out" class="col-lg-3" string="Takeout"/>
+                                <field name="pos_self_ordering_takeaway_preset_out"
+                                    required="pos_self_ordering_takeaway"
+                                    options="{'no_create': True}"
+                                    domain="['|', ('id', 'in', pos_available_preset_ids), ('id', '=', pos_default_preset_id)]" />
+                            </div>
+                        </div>
                     </setting>
                 </block>
             </block>

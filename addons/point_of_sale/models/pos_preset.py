@@ -1,5 +1,4 @@
-from odoo import fields, models, api, _
-from odoo.exceptions import UserError
+from odoo import fields, models, api
 from datetime import datetime, timedelta
 from collections import defaultdict
 
@@ -19,24 +18,13 @@ class PosPreset(models.Model):
     hour_closing = fields.Float(string='Closing hour', default=22.0, help="Closing hour for the preset.")
     use_timing = fields.Boolean(string='Timing', default=False)
     capacity_per_x_minutes = fields.Integer(string='Capacity', default=5)
-    x_minutes = fields.Integer(string='Minutes', default=20)
+    minutes_interval = fields.Integer(string='Minutes', default=20)
     preparation_time_minute = fields.Integer(string='Preparation Time', default=5)
 
     @api.model
     def _load_pos_data_domain(self, data):
         preset_ids = data['pos.config']['data'][0]['available_preset_ids'] + [data['pos.config']['data'][0]['default_preset_id']]
         return [('id', 'in', preset_ids)]
-
-    def write(self, vals):
-        config_ids = self.env['pos.config'].search_count([
-            ('has_active_session', '=', True),
-            ('default_preset_id', 'in', self.ids),
-            ('available_preset_ids', 'in', self.ids)])
-
-        if config_ids:
-            raise UserError(_('You cannot modify a preset that is currently in use by a PoS session.'))
-
-        return super().write(vals)
 
     # Slots are created directly here in the form of dates, to avoid polluting
     # the database with a “slots” model. All we need is the slot time, and with the preset
@@ -45,7 +33,7 @@ class PosPreset(models.Model):
         self.ensure_one()
         usage = self._compute_slots_usage()
         date_now = datetime.now()
-        interval = timedelta(minutes=self.x_minutes)
+        interval = timedelta(minutes=self.minutes_interval)
         date_now_opening = datetime(date_now.year, date_now.month, date_now.day, int(self.hour_opening), int((self.hour_opening % 1) * 60))
         date_now_closing = datetime(date_now.year, date_now.month, date_now.day, int(self.hour_closing), int((self.hour_closing % 1) * 60))
         slots = []
@@ -71,6 +59,7 @@ class PosPreset(models.Model):
         orders = self.env['pos.order'].search([
             ('preset_id', '=', self.id),
             ('session_id.state', '=', 'opened'),
+            ('preset_time', '!=', False),
             ('state', 'in', ['draft', 'paid', 'invoiced']),
         ])
         for order in orders:

@@ -211,13 +211,14 @@ export class SelfOrder extends Reactive {
         comboValues = {}
     ) {
         const product = productTemplate.product_variant_ids[0];
+        const productPrice = this.getProductPriceInfo(productTemplate, product);
         const values = {
             order_id: this.currentOrder,
             product_id: product,
             tax_ids: productTemplate.taxes_id.map((tax) => ["link", tax]),
             qty: qty,
             note: customer_note || "",
-            price_unit: product.lst_price,
+            price_unit: productPrice.total_excluded,
             price_extra: 0,
         };
 
@@ -345,7 +346,7 @@ export class SelfOrder extends Reactive {
         // Stand number page will recall this function after the stand number is set
         if (
             service === "table" &&
-            !order.takeaway &&
+            !order.isTakeaway &&
             device === "kiosk" &&
             !order.table_stand_number
         ) {
@@ -398,15 +399,24 @@ export class SelfOrder extends Reactive {
             return existingOrder;
         }
 
-        const fiscalPosition = this.models["account.fiscal.position"].find((fp) => {
-            return fp.id === this.config.default_fiscal_position_id?.id;
-        });
+        const fiscalPosition = this.config.use_presets
+            ? this.config.default_preset_id?.fiscal_position_id
+            : this.config.default_fiscal_position_id;
+
+        const pricelist = this.config.use_presets
+            ? this.config.default_preset_id?.pricelist_id
+            : this.config.default_pricelist_id;
 
         const newOrder = this.models["pos.order"].create({
             company_id: this.company,
             session_id: this.session,
             config_id: this.config,
             fiscal_position_id: fiscalPosition,
+            pricelist_id: pricelist,
+            preset_id:
+                this.config.use_presets && !this.config.self_ordering_takeaway
+                    ? this.config.default_preset_id
+                    : false,
         });
         this.selectedOrderUuid = newOrder.uuid;
 
@@ -804,8 +814,10 @@ export class SelfOrder extends Reactive {
         return result;
     }
 
-    getProductDisplayPrice(productTemplate, product) {
-        const pricelist = this.config.pricelist_id;
+    getProductPriceInfo(productTemplate, product) {
+        const pricelist = this.config.use_presets
+            ? this.currentOrder.preset_id?.pricelist_id
+            : this.config.default_pricelist_id;
         const price = productTemplate.get_price(pricelist, 1, 0, false, product);
 
         let taxes = productTemplate.taxes_id;
@@ -831,6 +843,10 @@ export class SelfOrder extends Reactive {
             this.currency
         );
 
+        return taxesData;
+    }
+    getProductDisplayPrice(productTemplate, product) {
+        const taxesData = this.getProductPriceInfo(productTemplate, product);
         if (this.config.iface_tax_included === "total") {
             return taxesData.total_included;
         } else {

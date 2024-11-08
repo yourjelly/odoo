@@ -30,6 +30,8 @@ class PosConfig(models.Model):
     )
     self_ordering_url = fields.Char(compute="_compute_self_ordering_url")
     self_ordering_takeaway = fields.Boolean("Self Takeaway")
+    self_ordering_takeaway_preset_in = fields.Many2one("pos.preset", "Eat In Preset")
+    self_ordering_takeaway_preset_out = fields.Many2one("pos.preset", "Takeaway Preset")
     self_ordering_mode = fields.Selection(
         [("nothing", "Disable"), ("consultation", "QR menu"), ("mobile", "QR menu + Ordering"), ("kiosk", "Kiosk")],
         string="Self Ordering Mode",

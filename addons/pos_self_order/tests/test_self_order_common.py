@@ -11,9 +11,10 @@ from odoo.exceptions import UserError
 class TestSelfOrderCommon(SelfOrderCommonTest):
     def test_self_order_common(self):
         self.pos_config.write({
-            'takeaway': True,
             'self_ordering_default_user_id': self.pos_admin.id,
             'self_ordering_takeaway': True,
+            'self_ordering_takeaway_preset_in': self.in_preset.id,
+            'self_ordering_takeaway_preset_out': self.out_preset.id,
             'self_ordering_mode': 'kiosk',
             'self_ordering_pay_after': 'each',
             'self_ordering_service_mode': 'table',

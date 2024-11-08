@@ -10,11 +10,12 @@ from odoo import Command
 class TestSelfOrderKiosk(SelfOrderCommonTest):
     def test_self_order_kiosk(self):
         self.pos_config.write({
-            'takeaway': True,
             'self_ordering_takeaway': True,
             'self_ordering_mode': 'kiosk',
             'self_ordering_pay_after': 'each',
             'self_ordering_service_mode': 'table',
+            'self_ordering_takeaway_preset_in': self.in_preset.id,
+            'self_ordering_takeaway_preset_out': self.out_preset.id,
         })
 
         self.pos_config.with_user(self.pos_user).open_ui()

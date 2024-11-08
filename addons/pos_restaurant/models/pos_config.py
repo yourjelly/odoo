@@ -2,8 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-import json
-from collections import defaultdict
 from odoo.tools import convert
 
 
@@ -15,12 +13,6 @@ class PosConfig(models.Model):
     floor_ids = fields.Many2many('restaurant.floor', string='Restaurant Floors', help='The restaurant floors served by this point of sale.')
     set_tip_after_payment = fields.Boolean('Set Tip After Payment', help="Adjust the amount authorized by payment terminals to add a tip after the customers left or at the end of the day.")
     module_pos_restaurant_appointment = fields.Boolean("Table Booking")
-    takeaway = fields.Boolean("Takeaway", help="Allow to create orders for takeaway customers.")
-    takeaway_fp_id = fields.Many2one(
-        'account.fiscal.position',
-        string='Alternative Fiscal Position',
-        help='This is useful for restaurants with onsite and take-away services that imply specific tax rates.',
-    )
 
     def _get_forbidden_change_fields(self):
         forbidden_keys = super(PosConfig, self)._get_forbidden_change_fields()

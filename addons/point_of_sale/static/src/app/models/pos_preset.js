@@ -47,7 +47,7 @@ export class PosPreset extends Base {
 
     generateSlots() {
         const usage = this.slotsUsage;
-        const interval = this.x_minutes;
+        const interval = this.minutes_interval;
         const dateTimeOpening = DateTime.fromSQL(this.hour_opening);
         const dateTimeClosing = DateTime.fromSQL(this.hour_closing);
         const slots = {};

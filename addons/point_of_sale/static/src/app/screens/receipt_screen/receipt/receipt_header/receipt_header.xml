@@ -20,7 +20,7 @@
                     <div>--------------------------------</div>
                     <div t-esc="props.data.cashier" />
                 </div>
-                <div t-elif="props.data.addressOnTicket">
+                <div t-if="props.data.addressOnTicket">
                     <div>--------------------------------</div>
                     Delivery to: <t t-esc="props.data.addressOnTicket.name" /><br/>
                     <t t-esc="props.data.addressOnTicket.contact_address" /><br/>

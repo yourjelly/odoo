@@ -9,8 +9,9 @@ from odoo.addons.pos_self_order.tests.self_order_common_test import SelfOrderCom
 class TestSelfOrderMobile(SelfOrderCommonTest):
     def test_self_order_mobile(self):
         self.pos_config.write({
-            'takeaway': True,
             'self_ordering_takeaway': True,
+            'self_ordering_takeaway_preset_in': self.in_preset.id,
+            'self_ordering_takeaway_preset_out': self.out_preset.id,
             'self_ordering_mode': 'mobile',
             'self_ordering_pay_after': 'each',
             'self_ordering_service_mode': 'table',

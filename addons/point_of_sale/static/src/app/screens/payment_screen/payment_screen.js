@@ -265,6 +265,20 @@ export class PaymentScreen extends Component {
     }
     async validateOrder(isForceValidate) {
         this.numberBuffer.capture();
+        const parnter = this.currentOrder.get_partner();
+        if (
+            this.pos.config.use_presets &&
+            this.currentOrder.preset_id?.address_on_ticket &&
+            (!parnter || !parnter?.contact_address?.trim()?.length)
+        ) {
+            this.dialog.add(AlertDialog, {
+                title: _t("No address"),
+                body: _t(
+                    "With the selected preset, you need to select a customer with a valid address before you can validate the order."
+                ),
+            });
+            return;
+        }
         if (this.pos.config.cash_rounding) {
             if (!this.currentOrder.check_paymentlines_rounding()) {
                 this._display_popup_error_paymentlines_rounding();

@@ -30,6 +30,12 @@ patch(PosOrder.prototype, {
             return acc;
         }, {});
     },
+    get isTakeaway() {
+        return (
+            this.config.self_ordering_takeaway &&
+            this.config.self_ordering_takeaway_preset_out.id === this.preset_id?.id
+        );
+    },
     recomputeChanges() {
         const lines = this.lines;
         for (const line of lines) {

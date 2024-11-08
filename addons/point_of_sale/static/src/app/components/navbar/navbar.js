@@ -18,9 +18,9 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { deduceUrl } from "@point_of_sale/utils";
 import { user } from "@web/core/user";
 import { OrderTabs } from "@point_of_sale/app/components/order_tabs/order_tabs";
-import { useTime } from "../hooks/time_hook";
-import { PresetSlotsPopup } from "../components/popups/preset_slots_popup/preset_slots_popup";
-import { makeAwaitable } from "../store/make_awaitable_dialog";
+import { useTime } from "@point_of_sale/app/hooks/time_hook";
+import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
+import { PresetSlotsPopup } from "../popups/preset_slots_popup/preset_slots_popup";
 
 export class Navbar extends Component {
     static template = "point_of_sale.Navbar";

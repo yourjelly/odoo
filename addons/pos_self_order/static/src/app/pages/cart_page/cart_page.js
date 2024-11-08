@@ -47,7 +47,6 @@ export class CartPage extends Component {
     async pay() {
         const orderingMode = this.selfOrder.config.self_ordering_service_mode;
         const type = this.selfOrder.config.self_ordering_mode;
-        const takeAway = this.selfOrder.currentOrder.takeaway;
 
         if (this.selfOrder.rpcLoading || !this.selfOrder.verifyCart()) {
             return;
@@ -56,7 +55,7 @@ export class CartPage extends Component {
         if (
             type === "mobile" &&
             orderingMode === "table" &&
-            !takeAway &&
+            !this.selfOrder.currentOrder.isTakeaway &&
             !this.selfOrder.currentTable
         ) {
             this.state.selectTable = true;
