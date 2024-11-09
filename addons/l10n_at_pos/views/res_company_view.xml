@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_company_form" model="ir.ui.view">
+        <field name="name">res.company.form.inherit.account</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <page name="general_info" position="after">
+                <page string="Fiskaly" name="fiskaly" invisible="not is_country_austria">
+                    <group>
+                        <group string="FON credentials">
+                            <field name="l10n_at_fon_participan_id"/>
+                            <field name="l10n_at_fon_user_id"/>
+                            <field name="l10n_at_fon_user_pin" password="1"/>
+                            <button name="l10n_at_action_authenticate_fon" groups="base.group_erp_manager" string="Authenticate FON" type="object"
+                                class="btn-primary" invisible="not l10n_at_fon_participan_id or not l10n_at_fon_user_id or not l10n_at_fon_user_pin"/>
+                        </group>
+                        <group string="Fiskaly Credentials">
+                            <field name="is_country_austria" invisible="1"/>
+                            <field name="l10n_at_fiskaly_api_key"/>
+                            <field name="l10n_at_fiskaly_api_secret" password="1"/>
+                            <field name="l10n_at_fiskaly_organization_id" invisible="1"/>
+                            <button name="l10n_at_action_authenticate_keys" groups="base.group_erp_manager" string="Authenticate Keys" type="object"
+                                class="btn-primary" invisible="not is_country_austria or not l10n_at_fiskaly_api_key or not l10n_at_fiskaly_api_secret"/>
+                            <!-- <div invisible="not l10n_at_fiskaly_organization_id">Credentials are authenticated</div> -->
+                        </group>
+                        <group string="Receipt Validation" invisible="not l10n_at_fiskaly_organization_id">
+                            <div name="options">
+                                <span class="d-inline-block">
+                                    <field name="l10n_at_monthly_receipt_validation"/>
+                                    <label for="l10n_at_monthly_receipt_validation"/>
+                                </span>
+                                <span class="d-inline-block">
+                                    <field name="l10n_at_yearly_receipt_validation"/>
+                                    <label for="l10n_at_yearly_receipt_validation"/>
+                                </span>
+                            </div>
+                        </group>
+                    </group>
+                </page>
+            </page>
+        </field>
+    </record>
+</odoo>

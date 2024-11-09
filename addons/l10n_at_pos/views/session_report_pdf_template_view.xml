@@ -1,0 +1,47 @@
+<odoo>
+    <record id="fiskaly_session_report" model="ir.actions.report">
+        <field name="name">DEP7 Report</field>
+        <field name="model">pos.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_at_pos.report_session_audit_template</field>
+        <field name="report_file">l10n_at_pos.report_session_audit_template</field>
+    </record>
+
+    <template id="report_session_audit_template">
+        <t t-foreach="data['session_reports']" t-as="session">
+            <t t-foreach="session.items()" t-as="session_data">
+                <t t-call="web.html_container">
+                    <t t-set="belege_list" t-value="session_data[1].get('Belege-Gruppe', [])[0].get('Belege-kompakt', [])"/>
+                    <div class="page">
+                        <t t-if="belege_list">
+                            <t t-call="web.external_layout">
+                                <div style="width: 80vw; overflow-x: auto;">
+                                    <p>Session: <t t-esc="session_data[0]"/></p>
+                                    <table class="table table-sm" style="width: 100%; table-layout: fixed;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 90%;">Belege-kompakt</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="belege_list" t-as="belege">
+                                                <tr>
+                                                    <td><t t-esc="belege"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <t t-call="web.external_layout">
+                                <p>Session: <t t-esc="session_data[0]"/> have no signed receipts between selected Time periods.</p>
+                            </t>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>    
+</odoo>

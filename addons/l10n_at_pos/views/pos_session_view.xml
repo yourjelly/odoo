@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_pos_fiskaly_details" model="ir.actions.act_window">
+        <field name="name">Fiskaly Report Details</field>
+        <field name="res_model">pos.fiskaly.details.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_fiskaly_report_order_details" name="Fiskaly Test report" action="action_report_pos_fiskaly_details" parent="point_of_sale.menu_point_rep" sequence="5"/>
+</odoo>

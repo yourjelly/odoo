@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_pos_form_l10n_at" model="ir.ui.view">
+        <field name="name">pos.order.form</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tracking_number']" position='after'>
+                <field name="l10n_at_pos_order_receipt_number" string="Fiskaly Receipt No" readonly="1"/>
+                <field name="is_fiskaly_order_receipt_signed" string="Signatured (SCU)" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_pos_order_tree_inherit" model="ir.ui.view">
+        <field name="name">pos.order.list.inherit</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="l10n_at_pos_order_receipt_number" string="Fiskaly Receipt No" readonly="1" optional="hide"/>
+                <field name="is_fiskaly_order_receipt_signed" string="Signatured (SCU)" readonly="1" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.actions.server" id="pos_order_sign_receipts">
+        <field name="name">Sign Orders</field>
+        <field name="model_id" ref="l10n_at_pos.model_pos_order"/>
+        <field name="groups_id" eval="[(4, ref('point_of_sale.group_pos_user'))]"/>
+        <field name="binding_model_id" ref="l10n_at_pos.model_pos_order" />
+        <field name="state">code</field>
+        <field name="binding_view_types">list,form</field>
+        <field name="code">
+if records:
+    action = records.action_queue_receipts_sign()
+        </field>
+    </record>
+</odoo>
