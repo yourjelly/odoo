@@ -7,40 +7,116 @@ import { hasTouch } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { ToolbarMobile } from "./mobile_toolbar";
 import { debounce } from "@web/core/utils/timing";
+import { omit, pick } from "@web/core/utils/objects";
 
-// Delay in ms for toolbar open after keyup, double click or triple click.
+/** @typedef { import("@html_editor/core/selection_plugin").EditorSelection } EditorSelection */
+/** @typedef { import("@html_editor/core/user_command_plugin").UserCommand } UserCommand */
+/** @typedef { import("@web/core/l10n/translation.js")._t} _t */
+/** @typedef { ReturnType<_t> } TranslatedString */
+
+/**
+ * @typedef {Object} ToolbarNamespace
+ * @property {string} id
+ * @property {(traversedNodes: Node[]) => boolean} isApplied
+ *
+ *
+ * @typedef {Object} ToolbarGroup
+ * @property {string} id
+ * @property {string} [namespace]
+ *
+ *
+ * @typedef {ToolbarCommandItem | ToolbarComponentItem} ToolbarItem
+ *
+ * @typedef {Object} ToolbarCommandItem
+ * Regular button: extends a user command specified by commandId.
+ * @property {string} id
+ * @property {string} groupId Id of a toolbar group
+ * @property {string} commandId Id of the user command to extend
+ * @property {Object} [commandParams] Passed to the command's `run` function - optional
+ * @property {TranslatedString} [title] inheritable from user command
+ * @property {string} [icon] Inheritable
+ * @property {string} [text] Can be used with (or instead of) `icon`
+ * @property {(selection: EditorSelection) => boolean} [isAvailable] Optional and inheritable
+ * @property {(selection: EditorSelection, nodes: Node[]) => boolean} [isActive] Optional
+ * @property {(selection: EditorSelection, nodes: Node[]) => boolean} [isDisabled] Optional
+ *
+ * @typedef {Object} ToolbarComponentItem
+ * Adds a custom component to the toolbar.
+ * @property {string} id
+ * @property {string} groupId
+ * @property {TranslatedString} title
+ * @property {Function} Component
+ * @property {Object} props
+ * @property {(selection: EditorSelection) => boolean} [isAvailable] Optional and inheritable
+ *
+ * ToolbarItem.id maps to the button's `name` attribute
+ * ToolbarItem.title maps to the button's `title` attribute (tooltip description)
+ */
+
+/**
+ * A ToolbarCommandItem must extend a user command ( @see UserCommand )
+ * specified by commandId. This means inheriting and overriding properties from
+ * a user command.
+ *
+ * Example:
+ *
+ * resources = {
+ *     user_commands: [
+ *         @type {UserCommand}
+ *         {
+ *             id: myCommand,
+ *             run: myCommandFunction,
+ *             title: _t("My Command"),
+ *             icon: "fa-bug",
+ *         },
+ *     ],
+ *     toolbar_groups: [
+ *         @type {ToolbarGroup}
+ *         { id: "myGroup" },
+ *     ],
+ *     toolbar_items: [
+ *         @type {ToolbarCommandItem}
+ *         {
+ *             id: "myButton",
+ *             groupId: "myGroup",
+ *             commandId: "myCommand",
+ *             title: _t("My Toolbar Command Button"), // overrides the user command's `title`
+ *             // `icon` is inherited from the user command
+ *         },
+ *         @type {ToolbarComponentItem}
+ *         {
+ *             id: "myComponentButton",
+ *             groupId: "myGroup",
+ *             title: _t("My Toolbar Component Button"),
+ *             Component: MyComponent,
+ *             props: { myProp: "myValue" },
+ *         },
+ *     ],
+ * };
+ */
+
+/** Delay in ms for toolbar open after keyup, double click or triple click. */
 const DELAY_TOOLBAR_OPEN = 300;
 
 export class ToolbarPlugin extends Plugin {
     static name = "toolbar";
-    static dependencies = ["overlay", "selection"];
+    static dependencies = ["overlay", "selection", "user_command"];
     static shared = ["getToolbarInfo"];
     resources = {
         onSelectionChange: this.handleSelectionChange.bind(this),
     };
 
     setup() {
-        const categoryIds = new Set();
-        for (const category of this.getResource("toolbarCategory")) {
-            if (categoryIds.has(category.id)) {
-                throw new Error(`Duplicate toolbar category id: ${category.id}`);
+        const groupIds = new Set();
+        for (const group of this.getResource("toolbar_groups")) {
+            if (groupIds.has(group.id)) {
+                throw new Error(`Duplicate toolbar group id: ${group.id}`);
             }
-            categoryIds.add(category.id);
+            groupIds.add(group.id);
         }
-        this.categories = this.getResource("toolbarCategory");
-        this.buttonGroups = [];
-        for (const category of this.categories) {
-            this.buttonGroups.push({
-                ...category,
-                buttons: this.getResource("toolbarItems").filter(
-                    (command) => command.category === category.id
-                ),
-            });
-        }
-        this.buttonsDict = Object.assign(
-            {},
-            ...this.getResource("toolbarItems").map((button) => ({ [button.id]: button }))
-        );
+
+        this.buttonGroups = this.getButtonGroups();
+
         this.isMobileToolbar = hasTouch() && window.visualViewport;
 
         if (this.isMobileToolbar) {
@@ -66,10 +142,6 @@ export class ToolbarPlugin extends Plugin {
             namespace: undefined,
         });
         this.updateSelection = null;
-
-        for (const button of Object.values(this.buttonsDict)) {
-            this.resolveButtonInheritance(button.id);
-        }
 
         this.onSelectionChangeActive = true;
         this.debouncedUpdateToolbar = debounce(this.updateToolbar, DELAY_TOOLBAR_OPEN);
@@ -122,31 +194,50 @@ export class ToolbarPlugin extends Plugin {
         super.destroy();
     }
 
-    handleCommand(command) {
-        switch (command) {
-            case "STEP_ADDED":
-                this.updateToolbar();
-                break;
-        }
-    }
+    /**
+     * @typedef {Object} ToolbarCommandButton
+     * @property {string} id
+     * @property {string} groupId
+     * @property {TranslatedString} title
+     * @property {Function} run
+     * @property {string} [icon]
+     * @property {string} [text]
+     * @property {(selection: EditorSelection) => boolean} [isAvailable]
+     * @property {(selection: EditorSelection, nodes: Node[]) => boolean} [isActive]
+     * @property {(selection: EditorSelection, nodes: Node[]) => boolean} [isDisabled]
+     *
+     * @typedef {ToolbarComponentItem} ToolbarComponentButton
+     */
 
     /**
-     * Resolves the inheritance of a button.
-     *
-     * Copies the properties of the parent button to the child button.
-     *
-     * @param {string} buttonId - The id of the button to resolve inheritance for.
-     * @throws {Error} If the inheritance button is not found.
+     * @returns {(ToolbarCommandButton| ToolbarComponentButton)[]}
      */
-    resolveButtonInheritance(buttonId) {
-        const button = this.buttonsDict[buttonId];
-        if (button.inherit) {
-            const parentButton = this.buttonsDict[button.inherit];
-            if (!parentButton) {
-                throw new Error(`Inheritance button ${button.inherit} not found`);
-            }
-            Object.assign(button, { ...parentButton, ...button });
-        }
+    getButtons() {
+        /** @type {ToolbarItem[]} */
+        const toolbarItems = this.getResource("toolbar_items");
+
+        /** @returns {ToolbarCommandButton} */
+        const commandItemToButton = (/** @type {ToolbarCommandItem}*/ item) => {
+            const command = this.shared.getCommand(item.commandId);
+            return {
+                ...pick(command, "title", "icon", "isAvailable"),
+                ...omit(item, "commandId", "commandParams"),
+                run: () => command.run(item.commandParams),
+            };
+        };
+
+        return toolbarItems.map((item) => ("Component" in item ? item : commandItemToButton(item)));
+    }
+
+    getButtonGroups() {
+        const buttons = this.getButtons();
+        /** @type {ToolbarGroup[]} */
+        const groups = this.getResource("toolbar_groups");
+
+        return groups.map((group) => ({
+            ...group,
+            buttons: buttons.filter((button) => button.groupId === group.id),
+        }));
     }
 
     getToolbarInfo() {
@@ -218,7 +309,7 @@ export class ToolbarPlugin extends Plugin {
 
     updateNamespace() {
         const traversedNodes = this.getFilterTraverseNodes();
-        for (const namespace of this.getResource('toolbarNamespace') || []) {
+        for (const namespace of this.getResource("toolbar_namespaces")) {
             if (namespace.isApplied(traversedNodes)) {
                 this.state.namespace = namespace.id;
                 return;
@@ -246,12 +337,11 @@ export class ToolbarPlugin extends Plugin {
         for (const buttonGroup of this.buttonGroups) {
             if (buttonGroup.namespace === this.state.namespace) {
                 for (const button of buttonGroup.buttons) {
-                    this.state.buttonsActiveState[button.id] = button.isFormatApplied?.(
+                    this.state.buttonsActiveState[button.id] = button.isActive?.(selection, nodes);
+                    this.state.buttonsDisabledState[button.id] = button.isDisabled?.(
                         selection,
                         nodes
                     );
-                    this.state.buttonsDisabledState[button.id] =
-                        button.hasFormat != null && !button.hasFormat?.(selection);
                     this.state.buttonsAvailableState[button.id] =
                         button.isAvailable === undefined || button.isAvailable(selection);
                 }

@@ -125,7 +125,8 @@ export class SelectionPlugin extends Plugin {
         // "collapseIfZWS",
     ];
     resources = {
-        shortcuts: [{ hotkey: "control+a", command: "SELECT_ALL" }],
+        user_commands: { id: "selectAll", run: this.selectAll.bind(this) },
+        shortcuts: [{ hotkey: "control+a", commandId: "selectAll" }],
     };
 
     setup() {
@@ -143,29 +144,14 @@ export class SelectionPlugin extends Plugin {
                 this.onKeyDownArrows(ev);
             }
         });
-        this.addDomListener(this.editable, "pointerdown", () => {
-            this.isPointerDown = true;
-        });
-        this.addDomListener(this.editable, "pointerup", () => {
-            this.isPointerDown = false;
-            this.preventNextPointerdownFix = false;
-        });
     }
 
-    handleCommand(command, payload) {
-        switch (command) {
-            case "SELECT_ALL":
-                {
+    selectAll() {
                     const selection = this.getEditableSelection();
                     const containerSelector = "#wrap > *, .oe_structure > *, [contenteditable]";
-                    const container =
-                        selection && closestElement(selection.anchorNode, containerSelector);
-                    const [anchorNode, anchorOffset, focusNode, focusOffset] =
-                        boundariesIn(container);
+        const container = selection && closestElement(selection.anchorNode, containerSelector);
+        const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesIn(container);
                     this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
-                }
-                break;
-        }
     }
 
     resetSelection() {

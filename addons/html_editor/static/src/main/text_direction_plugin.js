@@ -8,15 +8,19 @@ export class TextDirectionPlugin extends Plugin {
     static name = "text_direction";
     static dependencies = ["selection", "split", "format"];
     resources = {
-        powerboxItems: [
+        user_commands: [
             {
-                name: _t("Switch direction"),
+                id: "switchDirection",
+                title: _t("Switch direction"),
                 description: _t("Switch the text's direction"),
-                category: "format",
-                fontawesome: "fa-exchange",
-                action(dispatch) {
-                    dispatch("SWITCH_DIRECTION");
-                },
+                icon: "fa-exchange",
+                run: this.switchDirection.bind(this),
+            },
+        ],
+        powerbox_items: [
+            {
+                categoryId: "format",
+                commandId: "switchDirection",
             },
         ],
     };
@@ -26,14 +30,6 @@ export class TextDirectionPlugin extends Plugin {
             this.editable.setAttribute("dir", this.config.direction);
         }
         this.direction = this.config.direction || "ltr";
-    }
-
-    handleCommand(command) {
-        switch (command) {
-            case "SWITCH_DIRECTION":
-                this.switchDirection();
-                break;
-        }
     }
 
     switchDirection() {
