@@ -27,11 +27,17 @@
                                         class="btn-link"/>
                             </div>
                         </setting>
-                        <setting name="l10n_in_tds_tcs"
-                                 help="Enable this to activate Tax Deduction Source and Tax Collection Source."
-                                 string="TDS and TCS"
+                        <setting name="l10n_in_tds"
+                                 help="Enable this to activate Tax Deduction Source."
+                                 string="TDS"
                                  documentation="/applications/finance/fiscal_localizations/india.html">
-                            <field name="module_l10n_in_withholding"/>
+                            <field name="module_l10n_in_tds"/>
+                        </setting>
+                        <setting name="l10n_in_tcs"
+                                 help="Enable this to activate Tax Collection Source."
+                                 string="TCS"
+                                 documentation="/applications/finance/fiscal_localizations/india.html">
+                            <field name="module_l10n_in_tcs"/>
                         </setting>
                         <setting name="electronic_invoices_in"
                                  help="Connect to NIC (National Informatics Center) to submit invoices on posting."
