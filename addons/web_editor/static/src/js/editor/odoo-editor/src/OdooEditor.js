@@ -3234,9 +3234,20 @@ export class OdooEditor extends EventTarget {
             if (!node.matches || node.matches(CLIPBOARD_BLACKLISTS.remove.join(','))) {
                 node.remove();
             } else {
-                // Unwrap the illegal node's contents.
-                for (const unwrappedNode of unwrapContents(node)) {
-                    this._cleanForPaste(unwrappedNode);
+                let nodes;
+                if (node.nodeName === 'DIV' && [...node.childNodes].every(n => !isBlock(n))) {
+                    // Convert <div> to <p> to preserve the inline structure
+                    // while maintaining block-level behaviour.
+                    const p = this.document.createElement('p');
+                    p.append(...node.childNodes);
+                    node.replaceWith(p);
+                    nodes = p.childNodes;
+                } else {
+                    // Unwrap the illegal node's contents.
+                    nodes = unwrapContents(node);
+                }
+                for (const childNode of nodes) {
+                    this._cleanForPaste(childNode);
                 }
             }
         } else if (node.nodeType !== Node.TEXT_NODE) {
