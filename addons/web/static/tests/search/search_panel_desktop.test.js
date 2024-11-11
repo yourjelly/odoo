@@ -2848,6 +2848,7 @@ test("Display message when no filter availible", async () => {
         resModel: "partner",
         searchViewId: false,
     });
+    await contains(`.o_search_panel_sidebar button`).click();
     expect(`.o_search_panel_empty_state`).toHaveCount(1);
     expect(`.o_search_panel_empty_state button`).toHaveCount(1);
 });
