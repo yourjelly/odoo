@@ -110,6 +110,7 @@ options.registry.StepsConnector = options.Class.extend({
             this.hNextStepIconHeight = nextStepMainElementRect.height / 2;
 
             connectorEl.style.left = `calc(50% + ${stepMainElementRect.width / 2}px + 16px)`;
+            connectorEl.style.right = `calc(50% + ${stepMainElementRect.width / 2}px + 16px)`;
             connectorEl.style.height = `${
                 stepMainElementRect.height + Math.abs(stepHeightDifference)
             }px`;
@@ -127,10 +128,11 @@ options.registry.StepsConnector = options.Class.extend({
             connectorEl.style.display = 'block';
             const {height, width} = connectorEl.getBoundingClientRect();
             connectorEl.style.removeProperty('display');
+            connectorEl.classList.remove("unset", "flipY");
             if (type === "s_process_steps_connector_curved_arrow" && i % 2 === 0) {
-                connectorEl.style.transform = stepHeightDifference ? "unset" : "scale(1, -1)";
+                connectorEl.classList.add(stepHeightDifference ? "unset" : "flipY");
             } else {
-                connectorEl.style.transform = "unset";
+                connectorEl.classList.add("unset");
             }
             connectorEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
             connectorEl
