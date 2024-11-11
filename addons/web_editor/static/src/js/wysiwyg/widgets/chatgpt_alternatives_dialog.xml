@@ -9,6 +9,7 @@
                     t-as="alternative" t-key="alternative_index">
                     <button type="button" class="btn me-2 btn-sm btn-info"
                         t-att-class="state.alternativesMode == alternative[0] and state.messagesInProgress ? 'btn-success' : 'btn-info'"
+                        t-att-disabled="!props.originalText"
                         t-on-click="switchAlternativesMode" t-att-data-mode="alternative[0]">
                         <t t-out="alternative[1]"/>
                     </button>

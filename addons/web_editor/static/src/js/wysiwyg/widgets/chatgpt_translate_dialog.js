@@ -21,10 +21,20 @@ export class ChatGPTTranslateDialog extends ChatGPTDialog {
                     '- You must respect the format (wrapping the translated text between <generated_text> and </generated_text>)\n' +
                     '- Do not write HTML.'
             }],
-            messages: [],
-            translationInProgress: true,
+            messages: this.props.originalText
+                ? []
+                : [
+                    {
+                        author: "assistant",
+                        text: "You didn't select any text.",
+                        isError: true,
+                    }
+                ],
+            translationInProgress: Boolean(this.props.originalText),
         });
-        this._translate();
+        if (this.props.originalText) {
+            this._translate();
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -40,7 +50,7 @@ export class ChatGPTTranslateDialog extends ChatGPTDialog {
             let translatedText = content.replace(/^[\s\S]*<generated_text>/, '').replace(/<\/generated_text>[\s\S]*$/, '');
             if (!this.formatContent(translatedText).length) {
                 isError = true;
-                translatedText = "You didn't select any text.";
+                translatedText = "The selected text could not be translated.";
             }
             this.state.translationInProgress = false;
             if (!isError) {

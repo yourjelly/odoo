@@ -40,13 +40,23 @@ export class ChatGPTAlternativesDialog extends ChatGPTDialog {
                     '- Your answer must be different every time, never repeat yourself\n' +
                     '- You must respect whatever extra conditions the user gives you\n',
             }],
-            messages: [],
+            messages: this.props.originalText
+                ? []
+                : [
+                    {
+                        author: "assistant",
+                        text: "You didn't select any text.",
+                        isError: true,
+                    }
+                ],
             alternativesMode: '',
             messagesInProgress: 0,
             currentBatchId: null,
         });
         this._generationIndex = 0;
-        this._generateAlternatives();
+        if (this.props.originalText) {
+            this._generateAlternatives();
+        }
     }
 
     //--------------------------------------------------------------------------
