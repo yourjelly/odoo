@@ -10,6 +10,7 @@ import {
     xml,
 } from "@odoo/owl";
 import {
+    contains,
     defineModels,
     fields,
     makeMockEnv,
@@ -82,6 +83,7 @@ test(`Simple rendering: with search`, async () => {
         resModel: "foo",
         searchViewId: false,
     });
+    await contains(`.o_component_with_search_panel .o_search_panel_sidebar`).click();
     expect(`.o_control_panel .o_control_panel_actions .toy_search_bar`).toHaveCount(1);
     expect(`.o_component_with_search_panel .o_search_panel`).toHaveCount(1);
     expect(`.o_cp_searchview`).toHaveCount(0);
@@ -117,6 +119,7 @@ test(`Rendering with default ControlPanel and SearchPanel`, async () => {
             },
         }),
     });
+    await contains(`.o_component_with_search_panel .o_search_panel_sidebar`).click();
     expect(`.o_search_panel`).toHaveCount(1);
     expect(`.o_control_panel`).toHaveCount(1);
     expect(`.o_breadcrumb`).toHaveCount(1);
@@ -188,6 +191,7 @@ test(`Nested layouts`, async () => {
         resModel: "foo",
         searchViewId: false,
     });
+    await contains(`.o_component_with_search_panel .o_search_panel_sidebar`).click();
     expect(`.o_content.toy_a .o_content.toy_b .o_content.toy_c`).toHaveCount(1);
     expect(".o_control_panel").toHaveCount(2);
     expect(".o_content.o_component_with_search_panel").toHaveCount(3);
@@ -290,6 +294,7 @@ test(`Simple rendering: with dynamically displayed search`, async () => {
         resModel: "foo",
         searchViewId: false,
     });
+    await contains(`.o_component_with_search_panel .o_search_panel_sidebar`).click();
     expect(`.o_control_panel .o_control_panel_actions .toy_search_bar`).toHaveCount(1);
     expect(`.o_component_with_search_panel .o_search_panel`).toHaveCount(1);
     expect(`.o_cp_searchview`).toHaveCount(0);

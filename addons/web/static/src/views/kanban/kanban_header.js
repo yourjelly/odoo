@@ -104,7 +104,9 @@ export class KanbanHeader extends Component {
         let name = displayName;
         if (groupByField.type === "boolean") {
             name = name ? _t("Yes") : _t("No");
-        } else if (!name) {
+        }else if (groupByField.type === "char" && displayName === false) {
+            name = "sanket"
+        }else if (!name) {
             if (
                 isRelational(groupByField) ||
                 groupByField.type === "date" ||
