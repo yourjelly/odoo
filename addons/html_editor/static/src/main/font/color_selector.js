@@ -88,7 +88,11 @@ export class ColorSelector extends Component {
 
     onColorPreview(ev) {
         const color = ev.hex ? ev.hex : this.processColorFromEvent(ev);
-        this.props.dispatch("COLOR_PREVIEW", { color: color || "", mode: this.mode });
+        this.props.dispatch("COLOR_PREVIEW", {
+            color: color || "",
+            mode: this.mode,
+            previewMode: true,
+        });
     }
 
     onColorHover(ev) {

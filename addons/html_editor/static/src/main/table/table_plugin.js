@@ -675,14 +675,25 @@ export class TablePlugin extends Plugin {
         return didDeselectTable;
     }
 
-    applyTableColor(color, mode) {
+    applyTableColor(color, mode, previewMode) {
         const selectedTds = [...this.editable.querySelectorAll("td.o_selected_td")].filter(
             (node) => node.isContentEditable
         );
         if (selectedTds.length && mode === "backgroundColor") {
+            this.deselectTable();
             for (const td of selectedTds) {
                 this.shared.colorElement(td, color, mode);
             }
+            const coloredTds = [...selectedTds];
+            const currentColor = getComputedStyle(coloredTds[0]).backgroundColor;
+            for (const td of coloredTds) {
+                td.style.setProperty(
+                    "background-color",
+                    currentColor,
+                    previewMode ? "important" : ""
+                );
+            }
+            this.selectTableCells(this.shared.getEditableSelection());
         }
     }
 

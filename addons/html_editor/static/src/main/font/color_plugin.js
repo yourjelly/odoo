@@ -64,8 +64,8 @@ export class ColorPlugin extends Plugin {
 
     setup() {
         this.selectedColors = reactive({ color: "", backgroundColor: "" });
-        this.previewableApplyColor = this.shared.makePreviewableOperation((color, mode) =>
-            this.applyColor(color, mode)
+        this.previewableApplyColor = this.shared.makePreviewableOperation(
+            (color, mode, previewMode) => this.applyColor(color, mode, previewMode)
         );
     }
 
@@ -98,7 +98,11 @@ export class ColorPlugin extends Plugin {
                 this.updateSelectedColor();
                 break;
             case "COLOR_PREVIEW":
-                this.previewableApplyColor.preview(payload.color, payload.mode);
+                this.previewableApplyColor.preview(
+                    payload.color,
+                    payload.mode,
+                    payload.previewMode
+                );
                 this.updateSelectedColor();
                 break;
             case "COLOR_RESET_PREVIEW":
@@ -138,9 +142,9 @@ export class ColorPlugin extends Plugin {
      * @param {string} color hexadecimal or bg-name/text-name class
      * @param {string} mode 'color' or 'backgroundColor'
      */
-    applyColor(color, mode) {
+    applyColor(color, mode, previewMode = false) {
         for (const cb of this.getResource("colorApply") || []) {
-            if (cb(color, mode)) {
+            if (cb(color, mode, previewMode)) {
                 return;
             }
         }
