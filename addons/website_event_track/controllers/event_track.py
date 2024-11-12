@@ -541,30 +541,16 @@ class EventTrackController(http.Controller):
                 has_email_reminder = False
         return {'hasEmailReminder': has_email_reminder}
 
-    @http.route('/event/get_email_reminder_modal', type="json", auth="public", method=["POST"], csrf=False, website=True)
-    def get_email_reminder_modal(self):
-        return {"modal": http.request.render("website_event_track.modal_email_reminder").render()}
-
-    @http.route('/event/post-event-track-email-reminder', type='http', auth='public', methods=['POST'], website=True, sitemap=False, readonly=True)
-    def post_event_track_email_reminder(self, **kwargs):
+    @http.route('/event/add_event_track_email_reminder', type='json', auth="public", website=True, sitemap=False)
+    def add_event_track_email_reminder(self, **kwargs):
         visitor = request.env['website.visitor']._get_visitor_from_request()
-        # visitor.event_track_email_reminder = kwargs.get("email")
-        # template = request.env.ref("website_event_track.email_reminder").sudo()
-        # template.send_mail(1)
+        visitor.event_track_email_reminder = kwargs.get('email')
+        track = request.env['event.track'].search([("id", "=", kwargs.get('track_id'))])
+        track.send_email_reminder(visitor.event_track_email_reminder)
 
     @http.route('/event/send_email_reminder', type="json", auth="public", website=True)
     def send_email_reminder(self, track_id):
-        template = request.env.ref("website_event_track.email_reminder").sudo()
         visitor = request.env['website.visitor']._get_visitor_from_request()
-        email = visitor.event_track_email_reminder if visitor.event_track_email_reminder else request.env.user.email
+        email_to = visitor.event_track_email_reminder if visitor.event_track_email_reminder else request.env.user.email
         track = request.env['event.track'].search([("id", "=", track_id)])
-        urls = track.event_id._get_event_resource_urls()
-        external_calendars_context = {
-            'google_url': urls.get('google_url'),
-            'iCal_url': urls.get('iCal_url')
-        }
-        email_values = {
-            "email_to": email,
-            "body_html": request.render("website_event_track.email_reminder_body_html", external_calendars_context).render(),
-        }
-        template.send_mail(track_id, email_values=email_values)
+        track.send_email_reminder(email_to)

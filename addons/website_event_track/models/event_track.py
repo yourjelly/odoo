@@ -603,3 +603,14 @@ class Track(models.Model):
         )
 
         return track_candidates[:limit]
+
+    def send_email_reminder(self, email_to):
+        agenda_urls = self.event_id._get_event_resource_urls()
+        context = {
+            'google_url': agenda_urls.get('google_url'),
+            'iCal_url': agenda_urls.get('iCal_url'),
+            'base_url': self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        }
+        template = self.env.ref("website_event_track.email_reminder").sudo().with_context(context)
+        email_values = {"email_to": email_to}
+        template.send_mail(self.id, email_values=email_values)
