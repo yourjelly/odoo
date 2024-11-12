@@ -67,7 +67,7 @@ export class SearchBar extends Component {
         this.inputRef =
             this.env.config.disableSearchBarAutofocus || !this.props.autofocus
                 ? useRef("autofocus")
-                : useAutofocus();
+                : useAutofocus({ mobile: this.ui.isSmall }); // only force the focus on touch devices when the toggler is present
 
         useBus(this.env.searchModel, "focus-search", () => {
             this.inputRef.el.focus();
