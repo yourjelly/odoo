@@ -8,6 +8,7 @@ import { boundariesOut } from "@html_editor/utils/position";
 import { ImageTransformation } from "./image_transformation";
 import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";
+import { fillEmpty } from "@html_editor/utils/dom";
 
 function hasShape(imagePlugin, shapeName) {
     return () => imagePlugin.isSelectionShaped(shapeName);
@@ -35,13 +36,14 @@ export class ImagePlugin extends Plugin {
                 namespace: "image",
             }),
             withSequence(24, { id: "image_description", namespace: "image" }),
-            withSequence(25, { id: "image_shape", namespace: "image" }),
-            withSequence(26, { id: "image_padding", namespace: "image" }),
-            withSequence(26, {
+            withSequence(25, { id: "image_caption", namespace: "image" }),
+            withSequence(26, { id: "image_shape", namespace: "image" }),
+            withSequence(27, { id: "image_padding", namespace: "image" }),
+            withSequence(27, {
                 id: "image_size",
                 namespace: "image",
             }),
-            withSequence(26, { id: "image_transform", namespace: "image" }),
+            withSequence(27, { id: "image_transform", namespace: "image" }),
             withSequence(30, { id: "image_delete", namespace: "image" }),
         ],
         toolbarItems: [
@@ -63,6 +65,15 @@ export class ImagePlugin extends Plugin {
                     getDescription: () => this.getImageAttribute("alt"),
                     getTooltip: () => this.getImageAttribute("title"),
                 },
+            },
+            {
+                id: "image_caption",
+                category: "image_caption",
+                action(dispatch) {
+                    dispatch("CAPTION_IMAGE");
+                },
+                title: _t("Add a caption"),
+                text: "Caption",
             },
             {
                 id: "shape_rounded",
@@ -170,6 +181,8 @@ export class ImagePlugin extends Plugin {
                 icon: "fa-trash text-danger",
             },
         ],
+        hints: [{ selector: "FIGCAPTION", text: _t("Write a caption...") }],
+        isUnsplittable: node => node.nodeName === "FIGCAPTION", // avoid merge
     };
 
     setup() {
@@ -230,6 +243,13 @@ export class ImagePlugin extends Plugin {
                 selectedImg.setAttribute("alt", payload.description);
                 selectedImg.setAttribute("title", payload.tooltip);
                 this.dispatch("ADD_STEP");
+                break;
+            }
+            case "CAPTION_IMAGE": {
+                const selectedImg = this.getSelectedImage();
+                if (selectedImg) {
+                    this.captionImage(selectedImg);
+                }
                 break;
             }
             case "RESIZE_IMAGE": {
@@ -319,6 +339,14 @@ export class ImagePlugin extends Plugin {
         const selectedNodes = this.shared.getSelectedNodes();
         const selectedImg = selectedNodes.find((node) => node.tagName === "IMG");
         return selectedImg.getAttribute(attributeName) || undefined;
+    }
+
+    captionImage(image) {
+        const caption = this.document.createElement("figcaption");
+        caption.classList.add("figure-caption", "text-muted", "mt-2");
+        fillEmpty(caption);
+        image.after(caption);
+        this.shared.setSelection({ anchorNode: caption, anchorOffset: 0 });
     }
 
     /**
