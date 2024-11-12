@@ -221,6 +221,31 @@
                     </header>
                     <div class="o_pager_container">
                         <div class="o_scroll_bgshapes_basic">
+                        <we-title>Tests</we-title>
+                            <we-select-page string="Tests">
+                                <!-- <we-button data-shape="web_editor/Tests/01" data-select-label="Test 01"/> -->
+                                <we-button data-shape="web_editor/Tests/02" data-select-label="Test 02"/>
+                                <we-button data-shape="web_editor/Tests/03" data-select-label="Test 03"/>
+                                <we-button data-shape="web_editor/Tests/04" data-select-label="Test 04"/>
+                                <we-button data-shape="web_editor/Tests/05" data-select-label="Test 05"/>
+                                <we-button data-shape="web_editor/Tests/06" data-select-label="Test 06"/>
+                                <we-button data-shape="web_editor/Tests/07" data-select-label="Test 07"/>
+                                <we-button data-shape="web_editor/Tests/08" data-select-label="Test 08"/>
+                                <!-- <we-button data-shape="web_editor/Tests/09" data-select-label="Test 09"/> -->
+                                <we-button data-shape="web_editor/Tests/10" data-select-label="Test 10"/>
+                                <we-button data-shape="web_editor/Tests/11" data-select-label="Test 11"/>
+                                <we-button data-shape="web_editor/Tests/12" data-select-label="Test 12"/>
+                                <!-- <we-button data-shape="web_editor/Tests/13" data-select-label="Test 13"/> -->
+                                <we-button data-shape="web_editor/Tests/14" data-select-label="Test 14" data-animated="true"/>
+                                <we-button data-shape="web_editor/Tests/15" data-select-label="Test 15"/>
+                                <we-button data-shape="web_editor/Tests/16" data-select-label="Test 16"/>
+                                <we-button data-shape="web_editor/Tests/17" data-select-label="Test 17"/>
+                                <we-button data-shape="web_editor/Tests/18" data-select-label="Test 18"/>
+                                <we-button data-shape="web_editor/Tests/19" data-select-label="Test 19"/>
+                                <we-button data-shape="web_editor/Tests/20" data-select-label="Test 20"/>
+                                <we-button data-shape="web_editor/Tests/21" data-select-label="Test 21"/>
+                            </we-select-page>
+                            
                         <we-title>Connections</we-title>
                             <we-select-page string="Connections">
                                 <we-button data-shape="web_editor/Connections/01" data-select-label="Connections 01"/>
@@ -244,28 +269,46 @@
                                 <we-button data-shape="web_editor/Connections/19" data-select-label="Connections 19"/>
                                 <we-button data-shape="web_editor/Connections/20" data-select-label="Connections 20"/>
                             </we-select-page>
-                            <we-title>Origins</we-title>
-                            <we-select-page string="Origins">
-                                <we-button data-shape="web_editor/Origins/02_001" data-select-label="Origins 01"/>
-                                <we-button data-shape="web_editor/Origins/05" data-select-label="Origins 02"/>
-                                <we-button data-shape="web_editor/Origins/06_001" data-select-label="Origins 03"/>
-                                <we-button data-shape="web_editor/Origins/07_002" data-select-label="Origins 04"/>
-                                <we-button data-shape="web_editor/Origins/09_001" data-select-label="Origins 05"/>
-                                <we-button data-shape="web_editor/Origins/16" data-select-label="Origins 06" data-animated="true"/>
-                                <we-button data-shape="web_editor/Origins/17" data-select-label="Origins 07" data-animated="true"/>
-                                <we-button data-shape="web_editor/Origins/19" data-select-label="Origins 08"/>
+                            <we-title>Containers</we-title>
+                            <we-select-page string="Containers">
+                                <we-button data-shape="web_editor/Containers/01" data-select-label="Container 01"/>
+                                <we-button data-shape="web_editor/Containers/02" data-select-label="Container 02"/>
+                                <we-button data-shape="web_editor/Containers/03" data-select-label="Container 03"/>
+                                <we-button data-shape="web_editor/Containers/04" data-select-label="Container 04"/>
+                                <we-button data-shape="web_editor/Containers/05" data-select-label="Container 05" data-animated="true"/>
+                                <!-- Origins/16 to Containers/05-->
+                                <!-- <we-button data-shape="web_editor/Origins/16" data-select-label="Origins 06" data-animated="true"/> -->
+                                <we-button data-shape="web_editor/Containers/06" data-select-label="Container 06" data-animated="true"/>
+                                <!-- Origins/17 to containers_06 -->
+                                <!-- <we-button data-shape="web_editor/Origins/17" data-select-label="Origins 07" data-animated="true"/> -->
                             </we-select-page>
                             <we-title>Bold</we-title>
                             <we-select-page string="Bold">
+                                <!-- Origins/02_001 to Bold/13  -->
+                                <!-- <we-button data-shape="web_editor/Origins/02_001" data-select-label="Origins 01"/> -->
+                                <we-button data-shape="web_editor/Bold/13" data-select-label="Bold 01"/>
+                                <!-- Origins/07_002 & Origins/06_001 to Bold/14  -->
+                                <!-- <we-button data-shape="web_editor/Origins/06_001" data-select-label="Origins 03"/> -->
+                                <!-- <we-button data-shape="web_editor/Origins/07_002" data-select-label="Origins 04"/> -->
+                                <we-button data-shape="web_editor/Bold/14" data-select-label="Bold 02"/>
+                                <!-- Moved -->
+                                <we-button data-shape="web_editor/Origins/19" data-select-label="Bold 03"/>
+                                <!-- Origins/05 to Bold/15 -->
+                                <!-- <we-button data-shape="web_editor/Origins/05" data-select-label="Origins 02"/> -->
+                                <we-button data-shape="web_editor/Bold/15" data-select-label="Bold 04"/>
+                                <!-- Moved -->
+                                <we-button data-shape="web_editor/Origins/09_001" data-select-label="Origins 05"/>
+                                <!-- Bold/08 to Bold/01 -->
                                 <we-button data-shape="web_editor/Bold/01" data-select-label="Bold 01"/>
+                                <!-- <we-button data-shape="web_editor/Bold/08" data-select-label="Bold 07"/> -->
                                 <we-button data-shape="web_editor/Bold/03" data-select-label="Bold 02"/>
                                 <we-button data-shape="web_editor/Bold/04" data-select-label="Bold 03"/>
-                                <we-button data-shape="web_editor/Bold/05_001" data-select-label="Bold 04"/>
+                                <we-button data-shape="web_editor/Bold/05_001" data-select-label="Bold 04" class="to_change"/>
                                 <we-button data-shape="web_editor/Bold/06_001" data-select-label="Bold 05"/>
                                 <we-button data-shape="web_editor/Bold/07_001" data-select-label="Bold 06"/>
-                                <we-button data-shape="web_editor/Bold/08" data-select-label="Bold 07"/>
-                                <we-button data-shape="web_editor/Bold/09" data-select-label="Bold 08"/>
-                                <we-button data-shape="web_editor/Bold/10_001" data-select-label="Bold 09"/>
+                                
+                                <we-button data-shape="web_editor/Bold/09" data-select-label="Bold 08" class="to_change"/>
+                                <we-button data-shape="web_editor/Bold/10_001" data-select-label="Bold 09" class="to_change"/>
                                 <we-button data-shape="web_editor/Bold/12_001" data-select-label="Bold 10"/>
                             </we-select-page>
                             <we-title>Blobs</we-title>
@@ -289,6 +332,7 @@
                             <we-select-page string="Airy &amp; Zigs">
                                 <we-button data-shape="web_editor/Airy/01" data-select-label="Airy 01"/>
                                 <we-button data-shape="web_editor/Airy/06" data-select-label="Airy 02"/>
+                                <we-button data-shape="web_editor/Airy/06_001" data-select-label="Airy 02"/>
                                 <we-button data-shape="web_editor/Airy/02" data-select-label="Airy 03"/>
                                 <we-button data-shape="web_editor/Airy/07" data-select-label="Airy 04"/>
                                 <we-button data-shape="web_editor/Airy/08" data-select-label="Airy 05"/>
