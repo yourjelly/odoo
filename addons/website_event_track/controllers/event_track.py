@@ -15,7 +15,7 @@ import operator
 import pytz
 
 from odoo import exceptions, http, fields, tools, _
-from odoo.http import request
+from odoo.http import content_disposition, request
 from odoo.osv import expression
 from odoo.tools import is_html_empty, plaintext2html
 from odoo.tools.misc import babel_locale_parse
@@ -554,3 +554,19 @@ class EventTrackController(http.Controller):
         email_to = visitor.event_track_email_reminder if visitor.event_track_email_reminder else request.env.user.email
         track = request.env['event.track'].search([("id", "=", track_id)])
         track.send_email_reminder(email_to)
+
+    @http.route(['''/event/<model("event.event"):event>/track/<model("event.track"):track>/ics'''], type='http', auth="public")
+    def event_track_ics_file(self, event, track, **kwargs):
+        lang = request.context.get('lang', request.env.user.lang)
+        if request.env.user._is_public():
+            lang = request.cookies.get('frontend_lang')
+        track = track.with_context(lang=lang)
+        files = track._get_ics_file()
+        if not track.id in files:
+            return NotFound()
+        content = files[track.id]
+        return request.make_response(content, [
+            ('Content-Type', 'application/octet-stream'),
+            ('Content-Length', len(content)),
+            ('Content-Disposition', content_disposition(f'{event.name}-{track.name}.ics'))
+        ])
