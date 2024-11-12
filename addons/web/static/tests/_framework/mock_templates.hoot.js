@@ -1,5 +1,7 @@
 // ! WARNING: this module cannot depend on modules not ending with ".hoot" (except libs) !
 
+import { getRunner } from "../../lib/hoot/main_runner";
+
 //-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
@@ -60,10 +62,49 @@ export function makeTemplateFactory(name, factory) {
             return loader.modules.get(name);
         }
 
+        /** @type {Map<string, function>} */
+        const compiledTemplates = new Map();
+
+        /** @todo REMOVE (performance measurement) */
+        const __COMPILE_TIMES = [];
+        getRunner().afterAll(() => {
+            console.log(
+                "Time lost to template compilation (in ms):",
+                __COMPILE_TIMES.reduce((a, b) => a + b, 0)
+            );
+        });
+
         const factoryFn = factory.fn;
         factory.fn = (...args) => {
             const exports = factoryFn(...args);
+            const { clearProcessedTemplates, getTemplate } = exports;
+
+            // Patch "getTemplates" to access local cache
+            exports.getTemplate = function mockedGetTemplate(name) {
+                const rawTemplate = getTemplate(name) || this.rawTemplates[name];
+                if (typeof rawTemplate === "function" && !(rawTemplate instanceof Element)) {
+                    return rawTemplate;
+                }
+                if (!compiledTemplates.has(rawTemplate)) {
+                    compiledTemplates.set(rawTemplate, this._compileTemplate(name, rawTemplate));
+                } else {
+                    /** @todo REMOVE (performance measurement) */
+                    const __startTime = performance.now();
+                    this._compileTemplate(name, rawTemplate);
+                    __COMPILE_TIMES.push(performance.now() - __startTime);
+                }
+                return compiledTemplates.get(rawTemplate);
+            };
+
+            // Patch "clearProcessedTemplates" to clear local template cache
+            exports.clearProcessedTemplates = function mockedClearProcessedTemplates() {
+                compiledTemplates.clear();
+                return clearProcessedTemplates(...arguments);
+            };
+
+            // Replace alt & src attributes by default on all templates
             exports.registerTemplateProcessor(replaceAttributes);
+
             return exports;
         };
 
