@@ -2,7 +2,7 @@
 
 import warnings
 
-from collections import Counter
+from collections import Counter, OrderedDict, defaultdict
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from operator import itemgetter
@@ -12,9 +12,9 @@ from odoo import http, _
 from odoo.addons.website.controllers.form import WebsiteForm
 from odoo.osv.expression import AND
 from odoo.http import request
-from odoo.tools import email_normalize
+from odoo.models import BaseModel
+from odoo.tools import email_normalize, ormcache
 from odoo.tools.misc import groupby
-
 
 class WebsiteHrRecruitment(WebsiteForm):
     _jobs_per_page = 12
@@ -22,6 +22,34 @@ class WebsiteHrRecruitment(WebsiteForm):
     def sitemap_jobs(env, rule, qs):
         if not qs or qs.lower() in '/jobs':
             yield {'loc': '/jobs'}
+
+    def _get_available_job_options_and_count(self, fields, job_subset):
+        """ Get the available options for the given fields.
+        
+        This method is cached because 
+
+        :param fields: list of field names
+        :param job_subset: subset of jobs to consider
+        :return: dict of field names to available options and their count in the subset
+        """
+
+        all_jobs = request.env['hr.job'].search([])
+        total = len(job_subset)
+        counter_by_object_by_field = defaultdict(dict)
+        for field in fields:
+            subset_grouped = job_subset.grouped(field)
+            all_grouped = all_jobs.grouped(field)
+
+            empty_key = list(set(all_grouped.keys()) - set(subset_grouped.keys()))
+            for key in empty_key:
+                counter_by_object_by_field[field][key] = 0
+            for key in subset_grouped:
+                counter_by_object_by_field[field][key] = len(subset_grouped[key])
+            counter_by_object_by_field[field]['all'] = total
+
+        from pprint import pprint
+        pprint(counter_by_object_by_field)
+        return counter_by_object_by_field
 
     @http.route([
         '/jobs',
@@ -31,7 +59,13 @@ class WebsiteHrRecruitment(WebsiteForm):
              is_remote=False, is_other_department=False, is_untyped=None, page=1, search=None,
              industry_id=None, is_industry_untyped=False, **kwargs):
         env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
-
+        options = self._get_available_job_options_and_count([
+            'address_id',
+            'department_id',
+            'contract_type_id',
+            'industry_id',
+        ], env['hr.job'].search([('is_published', '=', True)]))
+        print(options)
         Country = env['res.country']
         Jobs = env['hr.job']
         Department = env['hr.department']
@@ -72,6 +106,7 @@ class WebsiteHrRecruitment(WebsiteForm):
             limit=1000, order="is_published desc, sequence, no_of_recruitment desc", options=options)
         # Browse jobs as superuser, because address is restricted
         jobs = details[0].get('results', Jobs).sudo()
+
 
         def sort(records_list, field_name):
             """ Sort records in the given collection according to the given
@@ -182,14 +217,16 @@ class WebsiteHrRecruitment(WebsiteForm):
         if count_untyped:
             count_per_employment_type[None] = count_untyped
 
-        #industries filter
-        count_per_industry = dict(Counter(job.industry_id or None for job in jobs))
+        # industries filter
+        count_per_industry = OrderedDict(Counter(job.industry_id or None for job in jobs))
         count_per_industry['all'] = total
         industries = jobs.industry_id
         if industry_id:
             jobs = jobs.filtered(lambda job: job.industry_id.id == industry_id)
+            total = len(jobs)
         elif is_industry_untyped:
             jobs = jobs.filtered(lambda job: not job.industry_id)
+            total = len(jobs)
 
         pager = request.website.pager(
             url=request.httprequest.path.partition('/page/')[0],
