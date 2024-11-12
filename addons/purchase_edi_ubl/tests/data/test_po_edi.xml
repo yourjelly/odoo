@@ -7,6 +7,7 @@
   <cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
   <cac:BuyerCustomerParty>
     <cac:Party>
+      <cbc:EndpointID schemeID="0208">LU25587702</cbc:EndpointID>
       <cac:PartyName>
         <cbc:Name>company_1_data</cbc:Name>
       </cac:PartyName>
@@ -32,6 +33,7 @@
   </cac:BuyerCustomerParty>
   <cac:SellerSupplierParty>
     <cac:Party>
+      <cbc:EndpointID schemeID="0208">LU25587702</cbc:EndpointID>
       <cac:PartyName>
         <cbc:Name>partner_a</cbc:Name>
       </cac:PartyName>
