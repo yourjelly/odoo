@@ -1,5 +1,4 @@
 from lxml import etree
-import uuid
 
 from odoo import models
 from odoo.exceptions import ValidationError
@@ -358,9 +357,6 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
         if not invoice.reversed_entry_id:
             return {}
 
-        if not invoice.reversed_entry_id.l10n_jo_edi_uuid:
-            invoice.reversed_entry_id.l10n_jo_edi_uuid = uuid.uuid4()
-
         return {
             'id': invoice.reversed_entry_id.name.replace('/', '_'),
             'uuid': invoice.reversed_entry_id.l10n_jo_edi_uuid,
@@ -384,9 +380,6 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
 
         customer = invoice.partner_id
         is_refund = invoice.move_type == 'out_refund'
-
-        if not invoice.l10n_jo_edi_uuid:
-            invoice.l10n_jo_edi_uuid = uuid.uuid4()
 
         vals['vals'].update({
             'ubl_version_id': '',

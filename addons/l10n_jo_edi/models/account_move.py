@@ -1,5 +1,6 @@
 import json
 import requests
+import uuid
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -10,7 +11,7 @@ JOFOTARA_URL = "https://backend.jofotara.gov.jo/core/invoices/"
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    l10n_jo_edi_uuid = fields.Char(string="Invoice UUID", copy=False)
+    l10n_jo_edi_uuid = fields.Char(string="Invoice UUID", copy=False, compute="_compute_l10n_jo_edi_uuid", store=True)
     l10n_jo_edi_qr = fields.Char(string="QR", copy=False)
 
     l10n_jo_edi_is_needed = fields.Boolean(
@@ -18,11 +19,9 @@ class AccountMove(models.Model):
         help="Jordan: technical field to determine if this invoice is eligible to be e-invoiced.",
     )
     l10n_jo_edi_state = fields.Selection(
-        selection=[('to_send', 'To Send'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'), ('cancelled', 'Cancelled')],
+        selection=[('to_send', 'To Send'), ('sent', 'Sent')],
         string="JoFotara State",
-        store=True,
-        copy=False,
-        compute='_compute_jo_edi_state')
+        copy=False)
     l10n_jo_edi_error = fields.Text(
         string="JoFotara Error",
         copy=False,
@@ -53,20 +52,6 @@ class AccountMove(models.Model):
                 and move.move_type in ("out_invoice", "out_refund")
             )
 
-    @api.depends("l10n_jo_edi_is_needed", "state", "l10n_jo_edi_xml_attachment_id", "l10n_jo_edi_error", "reversal_move_ids", "payment_state")
-    def _compute_jo_edi_state(self):
-        for move in self:
-            if not move.l10n_jo_edi_is_needed or move.state == 'draft':
-                move.l10n_jo_edi_state = None
-            elif move.state == 'posted':
-                move.l10n_jo_edi_state = 'to_send'
-            elif move.l10n_jo_edi_xml_attachment_id and not move.l10n_jo_edi_error:
-                move.l10n_jo_edi_state = 'sent'
-            elif move.reversal_move_ids and move.payment_state != 'partial':
-                move.l10n_jo_edi_state = 'to_cancel'
-            elif move.state == 'cancel' or move.payment_state == 'reversed':
-                move.l10n_jo_edi_state = 'cancelled'
-
     @api.depends("l10n_jo_edi_xml_attachment_id", "l10n_jo_edi_error")
     def _compute_show_reset_to_draft_button(self):
         # EXTENDS 'account'
@@ -79,9 +64,16 @@ class AccountMove(models.Model):
             {
                 "l10n_jo_edi_error": False,
                 "l10n_jo_edi_xml_attachment_file": False,
+                "l10n_jo_edi_state": False,
             }
         )
         return super().button_draft()
+
+    def action_post(self):
+        # EXTENDS 'account'
+        for invoice in self.filtered('l10n_jo_edi_is_needed'):
+            invoice.l10n_jo_edi_state = 'to_send'
+        return super().action_post()
 
     def _l10n_jo_build_jofotara_headers(self):
         self.ensure_one()
@@ -98,7 +90,9 @@ class AccountMove(models.Model):
 
         try:
             response = requests.post(JOFOTARA_URL, data=str(params), headers=headers, timeout=50, verify=False)
-        except (requests.exceptions.Timeout, requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
+        except requests.exceptions.Timeout:
+            return "Request time out! Please try again."
+        except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
             return f"Invalid request: {e}"
 
         response_text = response.content.decode()
@@ -128,6 +122,12 @@ class AccountMove(models.Model):
         if error_msg:
             raise UserError(f"{error_msg} To set: Configuration > Settings > Electronic Invoicing (Jordan)")
 
+    @api.depends("l10n_jo_edi_is_needed")
+    def _compute_l10n_jo_edi_uuid(self):
+        for invoice in self:
+            if invoice.l10n_jo_edi_is_needed and not invoice.l10n_jo_edi_uuid:
+                invoice.l10n_jo_edi_uuid = uuid.uuid4()
+
     def _l10n_jo_edi_send(self):
         self._l10n_jo_validate_config()
         for invoice in self:
@@ -152,6 +152,7 @@ class AccountMove(models.Model):
                 return error_message
             else:
                 invoice.l10n_jo_edi_error = False
+                invoice.l10n_jo_edi_state = 'sent'
                 invoice.with_context(no_new_invoice=True).message_post(
                     body=_("E-invoice (JoFotara) submitted successfully."),
                     attachment_ids=invoice_xml.ids,
