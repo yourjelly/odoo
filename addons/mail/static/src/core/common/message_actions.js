@@ -127,6 +127,27 @@ messageActionsRegistry
         onClick: (component) => component.props.message.onClickMarkAsUnread(component.props.thread),
         sequence: 70,
     })
+    .add("reply-all", {
+        condition: (component) =>
+            component.props.message.canReplyandForwardToComments(component.props.thread),
+        icon: "fa fa-reply",
+        title: _t("Reply All"),
+        onClick: (component) => {
+            debugger;
+            component.onClickReplyMessage();
+        },
+        sequence: 78,
+    })
+    .add("forwards", {
+        condition: (component) =>
+            component.props.message.canReplyandForwardToComments(component.props.thread),
+        icon: "fa fa-forward",
+        title: _t("Forward"),
+        onClick: (component) => {
+            component.onClickFowardMessage();
+        },
+        sequence: 79,
+    })
     .add("edit", {
         condition: (component) => component.props.message.editable,
         icon: "fa fa-pencil",

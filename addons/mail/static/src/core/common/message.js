@@ -8,7 +8,7 @@ import { MessageReactionMenu } from "@mail/core/common/message_reaction_menu";
 import { MessageReactions } from "@mail/core/common/message_reactions";
 import { MessageSeenIndicator } from "@mail/core/common/message_seen_indicator";
 import { RelativeTime } from "@mail/core/common/relative_time";
-import { htmlToTextContentInline } from "@mail/utils/common/format";
+import { htmlToTextContentInline, prettifyMessageContent, convertBrToLineBreak } from "@mail/utils/common/format";
 import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
 import { renderToElement } from "@web/core/utils/render";
 
@@ -500,6 +500,60 @@ export class Message extends Component {
         }
         this.state.showTranslation =
             !this.state.showTranslation && Boolean(message.translationValue);
+    }
+
+    async onClickReplyMessage() {
+        const body = convertBrToLineBreak(this.props.message.body);
+        const validMentions = this.store.getMentionsFromText(body, {
+            mentionedChannels: [],
+            mentionedPartners: this.props.message.recipients,
+        });
+        let recipients = this.props.message.notifications.map((data) => data.persona.id);
+        recipients = recipients.filter(
+            (id) => !this.props.thread.recipients.map(({ partner }) => partner.id).includes(id)
+        );
+        let bodyf = await prettifyMessageContent(body, validMentions);
+        const context = {
+            default_partner_ids: recipients,
+            default_body: `<br><blockquote>${bodyf}</blockquote><br>`,
+        };
+        this.openFullComposer(context);
+    }
+
+    async onClickFowardMessage() {
+        const body = convertBrToLineBreak(this.props.message.body);
+        const validMentions = this.store.getMentionsFromText(body, {
+            mentionedChannels: [],
+            mentionedPartners: this.props.message.recipients,
+        });
+        const context = {
+            default_body: await prettifyMessageContent(body, validMentions),
+        };
+        this.openFullComposer(context);
+    }
+
+    async openFullComposer(addtionalContext) {
+        const context = {
+            ...addtionalContext,
+            default_subject: this.props.message.subject,
+            default_model: this.props.thread.model,
+            default_subtype_xmlid: "mail.mt_comment",
+            default_res_ids: [this.props.thread.id],
+        };
+        const action = {
+            name: _t("Forward message"),
+            type: "ir.actions.act_window",
+            res_model: "mail.compose.message",
+            view_mode: "form",
+            views: [[false, "form"]],
+            target: "new",
+            context: context,
+        };
+        this.env.services.action.doAction(action, {
+            onClose: (...args) => {
+                this.props.thread.fetchNewMessages();
+            },
+        });
     }
 }
 
