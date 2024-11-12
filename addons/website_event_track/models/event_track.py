@@ -671,12 +671,15 @@ class Track(models.Model):
             result[track.id] = cal.serialize().encode('utf-8')
         return result
 
-    def send_email_reminder(self, email_to):
+    def send_email_reminder(self, email_to, lang=None):
         agenda_urls = self._get_event_track_resource_urls()
         context = {
             'google_url': agenda_urls.get('google_url'),
             'iCal_url': agenda_urls.get('iCal_url'),
             'base_url': self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         }
+        email_values = {"email_to": email_to}
+        if lang:
+            email_values[lang] = lang
         template = self.env.ref("website_event_track.email_reminder").sudo().with_context(context)
-        template.send_mail(self.id, email_values={"email_to": email_to})
+        template.send_mail(self.id, email_values=email_values)
