@@ -153,7 +153,7 @@ export class ToolbarPlugin extends Plugin {
         return {
             dispatch: this.dispatch,
             buttonGroups: this.buttonGroups,
-            getSelection: () => this.shared.getEditableSelection(),
+            getSelection: () => this.shared.getSelectionData(),
             state: this.state,
             focusEditable: () => this.shared.focusEditable(),
         };
@@ -218,7 +218,7 @@ export class ToolbarPlugin extends Plugin {
 
     updateNamespace() {
         const traversedNodes = this.getFilterTraverseNodes();
-        for (const namespace of this.getResource('toolbarNamespace') || []) {
+        for (const namespace of this.getResource("toolbarNamespace") || []) {
             if (namespace.isApplied(traversedNodes)) {
                 this.state.namespace = namespace.id;
                 return;
