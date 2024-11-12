@@ -172,7 +172,7 @@
     <div class="position-sticky bottom-0 w-100 overflow-x-scroll o_we_agenda_horizontal_scroller_container">
         <div class="o_we_agenda_horizontal_scroller"/>
     </div>
-    <div id="modal_email_reminder_container"/>
+<!--    <div id="modal_email_reminder_container"/>-->
 </template>
 
 <template id="agenda_main_track" name="Track Agenda: Track">
