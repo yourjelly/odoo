@@ -767,6 +767,10 @@ class configmanager:
                 "%s: directory is not writable" % d
         return d
 
+    @property
+    def is_testing(self):
+        return bool(self['test_enable'] or self['test_file'])
+
     def filestore(self, dbname):
         return os.path.join(self['data_dir'], 'filestore', dbname)
 

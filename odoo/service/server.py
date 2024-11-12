@@ -122,7 +122,7 @@ class BaseWSGIServerNoBind(LoggingBaseWSGIServerMixIn, werkzeug.serving.BaseWSGI
 class RequestHandler(werkzeug.serving.WSGIRequestHandler):
     def setup(self):
         # timeout to avoid chrome headless preconnect during tests
-        if config['test_enable'] or config['test_file']:
+        if config.is_testing:
             self.timeout = 5
         # flag the current thread as handling a http request
         super(RequestHandler, self).setup()
@@ -523,8 +523,7 @@ class ThreadedServer(CommonServer):
             import win32api
             win32api.SetConsoleCtrlHandler(lambda sig: self.signal_handler(sig, None), 1)
 
-        test_mode = config['test_enable'] or config['test_file']
-        if test_mode or (config['http_enable'] and not stop):
+        if config.is_testing or (config['http_enable'] and not stop):
             # some tests need the http daemon to be available...
             self.http_spawn()
 
@@ -577,7 +576,7 @@ class ThreadedServer(CommonServer):
             rc = preload_registries(preload)
 
         if stop:
-            if config['test_enable']:
+            if config.is_testing:
                 from odoo.tests.result import _logger as logger  # noqa: PLC0415
                 with Registry.registries._lock:
                     for db, registry in Registry.registries.d.items():
@@ -1316,7 +1315,7 @@ def preload_registries(dbnames):
                     load_test_file_py(registry, test_file)
 
             # run post-install tests
-            if config['test_enable']:
+            if config.is_testing:
                 from odoo.tests import loader  # noqa: PLC0415
                 t0 = time.time()
                 t0_sql = odoo.sql_db.sql_counter
@@ -1354,7 +1353,7 @@ def start(preload=None, stop=False):
     if odoo.evented:
         server = GeventServer(odoo.http.root)
     elif config['workers']:
-        if config['test_enable'] or config['test_file']:
+        if config.is_testing:
             _logger.warning("Unit testing in workers mode could fail; use --workers 0.")
 
         server = PreforkServer(odoo.http.root)

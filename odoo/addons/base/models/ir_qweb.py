@@ -388,9 +388,9 @@ from lxml import etree
 from dateutil.relativedelta import relativedelta
 from psycopg2.extensions import TransactionRollbackError
 
-from odoo import api, models, tools
+from odoo import api, models, modules, tools
 from odoo.modules.registry import _REGISTRY_CACHES
-from odoo.tools import config, safe_eval, pycompat
+from odoo.tools import safe_eval
 from odoo.tools.constants import SUPPORTED_DEBUGGER, EXTERNAL_ASSET
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, to_opcodes, _EXPR_OPCODES, _BLACKLIST
 from odoo.tools.json import scriptsafe
@@ -925,7 +925,7 @@ class IrQweb(models.AbstractModel):
             values.setdefault('res_company', self.env.company.sudo())
             values.update(
                 request=request,  # might be unbound if we're not in an httprequest context
-                test_mode_enabled=bool(config['test_enable'] or config['test_file']),
+                test_mode_enabled=modules.module.current_test,
                 json=scriptsafe,
                 quote_plus=werkzeug.urls.url_quote_plus,
                 time=safe_eval.time,
