@@ -2213,34 +2213,41 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     @route('/gmc-<lang>.xml', type='http', auth='public', website=True, multilang=False, sitemap=False)
     def products_xml_index(self, lang):
+        View = request.env['ir.ui.view'].sudo()
         mimetype = 'application/xml;charset=utf-8'
 
-        content = """<?xml version="1.0"?>
-<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
-<channel>
-<title>Example - My Store</title>
-<link>https://12d4-141-135-107-134.ngrok-free.app/</link>
-<description>This is an example of what i should do</description>
-<item>
+        products = request.env['product.template']
+        delivery_carriers = request.env['delivery.carrier'].search([
+            ('is_published', '=', True), ('delivery_type', '=', 'fixed')
+        ])
 
-<g:id>TV_123456</g:id>
-<g:title>Google Chromecast with Google TV custom</g:title>
-<g:description>Chromecast with Google TV brings you the entertainment you love, in up to 4K HDR, its also custom text</g:description>
-<g:link>https://store.google.com/product/chromecast_google_tv</g:link> <g:image_link>https://images.example.com/TV_123456.png</g:image_link> <g:condition>new</g:condition>
-<g:availability>in stock</g:availability>
-<g:price>49.99 USD</g:price>
-<g:shipping>
+        vals = {
+            'title': request.website.name,
+            'link': request.website.domain,
+            'description': _(""),
+            'items': [
+                {
+                    'id': product.id,
+                    'title': product.name,
+                    'description': product.description_ecommerce,
+                    'link': request.website.domain + product.website_url,
+                    'image_link': f"{request.website.domain}/web/image/product.template/{product.id}/image_1024" if product.image_1024 else request.website.domain + product._get_placeholder_filename('image_1024'),
+                    'availability': "in stock",
+                    'price': f"{product.list_price} {product.currency_id.name}",
+                    'mpn': product.barcode,
+                }
+                for product in products
+            ],
+            'shipping_methods': [
+                {
+                    'country': "US",  # TODO: everything needs to be done xd
+                    'service': carrier.name,
+                    'price': carrier.fixed_price,
+                }
+                for carrier in delivery_carriers
+            ]
+        }
 
-<g:country>US</g:country>
-<g:service>Standard</g:service>
-<g:price>7.99 USD</g:price>
+        content = View._render_template('website_sale.gmc_xml', vals)
 
-</g:shipping>
-<g:gtin>123456789123</g:gtin>
-<g:brand>Google</g:brand>
-
-</item>
-</channel>
-</rss>
-"""
         return request.make_response(content, [('Content-Type', mimetype)])

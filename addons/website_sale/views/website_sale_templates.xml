@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="gmc_xml">
+    <t t-translation="off">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</t>
+    <rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
+        <channel>
+            <title><t t-esc="title"/></title>
+            <link><t t-esc="link"/></link>
+            <description><t t-esc="description"/></description>
+            <t t-foreach="items" t-as="item" t-key="item.id">
+                <item>
+                    <g:id><t t-esc="item.id"/></g:id>
+                    <g:title><t t-esc="item.title"/></g:title>
+                    <g:description><t t-esc="item.description"/></g:description>
+                    <g:link><t t-esc="item.link"/></g:link>
+                    <g:image_link><t t-esc="item.image_link"/></g:image_link>
+                    <g:availability><t t-esc="item.availability"/></g:availability>
+                    <g:price><t t-esc="item.price"/></g:price>
+
+                    <g:identifier_exists>no</g:identifier_exists>
+                    <g:mpn><t t-esc="item.mpn"/></g:mpn>
+
+                    <t t-foreach="shipping_methods" t-as="method" t-key="method.service">
+                        <g:shipping>
+                            <g:country><t t-esc="method.country"/></g:country>
+                            <g:service><t t-esc="method.service"/></g:service>
+                            <g:price><t t-esc="method.price"/></g:price>
+                        </g:shipping>
+                    </t>
+                </item>
+            </t>
+        </channel>
+    </rss>
+</template>
+</odoo>
