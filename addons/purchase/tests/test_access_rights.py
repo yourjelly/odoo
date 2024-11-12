@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import Form, tagged
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 
 
 @tagged('post_install', '-at_install')
@@ -125,3 +125,15 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
         self.purchase_user.groups_id += group_purchase_manager
         order.with_user(self.purchase_user).button_approve()
         self.assertEqual(order.state, 'purchase')
+
+    def test_create_product_purchase_user(self):
+        uom = self.env.ref('uom.product_uom_gram')
+        self.purchase_user.groups_id += self.env.ref('product.group_product_manager')
+        try:
+            self.env['product.template'].with_user(self.purchase_user).create({
+                'name': 'Test Product UOM Default',
+                'type': 'consu',
+                'uom_id': uom.id,
+            })
+        except UserError as exc:
+            self.fail(f"The default purchase UOM should be in the same category as the sale UOM. {exc}")
