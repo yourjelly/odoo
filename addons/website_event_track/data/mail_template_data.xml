@@ -33,11 +33,24 @@
     <record id="email_reminder" model="mail.template">
         <field name="name">Add reminder via email</field>
         <field name="model_id" ref="website_event_track.model_event_track"/>
-        <field name="subject">Add reminder: {{ object.name }}</field>
-        <field name="email_from">{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or user.email_formatted or '') }}</field>
-        <field name="description"/>
+        <field name="subject">Add talk reminder: {{ object.name }}</field>
+        <field name="email_from">{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or '') }}</field>
+        <field name="description">Add talk reminder</field>
         <field name="body_html" type="html">
             <div>
+                Dear
+                <t t-if="not user_id.is_public" t-out="user_id.name"/>,
+                <br/>
+                <br/>
+                You recently ask to add reminders to your calendars for the
+                <a t-attf-href="{{ base_url }}{{ object.website_url }}" t-out="object.name"/>
+                talk
+                of
+                <a t-attf-href="{{ base_url }}{{ object.event_id.website_url }}" t-out="object.event_id.name"/>
+                event.
+                <br/>
+                <br/>
+                You can do it by clicking on these buttons:
                 <div>
                     <a t-att-href="iCal_url" class="o_weagenda_email_reminder_btn" title="Add to iCal">
                         <img t-attf-src="{{ base_url }}/event/static/src/img/apple-calendar.svg" alt="iCal" loading="lazy"/>
@@ -50,6 +63,11 @@
                         <img t-attf-src="{{ base_url }}/event/static/src/img/google-calendar.svg" alt="Google Agenda" loading="lazy"/>
                     </a>
                 </div>
+                <br/>
+                Thank you,
+                <br/>
+                <t t-out="object.event_id.organizer_id.name or object.event_id.company_id.name or ''">--<br/>Mitchell Admin
+                </t>
             </div>
             <style>
                 .o_weagenda_email_reminder_btn{
