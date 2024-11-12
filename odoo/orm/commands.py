@@ -1,7 +1,7 @@
 import enum
 
 
-class Command(enum.IntEnum):
+class Command:
     """
     :class:`~odoo.fields.One2many` and :class:`~odoo.fields.Many2many` fields
     expect a special command to manipulate the relation they implement.
