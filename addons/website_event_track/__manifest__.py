@@ -56,7 +56,8 @@
             'website_event_track/static/src/xml/event_track_proposal_templates.xml',
             'website_event_track/static/src/xml/website_event_pwa.xml',
             'website_event_track/static/src/xml/website_event_track_form_tags_wrapper.xml',
-            'website_event_track/static/src/js/event_track_email_reminder.js'
+            'website_event_track/static/src/js/event_track_email_reminder.js',
+            'website_event_track/static/src/xml/event_track_modal_email_reminder_templates.xml'
         ],
     },
     'license': 'LGPL-3',

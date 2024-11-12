@@ -30,8 +30,6 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
      * @param {Event} ev
      */
     _onReminderToggleClick: function (ev) {
-        var modalEmailReminder = new publicWidget.registry.websiteEventModalEmailReminder();
-        console.log(modalEmailReminder);
         ev.stopPropagation();
         ev.preventDefault();
         var self = this;
@@ -95,16 +93,14 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
     },
 
     _sendReminderMail: function(trackId){
-        rpc('/event/has_email_reminder').then( function (result){
+        rpc('/event/has_email_reminder').then( (result) => {
             if (result.hasEmailReminder){
                 rpc('/event/send_email_reminder',  {
                     track_id: trackId,
                 });
             }
             else {
-                rpc('/event/get_email_reminder_modal').then(function (result) {
-                   $("#modal_email_reminder_container").append(result.modal)
-                })
+                new publicWidget.registry.websiteEventModalEmailReminder(trackId).appendTo(this.getParent().$el);
             }
         })
     },
