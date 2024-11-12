@@ -426,6 +426,28 @@ export class KanbanRenderer extends Component {
         return group.list.load({ limit: group.list.records.length + group.model.initialLimit });
     }
 
+    onAltClickPressed(ev) {
+        if (ev.shiftKey && this.props.list.selection.length) {
+            // we must found the currently focused card and select each item between this one and the ev.target card
+            const lastId = this.props.list.selection.at(-1).id;
+            const currentId = ev.target.closest("article").dataset.id;
+            // we must select any records between the two
+            const { records } = this.props.list;
+            const record = records.find((e) => e.id === currentId);
+            const lastRecord = records.find((e) => e.id === lastId);
+            //TODO simplify this
+            const recordIndex = records.indexOf(record);
+            const lastCheckedRecordIndex = records.indexOf(lastRecord);
+            const start = Math.min(recordIndex, lastCheckedRecordIndex);
+            const end = Math.max(recordIndex, lastCheckedRecordIndex);
+            const { selected } = record;
+            console.log(start, end);
+            for (let i = start; i <= end; i++) {
+                records[i].toggleSelection(!selected);
+            }
+        }
+    }
+
     /**
      * @param {string} id
      * @param {boolean} isProcessing

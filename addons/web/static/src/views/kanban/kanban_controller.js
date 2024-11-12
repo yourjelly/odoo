@@ -19,8 +19,9 @@ import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
 import { KanbanRenderer } from "./kanban_renderer";
 import { useProgressBar } from "./progress_bar_hook";
+import { SelectionBox } from "@web/views/view_components/selection_box";
 
-import { Component, reactive, useRef, useState } from "@odoo/owl";
+import { Component, reactive, useEffect, useRef, useState } from "@odoo/owl";
 
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
 
@@ -28,7 +29,14 @@ const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "m
 
 export class KanbanController extends Component {
     static template = `web.KanbanView`;
-    static components = { Layout, KanbanRenderer, MultiRecordViewButton, SearchBar, CogMenu };
+    static components = {
+        Layout,
+        KanbanRenderer,
+        MultiRecordViewButton,
+        SearchBar,
+        CogMenu,
+        SelectionBox,
+    };
     static props = {
         ...standardViewProps,
         defaultGroupBy: {
@@ -174,6 +182,54 @@ export class KanbanController extends Component {
             }
         });
         this.searchBarToggler = useSearchBarToggler();
+        useEffect(
+            () => {
+                if (this.props.onSelectionChanged) {
+                    const resIds = this.model.root.selection.map((record) => record.resId);
+                    this.props.onSelectionChanged(resIds);
+                }
+            },
+            () => [this.model.root.selection.length]
+        );
+    }
+
+    get display() {
+        const { controlPanel } = this.props.display;
+        if (!controlPanel) {
+            return this.props.display;
+        }
+        return {
+            ...this.props.display,
+            controlPanel: {
+                ...controlPanel,
+                layoutActions: !this.hasSelectedRecords,
+            },
+        };
+    }
+
+    get hasSelectedRecords() {
+        return this.selectedRecords.length || this.isDomainSelected;
+    }
+
+    get selectedRecords() {
+        return this.model.root.selection;
+    }
+
+    get isDomainSelected() {
+        return this.model.root.isDomainSelected;
+    }
+
+    get isPageSelected() {
+        const root = this.model.root;
+        const nbTotal = root.isGrouped ? root.recordCount : root.count;
+        return (
+            root.selection.length === root.records.length &&
+            (!root.isRecordCountTrustable || nbTotal > this.selectedRecords.length)
+        );
+    }
+
+    async selectDomain(value) {
+        await this.model.root.selectDomain(value);
     }
 
     get modelParams() {

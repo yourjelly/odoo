@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.KanbanRenderer">
-        <div class="o_kanban_renderer o_renderer d-flex"
+        <div class="o_kanban_renderer o_renderer d-flex user-select-none"
             t-attf-class="{{ props.list.isGrouped ? 'o_kanban_grouped align-content-stretch' : 'o_kanban_ungrouped align-content-start flex-wrap justify-content-start' }}"
             t-ref="root"
         >
