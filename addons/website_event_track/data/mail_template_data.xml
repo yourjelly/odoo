@@ -35,7 +35,38 @@
         <field name="model_id" ref="website_event_track.model_event_track"/>
         <field name="subject">Add reminder: {{ object.name }}</field>
         <field name="email_from">{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or user.email_formatted or '') }}</field>
-        <field name="description"></field>
+        <field name="description"/>
+        <field name="body_html" type="html">
+            <div>
+                <div>
+                    <a t-att-href="iCal_url" class="o_weagenda_email_reminder_btn" title="Add to iCal">
+                        <img t-attf-src="{{ base_url }}/event/static/src/img/apple-calendar.svg" alt="iCal" loading="lazy"/>
+                    </a>
+                    <a t-att-href="iCal_url" class="o_weagenda_email_reminder_btn" title="Add to Outlook">
+                        <img t-attf-src="{{ base_url }}/event/static/src/img/outlook-calendar.svg" alt="Outlook" loading="lazy"/>
+                    </a>
+                    <a t-att-href="google_url" class="o_weagenda_email_reminder_btn" title="Add to Google"
+                       target="_blank">
+                        <img t-attf-src="{{ base_url }}/event/static/src/img/google-calendar.svg" alt="Google Agenda" loading="lazy"/>
+                    </a>
+                </div>
+            </div>
+            <style>
+                .o_weagenda_email_reminder_btn{
+                    background-color: #fbf8f2;
+                    padding: 0.375rem 1rem;
+                    text-align: center;
+                    text-decoration: none;
+
+                    display: inline-block;
+                    vertical-align: middle;
+                    cursor: pointer;
+                    user-select: none;
+                    border-radius: 0.4rem;
+                }
+            </style>
+        </field>
+
     </record>
 </data>
 
