@@ -620,14 +620,12 @@ class Track(models.Model):
 
     def _get_external_description(self):
         """ Adding the URL of the event track into the description """
-        print("go inside _get_external_description")
         self.ensure_one()
         shorten_description = shorten(html_to_inner_content(self.description), 1900)
         event_track_url = werkzeug.urls.url_join(self.get_base_url(), self.website_url)
         return f'<a href="{event_track_url}">{self.name}</a>\n{shorten_description}'
 
     def _get_event_track_resource_urls(self):
-        print("go inside _get_event_resource_urls")
         date_tz = self.event_id.date_tz
         url_date_start = self.date.astimezone(timezone(date_tz)).strftime('%Y%m%dT%H%M%S')
         url_date_stop = self.date_end.astimezone(timezone(date_tz)).strftime('%Y%m%dT%H%M%S')
@@ -674,7 +672,6 @@ class Track(models.Model):
         return result
 
     def send_email_reminder(self, email_to):
-        print("go inside send_email_reminder")
         agenda_urls = self._get_event_track_resource_urls()
         context = {
             'google_url': agenda_urls.get('google_url'),
