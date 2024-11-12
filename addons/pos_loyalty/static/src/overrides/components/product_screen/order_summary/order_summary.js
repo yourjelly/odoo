@@ -92,25 +92,39 @@ patch(OrderSummary.prototype, {
                 coupon.delete();
             }
         }
+        if (selectedLine.uiState.isRewardProductLine) {
+            const relatedLine = this.currentOrder.lines.find(
+                (line) => line._reward_product_id?.id === selectedLine.product_id.id
+            );
+            let maximumRewardQty = 0;
+            let relatedLoyaltyProgram = null;
+            let coupenChange = null;
+            if (relatedLine.reward_id.program_id.program_type === "loyalty") {
+                relatedLoyaltyProgram = this.currentOrder
+                    .getLoyaltyPoints()
+                    .find((lp) => lp.program.id === relatedLine?.reward_id.program_id.id);
+                maximumRewardQty = parseInt(
+                    relatedLine?.qty +
+                        (relatedLoyaltyProgram?.points.total / relatedLine?.points_cost) *
+                            relatedLine?.qty
+                );
+            } else {
+                relatedLoyaltyProgram = relatedLine?.reward_id?.program_id;
+                coupenChange =
+                    this.currentOrder.uiState.couponPointChanges[relatedLine?.coupon_id?.id];
+                maximumRewardQty =
+                    ((coupenChange?.points - relatedLine?.qty) / relatedLine?.points_cost) *
+                    relatedLine?.qty;
+            }
+            if (val > maximumRewardQty) {
+                val = maximumRewardQty;
+            }
+        }
         if (
             !selectedLine ||
             !selectedLine.is_reward_line ||
             (selectedLine.is_reward_line && ["", "remove"].includes(val))
         ) {
-            const relatedLine = this.currentOrder.lines.find(
-                (line) => line._reward_product_id?.id === selectedLine.product_id.id
-            );
-            const relatedLoyaltyProgram = this.currentOrder
-                .getLoyaltyPoints()
-                .find((lp) => lp.program.id === relatedLine?.reward_id.program_id.id);
-            const maximumRewardQty = parseInt(
-                relatedLine?.qty +
-                    (relatedLoyaltyProgram?.points.total / relatedLine?.points_cost) *
-                        relatedLine?.qty
-            );
-            if (val > maximumRewardQty) {
-                val = maximumRewardQty;
-            }
             super._setValue(val);
         }
         if (!selectedLine.is_reward_line || (selectedLine.is_reward_line && val === "remove")) {

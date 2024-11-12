@@ -170,14 +170,9 @@ patch(PosStore.prototype, {
         const pointsAddedPerProgram = order.pointsForPrograms(programs);
         for (const program of this.models["loyalty.program"].getAll()) {
             // Future programs may split their points per unit paid (gift cards for example), consider a non applicable program to give no points
-            const pointsAdded =
-                order._programIsApplicable(program) && order.allowedPrograms.includes(program.id)
-                    ? pointsAddedPerProgram[program.id]
-                    : changesPerProgram[program.id] &&
-                      order._get_reward_lines().length !== 0 &&
-                      !order.get_selected_orderline()?.uiState.isRewardProductLine
-                    ? changesPerProgram[program.id]
-                    : [];
+            const pointsAdded = order._programIsApplicable(program)
+                ? pointsAddedPerProgram[program.id]
+                : [];
             // For programs that apply to both (loyalty) we always add a change of 0 points, if there is none, since it makes it easier to
             //  track for claimable rewards, and makes sure to load the partner's loyalty card.
             if (program.is_nominative && !pointsAdded.length && order.get_partner()) {
