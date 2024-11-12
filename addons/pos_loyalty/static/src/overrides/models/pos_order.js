@@ -79,7 +79,6 @@ patch(PosOrder.prototype, {
             codeActivatedProgramRules: [],
             couponPointChanges: {},
         };
-        this.allowedPrograms = [];
         const oldCouponMapping = {};
         if (this.uiState.couponPointChanges) {
             for (const [key, pe] of Object.entries(this.uiState.couponPointChanges)) {
@@ -493,7 +492,6 @@ patch(PosOrder.prototype, {
     pointsForPrograms(programs) {
         pointsForProgramsCountedRules = {};
         const orderLines = this.get_orderlines();
-        this.allowedPrograms = [];
         const linesPerRule = {};
         for (const line of orderLines) {
             const reward = line.reward_id;
@@ -541,11 +539,7 @@ patch(PosOrder.prototype, {
                 );
                 const amountCheck =
                     (rule.minimum_amount_tax_mode === "incl" && amountWithTax) || amountWithoutTax;
-                if (
-                    rule.minimum_amount > amountCheck &&
-                    (!this.get_selected_orderline()?.uiState.isRewardProductLine ||
-                        program.program_type !== "loyalty")
-                ) {
+                if (rule.minimum_amount > amountCheck) {
                     continue;
                 }
                 let totalProductQty = 0;
@@ -587,17 +581,10 @@ patch(PosOrder.prototype, {
                         }
                     }
                 }
-                if (
-                    totalProductQty < rule.minimum_qty &&
-                    (!this.get_selected_orderline()?.uiState.isRewardProductLine ||
-                        program.program_type !== "loyalty")
-                ) {
+                if (totalProductQty < rule.minimum_qty) {
                     // Should also count the points from negative quantities.
                     // For example, when refunding an ewallet payment. See TicketScreen override in this addon.
                     continue;
-                }
-                if (!this.allowedPrograms.includes(program.id)) {
-                    this.allowedPrograms.push(program.id);
                 }
                 if (!(program.id in pointsForProgramsCountedRules)) {
                     pointsForProgramsCountedRules[program.id] = [];
