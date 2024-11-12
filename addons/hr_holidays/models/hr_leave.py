@@ -1118,7 +1118,15 @@ Attempting to double-book your time off won't magically make your vacation 2x be
 
         split_leaves.filtered(lambda l: l.state in 'validate')._validate_leave_request()
 
+<<<<<<< saas-17.4
     def action_validate(self, check_state=True):
+||||||| ed8b35cf2cbf0f583ecb12488d701aa9ae18f663
+    def action_validate(self):
+=======
+        return split_leaves
+
+    def action_validate(self):
+>>>>>>> 50b99b8db6ce6d3665ba242e472d700f1dca063e
         current_employee = self.env.user.employee_id
         leaves = self._get_leaves_on_public_holiday()
         if leaves:
