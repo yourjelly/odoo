@@ -2210,3 +2210,37 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'currency_id': website.currency_id.id,
             'pricelist_id': website.pricelist_id.id,
         })
+
+    @route('/gmc-<lang>.xml', type='http', auth='public', website=True, multilang=False, sitemap=False)
+    def products_xml_index(self, lang):
+        mimetype = 'application/xml;charset=utf-8'
+
+        content = """<?xml version="1.0"?>
+<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
+<channel>
+<title>Example - My Store</title>
+<link>https://12d4-141-135-107-134.ngrok-free.app/</link>
+<description>This is an example of what i should do</description>
+<item>
+
+<g:id>TV_123456</g:id>
+<g:title>Google Chromecast with Google TV custom</g:title>
+<g:description>Chromecast with Google TV brings you the entertainment you love, in up to 4K HDR, its also custom text</g:description>
+<g:link>https://store.google.com/product/chromecast_google_tv</g:link> <g:image_link>https://images.example.com/TV_123456.png</g:image_link> <g:condition>new</g:condition>
+<g:availability>in stock</g:availability>
+<g:price>49.99 USD</g:price>
+<g:shipping>
+
+<g:country>US</g:country>
+<g:service>Standard</g:service>
+<g:price>7.99 USD</g:price>
+
+</g:shipping>
+<g:gtin>123456789123</g:gtin>
+<g:brand>Google</g:brand>
+
+</item>
+</channel>
+</rss>
+"""
+        return request.make_response(content, [('Content-Type', mimetype)])
