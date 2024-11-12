@@ -8,21 +8,24 @@ export class SoundEffects {
      */
     constructor(env) {
         this.soundEffects = {
-            "channel-join": { defaultVolume: 0.3, path: "/mail/static/src/audio/channel_01_in" },
-            "channel-leave": { path: "/mail/static/src/audio/channel_04_out" },
-            deafen: { defaultVolume: 0.15, path: "/mail/static/src/audio/deafen_new_01" },
-            "incoming-call": { defaultVolume: 0.15, path: "/mail/static/src/audio/call_02_in_" },
-            "member-leave": { defaultVolume: 0.5, path: "/mail/static/src/audio/channel_01_out" },
-            mute: { defaultVolume: 0.2, path: "/mail/static/src/audio/mute_1" },
-            "new-message": { path: "/mail/static/src/audio/dm_02" },
-            "push-to-talk-on": { defaultVolume: 0.05, path: "/mail/static/src/audio/ptt_push_1" },
-            "push-to-talk-off": {
-                defaultVolume: 0.05,
-                path: "/mail/static/src/audio/ptt_release_1",
+            "call-join": { defaultVolume: 0.75, path: "/mail/static/src/audio/call-join" },
+            "call-leave": { defaultVolume: 0.75, path: "/mail/static/src/audio/call-leave" },
+            "ear-off": { defaultVolume: 0.15, path: "/mail/static/src/audio/ear-off" },
+            "ear-on": { defaultVolume: 0.15, path: "/mail/static/src/audio/ear-on" },
+            "mic-off": { defaultVolume: 0.2, path: "/mail/static/src/audio/mic-off" },
+            "mic-on": { defaultVolume: 0.2, path: "/mail/static/src/audio/mic-on" },
+            "ptt-press": { defaultVolume: 0.1, path: "/mail/static/src/audio/ptt-press" },
+            "ptt-release": { defaultVolume: 0.1, path: "/mail/static/src/audio/ptt-release" },
+            "call-invitation": {
+                defaultVolume: 0.15,
+                path: "/mail/static/src/audio/call-invitation",
             },
-            "screen-sharing": { defaultVolume: 0.5, path: "/mail/static/src/audio/share_02" },
-            undeafen: { defaultVolume: 0.15, path: "/mail/static/src/audio/undeafen_new_01" },
-            unmute: { defaultVolume: 0.2, path: "/mail/static/src/audio/unmute_1" },
+            "new-message": { path: "/mail/static/src/audio/new-message", defaultVolume: 0.5 },
+            "screen-sharing": {
+                defaultVolume: 0.75,
+                path: "/mail/static/src/audio/screen-sharing",
+            },
+            "member-leave": { defaultVolume: 0.5, path: "/mail/static/src/audio/channel_01_out" },
         };
     }
 
@@ -43,7 +46,8 @@ export class SoundEffects {
         }
         if (!soundEffect.audio) {
             const audio = new browser.Audio();
-            const ext = audio.canPlayType("audio/ogg; codecs=vorbis") ? ".ogg" : ".mp3";
+            // const ext = audio.canPlayType("audio/ogg; codecs=vorbis") ? ".ogg" : ".mp3";
+            const ext = ".mp3";
             audio.src = url(soundEffect.path + ext);
             soundEffect.audio = audio;
         }
