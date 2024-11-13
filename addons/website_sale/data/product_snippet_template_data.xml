@@ -7,7 +7,7 @@
                 <t t-set="record" t-value="data['_record']"/>
                 <t t-set="product_template_id" t-value="record.id if not record.is_product_variant else record.product_tmpl_id.id"/>
                 <t t-set="product_id" t-value="record.id if record.is_product_variant else record.product_variant_id.id"/>
-                <div class="o_carousel_product_card card h-100 w-100" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
+                <div class="o_carousel_product_card o_wsale_product_grid_wrapper card h-100 w-100" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <a class="o_carousel_product_img_link o_dynamic_product_hovered overflow-hidden" t-att-href="record.website_url">
                         <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" t-att-src="data['image_512']"
@@ -60,7 +60,7 @@
         <template id="dynamic_filter_template_product_product_view_detail" name="Classic Card - Detailed">
             <t t-foreach="records" t-as="data" data-number-of-elements="3" data-thumb="/website_sale/static/src/img/snippets_options/product_view_detail.svg">
                 <t t-set="record" t-value="data['_record']" data-arrow-position="bottom"/>
-                <div class="o_carousel_product_card card h-100 w-100" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
+                <div class="o_carousel_product_card o_wsale_product_grid_wrapper card h-100 w-100" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <a class="o_carousel_product_img_link o_dynamic_product_hovered overflow-hidden" t-att-href="record.website_url">
                         <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" t-att-src="data['image_512']" t-att-alt="record.display_name"/>
@@ -95,11 +95,16 @@
         <template id="dynamic_filter_template_product_product_mini_image" name="Image only">
             <t t-foreach="records" t-as="data" data-number-of-elements="4" data-number-of-elements-sm="1" data-thumb="/website_sale/static/src/img/snippets_options/product_image_only.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="card h-100 border-0 w-100 rounded-0 bg-transparent" t-att-data-url="record.website_url">
+                <div class="card o_wsale_product_grid_wrapper h-100 border-0 w-100 rounded-0 bg-transparent" t-att-data-url="record.website_url">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <a class="o_carousel_product_img_link o_dynamic_product_hovered overflow-hidden" t-att-href="record.website_url">
                         <img class="card-img-top h-auto o_img_product_square o_img_product_cover rounded" loading="lazy" t-att-src="data['image_512']" t-att-alt="record.display_name"/>
                     </a>
+                    <div class="mb-0">
+                        <t t-if="not record.is_product_variant">
+                            <t t-call="website_sale.dynamic_filter_attribute_value"/>
+                        </t>
+                    </div>
                 </div>
             </t>
         </template>
@@ -107,7 +112,7 @@
         <template id="dynamic_filter_template_product_product_mini_price" name="Image with price">
             <t t-foreach="records" t-as="data" data-thumb="/website_sale/static/src/img/snippets_options/product_image_with_price.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="card h-100 border-0 w-100 rounded-0 bg-transparent o_dynamic_product_hovered" t-att-data-url="record.website_url">
+                <div class="card o_wsale_product_grid_wrapper h-100 border-0 w-100 rounded-0 bg-transparent o_dynamic_product_hovered" t-att-data-url="record.website_url">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <a class="o_carousel_product_img_link o_dynamic_product_hovered overflow-hidden" t-att-href="record.website_url">
                         <img class="card-img-top h-auto o_img_product_square o_img_product_cover rounded" loading="lazy" t-att-src="data['image_512']" t-att-alt="record.display_name"/>
@@ -134,12 +139,17 @@
         <template id="dynamic_filter_template_product_product_mini_name" name="Image with name">
             <t t-foreach="records" t-as="data" data-thumb="/website_sale/static/src/img/snippets_options/product_image_with_name.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="card h-100 border-0 w-100 rounded-0 bg-transparent o_dynamic_product_hovered" t-att-data-url="record.website_url">
+                <div class="card o_wsale_product_grid_wrapper h-100 border-0 w-100 rounded-0 bg-transparent o_dynamic_product_hovered" t-att-data-url="record.website_url">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <a class="o_carousel_product_img_link overflow-hidden" t-att-href="record.website_url">
                         <img class="card-img-top h-auto o_img_product_square o_img_product_cover rounded" loading="lazy" t-att-src="data['image_512']" t-att-alt="record.display_name"/>
                     </a>
-                    <div class="h6 text-center mt-2 p-2" t-field="record.display_name"/>
+                    <div class="mt-2 text-center">
+                        <t t-if="not record.is_product_variant">
+                            <t t-call="website_sale.dynamic_filter_attribute_value"/>
+                        </t>
+                    </div>
+                    <div class="h6 text-center" t-field="record.display_name"/>
                     <div class="text-center">
                         <t t-if="is_view_active('website_sale.product_comment')" t-call="portal_rating.rating_widget_stars_static">
                             <t t-set="rating_avg" t-value="record.rating_avg"/>
@@ -153,7 +163,7 @@
         <template id="dynamic_filter_template_product_product_centered" name="Centered Product">
             <t t-foreach="records" t-as="data" data-arrow-position="bottom" data-thumb="/website_sale/static/src/img/snippets_options/product_centered.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="o_carousel_product_card card w-100" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
+                <div class="o_carousel_product_card o_wsale_product_grid_wrapper card w-100" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <input type="hidden" name="product-id" t-att-data-product-id="record.id"/>
                     <a class="o_carousel_product_img_link position-absolute mx-auto" t-att-href="record.website_url">
@@ -192,10 +202,10 @@
         <template id="dynamic_filter_template_product_product_borderless_1" name="Borderless Product n°1">
             <t t-foreach="records" t-as="data" data-thumb="/website_sale/static/src/img/snippets_options/product_borderless_1.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="o_carousel_product_card bg-transparent w-100 card border-0">
+                <div class="o_carousel_product_card o_wsale_product_grid_wrapper bg-transparent w-100 card border-0">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <input type="hidden" name="product-id" t-att-data-product-id="record.id"/>
-                    <a class="o_carousel_product_img_link o_dynamic_product_hovered stretched-link" t-att-href="record.website_url">
+                    <a class="o_carousel_product_img_link o_dynamic_product_hovered" t-att-href="record.website_url">
                         <div class="overflow-hidden rounded">
                             <img class="card-img-top o_img_product_square o_img_product_cover h-auto" loading="lazy" t-att-src="data['image_512']"
                             t-att-alt="record.display_name"/>
@@ -225,7 +235,7 @@
         <template id="dynamic_filter_template_product_product_borderless_2" name="Borderless Product n°2">
             <t t-foreach="records" t-as="data" data-thumb="/website_sale/static/src/img/snippets_options/product_borderless_2.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="o_carousel_product_card card w-100 border-0 bg-transparent" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
+                <div class="o_carousel_product_card o_wsale_product_grid_wrapper card w-100 border-0 bg-transparent" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <a class="o_carousel_product_img_link o_dynamic_product_hovered" t-att-href="record.website_url">
                         <div class="overflow-hidden rounded">
@@ -278,7 +288,7 @@
         <template id="dynamic_filter_template_product_product_banner" name="Large Banner">
             <t t-foreach="records" t-as="data" data-number-of-elements="1" data-number-of-elements-sm="1" data-thumb="/website_sale/static/src/img/snippets_options/product_banner.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="o_carousel_product_card card w-100" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
+                <div class="o_carousel_product_card o_wsale_product_grid_wrapper card w-100" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <div class="row flex-row-reverse">
                         <div class="col-lg-6 d-flex align-items-center justify-content-center justify-content-lg-end o_wrap_product_img position-relative">
@@ -320,6 +330,7 @@
                                     >
                                         Add to Cart
                                     </button>
+                                    hello
                                     <a class="btn btn-secondary me-1 mt-1" t-att-href="record.website_url">
                                         View Product
                                     </a>
@@ -340,11 +351,11 @@
                 data-extra-classes="o_carousel_multiple_rows"
                 data-thumb="/website_sale/static/src/img/snippets_options/product_horizontal_card.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="o_carousel_product_card card w-100 border-0 bg-light p-3" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
+                <div class="o_carousel_product_card o_wsale_product_grid_wrapper card w-100 border-0 bg-light p-3" t-att-data-add2cart-rerender="data.get('_add2cart_rerender')">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <div class="row h-100 p-0">
                         <div class="col-lg-4 position-static">
-                            <a class="stretched-link o_dynamic_product_hovered" t-att-href="record.website_url">
+                            <a class="o_dynamic_product_hovered" t-att-href="record.website_url">
                                 <img class="img img-fluid mx-auto o_img_product_square" loading="lazy" t-att-src="data['image_512']" t-att-alt="record.display_name"/>
                             </a>
                         </div>
@@ -400,9 +411,9 @@
                 data-extra-classes="o_carousel_multiple_rows"
                 data-thumb="/website_sale/static/src/img/snippets_options/product_horizontal_card_2.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="o_carousel_product_card card w-100 border-0 o_dynamic_product_hovered o_cc o_cc5">
+                <div class="o_carousel_product_card o_wsale_product_grid_wrapper card w-100 border-0 o_dynamic_product_hovered o_cc o_cc5">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
-                    <a class="stretched-link" t-att-href="record.website_url">
+                    <a t-att-href="record.website_url">
                         <img class="img img-fluid position-absolute w-100 h-100 o_img_product_cover" loading="lazy" t-att-src="data['image_512']" t-att-alt="record.display_name"/>
                     </a>
                     <div class="o_carousel_product_card_body d-flex flex-column justify-content-between h-100 bg-black-50 p-3 position-relative">
@@ -454,16 +465,16 @@
                 data-extra-classes="o_card_group rounded"
                 data-thumb="/website_sale/static/src/img/snippets_options/product_card_group.svg">
                 <t t-set="record" t-value="data['_record']"/>
-                <div class="o_carousel_product_card card w-100 rounded-0 border-top-0 border-start-0" t-att-data-url="record.website_url">
+                <div class="o_carousel_product_card o_wsale_product_grid_wrapper card w-100 rounded-0 border-top-0 border-start-0" t-att-data-url="record.website_url">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
                     <input type="hidden" name="product-id" t-att-data-product-id="record.id"/>
                     <div class="o_carousel_product_card_body card-body justify-content-between h-100 p-3">
-                        <div class="mb-0">
-                            <t t-if="not record.is_product_variant">
-                                <t t-call="website_sale.dynamic_filter_attribute_value"/>
-                            </t>
-                        </div>
                         <div class="row h-100">
+                            <div class="mb-0">
+                                <t t-if="not record.is_product_variant">
+                                    <t t-call="website_sale.product_attrbiutes_values"/>
+                                </t>
+                            </div>
                             <div class="col-8 d-flex flex-column">
                                 <div class="card-title h5" t-field="record.display_name"/>
                                 <div class="card-text h6 text-muted" t-field="record.description_sale"/>
@@ -479,7 +490,7 @@
                             </div>
                             <div class="col-4 position-static">
                                 <div class="overflow-hidden position-static">
-                                    <a class="stretched-link o_dynamic_product_hovered" t-att-href="record.website_url">
+                                    <a class="o_dynamic_product_hovered" t-att-href="record.website_url">
                                         <img class="img img-fluid o_img_product_square o_img_product_cover h-auto" loading="lazy" t-att-src="data['image_512']" t-att-alt="record.display_name"/>
                                     </a>
                                 </div>
@@ -512,19 +523,24 @@
         </record>
 
         <template id="dynamic_filter_attribute_value" name="Dynamic Product Attribute Value">
+            <t t-set="product" t-value="record" t-attf-class="o_test_attribute_value"/>
+            <t t-set="product_href" t-value="product.website_url"/>
                 <ul t-attf-class="list-unstyled js_add_cart_variants mb-0 #{ul_class}">
+                    <!-- Check if there is any color attribute -->
                     <t t-set="has_color" t-value="False"/>
-                    <t t-foreach="record.valid_product_template_attribute_line_ids" t-as="ptal">
+                    <t t-foreach="product.valid_product_template_attribute_line_ids" t-as="ptal">
                         <t t-set="attribute" t-value="ptal.attribute_id"/>
-                        <t t-if="attribute.display_type == 'color' and attribute.show_variants == 'visible'">
-                            <t t-set="has_color" t-value="True"/>
-                        </t>
+                            <t t-if="attribute.display_type == 'color' and attribute.show_variants == 'visible'">
+                                <t t-set="has_color" t-value="True"/>
+                            </t>
                     </t>
 
-                    <t t-foreach="record.valid_product_template_attribute_line_ids" t-as="ptal">
+                    <!-- Now display attributes based on the priority of color and radio -->
+                    <t t-foreach="product.valid_product_template_attribute_line_ids" t-as="ptal">
                         <t t-set="attribute" t-value="ptal.attribute_id"/>
                         <t t-set="ptavs" t-value="ptal.product_template_value_ids._only_active()"/>
 
+                        <!-- Only show color attributes if present -->
                         <t t-if="has_color and attribute.display_type == 'color'">
                             <li t-att-data-attribute_id="attribute.id"
                                 t-att-data-attribute_name="attribute.name"
@@ -543,7 +559,7 @@
                                         <t t-set="color_style"
                                             t-value="'background:' + str(ptav.html_color or ptav.name if not ptav.is_custom else '')"
                                         />
-                                        <a t-att-href="(product_href or '') + '#attribute_values=' + str(ptav.product_attribute_value_id.id)">
+                                        <a t-att-href="product_href + '#attribute_values=' + str(ptav.product_attribute_value_id.id)">
                                             <label
                                                 t-attf-style="#{img_style or color_style}"
                                                 t-attf-class="css_attribute_color_shop"                                                >
@@ -554,17 +570,22 @@
                             </li>
                         </t>
 
-                        <t t-if="not has_color and attribute.display_type == 'radio' and attribute.show_variants == 'visible'">
+                        <!-- Show radio attributes only if no color attribute exists -->
+                        <t t-elif="not has_color and attribute.display_type == 'radio' and attribute.show_variants == 'visible'">
                             <li t-att-data-attribute_id="attribute.id"
                                 t-att-data-attribute_name="attribute.name"
                                 t-att-data-attribute_display_type="attribute.display_type"
                             >
-                                <ul t-att-data-attribute_id="attribute.id" t-attf-class="list-inline list-unstyled o_wsale_product_attribute mb-2 #{'d-none' if single_and_custom else ''}">
+                                <ul t-att-data-attribute_id="attribute.id" t-attf-class="list-inline list-unstyled o_wsale_product_attribute #{'d-none' if single_and_custom else ''}">
                                     <t t-foreach="ptavs" t-as="ptav">
-                                        <li class="list-inline-item js_attribute_value">
-                                            <a class="text-primary attribute_value_shop"
-                                                t-att-href="(product_href or '') + '#attribute_values=' + str(ptav.product_attribute_value_id.id)">
-                                                <span style="font-size: 15px;" t-field="ptav.name"/>
+                                        <li class="list-inline-item mb-3"
+                                            t-att-data-attribute_product_ids="ptav.ptav_product_variant_ids.ids">
+                                            <a class="text-decoration-none"
+                                                t-att-href="product_href + '#attribute_values=' + str(ptav.product_attribute_value_id.id)">
+                                                <label
+                                                    t-attf-class="btn btn-outline-primary"
+                                                    t-field="ptav.name"
+                                                />
                                             </a>
                                         </li>
                                     </t>
@@ -572,6 +593,6 @@
                             </li>
                         </t>
                     </t>
-                </ul>
+            </ul>
         </template>
 </odoo>

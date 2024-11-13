@@ -795,13 +795,11 @@ publicWidget.registry.webisteProductImageChanger = publicWidget.Widget.extend({
         },
 
         _onMouseOver(ev) {
-            ev.preventDefault();
             const recordId = JSON.parse(ev.currentTarget.getAttribute("data-attribute_product_ids"))[0];
             this._onImageChange(recordId);
         },
 
         _onMouseOut(ev) {
-            ev.preventDefault();
             this._onImageRestore();
         },
 
