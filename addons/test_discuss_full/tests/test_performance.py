@@ -129,6 +129,9 @@ class TestDiscussFullPerformance(HttpCase):
         self.users[0].notification_type = 'inbox'
         message = self.channel_channel_public_1.message_post(body='test', message_type='comment', author_id=self.users[2].partner_id.id, partner_ids=self.users[0].partner_id.ids)
         # add star
+        members = self.channel_channel_public_1.channel_member_ids
+        member = members.filtered(lambda m: m.partner_id == self.users[0].partner_id).with_user(self.users[0])
+        member._set_last_seen_message(message)
         message.toggle_message_starred()
         self.env.company.sudo().name = 'YourCompany'
         # add folded channel
