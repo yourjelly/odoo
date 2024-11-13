@@ -10,8 +10,14 @@
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 import { Domain } from "@web/core/domain";
+<<<<<<< saas-17.2
 import { user } from "@web/core/user";
 import { constructDateRange, getPeriodOptions, QUARTER_OPTIONS } from "@web/search/utils/dates";
+||||||| 7296f8f42eb4ff2dbfd7e5d30c0117dc5f5a1bd7
+import { constructDateRange, getPeriodOptions, QUARTER_OPTIONS } from "@web/search/utils/dates";
+=======
+import { constructDateRange, QUARTER_OPTIONS } from "@web/search/utils/dates";
+>>>>>>> 548656e07d093aaa764520876124ff4372be8be0
 
 import { EvaluationError, helpers } from "@odoo/o-spreadsheet";
 import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
@@ -281,11 +287,10 @@ export class GlobalFiltersUIPlugin extends OdooUIPlugin {
                 if (!value || value.yearOffset === undefined) {
                     return [[{ value: "" }]];
                 }
-                const periodOptions = getPeriodOptions(DateTime.local());
                 const year = String(DateTime.local().year + value.yearOffset);
-                const period = periodOptions.find(({ id }) => value.period === id);
-                let periodStr = period && period.description;
-                // Named months aren't in getPeriodOptions
+                const period = QUARTER_OPTIONS[value.period];
+                let periodStr = period && "Q" + period.setParam.quarter; // we do not want the translated value (like T1 in French)
+                // Named months aren't in QUARTER_OPTIONS
                 if (!period) {
                     periodStr =
                         MONTHS[value.period] && String(MONTHS[value.period].value).padStart(2, "0");
