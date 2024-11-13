@@ -4951,6 +4951,15 @@ class AccountMove(models.Model):
         '''
         return False
 
+    def _refunds_origin_required(self):
+        return False
+
+    def _link_invoices_origin_if_needed(self, switched_moves):
+        """ When it is important to mention the refunded invoice, we make it possible here. """
+        original_invoices = self.filtered(lambda m: m.move_type == 'out_invoice')
+        if len(original_invoices) == 1 and len(switched_moves) == 1 and original_invoices._refunds_origin_required():
+            switched_moves.reversed_entry_id = original_invoices.id
+
     @api.model
     def get_invoice_localisation_fields_required_to_invoice(self, country_id):
         """ Returns the list of fields that needs to be filled when creating an invoice for the selected country.

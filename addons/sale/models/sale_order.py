@@ -1390,7 +1390,10 @@ class SaleOrder(models.Model):
         # We do this after the moves have been created since we need taxes, etc. to know if the total
         # is actually negative or not
         if final:
-            moves.sudo().filtered(lambda m: m.amount_total < 0).action_switch_move_type()
+            if moves_switch := moves.sudo().filtered(lambda m: m.amount_total < 0):
+                moves_switch.action_switch_move_type()
+                self.invoice_ids._link_invoices_origin_if_needed(moves_switch)
+
         for move in moves:
             if final:
                 # Downpayment might have been determined by a fixed amount set by the user.
