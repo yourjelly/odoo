@@ -4,6 +4,7 @@ import logging
 import pprint
 
 import requests
+import xml.etree.ElementTree as ET
 
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
@@ -27,12 +28,11 @@ class PaymentProvider(models.Model):
 
     # # === BUSINESS METHODS === #
 
-    def _dpo_make_request(self, endpoint, payload=None, method='POST'):
+    def _dpo_make_request(self, payload=None, method='POST'):
         """ Make a request to DPO API to create the Transaction Token.
 
         Note: self.ensure_one()
 
-        :param str endpoint: The endpoint to be reached by the request.
         :param dict payload: The payload of the request.
         :param str method: The HTTP method of the request.
         :return: The JSON-formatted content of the response.
@@ -41,10 +41,8 @@ class PaymentProvider(models.Model):
         """
         self.ensure_one()
 
-        url = 'https://secure.3gdirectpay.com/API/v6/' #TODO-DPO: self._dpo_get_api_url()
-        # TODO-DPO endpoint needed?
+        url = self.dpo_endpoint
         content_type = 'application/xml; charset=utf-8' if method == 'POST' else ''
-
         headers = {
             'Content-Type': content_type
         }
@@ -57,7 +55,7 @@ class PaymentProvider(models.Model):
                 _logger.exception(
                     "Invalid API request at %s with data:\n%s", url, pprint.pformat(payload)
                 )
-                # TODO-DPO parse the response (xml)
+                # TODO-DPO parse the response (xml) to extract error message
                 # msg = ', '.join(
                 #     [error.get('message', '') for error in response.json().get('errors', [])]
                 # )
@@ -69,8 +67,10 @@ class PaymentProvider(models.Model):
             raise ValidationError(
                 "DPO: " + _("Could not establish the connection to the API.")
             )
-        # TODO-DPO adapt to XML response
-        return response.json()
+        root = ET.fromstring(response.content.decode('utf-8'))
+        transaction_data = {element.tag: element.text for element in root}
+
+        return transaction_data
 
     def _get_default_payment_method_codes(self):
         """ Override of `payment` to return the default payment method codes. """
@@ -78,7 +78,3 @@ class PaymentProvider(models.Model):
         if self.code != 'dpo':
             return default_codes
         return const.DEFAULT_PAYMENT_METHOD_CODES
-
-    # TODO-DPO do we need to add extra features? (_compute_feature_support_fields)
-    # TODO-DPO do we have a test api url? (_dpo_get_api_url)
-    # TODO-DPO do we need a signature? (_dpo_calculate_signature)

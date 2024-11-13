@@ -18,6 +18,7 @@
                         name="dpo_service"
                         string="Service ID"
                         required="code == 'dpo' and state != 'disabled'"
+                        password="True"
                     />
                     <field
                         name="dpo_endpoint"

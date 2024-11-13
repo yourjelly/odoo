@@ -17,3 +17,7 @@
     'uninstall_hook': 'uninstall_hook',
     'license': 'LGPL-3',
 }
+
+# TODO-DPO: add tests
+# TODO-DPO: add readme
+# TODO-DPO: add .pot
