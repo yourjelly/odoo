@@ -305,15 +305,6 @@ class SaleOrderLine(models.Model):
             implied if so line of generated task has been modified, we may regenerate it.
         """
         so_line_task_global_project = self._get_so_lines_task_global_project()
-        products_no_project = so_line_task_global_project.filtered(
-            lambda sol: not (sol.product_id.project_id or sol.order_id.project_id)
-        ).product_id
-        if products_no_project:
-            raise UserError(_(
-                "A project must be defined on the quotation or on the form of products creating a task on order.\n"
-                "The following products need a project in which to put their task: %(product_names)s",
-                product_names=format_list(self.env, products_no_project.mapped('name')),
-            ))
         so_line_new_project = self._get_so_lines_new_project()
 
         # search so lines from SO of current so lines having their project generated, in order to check if the current one can
@@ -339,12 +330,16 @@ class SaleOrderLine(models.Model):
                     return True
             return False
 
+        # we store the projects of SOLs per sale order
+        map_order_project = defaultdict(set)
+
         # task_global_project: create task in global project
         for so_line in so_line_task_global_project:
             if not so_line.task_id:
                 project = map_sol_project.get(so_line.id) or so_line.order_id.project_id
                 if project and so_line.product_uom_qty > 0:
                     so_line._timesheet_create_task(project)
+                    map_order_project[so_line.order_id].add(project.id)
 
         # project_only, task_in_project: create a new project, based or not on a template (1 per SO). May be create a task too.
         # if 'task_in_project' and project_id configured on SO, use that one instead
@@ -372,14 +367,35 @@ class SaleOrderLine(models.Model):
                         project = map_so_project[so_line.order_id.id]
                 if not so_line.task_id:
                     so_line._timesheet_create_task(project=project)
+            if project:
+                map_order_project[so_line.order_id].add(project.id)
             so_line._handle_milestones(project)
 
         # If the SO generates projects or create task in project on confirmation and the project of the SO is not set, set it to the project with the lowest sequence
-        so_lines = so_line_task_global_project + so_line_new_project
-        so = so_lines.order_id
-        sol_projects = so_lines.project_id | so_lines.task_id.project_id
-        if not so.project_id and sol_projects:
-            so.project_id = sol_projects.sorted('sequence')[0]
+        orders = (so_line_task_global_project | so_line_new_project).order_id
+        for order in orders:
+            if order.project_id:
+                continue
+            order.project_id = self.env['project.project'].browse(map_order_project.get(order)).sorted('sequence')[:1]
+            lines_no_project = so_line_task_global_project.filtered(
+                lambda sol:
+                    sol.order_id == order
+                    and not sol.product_id.with_company(sol.company_id).project_id
+                    and not sol.task_id
+                    and sol.product_uom_qty > 0
+            )
+            if lines_no_project:
+                if order.project_id:
+                    # Also create tasks in the project of the SO for SOLs having no project configured on their product
+                    for so_line in lines_no_project:
+                        so_line._timesheet_create_task(order.project_id)
+                else:
+                    raise UserError(_(
+                        "A project must be defined on the quotation %(order)s or on the form of products creating a task on order.\n"
+                        "The following products need a project in which to put their task: %(product_names)s",
+                        order=order.name,
+                        product_names=format_list(self.env, lines_no_project.product_id.mapped('name')),
+                    ))
 
     def _handle_milestones(self, project):
         self.ensure_one()
