@@ -4,6 +4,7 @@ import { FileMediaDialog } from "@html_editor/main/media/media_dialog/file_media
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { nextLeaf } from "@html_editor/utils/dom_info";
 import { isBlock } from "@html_editor/utils/blocks";
+import { renderToElement } from "@web/core/utils/render";
 
 export class FilePlugin extends Plugin {
     static id = "file";
@@ -30,11 +31,22 @@ export class FilePlugin extends Plugin {
                     });
                 },
             },
+            {
+                id: "uploadFile",
+                title: _t("Upload File"),
+                description: _t("MY COMMAND upload a file"),
+                icon: "fa-upload",
+                run: () => this.openFileSelector(),
+            },
         ],
         powerbox_items: [
             {
                 categoryId: "media",
                 commandId: "openMediaDialog",
+            },
+            {
+                categoryId: "media",
+                commandId: "uploadFile",
             },
         ],
         mount_component_handlers: this.setupNewFile.bind(this),
@@ -99,5 +111,72 @@ export class FilePlugin extends Plugin {
                 },
             });
         }
+    }
+
+    openFileSelector() {
+        const { restore: restoreSelection } = this.dependencies.selection.preserveSelection();
+        const input = this.document.createElement("input");
+        input.type = "file";
+        input.accept = "*/*"; // TODO
+        // no multiple // TODO
+        input.click();
+        // input.style.display = "none";
+        input.addEventListener("change", (ev) => {
+            if (!input.files.length) {
+                console.log("no files selected");
+                return;
+            }
+            const { resModel, resId } = this.recordInfo;
+            this.services.upload.uploadFiles(
+                input.files,
+                { resModel, resId },
+                async (attachment) => {
+                    const [element] = await this.renderMedia([attachment]);
+                    this.onSaveMediaDialog(element, { restoreSelection });
+                }
+            );
+            // TODO: clear input value
+        });
+    }
+
+    /**
+     * @override
+     * Render the selected media. This needs a custom implementation because
+     * the media is rendered as a Behavior blueprint for Knowledge, hence
+     * no super call.
+     *
+     * @param {Object} selectedMedia First element of the selectedMediaArray,
+     *                 which has length = 1 in this case because this component
+     *                 is meant to be used with the prop `multiSelect = false`
+     * @returns {Array<HTMLElement>}
+     */
+    async renderMedia([selectedMedia]) {
+        let accessToken = selectedMedia.access_token;
+        if (!selectedMedia.public || !accessToken) {
+            // Generate an access token so that anyone with read access to the
+            // article can view its files.
+            [accessToken] = await this.services.orm.call("ir.attachment", "generate_access_token", [
+                selectedMedia.id,
+            ]);
+        }
+        const dotSplit = selectedMedia.name.split(".");
+        const extension = dotSplit.length > 1 ? dotSplit.pop() : undefined;
+        const fileData = {
+            access_token: accessToken,
+            checksum: selectedMedia.checksum,
+            extension,
+            filename: selectedMedia.name,
+            id: selectedMedia.id,
+            mimetype: selectedMedia.mimetype,
+            name: selectedMedia.name,
+            type: selectedMedia.type,
+            url: selectedMedia.url || "",
+        };
+        const fileBlock = renderToElement("html_editor.EmbeddedFileBlueprint", {
+            embeddedProps: JSON.stringify({
+                fileData,
+            }),
+        });
+        return [fileBlock];
     }
 }

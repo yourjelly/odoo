@@ -6,6 +6,7 @@ import { FileDocumentsSelector } from "./file_documents_selector";
  * FileMediaDialog will allow to select documents and images altogether
  * for the /file command.
  */
+// DELETE ME??
 export class FileMediaDialog extends MediaDialog {
     /**
      * @override
