@@ -332,3 +332,115 @@ class TestPosMrp(TestPointOfSaleCommon):
         self.assertEqual(expense_line.filtered(lambda l: l.product_id == self.kit).debit, 6000.0)
         interim_line = order.account_move.line_ids.filtered(lambda l: l.account_id.id == accounts['stock_output'].id)
         self.assertEqual(interim_line.filtered(lambda l: l.product_id == self.kit).credit, 6000.0)
+
+    def test_bom_kit_order_total_cost_with_shared_component(self):
+        category = self.env['product.category'].create({
+            'name': 'Category for average cost',
+            'property_cost_method': 'average',
+        })
+
+        self.kit_1 = self.env['product.product'].create({
+            'name': 'Kit Product 1',
+            'available_in_pos': True,
+            'type': 'product',
+            'lst_price': 30.0,
+            'categ_id': category.id,
+        })
+
+        self.kit_2 = self.env['product.product'].create({
+            'name': 'Kit Product 2',
+            'available_in_pos': True,
+            'type': 'product',
+            'lst_price': 200.0,
+            'categ_id': category.id,
+        })
+
+        self.shared_component_a = self.env['product.product'].create({
+            'name': 'Shared Comp A',
+            'type': 'product',
+            'available_in_pos': True,
+            'lst_price': 10.0,
+            'standard_price': 5.0,
+
+        })
+
+        self.other_component_a = self.env['product.product'].create({
+            'name': 'Other Comp A',
+            'type': 'product',
+            'available_in_pos': True,
+            'lst_price': 20.0,
+            'standard_price': 10.0,
+        })
+
+        self.other_component_b = self.env['product.product'].create({
+            'name': 'Other Comp B',
+            'type': 'product',
+            'available_in_pos': True,
+            'lst_price': 30.0,
+            'standard_price': 20.0,
+        })
+
+        bom_product_form = Form(self.env['mrp.bom'])
+        bom_product_form.product_id = self.kit_1
+        bom_product_form.product_tmpl_id = self.kit_1.product_tmpl_id
+        bom_product_form.product_qty = 1.0
+        bom_product_form.type = 'phantom'
+        with bom_product_form.bom_line_ids.new() as bom_line:
+            bom_line.product_id = self.shared_component_a
+            bom_line.product_qty = 1.0
+        with bom_product_form.bom_line_ids.new() as bom_line:
+            bom_line.product_id = self.other_component_a
+            bom_line.product_qty = 1.0
+        self.bom_a = bom_product_form.save()
+
+        bom_product_form = Form(self.env['mrp.bom'])
+        bom_product_form.product_id = self.kit_2
+        bom_product_form.product_tmpl_id = self.kit_2.product_tmpl_id
+        bom_product_form.product_qty = 1.0
+        bom_product_form.type = 'phantom'
+        with bom_product_form.bom_line_ids.new() as bom_line:
+            bom_line.product_id = self.shared_component_a
+            bom_line.product_qty = 10.0
+        with bom_product_form.bom_line_ids.new() as bom_line:
+            bom_line.product_id = self.other_component_b
+            bom_line.product_qty = 5.0
+        self.bom_b = bom_product_form.save()
+
+        self.pos_config.open_ui()
+        order = self.env['pos.order'].create({
+            'session_id': self.pos_config.current_session_id.id,
+            'lines': [(0, 0, {
+                'name': self.kit_1.name,
+                'product_id': self.kit_1.id,
+                'price_unit': self.kit_1.lst_price,
+                'qty': 1,
+                'tax_ids': [[6, False, []]],
+                'price_subtotal': self.kit_1.lst_price,
+                'price_subtotal_incl': self.kit_1.lst_price,
+            }), (0, 0, {
+                'name': self.kit_2.name,
+                'product_id': self.kit_2.id,
+                'price_unit': self.kit_2.lst_price,
+                'qty': 1,
+                'tax_ids': [[6, False, []]],
+                'price_subtotal': self.kit_2.lst_price,
+                'price_subtotal_incl': self.kit_2.lst_price,
+            })],
+            'pricelist_id': self.pos_config.pricelist_id.id,
+            'amount_paid': self.kit_1.lst_price + self.kit_2.lst_price,
+            'amount_total': self.kit_1.lst_price + self.kit_2.lst_price,
+            'amount_tax': 0.0,
+            'amount_return': 0.0,
+            'to_invoice': False,
+        })
+        payment_context = {"active_ids": order.ids, "active_id": order.id}
+        order_payment = self.PosMakePayment.with_context(**payment_context).create({
+            'amount': order.amount_total,
+            'payment_method_id': self.cash_payment_method.id
+        })
+        order_payment.with_context(**payment_context).check()
+
+        self.pos_config.current_session_id.action_pos_session_closing_control()
+        pos_order = self.env['pos.order'].search([], order='id desc', limit=1)
+        self.assertEqual(pos_order.lines[0].total_cost, 15.0)
+        self.assertEqual(pos_order.lines[1].total_cost, 150.0)
