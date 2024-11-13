@@ -23,6 +23,7 @@ except ImportError:
     vobject = None
 
 GOOGLE_CALENDAR_URL = 'https://www.google.com/calendar/render?'
+YAHOO_CALENDAR_URL = 'https://calendar.yahoo.com/?v=60&amp;view=d&amp;type=20&amp;'
 
 
 class Track(models.Model):
@@ -625,6 +626,17 @@ class Track(models.Model):
         event_track_url = werkzeug.urls.url_join(self.get_base_url(), self.website_url)
         return f'<a href="{event_track_url}">{self.name}</a>\n{shorten_description}'
 
+    def _get_yahoo_resource_url(self):
+        date_tz = self.event_id.date_tz
+        params = {
+            'title': self.name,
+            'location': self.location_id.name,
+            'st': self.date.astimezone(timezone(date_tz)).strftime('%Y%m%dT%H%M%S'),
+            'et': self.date_end.astimezone(timezone(date_tz)).strftime('%Y%m%dT%H%M%S'),
+        }
+        print(f"pass inside _get_yahoo: {YAHOO_CALENDAR_URL + werkzeug.urls.url_encode(params)}")
+        return YAHOO_CALENDAR_URL + werkzeug.urls.url_encode(params)
+
     def _get_event_track_resource_urls(self):
         date_tz = self.event_id.date_tz
         url_date_start = self.date.astimezone(timezone(date_tz)).strftime('%Y%m%dT%H%M%S')
@@ -644,7 +656,7 @@ class Track(models.Model):
         encoded_params = werkzeug.urls.url_encode(params)
         google_url = GOOGLE_CALENDAR_URL + encoded_params
         iCal_url = f'{base_url}/event/{self.event_id.id}/track/{self.id}/ics?{encoded_params}'
-        return {'google_url': google_url, 'iCal_url': iCal_url}
+        return {'google_url': google_url, 'iCal_url': iCal_url, 'yahoo_url': self._get_yahoo_resource_url()}
 
     def _get_ics_file(self):
         """ Returns iCalendar file for the event track.
@@ -676,6 +688,7 @@ class Track(models.Model):
         context = {
             'google_url': agenda_urls.get('google_url'),
             'iCal_url': agenda_urls.get('iCal_url'),
+            'yahoo_url': agenda_urls.get('yahoo_url'),
             'base_url': self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         }
         email_values = {"email_to": email_to}
