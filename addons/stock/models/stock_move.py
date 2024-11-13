@@ -376,7 +376,8 @@ class StockMove(models.Model):
             self.env['stock.move.line'].browse(mls_to_unlink).unlink()
 
         def _process_increase(move, quantity):
-            # move._action_assign(quantity)
+            move._action_assign(quantity)
+            # Add manually what the reservation didn't found
             move._set_quantity_done(move.quantity)
 
         err = []
@@ -1759,8 +1760,9 @@ Please change the quantity done or the rounding precision of your unit of measur
                 move.next_serial_count = move.product_uom_qty
 
         self.env['stock.move.line'].create(move_line_vals_list)
-        StockMove.browse(partially_available_moves_ids).write({'state': 'partially_available'})
-        StockMove.browse(assigned_moves_ids).write({'state': 'assigned'})
+        if not force_qty:
+            StockMove.browse(partially_available_moves_ids).write({'state': 'partially_available'})
+            StockMove.browse(assigned_moves_ids).write({'state': 'assigned'})
         if not self.env.context.get('bypass_entire_pack'):
             self.picking_id._check_entire_pack()
         StockMove.browse(moves_to_redirect).move_line_ids._apply_putaway_strategy()
