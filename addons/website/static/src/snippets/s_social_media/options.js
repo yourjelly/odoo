@@ -36,7 +36,7 @@ options.registry.SocialMedia = options.Class.extend({
     async onBuilt() {
         await this._fetchSocialMedia();
         for (const anchorEl of this.$target[0].querySelectorAll(':scope > a')) {
-            const mediaName = anchorEl.href.split(".").pop();
+            const mediaName = this._findRelevantSocialMedia(anchorEl.href);
             if (mediaName && !dbSocialValues[`social_${mediaName}`]) {
                 // Delete social media without value in DB.
                 anchorEl.remove();
