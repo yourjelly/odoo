@@ -514,6 +514,8 @@ export class Composer extends Component {
                     recipientAdditionalValues[recipient.email] = recipient.create_values || {};
                 });
                 const partners = await rpc("/mail/partner/from_email", {
+                    thread_model: this.thread.model,
+                    thread_id: this.thread.id,
                     emails: recipientEmails,
                     additional_values: recipientAdditionalValues,
                 });

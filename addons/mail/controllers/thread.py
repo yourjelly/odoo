@@ -42,7 +42,7 @@ class ThreadController(http.Controller):
         }
 
     @http.route("/mail/partner/from_email", methods=["POST"], type="jsonrpc", auth="user")
-    def mail_thread_partner_from_email(self, emails, additional_values=None):
+    def mail_thread_partner_from_email(self, thread_model, thread_id, emails, additional_values=None):
         partners = [
             {"id": partner.id, "name": partner.name, "email": partner.email}
             for partner in request.env["res.partner"]._find_or_create_from_emails(emails, additional_values)
