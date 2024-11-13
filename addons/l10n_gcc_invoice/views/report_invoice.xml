@@ -327,7 +327,7 @@
                     </tbody>
                 </table>
 
-                <div class="clearfix pt-4 pb-3">
+                <div class="clearfix">
                     <div id="total" class="row">
                         <div class="col-6">
                             <table class="table table-sm" style="page-break-inside: avoid;">
@@ -425,7 +425,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <p t-if="o.move_type in ('out_invoice', 'in_refund') and o.payment_reference" name="payment_communication">
                     <div class="row">
                         <div class="col-4">
