@@ -1284,18 +1284,14 @@ export function onRpc(...args) {
  *
  * @returns {void}
  */
-export function stepAllNetworkCalls() {
+export function stepAllNetworkCalls(excludeCalls = []) {
     onRpc("/*", (request) => {
         const route = new URL(request.url).pathname;
-        let match = route.match(R_DATASET_ROUTE);
-        if (match) {
-            return void expect.step(match.groups?.step || route);
+        const match = route.match(R_DATASET_ROUTE) || route.match(R_WEBCLIENT_ROUTE);
+        const step = match?.groups?.step || route;
+        if (!excludeCalls.includes(step)) {
+            expect.step(step);
         }
-        match = route.match(R_WEBCLIENT_ROUTE);
-        if (match) {
-            return void expect.step(match.groups?.step || route);
-        }
-        return void expect.step(route);
     });
 }
 
