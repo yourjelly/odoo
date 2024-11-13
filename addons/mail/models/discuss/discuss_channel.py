@@ -700,8 +700,8 @@ class DiscussChannel(models.Model):
              ('res_id', '=', self.id)
             ]).id
 
-    def _get_allowed_message_post_params(self):
-        return super()._get_allowed_message_post_params() | {"special_mentions", "parent_id"}
+    def _get_thread_controller_allowed_post_params(self):
+        return super()._get_thread_controller_allowed_post_params() | {"special_mentions", "parent_id"}
 
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, *, message_type='notification', **kwargs):

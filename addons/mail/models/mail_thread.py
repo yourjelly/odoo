@@ -2064,9 +2064,6 @@ class MailThread(models.AbstractModel):
     # MESSAGE POST MAIN
     # ------------------------------------------------------------
 
-    def _get_allowed_message_post_params(self):
-        return {"attachment_ids", "body", "message_type", "partner_ids", "subtype_xmlid"}
-
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, *,
                      body='', subject=None, message_type='notification',
@@ -3019,6 +3016,9 @@ class MailThread(models.AbstractModel):
             'skip_existing',
             'subtitles',
         }
+
+    def _get_thread_controller_allowed_post_params(self):
+        return {"attachment_ids", "body", "message_type", "partner_ids", "subtype_xmlid"}
 
     @api.model
     def _is_notification_scheduled(self, notify_scheduled_date):

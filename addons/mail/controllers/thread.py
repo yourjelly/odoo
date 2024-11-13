@@ -12,6 +12,7 @@ from odoo.addons.mail.tools.discuss import Store
 
 
 class ThreadController(http.Controller):
+
     @http.route("/mail/thread/data", methods=["POST"], type="jsonrpc", auth="public", readonly=True)
     def mail_thread_data(self, thread_model, thread_id, request_list, **kwargs):
         thread = request.env[thread_model]._get_thread_with_access(thread_id, **kwargs)
@@ -54,8 +55,9 @@ class ThreadController(http.Controller):
         - message_subtype_data: data about document subtypes: which are
             available, which are followed if any"""
         request.env["mail.followers"].check_access("read")
-        follower = request.env["mail.followers"].sudo().browse(follower_id)
-        follower.ensure_one()
+        follower = request.env["mail.followers"].sudo().browse(follower_id).exists()
+        if not follower:
+            raise NotFound()
         record = request.env[follower.res_model].browse(follower.res_id)
         record.check_access("read")
         # find current model subtypes, add them to a dictionary
@@ -139,7 +141,7 @@ class ThreadController(http.Controller):
         post_data = {
                 key: value
                 for key, value in post_data.items()
-                if key in thread._get_allowed_message_post_params()
+                if key in thread._get_thread_controller_allowed_post_params()
             }
         # sudo: mail.thread - users can post on accessible threads
         message = thread.sudo().message_post(**self._prepare_post_data(post_data, thread, **kwargs))
