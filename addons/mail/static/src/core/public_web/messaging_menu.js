@@ -160,6 +160,32 @@ export class MessagingMenu extends Component {
             this.store.discuss.thread = undefined;
         }
     }
+
+    messageBody(message) {
+        if (!message) {
+            return { text: "" };
+        }
+        if (!message.isBodyEmpty) {
+            return { text: message.inlineBody || message.subtype_description };
+        }
+        const attachment = message.attachment_ids.at(-1) || {};
+        const { isImage, isVideo, mimetype, name, voice } = attachment;
+        let icon;
+        let text = name;
+        if (isImage) {
+            icon = "fa-picture-o";
+        } else if (mimetype === "audio/mpeg") {
+            icon = voice ? "fa-microphone" : "fa-headphones";
+            if (voice) {
+                text = _t("Voice Message");
+            }
+        } else if (isVideo) {
+            icon = "fa-video";
+        } else {
+            icon = "fa-file";
+        }
+        return { icon, text };
+    }
 }
 
 registry
