@@ -469,6 +469,11 @@ class MailThread(models.AbstractModel):
             return self.with_context(lang=self.env.user.lang)
         return self
 
+    def _filter_for_message_access(self, message_operation):
+        if message_operation != "create":
+            raise NotImplementedError()
+        
+
     def _check_can_update_message_content(self, messages):
         """" Checks that the current user can update the content of the message.
         Current heuristic is
@@ -4628,8 +4633,8 @@ class MailThread(models.AbstractModel):
         return res
 
     @api.model
-    def _get_thread_with_access(self, thread_id, mode="read", **kwargs):
-        thread = self.browse(thread_id)
-        if thread.exists() and thread.sudo(False).has_access(mode):
+    def _get_thread_with_access(self, thread_id, mode="read", access_params=None):
+        thread = self.browse(thread_id).exists()
+        if thread and thread.sudo(False).has_access(mode):
             return thread
-        return self.browse()
+        return self.browse().sudo(False)
