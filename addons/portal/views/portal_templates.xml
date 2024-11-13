@@ -528,6 +528,15 @@
         </div>
     </template>
 
+    <template id="login_portal_my_details_fields" inherit_id="portal.portal_my_details_fields" primary="True">
+        <xpath expr="//div[input[@name='name']]" position="before">
+            <div t-attf-class="mb-3 #{error.get('login') and 'o_has_error' or ''} col-xl-12">
+                <label class="col-form-label" for="login">Login ID-test</label>
+                <input type="text" name="login" t-attf-class="form-control #{error.get('login') and 'is-invalid' or ''}" t-att-value="login" />
+            </div>
+        </xpath>
+    </template>
+
     <template id="portal_my_details">
         <t t-call="portal.portal_layout">
             <t t-set="additional_title">Contact Details</t>
@@ -535,7 +544,7 @@
                 <div class="row o_portal_details">
                     <div class="col-lg-8">
                         <div class="row">
-                            <t t-call="portal.portal_my_details_fields"/>
+                            <t t-call="portal.login_portal_my_details_fields"/>
                             <input type="hidden" name="redirect" t-att-value="redirect"/>
                         </div>
                         <div class="clearfix text-end mb-5">
