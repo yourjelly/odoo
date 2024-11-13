@@ -7,6 +7,8 @@
                 <list editable="bottom">
                     <field name="sequence" widget="handle" />
                     <field name="name" />
+                    <field name="country_code" optional="show"/>
+                    <field name="parent_id" optional="hide"/>
                 </list>
             </field>
         </record>
@@ -17,8 +19,12 @@
                 <form>
                     <group>
                         <group>
-                            <field name="sequence" />
-                            <field name="name" />
+                            <field name="sequence"/>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="country_code"/>
+                            <field name="parent_id"/>
                         </group>
                     </group>
                 </form>

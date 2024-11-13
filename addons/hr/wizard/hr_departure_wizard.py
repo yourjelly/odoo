@@ -16,13 +16,24 @@ class HrDepartureWizard(models.TransientModel):
             departure_date = self._get_employee_departure_date()
         return departure_date or fields.Date.today()
 
-    departure_reason_id = fields.Many2one("hr.departure.reason", default=lambda self: self.env['hr.departure.reason'].search([], limit=1), required=True)
+    departure_reason_id = fields.Many2one("hr.departure.reason", required=True,
+        domain=lambda self: self._get_departure_reason_domain(),
+        default=lambda self: self.env['hr.departure.reason'].search(self._get_departure_reason_domain(), limit=1),
+    )
     departure_description = fields.Html(string="Additional Information")
     departure_date = fields.Date(string="Departure Date", required=True, default=_get_default_departure_date)
     employee_id = fields.Many2one(
         'hr.employee', string='Employee', required=True,
         default=lambda self: self.env.context.get('active_id', None),
     )
+
+    def _get_departure_reason_domain(self):
+        allowed_companies = self.env['res.company'].browse(self.env.context.get('allowed_company_ids', []))
+        return self.env['hr.departure.reason']._country_domain(allowed_companies.mapped('country_code'))
+#         ret = self.env['hr.departure.reason']._country_domain(allowed_companies.mapped('country_code'))
+#         print(ret)
+#         breakpoint()
+#         return ret
 
     def action_register_departure(self):
         employee = self.employee_id
