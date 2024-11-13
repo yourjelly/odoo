@@ -51,6 +51,12 @@ registerWebsitePreviewTour("test_parallax", {
     content: "Check that the option was correctly applied",
     trigger: ':iframe span.s_parallax_bg[style*=top][style*=bottom][style*=transform]',
 },
+    changeOption("Parallax", "we-toggler"),
+    changeOption("Parallax", 'we-button[data-select-data-attribute="zoom_in"]'),
+{
+    content: "Check that the option was correctly applied",
+    trigger: ':iframe span.s_parallax_bg[style*="transform: scale("]',
+},
     ...clickOnSave(),
     ...clickOnEditAndWaitEditMode(),
 {

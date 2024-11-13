@@ -2414,16 +2414,11 @@ options.registry.Parallax = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    async selectDataAttribute(previewMode, widgetValue, params) {
-        await this._super(...arguments);
-        if (params.attributeName !== 'scrollBackgroundRatio') {
+    async setParallaxType(previewMode, widgetValue, params) {
+        if (params.attributeName !== "scrollBackgroundRatio") {
             return;
         }
-
-        const isParallax = (widgetValue !== '0');
-        this.$target.toggleClass('parallax', isParallax);
-        this.$target.toggleClass('s_parallax_is_fixed', widgetValue === '1');
-        this.$target.toggleClass('s_parallax_no_overflow_hidden', (widgetValue === '0' || widgetValue === '1'));
+        const isParallax = this._configureParallaxType(widgetValue, params);
         if (isParallax) {
             if (!this.parallaxEl) {
                 this.parallaxEl = document.createElement('span');
@@ -2454,18 +2449,15 @@ options.registry.Parallax = options.Class.extend({
      * @override
      */
     async _computeWidgetState(methodName, params) {
-        if (methodName === 'selectDataAttribute' && params.parallaxTypeOpt) {
-            const attrName = params.attributeName;
-            const attrValue = (this.$target[0].dataset[attrName] || params.attributeDefaultValue).trim();
-            switch (attrValue) {
-                case '0':
-                case '1': {
-                    return attrValue;
-                }
-                default: {
-                    return (attrValue.startsWith('-') ? '-1.5' : '1.5');
-                }
+        if (methodName === "setParallaxType" && params.parallaxTypeOpt) {
+            const { attributeName, attributeDefaultValue } = params;
+            const attributeValue = (this.$target[0].dataset[attributeName] || attributeDefaultValue).trim();
+            const parallaxType = this.$target[0].dataset.parallaxType;
+                if (attributeValue === "0" || attributeValue === "1") {
+                return attributeValue;
             }
+            // Return parallax type if available, otherwise compute fallback value
+            return parallaxType || (attributeValue.startsWith("-") ? "-1.5" : "1.5");
         }
         return this._super(...arguments);
     },
@@ -2481,6 +2473,30 @@ options.registry.Parallax = options.Class.extend({
             name: 'target',
             data: this.parallaxEl ? $(this.parallaxEl) : this.$target,
         });
+    },
+
+    /**
+     * Configure the current parallax type.
+     * 
+     * @private
+     * @returns {boolean} Indicates if a parallax type is selected or not.
+     */
+    _configureParallaxType(widgetValue, params) {
+        const isParallax = widgetValue !== "0";
+        this.$target[0].classList.toggle("parallax", isParallax);
+        this.$target[0].classList.toggle("s_parallax_is_fixed", widgetValue === "1");
+        this.$target[0].classList.toggle("s_parallax_no_overflow_hidden", widgetValue === "0" || widgetValue === "1");
+        const typeValues = {
+            "zoom_in": 1.2,
+            "zoom_out": 0.2,
+        }
+        if (widgetValue in typeValues) {
+            this.$target[0].dataset.parallaxType = widgetValue;
+            this.$target[0].dataset.scrollBackgroundRatio = typeValues[widgetValue];
+        } else if (params.name) {
+            delete this.$target[0].dataset.parallaxType;
+        }
+        return isParallax;
     },
 
     //--------------------------------------------------------------------------
