@@ -65,6 +65,13 @@
 // Fields
 //------------------------------------------------------------------------------
 
+.o_wrap_label:has(.o_field_many2one_avatar),
+.o_wrap_input:has(.o_field_many2one_avatar),
+.o_wrap_label:has(.o_field_many2many_tags_avatar),
+.o_wrap_input:has(.o_field_many2many_tags_avatar) {
+    min-height: 2.345em;
+}
+
 .o_field_widget {
     // Default display and alignment of widget and internal <input/>
     text-align: inherit;
