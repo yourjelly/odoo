@@ -1,3 +1,4 @@
+from odoo import Command
 from odoo.tests import tagged
 from odoo.tools.float_utils import float_is_zero
 from odoo.addons.l10n_jo_edi.tests.jo_edi_common import JoEdiCommon
@@ -44,7 +45,31 @@ class TestJoEdiPrecision(JoEdiCommon):
 
         return defaults
 
-    def validate_jo_edi_numbers(self, xml_string):
+    def _validate_jo_edi_numbers(self, xml_string):
+        """
+        TLDR: This method checks that units sum up to total values.
+        ===================================================================================================
+        Problem statement:
+        When an EDI is submitted to JoFotara portal, multiple validations are executed to ensure invoice data integrity.
+        The most important ones of these validations are the following:-
+        --------------------------- ▼ invoice line level ▼  ---------------------------
+        1. line_extension_amount = (price_unit * quantity) - discount
+        2. taxable_amount = line_extension_amount
+        3. rounding_amount = line_extension_amount + general_tax_amount + special_tax_amount
+        --------------------------- ▼ invoice level ▼ ---------------------------------
+        4. tax_exclusive_amount = sum(price_unit * quantity)
+        5. tax_inclusive_amount = sum(price_unit * quantity - discount + general_tax_amount + special_tax_amount)
+        6. payable_amount = tax_inclusive_amount
+        -------------------------------------------------------------------------------
+        The JoFotara portal, however, has no tolerance with rounding errors up to 9 decimal places.
+        Hence, the reported values are expected to be up to 9 decimal places,
+        and the aggregated units should match reported totals up to 9 decimal places.
+        Moreover, reported totals have to equal (or at least be as close as possible) to totals stored in Odoo.
+        And since the JOD has precision of 3 decimal places, everything is stored in Odoo approximated to 3 decimal places.
+        -------------------------------------------------------------------------------
+        This method runs validations in a fashion similar to those running on the JoFotara portal.
+        It returns all the errors encountered in a string.
+        """
         root = self.get_xml_tree_from_string(xml_string)
         error_message = ""
 
@@ -136,29 +161,29 @@ class TestJoEdiPrecision(JoEdiCommon):
         self.company.l10n_jo_edi_taxpayer_type = 'sales'
         self.company.l10n_jo_edi_sequence_income_source = '16683693'
 
-        invoice_values = {
+        invoice_vals = {
             'name': 'TestEIN022',
-            'currency': self.usd,
+            'currency_id': eur.id,
             'date': '2023-11-12',
-            'lines': [
-                {
-                    'product_id': self.product_a,
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
                     'quantity': 3.48,
-                    'price': 1.56,
-                    'discount_percent': 2.5,
-                    'tax_ids': [self.jo_general_tax_16_included],
-                },
-                {
-                    'product_id': self.product_b,
+                    'price_unit': 1.56,
+                    'discount': 2.5,
+                    'tax_ids': [Command.set(self.jo_general_tax_16_included.ids)],
+                }),
+                Command.create({
+                    'product_id': self.product_b.id,
                     'quantity': 6.02,
-                    'price': 2.79,
-                    'discount_percent': 2.5,
-                    'tax_ids': [self.jo_general_tax_16_included],
-                },
+                    'price_unit': 2.79,
+                    'discount': 2.5,
+                    'tax_ids': [Command.set(self.jo_general_tax_16_included.ids)],
+                }),
             ],
         }
-        invoice = self._create_invoice(invoice_values)
+        invoice = self._l10n_jo_create_invoice(invoice_vals)
 
-        generated_file = self.env['account.edi.xml.ubl_21.jo']._export_invoice(invoice)
-        errors = self.validate_jo_edi_numbers(generated_file)
+        generated_file = self.env['account.edi.xml.ubl_21.jo']._export_invoice(invoice)[0]
+        errors = self._validate_jo_edi_numbers(generated_file)
         self.assertFalse(errors, errors)

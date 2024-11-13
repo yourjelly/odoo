@@ -1,9 +1,11 @@
-import json
+import base64
+import psycopg2
 import requests
 import uuid
+from werkzeug.urls import url_encode
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.tools import SQL
 
 JOFOTARA_URL = "https://backend.jofotara.gov.jo/core/invoices/"
 
@@ -52,18 +54,37 @@ class AccountMove(models.Model):
                 and move.move_type in ("out_invoice", "out_refund")
             )
 
-    @api.depends("l10n_jo_edi_xml_attachment_id", "l10n_jo_edi_error")
+    @api.depends("l10n_jo_edi_state")
     def _compute_show_reset_to_draft_button(self):
         # EXTENDS 'account'
         super()._compute_show_reset_to_draft_button()
         self.filtered(lambda move: move.l10n_jo_edi_state == 'sent').show_reset_to_draft_button = False
+
+    @api.depends("l10n_jo_edi_is_needed")
+    def _compute_l10n_jo_edi_uuid(self):
+        for invoice in self:
+            if invoice.l10n_jo_edi_is_needed and not invoice.l10n_jo_edi_uuid:
+                invoice.l10n_jo_edi_uuid = uuid.uuid4()
+
+    def _l10n_jo_qr_code_src(self):
+        self.ensure_one()
+        encoded_params = url_encode({
+            'barcode_type': 'QR',
+            'value': self.l10n_jo_edi_qr,
+            'width': 200,
+            'height': 200,
+        })
+        return f'/report/barcode/?{encoded_params}'
+
+    def _is_sales_refund(self):
+        self.ensure_one()
+        return self.company_id.l10n_jo_edi_taxpayer_type == 'sales' and self.move_type == 'out_refund'
 
     def button_draft(self):
         # EXTENDS 'account'
         self.write(
             {
                 "l10n_jo_edi_error": False,
-                "l10n_jo_edi_xml_attachment_file": False,
                 "l10n_jo_edi_state": False,
             }
         )
@@ -78,76 +99,81 @@ class AccountMove(models.Model):
     def _l10n_jo_build_jofotara_headers(self):
         self.ensure_one()
         return {
-            'Client-Id': self.company_id.l10n_jo_edi_client_id,
+            'Client-Id': self.company_id.l10n_jo_edi_client_identifier,
             'Secret-Key': self.company_id.l10n_jo_edi_secret_key,
-            'Content-Type': 'application/json',
         }
 
     def _submit_to_jofotara(self):
         self.ensure_one()
         headers = self._l10n_jo_build_jofotara_headers()
-        params = '{"invoice": "%s"}' % self.l10n_jo_edi_xml_attachment_id.datas.decode('ascii')
+        xml_invoice = self.env['account.edi.xml.ubl_21.jo']._export_invoice(self)[0]
+        params = {'invoice': base64.b64encode(xml_invoice).decode()}
 
         try:
-            response = requests.post(JOFOTARA_URL, data=str(params), headers=headers, timeout=50, verify=False)
+            response = requests.post(JOFOTARA_URL, json=params, headers=headers, timeout=50)
         except requests.exceptions.Timeout:
-            return "Request time out! Please try again."
-        except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
-            return f"Invalid request: {e}"
+            return _("Request time out! Please try again.")
+        except requests.exceptions.RequestException as e:
+            return _("Invalid request: %s", e)
 
-        response_text = response.content.decode()
         if not response.ok:
-            return f"Request failed: {response_text}"
-        dict_response = json.loads(response_text)
+            return _("Request failed: %s", response.content.decode())
+        dict_response = response.json()
         self.l10n_jo_edi_qr = str(dict_response.get('EINV_QR', ''))
-
-    def _l10n_jo_qr_code_src(self):
-        self.ensure_one()
-        return f'/report/barcode/?barcode_type=QR&value={self.l10n_jo_edi_qr}&width=200&height=200'
+        self.env["ir.attachment"].create(
+            {
+                "res_model": "account.move",
+                "res_id": self.id,
+                "res_field": "l10n_jo_edi_xml_attachment_file",
+                "name": self._l10n_jo_edi_get_xml_attachment_name(),
+                "raw": xml_invoice,
+            }
+        )
 
     def _l10n_jo_edi_get_xml_attachment_name(self):
         return f"{self.name.replace('/', '_')}_edi.xml"
 
     def _l10n_jo_validate_config(self):
         error_msg = ''
-        if not self.company_id.l10n_jo_edi_client_id:
-            error_msg += "Client ID is missing.\n"
+        if not self.company_id.l10n_jo_edi_client_identifier:
+            error_msg += _("Client ID is missing.\n")
         if not self.company_id.l10n_jo_edi_secret_key:
-            error_msg += "Secret key is missing.\n"
+            error_msg += _("Secret key is missing.\n")
         if not self.company_id.l10n_jo_edi_taxpayer_type:
-            error_msg += "Taxpayer type is missing.\n"
+            error_msg += _("Taxpayer type is missing.\n")
         if not self.company_id.l10n_jo_edi_sequence_income_source:
-            error_msg += "Activity number (Sequence of income source) is missing.\n"
+            error_msg += _("Activity number (Sequence of income source) is missing.\n")
 
         if error_msg:
-            raise UserError(f"{error_msg} To set: Configuration > Settings > Electronic Invoicing (Jordan)")
+            return _("%s To set: Configuration > Settings > Electronic Invoicing (Jordan)", error_msg)
 
-    @api.depends("l10n_jo_edi_is_needed")
-    def _compute_l10n_jo_edi_uuid(self):
-        for invoice in self:
-            if invoice.l10n_jo_edi_is_needed and not invoice.l10n_jo_edi_uuid:
-                invoice.l10n_jo_edi_uuid = uuid.uuid4()
+    def _l10n_jo_validate_fields(self):
+        def has_non_digit_vat(partner, partner_type):
+            if partner.vat and not partner.vat.isdigit():
+                return _("JoFotara portal cannot process %s VAT with non-digit characters in it\n", partner_type)
+            return ""
+        error_msg = ''
+
+        customer = self.partner_id
+        error_msg += has_non_digit_vat(customer, 'customer')
+
+        supplier = self.company_id.partner_id.commercial_partner_id
+        error_msg += has_non_digit_vat(supplier, 'supplier')
+
+        negative_invoice_lines = self.invoice_line_ids.filtered(lambda line:
+                                                                line.display_type not in ('line_note', 'line_section')
+                                                                and line._check_edi_line_tax_required()
+                                                                and (line.quantity < 0 or line.price_unit < 0))
+        if negative_invoice_lines:
+            error_msg += _("JoFotara portal cannot process negative quantity nor negative price on invoice lines")
+
+        return error_msg
 
     def _l10n_jo_edi_send(self):
-        self._l10n_jo_validate_config()
         for invoice in self:
-            invoice_xml = self.env["ir.attachment"].create(
-                {
-                    "res_model": "account.move",
-                    "res_id": invoice.id,
-                    "res_field": "l10n_jo_edi_xml_attachment_file",
-                    "name": invoice._l10n_jo_edi_get_xml_attachment_name(),
-                    "raw": invoice.env['account.edi.xml.ubl_21.jo']._export_invoice(invoice),
-                }
-            )
-            invoice.invalidate_recordset(
-                fnames=[
-                    "l10n_jo_edi_xml_attachment_id",
-                    "l10n_jo_edi_xml_attachment_file",
-                ]
-            )
-
-            if error_message := invoice._submit_to_jofotara():
+            if not self.env['res.company']._with_locked_records(records=invoice, allow_raising=False):
+                return
+            if error_message := invoice._l10n_jo_validate_config() or invoice._l10n_jo_validate_fields() or invoice._submit_to_jofotara():
                 invoice.l10n_jo_edi_error = error_message
                 return error_message
             else:
@@ -155,5 +181,6 @@ class AccountMove(models.Model):
                 invoice.l10n_jo_edi_state = 'sent'
                 invoice.with_context(no_new_invoice=True).message_post(
                     body=_("E-invoice (JoFotara) submitted successfully."),
-                    attachment_ids=invoice_xml.ids,
+                    attachment_ids=invoice.l10n_jo_edi_xml_attachment_id.ids,
                 )
+                self._cr.commit()

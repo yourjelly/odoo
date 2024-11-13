@@ -50,7 +50,10 @@ class JoEdiCommon(AccountTestInvoicingCommon):
 
     @classmethod
     def setup_currency_rate(cls, currency, rate):
-        currency.sudo().rate_ids.unlink()
+        currency.sudo().update({
+            'rate_ids': [Command.clear()],
+            'active': True,
+        })
         return cls.env['res.currency.rate'].create({
             'name': '2019-01-01',
             'rate': rate,
@@ -58,44 +61,28 @@ class JoEdiCommon(AccountTestInvoicingCommon):
             'company_id': cls.company_data['company'].id,
         })
 
-    def _structure_move_vals(self, move_vals):
-        return {
-            'name': move_vals['name'],
-            'move_type': move_vals['type'],
+    def _l10n_jo_create_invoice(self, invoice_vals):
+        invoice_vals.update({
+            'move_type': 'out_invoice',
             'company_id': self.company.id,
             'partner_id': self.partner_jo.id,
-            'invoice_date': move_vals.get('date', '2019-01-01'),
-            'currency_id': move_vals.get('currency', self.company.currency_id).id,
-            'narration': move_vals.get('narration'),
-            'invoice_line_ids': [Command.create({
-                'product_id': line['product_id'].id,
-                'price_unit': line['price'],
-                'quantity': line['quantity'],
-                'discount': line['discount_percent'],
-                'currency_id': move_vals.get('currency', self.company.currency_id).id,
-                'tax_ids': [Command.set([tax.id for tax in line.get('tax_ids', [])])],
-            }) for line in move_vals.get('lines', [])],
-        }
-
-    def _create_invoice(self, invoice_vals):
-        invoice_vals['type'] = 'out_invoice'
-        vals = self._structure_move_vals(invoice_vals)
-        move = self.env['account.move'].create(vals)
+            'invoice_date': invoice_vals.get('invoice_date', '2019-01-01'),
+        })
+        move = self.env['account.move'].create(invoice_vals)
         move.action_post()
         return move
 
-    def _create_refund(self, refund_vals, return_reason, invoice_vals):
-        invoice = self._create_invoice(invoice_vals)
+    def _l10n_jo_create_refund(self, refund_vals, return_reason, invoice_vals):
+        invoice = self._l10n_jo_create_invoice(invoice_vals)
         reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=invoice.ids).create({
             'reason': return_reason,
             'journal_id': invoice.journal_id.id,
         }).refund_moves()
         reverse_move = self.env['account.move'].browse(reversal['res_id'])
-        refund_vals['type'] = 'out_refund'
-        if 'lines' in refund_vals:
+        if 'invoice_line_ids' in refund_vals:
             # because they will be set by refund_vals
             reverse_move.invoice_line_ids = [Command.clear()]
-        reverse_move.update(self._structure_move_vals(refund_vals))
+        reverse_move.update(refund_vals)
         reverse_move.action_post()
         return reverse_move
 

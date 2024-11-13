@@ -1,7 +1,7 @@
 {
     'name': 'Jordan E-Invoicing',
     'countries': ['jo'],
-    'version': '0.1',
+    'version': '1.0',
     'category': 'Accounting/Localizations/EDI',
     'summary': 'Electronic Invoicing for Jordan UBL 2.1',
     'author': 'Odoo S.A., Smart Way Business Solutions',
@@ -16,5 +16,5 @@
         'views/res_config_settings_views.xml',
     ],
     'installable': True,
-    'license': 'OEEL-1',
+    'license': 'LGPL-3',
 }

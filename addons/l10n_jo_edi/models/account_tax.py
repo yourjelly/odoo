@@ -6,5 +6,6 @@ class AccountTax(models.Model):
 
     def _l10n_jo_is_exempt_tax(self):
         self.ensure_one()
-        exempted_taxes_refs = ['jo_zero_sale_exempted']
-        return self.id in [self.env['account.chart.template'].ref(tax_ref).id for tax_ref in exempted_taxes_refs]
+        exempt_tags = self.env.ref('l10n_jo.tax_report_vat_sale_export_exempt_local_zero_tag')._get_matching_tags()
+        exempt_taxes = self.env['account.tax'].search([('repartition_line_ids.tag_ids', 'in', exempt_tags.ids)])
+        return self.id in exempt_taxes.ids

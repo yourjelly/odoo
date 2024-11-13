@@ -19,8 +19,8 @@
                                     <field name="l10n_jo_edi_secret_key"/>
                                 </div>
                                 <div class="row">
-                                    <label for="l10n_jo_edi_client_id" class="col-lg-4 o_light_label"/>
-                                    <field name="l10n_jo_edi_client_id"/>
+                                    <label for="l10n_jo_edi_client_identifier" class="col-lg-4 o_light_label"/>
+                                    <field name="l10n_jo_edi_client_identifier"/>
                                 </div>
                                 <div class="row">
                                     <label for="l10n_jo_edi_taxpayer_type" class="col-lg-4 o_light_label"/>

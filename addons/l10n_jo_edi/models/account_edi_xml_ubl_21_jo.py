@@ -1,7 +1,7 @@
 from lxml import etree
+from types import SimpleNamespace
 
 from odoo import models
-from odoo.exceptions import ValidationError
 from odoo.tools import float_repr
 from odoo.tools.float_utils import float_round
 
@@ -9,7 +9,7 @@ from odoo.tools.float_utils import float_round
 # There is a need for this dummy currency because:
 # 1. In `ubl_20_templates.xml`, the currency name is read from currency like `vals['currency'].name`
 # 2. In Jordanian EDI XML documentation, certain locations expect the currency name to be `JO` not `JOD`.
-JO_CURRENCY = type('JoCurrency', (), {'name': 'JO'})()
+JO_CURRENCY = SimpleNamespace(name='JO')
 
 JO_MAX_DP = 9
 
@@ -20,10 +20,6 @@ JO_MAX_DP = 9
 
 def _round_max_dp(value):
     return float_round(value, JO_MAX_DP)
-
-
-def _is_sales_refund(invoice):
-    return invoice.company_id.l10n_jo_edi_taxpayer_type == 'sales' and invoice.move_type == 'out_refund'
 
 
 def _get_line_amount_before_discount_jod(line, taxes_vals):
@@ -59,31 +55,15 @@ def _get_payment_method_code(invoice):
 
 def _aggregate_totals(vals):
     """
-    TLDR: This method is needed to ensure that units sum up to total values.
+    This method is needed to ensure that units sum up to total values.
     ===================================================================================================
-    Problem statement:
-    When an EDI is submitted to JoFotara portal, multiple validations are executed to ensure invoice data integrity.
-    The most important ones of these validations are the following:-
-    --------------------------- ▼ invoice line level ▼  ---------------------------
-    1. line_extension_amount = (price_unit * quantity) - discount
-    2. taxable_amount = line_extension_amount
-    3. rounding_amount = line_extension_amount + general_tax_amount + special_tax_amount
-    --------------------------- ▼ invoice level ▼ ---------------------------------
-    4. tax_exclusive_amount = sum(price_unit * quantity)
-    5. tax_inclusive_amount = sum(price_unit * quantity - discount + general_tax_amount + special_tax_amount)
-    6. payable_amount = tax_inclusive_amount
+    Problem statement can be found inside tests/test_jo_edi_precision.py in the docstring of _validate_jo_edi_numbers
     -------------------------------------------------------------------------------
-    The portal, however, has no tolerance with rounding errors up to 9 decimal places.
-    Hence the reported values are expected to be up to 9 decimal places,
-    and the aggregated units should match reported totals up to 9 decimal places.
-    Moreover, reported totals have to equal (or at least be as close as possible) to totals stored in Odoo.
-    And since the JOD has precision of 3 decimal places, everything is stored in Odoo approximated to 3 decimal places.
-    ===================================================================================================
     Solution:
     taxes_vals (calculated from invoice._prepare_invoice_aggregated_taxes() in `account_edi_xml_ubl_20` module)
     is calculated to generate units with no rounding ensuring that these when aggregated sum up to the totals stored in Odoo.
     This method here uses these unit to calculate the totals again so that JoFotara validations don't fail.
-    The difference between reported totals and Odoo stored totals in this case is always < 0.001 JOD.
+    The difference between reported totals and Odoo stored totals in this case is < 0.001 JOD.
     """
     tax_inclusive_amount = 0
     tax_exclusive_amount = 0
@@ -114,9 +94,9 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
     _inherit = 'account.edi.xml.ubl_21'
     _description = "UBL 2.1 (JoFotara)"
 
-    ####################################################
-    # overriding vals methods of account.edi.xml.ubl_20
-    ####################################################
+    ########################################################
+    # overriding vals methods of account_edi_xml_ubl_20 file
+    ########################################################
 
     def _get_country_vals(self, country):
         return {
@@ -124,8 +104,6 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
         }
 
     def _get_partner_party_identification_vals_list(self, partner):
-        if partner.vat and not partner.vat.isdigit():
-            raise ValidationError("JoFotara portal cannot process customer VAT with non-digit characters in it")
         return [{
             'id_attrs': {'schemeID': 'TN'},
             'id': partner.vat,
@@ -208,7 +186,7 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
             return []
 
         vals = self._get_invoice_tax_totals_vals_helper(taxes_vals)
-        if not _is_sales_refund(invoice):
+        if not invoice._is_sales_refund():
             vals['tax_subtotal_vals'] = []
         return [vals]
 
@@ -273,10 +251,6 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
         return [vals]
 
     def _get_invoice_line_vals(self, line, line_id, taxes_vals):
-        if line.quantity < 0:
-            raise ValidationError("JoFotara portal cannot process negative quantity on invoice line")
-        if line.price_unit < 0:
-            raise ValidationError("JoFotara portal cannot process negative price on invoice line")
         return {
             'currency': JO_CURRENCY,
             'currency_dp': self._get_currency_decimal_places(),
@@ -294,11 +268,11 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
             'currency': JO_CURRENCY,
             'currency_dp': self._get_currency_decimal_places(),
             'allowance_total_amount': allowance_total_amount,
-            'prepaid_amount': 0 if _is_sales_refund(invoice) else None,
+            'prepaid_amount': 0 if invoice._is_sales_refund() else None,
         }
 
     ####################################################
-    # overriding vals methods of account.edi.common
+    # overriding vals methods of account_edi_common file
     ####################################################
 
     def format_float(self, amount, precision_digits):
@@ -371,7 +345,7 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
         vals = super()._export_invoice_vals(invoice)
 
         vals.update({
-            'main_template': 'account_edi_ubl_cii.ubl_20_Invoice',
+            'main_template': 'l10n_jo_edi.ubl_jo_Invoice',
             'InvoiceType_template': 'l10n_jo_edi.ubl_jo_InvoiceType',
             'PaymentMeansType_template': 'l10n_jo_edi.ubl_jo_PaymentMeansType',
             'InvoiceLineType_template': 'l10n_jo_edi.ubl_jo_InvoiceLineType',
@@ -406,16 +380,3 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
         _aggregate_totals(vals['vals'])
 
         return vals
-
-    def _add_name_space(self, xml_string, prefix, namespace):
-        root = etree.fromstring(xml_string)
-        new_nsmap = root.nsmap.copy()
-        new_nsmap[prefix] = namespace
-        new_root = etree.Element(root.tag, nsmap=new_nsmap)
-        new_root[:] = root[:]
-        return etree.tostring(new_root, encoding='UTF-8')
-
-    def _export_invoice(self, invoice):
-        xml_file, _ = super()._export_invoice(invoice)
-        prefix, namespace = ('ext', 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2')
-        return self._add_name_space(xml_file, prefix, namespace)
