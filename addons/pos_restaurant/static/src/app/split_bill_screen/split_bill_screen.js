@@ -86,36 +86,38 @@ export class SplitBillScreen extends Component {
 
     async createSplittedOrder() {
         const curOrderUuid = this.currentOrder.uuid;
-        const originalOrder = this.pos.models["pos.order"].find((o) => o.uuid === curOrderUuid);
+        let originalOrder = this.pos.models["pos.order"].find((o) => o.uuid === curOrderUuid);
         const originalOrderName = this._getOrderName(originalOrder);
         const newOrderName = this._getSplitOrderName(originalOrderName);
 
-        const newOrder = this.pos.createNewOrder();
+        let newOrder = this.pos.createNewOrder();
         newOrder.floating_order_name = newOrderName;
         newOrder.uiState.splittedOrderUuid = curOrderUuid;
         newOrder.originalSplittedOrder = originalOrder;
 
+        const splitQty = this._computeSplitQry(originalOrder, this.qtyTracker);
         // Create lines for the new order
         const lineToDel = [];
         for (const line of originalOrder.lines) {
             if (this.qtyTracker[line.uuid]) {
                 const data = line.serialize();
                 delete data.uuid;
-                this.pos.models["pos.order.line"].create(
+                const newOrderLine = this.pos.models["pos.order.line"].create(
                     {
                         ...data,
-                        qty: this.qtyTracker[line.uuid],
+                        qty: splitQty[line.uuid].newOrderline.qty,
                         order_id: newOrder.id,
                     },
                     false,
                     true
                 );
+                splitQty[line.uuid].newOrderline["uuid"] = newOrderLine.uuid;
 
                 if (line.get_quantity() === this.qtyTracker[line.uuid]) {
                     lineToDel.push(line);
                 }
                 // Update line quantity and handle zero values after sending order in preparation
-                line.update({ qty: line.get_quantity() - this.qtyTracker[line.uuid] });
+                line.update({ qty: splitQty[line.uuid].originalOrderline.qty });
                 // Mark line as 'splitted' in the originalOrder's last_order_preparation_change
                 if (line.preparationKey in originalOrder.last_order_preparation_change.lines) {
                     originalOrder.last_order_preparation_change.lines[line.preparationKey][
@@ -126,7 +128,7 @@ export class SplitBillScreen extends Component {
         }
         const deleteLines = () => {
             for (const line of lineToDel) {
-                line.delete();
+                originalOrder.lines.find((ol) => ol.uuid === line.uuid)?.delete();
             }
         };
 
@@ -136,15 +138,31 @@ export class SplitBillScreen extends Component {
             this.pos.orderPreparationCategories.size &&
             Object.keys(originalOrder.last_order_preparation_change.lines).length > 0
         ) {
+            this.env.services.ui.block();
             originalOrder.updateLastOrderChange();
             newOrder.updateLastOrderChange();
-
             newOrder.last_order_preparation_change["original_order_uuid"] = originalOrder.uuid;
+
             await this.pos.sendOrderInPreparationUpdateLastChange(originalOrder);
+            originalOrder = this.pos.models["pos.order"].find((o) => o.uuid === originalOrder.uuid);
             deleteLines();
             await this.pos.sendOrderInPreparationUpdateLastChange(newOrder);
+
+            this.env.services.ui.unblock();
         } else {
             deleteLines();
+        }
+        newOrder = this.pos.models["pos.order"].find((o) => o.uuid === newOrder.uuid);
+        for (const [key, qtyValue] of Object.entries(splitQty)) {
+            const ogOrderline = originalOrder.lines.find((l) => l.uuid === key);
+            if (ogOrderline) {
+                ogOrderline.qty += qtyValue.originalOrderline.remaining;
+            }
+
+            const newOrderline = newOrder.lines.find((l) => l.uuid === qtyValue.newOrderline.uuid);
+            if (newOrderline) {
+                newOrderline.qty += qtyValue.newOrderline.remaining;
+            }
         }
 
         originalOrder.customer_count -= 1;
@@ -153,6 +171,33 @@ export class SplitBillScreen extends Component {
         this.pos.selectedOrderUuid = null;
         this.pos.set_order(newOrder);
         this.back();
+    }
+
+    _computeSplitQry(originalOrder, qtyTracker) {
+        const splitQty = {};
+        for (const line of originalOrder.lines) {
+            if (qtyTracker[line.uuid]) {
+                const orderedQty =
+                    originalOrder.last_order_preparation_change.lines[line.preparationKey]
+                        ?.quantity || 0;
+                const unorderedQty = line.qty - orderedQty;
+
+                const delta = qtyTracker[line.uuid] - unorderedQty;
+                const newQty = delta > 0 ? delta : 0;
+
+                splitQty[line.uuid] = {
+                    originalOrderline: {
+                        qty: orderedQty - newQty,
+                        remaining: unorderedQty - (qtyTracker[line.uuid] - newQty),
+                    },
+                    newOrderline: {
+                        qty: newQty,
+                        remaining: qtyTracker[line.uuid] - newQty,
+                    },
+                };
+            }
+        }
+        return splitQty;
     }
 
     getLineData(line) {
