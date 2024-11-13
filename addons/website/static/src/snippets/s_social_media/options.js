@@ -125,6 +125,7 @@ options.registry.SocialMedia = options.Class.extend({
             const entry = entries[listPosition];
             // Check if the url is valid.
             const url = entry.display_name;
+            entry.media =  this._findRelevantSocialMedia(url);
             if (url && !/^(([a-zA-Z]+):|\/)/.test(url)) {
                 // We permit every protocol (http:, https:, ftp:, mailto:,...).
                 // If none is explicitly specified, we assume it is a https.
@@ -137,7 +138,6 @@ options.registry.SocialMedia = options.Class.extend({
             }
 
             let anchorEl = anchorEls[entry.domPosition];
-            if (entry.selected) {
                 if (!anchorEl) {
                     if (anchorEls.length === 0) {
                         // Create a HTML element if no one already exist.
@@ -151,50 +151,51 @@ options.registry.SocialMedia = options.Class.extend({
                         anchorEl = this.$target[0].querySelector(':scope > a').cloneNode(true);
                         this._removeSocialMediaClasses(anchorEl);
                     }
-                    const iEl = anchorEl.querySelector(ICON_SELECTOR);
-                    if (iEl) {
-                        const faIcon = isDbField
-                            ? entry.media === "youtube"
-                                ? `fa-${entry.media}-play`
-                                : `fa-${entry.media}`
-                            : "fa-pencil";
-                        iEl.classList.add(faIcon);
-                    }
                     if (isDbField) {
                         anchorEl.href = dbSocialValues[`social_${encodeURIComponent(entry.media)}`];
                         anchorEl.classList.add(`s_social_media_${entry.media}`);
                     }
                     setAriaLabelOfSocialNetwork(anchorEl, entry.media, entry.display_name);
                 }
-            } else {
-                if (anchorEl) {
-                    delete entry.domPosition;
-                    anchorEl.remove();
+                const iEl = anchorEl.querySelector(ICON_SELECTOR);
+                if (iEl) {
+                    const faIcon = isDbField
+                        ? entry.media === "youtube"
+                            ? `fa-${entry.media}-play`
+                            : `fa-${entry.media}`
+                        : "fa-pencil";
+                    this._removeSocialMediaClasses(anchorEl);
+                    iEl.classList.add(faIcon);
                 }
-                entry.listPosition = listPosition;
-                this.entriesNotInDom.push(entry);
-                continue;
-            }
-            if (!isDbField) {
-                // Handle URL change for custom links.
-                const href = anchorEl.getAttribute('href');
-                if (href !== entry.display_name) {
-                    let socialMedia = null;
-                    if (this._isValidURL(entry.display_name)) {
-                        // Propose an icon only for valid URLs (no mailto).
-                        socialMedia = this._findRelevantSocialMedia(entry.display_name);
-                        if (socialMedia) {
-                            const iEl = anchorEl.querySelector(ICON_SELECTOR);
-                            this._removeSocialMediaClasses(anchorEl);
-                            anchorEl.classList.add(`s_social_media_${socialMedia}`);
-                            if (iEl) {
-                                iEl.classList.add(`fa-${socialMedia}`);
-                            }
+                // new socal media
+                if(!entry.selected) {
+                    if (anchorEl) {
+                        delete entry.domPosition;
+                        anchorEl.remove();
+                    }
+                    entry.listPosition = listPosition;
+                    this.entriesNotInDom.push(entry);
+                    continue;
+                }
+            // sets the icon for each social medias.
+            const href = anchorEl.getAttribute('href');
+            if (href !== entry.display_name) {
+                let socialMedia = null;
+                if (this._isValidURL(entry.display_name)) {
+                    // Propose an icon only for valid URLs (no mailto).
+                    socialMedia = this._findRelevantSocialMedia(entry.display_name);
+                    socialMedia === "youtube" ? socialMedia = "youtube-play" : socialMedia;
+                    if (socialMedia) {
+                        const iEl = anchorEl.querySelector(ICON_SELECTOR);
+                        this._removeSocialMediaClasses(anchorEl);
+                        anchorEl.classList.add(`s_social_media_${socialMedia}`);
+                        if (iEl) {
+                            iEl.classList.add(`fa-${socialMedia}`);
                         }
                     }
-                    anchorEl.setAttribute('href', entry.display_name);
-                    setAriaLabelOfSocialNetwork(anchorEl, socialMedia, entry.display_name);
                 }
+                anchorEl.setAttribute('href', entry.display_name);
+                setAriaLabelOfSocialNetwork(anchorEl, socialMedia, entry.display_name);
             }
             // Place the link at the correct position
             this.$target[0].appendChild(anchorEl);
@@ -229,7 +230,8 @@ options.registry.SocialMedia = options.Class.extend({
         let domPosition = 0;
         // Check the DOM to compute the state of the ListUserValueWidget.
         let entries = [...this.$target[0].querySelectorAll(':scope > a')].map(el => {
-            const media = el.href === el.href.split(".") ? el.href : el.href.split(".")[1];
+            const validURL = this._isValidURL(el.href);
+            const media = validURL ? new URL(el.href).hostname.split('.').slice(-2)[0] : "/";
             // Avoid a DOM entry and a non-dom entry having the same position.
             while (this.entriesNotInDom.find(entry => entry.listPosition === listPosition)) {
                 listPosition++;
