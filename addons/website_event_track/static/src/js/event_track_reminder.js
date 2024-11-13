@@ -10,6 +10,8 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
     selector: '.o_wetrack_js_reminder',
     events: {
         'click': '_onReminderToggleClick',
+        'mouseover i': '_fillIcon',
+        'mouseout i': '_emptyIcon'
     },
 
     /**
@@ -92,6 +94,20 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
         }
     },
 
+    _fillIcon: function (ev) {
+        var $el = $(ev.target)
+        if (!$el.data('reminder-on')){
+            $el.removeClass('fa-bell-o').addClass('fa-bell');
+        }
+    },
+
+    _emptyIcon: function (ev){
+        var $el = $(ev.target)
+        if (!$el.data('reminder-on')){
+            $(ev.target).removeClass('fa-bell').addClass('fa-bell-o');
+        }
+    },
+
     _sendReminderMail: function(trackId){
         rpc('/event/has_email_reminder').then( (result) => {
             if (result.hasEmailReminder){
@@ -104,6 +120,7 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
             }
         })
     },
+
 });
 
 export default publicWidget.registry.websiteEventTrackReminder;
