@@ -1591,7 +1591,9 @@ export function isUnbreakable(node) {
                 node.getAttribute('t-value') ||
                 node.getAttribute('t-out') ||
                 node.getAttribute('t-raw'))) ||
-        node.classList.contains('oe_unbreakable')
+        node.classList.contains('oe_unbreakable') ||
+        (node.tagName === "A" && node.getAttribute('role') === "tab") ||
+        (node.classList.contains('btn') || node.getAttribute('role') === "button")
     );
 }
 
