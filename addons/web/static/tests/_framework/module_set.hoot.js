@@ -131,7 +131,7 @@ const fetchDependencies = async (addons) => {
     }
     if (addonsToFetch.length) {
         if (!dependencyBatch.length) {
-            dependencyBatchPromise = new Promise(setTimeout).then(() => {
+            dependencyBatchPromise = Deferred.resolve().then(() => {
                 const module_names = [...new Set(dependencyBatch)];
                 dependencyBatch = [];
                 return orm("ir.module.module.dependency", "all_dependencies", [], { module_names });
@@ -544,7 +544,7 @@ let dependencyBatchPromise = null;
 let nextRpcId = 1e9;
 
 // Invoke tests after the module loader finished loading.
-setTimeout(runTests);
+Deferred.resolve().then(runTests);
 
 //-----------------------------------------------------------------------------
 // Exports

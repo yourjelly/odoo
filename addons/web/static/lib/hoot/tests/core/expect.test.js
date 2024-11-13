@@ -349,22 +349,22 @@ describe(parseUrl(import.meta.url), () => {
 
         test("verifyErrors", async () => {
             expect.assertions(1);
-            expect.errors(2);
+            expect.errors(3);
 
-            const asyncBoom = async () => {
-                throw new Error("rejection");
+            const boom = (msg) => {
+                throw new Error(msg);
             };
 
-            const boom = () => {
-                throw new Error("error");
-            };
+            // Timeout
+            setTimeout(() => boom("timeout"));
+            // Promise
+            Promise.resolve().then(() => boom("async"));
+            // Event
+            window.dispatchEvent(new ErrorEvent("error", { message: "event" }));
 
-            asyncBoom();
-            setTimeout(boom);
-            await tick();
             await tick();
 
-            expect.verifyErrors(["error", "rejection"]);
+            expect.verifyErrors(["event", "async", "timeout"]);
         });
 
         test("verifySteps", () => {

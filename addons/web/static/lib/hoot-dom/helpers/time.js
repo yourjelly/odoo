@@ -85,7 +85,7 @@ const ID_PREFIX = {
 /** @type {Map<string, [() => any, number, number]>} */
 const timers = new Map();
 
-let allowTimers = true;
+let allowTimers = false;
 let freezed = false;
 let frameDelay = 1000 / 60;
 let nextDummyId = 1;
@@ -161,10 +161,14 @@ export function cancelAllTimers() {
     }
 }
 
-export function cleanupTime() {
+export async function cleanupTime() {
+    allowTimers = false;
+    freezed = false;
+
     cancelAllTimers();
 
-    freezed = false;
+    // Wait for remaining async code to run
+    await delay();
 }
 
 /**
@@ -305,24 +309,15 @@ export function resetTimeOffset() {
  * animations, and then advances the current time by that amount.
  *
  * @see {@link advanceTime}
- * @param {boolean} [preventTimers=false]
  * @returns {Promise<number>} time consumed by timers (in ms).
  */
-export async function runAllTimers(preventTimers = false) {
+export async function runAllTimers() {
     if (!timers.size) {
         return 0;
     }
 
-    if (preventTimers) {
-        allowTimers = false;
-    }
-
     const endts = $max(...[...timers.values()].map(([, init, delay]) => init + delay));
     const ms = await advanceTime($ceil(endts - now()));
-
-    if (preventTimers) {
-        allowTimers = true;
-    }
 
     return ms;
 }
@@ -337,6 +332,10 @@ export function setFrameRate(frameRate) {
         throw new Error("frame rate must be an number between 1 and 1000");
     }
     frameDelay = 1000 / frameRate;
+}
+
+export function setupTime() {
+    allowTimers = true;
 }
 
 /**
