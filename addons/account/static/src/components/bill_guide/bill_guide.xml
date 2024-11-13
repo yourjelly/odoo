@@ -58,7 +58,7 @@
                 <div t-else="">
                     <div class="text-center">
                         <img class="img-fluid"
-                            src="/web/static/img/bill.svg"
+                            src="/web/static/img/Bill.svg"
                             alt="Create bill manually"/>
                     </div>
                     <div class="text-center mt-2">
