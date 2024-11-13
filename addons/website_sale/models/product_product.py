@@ -148,3 +148,54 @@ class ProductProduct(models.Model):
             self.website_published = True
         else:
             self.website_published = False
+
+    def _get_availability(self):
+        return 'in stock'
+
+    def _get_image_link(self):
+        return (
+            f"/web/image/product.product/{self.id}/image_1920" if self.image_1920 else
+            self._get_placeholder_filename('image_1920')
+        )
+
+    def _get_extra_images(self):
+        return self.product_variant_image_ids | self.product_template_image_ids
+
+    def _get_gmc_values(self):
+        self.ensure_one()
+
+        domain = self.website_id.domain or request.website.domain or request.httprequest.url_root.strip('/')
+
+        def format_price(price, currency): return f"{price} {currency.name}"
+
+        vals = {
+            # Required
+            'id': self.id,
+            'title': self.name,
+            'description': self.description_ecommerce,
+            'link': domain + self.website_url,
+            'image_link': domain + self._get_image_link(),
+            'availability': self._get_availability(),
+            'price': format_price(self.list_price, self.currency_id),
+
+            # Optional
+            'additionnal_image_link': [
+                f"{domain}/web/image/product.image/{extra_image.id}/image_1920"
+                for extra_image in self._get_extra_images()
+                if extra_image.image_1920  # only images, no video urls
+            ],
+            'product_type': [
+                self.categ_id.complete_name.replace('/', '>'),  # google uses a onther format
+
+            ] + [
+                category.display_name
+                for category in self.public_categ_ids
+            ],
+        }
+
+        if self.barcode:
+            vals.update([('gtin', self.barcode), ('identifier_exists', 'yes')])
+        else:
+            vals['identifier_exists'] = 'no'
+
+        return vals

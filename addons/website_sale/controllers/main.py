@@ -2216,35 +2216,32 @@ class WebsiteSale(payment_portal.PaymentPortal):
         View = request.env['ir.ui.view'].sudo()
         mimetype = 'application/xml;charset=utf-8'
 
-        products = request.env['product.template']
-        delivery_carriers = request.env['delivery.carrier'].search([
+        products = request.env['product.product'].search([('is_published', '=', True)])
+        delivery_carriers = request.env['delivery.carrier'].sudo().search([
             ('is_published', '=', True), ('delivery_type', '=', 'fixed')
         ])
 
+        seo = request.website.get_website_meta().get('default_opengraph', {})
+        domain = seo.get('og:url', request.website.domain)
+
+        pricelist = request.website.pricelist_id
+
         vals = {
-            'title': request.website.name,
-            'link': request.website.domain,
-            'description': _(""),
+            'title': seo.get('og:title', request.website.name),
+            'link': domain,
+            'description': seo.get('og:desciption', ""),
             'items': [
-                {
-                    'id': product.id,
-                    'title': product.name,
-                    'description': product.description_ecommerce,
-                    'link': request.website.domain + product.website_url,
-                    'image_link': f"{request.website.domain}/web/image/product.template/{product.id}/image_1024" if product.image_1024 else request.website.domain + product._get_placeholder_filename('image_1024'),
-                    'availability': "in stock",
-                    'price': f"{product.list_price} {product.currency_id.name}",
-                    'mpn': product.barcode,
-                }
+                product._get_gmc_values()
                 for product in products
             ],
             'shipping_methods': [
                 {
-                    'country': "US",  # TODO: everything needs to be done xd
+                    'country': country.code,
                     'service': carrier.name,
                     'price': carrier.fixed_price,
                 }
                 for carrier in delivery_carriers
+                for country in (carrier.country_ids or request.env['res.country'].search([]))
             ]
         }
 

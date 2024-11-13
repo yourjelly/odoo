@@ -1,30 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<template id="gmc_xml">
-    <t t-translation="off">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</t>
+<template id="gmc_xml"><t t-translation="off">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</t>
     <rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
         <channel>
-            <title><t t-esc="title"/></title>
-            <link><t t-esc="link"/></link>
-            <description><t t-esc="description"/></description>
-            <t t-foreach="items" t-as="item" t-key="item.id">
+            <title><t t-out="title"/></title>
+            <t t-translation="off">&lt;link&gt;<t t-out="link"/>&lt;/link&gt;</t>
+            <description><t t-out="description"/></description>
+            <t t-foreach="items" t-as="item" >
                 <item>
-                    <g:id><t t-esc="item.id"/></g:id>
-                    <g:title><t t-esc="item.title"/></g:title>
-                    <g:description><t t-esc="item.description"/></g:description>
-                    <g:link><t t-esc="item.link"/></g:link>
-                    <g:image_link><t t-esc="item.image_link"/></g:image_link>
-                    <g:availability><t t-esc="item.availability"/></g:availability>
-                    <g:price><t t-esc="item.price"/></g:price>
+                    <g:id><t t-out="item['id']"/></g:id>
+                    <g:title><t t-out="item['title']"/></g:title>
+                    <g:description><t t-out="item['description']"/></g:description>
+                    <g:link><t t-out="item['link']"/></g:link>
+                    <g:image_link><t t-out="item['image_link']"/></g:image_link>
+                    <g:availability><t t-out="item['availability']"/></g:availability>
+                    <g:price><t t-out="item['price']"/></g:price>
+                    <g:unit_pricing_measure><t t-out="item['unit_pricing_measure']"/></g:unit_pricing_measure>
 
-                    <g:identifier_exists>no</g:identifier_exists>
-                    <g:mpn><t t-esc="item.mpn"/></g:mpn>
+                    <t t-translation="off">
+                        &lt;g:identifier_exists&gt;no&lt;/g:identifier_exists&gt;
+                    </t>
+                    <g:mpn><t t-out="item['mpn']"/></g:mpn>
 
-                    <t t-foreach="shipping_methods" t-as="method" t-key="method.service">
+                    <t t-foreach="shipping_methods" t-as="method">
                         <g:shipping>
-                            <g:country><t t-esc="method.country"/></g:country>
-                            <g:service><t t-esc="method.service"/></g:service>
-                            <g:price><t t-esc="method.price"/></g:price>
+                            <g:country><t t-out="method['country']"/></g:country>
+                            <g:service><t t-out="method['service']"/></g:service>
+                            <g:price><t t-out="method['price']"/></g:price>
                         </g:shipping>
                     </t>
                 </item>
