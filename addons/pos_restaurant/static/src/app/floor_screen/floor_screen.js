@@ -149,9 +149,7 @@ export class FloorScreen extends Component {
                 table.position_h = table.getX();
                 table.position_v = table.getY();
                 if (table.parent_id) {
-                    this.pos.data.write("restaurant.table", [table.id], {
-                        parent_id: null,
-                    });
+                    this.pos.data.write("restaurant.table", [table.id], { parent_id: null });
                 }
             },
             onWillStartDrag: ({ element, x, y }) => {
@@ -225,12 +223,16 @@ export class FloorScreen extends Component {
                     return;
                 }
                 const oToTrans = this.pos.getActiveOrdersOnTable(table)[0];
-                if (oToTrans) {
-                    this.pos.transferOrder(oToTrans.uuid, this.state.potentialLink.parent);
-                }
                 this.pos.data.write("restaurant.table", [table.id], {
                     parent_id: this.state.potentialLink.parent.id,
                 });
+                this.pos.data.write("restaurant.table", [table.parent_id.id], {
+                    child_ids: [[4, this.state.potentialLink.child.id]],
+                });
+                if (oToTrans) {
+                    // oToTrans.uiState.initialOrderLines = oToTrans.lines.map((line) => line.uuid);
+                    this.pos.transferOrder(oToTrans.uuid, this.state.potentialLink.parent, true);
+                }
                 this.state.potentialLink = null;
             },
         });

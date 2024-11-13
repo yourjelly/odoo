@@ -107,6 +107,7 @@ class RestaurantTable(models.Model):
     seats = fields.Integer('Seats', default=1, help="The default number of customer served at this table.")
     color = fields.Char('Color', help="The table's color, expressed as a valid 'background' CSS property value", default="#35D374")
     parent_id = fields.Many2one('restaurant.table', string='Parent Table', help="The parent table if this table is part of a group of tables")
+    child_ids = fields.One2many('restaurant.table', 'parent_id', string='Children Tables')
     active = fields.Boolean('Active', default=True, help='If false, the table is deactivated and will not be available in the point of sale')
 
     @api.depends('table_number', 'floor_id')
@@ -120,7 +121,7 @@ class RestaurantTable(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config_id):
-        return ['table_number', 'width', 'height', 'position_h', 'position_v', 'parent_id', 'shape', 'floor_id', 'color', 'seats', 'active']
+        return ['table_number', 'width', 'height', 'position_h', 'position_v', 'parent_id', 'child_ids', 'shape', 'floor_id', 'color', 'seats', 'active']
 
     def are_orders_still_in_draft(self):
         draft_orders_count = self.env['pos.order'].search_count([('table_id', 'in', self.ids), ('state', '=', 'draft')])

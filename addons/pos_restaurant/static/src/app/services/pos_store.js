@@ -316,7 +316,13 @@ patch(PosStore.prototype, {
             [...el.classList].find((c) => c.includes("tableId")).split("-")[1]
         );
     },
-    async transferOrder(orderUuid, destinationTable) {
+    getMainTable(table) {
+        while (table.parent_id) {
+            table = table.parent_id;
+        }
+        return table;
+    },
+    async transferOrder(orderUuid, destinationTable, isMergedOrder = false) {
         const order = this.models["pos.order"].getBy("uuid", orderUuid);
         const originalTable = order.table_id;
         this.loadingOrderState = false;
@@ -331,15 +337,49 @@ patch(PosStore.prototype, {
             this.set_order(order);
             this.addPendingOrder([order.id]);
         } else {
-            const destinationOrder = this.getActiveOrdersOnTable(destinationTable)[0];
+            const mainTable = this.getMainTable(destinationTable);
+            const destinationOrder = this.getActiveOrdersOnTable(mainTable)[0];
             const linesToUpdate = [];
             for (const orphanLine of order.lines) {
                 const adoptingLine = destinationOrder.lines.find((l) =>
                     l.can_be_merged_with(orphanLine)
                 );
                 if (adoptingLine) {
+                    if (order.last_order_preparation_change.lines[orphanLine.preparationKey]) {
+                        if (
+                            destinationOrder.last_order_preparation_change.lines[
+                                adoptingLine.preparationKey
+                            ]
+                        ) {
+                            destinationOrder.last_order_preparation_change.lines[
+                                adoptingLine.preparationKey
+                            ]["quantity"] +=
+                                order.last_order_preparation_change.lines[
+                                    orphanLine.preparationKey
+                                ]["quantity"];
+                        } else {
+                            destinationOrder.last_order_preparation_change.lines[
+                                adoptingLine.preparationKey
+                            ] = {
+                                ...order.last_order_preparation_change.lines[
+                                    orphanLine.preparationKey
+                                ],
+                                uuid: adoptingLine.uuid,
+                            };
+                        }
+                    }
                     adoptingLine.merge(orphanLine);
                 } else {
+                    if (
+                        order.last_order_preparation_change.lines[orphanLine.preparationKey] &&
+                        !destinationOrder.last_order_preparation_change.lines[
+                            orphanLine.preparationKey
+                        ]
+                    ) {
+                        destinationOrder.last_order_preparation_change.lines[
+                            orphanLine.preparationKey
+                        ] = order.last_order_preparation_change.lines[orphanLine.preparationKey];
+                    }
                     linesToUpdate.push(orphanLine);
                 }
             }
@@ -350,9 +390,13 @@ patch(PosStore.prototype, {
             if (destinationOrder?.id) {
                 this.addPendingOrder([destinationOrder.id]);
             }
-            await this.deleteOrders([order]);
+            if (!isMergedOrder) {
+                order.transferdOrderToTable = destinationTable.id;
+            }
         }
         await this.setTable(destinationTable);
+        this.addPendingOrder([order.id]);
+        await this.deleteOrders([order]);
     },
     updateTables(...tables) {
         this.data.call("restaurant.table", "update_tables", [
