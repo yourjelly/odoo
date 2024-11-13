@@ -362,7 +362,7 @@ export class FloorScreen extends Component {
     }
     async onWillStart() {
         this.pos.searchProductWord = "";
-        await this.pos.unsetTable();
+        this.pos.unsetTable();
     }
     get floorBackround() {
         return this.activeFloor.floor_background_image
