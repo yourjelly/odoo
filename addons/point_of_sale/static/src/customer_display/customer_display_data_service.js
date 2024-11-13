@@ -2,10 +2,12 @@ import { reactive } from "@odoo/owl";
 import { deduceUrl, getOnNotified } from "@point_of_sale/utils";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
+import { _t } from "@web/core/l10n/translation";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 export const CustomerDisplayDataService = {
-    dependencies: ["bus_service"],
-    async start(env, { bus_service }) {
+    dependencies: ["bus_service", "dialog"],
+    async start(env, { bus_service, dialog }) {
         const data = reactive({});
         if (session.type === "local") {
             new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY").onmessage = (event) => {
@@ -21,6 +23,7 @@ export const CustomerDisplayDataService = {
             );
         }
         if (session.type === "proxy") {
+<<<<<<< 18.0
             setInterval(async () => {
                 const response = await fetch(
                     `${deduceUrl(session.proxy_ip)}/hw_proxy/customer_facing_display`,
@@ -35,6 +38,53 @@ export const CustomerDisplayDataService = {
                 );
                 const payload = await response.json();
                 Object.assign(data, payload.result.data);
+||||||| 70cec04734b4b52b6a7f4310d4eb40a9a46fec11
+            setInterval(async () => {
+                const response = await fetch(
+                    `${deduceUrl(session.proxy_ip)}/hw_proxy/customer_facing_display`,
+                    {
+                        method: "POST",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            action: "get",
+                        }),
+                    }
+                );
+                const payload = await response.json();
+                Object.assign(data, payload.result.data);
+=======
+            const intervalId = setInterval(async () => {
+                try {
+                    const response = await fetch(
+                        `${deduceUrl(session.proxy_ip)}/hw_proxy/customer_facing_display`,
+                        {
+                            method: "POST",
+                            headers: {
+                                Accept: "application/json",
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                action: "get",
+                            }),
+                        }
+                    );
+                    const payload = await response.json();
+                    Object.assign(data, payload.result.data);
+                } catch (error) {
+                    dialog.add(AlertDialog, {
+                        title: _t("IoT customer display error"),
+                        body: _t(
+                            "Error: %s.\nMake sure there is an IoT Box subscription associated with your Odoo database, then restart the IoT Box.",
+                            error
+                        ),
+                    });
+                    console.error("Error fetching data for the IoT customer display: %s", error);
+                    clearInterval(intervalId);
+                }
+>>>>>>> eb01295bbdab82a93d4d005ea6ded47f20f937c2
             }, 1000);
         }
         return data;
