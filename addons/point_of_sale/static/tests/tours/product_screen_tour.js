@@ -413,3 +413,37 @@ registry.category("web_tour.tours").add("AutofillCashCount", {
             ProductScreen.cashDifferenceIs(0),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("LotNumberTour", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Product A"),
+            {
+                trigger: `.popup-input`,
+                run: "click",
+            },
+            {
+                content: `Select 1001 lot number`,
+                trigger: `.options-dropdown .option:contains("1001")`,
+                run: "click",
+            },
+            Dialog.confirm(),
+            {
+                content: `Check orderline with Product A has lot number SN 1001`,
+                isActive: ["desktop"],
+                trigger: `.order-container .orderline:has(.product-name:contains("Product A")):has(.info-list .pack-lot-number:contains(SN 1001))`,
+            },
+            Chrome.createFloatingOrder(),
+            ProductScreen.clickDisplayedProduct("Product A"),
+            {
+                trigger: `.popup-input`,
+                run: "click",
+            },
+            {
+                content: `Check lot number 1001 is not in option list`,
+                trigger: `.options-dropdown .option:not(:contains("1001"))`,
+            },
+        ].flat(),
+});

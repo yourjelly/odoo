@@ -1881,6 +1881,12 @@ export class PosStore extends Reactive {
             canCreateLots = true;
         }
 
+        // Remove lots name that are being used in active orders
+        const usedLotNames = this.models["pos.pack.operation.lot"]
+            .filter((lot) => lot.pos_order_line_id?.product_id?.id === product.id)
+            .map((lot) => lot.lot_name);
+        existingLots = existingLots.filter((lot) => !usedLotNames.includes(lot.name));
+
         const existingLotsName = existingLots.map((l) => l.name);
         const payload = await makeAwaitable(this.dialog, EditListPopup, {
             title: _t("Lot/Serial Number(s) Required"),

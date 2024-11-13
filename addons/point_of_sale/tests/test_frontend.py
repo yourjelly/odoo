@@ -1176,6 +1176,42 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'LotRefundTour', login="pos_user")
 
+    def test_lot_number(self):
+        default_warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.main_pos_config.company_id.id)], limit=1)
+        self.stock_location = default_warehouse.lot_stock_id
+        misc_catg = self.env['pos.category'].search([('name', '=', 'Misc test')])
+        self.product2 = self.env['product.product'].create({
+            'name': 'Product A',
+            'is_storable': True,
+            'tracking': 'serial',
+            'pos_categ_ids': [(4, misc_catg.id)],
+        })
+
+        lot1 = self.env['stock.lot'].create({
+            'name': '1001',
+            'product_id': self.product2.id,
+        })
+        lot2 = self.env['stock.lot'].create({
+            'name': '1002',
+            'product_id': self.product2.id,
+        })
+
+        self.env['stock.quant'].with_context(inventory_mode=True).create({
+            'product_id': self.product2.id,
+            'inventory_quantity': 1,
+            'location_id': self.stock_location.id,
+            'lot_id': lot1.id
+        }).action_apply_inventory()
+        self.env['stock.quant'].with_context(inventory_mode=True).create({
+            'product_id': self.product2.id,
+            'inventory_quantity': 1,
+            'location_id': self.stock_location.id,
+            'lot_id': lot2.id
+        }).action_apply_inventory()
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'LotNumberTour', login="pos_user")
+
     def test_receipt_tracking_method(self):
         self.product_a = self.env['product.product'].create({
             'name': 'Product A',

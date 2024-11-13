@@ -87,6 +87,7 @@ export class EditListInput extends Component {
         }
     }
     onClick(event) {
+        this.props.onSelectItem(this.props.item._id);
         this.resetOptionsDropdown();
     }
     onInput(event) {

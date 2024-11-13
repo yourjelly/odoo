@@ -44,7 +44,7 @@
                             <li t-if="note.trim() !== ''" t-esc="note" class="internal-note badge mt-2 p-2 rounded-pill bg-info text-info bg-opacity-25" style="font-size: 0.85rem;" />
                         </t>
                     </div>
-                    <li t-foreach="line.packLotLines or []" t-as="lot" t-key="lot_index" t-esc="lot" />
+                    <li t-foreach="line.packLotLines or []" t-as="lot" t-key="lot_index" t-esc="lot" class="pack-lot-number" />
                     <t t-slot="default" />
                 </ul>
             </div>
