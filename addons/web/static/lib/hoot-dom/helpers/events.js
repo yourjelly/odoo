@@ -242,13 +242,17 @@ const getDefaultRunTimeValue = () => ({
 
     // File
     fileInput: null,
-});
 
-const getDefaultSpecialKeysValue = () => ({
-    altKey: false,
-    ctrlKey: false,
-    metaKey: false,
-    shiftKey: false,
+    // Buttons
+    buttons: 0,
+
+    // Modifier keys
+    modifierKeys: {
+        altKey: false,
+        ctrlKey: false,
+        metaKey: false,
+        shiftKey: false,
+    },
 });
 
 /**
@@ -279,7 +283,7 @@ const getDifferentParents = (el1, el2) => {
 /**
  * @template {typeof Event} T
  * @param {EventType} eventType
- * @returns {[T, (attrs: FullEventInit) => EventInit]}
+ * @returns {[T, ((attrs: FullEventInit) => EventInit), number]}
  */
 const getEventConstructor = (eventType) => {
     switch (eventType) {
@@ -292,10 +296,10 @@ const getEventConstructor = (eventType) => {
         case "mousemove":
         case "mouseover":
         case "mouseout":
-            return [MouseEvent, mapBubblingMouseEvent];
+            return [MouseEvent, mapMouseEvent, BUBBLES + CANCELABLE];
         case "mouseenter":
         case "mouseleave":
-            return [MouseEvent, mapNonBubblingMouseEvent];
+            return [MouseEvent, mapMouseEvent];
 
         // Pointer events
         case "click":
@@ -304,30 +308,30 @@ const getEventConstructor = (eventType) => {
         case "pointermove":
         case "pointerover":
         case "pointerout":
-            return [PointerEvent, mapBubblingPointerEvent];
+            return [PointerEvent, mapPointerEvent, BUBBLES + CANCELABLE];
         case "pointerenter":
         case "pointerleave":
         case "pointercancel":
-            return [PointerEvent, mapNonBubblingPointerEvent];
+            return [PointerEvent, mapPointerEvent];
 
         // Focus events
         case "blur":
         case "focus":
-            return [FocusEvent, mapNonBubblingEvent];
+            return [FocusEvent, mapEvent];
         case "focusin":
         case "focusout":
-            return [FocusEvent, mapBubblingEvent];
+            return [FocusEvent, mapEvent, BUBBLES];
 
         // Clipboard events
         case "cut":
         case "copy":
         case "paste":
-            return [ClipboardEvent, mapBubblingEvent];
+            return [ClipboardEvent, mapEvent, BUBBLES];
 
         // Keyboard events
         case "keydown":
         case "keyup":
-            return [KeyboardEvent, mapKeyboardEvent];
+            return [KeyboardEvent, mapKeyboardEvent, BUBBLES + CANCELABLE];
 
         // Drag events
         case "drag":
@@ -337,67 +341,67 @@ const getEventConstructor = (eventType) => {
         case "dragleave":
         case "dragover":
         case "drop":
-            return [DragEvent, mapBubblingEvent];
+            return [DragEvent, mapEvent, BUBBLES];
 
         // Input events
         case "beforeinput":
-            return [InputEvent, mapCancelableInputEvent];
+            return [InputEvent, mapInputEvent, BUBBLES + CANCELABLE];
         case "input":
-            return [InputEvent, mapInputEvent];
+            return [InputEvent, mapInputEvent, BUBBLES];
 
         // Composition events
         case "compositionstart":
         case "compositionend":
-            return [CompositionEvent, mapBubblingEvent];
+            return [CompositionEvent, mapEvent, BUBBLES];
 
         // Selection events
         case "select":
         case "selectionchange":
-            return [Event, mapBubblingEvent];
+            return [Event, mapEvent, BUBBLES];
 
         // Touch events
         case "touchstart":
         case "touchend":
         case "touchmove":
-            return [TouchEvent, mapCancelableTouchEvent];
+            return [TouchEvent, mapTouchEvent, BUBBLES + CANCELABLE];
         case "touchcancel":
-            return [TouchEvent, mapNonCancelableTouchEvent];
+            return [TouchEvent, mapTouchEvent, BUBBLES];
 
         // Resize events
         case "resize":
-            return [Event, mapNonBubblingEvent];
+            return [Event, mapEvent];
 
         // Submit events
         case "submit":
-            return [SubmitEvent, mapBubblingCancelableEvent];
+            return [SubmitEvent, mapEvent, BUBBLES + CANCELABLE];
 
         // Wheel events
         case "wheel":
-            return [WheelEvent, mapWheelEvent];
+            return [WheelEvent, mapWheelEvent, BUBBLES];
 
         // Animation events
         case "animationcancel":
         case "animationend":
         case "animationiteration":
         case "animationstart": {
-            return [AnimationEvent, mapBubblingCancelableEvent];
+            return [AnimationEvent, mapEvent, BUBBLES + CANCELABLE];
         }
 
         // Error events
         case "error":
-            return [ErrorEvent, mapNonBubblingEvent];
+            return [ErrorEvent, mapEvent];
         case "unhandledrejection":
-            return [PromiseRejectionEvent, mapNonBubblingCancelableEvent];
+            return [PromiseRejectionEvent, mapEvent, CANCELABLE];
 
         // Unload events (BeforeUnloadEvent cannot be constructed)
         case "beforeunload":
-            return [Event, mapNonBubblingCancelableEvent];
+            return [Event, mapEvent, CANCELABLE];
         case "unload":
-            return [Event, mapNonBubblingEvent];
+            return [Event, mapEvent];
 
         // Default: base Event constructor
         default:
-            return [Event, mapBubblingEvent];
+            return [Event, mapEvent, BUBBLES];
     }
 };
 
@@ -568,6 +572,43 @@ const redirectSubmit = (ev) => {
 };
 
 /**
+ * @param {PointerEventInit} eventInit
+ * @param {boolean} toggle
+ */
+const registerButton = (eventInit, toggle) => {
+    let value = 0;
+    switch (eventInit.button) {
+        case 0: {
+            // Main button (left button)
+            value = 1;
+            break;
+        }
+        case 1: {
+            // Auxiliary button (wheel button)
+            value = 4;
+            break;
+        }
+        case 2: {
+            // Secondary button (right button)
+            value = 2;
+            break;
+        }
+        case 3: {
+            // Fourth button (Browser Back)
+            value = 8;
+            break;
+        }
+        case 4: {
+            // Fifth button (Browser Forward)
+            value = 16;
+            break;
+        }
+    }
+
+    runTime.buttons = $max(runTime.buttons + (toggle ? value : -value), 0);
+};
+
+/**
  * @param {Event} ev
  */
 const registerFileInput = ({ target }) => {
@@ -639,18 +680,22 @@ const registerForChange = async (target, initialValue, confirmAction) => {
  */
 const registerSpecialKey = (eventInit, toggle) => {
     switch (eventInit.key) {
-        case "Alt":
-            specialKeys.altKey = toggle;
+        case "Alt": {
+            runTime.modifierKeys.altKey = toggle;
             break;
-        case "Control":
-            specialKeys.ctrlKey = toggle;
+        }
+        case "Control": {
+            runTime.modifierKeys.ctrlKey = toggle;
             break;
-        case "Meta":
-            specialKeys.metaKey = toggle;
+        }
+        case "Meta": {
+            runTime.modifierKeys.metaKey = toggle;
             break;
-        case "Shift":
-            specialKeys.shiftKey = toggle;
+        }
+        case "Shift": {
+            runTime.modifierKeys.shiftKey = toggle;
             break;
+        }
     }
 };
 
@@ -1352,6 +1397,8 @@ const _pointerDown = async (target, options) => {
         button: options?.button || 0,
     };
 
+    registerButton(eventInit, true);
+
     if (pointerDownTarget !== runTime.previousPointerDownTarget) {
         runTime.clickCount = 0;
     }
@@ -1395,6 +1442,8 @@ const _pointerUp = async (target, options) => {
         ...runTime.position,
         button: options?.button || 0,
     };
+
+    registerButton(eventInit, false);
 
     if (runTime.isDragging) {
         // If dragging, only drag events are triggered
@@ -1543,7 +1592,6 @@ let fullClear = false;
 
 // Keyboard global variables
 const changeTargetListeners = [];
-const specialKeys = getDefaultSpecialKeysValue();
 
 // Other global variables
 const runTime = getDefaultRunTimeValue();
@@ -1552,49 +1600,18 @@ const runTime = getDefaultRunTimeValue();
 // Event init attributes mappers
 //-----------------------------------------------------------------------------
 
+const BUBBLES = 0b001;
+const CANCELABLE = 0b010;
+
 // Generic mappers
 // ---------------
 
 /**
- * - bubbles
- * - can be canceled
- * @param {FullEventInit} eventInit
- */
-const mapBubblingCancelableEvent = (eventInit) => ({
-    ...mapBubblingEvent(eventInit),
-    cancelable: true,
-});
-
-/**
- * - bubbles
- * - cannot be canceled
- * @param {FullEventInit} eventInit
- */
-const mapBubblingEvent = (eventInit) => ({
-    composed: true,
-    ...eventInit,
-    bubbles: true,
-});
-
-/**
- * - does not bubble
- * - can be canceled
- * @param {FullEventInit} eventInit
- */
-const mapNonBubblingCancelableEvent = (eventInit) => ({
-    ...mapNonBubblingEvent(eventInit),
-    cancelable: true,
-});
-
-/**
  * - does not bubble
  * - cannot be canceled
  * @param {FullEventInit} eventInit
  */
-const mapNonBubblingEvent = (eventInit) => ({
-    composed: true,
-    ...eventInit,
-});
+const mapEvent = (eventInit) => eventInit;
 
 // Pointer, mouse & wheel event mappers
 // ------------------------------------
@@ -1602,47 +1619,34 @@ const mapNonBubblingEvent = (eventInit) => ({
 /**
  * @param {FullEventInit<MouseEventInit>} eventInit
  */
-const mapBubblingMouseEvent = (eventInit) => ({
+const mapMouseEvent = (eventInit) => ({
+    button: -1,
+    buttons: runTime.buttons,
     clientX: eventInit.clientX ?? eventInit.pageX ?? eventInit.screenX ?? 0,
     clientY: eventInit.clientY ?? eventInit.pageY ?? eventInit.screenY ?? 0,
     view: getWindow(),
-    ...specialKeys,
-    ...mapBubblingCancelableEvent(eventInit),
-});
-
-/**
- * @param {FullEventInit<MouseEventInit>} eventInit
- */
-const mapNonBubblingMouseEvent = (eventInit) => ({
-    ...mapBubblingMouseEvent(eventInit),
-    bubbles: false,
-    cancelable: false,
+    ...runTime.modifierKeys,
+    ...eventInit,
 });
 
 /**
  * @param {FullEventInit<PointerEventInit>} eventInit
  */
-const mapBubblingPointerEvent = (eventInit) => ({
+const mapPointerEvent = (eventInit) => ({
+    ...mapMouseEvent(eventInit),
+    button: 0,
     pointerId: 1,
     pointerType: hasTouch() ? "touch" : "mouse",
-    ...mapBubblingMouseEvent(eventInit),
-});
-
-/**
- * @param {FullEventInit<PointerEventInit>} eventInit
- */
-const mapNonBubblingPointerEvent = (eventInit) => ({
-    pointerId: 1,
-    pointerType: hasTouch() ? "touch" : "mouse",
-    ...mapNonBubblingMouseEvent(eventInit),
+    ...eventInit,
 });
 
 /**
  * @param {FullEventInit<WheelEventInit>} eventInit
  */
 const mapWheelEvent = (eventInit) => ({
-    ...specialKeys,
-    ...mapBubblingEvent(eventInit),
+    ...mapMouseEvent(eventInit),
+    button: 0,
+    ...eventInit,
 });
 
 // Touch event mappers
@@ -1651,12 +1655,12 @@ const mapWheelEvent = (eventInit) => ({
 /**
  * @param {FullEventInit<TouchEventInit>} eventInit
  */
-const mapCancelableTouchEvent = (eventInit) => {
+const mapTouchEvent = (eventInit) => {
     const touches = eventInit.targetTouches ||
         eventInit.touches || [new Touch({ identifier: 0, ...eventInit })];
     return {
         view: getWindow(),
-        ...mapBubblingCancelableEvent(eventInit),
+        ...eventInit,
         changedTouches: eventInit.changedTouches || touches,
         target: eventInit.target,
         targetTouches: eventInit.targetTouches || touches,
@@ -1664,24 +1668,8 @@ const mapCancelableTouchEvent = (eventInit) => {
     };
 };
 
-/**
- * @param {FullEventInit<TouchEventInit>} eventInit
- */
-const mapNonCancelableTouchEvent = (eventInit) => ({
-    ...mapCancelableTouchEvent(eventInit),
-    cancelable: false,
-});
-
 // Keyboard & input event mappers
 // ------------------------------
-
-/**
- * @param {FullEventInit<InputEventInit>} eventInit
- */
-const mapCancelableInputEvent = (eventInit) => ({
-    ...mapInputEvent(eventInit),
-    cancelable: true,
-});
 
 /**
  * @param {FullEventInit<InputEventInit>} eventInit
@@ -1690,17 +1678,17 @@ const mapInputEvent = (eventInit) => ({
     data: null,
     isComposing: Boolean(runTime.isComposing),
     view: getWindow(),
-    ...mapBubblingEvent(eventInit),
+    ...eventInit,
 });
 
 /**
  * @param {FullEventInit<KeyboardEventInit>} eventInit
  */
 const mapKeyboardEvent = (eventInit) => ({
-    ...specialKeys,
     isComposing: Boolean(runTime.isComposing),
     view: getWindow(),
-    ...mapBubblingCancelableEvent(eventInit),
+    ...runTime.modifierKeys,
+    ...eventInit,
 });
 
 //-----------------------------------------------------------------------------
@@ -1865,8 +1853,19 @@ export async function dispatch(target, type, eventInit) {
         }
     }
 
-    const [Constructor, processParams] = getEventConstructor(type);
-    const params = processParams({ ...eventInit, target, type });
+    const [Constructor, processParams, flags] = getEventConstructor(type);
+    const params = processParams({
+        composed: true,
+        ...eventInit,
+        target,
+        type,
+    });
+    if (flags & BUBBLES) {
+        params.bubbles = true;
+    }
+    if (flags & CANCELABLE) {
+        params.cancelable = true;
+    }
     const event = new Constructor(type, params);
 
     await Promise.resolve(target.dispatchEvent(event));
@@ -1930,8 +1929,12 @@ export async function drag(target, options) {
         /** @type {DragHelpers["cancel"]} */
         async function cancel(options) {
             const finalizeEvents = setupEvents("drag & drop: cancel");
+            const element = getDocument().body;
 
-            await _press(getDocument().body, { key: "Escape" });
+            // Reset buttons
+            runTime.buttons = 0;
+
+            await _press(element, { key: "Escape" });
 
             dragEvents.push(...(await finalizeEvents(options)));
 
@@ -2443,9 +2446,6 @@ export function setupEventActions(fixture) {
 
     // Runtime global variables
     $assign(runTime, getDefaultRunTimeValue());
-
-    // Special keys
-    $assign(specialKeys, getDefaultSpecialKeysValue());
 }
 
 /**
