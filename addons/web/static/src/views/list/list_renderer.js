@@ -843,7 +843,9 @@ export class ListRenderer extends Component {
         if (group.groupByField.type === "boolean") {
             return group.value === undefined ? _t("None") : group.value ? _t("Yes") : _t("No");
         } else {
-            return group.value === undefined || group.value === false
+            return group.displayName === undefined
+                ? _t("None")
+                : group.displayName === false
                 ? _t("None")
                 : group.displayName;
         }
