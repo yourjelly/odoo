@@ -616,6 +616,7 @@ export class TablePlugin extends Plugin {
             ) {
                 // Handle selecting an empty cell.
                 this.selectTableCells(selection);
+                this.dispatch("UPDATE_TOOLBAR", { forceOpen: true });
             }
         }
     }

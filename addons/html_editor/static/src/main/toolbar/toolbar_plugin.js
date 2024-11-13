@@ -91,8 +91,11 @@ export class ToolbarPlugin extends Plugin {
                     // Fast open, just wait for a possible selection change due
                     // to mouseup.
                     setTimeout(() => {
-                        this.updateToolbar();
-                        this.onSelectionChangeActive = true;
+                        if (!this.updateWithoutSelectionChange) {
+                            this.updateToolbar();
+                            this.onSelectionChangeActive = true;
+                        }
+                        delete this.updateWithoutSelectionChange;
                     });
                 }
             });
@@ -122,10 +125,15 @@ export class ToolbarPlugin extends Plugin {
         super.destroy();
     }
 
-    handleCommand(command) {
+    handleCommand(command, payload) {
         switch (command) {
             case "STEP_ADDED":
                 this.updateToolbar();
+                break;
+            case "UPDATE_TOOLBAR":
+                this.updateToolbar(this.shared.getSelectionData(), {
+                    forceOpen: payload.forceOpen,
+                });
                 break;
         }
     }
@@ -165,8 +173,11 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 
-    updateToolbar(selectionData = this.shared.getSelectionData()) {
-        this.updateToolbarVisibility(selectionData);
+    updateToolbar(selectionData = this.shared.getSelectionData(), { forceOpen } = {}) {
+        if (forceOpen) {
+            this.updateWithoutSelectionChange = true;
+        }
+        this.updateToolbarVisibility(selectionData, forceOpen);
         if (this.overlay.isOpen || this.config.disableFloatingToolbar) {
             this.updateNamespace();
             this.updateButtonsStates(selectionData.editableSelection);
@@ -179,12 +190,12 @@ export class ToolbarPlugin extends Plugin {
             .filter((node) => !isTextNode(node) || (node.textContent !== "\n" && !isZWS(node)));
     }
 
-    updateToolbarVisibility(selectionData) {
+    updateToolbarVisibility(selectionData, show = false) {
         if (this.config.disableFloatingToolbar) {
             return;
         }
 
-        if (this.shouldBeVisible(selectionData)) {
+        if (this.shouldBeVisible(selectionData) || show) {
             // Open toolbar or update its position
             const props = { toolbar: this.getToolbarInfo(), class: "shadow rounded my-2" };
             this.overlay.open({ props });
@@ -218,7 +229,7 @@ export class ToolbarPlugin extends Plugin {
 
     updateNamespace() {
         const traversedNodes = this.getFilterTraverseNodes();
-        for (const namespace of this.getResource('toolbarNamespace') || []) {
+        for (const namespace of this.getResource("toolbarNamespace") || []) {
             if (namespace.isApplied(traversedNodes)) {
                 this.state.namespace = namespace.id;
                 return;
