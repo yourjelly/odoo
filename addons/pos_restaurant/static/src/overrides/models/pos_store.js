@@ -312,6 +312,12 @@ patch(PosStore.prototype, {
         return this.get_open_orders().filter((order) => order.table_id?.id === tableId);
     },
     async unsetTable() {
+        this.selectedTable = null;
+        const order = this.get_order();
+        if (order && !order.isBooked) {
+            this.removeOrder(order);
+        }
+        this.set_order(null);
         try {
             await this.syncAllOrders();
         } catch (e) {
@@ -320,12 +326,6 @@ patch(PosStore.prototype, {
             }
             Promise.reject(e);
         }
-        this.selectedTable = null;
-        const order = this.get_order();
-        if (order && !order.isBooked) {
-            this.removeOrder(order);
-        }
-        this.set_order(null);
     },
     getActiveOrdersOnTable(table) {
         return this.models["pos.order"].filter(
