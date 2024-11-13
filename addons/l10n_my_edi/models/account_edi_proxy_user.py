@@ -11,7 +11,7 @@ from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 
-class AccountEdiProxyClientUser(models.Model):
+class Account_Edi_Proxy_ClientUser(models.Model):
     _inherit = 'account_edi_proxy_client.user'
 
     # ------------------

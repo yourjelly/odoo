@@ -42,12 +42,11 @@ COUNTRY_CODE_MAP = {
 E_164_REGEX = re.compile(r"^\+[1-9]\d{1,14}$")
 
 
-class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
+class AccountEdiXmlUbl_Myinvois_My(models.AbstractModel):
     """
     * MyInvois API formats doc: https://sdk.myinvois.hasil.gov.my/documents
     """
-    _inherit = "account.edi.xml.ubl_21"
-    _name = 'account.edi.xml.ubl_myinvois_my'
+    _inherit = ["account.edi.xml.ubl_21"]
     _description = "Malaysian implementation of ubl for the MyInvois portal"
 
     # -----------------------

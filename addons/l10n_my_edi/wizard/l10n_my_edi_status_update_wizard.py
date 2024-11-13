@@ -4,8 +4,7 @@ from odoo import _, fields, models
 from odoo.exceptions import UserError
 
 
-class L10nMyEdiStatusUpdateWizard(models.TransientModel):
-    _name = 'l10n_my_edi.document.status.update'
+class L10n_My_EdiDocumentStatusUpdate(models.TransientModel):
     _description = 'Document Status Update Wizard'
 
     invoice_id = fields.Many2one(
