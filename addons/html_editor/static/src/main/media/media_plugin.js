@@ -86,7 +86,7 @@ export class MediaPlugin extends Plugin {
         ],
         powerbox_categories: withSequence(40, { id: "media", name: _t("Media") }),
         powerbox_items: getPowerboxItems(this),
-        power_buttons: { commandId: "insertImage" },
+        power_buttons: withSequence(1, { commandId: "insertImage" }),
 
         /** Handlers */
         clean_handlers: this.clean.bind(this),
