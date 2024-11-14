@@ -151,19 +151,40 @@ class MrpWorkorder(models.Model):
 
     @api.depends('production_availability', 'blocked_by_workorder_ids.state', 'qty_ready')
     def _compute_state(self):
-        # Force to compute the production_availability right away.
-        # It is a trick to force that the state of workorder is computed at the end of the
-        # cyclic depends with the mo.state, mo.reservation_state and wo.state and avoid recursion error
-        self.mapped('production_availability')
         for workorder in self:
             if workorder.state not in ('pending', 'waiting', 'ready'):
                 continue
+<<<<<<< master
             blocked = any(w.state not in ('done', 'cancel') for w in workorder.blocked_by_workorder_ids)
             has_qty_ready = float_compare(workorder.qty_ready, 0, precision_rounding=workorder.product_uom_id.rounding) > 0
             if blocked and not has_qty_ready:
+||||||| 79e28829822cf346bb2e794f78a567d30f3e4b36
+            if not all([wo.state in ('done', 'cancel') for wo in workorder.blocked_by_workorder_ids]):
+=======
+            no_recursion_blocked_by_workorder_ids = workorder.blocked_by_workorder_ids.with_context(no_recursion=True)
+            if workorder.production_availability == 'assigned':
+                if all(wo.state in ('done', 'cancel') for wo in no_recursion_blocked_by_workorder_ids):
+                    workorder.state = 'ready'
+                else:
+                    workorder.state = 'pending'
+                continue
+            if self._context.get('no_recursion'):
+                continue
+            if no_recursion_blocked_by_workorder_ids and not all(wo.state in ('done', 'cancel') for wo in no_recursion_blocked_by_workorder_ids):
+>>>>>>> 903f2f7c25167b5d12415dad8cf0f38918a619a1
                 workorder.state = 'pending'
+<<<<<<< master
             elif workorder.production_availability == 'assigned' or (has_qty_ready and workorder.blocked_by_workorder_ids):
                 workorder.state = 'ready'
+||||||| 79e28829822cf346bb2e794f78a567d30f3e4b36
+                continue
+            if workorder.production_availability not in ('waiting', 'confirmed', 'assigned'):
+                continue
+            if workorder.production_availability == 'assigned' and workorder.state == 'waiting':
+                workorder.state = 'ready'
+            elif workorder.production_availability != 'assigned' and workorder.state == 'ready':
+=======
+>>>>>>> 903f2f7c25167b5d12415dad8cf0f38918a619a1
             else:
                 workorder.state = 'waiting'
 
