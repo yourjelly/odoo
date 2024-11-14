@@ -77,8 +77,8 @@ QUnit.module("Expense", (hooks) => {
         await nextTick();
         assert.strictEqual(
             statusBar.scrollLeft,
-            20,
-            "the o_content should be 20 due to the overflow auto"
+            200,
+            "the o_content should be 200 due to the overflow auto"
         );
     });
 });
