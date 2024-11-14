@@ -26,7 +26,7 @@ export async function startInteraction(I, html, options) {
 
 export async function startInteractions(
     html,
-    options = { waitForStart: true },
+    options = { waitForStart: true/*, env: env*/ },
 ) {
     defineMailModels();
     const fixture = getFixture();
@@ -42,7 +42,7 @@ export async function startInteractions(
             }
         }
     }
-    const env = await makeMockEnv();
+    const env = /*options.env || */await makeMockEnv();
     const core = env.services.website_core;
     if (options.waitForStart) {
         await core.isReady;
