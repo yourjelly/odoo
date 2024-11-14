@@ -9,3 +9,32 @@
     }
   }
 }
+
+@media (min-width: 768px) {
+  .o_carousel_inner {
+    display: flex;
+  }
+
+  .o_carousel_item {
+    margin-right: 0;
+    display: block;
+  }
+
+  //TODO: Find a better way to insert flex% (= 100/colSize)
+  .o_carousel_col_1{
+    flex: 0 0 100%;
+  }
+
+  .o_carousel_col_2{
+    flex: 0 0 50%;
+  }
+
+  .o_carousel_col_3{
+    flex: 0 0 33.33%;
+  }
+
+  .o_carousel_col_4{
+    flex: 0 0 25%;
+  }
+
+}

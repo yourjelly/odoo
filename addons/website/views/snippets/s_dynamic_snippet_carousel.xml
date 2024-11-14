@@ -12,6 +12,11 @@
             <we-input string="Slider Speed"
                   data-select-data-attribute="1s" data-name="speed_opt" data-attribute-name="carouselInterval" data-no-preview="true"
                   data-unit="s" data-save-unit="ms" data-step="0.1"/>
+            <we-button-group string="Scrolling Mode" data-name="scrolling_opt" data-no-preview="true" data-attribute-default-value="page">
+                <we-button data-select-data-attribute="page" data-attribute-name="scrollMode">All</we-button>
+                <we-button data-select-data-attribute="single" data-attribute-name="scrollMode">Single</we-button>
+            </we-button-group>
+
             <t t-out="0"/>
         </t>
     </template>
