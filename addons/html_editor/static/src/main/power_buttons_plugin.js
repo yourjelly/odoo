@@ -44,6 +44,7 @@ export class PowerButtonsPlugin extends Plugin {
     resources = {
         layout_geometry_change_handlers: this.updatePowerButtons.bind(this),
         selectionchange_handlers: this.updatePowerButtons.bind(this),
+        step_added_handlers: this.updatePowerButtons.bind(this),
     };
 
     setup() {

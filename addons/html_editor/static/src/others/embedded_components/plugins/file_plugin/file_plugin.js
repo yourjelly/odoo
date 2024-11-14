@@ -41,13 +41,11 @@ export class FilePlugin extends Plugin {
         if (!files.length) {
             return;
         }
-        const { resModel, resId } = this.recordInfo;
-        // @todo: handler errors
-        await this.services.upload.uploadFiles(files, { resModel, resId }, async (attachment) => {
-            const element = await this.renderMedia(attachment);
-            this.dependencies.dom.insert(element);
-            this.config.onAttachmentChange?.(attachment);
-        });
+        const attachments = await this.createAttachments(files);
+        const fileElements = await Promise.all(
+            attachments.map((attachment) => this.renderMedia(attachment))
+        );
+        this.insertAsGrid(fileElements);
         this.dependencies.history.addStep();
     }
 
@@ -83,6 +81,30 @@ export class FilePlugin extends Plugin {
         // @todo: handle dom changes in between
         restoreSelection();
         return input.files;
+    }
+
+    async createAttachments(files) {
+        const { resModel, resId } = this.recordInfo;
+        const attachments = [];
+        // @todo: handler errors
+        await this.services.upload.uploadFiles(files, { resModel, resId }, (attachment) => {
+            attachments.push(attachment);
+            this.config.onAttachmentChange?.(attachment);
+        });
+        return attachments;
+    }
+
+    insertAsGrid(elements) {
+        const container = this.document.createElement("div");
+        container.classList.add(
+            "d-flex",
+            "justify-content-start",
+            "flex-wrap",
+            "gap-1",
+            "oe_movable"
+        );
+        container.append(...elements);
+        this.dependencies.dom.insert(container);
     }
 
     get recordInfo() {

@@ -9,6 +9,8 @@
     outline-offset: -1px;
     display: flex;
     padding: 5px;
+    width: fit-content;
+    min-width: 250px;
 
     [data-embedded-editable] {
         background-color: white;
