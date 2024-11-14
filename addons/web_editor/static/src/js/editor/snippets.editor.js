@@ -2246,6 +2246,7 @@ var SnippetsMenu = Widget.extend({
         this.el.classList.toggle('d-none', foldState);
         this.el.ownerDocument.body.classList.toggle('editor_has_snippets', !foldState);
         this.folded = !!foldState;
+        this.options?.wysiwyg?.onSnippetsFoldChange?.(this.folded);
     },
     /**
      * Get the editable area.

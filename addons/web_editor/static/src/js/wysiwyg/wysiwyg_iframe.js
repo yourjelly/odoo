@@ -78,7 +78,11 @@ patch(Wysiwyg.prototype, {
         var self = this;
         this.$editable = $('<div class="note-editable oe_structure odoo-editor-editable"></div>');
         this.$el.removeClass('note-editable oe_structure odoo-editor-editable');
-        this.$iframe = $('<iframe class="wysiwyg_iframe o_iframe">').css({
+        this.$iframe = $(
+            `<iframe class="wysiwyg_iframe o_iframe ${
+                this.snippetsMenu && !this.snippetsMenu.folded ? "has_snippets_sidebar" : ""
+            }">`
+        ).css({
             width: '100%'
         });
         var avoidDoubleLoad = 0; // this bug only appears on some configurations.
@@ -216,6 +220,18 @@ patch(Wysiwyg.prototype, {
             }
         } else {
             return super._onScroll(...arguments);
+        }
+    },
+
+    onSnippetsFoldChange(folded) {
+        const iframe = this.$iframe?.get(0);
+        if (!iframe) {
+            return;
+        }
+        if (folded) {
+            iframe.classList.remove("has_snippets_sidebar");
+        } else {
+            iframe.classList.add("has_snippets_sidebar");
         }
     },
 
