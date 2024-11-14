@@ -30,6 +30,7 @@ import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { escape, sprintf } from "@web/core/utils/strings";
 import { isDisplayStandalone, isIOS, isMobileOS } from "@web/core/browser/feature_detection";
+import { CreatePollDialog } from "./create_poll_dialog";
 
 const EDIT_CLICK_TYPE = {
     CANCEL: "cancel",
@@ -86,6 +87,7 @@ export class Composer extends Component {
 
     setup() {
         super.setup();
+        this.dialogService = useService("dialog");
         this.isMobileOS = isMobileOS();
         this.isIosPwa = isIOS() && isDisplayStandalone();
         this.OR_PRESS_SEND_KEYBIND = markup(
@@ -297,6 +299,15 @@ export class Composer extends Component {
 
     get sendKeybinds() {
         return this.props.mode === "extended" ? [_t("CTRL"), _t("Enter")] : [_t("Enter")];
+    }
+
+    onClickCreatePoll() {
+        this.dialogService.add(CreatePollDialog, {
+            title: _t("Create a Poll"),
+            confirmText: _t("Post"),
+            size: "md",
+            thread: this.thread,
+        });
     }
 
     get showComposerAvatar() {

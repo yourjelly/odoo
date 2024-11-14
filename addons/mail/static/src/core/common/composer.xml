@@ -133,6 +133,7 @@
     >
         <div class="o-mail-Composer-mainActions d-flex flex-grow-1 align-items-baseline" t-att-class="{ 'mt-1': !props.composer.message and !env.inChatWindow and !extended }" t-ref="main-actions">
             <t t-call="mail.Composer.emojiPicker"/>
+            <button t-on-click="onClickCreatePoll" class="btn btn-link rounded-pill"><i class="fa fa-plus-circle"/></button>
             <t t-call="mail.Composer.attachFiles"/>
             <t t-if="extended and ui.isSmall and props.composer.message" t-call="mail.Composer.sendButton"/>
             <t t-if="!extended" t-call="mail.Composer.fullComposer"/>
