@@ -1,6 +1,7 @@
 import { uniqueId } from "@web/core/utils/functions";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { renderToElement } from "@web/core/utils/render";
+import * as masonryUtils from "@web_editor/js/common/masonry_layout_utils";
 
 
 const GalleryWidget = publicWidget.Widget.extend({
@@ -8,6 +9,8 @@ const GalleryWidget = publicWidget.Widget.extend({
     selector: '.s_image_gallery:not(.o_slideshow)',
     events: {
         'click img': '_onClickImg',
+        "click #btn-show-more": "_showMore",
+        "click #btn-hide-extra": "_hideExtra",
     },
 
     /**
@@ -16,6 +19,12 @@ const GalleryWidget = publicWidget.Widget.extend({
     start() {
         this._super(...arguments);
         this.originalSources = [...this.el.querySelectorAll("img")].map(img => img.getAttribute("src"));
+
+        this._maybeEnableExpandControl();
+
+        if (this.el.classList.contains("o_masonry")) {
+            masonryUtils.observeMasonryContainerResize(this.el);
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -98,6 +107,110 @@ const GalleryWidget = publicWidget.Widget.extend({
             // from collapsing.
             ev.stopPropagation();
         }
+    },
+    /**
+     * Manages visibility of gallery items and expand controls
+     *
+     * @private
+     */
+    _maybeEnableExpandControl() {
+        const galleryItems = this._getSortedGalleryItems();
+        const maxAllowedItemCount =
+            parseInt(this.el.dataset.expandableCount) || galleryItems.length;
+
+        const showMoreButton = this.el.querySelector("#show-more-container");
+        if (showMoreButton) {
+            // Display expand button if expandable setting is enabled
+            if (
+                this.el.dataset.expandable === "true" &&
+                galleryItems.length > maxAllowedItemCount
+            ) {
+                showMoreButton.classList.remove("d-none");
+            }
+        }
+    },
+    /**
+     * Displays hidden gallery items
+     *
+     * @private
+     */
+    _showMore() {
+        const galleryItems = this._getSortedGalleryItems();
+
+        // Show all items and toggle visibility of expand buttons
+        const showMoreButton = this.el.querySelector("#show-more-container");
+        const hideExtraButton = this.el.querySelector("#btn-hide-extra");
+
+        if (showMoreButton && hideExtraButton) {
+            showMoreButton.classList.add("d-none");
+            hideExtraButton.classList.remove("d-none");
+
+            for (const item of galleryItems) {
+                item.classList.remove("d-none");
+            }
+        }
+    },
+    /**
+     * Hides extra gallery items
+     *
+     * @private
+     */
+    _hideExtra() {
+        const galleryItems = this._getSortedGalleryItems();
+        const maxAllowedItemCount =
+            parseInt(this.el.dataset.expandableCount) || galleryItems.length;
+
+        const showMoreButton = this.el.querySelector("#show-more-container");
+        const hideExtraButton = this.el.querySelector("#btn-hide-extra");
+
+        if (showMoreButton && hideExtraButton) {
+            // Hide items beyond max allowed count
+            galleryItems.forEach((item, index) => {
+                if (index >= maxAllowedItemCount) {
+                    item.classList.add("d-none");
+                }
+            });
+
+            // Toggle expand button visibility
+            hideExtraButton.classList.add("d-none");
+            showMoreButton.classList.remove("d-none");
+
+            // Bring the gallery into view
+            showMoreButton.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+            });
+        }
+    },
+    /**
+     * Retrieves gallery items.
+     *
+     * Handles different gallery layouts (`o_grid`, `o_masonry`, `o_col`) and
+     * sorts items according to their `data-index` attribute.
+     *
+     * @private
+     * @returns {Array} An array of sorted elements in the gallery by their
+     *                  index.
+     */
+    _getSortedGalleryItems() {
+        const snippetEl = this.el;
+        let galleryItems;
+
+        if (snippetEl.classList.contains("o_grid")) {
+            // For grid layout images are wrapped in div (.o_grid_item)
+            galleryItems = Array.from(snippetEl.querySelectorAll(".o_grid_item")).sort(
+                (a, b) =>
+                    parseInt(a.querySelector("[data-index]").dataset.index) -
+                    parseInt(b.querySelector("[data-index]").dataset.index)
+            );
+        } else {
+            // For `o_masonry` and `o_col` layouts
+            galleryItems = Array.from(snippetEl.querySelectorAll("[data-index]")).sort(
+                (a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index)
+            );
+        }
+
+        return galleryItems;
     },
 });
 
