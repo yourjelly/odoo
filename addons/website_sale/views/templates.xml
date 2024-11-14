@@ -183,9 +183,11 @@
 
     <template id="products_item" name="Products item">
         <!-- TODO VCR -->
-        <form action="/shop/cart/update" method="post" class="oe_product_cart h-100 d-flex"
+        <form
+            class="oe_product_cart h-100 d-flex"
             t-att-data-publish="product.website_published and 'on' or 'off'"
-            itemscope="itemscope" itemtype="http://schema.org/Product">
+            itemscope="itemscope" itemtype="http://schema.org/Product"
+        >
             <t t-set="product_href" t-value="keep(product.website_url, page=(pager['page']['num'] if pager['page']['num']&gt;1 else None)) + selected_attributes_hash" />
             <t t-set="image_type" t-value="product._get_suitable_image_size(ppr, td_product['x'], td_product['y'])"/>
 
@@ -1337,7 +1339,7 @@
                             <div t-field="product.description_ecommerce" class="oe_structure"
                                 placeholder="A detailed, formatted description to promote your product on this page. Use '/' to discover more features."/>
                             <!-- TODO VCR -->
-                            <form t-if="product._is_add_to_cart_possible()" action="/shop/cart/update" method="POST">
+                            <form t-if="product._is_add_to_cart_possible()">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" t-nocache="The csrf token must always be up to date."/>
                                 <div class="js_product js_main_product mb-3">
                                     <div>

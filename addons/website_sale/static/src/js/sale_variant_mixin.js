@@ -133,40 +133,6 @@ var VariantMixin = {
     },
 
     /**
-     * Hack to add and remove from cart with json
-     * TODO VCR rename this weird thing
-     * @param {MouseEvent} ev
-     */
-    onClickAddCartJSON: function (ev) {
-        ev.preventDefault();
-        var $link = $(ev.currentTarget);
-        var $input = $link.closest('.input-group').find("input");
-        var min = parseFloat($input.data("min") || 0);
-        var max = parseFloat($input.data("max") || Infinity);
-        var previousQty = parseFloat($input.val() || 0, 10);
-        var quantity = ($link.has(".fa-minus").length ? -1 : 1) + previousQty;
-        var newQty = quantity > min ? (quantity < max ? quantity : max) : min;
-
-        if (newQty !== previousQty) {
-            $input.val(newQty).trigger('change');
-        }
-        return false;
-    },
-
-    /**
-     * When the quantity is changed, we need to query the new price of the product.
-     * Based on the pricelist, the price might change when quantity exceeds a certain amount.
-     *
-     * @param {MouseEvent} ev
-     */
-    onChangeAddQuantity: function (ev) {
-        const $parent = $(ev.currentTarget).closest('form');
-        if ($parent.length > 0) {
-            this.triggerVariantChange($parent);
-        }
-    },
-
-    /**
      * Triggers the price computation and other variant specific changes
      *
      * @param {$.Element} $container

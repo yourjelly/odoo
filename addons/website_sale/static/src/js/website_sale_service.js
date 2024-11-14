@@ -17,7 +17,7 @@ import { session } from '@web/session';
 const { DateTime } = luxon;
 
 /**
- * Manages product addition via the `addToCart` function.
+ * Manages product addition via the {@link addToCart} function.
  *
  * This function handles the process of adding products to the cart, including:
  * - Opening configurators if needed.
@@ -27,21 +27,35 @@ const { DateTime } = luxon;
  * - Updating the cart count in the navbar.
  *
  * Override this class to implement additional checks or
- * provide relevant information before adding a product to the cart.
+ * provide relevant information when adding a product to the cart.
  */
 export class WebsiteSaleService {
     static dependencies = ['cartNotificationService', 'dialog'];
 
     /**
-     * The service is initialized in `setup` to allow patching, as constructors can't be patched.
+     * Creates an instance of the service and initializes it using the {@link setup} method.
+     *
+     * The constructor delegates initialization to {@link setup}, allowing dependencies to be
+     * patched, as constructors cannot be patched.
+     *
+     * @returns {Object} - The initialized service object returned by {@link setup}.
      */
     constructor() {
         return this.setup(...arguments);
     }
 
-    setup(_env, dependencies) {
-        this.cartNotificationService = dependencies.cartNotificationService;
-        this.dialog = dependencies.dialog;
+    /**
+     * Initializes the service by wiring up dependencies and setting up methods.
+     *
+     * @param {import("@web/env").OdooEnv} _env - The environment object, not used here.
+     * @param {import("services").ServiceFactories} services - An object containing instances of the
+     *      required services specified in the {@link dependencies} array.
+     *
+     * @returns {Object} - An object exposing the public methods of the service.
+     */
+    setup(_env, services) {
+        this.cartNotificationService = services.cartNotificationService;
+        this.dialog = services.dialog;
         this.rpc = rpc;  // To be overridable in tests.
 
         // Only expose `addToCart` in the service registry.
@@ -107,7 +121,7 @@ export class WebsiteSaleService {
         },
         isBuyNow=false
     ) {
-        if (!productId) {
+        if (!productId && ptavs.length) { // TODO VCR do that in the backend?
             productId = await this.rpc('/sale/create_product_variant', {
                 product_template_id: productTemplateId,
                 product_template_attribute_value_ids: ptavs,
@@ -343,15 +357,16 @@ export class WebsiteSaleService {
     ) {
         //this._trackProducts([mainProduct, ...optionalProducts]);
 
-        const data = await this.rpc('/shop/cart/update', {
+        const data = await this.rpc('/shop/cart/add', {
             product_template_id: productTemplateId,
             product_id: productId,
-            add_qty: quantity,
+            quantity: quantity,
             product_custom_attribute_values: productCustomAttributeValues,
             no_variant_attribute_value_ids: noVariantAttributeValues,
             force_create: true,
             ...rest
         });
+        // TODO VCR should not redirect if errors.
         if (isBuyNow) {
             window.location = '/shop/cart';
         } else if (session.add_to_cart_action === 'stay') {  // TODO VCR check condition and navbar code

@@ -5,10 +5,11 @@ from odoo.http import request, route
 from odoo.addons.sale.controllers.combo_configurator import (
     SaleComboConfiguratorController,
 )
+from odoo.addons.website_sale.controllers.cart import Cart
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
 
-class WebsiteSaleComboConfiguratorController(SaleComboConfiguratorController, WebsiteSale):
+class WebsiteSaleComboConfiguratorController(SaleComboConfiguratorController, Cart, WebsiteSale):
 
     @route(
         route='/website_sale/combo_configurator/get_data',

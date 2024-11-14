@@ -14,11 +14,9 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
     selector: '.oe_website_sale',
     events: Object.assign({}, VariantMixin.events || {}, {
         'change form .js_product:first input[name="add_qty"]': '_onChangeAddQuantity',
-        'click a.js_add_cart_json': '_onClickAddCartJSON',
+        'click a.js_add_cart_json': '_setQuantity',
         'click .a-submit': '_onClickSubmit',
         'change form.js_attributes input, form.js_attributes select': '_onChangeAttribute',
-        'mouseup form.js_add_cart_json label': '_onMouseupAddCartLabel',
-        'touchend form.js_add_cart_json label': '_onMouseupAddCartLabel',
         'submit .o_wsale_products_searchbar_form': '_onSubmitSaleSearch',
         'click #add_to_cart, .o_we_buy_now, #products_grid .o_wsale_product_btn .a-submit': 'async _onClickAdd',
         'click input.js_product_change': 'onChangeVariant',
@@ -326,18 +324,44 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
         return def();
     },
     /**
+     * Hack to add and remove from cart with json
+     *
      * @private
      * @param {MouseEvent} ev
+     *
+     * @returns {void}
      */
-    _onClickAddCartJSON: function (ev) {
-        this.onClickAddCartJSON(ev);
+    _setQuantity: function (ev) {
+        ev.preventDefault();
+
+        const input = ev.currentTarget.closest('.input-group').querySelector('input');
+        const min = parseFloat(input.dataset.min || 0);
+        const max = parseFloat(input.dataset.max || Infinity);
+        const previousQty = parseFloat(input.value || 0, 10);
+        const quantity = (
+            ev.currentTarget.querySelector('i').classList.contains('fa-minus') ? -1 : 1
+        ) + previousQty;
+        const newQty = quantity > min ? (quantity < max ? quantity : max) : min;
+
+        if (newQty !== previousQty) {
+            input.value = newQty
+            $(input).trigger('change')  // TODO VCR WTF? .dispatchEvent(new Event('change'));
+        }
     },
     /**
+     * When the quantity is changed, we need to query the new price of the product.
+     * Based on the pricelist, the price might change when quantity exceeds a certain amount.
+     *
      * @private
-     * @param {Event} ev
+     * @param {MouseEvent} ev
+     *
+     * @returns {void}
      */
     _onChangeAddQuantity: function (ev) {
-        this.onChangeAddQuantity(ev);
+        const $parent = $(ev.currentTarget).closest('form');
+        if ($parent.length > 0) {
+            this.triggerVariantChange($parent);
+        }
     },
     /**
      * @private
@@ -378,21 +402,6 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
             }
             $(ev.currentTarget).closest("form").submit();
         }
-    },
-    /**
-     * @private
-     * @param {Event} ev
-     */
-    _onMouseupAddCartLabel: function (ev) { // change price when they are variants
-        var $label = $(ev.currentTarget);
-        var $price = $label.parents("form:first").find(".oe_price .oe_currency_value");
-        if (!$price.data("price")) {
-            $price.data("price", parseFloat($price.text()));
-        }
-        var value = $price.data("price") + parseFloat($label.find(".badge span").text() || 0);
-
-        var dec = value % 1;
-        $price.html(value + (dec < 0.01 ? ".00" : (dec < 1 ? "0" : "") ));
     },
     /**
      * @private
