@@ -4,6 +4,7 @@ import { TourStepAutomatic } from "./tour_step_automatic";
 import { Macro } from "@web/core/macro";
 import { browser } from "@web/core/browser/browser";
 import { setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
+import { delay } from "@web/core/utils/concurrency";
 
 export class TourAutomatic {
     mode = "auto";
@@ -49,12 +50,9 @@ export class TourAutomatic {
                                 // eslint-disable-next-line no-debugger
                                 debugger;
                             }
-                            // This delay is important for making the current set of tour tests pass.
-                            // IMPROVEMENT: Find a way to remove this delay.
-                            await new Promise((resolve) => requestAnimationFrame(resolve));
-                            await new Promise((resolve) =>
-                                browser.setTimeout(resolve, this.stepDelay)
-                            );
+                            if (this.stepDelay) {
+                                await delay(this.stepDelay);
+                            }
                         },
                     },
                     {
@@ -70,9 +68,7 @@ export class TourAutomatic {
                                 if (!step.skipped && this.showPointerDuration > 0 && step.element) {
                                     // Useful in watch mode.
                                     pointer.pointTo(step.element, this);
-                                    await new Promise((r) =>
-                                        browser.setTimeout(r, this.showPointerDuration)
-                                    );
+                                    await delay(this.showPointerDuration);
                                     pointer.hide();
                                 }
                                 console.log(step.element);
@@ -99,7 +95,7 @@ export class TourAutomatic {
 
         this.macro = new Macro({
             name: this.name,
-            checkDelay: this.checkDelay || 500,
+            checkDelay: this.checkDelay || 400,
             steps: macroSteps,
             onError: (error) => {
                 this.throwError(error);
