@@ -62,7 +62,8 @@ const addNewSocialNetwork = function (optionIndex, linkIndex, url, replaceIcon =
     },
     {
         content: "Ensure new option is found",
-        trigger: `we-list table input:eq(${optionIndex})[data-list-position="${optionIndex}"][data-dom-position="${linkIndex}"][data-undeletable=false]`,
+        // i was here!
+        trigger: `we-list table input:eq(${optionIndex})[data-list-position="${optionIndex}"][data-dom-position="${optionIndex}"][data-undeletable=true]`,
     },
     {
         content: "Ensure new link is found",
@@ -212,6 +213,37 @@ registerWebsitePreviewTour('snippet_social_media', {
                  ":has(a:eq(0)[href='https://twitter.com/Odoo']:has(img))" +
                  ":has(a:eq(9)[href='https://google.com']:has(img))" +
                  ":has(a:eq(10)[href='https://facebook.com']:has(img))",
+    },
+    // Additional test steps to check URL change and icon update
+    {
+        content: 'Change Twitter URL to a different one',
+        trigger: 'we-list table input:eq(0)',
+        run: "edit https://www.linkedin.com/company/odoo && click body",
+    },
+    {
+        content: "Ensure LinkedIn icon is found",
+        trigger: ":iframe .s_social_media" +
+                 ":has(a:eq(0)[href='https://www.linkedin.com/company/odoo']:has(i.fa-linkedin))",
+    },
+    {
+        content: 'Change LinkedIn URL to a different one',
+        trigger: 'we-list table input:eq(1)',
+        run: "edit https://www.instagram.com/explore/tags/odoo && click body",
+    },
+    {
+        content: "Ensure Instagram icon is found",
+        trigger: ":iframe .s_social_media" +
+                 ":has(a:eq(1)[href='https://www.instagram.com/explore/tags/odoo']:has(i.fa-instagram))",
+    },
+    {
+        content: 'Change Instagram URL to a different one',
+        trigger: 'we-list table input:eq(2)',
+        run: "edit https://github.com/odoo && click body",
+    },
+    {
+        content: "Ensure GitHub icon is found",
+        trigger: ":iframe .s_social_media" +
+                 ":has(a:eq(2)[href='https://github.com/odoo']:has(i.fa-github))",
     },
     ...clickOnSave(),
 ]);

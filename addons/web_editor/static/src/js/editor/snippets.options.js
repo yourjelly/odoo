@@ -2475,7 +2475,8 @@ const ListUserValueWidget = UserValueWidget.extend({
         if (this.el.dataset.newElementsNotToggleable) {
             recordData.notToggleable = true;
         }
-        this._addItemToTable(undefined, this.el.dataset.defaultValue, recordData);
+        const { id } = recordData;
+        this._addItemToTable(id, this.el.dataset.defaultValue, recordData);
         this._notifyCurrentState();
         // Scroll to the new list element.
         this.el.querySelector('tr:last-child')

@@ -164,7 +164,6 @@ options.registry.SocialMedia = options.Class.extend({
                             ? `fa-${entry.media}-play`
                             : `fa-${entry.media}`
                         : "fa-pencil";
-                    this._removeSocialMediaClasses(anchorEl);
                     iEl.classList.add(faIcon);
                 }
                 // new socal media
@@ -236,10 +235,11 @@ options.registry.SocialMedia = options.Class.extend({
             while (this.entriesNotInDom.find(entry => entry.listPosition === listPosition)) {
                 listPosition++;
             }
+            const socialMediaInDB = dbSocialValues[`social_${media}`];
             return {
                 id: weUtils.generateHTMLId(),
                 display_name: media ? dbSocialValues[`social_${media}`] : el.getAttribute('href'),
-                placeholder: `${dbSocialValues[`social_${media}`]} || "example"}.com/yourPage`,
+                placeholder: socialMediaInDB ? socialMediaInDB : `https://example.com/yourPage`,
                 undeletable: !!media,
                 notToggleable: !media,
                 selected: true,
