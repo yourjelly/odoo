@@ -87,6 +87,23 @@ class TestWebsiteSaleDelivery(HttpCase):
             'code': 'infinite-money-glitch',
         })
 
+        self.discount_50 = self.env['loyalty.program'].create({
+            'name': "50% discount code",
+            'program_type': 'promo_code',
+            'trigger': 'with_code',
+            'applies_on': 'current',
+            'rule_ids': [Command.create({
+                'mode': 'with_code',
+                'code': 'test-50pc',
+            })],
+            'reward_ids': [Command.create({
+                'reward_type': 'discount',
+                'discount': 50.0,
+                'discount_mode': 'percent',
+                'discount_applicability': 'order',
+            })],
+        })
+
         self.product_delivery_normal1 = self.env['product.product'].create({
             'name': 'Normal Delivery Charges',
             'invoice_policy': 'order',
@@ -114,6 +131,13 @@ class TestWebsiteSaleDelivery(HttpCase):
             'website_published': True,
             'product_id': self.product_delivery_normal2.id,
         })
+
+    def test_update_shipping_after_discount(self):
+        """
+        Verify that after applying a discount code, any `free_over` shipping gets recalculated.
+        """
+        self.normal_delivery.write({'free_over': True, 'amount': 75.0})
+        self.start_tour('/shop', 'update_shipping_after_discount', login='admin')
 
     def test_shop_sale_gift_card_keep_delivery(self):
         # Get admin user and set his preferred shipping method to normal delivery
