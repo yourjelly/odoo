@@ -47,7 +47,6 @@ import {
 } from "@odoo/owl";
 import { isCSSColor } from '@web/core/utils/colors';
 import { EmojiPicker } from '@web/core/emoji_picker/emoji_picker';
-import { Tooltip } from "@web/core/tooltip/tooltip";
 
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
@@ -156,6 +155,7 @@ export class Wysiwyg extends Component {
         this.notification = useService("notification");
         this.popover = useService("popover");
         this.busService = this.env.services.bus_service;
+        this.tooltip = useService("tooltip");
         this.user = user;
         this.snippetsMenuContainer = useRef("snippets-menu-container");
         this.mutex = new Mutex();
@@ -516,6 +516,8 @@ export class Wysiwyg extends Component {
             convertNumericToUnit: options.convertNumericToUnit,
             autoActivateContentEditable: this.options.autoActivateContentEditable,
         }, editorCollaborationOptions));
+
+        this.tooltip.setCustomDOM(this.odooEditor.document);
 
         this.odooEditor.addEventListener('contentChanged', function () {
             self.$editable.trigger('content_changed');
@@ -2313,8 +2315,7 @@ export class Wysiwyg extends Component {
                 }
                 // Tooltips need to be cleared before leaving the editor.
                 this.saving_mutex.exec(() => {
-                    const removeTooltip = this.popover.add(e.target, Tooltip, { tooltip: _t('Double-click to edit') });
-                    this.tooltipTimeouts.push(setTimeout(() => removeTooltip(), 800));
+                    this.tooltip.add(e.target, { tooltip:_t('Double-click to edit') });
                 });
             }, 400));
         }

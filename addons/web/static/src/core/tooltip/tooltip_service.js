@@ -40,7 +40,6 @@ import { whenReady } from "@odoo/owl";
  */
 
 const OPEN_DELAY = 400;
-const CLOSE_DELAY = 200;
 
 export const tooltipService = {
     dependencies: ["popover"],
@@ -63,23 +62,6 @@ export const tooltipService = {
         }
 
         /**
-         * Checks that the target is in the DOM and we're hovering the target.
-         * @returns {boolean}
-         */
-        function shouldCleanup() {
-            if (!target) {
-                return false;
-            }
-            if (!document.body.contains(target)) {
-                return true; // target is no longer in the DOM
-            }
-            if (hasTouch() && !mouseEntered) {
-                return !touchPressed;
-            }
-            return false;
-        }
-
-        /**
          * Checks whether there is a tooltip registered on the event target, and
          * if there is, creates a timeout to open the corresponding tooltip
          * after a delay.
@@ -98,9 +80,6 @@ export const tooltipService = {
         function openTooltip(el, { tooltip = "", template, info, position, delay = OPEN_DELAY }) {
             target = el;
             cleanup();
-            if (!tooltip && !template) {
-                return;
-            }
 
             openTooltipTimeout = browser.setTimeout(() => {
                 // verify that the element is still in the DOM
@@ -178,19 +157,11 @@ export const tooltipService = {
             touchPressed = true;
             openElementsTooltip(ev.target);
         }
-
-        whenReady(() => {
-            // Regularly check that the target is still in the DOM and if not, close the tooltip
-            browser.setInterval(() => {
-                if (shouldCleanup()) {
-                    cleanup();
-                }
-            }, CLOSE_DELAY);
-
+        function setCustomDOM(customDocument = document) {
             if (hasTouch()) {
-                document.body.addEventListener("touchstart", onTouchStart);
+                customDocument.body.addEventListener("touchstart", onTouchStart);
 
-                document.body.addEventListener("touchend", (ev) => {
+                customDocument.body.addEventListener("touchend", (ev) => {
                     if (ev.target.matches("[data-tooltip], [data-tooltip-template]")) {
                         if (!ev.target.dataset.tooltipTouchTapToShow) {
                             touchPressed = false;
@@ -198,7 +169,7 @@ export const tooltipService = {
                     }
                 });
 
-                document.body.addEventListener("touchcancel", (ev) => {
+                customDocument.body.addEventListener("touchcancel", (ev) => {
                     if (ev.target.matches("[data-tooltip], [data-tooltip-template]")) {
                         if (!ev.target.dataset.tooltipTouchTapToShow) {
                             touchPressed = false;
@@ -208,14 +179,18 @@ export const tooltipService = {
             }
 
             // Listen (using event delegation) to "mouseenter" events to open the tooltip if any
-            document.body.addEventListener("mouseenter", onMouseenter, { capture: true });
+            customDocument.body.addEventListener("mouseenter", onMouseenter, { capture: true });
             // Listen (using event delegation) to "mouseleave" events to close the tooltip if any
-            document.body.addEventListener("mouseleave", onMouseleave, { capture: true });
+            customDocument.body.addEventListener("mouseleave", onMouseleave, { capture: true });
+        }
+        whenReady(() => {
+            setCustomDOM();
         });
 
         return {
             add(el, params) {
                 elementsWithTooltips.set(el, params);
+                openTooltip(el, elementsWithTooltips.get(el));
                 return () => {
                     elementsWithTooltips.delete(el);
                     if (target === el) {
@@ -223,6 +198,7 @@ export const tooltipService = {
                     }
                 };
             },
+            setCustomDOM,
         };
     },
 };
