@@ -1027,7 +1027,7 @@ class ChromeBrowser:
             headless=True
     ):
         headless_switches = {
-            '--headless': '',
+            '--headless': 'new',
             '--disable-extensions': '',
             '--disable-background-networking' : '',
             '--disable-background-timer-throttling' : '',
