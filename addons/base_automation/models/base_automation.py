@@ -725,7 +725,23 @@ class BaseAutomation(models.Model):
                 records = create.origin(self.with_env(automations.env), vals_list, **kw)
                 # check postconditions, and execute actions on the records that satisfy them
                 for automation in automations.with_context(old_values=None):
-                    automation._process(automation._filter_post(records, feedback=True))
+                    if automation.filter_pre_domain:
+                        pre_filter_id_fields = [
+                            leaf[0] for leaf in safe_eval.safe_eval(automation.filter_pre_domain)
+                            if leaf[0].partition('_')[-1] == 'id'
+                        ]
+                        r = records.sudo().read(pre_filter_id_fields)
+                        passing_ids = []
+                        for read_vals in r:
+                            rec_id = read_vals.pop('id')
+                            # vacuously true, I guess it's fine?
+                            if all(val is False for val in read_vals):
+                                passing_ids.append(rec_id)
+                        passing_records = self.env[self._name].browse(passing_ids)
+                        passing_records += automation._filter_pre(records - passing_records, feedback=True)
+                    else:
+                        passing_records = records
+                    automation._process(automation._filter_post(passing_records, feedback=True))
                 return records.with_env(self.env)
 
             return create
