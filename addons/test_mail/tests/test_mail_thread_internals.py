@@ -15,17 +15,45 @@ from odoo.tests import Form, tagged, users
 from odoo.tools import mute_logger
 
 
-@tagged('mail_thread')
+@tagged('mail_thread', 'mail_tools')
 class TestAPI(MailCommon, TestRecipients):
 
     @classmethod
     def setUpClass(cls):
-        super(TestAPI, cls).setUpClass()
-        cls.ticket_record = cls.env['mail.test.ticket'].with_context(cls._test_context).create({
+        super().setUpClass()
+        cls.user_employee.write({'groups_id': [(4, cls.env.ref("base.group_partner_manager").id)]})
+        cls.test_partner = cls.env['res.partner'].create({
+            'email': '"Test External" <test.external@example.com>',
+            'mobile': '+32455001122',
+            'name': 'Test External',
+        })
+        cls.ticket_record = cls.env['mail.test.ticket.mc'].create({
+            'company_id': cls.user_employee.company_id.id,
             'email_from': '"Paulette Vachette" <paulette@test.example.com>',
+            'mobile_number': '+32455998877',
+            'phone_number': 'wrong',
             'name': 'Test',
             'user_id': cls.user_employee.id,
         })
+        cls.ticket_records = cls.ticket_record + cls.env['mail.test.ticket.mc'].create([
+            {
+                'email_from': '"Maybe Paulette" <PAULETTE@test.example.com>',
+                'name': 'Duplicate email',
+            }, {
+                'email_from': '"Multi Customer" <multi@test.example.com>, "Multi 2" <multi.2@test.example.com>',
+                'name': 'Multi Email',
+            }, {
+                'email_from': 'wrong',
+                'mobile_number': '+32455000001',
+                'name': 'Wrong email',
+            }, {
+                'email_from': False,
+                'name': 'Falsy email',
+            }, {
+                'email_from': f'"Other Name" <{cls.test_partner.email_normalized}>',
+                'name': 'Test Partner Email',
+            },
+        ])
 
     @users('employee')
     def test_body_escape(self):
@@ -97,6 +125,103 @@ class TestAPI(MailCommon, TestRecipients):
         self.assertEqual(message.body, expected)
         ticket_record._message_update_content(message, "Hello <R&D/>")
         self.assertEqual(message.body, Markup('<p>Hello &lt;R&amp;D/&gt;<span class="o-mail-Message-edited"></span></p>'))
+
+    @users('employee')
+    def test_mail_partner_find_from_emails(self):
+        """ Test '_partner_find_from_emails'. Multi mode is mainly targeting
+        finding or creating partners based on record information or message
+        history. """
+        existing_partners = self.env['res.partner'].sudo().search([])
+        tickets = self.ticket_records.with_user(self.env.user)
+        self.assertEqual(len(tickets), 6)
+        res = tickets._partner_find_from_emails({ticket: [ticket.email_from] for ticket in tickets})
+        self.assertEqual(len(tickets), len(res))
+
+        # fetch partners that should have been created
+        new = self.env['res.partner'].search([('email_normalized', '=', 'paulette@test.example.com')])
+        self.assertEqual(len(new), 1, 'Should have created once the customer, even if found in various duplicates')
+        self.assertNotIn(new, existing_partners)
+        new_wrong = self.env['res.partner'].search([('email', '=', 'wrong')])
+        self.assertEqual(len(new_wrong), 1, 'Should have created once the wrong email')
+        self.assertNotIn(new, new_wrong)
+        new_multi = self.env['res.partner'].search([('email_normalized', '=', 'multi@test.example.com')])
+        self.assertEqual(len(new_multi), 1, 'Should have created a based for multi email, using the first found email')
+        self.assertNotIn(new, new_multi)
+
+        # assert results: found / create partners and their values (if applies)
+        record_customer_values = {
+            'company_id': self.user_employee.company_id,
+            'email': 'paulette@test.example.com',
+            'mobile': '+32455998877',
+            'name': 'Paulette Vachette',
+            'phone': 'wrong',
+        }
+        expected_all = [
+            (new, [record_customer_values]),
+            (new, [record_customer_values]),
+            (new_multi, [{  # not the actual record customer hence no mobile / phone, see _get_customer_information
+                'company_id': self.user_employee.company_id,
+                'email': 'multi@test.example.com',
+                'mobile': False,
+                'name': 'Multi Customer',
+                'phone': False,
+            }]),
+            (new_wrong, [{'name': 'wrong', 'email': 'wrong', 'company_id': self.env['res.company']}]),
+            (self.env['res.partner'], [{}]),
+            (self.test_partner, [{}]),
+        ]
+        for ticket, (exp_partners, exp_values_list) in zip(tickets, expected_all):
+            partners = res[ticket.id]
+            with self.subTest(ticket_name=ticket.name):
+                self.assertEqual(partners, exp_partners)
+                for partner, exp_values in zip(partners, exp_values_list):
+                    for fname, fvalue in exp_values.items():
+                        self.assertEqual(partners[fname], fvalue)
+
+    @users('employee')
+    def test_mail_partner_find_from_emails_single(self):
+        """ Test single shortcut for '_partner_find_from_emails' """
+        # create a mess, mix of portal / internal users + customer, to test ordering
+        portal_user, internal_user = self.env['res.users'].sudo().create([
+            {
+                'email': 'test.ordering@test.example.com',
+                'groups_id': [(4, self.env.ref('base.group_portal').id)],
+                'login': 'order_portal',
+                'name': 'Portal Test User for ordering',
+            }, {
+                'email': 'test.ordering@test.example.com',
+                'groups_id': [(4, self.env.ref('base.group_user').id)],
+                'login': 'order_internal',
+                'name': 'Internal Test User for ordering',
+            }
+        ])
+        dupe_partner = self.env['res.partner'].create({'email': 'test.ordering@test.example.com', 'name': 'Dupe Partner'})
+        self.assertTrue(portal_user.partner_id.id < internal_user.partner_id.id)
+        self.assertTrue(internal_user.partner_id.id < dupe_partner.id)
+
+        ticket = self.ticket_record.with_user(self.env.user)
+        res = ticket._partner_find_from_emails_single([
+            'raoul@test.example.com',
+            ticket.email_from,
+            self.test_partner.email,
+            'test.ordering@test.example.com',
+        ])
+
+        # new - extra email
+        other = res[0]
+        self.assertEqual(other.company_id, self.user_employee.company_id)
+        self.assertEqual(other.email, "raoul@test.example.com")
+        self.assertFalse(other.mobile)
+        self.assertEqual(other.name, "raoul@test.example.com")
+        # new - linked to record
+        customer = res[1]
+        self.assertEqual(customer.company_id, self.user_employee.company_id)
+        self.assertEqual(customer.email, "paulette@test.example.com")
+        self.assertEqual(customer.mobile, "+32455998877", "Should come from record, see '_get_customer_information'")
+        self.assertEqual(customer.name, "Paulette Vachette")
+        # found
+        self.assertEqual(res[2], self.test_partner)
+        self.assertEqual(res[3], internal_user.partner_id)
 
     @users('employee')
     def test_message_get_default_recipients(self):

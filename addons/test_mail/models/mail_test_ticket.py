@@ -87,15 +87,16 @@ class MailTestTicket(models.Model):
     def _get_customer_information(self):
         email_normalized_to_values = super()._get_customer_information()
 
-        for record in self.filtered('email_from'):
-            email_from_normalized = email_normalize(record.email_from)
-            if not email_from_normalized:  # do not fill Falsy with random data
+        for ticket in self.filtered('email_from'):
+            email_from_normalized = email_normalize(ticket.email_from)
+            # do not fill Falsy with random data, unless monorecord (= always correct)
+            if not email_from_normalized and len(self) > 1:
                 continue
             values = email_normalized_to_values.setdefault(email_from_normalized, {})
             if not values.get('mobile'):
-                values['mobile'] = record.mobile_number
+                values['mobile'] = ticket.mobile_number
             if not values.get('phone'):
-                values['phone'] = record.phone_number
+                values['phone'] = ticket.phone_number
         return email_normalized_to_values
 
     def _message_get_suggested_recipients(self):
@@ -151,6 +152,19 @@ class MailTestTicketMc(models.Model):
 
     company_id = fields.Many2one('res.company', 'Company', default=lambda self: self.env.company)
     container_id = fields.Many2one('mail.test.container.mc', tracking=True)
+
+    def _get_customer_information(self):
+        email_normalized_to_values = super()._get_customer_information()
+
+        for ticket in self.filtered('email_from'):
+            email_from_normalized = email_normalize(ticket.email_from)
+            # do not fill Falsy with random data, unless monorecord (= always correct)
+            if not email_from_normalized and len(self) > 1:
+                continue
+            values = email_normalized_to_values.setdefault(email_from_normalized, {})
+            if not values.get('company_id'):
+                values['company_id'] = ticket.company_id.id
+        return email_normalized_to_values
 
 
 class MailTestContainer(models.Model):

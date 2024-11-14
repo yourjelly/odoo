@@ -110,8 +110,8 @@ class ResPartner(models.Model):
         return self.create(create_values)
 
     @api.model
-    def _find_or_create_from_emails(self, emails, additional_values=None,
-                                    force_create=True):
+    def _find_or_create_from_emails(self, emails, ban_emails=None, additional_values=None,
+                                    force_create=True, sort_key=None, sort_reverse=False):
         """ Based on a list of emails, find or (optionally) create partners.
         If an email is not unique (e.g. multi-email input), only the first found
         valid email in input is considered.
@@ -128,6 +128,9 @@ class ResPartner(models.Model):
 
         :param list emails: list of emails that may be formatted (each input
           will be parsed and normalized);
+        :param list ban_emails: optional list of banished emails: if partner
+          is not found, it won't be created e.g. because it may interfere
+          with master data like aliases;
         :param dict additional_values: additional values per normalized or
           raw invalid email given to partner creation. Typically used to
           propagate a company_id and customer information from related record.
@@ -135,6 +138,14 @@ class ResPartner(models.Model):
         :param bool force_create: might skip the 'create' part of 'find or
           create' if used mainly as 'find and sort' tools without adding new
           partners in db;
+        :param sort_key: an optional sorting key for sorting partners before
+          finding one with matching email normalized. When several partners
+          have the same email, users might want to give a preference based
+          on e.g. company, being a customer or not, ... Default ordering is
+          to use 'id ASC', which means older partners first as they are considered
+          as more relevant. Default order based on complete_name seems more
+          random when having duplicates;
+        :param bool sort_reverse: given to sorted, see reverse of sort methods;
 
         :return: res.partner records in a list, following order of emails. It
           is not a recordset, to keep Falsy values for every not found / not
@@ -149,13 +160,13 @@ class ResPartner(models.Model):
         # for existing partners based on those emails
         emails_normalized = {email_normalized
                              for _name, email_normalized in name_emails
-                             if email_normalized}
+                             if email_normalized and email_normalized not in (ban_emails or [])}
         # find partners for invalid (but not void) emails, aka either invalid email
         # either no email and a name that will be used as email
         names = {
             name.strip()
             for name, email_normalized in name_emails
-            if not email_normalized and name.strip()
+            if not email_normalized and name.strip() and name.strip() not in (ban_emails or [])
         }
         if emails_normalized or names:
             domains = []
@@ -185,6 +196,7 @@ class ResPartner(models.Model):
                     **additional_values.get(email_normalized, {}),
                 }
                 for name, email_normalized in notfound_name_emails
+                if email_normalized not in (ban_emails or [])
             ]
             # create partners for invalid emails (aka name and not email_normalized)
             # without any existing partner
@@ -194,11 +206,15 @@ class ResPartner(models.Model):
                     'email': name,
                     **additional_values.get(name, {}),
                 }
-                for name in names if name not in partners.mapped('email')
+                for name in names if name not in partners.mapped('email') and name not in (ban_emails or [])
             ]
             # create partners once
             if tocreate_vals_list:
                 partners += self.create(tocreate_vals_list)
+
+        # sort partners (already ordered based on search)
+        if sort_key:
+            partners = partners.sorted(key=sort_key, reverse=sort_reverse)
 
         return [
             next(
