@@ -1142,11 +1142,20 @@ patch(Order.prototype, {
         if (!cheapestLine) {
             return { discountable: 0, discountablePerTax: {} };
         }
-        const taxKey = cheapestLine.get_taxes().map((t) => t.id);
-        return {
-            discountable: cheapestLine.getComboTotalPriceWithoutTax(),
-            discountablePerTax: Object.fromEntries([[taxKey, cheapestLine.getComboTotalPriceWithoutTax()]]),
-        };
+        const tax = cheapestLine.get_taxes();
+        let res;
+        if (!tax.price_include){
+            res = {
+                discountable: cheapestLine.getComboTotalPrice(),
+                discountablePerTax: Object.fromEntries([[tax.id, cheapestLine.getComboTotalPrice()]]),
+            };
+        }else{
+            res = {
+                discountable: cheapestLine.getComboTotalPriceWithoutTax(),
+                discountablePerTax: Object.fromEntries([[tax.id, cheapestLine.getComboTotalPriceWithoutTax()]]),
+            };
+        }
+        return res;
     },
     /**
      * @param {loyalty.reward} reward
