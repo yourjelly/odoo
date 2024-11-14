@@ -746,7 +746,7 @@ class TestUpdateRecurrentEvents(TestRecurrentEvents):
         self.assertEqual(self.events.exists(), self.events[0])
 
     def test_unlink_recurrence_wizard_next(self):
-        """ Test unlinking the next recurrence using the delete wizard. """
+        """ Test unlinking the next recurrent event using the delete wizard. """
         # Retrieve the recurring event to delete the next event occurrence.
         event = self.events[1]
 

@@ -6,7 +6,7 @@ from odoo import api, fields, models
 
 class CalendarPopoverDeleteWizard(models.TransientModel):
     _name = 'calendar.popover.delete.wizard'
-    _inherit = 'mail.composer.mixin'
+    _inherit = ['mail.composer.mixin']
     _description = 'Calendar Popover Delete Wizard'
 
 
@@ -20,27 +20,29 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
     )
 
     def close(self):
-        if self.record.attendees_count == 1 and self.record.user_id.partner_id == self.record.partner_ids:
-            if not self.record or not self.delete:
-                pass
-            elif self.delete == 'one':
-                self.record.unlink()
-            else:
-                switch = {
-                    'next': 'future_events',
-                    'all': 'all_events'
-                }
-                self.record.action_mass_deletion(switch.get(self.delete, ''))
-        else:
+        # Return if there are multiple attendees or if the organizer's partner_id differs
+        if self.record.attendees_count != 1 or self.record.user_id.partner_id != self.record.partner_ids:
             return self.record.action_unlink_event(self.record.partner_id.id, self.delete)
+        if not self.record or not self.delete:
+            pass
+        elif self.delete == 'one':
+            self.record.unlink()
+        else:
+            switch = {
+                'next': 'future_events',
+                'all': 'all_events'
+            }
+            self.record.action_mass_deletion(switch.get(self.delete, ''))
 
     @api.depends('record')
     def _compute_recipient_ids(self):
+        """ Compute the recipients by combining the record's partner and message partners. """
         for wizard in self:
             wizard.recipient_ids = wizard.record.partner_id | wizard.record.message_partner_ids
 
     @api.depends('record')
     def _compute_subject(self):
+        """ Compute the subject by rendering the template's subject field based on the record. """
         for wizard in self.filtered('template_id'):
             wizard.subject = wizard.template_id._render_field(
                 'subject',
@@ -51,6 +53,7 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
 
     @api.depends('record')
     def _compute_body(self):
+        """ Compute the body by rendering the template's body HTML field based on the record. """
         for wizard in self.filtered('template_id'):
             wizard.body = wizard.template_id._render_field(
                 'body_html',
@@ -60,7 +63,8 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
             )[wizard.record.id]
 
     def action_delete(self):
-        """ Delete the event based on the specified deletion type.
+        """
+        Delete the event based on the specified deletion type.
 
         :return: Action URL to redirect to the calendar view
         """
@@ -84,10 +88,7 @@ class CalendarPopoverDeleteWizard(models.TransientModel):
         }
 
     def action_send_mail_and_delete(self):
-        """
-        Send email notification and delete the event based on the specified deletion type.
-        """
-        # Send email notification.
+        """ Send email notification and delete the event based on the specified deletion type. """
         self.env.ref('calendar.calendar_template_delete_event').send_mail(
             self.record.id, email_layout_xmlid='mail.mail_notification_light', force_send=True
         )

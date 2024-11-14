@@ -40,11 +40,15 @@ export class CalendarFormController extends FormController {
         return super.beforeExecuteActionButton(...arguments);
     }
 
+    /**
+     * Custom delete function for calendar events, which can call the unlink action or not.
+     * When there is only one attendee, who is also the organizer, and the organizer is not listed in the current attendees, it performs the default delete.
+     * Otherwise, it calls the unlink action on the server.
+     */
     async deleteRecord() {
-        if (
-            this.model.root._values.attendees_count == 1 &&
-            this.model.root._values.user_id[0] !== this.model.root._values.partner_ids._currentIds[0]
-        ){
+        const rootValues = this.model.root._values;
+        if (rootValues.attendees_count == 1 && rootValues.user_id[0] !== rootValues.partner_ids._currentIds[0]) {
+            // Call the default delete if the event has only one attendee and the user is not listed in partner_ids.
             super.deleteRecord(...arguments);
         } else {
             const action = await this.orm.call("calendar.event", "action_unlink_event", [
