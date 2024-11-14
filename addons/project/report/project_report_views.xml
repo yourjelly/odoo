@@ -33,7 +33,7 @@
             <field name="name">report.project.task.user.graph</field>
             <field name="model">report.project.task.user</field>
             <field name="arch" type="xml">
-                <graph string="Tasks Analysis" sample="1" disable_linking="1">
+                <graph string="Tasks Analysis" sample="1">
                      <field name="project_id"/>
                      <field name="stage_id"/>
                      <field name="nbr" invisible="1"/>
@@ -43,7 +43,7 @@
                  </graph>
              </field>
         </record>
-    
+
 
         <!-- We need to create an fsm view here so that we can prevent the
         remaining_hours_so field from being automatically added to the fsm view
