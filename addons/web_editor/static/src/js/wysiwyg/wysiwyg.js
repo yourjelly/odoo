@@ -2593,7 +2593,7 @@ export class Wysiwyg extends Component {
                 description: _t('Insert an image'),
                 fontawesome: 'fa-file-image-o',
                 callback: () => {
-                    this.openMediaDialog();
+                    this.openMediaDialog({ noVideos: !editorOptions.allowCommandVideo });
                 },
             });
         }
