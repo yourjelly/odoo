@@ -3449,7 +3449,24 @@ export class Wysiwyg extends Component {
         this._historyShareId = historyShareId;
         this._historySyncAtLeastOnce = true;
         this.odooEditor.historyResetFromSteps(steps, historyIds);
-        this.odooEditor.historyResetLatestComputedSelection();
+        if (this.odooEditor._lastMouseClickPosition) {
+            const [x, y] = this.odooEditor._lastMouseClickPosition;
+            let range;
+            if (document.caretRangeFromPoint) {
+                range = document.caretRangeFromPoint(x, y);
+            } else if (document.caretPositionFromPoint) {
+                // Firefox
+                const pos = document.caretPositionFromPoint(x, y);
+                range = document.createRange();
+                range.setStart(pos.offsetNode, pos.offset);
+                range.collapse(true);
+            }
+            if (range) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
         return true;
     }
     /**
