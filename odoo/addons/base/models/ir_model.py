@@ -580,6 +580,8 @@ class IrModelFields(models.Model):
     sanitize_form = fields.Boolean(string='Sanitize HTML Form', default=True)
     strip_style = fields.Boolean(string='Strip Style Attribute', default=False)
     strip_classes = fields.Boolean(string='Strip Class Attribute', default=False)
+    # Properties field definition, useless for other fields
+    definition = fields.Char(string='Properties Definition', default='')
 
 
     @api.depends('relation', 'relation_field')
@@ -1158,6 +1160,8 @@ class IrModelFields(models.Model):
             'sanitize_form': field.sanitize_form if field.type == 'html' else None,
             'strip_style': field.strip_style if field.type == 'html' else None,
             'strip_classes': field.strip_classes if field.type == 'html' else None,
+            # properties field attributes (useless for other fields)
+            'definition': field.definition if field.type == 'properties' else None,
         }
 
     def _reflect_fields(self, model_names):
@@ -1304,6 +1308,8 @@ class IrModelFields(models.Model):
                 not (field_data['currency_field'] and self._is_manual_name(field_data['currency_field'])):
                 return
             attrs['currency_field'] = field_data['currency_field']
+        elif field_data['ttype'] == 'properties':
+            attrs['definition'] = field_data['definition']
         # add compute function if given
         if field_data['compute']:
             attrs['compute'] = make_compute(field_data['compute'], field_data['depends'])
