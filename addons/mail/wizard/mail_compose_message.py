@@ -10,6 +10,7 @@ from odoo import _, api, fields, models, Command, tools
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools.mail import is_html_empty, email_normalize, email_split_and_format
+from odoo.tools.misc import partition
 from odoo.addons.mail.tools.parser import parse_res_ids
 
 
@@ -753,11 +754,16 @@ class MailComposeMessage(models.TransientModel):
         sudo as it is considered as a technical model. """
         mails_sudo = self.env['mail.mail'].sudo()
 
+        all_canceled = []
         batch_size = int(
             self.env['ir.config_parameter'].sudo().get_param('mail.batch_size')
         ) or self._batch_size or 50  # be sure to not have 0, as otherwise no iteration is done
         for res_ids_iter in tools.split_every(batch_size, res_ids):
-            res_ids_values = list(self._prepare_mail_values(res_ids_iter).values())
+            res_ids_values, canceled = partition(
+                lambda value: value.get('state') != 'cancel',
+                self._prepare_mail_values(res_ids_iter).values()
+            )
+            all_canceled.extend(canceled)
 
             iter_mails_sudo = self.env['mail.mail'].sudo().create(res_ids_values)
             mails_sudo += iter_mails_sudo
@@ -784,6 +790,18 @@ class MailComposeMessage(models.TransientModel):
             if auto_commit is True:
                 self._cr.commit()
             self.env.invalidate_all()
+
+        if all_canceled:
+            self.env[self.model].browse([message['res_id'] for message in all_canceled])._message_log_batch(
+                bodies={
+                    message['res_id']: _(
+                        "Unsent message (error code: %(reason)s): %(message)s",
+                        reason=message.get('failure_type', _("unknown")),
+                        message=message['body']
+                    )
+                    for message in all_canceled
+                }
+            )
 
         return mails_sudo
 

@@ -333,7 +333,15 @@ class SmsComposer(models.TransientModel):
     def _prepare_log_body_values(self, sms_records_values):
         result = {}
         for record_id, sms_values in sms_records_values.items():
-            result[record_id] = sms_content_to_rendered_html(sms_values['body'])
+            # Avoid to log sms with blacklisted number in the chatter as they appear as being sent otherwise.
+            if sms_values.get('state') == 'canceled':
+                result[record_id] = _(
+                    "Unsent message (error code: %(reason)s): %(message)s",
+                    reason=sms_values.get('failure_type', _("unknown")),
+                    message=sms_content_to_rendered_html(sms_values['body'])
+                )
+            else:
+                result[record_id] = sms_content_to_rendered_html(sms_values['body'])
         return result
 
     def _prepare_mass_log_values(self, records, sms_records_values):
