@@ -67,11 +67,7 @@ tour.register('account_tax_group', {
     {
         content: "Modify the input value",
         trigger: '.o_tax_group_edit_input input',
-        run: function (actions) {
-            $('.o_tax_group_edit_input input').val(200);
-            $('.o_tax_group_edit_input input').select();
-            $('.o_tax_group_edit_input input').blur();
-        },
+        run: "text 200",
     },
     // Check new value for total (with modified tax_group_amount).
     {
