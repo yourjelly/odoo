@@ -677,4 +677,14 @@ describe("Toolbar", () => {
         const formatButtons = queryAll(".o-we-toolbar .btn-group[name='decoration'] .btn");
         expect(formatButtons.at(-1)).toHaveAttribute("name", "remove_format");
     });
+
+    test("Should remove background color of text within a fully selected table", async () => {
+        const { el } = await setupEditor(
+            `<table class="table table-bordered o_table o_selected_table"><tbody><tr><td class="o_selected_td"><p><font style="background-color: rgb(255, 0, 0);">[abc</font></p></td><td class="o_selected_td"><p><br></p></td></tr></tbody></table><p>]<br></p>`
+        );
+        await removeFormatClick();
+        expect(getContent(el)).toBe(
+            `<table class="table table-bordered o_table o_selected_table"><tbody><tr><td class="o_selected_td"><p>[abc</p></td><td class="o_selected_td"><p>\u200b</p></td></tr></tbody></table><p>]\u200b</p>`
+        );
+    });
 });
