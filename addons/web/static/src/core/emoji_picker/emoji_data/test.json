@@ -1,0 +1,46 @@
+[
+    {
+        "category": "Smileys & People",
+        "codepoints": "😀",
+        "keywords": [
+            "cheerful",
+            "cheery",
+            "face",
+            "grin",
+            "grinning",
+            "happy",
+            "laugh",
+            "nice",
+            "smile",
+            "smiling",
+            "teeth"
+        ],
+        "name": "grinning face",
+        "shortcodes": [
+            ":grinning_face:"
+        ]
+    },
+    {
+        "category": "Smileys & People",
+        "codepoints": "😃",
+        "keywords": [
+            "awesome",
+            "big",
+            "eyes",
+            "face",
+            "grin",
+            "grinning",
+            "happy",
+            "mouth",
+            "open",
+            "smile",
+            "smiling",
+            "teeth",
+            "yay"
+        ],
+        "name": "grinning face with big eyes",
+        "shortcodes": [
+            ":grinning_face_with_big_eyes:"
+        ]
+    }
+]

@@ -222,7 +222,7 @@ function generateMentionsLinks(body, { partners = [], threads = [], specialMenti
 async function _generateEmojisOnHtml(htmlString) {
     const { emojis } = await loadEmoji();
     for (const emoji of emojis) {
-        for (const source of [...emoji.shortcodes, ...emoji.emoticons]) {
+        for (const source of emoji.shortcodes) {
             const escapedSource = escape(String(source)).replace(
                 /([.*+?=^!:${}()|[\]/\\])/g,
                 "\\$1"

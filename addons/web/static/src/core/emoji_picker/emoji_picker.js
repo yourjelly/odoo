@@ -1,4 +1,5 @@
 import { markEventHandled } from "@web/core/utils/misc";
+import { rpc } from "@web/core/network/rpc";
 
 import {
     App,
@@ -41,16 +42,26 @@ export const loader = {
     },
 };
 
+async function loadEmojis() {
+    try {
+        const response = await rpc('/load_emoji_bundle');
+        const path = response.path;
+        const categories = await(await fetch(`/web/static/src/core/emoji_picker/emoji_data/emojiCategories.json`)).json();
+        const emojis = await(await fetch(path)).json();
+        return [emojis, categories];
+    } catch (error) {
+        console.error("Error loading emoji data:", error);
+        return [];
+    }
+}
+
 /** @returns {Promise<{ categories: Object[], emojis: Object[] }>")} */
 export async function loadEmoji() {
     const res = { categories: [], emojis: [] };
     try {
-        await loader.loadEmoji();
-        const { getCategories, getEmojis } = odoo.loader.modules.get(
-            "@web/core/emoji_picker/emoji_data"
-        );
-        res.categories = getCategories();
-        res.emojis = getEmojis();
+        const [emojis, categories] = await loadEmojis();
+        res.categories = categories;
+        res.emojis = emojis;
         return res;
     } catch {
         // Could be intentional (tour ended successfully while emoji still loading)
@@ -191,7 +202,7 @@ export class EmojiPicker extends Component {
             .map(([codepoints]) => this.emojiByCodepoints[codepoints]);
         if (this.searchTerm && recent.length > 0) {
             return fuzzyLookup(this.searchTerm, recent, (emoji) =>
-                [emoji.name, ...emoji.keywords, ...emoji.emoticons, ...emoji.shortcodes].join(" ")
+                [emoji.name, ...emoji.keywords, ...emoji.shortcodes].join(" ")
             );
         }
         return recent.slice(0, 42);
@@ -256,7 +267,7 @@ export class EmojiPicker extends Component {
         }
         if (this.searchTerm.length > 1) {
             return fuzzyLookup(this.searchTerm, emojisToDisplay, (emoji) =>
-                [emoji.name, ...emoji.keywords, ...emoji.emoticons, ...emoji.shortcodes].join(" ")
+                [emoji.name, ...emoji.keywords, ...emoji.shortcodes].join(" ")
             );
         }
         return emojisToDisplay;

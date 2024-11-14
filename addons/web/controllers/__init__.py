@@ -17,7 +17,7 @@ from . import vcard
 from . import view
 from . import webclient
 from . import webmanifest
-
+from . import emoji
 
 def __getattr__(attr):
     if attr != 'main':

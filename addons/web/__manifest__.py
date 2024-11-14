@@ -39,9 +39,6 @@ This module provides the core of the Odoo Web Client.
         # Examples:
         #   > web_editor.assets_snippets_menu = assets needed by components defined in the "web_editor" module.
 
-        'web.assets_emoji': [
-            'web/static/src/core/emoji_picker/emoji_data.js'
-        ],
         'web.assets_backend': [
             ('include', 'web._assets_helpers'),
             ('include', 'web._assets_backend_helpers'),
