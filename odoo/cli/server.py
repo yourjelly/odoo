@@ -16,7 +16,6 @@ import logging
 import os
 import re
 import sys
-from pathlib import Path
 
 from psycopg2.errors import InsufficientPrivilege
 
@@ -173,8 +172,10 @@ def main(args):
     rc = odoo.service.server.start(preload=preload, stop=stop)
     sys.exit(rc)
 
+
 class Server(Command):
     """Start the odoo server (default command)"""
+
     def run(self, args):
-        odoo.tools.config.parser.prog = f'{Path(sys.argv[0]).name} {self.name}'
+        odoo.tools.config.parser.prog = self.prog_name
         main(args)
