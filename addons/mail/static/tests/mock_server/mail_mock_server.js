@@ -756,7 +756,9 @@ async function mail_thread_partner_from_email(request) {
     /** @type {import("mock_models").ResPartner} */
     const ResPartner = this.env["res.partner"];
 
-    const { emails, additional_values = {} } = await parseRequestParams(request);
+    const { thread_model, thread_id, emails, additional_values = {} } = await parseRequestParams(request);
+    // use variables, but don't actually implement py in JS, much effort for nothing
+    this.env[thread_model].browse(thread_id);
     const partners = emails.map((email) => ResPartner.search([["email", "=", email]])[0]);
     for (const index in partners) {
         if (!partners[index]) {

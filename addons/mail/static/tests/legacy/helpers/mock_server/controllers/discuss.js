@@ -398,7 +398,7 @@ patch(MockServer.prototype, {
      * @param {string[]} emails
      * @returns {Object[]} list of partner data
      */
-    _mockRouteMailPartnerFromEmail(emails, additional_values = {}) {
+    _mockRouteMailPartnerFromEmail(thread_model, thread_id, emails, additional_values = {}) {
         const partners = emails.map(
             (email) => this.pyEnv["res.partner"].search([["email", "=", email]])[0]
         );

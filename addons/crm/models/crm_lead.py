@@ -1847,18 +1847,18 @@ class CrmLead(models.Model):
         return Partner.create(self._prepare_customer_values(self.name, is_company=False))
 
     def _get_customer_information(self):
-        email_normalized_to_values = super()._get_customer_information()
-        Partner = self.env['res.partner']
+        email_keys_to_values = super()._get_customer_information()
 
-        for record in self.filtered('email_normalized'):
-            values = email_normalized_to_values.setdefault(record.email_normalized, {})
+        for record in self.filtered('email_from'):
+            email_key = record.email_normalized or record.email_from
+            values = email_keys_to_values.setdefault(email_key, {})
             contact_name = record.contact_name or record.partner_name or parse_contact_from_email(record.email_from)[0] or record.email_from
             # Note that we don't attempt to create the parent company even if partner name is set
             values.update(record._prepare_customer_values(contact_name, is_company=False))
             values['company_name'] = record.partner_name
             if contact_name == record.partner_name:
                 values['company_type'] = 'company'
-        return email_normalized_to_values
+        return email_keys_to_values
 
     def _prepare_customer_values(self, partner_name, is_company=False, parent_id=False):
         """ Extract data from lead to create a partner.
