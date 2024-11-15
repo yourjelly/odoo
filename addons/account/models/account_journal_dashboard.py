@@ -1008,10 +1008,14 @@ class account_journal(models.Model):
         action = self.env["ir.actions.act_window"]._for_xml_id(action_name)
 
         context = self._context.copy()
+        include_refund = context.get('include_refund', False)
         if 'context' in action and isinstance(action['context'], str):
             context.update(ast.literal_eval(action['context']))
         else:
             context.update(action.get('context', {}))
+        if include_refund and self.type in ('sale', 'purchase'):
+            filters = {'sale': 'search_default_out_invoice', 'purchase': 'search_default_in_invoice'}
+            context.update({filters[self.type]: False})
         action['context'] = context
         action['context'].update({
             'default_journal_id': self.id,
