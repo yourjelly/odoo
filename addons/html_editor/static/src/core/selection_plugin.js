@@ -113,6 +113,7 @@ function getUnselectedEdgeNodes(selection) {
  * @property { SelectionPlugin['getTraversedBlocks'] } getTraversedBlocks
  * @property { SelectionPlugin['getTraversedNodes'] } getTraversedNodes
  * @property { SelectionPlugin['modifySelection'] } modifySelection
+ * @property { SelectionPlugin['forceCursorAfterElement'] } forceCursorAfterElement
  * @property { SelectionPlugin['preserveSelection'] } preserveSelection
  * @property { SelectionPlugin['rectifySelection'] } rectifySelection
  * @property { SelectionPlugin['resetActiveSelection'] } resetActiveSelection
@@ -131,6 +132,7 @@ export class SelectionPlugin extends Plugin {
         "setCursorStart",
         "setCursorEnd",
         "extractContent",
+        "forceCursorAfterElement",
         "preserveSelection",
         "resetSelection",
         "getSelectedNodes",
@@ -489,6 +491,35 @@ export class SelectionPlugin extends Plugin {
      */
     setCursorEnd(node) {
         return this.setSelection({ anchorNode: node, anchorOffset: nodeSize(node) });
+    }
+    /**
+     * Set the cursor after the given node.
+     * @param { EditorSelection } selection
+     */
+    forceCursorAfterElement(selection) {
+        console.log("**************************************");
+        console.log("**************************************");
+        console.log("**************************************");
+        console.log("selection.anchornode", selection.anchorNode);
+        console.log("selection.anchorOffset", selection.anchorOffset);
+        console.log("node.childNodes.length", selection.anchorNode.textContent.length);
+        const node = closestElement(selection.anchorNode);
+        // Ensure we only move the cursor after the end of an element,
+        // if the current selection is a the very end of that same element.
+        if (
+            !selection.isCollapsed ||
+            selection.anchorOffset !== selection.anchorNode.textContent.length ||
+            node.lastChild !== selection.anchorNode
+        ) {
+            return;
+        }
+        console.log("node", node, node.outerHTML);
+        const parentElement = node.parentElement;
+        const nodeIndex = Array.from(parentElement.childNodes).indexOf(node);
+        return this.setSelection(
+            { anchorNode: parentElement, anchorOffset: nodeIndex + 1 },
+            { normalize: false }
+        );
     }
 
     /**

@@ -367,6 +367,9 @@ describe("Link creation", () => {
         test("should set the link on two existing characters", async () => {
             const { el } = await setupEditor("<p>H[el]lo</p>");
             await waitFor(".o-we-toolbar");
+            // link button should be enabled
+            !expect('.o-we-toolbar button[title="link"]').toHaveClass("disabled");
+            !expect('.o-we-toolbar button[title="link"]').toHaveAttribute("disabled");
             await click(".o-we-toolbar .fa-link");
             await contains(".o-we-linkpopover input.o_we_href_input_link").edit("#");
             expect(cleanLinkArtifacts(getContent(el))).toBe('<p>H<a href="#">el[]</a>lo</p>');
@@ -374,8 +377,10 @@ describe("Link creation", () => {
         test("should not allow to create a link if selection span multiple block", async () => {
             const { el } = await setupEditor("<p>H[ello</p><p>wor]ld</p>");
             await waitFor(".o-we-toolbar");
-            expect(".o-we-toolbar .fa-link").toHaveClass("disabled"); // link button should be disabled
-            await click(".o-we-toolbar .fa-link");
+            // link button should be disabled
+            expect('.o-we-toolbar button[title="Link"]').toHaveClass("disabled");
+            expect('.o-we-toolbar button[title="Link"]').toHaveAttribute("disabled");
+            await click('.o-we-toolbar button[title="Link"]');
             expect(getContent(el)).toBe("<p>H[ello</p><p>wor]ld</p>");
         });
         test("when you open link popover with a label, url input should be focus by default ", async () => {
