@@ -60,7 +60,7 @@ class MailGroup(models.Model):
     member_count = fields.Integer('Members Count', compute='_compute_member_count')
     # Moderation
     is_moderator = fields.Boolean(string='Moderator', help='Current user is a moderator of the group', compute='_compute_is_moderator')
-    moderation = fields.Boolean(string='Moderate this group')
+    moderation = fields.Boolean(string='Moderate')
     moderation_rule_count = fields.Integer(string='Moderated emails count', compute='_compute_moderation_rule_count')
     moderation_rule_ids = fields.One2many('mail.group.moderation', 'mail_group_id', string='Moderated Emails')
     moderator_ids = fields.Many2many('res.users', 'mail_group_moderator_rel', string='Moderators',
