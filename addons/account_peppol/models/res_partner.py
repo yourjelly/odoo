@@ -18,7 +18,7 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     invoice_sending_method = fields.Selection(
-        selection_add=[('peppol', 'by Peppol')],
+        selection_add=[('peppol', 'by Peppol only')],
     )
     available_peppol_sending_methods = fields.Json(compute='_compute_available_peppol_sending_methods')
     available_peppol_edi_formats = fields.Json(compute='_compute_available_peppol_edi_formats')

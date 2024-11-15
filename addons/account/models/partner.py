@@ -565,7 +565,7 @@ class ResPartner(models.Model):
         string="Invoice sending",
         selection=[
             ('manual', 'Download'),
-            ('email', 'by Email'),
+            ('email', 'by Email only'),
         ],
         company_dependent=True,
     )
