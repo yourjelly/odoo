@@ -424,7 +424,7 @@ export class DateTimePicker extends Component {
 
         const timeValues = this.values.map((val) => [
             (val || DateTime.local()).hour,
-            val?.minute || 0,
+            val?.minute || DateTime.local().minute || 0,
             val?.second || 0,
         ]);
         if (props.range) {
