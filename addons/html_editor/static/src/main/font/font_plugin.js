@@ -298,6 +298,7 @@ export class FontPlugin extends Plugin {
             // @todo @phoenix: if this condition can be anticipated before the split,
             // handle the splitBlock only in such case.
             if (
+                !this.dependencies.split.isUnsplittable(params.blockToSplit) &&
                 headingTags.includes(newElement.tagName) &&
                 !descendants(newElement).some(isVisibleTextNode)
             ) {
