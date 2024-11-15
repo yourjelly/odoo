@@ -5,9 +5,8 @@ import { ImageDescription } from "./image_description";
 import { ImagePadding } from "./image_padding";
 import { createFileViewer } from "@web/core/file_viewer/file_viewer_hook";
 import { boundariesOut } from "@html_editor/utils/position";
-import { ImageTransformation } from "./image_transformation";
-import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";
+import { ImageTransformButton } from "./image_transform_button";
 
 function hasShape(imagePlugin, shapeName) {
     return () => imagePlugin.isSelectionShaped(shapeName);
@@ -55,12 +54,6 @@ export class ImagePlugin extends Plugin {
                 run: () => this.setImageShape("img-thumbnail"),
             },
             { id: "resizeImage", run: this.resizeImage.bind(this) },
-            {
-                id: "transformImage",
-                title: _t("Transform the picture (click twice to reset transformation)"),
-                icon: "fa-object-ungroup",
-                run: this.transformImage.bind(this),
-            },
         ],
         toolbar_namespaces: [
             {
@@ -81,6 +74,7 @@ export class ImagePlugin extends Plugin {
             withSequence(26, { id: "image_transform", namespace: "image" }),
             withSequence(30, { id: "image_delete", namespace: "image" }),
         ],
+
         toolbar_items: [
             {
                 id: "image_preview",
@@ -169,8 +163,9 @@ export class ImagePlugin extends Plugin {
             {
                 id: "image_transform",
                 groupId: "image_transform",
-                commandId: "transformImage",
-                isActive: () => this.isImageTransformationOpen(),
+                title: _t("Transform the picture (click twice to reset transformation)"),
+                Component: ImageTransformButton,
+                props: this.getImageTransformProps(),
             },
             {
                 id: "image_delete",
@@ -178,7 +173,6 @@ export class ImagePlugin extends Plugin {
                 commandId: "deleteImage",
             },
         ],
-        selectionchange_handlers: this.onSelectionChange.bind(this),
         paste_url_overrides: this.handlePasteUrl.bind(this),
     };
 
@@ -200,7 +194,6 @@ export class ImagePlugin extends Plugin {
 
     destroy() {
         super.destroy();
-        this.closeImageTransformation();
     }
 
     setImagePadding({ size } = {}) {
@@ -223,14 +216,6 @@ export class ImagePlugin extends Plugin {
         }
         selectedImg.style.width = size || "";
         this.dependencies.history.addStep();
-    }
-
-    transformImage() {
-        const selectedImg = this.getSelectedImage();
-        if (!selectedImg) {
-            return;
-        }
-        this.openImageTransformation(selectedImg);
     }
 
     setImageShape(className, { excludeClasses = [] } = {}) {
@@ -267,17 +252,8 @@ export class ImagePlugin extends Plugin {
         const selectedImg = this.getSelectedImage();
         if (selectedImg) {
             selectedImg.remove();
-            this.closeImageTransformation();
             this.dependencies.history.addStep();
         }
-    }
-
-    onSelectionChange(selectionData) {
-        const { anchorNode, focusNode } = selectionData.documentSelection;
-        if (!anchorNode && !focusNode) {
-            return;
-        }
-        this.closeImageTransformation();
     }
 
     getSelectedImage() {
@@ -334,33 +310,6 @@ export class ImagePlugin extends Plugin {
         }
     }
 
-    openImageTransformation(image) {
-        if (registry.category("main_components").contains("ImageTransformation")) {
-            return;
-        }
-        Promise.resolve().then(() => {
-            this.document.getSelection()?.removeAllRanges();
-        });
-        registry.category("main_components").add("ImageTransformation", {
-            Component: ImageTransformation,
-            props: {
-                image,
-                document: this.document,
-                destroy: () => this.closeImageTransformation(),
-                onChange: () => this.dependencies.history.addStep(),
-            },
-        });
-    }
-
-    isImageTransformationOpen() {
-        return registry.category("main_components").contains("ImageTransformation");
-    }
-
-    closeImageTransformation() {
-        if (this.isImageTransformationOpen()) {
-            registry.category("main_components").remove("ImageTransformation");
-        }
-    }
     updateImageDescription({ description, tooltip } = {}) {
         const selectedImg = this.getSelectedImage();
         if (!selectedImg) {
@@ -369,5 +318,24 @@ export class ImagePlugin extends Plugin {
         selectedImg.setAttribute("alt", description);
         selectedImg.setAttribute("title", tooltip);
         this.dependencies.history.addStep();
+    }
+
+    resetImageTransformation(image) {
+        image.setAttribute(
+            "style",
+            (image.getAttribute("style") || "").replace(/[^;]*transform[\w:]*;?/g, "")
+        );
+        this.dependencies.history.addStep();
+    }
+
+    getImageTransformProps() {
+        return {
+            icon: "fa-object-ungroup",
+            getSelectedImage: this.getSelectedImage.bind(this),
+            resetImageTransformation: this.resetImageTransformation.bind(this),
+            addStep: this.dependencies.history.addStep.bind(this),
+            document: this.document,
+            editable: this.editable,
+        };
     }
 }

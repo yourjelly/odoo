@@ -3,7 +3,7 @@ import { click, press, queryOne, waitFor, waitUntil } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
 import { contains } from "@web/../tests/web_test_helpers";
-import { setContent } from "./_helpers/selection";
+import { setContent, setSelection } from "./_helpers/selection";
 import { undo } from "./_helpers/user_actions";
 
 const base64Img =
@@ -272,7 +272,7 @@ test("Can transform an image", async () => {
     `);
     await click("img.test-image");
     await waitFor(".o-we-toolbar");
-    await click(".o-we-toolbar button[name='image_transform']");
+    await click(".o-we-toolbar div[name='image_transform'] button");
     await animationFrame();
     const transfoContainers = document.querySelectorAll(".transfo-container");
     expect(transfoContainers).toHaveCount(1);
@@ -289,7 +289,7 @@ test("Image transformation dissapear when selection change", async () => {
     `);
     await click("img.test-image");
     await waitFor(".o-we-toolbar");
-    await click(".o-we-toolbar button[name='image_transform']");
+    await click(".o-we-toolbar div[name='image_transform'] button");
     await animationFrame();
     let transfoContainers = document.querySelectorAll(".transfo-container");
     expect(transfoContainers).toHaveCount(1);
@@ -316,16 +316,87 @@ test("Image transformation disappear on escape", async () => {
     await waitFor(".o-we-toolbar");
     let toolbar = document.querySelectorAll(".o-we-toolbar");
     expect(toolbar.length).toBe(1);
-    click(".o-we-toolbar button[name='image_transform']");
+    click(".o-we-toolbar div[name='image_transform'] button");
     await animationFrame();
     toolbar = document.querySelectorAll(".o-we-toolbar");
-    expect(toolbar.length).toBe(0);
+    expect(toolbar.length).toBe(1);
     let transfoContainers = document.querySelectorAll(".transfo-container");
     expect(transfoContainers.length).toBe(1);
     press("escape");
     await animationFrame();
     transfoContainers = document.querySelectorAll(".transfo-container");
     expect(transfoContainers.length).toBe(0);
+});
+
+test("Image transformation scalers position", async () => {
+    await setupEditor(`
+        <p><img class="img-fluid test-image" src="${base64Img}"></p>
+    `);
+
+    const checkScalersPositions = (image) => {
+        const rect = image.getBoundingClientRect();
+        const topValues = [rect.top, rect.top + rect.height / 2, rect.top + rect.height];
+        const leftValues = [rect.left, rect.left + rect.width / 2, rect.left + rect.width];
+        const vertical = "tmb";
+        const horizontal = "lcr";
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (i == 1 && j == 1) {
+                    // no middle-center handler
+                    continue;
+                }
+                const scaler = queryOne(`.transfo-scaler-${vertical[i]}${horizontal[j]}`);
+                const scalerRect = scaler.getBoundingClientRect();
+                expect(scalerRect.top + scalerRect.height / 2).toBe(topValues[i], { digits: 3 });
+                expect(scalerRect.left + scalerRect.width / 2).toBe(leftValues[j], {
+                    digits: 3,
+                });
+            }
+        }
+    };
+    click("img.test-image");
+    await waitFor(".o-we-toolbar");
+    expect(".o-we-toolbar").toHaveCount(1);
+    click(".o-we-toolbar div[name='image_transform'] button");
+    await animationFrame();
+    expect(".o-we-toolbar").toHaveCount(1);
+    expect(".transfo-container").toHaveCount(1);
+    checkScalersPositions(queryOne("img"));
+    // resize by 25% update the position of the scalers
+    click('.o-we-toolbar [name="resize_25"]');
+    await animationFrame();
+    checkScalersPositions(queryOne("img"));
+});
+
+test("Image transformation reset", async () => {
+    const { el } = await setupEditor(`
+        <img class="img-fluid test-image" src="${base64Img}">
+        <p>text</p>
+    `);
+    const transformButtonSelector = ".o-we-toolbar div[name='image_transform'] button";
+    const resetTransformButtonSelector = ".o-we-toolbar div[name='image_transform'] button.active";
+    await click("img.test-image");
+    await waitFor(".o-we-toolbar");
+
+    expect(transformButtonSelector).toHaveCount(1);
+    expect(resetTransformButtonSelector).toHaveCount(0);
+
+    setSelection({ anchorNode: el.querySelector("p"), anchorOffset: 0 });
+    el.querySelector("img").style.setProperty(
+        "transform",
+        "rotate(25deg) translateX(-0.2%) translateY(0.4%)"
+    );
+    await click("img.test-image");
+    await animationFrame();
+    await waitFor(".o-we-toolbar");
+    await click(transformButtonSelector);
+    await animationFrame();
+    expect(resetTransformButtonSelector).toHaveCount(1);
+    await click(resetTransformButtonSelector);
+    await animationFrame();
+    expect(el.querySelector("img").style.getPropertyValue("transform")).toBe("");
+    expect(transformButtonSelector).toHaveCount(1);
+    expect(resetTransformButtonSelector).toHaveCount(0);
 });
 
 test("Can delete an image", async () => {
