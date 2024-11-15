@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <record id="form_view_wizard_stock_ledger_jar" model="ir.ui.view">
+            <field name="name">wizard_stock_ledger.form</field>
+            <field name="model">wizard.stock.ledger</field>
+            <field name="priority">16</field>
+            <field name="arch" type="xml">
+                <form string="Stock Ledger Wizard">
+                        <div invisible="not datas">
+                            <strong>Download File and see stock ledger report</strong>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="report_type" widget="radio" invisible="datas"/>
+                                <field name="based_on" string="Based On" required="1" invisible="datas"/>
+                                <field name="product_ids" widget="many2many_tags" invisible="based_on != 'products' or datas" options="{'no_create': True}"/>
+                                <field name="product_categ_ids" widget="many2many_tags" invisible="based_on != 'categories' or datas" options="{'no_create': True}"/>
+                                <field name="location_ids" widget="many2many_tags" domain="[('usage', '=', 'internal')]" invisible="report_type != 'detailed' or datas"/>
+                            </group>
+                            <group invisible="datas">
+                                <field name="from_date" string="From Date" required="1" />
+                                <field name="to_date" string="To Date" required="1" />
+                            </group>
+                            <group>
+                                <field name="datas" filename="datas_fname" readonly="1" invisible="not datas"/>
+                                <field name="datas_fname" invisible="1" class="oe_inline oe_right"/>
+                            </group>
+                        </group>
+                    <footer>
+                        <button name="action_server_stock_statement_jar" type="object" string="Print" class="oe_highlight" invisible="datas"/>
+                        <button string="Cancel" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        
+    </data>
+
+    <record id="action_act_window_stock_ledger_jar" model="ir.actions.act_window">
+            <field name="name">Stock Ledger</field>
+            <field name="res_model">wizard.stock.ledger</field>
+            <field name="view_mode">form</field>
+            <!-- <field name="context">{}</field> -->
+            <field name="target">new</field>
+    </record>
+</odoo>
