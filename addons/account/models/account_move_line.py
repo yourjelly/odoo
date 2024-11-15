@@ -1305,7 +1305,7 @@ class AccountMoveLine(models.Model):
                 if line.reconciled:
                     raise UserError(_('Lines from "Off-Balance Sheet" accounts cannot be reconciled'))
 
-    @api.constrains('account_id', 'display_type')
+    """@api.constrains('account_id', 'display_type')
     def _check_payable_receivable(self):
         for line in self:
             account_type = line.account_id.account_type
@@ -1318,7 +1318,7 @@ class AccountMoveLine(models.Model):
                 if account_type == 'asset_receivable':
                     raise UserError(_("Account %s is of receivable type, but is used in a purchase operation.", line.account_id.code))
                 if (line.display_type == 'payment_term') ^ (account_type == 'liability_payable'):
-                    raise UserError(_("Any journal item on a payable account must have a due date and vice versa."))
+                    raise UserError(_("Any journal item on a payable account must have a due date and vice versa."))"""
 
     @api.constrains('product_uom_id')
     def _check_product_uom_category_id(self):

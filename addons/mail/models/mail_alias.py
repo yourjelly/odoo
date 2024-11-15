@@ -273,6 +273,8 @@ class Alias(models.Model):
         """
         alias_names, alias_domains = [], []
         if 'alias_name' in vals:
+            del vals['alias_name']
+        if 'alias_name' in vals:
             vals['alias_name'] = self._sanitize_alias_name(vals['alias_name'])
         if vals.get('alias_name') and self.ids:
             alias_names = [vals['alias_name']] * len(self)
