@@ -3,6 +3,7 @@
     <!--TODO-DPO hidden values needed?-->
     <template id="redirect_form">
         <form t-att-action="api_url" method="post"/>
+        <!--TODO-DPO hidden values needed? TransToken in dpo module. Doesn't seem needed?-->
     </template>
 
 </odoo>

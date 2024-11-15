@@ -4,7 +4,7 @@
     <record id="payment.payment_provider_dpo" model="payment.provider">
         <field name="code">dpo</field>
         <field name="redirect_form_view_id" ref="redirect_form"/>
-        <!-- <field name="allow_tokenization">True</field> TODO-DPO needed? -->
+        <!-- <field name="allow_tokenization">True</field> TODO-DPO needed? other info needed?pay url there if static? -->
     </record>
 
 </odoo>

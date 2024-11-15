@@ -222,6 +222,10 @@
         <field name="payment_method_ids"
                eval="[Command.set([
                          ref('payment.payment_method_card'),
+                         ref('payment.payment_method_mpesa'),
+                         ref('payment.payment_method_bank_transfer'),
+                         ref('payment.payment_method_paypal'),
+                         ref('payment.payment_method_ussd'),
                      ])]"
         />
     </record>

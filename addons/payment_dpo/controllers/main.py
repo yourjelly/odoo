@@ -22,7 +22,23 @@ class DPOController(http.Controller):
         """
         _logger.info("Handling redirection from DPO with data:\n%s", pprint.pformat(data))
 
-        # TODO-DPO call _handle_notification_data
+        # extract to _dpo_verify_transaction_token(data)
+        dpo_provider = request.env['payment.provider'].search([('code', '=', 'dpo')], limit=1)
+        payload = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <API3G>
+                <CompanyToken>{dpo_provider.dpo_company_token}</CompanyToken>
+                <Request>verifyToken</Request>
+                <TransactionToken>{data.get('TransID')}</TransactionToken>
+            </API3G>
+        """
+        # call here or call from process notification data?
+        result = dpo_provider._dpo_make_request(payload=payload)
+
+
+        # Handle the notification data.
+        result.update(data)
+        request.env['payment.transaction'].sudo()._handle_notification_data('dpo', result)
 
         # Redirect the user to the status page.
         return request.redirect('/payment/status')
