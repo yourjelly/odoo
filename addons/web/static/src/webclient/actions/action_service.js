@@ -340,10 +340,18 @@ export function makeActionManager(env, router = _router) {
             const key = `${JSON.stringify(actionRequest)},${JSON.stringify(ctx)}`;
             let action = await actionCache[key];
             if (!action) {
-                actionCache[key] = rpc("/web/action/load", {
-                    action_id: actionRequest,
-                    context: ctx,
-                });
+                const result = localStorage.getItem(key);
+                if (result) {
+                    actionCache[key] = Promise.resolve(JSON.parse(result));
+                } else {
+                    actionCache[key] = rpc("/web/action/load", {
+                        action_id: actionRequest,
+                        context: ctx,
+                    }).then((result) => {
+                        localStorage.setItem(key, JSON.stringify(result));
+                        return result;
+                    });
+                }
                 action = await actionCache[key];
                 if (action.help) {
                     action.help = markup(action.help);

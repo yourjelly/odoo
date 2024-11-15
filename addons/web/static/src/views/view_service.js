@@ -103,36 +103,43 @@ export const viewService = {
 
             const key = JSON.stringify([resModel, views, filteredContext, loadViewsOptions]);
             if (!cache[key]) {
-                cache[key] = orm
-                    .call(resModel, "get_views", [], {
-                        context: filteredContext,
-                        views,
-                        options: loadViewsOptions,
-                    })
-                    .then((result) => {
-                        const { models, views } = result;
-                        const viewDescriptions = {
-                            fields: models[resModel].fields,
-                            relatedModels: models,
-                            views: {},
-                        };
-                        for (const viewType in views) {
-                            const { arch, toolbar, id, filters, custom_view_id } = views[viewType];
-                            const viewDescription = { arch, id, custom_view_id };
-                            if (toolbar) {
-                                viewDescription.actionMenus = toolbar;
+                const result = localStorage.getItem(key);
+                if (result) {
+                    cache[key] = Promise.resolve(JSON.parse(result));
+                } else {
+                    cache[key] = orm
+                        .call(resModel, "get_views", [], {
+                            context: filteredContext,
+                            views,
+                            options: loadViewsOptions,
+                        })
+                        .then((result) => {
+                            const { models, views } = result;
+                            const viewDescriptions = {
+                                fields: models[resModel].fields,
+                                relatedModels: models,
+                                views: {},
+                            };
+                            for (const viewType in views) {
+                                const { arch, toolbar, id, filters, custom_view_id } =
+                                    views[viewType];
+                                const viewDescription = { arch, id, custom_view_id };
+                                if (toolbar) {
+                                    viewDescription.actionMenus = toolbar;
+                                }
+                                if (filters) {
+                                    viewDescription.irFilters = filters;
+                                }
+                                viewDescriptions.views[viewType] = viewDescription;
                             }
-                            if (filters) {
-                                viewDescription.irFilters = filters;
-                            }
-                            viewDescriptions.views[viewType] = viewDescription;
-                        }
-                        return viewDescriptions;
-                    })
-                    .catch((error) => {
-                        delete cache[key];
-                        return Promise.reject(error);
-                    });
+                            localStorage.setItem(key, JSON.stringify(viewDescriptions));
+                            return viewDescriptions;
+                        })
+                        .catch((error) => {
+                            delete cache[key];
+                            return Promise.reject(error);
+                        });
+                }
             }
             return cache[key];
         }
