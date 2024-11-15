@@ -5,7 +5,7 @@
         <field name="name">account.move.send.wizard.form</field>
         <field name="model">account.move.send.wizard</field>
         <field name="arch" type="xml">
-            <form>
+            <form class="o_account_move_send_wizard">
                 <field name="move_id" invisible="1"/>
 
                 <!-- Warnings -->
