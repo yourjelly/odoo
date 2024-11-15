@@ -288,7 +288,8 @@ export class HistoryPlugin extends Plugin {
     handleNewRecords(records) {
         const filteredRecords = this.processNewRecords(records);
         if (filteredRecords.length) {
-            this.getResource("handleNewRecords").forEach((cb) => cb(filteredRecords));
+            const stepState = this.stepsStates[this.currentStep.id];
+            this.getResource("handleNewRecords").forEach((cb) => cb(filteredRecords, stepState));
             // Process potential new records adds by handleNewRecords.
             this.processNewRecords(this.observer.takeRecords());
             this.dispatchContentUpdated();
@@ -531,8 +532,16 @@ export class HistoryPlugin extends Plugin {
         // @todo @phoenix sanitize plugin
         // this.sanitize();
 
-        this.handleObserverRecords();
+        // // Set the state of the step here.
+        // // That way, the state of undo and redo is truly accessible
+        // // when executing the onChange callback.
+        // // It is useful for external components if they execute shared.can[Undo|Redo]
         const currentStep = this.currentStep;
+        if (stepState) {
+            this.stepsStates.set(currentStep.id, stepState);
+        }
+
+        this.handleObserverRecords();
         if (!currentStep.mutations.length) {
             return false;
         }
@@ -551,13 +560,6 @@ export class HistoryPlugin extends Plugin {
             mutations: [],
             previousStepId: undefined,
         });
-        // Set the state of the step here.
-        // That way, the state of undo and redo is truly accessible
-        // when executing the onChange callback.
-        // It is useful for external components if they execute shared.can[Undo|Redo]
-        if (stepState) {
-            this.stepsStates.set(currentStep.id, stepState);
-        }
         this.stageSelection();
         this.dispatchTo("step_added_handlers", { step: currentStep, stepCommonAncestor });
         this.config.onChange?.();
