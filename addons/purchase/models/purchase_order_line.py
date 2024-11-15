@@ -309,7 +309,7 @@ class PurchaseOrderLine(models.Model):
             return {'warning': warning}
         return {}
 
-    @api.depends('product_qty', 'product_uom_id', 'company_id', 'order_id.partner_id')
+    @api.depends('product_qty', 'product_uom_id', 'company_id', 'order_id.partner_id', 'order_id.state')
     def _compute_price_unit_and_date_planned_and_name(self):
         for line in self:
             if not line.product_id or line.invoice_lines or not line.company_id:
@@ -322,7 +322,7 @@ class PurchaseOrderLine(models.Model):
                 uom_id=line.product_uom_id,
                 params=params)
 
-            if seller or not line.date_planned:
+            if (seller or not line.date_planned) and line.order_id.state == "purchase":
                 line.date_planned = line._get_date_planned(seller).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             # If not seller, use the standard price. It needs a proper currency conversion.

@@ -5,45 +5,69 @@
             <div class="row justify-content-between gap-3 gap-lg-0">
                 <div class="col-12 col-lg-5 col-xl-5 col-xxl-4 flex-grow-1 flex-lg-grow-0 flex-shrink-0">
                     <div class="grid gap-4">
-                        <div class="g-col-3 g-col-sm-2 d-flex align-items-center py-2 justify-content-end text-end justify-content-lg-start text-lg-start text-break">
-                            All RFQs
+                        <div class="g-col-3 g-col-sm-2 d-flex align-items-center py-2 justify-content-end text-end justify-content-lg-start text-lg-start text-break fw-bold">
+                            All
                         </div>
                         <div class="g-col-9 g-col-sm-10 grid gap-1">
                             <div class="g-col-4 p-0" t-on-click="setSearchContext" title="All Draft RFQs" filter_name="draft_rfqs">
-                                <a href="#" class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal">
-                                    <div class="fs-2" t-out="purchaseData['all_to_send']"/>To Send
+                                <a href="#" t-attf-class="w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal #{purchaseData['all_to_send'] == 0 ? 'btn btn-secondary' : 'btn btn-info'}">
+                                    <div class="fs-2">
+                                        <span t-out="purchaseData['all_to_send']"/> <i class="fa fa-star text-yellow"></i> <span t-out="purchaseData['all_priority_in_new_state']"/>
+                                    </div>New
                                 </a>
                             </div>
-                            <div class="g-col-4 p-0" t-on-click="setSearchContext" title="All Waiting RFQs" filter_name="waiting_rfqs">
-                                <a href="#" class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal">
-                                    <div class="fs-2" t-out="purchaseData['all_waiting']"/>Waiting
+                            <div class="g-col-4 p-0" t-on-click="setSearchContext" title="All Sent RFQs" filter_name="sent_rfqs">
+                                <a href="#" class="btn btn-secondary w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal">
+                                    <div class="fs-2" t-out="purchaseData['all_sent_rfqs']"/>RFQ SENT
                                 </a>
                             </div>
                             <div class="g-col-4 p-0" t-on-click="setSearchContext" title="All Late RFQs" filter_name="late_rfqs">
-                                <a href="#" class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal">
+                                <a href="#" class="btn btn-warning w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal">
                                     <div class="fs-2" t-out="purchaseData['all_late']"/>Late
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0" t-on-click="setSearchContext" title="All Order Not Acknowledged" filter_name="order_not_acknowledged">
+                                <a href="#" class="btn btn-info w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal">
+                                    <div class="fs-2" t-out="purchaseData['all_not_acknowledged']"/>Order Not Acknowledged
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0" t-on-click="setSearchContext" title="All Late Receipts Order" filter_name="late_receipt">
+                                <a href="#" t-attf-class="w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal #{purchaseData['all_late_receipt'] == 0 ? 'btn btn-secondary' : 'btn btn-danger'}">
+                                    <div class="fs-2" t-out="purchaseData['all_late_receipt']"/>Late Receipts
                                 </a>
                             </div>
                         </div>
                     </div>
                     <div class="grid gap-4">
-                        <div class="g-col-3 g-col-sm-2 d-flex align-items-center py-2 justify-content-end text-end justify-content-lg-start text-lg-start text-break">
-                            My RFQs
+                        <div class="g-col-3 g-col-sm-2 d-flex align-items-center py-2 justify-content-end text-end justify-content-lg-start text-lg-start text-break fw-bold">
+                            My
                         </div>
                         <div class="g-col-9 g-col-sm-10 grid gap-2">
                             <div class="g-col-4 p-0" t-on-click="setSearchContext" title="My Draft RFQs" filter_name="draft_rfqs,my_purchases">
                                 <a href="#" class="btn btn-light d-flex align-items-center w-100 h-100 p-0 border-0 bg-100 fw-normal">
-                                    <div class="w-100 p-2" t-out="purchaseData['my_to_send']"/>
+                                    <div class="w-100 p-2">
+                                        <span t-out="purchaseData['my_to_send']"/> <i class="fa fa-star text-yellow"></i> <span t-out="purchaseData['my_priority_in_new_state']"/>
+                                    </div>
                                 </a>
                             </div>
-                            <div class="g-col-4 p-0" t-on-click="setSearchContext" title="My Waiting RFQs" filter_name="waiting_rfqs,my_purchases">
+                            <div class="g-col-4 p-0" t-on-click="setSearchContext" title="My Sent RFQs" filter_name="sent_rfqs,my_purchases">
                                 <a href="#" class="btn btn-light d-flex align-items-center w-100 h-100 p-0 border-0 bg-100 fw-normal">
-                                    <div class="w-100 p-2" t-out="purchaseData['my_waiting']"/>
+                                    <div class="w-100 p-2" t-out="purchaseData['my_sent_rfqs']"/>
                                 </a>
                             </div>
                             <div class="g-col-4 p-0" t-on-click="setSearchContext" title="My Late RFQs" filter_name="late_rfqs,my_purchases">
                                 <a href="#" class="btn btn-light d-flex align-items-center w-100 h-100 p-0 border-0 bg-100 fw-normal">
                                     <div class="w-100 p-2" t-out="purchaseData['my_late']"/>
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0" t-on-click="setSearchContext" title="My Order Not Acknowledged" filter_name="order_not_acknowledged,my_purchases">
+                                <a href="#" class="btn btn-light d-flex align-items-center w-100 h-100 p-0 border-0 bg-100 fw-normal">
+                                    <div class="w-100 p-2" t-out="purchaseData['my_not_acknowledged']"/>
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0" t-on-click="setSearchContext" title="My Late Receipts Order" filter_name="late_receipt,my_purchases">
+                                <a href="#" class="btn btn-light d-flex align-items-center w-100 h-100 p-0 border-0 bg-100 fw-normal">
+                                    <div class="w-100 p-2" t-out="purchaseData['my_late_receipt']"/>
                                 </a>
                             </div>
                         </div>
@@ -54,36 +78,20 @@
                         <div class="grid gap-2 h-100">
                             <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
                                 <div class="g-col-12 g-col-sm-4 g-col-lg-6 d-flex align-items-center justify-content-center text-center justify-content-md-end text-md-end mt-4 mt-sm-0 text-break">
-                                    Avg Order Value
+                                    OTD
                                 </div>
                                 <div class="g-col-12 g-col-sm-8 g-col-lg-5 d-flex align-items-center justify-content-center py-2 bg-100">
-                                    <span><t t-out="purchaseData['all_avg_order_value']"/></span>
-                                </div>
-                            </div>
-                            <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
-                                <div class="g-col-12 g-col-sm-4 g-col-lg-6 d-flex align-items-center py-2 justify-content-center text-center justify-content-md-end text-md-end mt-4 mt-sm-0 text-break">
-                                    Purchased Last 7 Days
-                                </div>
-                                <div class="g-col-12 g-col-sm-8 g-col-lg-6 d-flex align-items-center justify-content-center py-2 bg-100">
-                                    <span><t t-out="purchaseData['all_total_last_7_days']"/></span>
+                                    <span><t t-out="purchaseData['all_on_time_delivery']"/>%</span>
                                 </div>
                             </div>
                         </div>
                         <div class="grid gap-2 h-100">
                             <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
                                 <div class="g-col-12 g-col-sm-4 g-col-lg-6 d-flex align-items-center justify-content-center text-center justify-content-md-end text-md-end mt-4 mt-sm-0 text-break">
-                                    Lead Time to Purchase
+                                    MY OTD
                                 </div>
                                 <div class="g-col-12 g-col-sm-8 g-col-lg-5 d-flex align-items-center justify-content-center py-2 bg-100">
-                                    <span><t t-out="purchaseData['all_avg_days_to_purchase']"/> &#160;Days</span>
-                                </div>
-                            </div>
-                            <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
-                                <div class="g-col-12 g-col-md-4 g-col-sm-4 g-col-lg-6 d-flex align-items-center justify-content-center text-center justify-content-md-end text-md-end mt-4 mt-sm-0 text-break">
-                                    RFQs Sent Last 7 Days
-                                </div>
-                                <div class="g-col-12 g-col-sm-8 g-col-lg-6 d-flex align-items-center justify-content-center py-2 bg-100">
-                                    <span><t t-out="purchaseData['all_sent_rfqs']"/></span>
+                                    <span><t t-out="purchaseData['my_on_time_delivery']"/>%</span>
                                 </div>
                             </div>
                         </div>

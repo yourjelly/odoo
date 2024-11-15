@@ -24,16 +24,6 @@
         <br/><br/>
         If you have any questions, please do not hesitate to contact us.
         <br/><br/>
-            <a t-att-href="object.get_confirm_url(confirm_type='reception')"
-                target="_blank"
-                style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
-                Accept</a>
-
-            <a t-att-href="object.get_confirm_url(confirm_type='decline')"
-                target="_blank"
-                style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
-                Decline</a>
-        <br/><br/>
         Best regards,
         <t t-if="not is_html_empty(object.user_id.signature)">
             <br/><br/>
@@ -61,17 +51,10 @@
             (<t t-out="object.partner_id.parent_id.name or ''">Azure Interior</t>)
         </t>
         <br/><br/>
-        Here is in attachment a purchase order <span style="font-weight:bold;" t-out="object.name or ''">P00015</span>
-        <t t-if="object.partner_ref">
-            with reference: <t t-out="object.partner_ref or ''">REF_XXX</t>
-        </t>
-        amounting in <span style="font-weight:bold;" t-out="format_amount(object.amount_total, object.currency_id) or ''">$ 10.00</span>
-        from <t t-out="object.company_id.name or ''">YourCompany</t>. 
-        <br/><br/>
+        Here is a reminder that the delivery of the purchase order <span style="font-weight:bold;" t-out="object.name or ''">P00015</span>
         <t t-if="object.date_planned">
-            The receipt is expected for <span style="font-weight:bold;" t-out="format_date(object.date_planned) or ''">05/05/2021</span>.
-            <br/><br/>
-            Could you please acknowledge the receipt of this order?
+            is expected for <span style="font-weight:bold;" t-out="format_date(object.date_planned) or ''">05/05/2021</span>.
+            Could you please confirm it will be<br/> delivered on time?
         </t>
         <t t-if="not is_html_empty(object.user_id.signature)">
             <br/><br/>

@@ -119,7 +119,7 @@ class PurchaseOrder(models.Model):
     tax_totals = fields.Binary(compute='_compute_tax_totals', exportable=False)
     amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
     amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all')
-    amount_total_cc = fields.Monetary(string="Company Total", store=True, readonly=True, compute="_amount_all", currency_field="company_currency_id")
+    amount_total_cc = fields.Monetary(string="Total In Currency", store=True, readonly=True, compute="_amount_all", currency_field="company_currency_id")
 
     fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     tax_country_id = fields.Many2one(
@@ -199,12 +199,12 @@ class PurchaseOrder(models.Model):
         for order in self:
             order.amount_total_cc = order.amount_total / order.currency_rate
 
-    @api.depends('order_line.date_planned')
+    @api.depends('order_line.date_planned', 'state')
     def _compute_date_planned(self):
         """ date_planned = the earliest date_planned across all order lines. """
         for order in self:
             dates_list = order.order_line.filtered(lambda x: not x.display_type and x.date_planned).mapped('date_planned')
-            if dates_list:
+            if dates_list and order.state == 'purchase':
                 order.date_planned = min(dates_list)
             else:
                 order.date_planned = False
@@ -502,7 +502,6 @@ class PurchaseOrder(models.Model):
         }
 
     def print_quotation(self):
-        self.write({'state': "sent"})
         return self.env.ref('purchase.report_purchase_quotation').report_action(self)
 
     def button_approve(self, force=False):
@@ -535,12 +534,6 @@ class PurchaseOrder(models.Model):
         if purchase_orders_with_invoices:
             raise UserError(_("Unable to cancel purchase order(s): %s. You must first cancel their related vendor bills.", format_list(self.env, purchase_orders_with_invoices.mapped('display_name'))))
         self.write({'state': 'cancel', 'mail_reminder_confirmed': False})
-
-    def button_unlock(self):
-        self.write({'state': 'purchase'})
-
-    def button_done(self):
-        self.write({'state': 'done', 'priority': '0'})
 
     def _prepare_supplier_info(self, partner, line, price, currency):
         # Prepare supplierinfo data when adding a product
@@ -849,59 +842,59 @@ class PurchaseOrder(models.Model):
 
         result = {
             'all_to_send': 0,
-            'all_waiting': 0,
-            'all_late': 0,
-            'my_to_send': 0,
-            'my_waiting': 0,
-            'my_late': 0,
-            'all_avg_order_value': 0,
-            'all_avg_days_to_purchase': 0,
-            'all_total_last_7_days': 0,
+            'all_priority_in_new_state': 0,
             'all_sent_rfqs': 0,
+            'all_late': 0,
+            'all_not_acknowledged': 0,
+            'all_late_receipt': 0,
+            'my_to_send': 0,
+            'my_priority_in_new_state': 0,
+            'my_sent_rfqs': 0,
+            'my_late': 0,
+            'my_not_acknowledged': 0,
+            'my_late_receipt': 0,
+            'all_on_time_delivery': 0,
+            'my_on_time_delivery': 0,
             'company_currency_symbol': self.env.company.currency_id.symbol
         }
 
-        one_week_ago = fields.Datetime.to_string(fields.Datetime.now() - relativedelta(days=7))
+        three_month_ago = fields.Datetime.to_string(fields.Datetime.now() - relativedelta(months=3))
 
-        query = """SELECT COUNT(1)
-                   FROM mail_message m
-                   JOIN purchase_order po ON (po.id = m.res_id)
-                   WHERE m.create_date >= %s
-                     AND m.model = 'purchase.order'
-                     AND m.message_type = 'notification'
-                     AND m.subtype_id = %s
-                     AND po.company_id = %s;
-                """
+        purchase_orders = self.env['purchase.order'].search([
+            ('date_order', '>=', three_month_ago),
+            ('state', '=', 'purchase'),
+        ])
+        on_time_rates = [
+            po.partner_id.on_time_rate for po in purchase_orders if po.partner_id.on_time_rate
+        ]
+        all_on_time_delivery = (sum(on_time_rates) / len(purchase_orders) if purchase_orders else 0)
 
-        self.env.cr.execute(query, (one_week_ago, self.env.ref('purchase.mt_rfq_sent').id, self.env.company.id))
-        res = self.env.cr.fetchone()
-        result['all_sent_rfqs'] = res[0] or 0
+        my_purchase_orders = self.env['purchase.order'].search([
+            ('date_order', '>=', three_month_ago),
+            ('state', '=', 'purchase'),
+            ('user_id', '=', self.env.uid)
+        ])
+        my_on_time_rates = [
+            po.partner_id.on_time_rate for po in my_purchase_orders if po.partner_id.on_time_rate
+        ]
+        my_on_time_delivery = (sum(my_on_time_rates) / len(my_purchase_orders) if purchase_orders else 0)
 
         # easy counts
         po = self.env['purchase.order']
         result['all_to_send'] = po.search_count([('state', '=', 'draft')])
         result['my_to_send'] = po.search_count([('state', '=', 'draft'), ('user_id', '=', self.env.uid)])
-        result['all_waiting'] = po.search_count([('state', '=', 'sent'), ('date_order', '>=', fields.Datetime.now())])
-        result['my_waiting'] = po.search_count([('state', '=', 'sent'), ('date_order', '>=', fields.Datetime.now()), ('user_id', '=', self.env.uid)])
-        result['all_late'] = po.search_count([('state', 'in', ['draft', 'sent', 'to approve']), ('date_order', '<', fields.Datetime.now())])
-        result['my_late'] = po.search_count([('state', 'in', ['draft', 'sent', 'to approve']), ('date_order', '<', fields.Datetime.now()), ('user_id', '=', self.env.uid)])
-
-        # Calculated values ('avg order value', 'avg days to purchase', and 'total last 7 days') note that 'avg order value' and
-        # 'total last 7 days' takes into account exchange rate and current company's currency's precision.
-        # This is done via SQL for scalability reasons
-        query = """SELECT AVG(COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total)),
-                          AVG(extract(epoch from age(po.date_approve,po.create_date)/(24*60*60)::decimal(16,2))),
-                          SUM(CASE WHEN po.date_approve >= %s THEN COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total) ELSE 0 END)
-                   FROM purchase_order po
-                   WHERE po.state in ('purchase', 'done')
-                     AND po.company_id = %s
-                """
-        self._cr.execute(query, (one_week_ago, self.env.company.id))
-        res = self.env.cr.fetchone()
-        result['all_avg_days_to_purchase'] = round(res[1] or 0, 2)
-        currency = self.env.company.currency_id
-        result['all_avg_order_value'] = format_amount(self.env, res[0] or 0, currency)
-        result['all_total_last_7_days'] = format_amount(self.env, res[2] or 0, currency)
+        result['all_priority_in_new_state'] = po.search_count([('state', '=', 'draft'), ('priority', '=', 1)])
+        result['my_priority_in_new_state'] = po.search_count([('state', '=', 'draft'), ('priority', '=', 1), ('user_id', '=', self.env.uid)])
+        result['all_sent_rfqs'] = po.search_count([('state', '=', 'sent')])
+        result['my_sent_rfqs'] = po.search_count([('state', '=', 'sent'), ('user_id', '=', self.env.uid)])
+        result['all_late'] = po.search_count([('state', 'in', ['draft', 'sent']), ('date_order', '<', fields.Datetime.now())])
+        result['my_late'] = po.search_count([('state', 'in', ['draft', 'sent']), ('date_order', '<', fields.Datetime.now()), ('user_id', '=', self.env.uid)])
+        result['all_not_acknowledged'] = po.search_count([('state', '=', 'purchase'), ('mail_reception_confirmed', '=', False), ('mail_reception_declined', '=', False)])
+        result['my_not_acknowledged'] = po.search_count([('state', '=', 'purchase'), ('mail_reception_confirmed', '=', False), ('mail_reception_declined', '=', False), ('user_id', '=', self.env.uid)])
+        result['all_late_receipt'] = po.search_count([('state', '=', 'purchase'), ('state', '!=', 'done'), ('date_planned', '<', fields.Datetime.now())])
+        result['my_late_receipt'] = po.search_count([('state', '=', 'purchase'), ('state', '!=', 'done'), ('date_planned', '<', fields.Datetime.now()), ('user_id', '=', self.env.uid)])
+        result['all_on_time_delivery'] = all_on_time_delivery
+        result['my_on_time_delivery'] = my_on_time_delivery
 
         return result
 
