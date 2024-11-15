@@ -44,7 +44,6 @@ class AccountMoveSendWizard(models.TransientModel):
         store=True,
     )
     display_pdf_report_id = fields.Boolean(compute='_compute_display_pdf_report_id')
-    is_download_only = fields.Boolean(compute='_compute_is_download_only')
 
     # MAIL
     mail_template_id = fields.Many2one(
@@ -129,13 +128,12 @@ class AccountMoveSendWizard(models.TransientModel):
         """ Select one applicable sending method given the following priority
         1. preferred method set on partner,
         2. email,
-        3. manual.
         """
         methods = self.env['ir.model.fields'].get_field_selection('res.partner', 'invoice_sending_method')
         for wizard in self:
             preferred_method = self._get_default_sending_method(wizard.move_id)
             need_fallback = not self._is_applicable_to_move(preferred_method, wizard.move_id)
-            fallback_method = need_fallback and ('email' if self._is_applicable_to_move('email', wizard.move_id) else 'manual')
+            fallback_method = need_fallback and 'email'
             wizard.sending_method_checkboxes = {
                 method_key: {
                     'checked': method_key == preferred_method if not need_fallback else method_key == fallback_method,
@@ -177,11 +175,6 @@ class AccountMoveSendWizard(models.TransientModel):
         available_templates_count = self.env['ir.actions.report'].search_count([('is_invoice_report', '=', True)], limit=2)
         for wizard in self:
             wizard.display_pdf_report_id = available_templates_count > 1 and not wizard.move_id.invoice_pdf_report_id
-
-    @api.depends('sending_methods')
-    def _compute_is_download_only(self):
-        for wizard in self:
-            wizard.is_download_only = wizard.sending_methods == ['manual']
 
     @api.depends('move_id')
     def _compute_mail_template_id(self):
@@ -238,7 +231,7 @@ class AccountMoveSendWizard(models.TransientModel):
     @api.depends('sending_methods')
     def _compute_can_edit_body(self):
         for record in self:
-            record.can_edit_body = 'email' in record.sending_methods
+            record.can_edit_body = record.sending_methods and 'email' in record.sending_methods
 
     # Overrides of mail.composer.mixin
     @api.depends('model')  # Fake trigger otherwise not computed in new mode

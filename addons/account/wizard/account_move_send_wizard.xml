@@ -62,18 +62,10 @@
                 </div>
 
                 <footer>
-                    <button string="Print &amp; Send"
+                    <button string="Send"
                             data-hotkey="q"
                             name="action_send_and_print"
                             type="object"
-                            invisible="is_download_only"
-                            class="print btn-primary o_mail_send">
-                    </button>
-                    <button string="Print"
-                            data-hotkey="w"
-                            name="action_send_and_print"
-                            type="object"
-                            invisible="not is_download_only"
                             class="print btn-primary o_mail_send">
                     </button>
                     <button string="Discard"

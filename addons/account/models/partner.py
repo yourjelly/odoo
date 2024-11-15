@@ -563,7 +563,6 @@ class ResPartner(models.Model):
     invoice_sending_method = fields.Selection(
         string="Invoice sending",
         selection=[
-            ('manual', 'Download'),
             ('email', 'by Email'),
         ],
         company_dependent=True,

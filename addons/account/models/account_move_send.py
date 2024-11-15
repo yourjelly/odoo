@@ -290,10 +290,9 @@ class AccountMoveSend(models.AbstractModel):
     @api.model
     def _is_applicable_to_move(self, method, move):
         """ TO OVERRIDE - """
-        if method == 'email':
-            return bool(move.partner_id.email)
-        else:
-            return method == 'manual'
+        # if method == 'email':
+        #     return bool(move.partner_id.email)
+        return True
 
     @api.model
     def _hook_invoice_document_before_pdf_report_render(self, invoice, invoice_data):
