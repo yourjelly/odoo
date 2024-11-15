@@ -16,12 +16,12 @@
                         </div>
                         <div class="input-group mb-1">
                             <input t-ref="url" class="o_we_href_input_link form-control form-control-sm" t-model="state.url" title="URL" placeholder="Type your URL" t-on-keydown="onKeydownEnter"/>
-                            <span class="mx-2" t-if="!state.url">
-                                or <button class="mx-2 btn btn-primary btn-sm"> FP file </button>
+                            <span class="ms-1" t-if="props.fileUploadEnabled and !state.url">
+                                or <button class="btn btn-primary btn-sm" t-on-click="() => props.onUpload(state.label)">Upload File</button>
                             </span>
 
                         </div>
-                        <div t-if="state.url" class="input-group" t-on-change="onChangeClasses">
+                        <div t-if="!(props.fileUploadEnabled and !state.url)" class="input-group" t-on-change="onChangeClasses">
                             <select name="link_type" class="form-select form-select-sm" t-att-class="{'mb-1': state.type !==  ''}" t-on-change="(ev)=>this.state.type = ev.target.value">
                                 <t t-foreach="this.colorsData" t-as="colorData" t-key="colorData.type">
                                     <t t-if="colorData.type !== 'custom'">

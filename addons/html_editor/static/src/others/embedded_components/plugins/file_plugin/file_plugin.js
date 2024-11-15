@@ -17,7 +17,7 @@ export class FilePlugin extends Plugin {
                 title: _t("File Download"),
                 description: _t("Upload a file to download"),
                 icon: "fa-upload",
-                run: () => this.uploadLocalFiles(),
+                run: () => this.uploadAndInsertFiles(),
                 isAvailable: ({ anchorNode }) =>
                     !this.config.disableFile &&
                     // @todo: shouldn't it be disabled for any embedded component?
@@ -32,24 +32,37 @@ export class FilePlugin extends Plugin {
         mount_component_handlers: this.setupNewFile.bind(this),
         normalize_handlers: this.padFileElementsWithZWS.bind(this),
         intangible_char_for_keyboard_navigation_predicates: (_, char) => char === "\u200b",
+        file_upload_providers: this.uploadSingleFile.bind(this),
     };
+
+    async uploadAndInsertFiles() {
+        const fileCards = await this.uploadLocalFiles();
+        fileCards.forEach((card) => this.dependencies.dom.insert(card));
+        this.dependencies.history.addStep();
+    }
 
     /**
      * @param {Object} options
      * @param {boolean} [options.multiple=true] Allow multiple files to be selected
      * @param {string} [options.accept] Accepted file types (accept attribute of input[type=file])
+     * @returns {Promise<HTMLElement[]>}
      */
-    async uploadLocalFiles({ multiple = true, accept = "*/*" } = {}) {
+    async uploadLocalFiles({ multiple = true, accept = "*/*", filename = undefined } = {}) {
         const files = await this.selectLocalFiles({ multiple, accept });
         if (!files.length) {
-            return;
+            return [];
         }
         const attachments = await this.createAttachments(files);
-        const fileElements = await Promise.all(
-            attachments.map((attachment) => this.renderMedia(attachment))
-        );
-        fileElements.forEach((element) => this.dependencies.dom.insert(element));
-        this.dependencies.history.addStep();
+        return Promise.all(attachments.map((attachment) => this.renderMedia(attachment)));
+    }
+
+    async uploadSingleFile({ accept = "*/*", filename } = {}) {
+        const files = await this.selectLocalFiles({ multiple: false, accept });
+        if (!files.length) {
+            return [];
+        }
+        const [attachment] = await this.createAttachments([files[0]]);
+        return this.renderMedia(attachment, { filename });
     }
 
     /**
@@ -75,17 +88,22 @@ export class FilePlugin extends Plugin {
                 input.removeEventListener("change", resolveAndClear);
                 this.editable.removeEventListener("focus", resolveAndClear);
             };
-            // Detect file selected
+            // Detect file(s) selected
             input.addEventListener("change", resolveAndClear);
-            // Detect file selector closed without selecting file
+            // Detect file selector closed without selecting files (cancel)
             this.editable.addEventListener("focus", resolveAndClear);
         });
 
         // @todo: handle dom changes in between
+        // @todo: consider using focusEditable instead
         restoreSelection();
         return input.files;
     }
 
+    /**
+     * @param {FileList} files
+     * @returns {Promise<Object[]>} Attachments
+     */
     async createAttachments(files) {
         const { resModel, resId } = this.recordInfo;
         const attachments = [];
@@ -161,7 +179,7 @@ export class FilePlugin extends Plugin {
      * @param {Object} attachment
      * @returns {Promise<HTMLElement>}
      */
-    async renderMedia(attachment) {
+    async renderMedia(attachment, { filename } = {}) {
         let accessToken = attachment.access_token;
         if (!attachment.public || !accessToken) {
             // Generate an access token so that anyone with read access to the
@@ -176,7 +194,7 @@ export class FilePlugin extends Plugin {
             access_token: accessToken,
             checksum: attachment.checksum,
             extension,
-            filename: attachment.name,
+            filename: filename || attachment.name,
             id: attachment.id,
             mimetype: attachment.mimetype,
             name: attachment.name,

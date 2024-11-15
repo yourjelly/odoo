@@ -212,6 +212,9 @@ export class LinkPlugin extends Plugin {
 
         this.getExternalMetaData = memoize(fetchExternalMetaData);
         this.getInternalMetaData = memoize(fetchInternalMetaData);
+
+        [this.uploadLocalFile] = this.getResource("file_upload_providers");
+        this.fileUploadEnabled = !!this.uploadLocalFile;
     }
 
     destroy() {
@@ -410,6 +413,16 @@ export class LinkPlugin extends Plugin {
                     }
                     this.dependencies.selection.focusEditable();
                     this.removeCurrentLinkIfEmtpy();
+                    this.dependencies.history.addStep();
+                },
+                fileUploadEnabled: this.fileUploadEnabled,
+                onUpload: async (label) => {
+                    const fileCard = await this.uploadLocalFile({ filename: label });
+                    if (!fileCard) {
+                        return;
+                    }
+                    this.overlay.close();
+                    this.linkElement.replaceWith(fileCard);
                     this.dependencies.history.addStep();
                 },
             };

@@ -15,6 +15,8 @@ export class LinkPopover extends Component {
         getInternalMetaData: Function,
         getExternalMetaData: Function,
         isImage: Boolean,
+        fileUploadEnabled: { type: Boolean, optional: true },
+        onUpload: { type: Function, optional: true },
     };
     colorsData = [
         { type: "", label: _t("Link"), btnPreview: "link" },
