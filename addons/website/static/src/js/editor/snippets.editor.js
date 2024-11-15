@@ -122,6 +122,8 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
         // grid padding option so it is not applied on inner rows.
         const $gridPaddingOptions = $html.find('[data-css-property="--grid-item-padding-y"], [data-css-property="--grid-item-padding-x"]');
         $gridPaddingOptions.attr("data-apply-to", ".row.o_grid_mode");
+        //TODO adapt in 18.0 as well as in master
+        $html.find("a[role='tab'], a[role='button'], a.btn").attr("data-oe-type", "button");
     },
     /**
      * Depending of the demand, reconfigure they gmap key or configure it
