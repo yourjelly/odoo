@@ -6,10 +6,11 @@ import uuid
 from collections import defaultdict
 from operator import attrgetter
 
-from odoo.exceptions import AccessError, MissingError
+from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.osv import expression
 from odoo.tools import OrderedSet, is_list_of
 from odoo.tools.misc import has_list_types
+from odoo.tools.translate import _
 
 from .fields import Field, _logger
 from .models import BaseModel
@@ -119,11 +120,9 @@ class Properties(Field):
                 raise ValueError(f"Wrong property value {value!r}")
         if not validate or not record._ids:
             return value
-        # writing the same truthy value to properties with different definitions doesn't make sense
-        definition = self._get_properties_definition(record[0])
+        definition = self._get_properties_definition(record)
         value = self._dict_to_list(value, definition)
-        res_ids_per_model = self._get_res_ids_per_model(record.env, [value], validate=False)
-        self._parse_json_types(value, record.env, res_ids_per_model)
+        self._parse_json_types(value, record.env, None)
 
         return self._list_to_dict(value)
 
@@ -194,7 +193,7 @@ class Properties(Field):
 
         return super().convert_to_write(value, record)
 
-    def _get_res_ids_per_model(self, env, values_list, validate=True):
+    def _get_res_ids_per_model(self, env, values_list):
         """Read everything needed in batch for the given records.
 
         To retrieve relational properties names, or to check their existence,
@@ -224,9 +223,6 @@ class Properties(Field):
 
                 ids_per_model[comodel].update(default)
                 ids_per_model[comodel].update(property_value)
-
-        if not validate:
-            return {model: set(ids) for model, ids in ids_per_model.items()}
 
         # check existence and pre-fetch in batch
         res_ids_per_model = {}
@@ -348,11 +344,18 @@ class Properties(Field):
 
         return properties_list_values
 
-    def _get_properties_definition(self, record):
-        """Return the properties definition of the given record."""
-        container = record[self.definition_record]
-        if container:
-            return container.sudo()[self.definition_record_field]
+    def _get_properties_definition(self, records):
+        """Return the properties definition of the given records."""
+        if not records:
+            return []
+        first_record = records.__class__(records.env, records._ids[:1], records._prefetch_ids)
+        first_container = first_record[self.definition_record]
+        first_definition = first_container.sudo()[self.definition_record_field]
+        for record in records[1:]:
+            container = record[self.definition_record]
+            if container != first_container and container.sudo()[self.definition_record_field] != first_definition:
+                raise ValidationError(_("records %s don't have the same definition", records))
+        return first_definition
 
     @classmethod
     def _add_display_name(cls, values_list, env, value_keys=('value', 'default')):
@@ -443,7 +446,8 @@ class Properties(Field):
     def _parse_json_types(cls, values_list, env, res_ids_per_model):
         """Parse the value stored in the JSON.
 
-        Check for records existence, if we removed a selection option, ...
+        Check for records existence when res_ids_per_model is not None,
+        if we removed a selection option, ...
         Modify in place "values_list".
 
         :param values_list: List of properties definition and values
@@ -481,7 +485,7 @@ class Properties(Field):
                 if not isinstance(property_value, int):
                     raise ValueError(f'Wrong many2one value: {property_value!r}.')
 
-                if property_value not in res_ids_per_model[res_model]:
+                if res_ids_per_model is not None and property_value not in res_ids_per_model[res_model]:
                     property_value = False
 
             elif property_type == 'many2many' and property_value and res_model in env:
@@ -492,10 +496,11 @@ class Properties(Field):
                     # remove duplicated value and preserve order
                     property_value = list(dict.fromkeys(property_value))
 
-                property_value = [
-                    id_ for id_ in property_value
-                    if id_ in res_ids_per_model[res_model]
-                ]
+                if res_ids_per_model is not None:
+                    property_value = [
+                        id_ for id_ in property_value
+                        if id_ in res_ids_per_model[res_model]
+                    ]
 
             property_definition['value'] = property_value
 
