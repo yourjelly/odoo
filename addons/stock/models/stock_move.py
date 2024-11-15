@@ -2423,3 +2423,7 @@ Please change the quantity done or the rounding precision of your unit of measur
             ),
             'readOnly': False,
         }
+
+    def _visible_quantity(self):
+        self.ensure_one()
+        return self.quantity
