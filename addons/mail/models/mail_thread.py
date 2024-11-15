@@ -3585,7 +3585,7 @@ class MailThread(models.AbstractModel):
             'mail_message_id': message.id,
             'references': references,
         }
-        if mail_subject != message.subject:
+        if mail_subject != (' '.join(message.subject.splitlines()) if message.subject else message.subject):
             base_mail_values['subject'] = mail_subject
         if additional_values:
             base_mail_values.update(additional_values)
