@@ -1,10 +1,11 @@
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { nextLeaf } from "@html_editor/utils/dom_info";
+import { isZWS, nextLeaf } from "@html_editor/utils/dom_info";
 import { isBlock } from "@html_editor/utils/blocks";
 import { renderToElement } from "@web/core/utils/render";
 import { withSequence } from "@html_editor/utils/resource";
+import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
 
 export class FilePlugin extends Plugin {
     static id = "file";
@@ -29,6 +30,8 @@ export class FilePlugin extends Plugin {
         },
         power_buttons: withSequence(5, { commandId: "uploadFile" }),
         mount_component_handlers: this.setupNewFile.bind(this),
+        normalize_handlers: this.padFileElementsWithZWS.bind(this),
+        intangible_char_for_keyboard_navigation_predicates: (_, char) => char === "\u200b",
     };
 
     /**
@@ -45,7 +48,7 @@ export class FilePlugin extends Plugin {
         const fileElements = await Promise.all(
             attachments.map((attachment) => this.renderMedia(attachment))
         );
-        this.insertAsGrid(fileElements);
+        fileElements.forEach((element) => this.dependencies.dom.insert(element));
         this.dependencies.history.addStep();
     }
 
@@ -94,17 +97,30 @@ export class FilePlugin extends Plugin {
         return attachments;
     }
 
-    insertAsGrid(elements) {
-        const container = this.document.createElement("div");
-        container.classList.add(
-            "d-flex",
-            "justify-content-start",
-            "flex-wrap",
-            "gap-1",
-            "oe_movable"
-        );
-        container.append(...elements);
-        this.dependencies.dom.insert(container);
+    /**
+     * @todo wrap zws in span with class or data-att and remove it on clean for save?
+     *
+     * Make sure that file elements have a ZWS before and after them, to allow
+     * the user to navigate around them with the keyboard.
+     *
+     * @param {HTMLElement} root
+     */
+    padFileElementsWithZWS(root) {
+        const cursors = this.dependencies.selection.preserveSelection();
+        const padWithZWS = (element, position) => {
+            const zws = this.document.createTextNode("\u200b");
+            cursors.update(callbacksForCursorUpdate[position](element, zws));
+            element[position](zws);
+        };
+        for (const fileElement of root.querySelectorAll("[data-embedded='file']")) {
+            if (!isZWS(fileElement.previousSibling)) {
+                padWithZWS(fileElement, "before");
+            }
+            if (!isZWS(fileElement.nextSibling)) {
+                padWithZWS(fileElement, "after");
+            }
+        }
+        cursors.restore();
     }
 
     get recordInfo() {
@@ -138,6 +154,10 @@ export class FilePlugin extends Plugin {
     }
 
     /**
+     * @todo: this method should take a list of attachments and render them all
+     * making a single call to the server to generate access tokens for each of
+     * them
+     *
      * @param {Object} attachment
      * @returns {Promise<HTMLElement>}
      */

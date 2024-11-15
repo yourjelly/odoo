@@ -1,5 +1,6 @@
 import { closestBlock, isBlock } from "./blocks";
 import {
+    getDeepestPosition,
     isContentEditable,
     isNotEditableNode,
     isSelfClosingElement,
@@ -242,6 +243,7 @@ export const callbacksForCursorUpdate = {
  */
 export function getAdjacentCharacter(selection, side, editable) {
     let { focusNode, focusOffset } = selection;
+    [focusNode, focusOffset] = getDeepestPosition(focusNode, focusOffset);
     const originalBlock = closestBlock(focusNode);
     let adjacentCharacter;
     while (!adjacentCharacter && focusNode) {
