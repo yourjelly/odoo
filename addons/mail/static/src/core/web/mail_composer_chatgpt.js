@@ -20,9 +20,9 @@ export class MailComposerChatGPT extends Component {
             insert: content => {
                 const root = document.createElement("div");
                 root.appendChild(content);
-                const { body } = this.props.record.data;
+                const { [this.props.name]: body } = this.props.record.data;
                 this.props.record.update({
-                    body: body + markup(root.innerHTML)
+                    [this.props.name]: body + markup(root.innerHTML)
                 });
             },
             /**
