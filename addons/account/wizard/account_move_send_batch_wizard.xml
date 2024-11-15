@@ -17,6 +17,7 @@
                 <field name="summary_data" widget="account_batch_sending_summary" nolabel="1"/>
 
                 <footer>
+                    <!-- Todo (rugo) -->
                     <button string="Print &amp; Send"
                             data-hotkey="q"
                             name="action_send_and_print"
