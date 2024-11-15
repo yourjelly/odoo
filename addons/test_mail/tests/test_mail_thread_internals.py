@@ -21,7 +21,6 @@ class TestAPI(MailCommon, TestRecipients):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user_employee.write({'groups_id': [(4, cls.env.ref("base.group_partner_manager").id)]})
         cls.test_partner = cls.env['res.partner'].create({
             'email': '"Test External" <test.external@example.com>',
             'mobile': '+32455001122',
