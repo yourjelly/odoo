@@ -290,26 +290,10 @@ describe("RPC calls", () => {
         expect(result.groups.every((g) => g.profession_count === g.__recordIds.length)).toBe(true);
     });
 
-    test("'read_group': no group", async () => {
+    test("'web_read_group': groupBy", async () => {
         const server = new DeterministicSampleServer("hobbit", fields.hobbit);
         const result = await server.mockRpc({
-            method: "read_group",
-            model: "hobbit",
-            fields: [],
-            groupBy: [],
-        });
-        expect(result).toEqual([
-            {
-                __count: MAIN_RECORDSET_SIZE,
-                __domain: [],
-            },
-        ]);
-    });
-
-    test("'read_group': groupBy", async () => {
-        const server = new DeterministicSampleServer("hobbit", fields.hobbit);
-        const result = await server.mockRpc({
-            method: "read_group",
+            method: "web_read_group",
             model: "hobbit",
             fields: [],
             groupBy: ["profession"],
@@ -319,10 +303,10 @@ describe("RPC calls", () => {
         expect(result.reduce((acc, g) => acc + g.profession_count, 0)).toBe(MAIN_RECORDSET_SIZE);
     });
 
-    test("'read_group': groupBy and field", async () => {
+    test("'web_read_group': groupBy and field", async () => {
         const server = new DeterministicSampleServer("hobbit", fields.hobbit);
         const result = await server.mockRpc({
-            method: "read_group",
+            method: "web_read_group",
             model: "hobbit",
             fields: ["age:sum"],
             groupBy: ["profession"],
@@ -335,10 +319,10 @@ describe("RPC calls", () => {
         );
     });
 
-    test("'read_group': multiple groupBys and lazy", async () => {
+    test("'web_read_group': multiple groupBys and lazy", async () => {
         const server = new DeterministicSampleServer("hobbit", fields.hobbit);
         const result = await server.mockRpc({
-            method: "read_group",
+            method: "web_read_group",
             model: "hobbit",
             fields: [],
             groupBy: ["profession", "age"],
@@ -347,10 +331,10 @@ describe("RPC calls", () => {
         expect("age" in result[0]).toBe(false);
     });
 
-    test("'read_group': multiple groupBys and not lazy", async () => {
+    test("'web_read_group': multiple groupBys and not lazy", async () => {
         const server = new DeterministicSampleServer("hobbit", fields.hobbit);
         const result = await server.mockRpc({
-            method: "read_group",
+            method: "web_read_group",
             model: "hobbit",
             fields: [],
             groupBy: ["profession", "age"],
@@ -360,10 +344,10 @@ describe("RPC calls", () => {
         expect("age" in result[0]).toBe(true);
     });
 
-    test("'read_group': multiple groupBys among which a many2many", async () => {
+    test("'web_read_group': multiple groupBys among which a many2many", async () => {
         const server = new DeterministicSampleServer("res.users", fields["res.users"]);
         const result = await server.mockRpc({
-            method: "read_group",
+            method: "web_read_group",
             model: "res.users",
             fields: [],
             groupBy: ["height", "tag_ids"],
@@ -407,11 +391,11 @@ describe("RPC calls", () => {
         expect(result).toHaveLength(MAIN_RECORDSET_SIZE);
     });
 
-    test("'read_group': partial support of array_agg", async () => {
+    test("'web_read_group': partial support of array_agg", async () => {
         fields["res.users"].id = { type: "integer", name: "ID" };
         const server = new DeterministicSampleServer("res.users", fields["res.users"]);
         const result = await server.mockRpc({
-            method: "read_group",
+            method: "web_read_group",
             model: "res.users",
             fields: ["unused_label:array_agg(id)"],
             groupBy: [],

@@ -454,11 +454,6 @@ test.tags("desktop")("basic grouped rendering", async () => {
         },
     });
 
-    onRpc("web_read_group", ({ kwargs }) => {
-        // the lazy option is important, so the server can fill in the empty groups
-        expect(kwargs.lazy).toBe(true, { message: "should use lazy read_group" });
-    });
-
     await mountView({
         type: "kanban",
         resModel: "partner",
@@ -1826,7 +1821,7 @@ test.tags("desktop")("quick create record without quick_create_view", async () =
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "onchange", // quick create
@@ -1892,7 +1887,7 @@ test.tags("desktop")("quick create record with quick_create_view", async () => {
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "get_views", // form view in quick create
@@ -2126,7 +2121,7 @@ test.tags("desktop")("quick create record in grouped on m2o (no quick_create_vie
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "onchange", // quick create
@@ -2191,7 +2186,7 @@ test.tags("desktop")("quick create record in grouped on m2o (with quick_create_v
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "get_views", // form view in quick create
@@ -2236,7 +2231,7 @@ test("quick create record in grouped on m2m (no quick_create_view)", async () =>
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "onchange", // quick create
@@ -2282,7 +2277,7 @@ test.tags("desktop")("quick create record in grouped on m2m in the None column",
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "web_search_read", // read records when unfolding 'None'
@@ -2335,7 +2330,7 @@ test("quick create record in grouped on m2m (field not in template)", async () =
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "get_views", // get form view
@@ -2394,7 +2389,7 @@ test("quick create record in grouped on m2m (field in the form view)", async () 
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "get_views", // get form view
@@ -2494,7 +2489,7 @@ test.tags("desktop")("quick create record with default values and onchanges", as
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "get_views", // form view in quick create
@@ -2573,7 +2568,7 @@ test("quick create record with onchange of field marked readonly", async () => {
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
     ]);
@@ -3654,7 +3649,7 @@ test("quick create record fails in grouped by selection", async () => {
 
 test.tags("desktop")("quick create record in empty grouped kanban", async () => {
     onRpc("web_read_group", () => {
-        // override read_group to return empty groups, as this is
+        // override web_read_group to return empty groups, as this is
         // the case for several models (e.g. project.task grouped
         // by stage_id)
         return {
@@ -5430,7 +5425,7 @@ test.tags("desktop")("auto fold group when reach the limit", async () => {
 
 test.tags("desktop")("auto fold group when reach the limit (2)", async () => {
     // this test is similar to the previous one, except that in this one,
-    // read_group sets the __fold key on each group, even those that are
+    // web_read_group sets the __fold key on each group, even those that are
     // unfolded, which could make subtle differences in the code
     for (let i = 0; i < 12; i++) {
         Product._records.push({ id: 8 + i, name: `column ${i}` });
@@ -5716,7 +5711,7 @@ test("delete an empty column, then a column with records.", async () => {
     let firstLoad = true;
 
     onRpc("web_read_group", function ({ parent }) {
-        // override read_group to return an extra empty groups
+        // override web_read_group to return an extra empty groups
         const result = parent();
         if (firstLoad) {
             result.groups.unshift({
@@ -5831,7 +5826,7 @@ test.tags("desktop")("edit a column in grouped on m2o", async () => {
 
     expect(".modal").toHaveCount(0, { message: "the modal should be closed" });
     expect(queryText(".o_column_title", { root: getKanbanColumn(1) })).toBe("ged\n(2)");
-    expect(nbRPCs).toBe(4, { message: "should have done 1 write, 1 read_group and 2 search_read" });
+    expect(nbRPCs).toBe(4, { message: "should have done 1 write, 1 web_read_group and 2 search_read" });
 });
 
 test("edit a column propagates right context", async () => {
@@ -6498,7 +6493,7 @@ test.tags("desktop")("no content helper when no data", async () => {
 
 test("no nocontent helper for grouped kanban with empty groups", async () => {
     onRpc("web_read_group", function ({ kwargs, parent }) {
-        // override read_group to return empty groups, as this is
+        // override web_read_group to return empty groups, as this is
         // the case for several models (e.g. project.task grouped
         // by stage_id)
         const result = parent();
@@ -6882,7 +6877,7 @@ test("empty kanban with sample data grouped by date range (fill temporal)", asyn
 
 test("empty grouped kanban with sample data and click quick create", async () => {
     onRpc("web_read_group", function ({ kwargs, parent }) {
-        // override read_group to return empty groups, as this is
+        // override web_read_group to return empty groups, as this is
         // the case for several models (e.g. project.task grouped
         // by stage_id)
         const result = parent();
@@ -6933,7 +6928,7 @@ test("empty grouped kanban with sample data and click quick create", async () =>
 
 test.tags("desktop")("quick create record in grouped kanban with sample data", async () => {
     onRpc("web_read_group", function ({ kwargs, parent }) {
-        // override read_group to return empty groups, as this is
+        // override web_read_group to return empty groups, as this is
         // the case for several models (e.g. project.task grouped
         // by stage_id)
         const result = parent();
@@ -6975,7 +6970,7 @@ test.tags("desktop")("quick create record in grouped kanban with sample data", a
 
 test("empty grouped kanban with sample data and cancel quick create", async () => {
     onRpc("web_read_group", function ({ kwargs, parent }) {
-        // override read_group to return empty groups, as this is
+        // override web_read_group to return empty groups, as this is
         // the case for several models (e.g. project.task grouped
         // by stage_id)
         const result = parent();
@@ -7088,7 +7083,7 @@ test.tags("desktop")("empty kanban with sample data", async () => {
 test("empty grouped kanban with sample data and many2many_tags", async () => {
     onRpc("web_read_group", function ({ kwargs, parent }) {
         const result = parent();
-        // override read_group to return empty groups, as this is
+        // override web_read_group to return empty groups, as this is
         // the case for several models (e.g. project.task grouped
         // by stage_id)
         result.groups.forEach((group) => {
@@ -7145,7 +7140,7 @@ test.tags("desktop")("sample data does not change after reload with sample data"
 
     onRpc("web_read_group", function ({ kwargs, parent }) {
         const result = parent();
-        // override read_group to return empty groups, as this is
+        // override web_read_group to return empty groups, as this is
         // the case for several models (e.g. project.task grouped
         // by stage_id)
         result.groups.forEach((group) => {
@@ -7257,7 +7252,7 @@ test.tags("desktop")("empty grouped kanban with sample data: cannot fold a colum
     // folding a column in grouped kanban with sample data is disabled, for the sake of simplicity
     onRpc("web_read_group", function ({ kwargs, parent }) {
         const result = parent();
-        // override read_group to return a single, empty group
+        // override web_read_group to return a single, empty group
         result.groups = result.groups.slice(0, 1);
         result.groups[0][`${kwargs.groupby[0]}_count`] = 0;
         result.length = 1;
@@ -7303,7 +7298,7 @@ test("empty grouped kanban with sample data: delete a column", async () => {
     ];
 
     onRpc("web_read_group", () => {
-        // override read_group to return a single, empty group
+        // override web_read_group to return a single, empty group
         return {
             groups,
             length: groups.length,
@@ -9122,7 +9117,7 @@ test("RPCs when (de)activating kanban view progressbar filters", async () => {
         "web_search_read",
         "web_read_group", // recomputes aggregates
         "web_search_read",
-        'web_read_group domain ["&",["bar","=",true],["foo","=","yop"]]', // perform read_group only on second column (bar=true)
+        'web_read_group domain ["&",["bar","=",true],["foo","=","yop"]]', // perform web_read_group only on second column (bar=true)
         "read_progress_bar",
         "web_read_group",
         "web_read_group",
@@ -9131,7 +9126,7 @@ test("RPCs when (de)activating kanban view progressbar filters", async () => {
         // activate filter
         "web_read_group", // recomputes aggregates
         "web_search_read",
-        'web_read_group domain ["&",["bar","=",true],["foo","=","gnap"]]', // perform read_group only on second column (bar=true)
+        'web_read_group domain ["&",["bar","=",true],["foo","=","gnap"]]', // perform web_read_group only on second column (bar=true)
         "read_progress_bar",
         "web_read_group",
         "web_read_group",
@@ -9972,7 +9967,7 @@ test.tags("desktop")("keynav: grouped kanban with empty columns", async () => {
     Partner._records[1].state = "abc";
 
     onRpc("web_read_group", function ({ parent }) {
-        // override read_group to return empty groups, as this is
+        // override web_read_group to return empty groups, as this is
         // the case for several models (e.g. project.task grouped
         // by stage_id)
         const result = parent();
@@ -12282,7 +12277,7 @@ test.tags("desktop")("quick create record in grouped kanban in a form view dialo
         "/web/webclient/translations",
         "/web/webclient/load_menus",
         "get_views",
-        "web_read_group", // initial read_group
+        "web_read_group", // initial web_read_group
         "web_search_read", // initial search_read (first column)
         "web_search_read", // initial search_read (second column)
         "onchange", // quick create
@@ -13315,7 +13310,7 @@ test("Correct values for progress bar with toggling filter and slow RPC", async 
 
 test.tags("desktop")("click on empty kanban must shake the NEW button", async () => {
     onRpc("web_read_group", () => {
-        // override read_group to return empty groups, as this is
+        // override web_read_group to return empty groups, as this is
         // the case for several models (e.g. project.task grouped
         // by stage_id)
         return {
