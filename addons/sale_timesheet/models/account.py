@@ -124,6 +124,8 @@ class AccountAnalyticLine(models.Model):
                     return map_entry.sale_line_id
             if self.project_id.sale_line_id:
                 return self.project_id.sale_line_id
+        # Infinite looping starts here
+        self.env.add_to_compute(self.task_id._fields["sale_line_id"], self)
         if self.task_id.allow_billable and self.task_id.sale_line_id:
             if self.task_id.pricing_type in ('task_rate', 'fixed_rate'):
                 return self.task_id.sale_line_id
