@@ -24,15 +24,7 @@ class Rating(http.Controller):
         if rate not in (1, 3, 5):
             raise ValueError(_("Incorrect rating: should be 1, 3 or 5 (received %d)"), rate)
 
-        rating, record_sudo = self._get_rating_and_record(token)
-
-        record_sudo.rating_apply(
-            rate,
-            rating=rating,
-            feedback=_('Customer rated %r.', record_sudo.display_name),
-            subtype_xmlid=None,
-            notify_delay_send=True,
-        )
+        rating = self._get_rating_and_record(token)[0]  # we only need the first return value
 
         lang = rating.partner_id.lang or get_lang(request.env).code
         return request.env['ir.ui.view'].with_context(lang=lang)._render_template('rating.rating_external_page_submit', {
