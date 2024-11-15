@@ -1,6 +1,15 @@
-import { Component, onWillDestroy, onWillStart, useRef, useState, useSubEnv } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillStart,
+    onWillUnmount,
+    useRef,
+    useState,
+    useSubEnv,
+} from "@odoo/owl";
 import { LazyComponent, loadBundle } from "@web/core/assets";
 import { registry } from "@web/core/registry";
+import { uniqueId } from "@web/core/utils/functions";
 import { useService } from "@web/core/utils/hooks";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 import { WebsiteSystrayItem } from "./website_systray_item";
@@ -29,14 +38,18 @@ class WebsiteBuilder extends Component {
         });
         this.state = useState({ isEditing: false });
 
+        this.systrayName = `website.WebsiteSystrayItem_${uniqueId()}`;
+
         onWillStart(async () => {
             const slugCurrentWebsite = await this.orm.call("website", "get_current_website");
             this.backendWebsiteId = unslugHtmlDataObject(slugCurrentWebsite).id;
             this.initialUrl = `/website/force/${encodeURIComponent(this.backendWebsiteId)}`;
         });
-        this.addSystrayItems();
-        onWillDestroy(() => {
-            registry.category("systray").remove("website.WebsiteSystrayItem");
+        onMounted(() => {
+            this.addSystrayItems();
+        });
+        onWillUnmount(() => {
+            registry.category("systray").remove(this.systrayName);
         });
     }
 
@@ -57,7 +70,7 @@ class WebsiteBuilder extends Component {
         registry
             .category("systray")
             .add(
-                "website.WebsiteSystrayItem",
+                this.systrayName,
                 { Component: WebsiteSystrayItem, props: systrayProps },
                 { sequence: -100 }
             );

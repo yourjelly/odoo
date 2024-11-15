@@ -11,6 +11,7 @@ import { SetupEditorPlugin } from "./plugins/setup_editor_plugin";
 import { SnippetModel } from "./snippet_model";
 import { BlockTab, blockTab } from "./snippets_menu_tabs/block_tab";
 import { CustomizeTab, customizeTab } from "./snippets_menu_tabs/customize_tab";
+import { useService } from "@web/core/utils/hooks";
 
 const BUILDER_PLUGIN = [
     ElementToolboxPlugin,
@@ -51,6 +52,8 @@ export class SnippetsMenu extends Component {
         useHotkey("control+z", () => this.undo());
         useHotkey("control+y", () => this.redo());
         useHotkey("control+shift+z", () => this.redo());
+
+        this.action = useService("action");
 
         const editorBus = new EventBus();
         this.editor = new Editor(
@@ -113,6 +116,9 @@ export class SnippetsMenu extends Component {
     }
 
     save() {
+        this.action.restore(this.action.currentController.jsId);
+        // this.props.closeEditor();
+
         console.log("todo");
     }
 
