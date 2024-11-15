@@ -2654,6 +2654,16 @@ export class Wysiwyg extends Component {
                     this.openMediaDialog();
                 },
             });
+            commands.push({
+                category: _t('Media'),
+                name: _t('File Download'),
+                priority: 40,
+                description: _t('Upload a file to download'),
+                fontawesome: 'fa-upload',
+                callback: () => {
+                    // TODO: upload local file
+                },
+            });
         }
         if (editorOptions.allowCommandVideo) {
             commands.push({
