@@ -104,9 +104,9 @@ class MrpProduction(models.Model):
                 if byproduct.cost_share == 0:
                     continue
                 byproduct_cost_share += byproduct.cost_share
-                if byproduct.product_id.cost_method in ('fifo', 'average'):
+                if byproduct.product_id.with_company(finished_move.production_id.company_id).cost_method in ('fifo', 'average'):
                     byproduct.price_unit = total_cost * byproduct.cost_share / 100 / byproduct.product_uom._compute_quantity(byproduct.quantity_done, byproduct.product_id.uom_id)
-            if finished_move.product_id.cost_method in ('fifo', 'average'):
+            if finished_move.product_id.with_company(finished_move.production_id.company_id).cost_method in ('fifo', 'average'):
                 finished_move.price_unit = total_cost * float_round(1 - byproduct_cost_share / 100, precision_rounding=0.0001) / qty_done
         return True
 
