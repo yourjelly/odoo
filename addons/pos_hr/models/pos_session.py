@@ -34,17 +34,45 @@ class PosSession(models.Model):
         author_id = self.employee_id._get_related_partners() or self.user_id
         self.message_post(body=plaintext2html(_('Closed Register')), author_id=author_id.id)
 
+<<<<<<< master
     def _aggregate_payments_amounts_by_employee(self, all_payments):
         payments_by_employee = {}
+||||||| e8eee7844e5a876c0c499ad078668654438d0dbd
+    def _aggregate_payments_amounts_by_employee(self, payments):
+        payments_by_employee = {}
+=======
+    def _aggregate_payments_amounts_by_employee(self, payments):
+        payments_by_employee = []
+>>>>>>> 2a7fa04abf3f3d49f9073a99ec3e9b2e598627a4
 
+<<<<<<< master
         for employee, payments in all_payments.grouped('employee_id').items():
             payments_by_employee[employee.id] = {
                 'id': employee.id,
                 'name': employee.name,
                 'amount': sum(payments.mapped('amount')),
             }
+||||||| e8eee7844e5a876c0c499ad078668654438d0dbd
+        for employee, payments in payments.grouped('employee_id').items():
+            payments_by_employee[employee.id] = {
+                'id': employee.id,
+                'name': employee.name,
+                'amount': sum(payments.mapped('amount')),
+            }
+=======
+        for employee, payments_group in payments.grouped('employee_id').items():
+            payments_by_employee.append({
+                'id': employee.id if employee else 'others',
+                'name': employee.name if employee else _('Others'),
+                'amount': sum(payments_group.mapped('amount')),
+            })
+>>>>>>> 2a7fa04abf3f3d49f9073a99ec3e9b2e598627a4
 
-        return sorted(payments_by_employee.values(), key=lambda p: p['name'])
+        # Sort such that "Others" is always the last item
+        return sorted(
+            payments_by_employee,
+            key=lambda p: (p['id'] == 'others', p['name'])
+        )
 
     def _aggregate_moves_by_employee(self):
         moves_per_employee = {}
