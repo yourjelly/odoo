@@ -16,13 +16,12 @@ class AccountMoveSend(models.AbstractModel):
         alerts = super()._get_alerts(moves, moves_data)
         if peppol_moves := moves.filtered(lambda m: 'peppol' in moves_data[m]['sending_methods']):
             invalid_partners = peppol_moves.filtered(
-                lambda move: move.partner_id.commercial_partner_id.with_company(move.company_id).peppol_verification_state != 'valid'
+                lambda move: move.partner_id.commercial_partner_id.with_company(move.company_id).peppol_verification_state == 'not_valid_format'
             ).partner_id.commercial_partner_id
             ubl_warning_already_displayed = 'account_edi_ubl_cii_configure_partner' in alerts
             if invalid_partners and not ubl_warning_already_displayed:
                 alerts['account_peppol_warning_partner'] = {
-                    'message': _("The following partners are not correctly configured to receive Peppol documents. "
-                                 "Please check and verify their Peppol endpoint and the Electronic Invoicing format"),
+                    'message': _("Customer is on Peppol but did not enable receiving documents."),
                     'action_text': _("View Partner(s)"),
                     'action': invalid_partners._get_records_action(name=_("Check Partner(s)")),
                 }
@@ -31,6 +30,30 @@ class AccountMoveSend(models.AbstractModel):
                 alerts['account_peppol_demo_test_mode'] = {
                     'message': _("Peppol is in testing/demo mode."),
                     'level': 'info',
+                }
+        if partner_with_peppol_not_selected := moves.filtered(
+            lambda m: m.partner_id.commercial_partner_id.with_company(m.company_id).peppol_verification_state == 'valid'
+                      and 'peppol' not in moves_data[m]['sending_methods']
+        ).partner_id.commercial_partner_id:
+            # partner has Peppol enabled but Peppol is not in the selected sending methods (warning only displayed in single invoice mode)
+            if len(partner_with_peppol_not_selected) == 1:
+                alerts['account_peppol_partner_want_peppol'] = {
+                    'message': _(
+                        "%s has requested electronic invoices reception on Peppol.",
+                         partner_with_peppol_not_selected.display_name
+                    ),
+                    'level': 'info',
+                    'action_text': _("Why should you use it ?"),
+                    'action': {
+                        'name': _("Why should I use PEPPOL ?"),
+                        'type': 'ir.actions.client',
+                        'tag': 'account_peppol.what_is_peppol',
+                        'target': 'new',
+                        'context': {
+                            'footer': False,
+                            'move_ids': moves.ids,
+                        },
+                    },
                 }
         return alerts
 
@@ -62,6 +85,7 @@ class AccountMoveSend(models.AbstractModel):
             return all([
                 self._is_applicable_to_company(method, move.company_id),
                 move.partner_id.commercial_partner_id.with_company(move.company_id).is_peppol_edi_format,
+                move.partner_id.commercial_partner_id.with_company(move.company_id).peppol_verification_state == 'valid',
                 move.company_id.account_peppol_proxy_state != 'rejected',
                 move._need_ubl_cii_xml(move.partner_id.commercial_partner_id.with_company(move.company_id).invoice_edi_format)
                 or move.ubl_cii_xml_id and move.peppol_move_state not in ('processing', 'done'),
