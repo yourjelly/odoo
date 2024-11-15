@@ -155,5 +155,5 @@ class ReportController(http.Controller):
             raise werkzeug.exceptions.InternalServerError(response=res) from e
 
     @http.route(['/report/check_pdf_engine'], type='jsonrpc', auth='user', readonly=True)
-    def check_pdf_engine(self):
-        return request.env['ir.actions.report'].get_pdf_engine_state()
+    def check_pdf_engine(self, subtype=None):
+        return request.env['ir.actions.report'].get_pdf_engine_state(subtype)

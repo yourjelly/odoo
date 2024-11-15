@@ -67,10 +67,10 @@ function getPdfEngineStatusMessage(status, engine) {
  */
 export async function downloadReport(rpc, action, type, userContext) {
     let message;
-    if (type === "pdf") {
+    if (type.startsWith("pdf")) {
         // Cache the wkhtml status on the function. In prod this means is only
         // checked once, but we can reset it between tests to test multiple statuses.
-        downloadReport.pdfEngineStatusProm ||= rpc("/report/check_pdf_engine");
+        downloadReport.pdfEngineStatusProm ||= rpc("/report/check_pdf_engine", {subtype: type});
         const {engine, status} = await downloadReport.pdfEngineStatusProm;
         message = getPdfEngineStatusMessage(status, engine);
         if (!["upgrade", "ok"].includes(status)) {
