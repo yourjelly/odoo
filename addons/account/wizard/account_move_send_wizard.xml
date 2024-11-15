@@ -81,6 +81,7 @@
                             special="cancel"
                             class="btn-secondary"/>
 
+                    <field name="mail_attachments_widget" widget="mail_attachments_selector" invisible="not can_edit_body"/>
                     <field name="mail_template_id" widget="mail_composer_template_selector"/>
                 </footer>
             </form>
