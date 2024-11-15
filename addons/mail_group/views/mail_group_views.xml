@@ -112,7 +112,7 @@
                                             invisible="alias_domain_id"/>
                                 </div>
                             </div>
-                            <field name="description"/>
+                            <field name="description" placeholder='e.g. "This group is about ..."'/>
                             <field name="moderation"/>
                             <td class="o_td_label">
                                 <label for="moderator_ids" string="Moderators" invisible="not moderation"/>
