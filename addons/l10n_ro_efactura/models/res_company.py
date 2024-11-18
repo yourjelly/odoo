@@ -33,6 +33,19 @@ class ResCompany(models.Model):
             else:
                 company.l10n_ro_edi_callback_url = False
 
+    def _l10n_ro_edi_log_message(self, message: str):
+        self.env['ir.logging'].create({
+            'name': 'l10n_ro_edi_log',
+            'type': 'server',
+            'level': 'INFO',
+            'dbname': self.env.cr.dbname,
+            'message': message,
+            'func': '',
+            'path': '',
+            'line': '',
+        })
+        self.env.cr.commit()
+
     def _l10n_ro_edi_process_token_response(self, response_json):
         """
         To be called just after processing the json response from https://logincert.anaf.ro/anaf-oauth2/v1/token
@@ -40,10 +53,7 @@ class ResCompany(models.Model):
         """
         self.ensure_one()
         if 'access_token' not in response_json or 'refresh_token' not in response_json:
-            error_message = _("Token not found.\nResponse: %s", response_json)
-            self.l10n_ro_edi_oauth_error = error_message
-            self.env.cr.commit()
-            raise UserError(error_message)
+            raise UserError(_("Token not found.\nResponse: %s", response_json))
 
         # The access_token is in JWT format, which consists of 3 parts separated by '.':
         # Header, Payload, and Signature. We only need the Payload part to decode the token
@@ -103,4 +113,7 @@ class ResCompany(models.Model):
         ])
         session = requests.Session()
         for company in ro_companies:
-            company._l10n_ro_edi_refresh_access_token(session)
+            try:
+                company._l10n_ro_edi_refresh_access_token(session)
+            except Exception as e:
+                self._l10n_ro_edi_log_message(f"Refresh token failed [company={company.id}]\n{str(e)}")
