@@ -11,7 +11,7 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 class Delivery(WebsiteSale):
     _express_checkout_delivery_route = '/shop/express/shipping_address_change'
 
-    @route('/shop/delivery_methods', type='jsonrpc', auth='public', website=True)
+    @route('/shop/delivery_methods', type='jsonrpc', auth='public', website=True, readonly=True)
     def shop_delivery_methods(self):
         """ Fetch available delivery methods and render them in the delivery form.
 
@@ -86,7 +86,14 @@ class Delivery(WebsiteSale):
             ),
         }
 
-    @route('/shop/get_delivery_rate', type='jsonrpc', auth='public', methods=['POST'], website=True)
+    @route(
+        '/shop/get_delivery_rate',
+        type='jsonrpc',
+        auth='public',
+        methods=['POST'],
+        website=True,
+        readonly=True,
+    )
     def shop_get_delivery_rate(self, dm_id):
         """ Return the delivery rate data for the given delivery method.
 
@@ -128,7 +135,13 @@ class Delivery(WebsiteSale):
         order_sudo = request.website.sale_get_order()
         order_sudo._set_pickup_location(pickup_location_data)
 
-    @route('/website_sale/get_pickup_locations', type='jsonrpc', auth='public', website=True)
+    @route(
+        '/website_sale/get_pickup_locations',
+        type='jsonrpc',
+        auth='public',
+        website=True,
+        readonly=True,
+    )
     def website_sale_get_pickup_locations(self, zip_code=None, **kwargs):
         """ Fetch the order from the request and return the pickup locations close to the zip code.
 
