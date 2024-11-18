@@ -549,10 +549,10 @@ class TestDiscuss(MailCommon, TestRecipients):
     def test_suggested_recipients_default_create_value(self):
         """ Test default creation values returned for suggested recipient. """
         email = 'newpartner@example.com'
-        data_from_record_mobile = '+33199001015'
+        data_from_record_phone = '+33199001015'
         record = self.env['mail.test.ticket'].create({
             'email_from': email,
-            'mobile_number': data_from_record_mobile,
+            'phone_number': data_from_record_phone,
         })
         suggestions = record._message_get_suggested_recipients()
         self.assertItemsEqual(
@@ -563,7 +563,7 @@ class TestDiscuss(MailCommon, TestRecipients):
                     'reason': 'Customer Email',
                     'name': 'newpartner@example.com',
                     'email': 'newpartner@example.com',
-                    'create_values': {'mobile': '+33199001015', 'phone': False},
+                    'create_values': {'phone': '+33199001015'},
                 }
             ],
         )

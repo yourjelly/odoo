@@ -250,9 +250,9 @@ class EventRegistration(models.Model):
         })
         # try to avoid copying registration_phone on both phone and mobile fields
         # as would be noise; pay attention partner.hone is propagated through compute
-        mobile = valid_partner.mobile or registration_phone
+        mobile = valid_partner.phone or registration_phone
         if mobile != contact_vals.get('phone', valid_partner.phone):
-            contact_vals['mobile'] = valid_partner.mobile or registration_phone
+            contact_vals['phone'] = valid_partner.phone or registration_phone
 
         return contact_vals
 

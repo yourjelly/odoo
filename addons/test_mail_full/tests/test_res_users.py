@@ -13,7 +13,6 @@ class TestResUsers(TestMailFullCommon):
         cls.portal_user = mail_new_test_user(
             cls.env,
             login='portal_user',
-            mobile='+32 494 12 34 56',
             phone='+32 494 12 34 89',
             password='password',
             name='Portal User',
@@ -24,7 +23,6 @@ class TestResUsers(TestMailFullCommon):
         cls.portal_user_2 = mail_new_test_user(
             cls.env,
             login='portal_user_2',
-            mobile='+32 494 12 34 22',
             phone='invalid phone',
             password='password',
             name='Portal User 2',

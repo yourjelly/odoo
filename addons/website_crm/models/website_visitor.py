@@ -16,11 +16,11 @@ class WebsiteVisitor(models.Model):
         for visitor in self:
             visitor.lead_count = len(visitor.lead_ids)
 
-    @api.depends('partner_id.email_normalized', 'partner_id.mobile', 'lead_ids.email_normalized', 'lead_ids.mobile')
+    @api.depends('partner_id.email_normalized', 'partner_id.phone', 'lead_ids.email_normalized', 'lead_ids.phone')
     def _compute_email_phone(self):
         super(WebsiteVisitor, self)._compute_email_phone()
 
-        left_visitors = self.filtered(lambda visitor: not visitor.email or not visitor.mobile)
+        left_visitors = self.filtered(lambda visitor: not visitor.email or not visitor.phone)
         leads = left_visitors.mapped('lead_ids').sorted('create_date', reverse=True)
         visitor_to_lead_ids = dict((visitor.id, visitor.lead_ids.ids) for visitor in left_visitors)
 
@@ -28,8 +28,8 @@ class WebsiteVisitor(models.Model):
             visitor_leads = leads.filtered(lambda lead: lead.id in visitor_to_lead_ids[visitor.id])
             if not visitor.email:
                 visitor.email = next((lead.email_normalized for lead in visitor_leads if lead.email_normalized), False)
-            if not visitor.mobile:
-                visitor.mobile = next((lead.mobile or lead.phone for lead in visitor_leads if lead.mobile or lead.phone), False)
+            if not visitor.phone:
+                visitor.phone = next((lead.phone for lead in visitor_leads if lead.phone), False)
 
     def _check_for_message_composer(self):
         check = super(WebsiteVisitor, self)._check_for_message_composer()

@@ -158,10 +158,8 @@ class TestSubqueries(TransactionCase):
                         ({many2one} IN (
                             {subselect} WHERE ("res_partner"."function" LIKE %s)
                         )) OR (({many2one} NOT IN (
-                            {subselect} WHERE (
-                                ("res_partner"."phone" LIKE %s)
-                                AND ("res_partner"."mobile" LIKE %s)
-                            )))
+                            {subselect} WHERE ("res_partner"."phone" LIKE %s)
+                            ))
                             OR "test_new_api_multi"."partner" IS NULL
                         )
                     ) AND ({many2one} IN (
@@ -183,12 +181,11 @@ class TestSubqueries(TransactionCase):
         )]):
             # (function or not (phone and mobile)) and not website and (name or email)
             self.env['test_new_api.multi'].search([
-                '&', '&',
                     '|',
                         ('partner.function', 'like', 'Colonel'),
-                        '!', '&',
+                        '&', '!',
                             ('partner.phone', 'like', '+01'),
-                            ('partner.mobile', 'like', '+01'),
+                        '&',
                     '!', ('partner.website', 'like', 'sgc.us'),
                     '|',
                         ('partner.name', 'like', 'jack'),
