@@ -132,8 +132,13 @@
         z-index: $o-mail-NavigableList-zIndex - 2;
     }
 
+    button {
+        opacity: 25%;
+    }
+
     button:hover, .focus {
-        background-color: mix($o-gray-100, $o-gray-200) !important;
+        // background-color: mix($o-gray-100, $o-gray-200) !important;
+        opacity: 100%;
     }
 }
 

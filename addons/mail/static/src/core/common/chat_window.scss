@@ -21,6 +21,7 @@
     color: inherit !important;
     &:hover:not(.o-actionsMenu), &.o-active, &.o-hover {
         background-color: var(--mail-ChatWindow-commandHoverBg, mix($gray-100, $gray-200));
+        border-color: transparent !important;
     }
     &:not(.o-active):not(.o-hover) .fa-caret-down {
         opacity: 50%;
