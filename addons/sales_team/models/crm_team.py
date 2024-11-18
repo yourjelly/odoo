@@ -170,12 +170,12 @@ class CrmTeam(models.Model):
                 ('user_id', 'in', team.member_ids.ids)
             ])
             if other_memberships:
-                member_warning = _("Adding %(user_names)s in this team will remove them from %(team_names)s.",
+                member_warning = _("%(user_names)s already in other teams (%(team_names)s).",
                                    user_names=", ".join(other_memberships.mapped('user_id.name')),
                                    team_names=", ".join(other_memberships.mapped('crm_team_id.name'))
                                   )
             if member_warning:
-                team.member_warning = member_warning + " " + _("Working in multiple teams? Activate the option under Configuration>Settings.")
+                team.member_warning = member_warning + " " + _("Working in multiple teams?")
 
     def _search_member_ids(self, operator, value):
         return [('crm_team_member_ids.user_id', operator, value)]
