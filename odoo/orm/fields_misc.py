@@ -8,6 +8,7 @@ from psycopg2.extras import Json as PsycopgJson
 
 from odoo.tools import SQL
 
+from .domains import Domain
 from .fields import Field
 from .identifiers import IdType
 
@@ -47,6 +48,20 @@ class Boolean(Field[bool]):
         else:
             sql_expr = SQL("%s IS NOT TRUE", sql_field)
         return self._condition_to_sql_company(sql_expr, model, alias, field_expr, operator, value, query)
+
+    def filter_function(self, records, getter, operator, value):
+        if operator != 'in':
+            return super().filter_function(records, getter, operator, value)
+        values = {bool(v) for v in value}
+        if len(values) == 1:
+            if next(iter(values)):
+                return getter
+            else:
+                return lambda rec: not getter(rec)
+        if not values:
+            return lambda _: False
+        else:
+            return lambda _: True
 
 
 class Json(Field):
@@ -114,3 +129,10 @@ class Id(Field[IdType | typing.Literal[False]]):
         # do not flush, just return the identifier
         assert self.store, 'id field must be stored'
         return SQL.identifier(alias, self.name)
+
+    def filter_function(self, records, getter, operator, value):
+        if operator == 'any':
+            assert isinstance(value, Domain)
+            ids = set(records.filtered(value)._ids)
+            return lambda rec: rec.id in ids
+        return super().filter_function(records, getter, operator, value)

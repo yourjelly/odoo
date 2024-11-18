@@ -60,13 +60,17 @@ import warnings
 from datetime import date, datetime, time, timedelta
 
 from odoo.tools import SQL, OrderedSet, Query, classproperty, partition, str2bool
+
 from .identifiers import NewId
-from .utils import COLLECTION_TYPES
+from .utils import COLLECTION_TYPES, get_field_name_from_expression
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterable, Iterator
+
     from odoo.fields import Field
     from odoo.models import BaseModel
+
+    M = typing.TypeVar('M', bound=BaseModel)
 
 
 _logger = logging.getLogger('odoo.domains')
@@ -325,6 +329,13 @@ class Domain:
         # just execute the optimization code that goes through all the fields
         self._optimize(model)
 
+    def filter_records(self, records: M) -> M:
+        """Filter a recordset using this domain.
+
+        The implentation keeps the prefetch of the given records.
+        """
+        raise NotImplementedError
+
     def _optimize(self, model: BaseModel) -> Domain:
         """Perform optimizations of the node given a model to resolve the fields
 
@@ -392,6 +403,11 @@ class DomainBool(Domain):
             yield _TRUE_LEAF
         else:
             yield _FALSE_LEAF
+
+    def filter_records(self, records: M) -> M:
+        if not self.__value:
+            records = records.browse()
+        return records
 
     def _to_sql(self, model: BaseModel, alias: str, query: Query) -> SQL:
         return SQL("TRUE") if self.__value else SQL("FALSE")
@@ -463,6 +479,9 @@ class DomainNot(Domain):
 
     def __hash__(self):
         return ~hash(self.child)
+
+    def filter_records(self, records: M) -> M:
+        return (records - self.child.filter_records(records)).with_prefetch(records._prefetch_ids)
 
     def _to_sql(self, model: BaseModel, alias: str, query: Query) -> SQL:
         condition = self.child._to_sql(model, alias, query)
@@ -635,6 +654,13 @@ class DomainAnd(DomainNary):
             return DomainAnd([other, *self.children])
         return NotImplemented
 
+    def filter_records(self, records: M) -> M:
+        for child in self.children:
+            records = child.filter_records(records)
+            if not records:
+                break
+        return records
+
 
 class DomainOr(DomainNary):
     """Domain: OR with multiple children"""
@@ -660,6 +686,16 @@ class DomainOr(DomainNary):
         if isinstance(other, Domain) and not isinstance(other, DomainBool):
             return DomainOr([other, *self.children])
         return NotImplemented
+
+    def filter_records(self, records: M) -> M:
+        remaining = records
+        for child in self.children:
+            matched = child.filter_records(remaining)
+            if matched:
+                remaining = (remaining - matched).with_prefetch(records._prefetch_ids)
+                if not remaining:
+                    return records
+        return (records - remaining).with_prefetch(records._prefetch_ids)
 
 
 class DomainCondition(Domain):
@@ -889,6 +925,24 @@ class DomainCondition(Domain):
             self._raise("Cannot use 'any' with non-relational fields")
 
         return self
+
+    def filter_records(self, records: M) -> M:
+        operator = self.operator
+        if operator not in STANDARD_CONDITION_OPERATORS:
+            return self._optimize(records).filter_records(records)
+        value = self.value
+        if isinstance(value, SQL):
+            ids = set(records.with_context(active_test=False)._search(DomainCondition('id', 'in', OrderedSet(records.ids)) & self).get_result_ids())
+            return records.filtered(lambda rec: rec.id in ids)
+        if isinstance(value, Query):
+            ids = set(value.get_result_ids())
+            return records.filtered(lambda rec: rec.id in ids)
+
+        field, _property_name = self.__get_field(records)
+        positive_operator = NEGATIVE_CONDITION_OPERATORS.get(operator, operator)
+        func = field.filter_function(records, field.expression_getter(self.field), operator, value)
+        filter_func = func if positive_operator == operator else lambda rec: not func(rec)
+        return records.filtered(filter_func)
 
     def _to_sql(self, model: BaseModel, alias: str, query: Query) -> SQL:
         field_expr, operator, value = self.field, self.operator, self.value
