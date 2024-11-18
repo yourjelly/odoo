@@ -140,7 +140,8 @@
                                 <span t-else="">No Milestone</span>
                             </th>
                             <th t-if="groupby == 'stage'" t-attf-colspan="{{grouped_tasks_colspan}}">
-                                <span class="text-truncate" t-field="tasks[0].sudo().stage_id.name"/></th>
+                                <span t-if="tasks[0].sudo().stage_id" class="text-truncate" t-field="tasks[0].sudo().stage_id.name"/>
+                                <span t-else="">No Stage</span></th>
                             <th t-if="groupby == 'priority'" t-attf-colspan="{{grouped_tasks_colspan}}">
                                 <span class="text-truncate" t-field="tasks[0].sudo().priority"/></th>
                             <th t-if="groupby == 'status'" t-attf-colspan="{{grouped_tasks_colspan}}">
