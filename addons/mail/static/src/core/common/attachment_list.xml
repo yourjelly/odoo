@@ -41,7 +41,6 @@
                 <!-- t-attf-class overridden in extensions -->
                 <div
                     t-foreach="cards" t-as="attachment" t-key="attachment.id"
-                    class="o-mail-AttachmentCard d-flex rounded mb-1 me-1 mw-100 overflow-auto"
                     t-att-class="{
                                'ms-1': isInChatWindowAndIsAlignedRight,
                                'me-1': !isInChatWindowAndIsAlignedRight,
@@ -53,38 +52,45 @@
                     t-on-click="() => this.fileViewer.open(attachment, props.attachments)"
                 >
                     <!-- o_image from mimetype.scss -->
-                    <t t-ref="nonImageMain">
-                        <div class="o-mail-AttachmentCard-image o_image flex-shrink-0 m-1" role="menuitem" aria-label="Preview" t-att-tabindex="-1" t-att-aria-disabled="false" t-att-data-mimetype="attachment.mimetype"/>
-                        <div class="overflow-auto d-flex justify-content-center flex-column px-1">
-                            <div t-if="attachment.name" class="text-truncate" t-out="props.messageSearch?.highlight(attachment.name) ?? attachment.name"/>
-                            <small t-if="attachment.extension" class="text-uppercase" t-esc="attachment.extension"/>
+                    <div class="o-mail-AttachmentCard d-flex rounded mb-1 me-1 mw-100 overflow-auto">
+                        <t t-ref="nonImageMain">
+                            <div class="o-mail-AttachmentCard-image o_image flex-shrink-0 m-1" role="menuitem" aria-label="Preview" t-att-tabindex="-1" t-att-aria-disabled="false" t-att-data-mimetype="attachment.mimetype"/>
+                            <div class="overflow-auto d-flex justify-content-center flex-column px-1">
+                                <div t-if="attachment.name" class="text-truncate" t-out="props.messageSearch?.highlight(attachment.name) ?? attachment.name"/>
+                                <small t-if="attachment.extension" class="text-uppercase" t-esc="attachment.extension"/>
+                            </div>
+                        </t>
+                        <div class="flex-grow-1"/>
+                        <div class="o-mail-AttachmentCard-aside position-relative rounded-end overflow-hidden d-flex" t-att-class="{ 'o-hasMultipleActions d-flex flex-column': showDelete and !env.inComposer }">
+                            <div t-if="attachment.uploading" class="d-flex justify-content-center align-items-center w-100 h-100" title="Uploading">
+                                <i class="fa fa-spin fa-spinner"/>
+                            </div>
+                            <div t-if="!attachment.uploading and env.inComposer" class="d-flex justify-content-center me-2 align-items-center w-100 h-100 text-primary" title="Uploaded">
+                                <i class="fa fa-check"/>
+                            </div>
+                            <button t-if="showDelete"
+                                    class="o-mail-AttachmentCard-unlink btn top-0 align-items-center justify-content-center d-flex w-100 h-100 rounded-0 border-0"
+                                    t-attf-class="{{ env.inComposer ? 'o-inComposer position-absolute btn-primary transition-base justify-content-center' : 'bg-300' }}"
+                                    t-on-click.stop="() => this.onClickUnlink(attachment)" title="Remove"
+                            >
+                                <i class="fa fa-trash" role="img" aria-label="Remove"/>
+                            </button>
+                            <a t-if="attachment.type === 'url'" class="btn d-flex align-items-center justify-content-center w-100 h-100 rounded-0" t-attf-class="{{ bg-300 }}" t-att-href="attachment.url" target='_blank' title="Open Link">
+                                <i class="fa fa-external-link" role="img" aria-label="Open Link"/>
+                            </a>
+                            <!-- t-attf-class overridden in extensions -->
+                            <button t-elif="canDownload(attachment)" class="btn d-flex align-items-center justify-content-center w-100 h-100 rounded-0"
+                                    t-attf-class="{{ bg-300 }}"
+                                    t-on-click.stop="() => this.onClickDownload(attachment)" title="Download"
+                            >
+                                <i class="fa fa-download" role="img" aria-label="Download"/>
+                            </button>
                         </div>
-                    </t>
-                    <div class="flex-grow-1"/>
-                    <div class="o-mail-AttachmentCard-aside position-relative rounded-end overflow-hidden d-flex" t-att-class="{ 'o-hasMultipleActions d-flex flex-column': showDelete and !env.inComposer }">
-                        <div t-if="attachment.uploading" class="d-flex justify-content-center align-items-center w-100 h-100" title="Uploading">
-                            <i class="fa fa-spin fa-spinner"/>
+                        <div>
+                            <span>
+                                <input type="checkbox" />
+                            </span>
                         </div>
-                        <div t-if="!attachment.uploading and env.inComposer" class="d-flex justify-content-center me-2 align-items-center w-100 h-100 text-primary" title="Uploaded">
-                            <i class="fa fa-check"/>
-                        </div>
-                        <button t-if="showDelete"
-                                class="o-mail-AttachmentCard-unlink btn top-0 align-items-center justify-content-center d-flex w-100 h-100 rounded-0 border-0"
-                                t-attf-class="{{ env.inComposer ? 'o-inComposer position-absolute btn-primary transition-base justify-content-center' : 'bg-300' }}"
-                                t-on-click.stop="() => this.onClickUnlink(attachment)" title="Remove"
-                        >
-                            <i class="fa fa-trash" role="img" aria-label="Remove"/>
-                        </button>
-                        <a t-if="attachment.type === 'url'" class="btn d-flex align-items-center justify-content-center w-100 h-100 rounded-0" t-attf-class="{{ bg-300 }}" t-att-href="attachment.url" target='_blank' title="Open Link">
-                            <i class="fa fa-external-link" role="img" aria-label="Open Link"/>
-                        </a>
-                        <!-- t-attf-class overridden in extensions -->
-                        <button t-elif="canDownload(attachment)" class="btn d-flex align-items-center justify-content-center w-100 h-100 rounded-0"
-                                t-attf-class="{{ bg-300 }}"
-                                t-on-click.stop="() => this.onClickDownload(attachment)" title="Download"
-                        >
-                            <i class="fa fa-download" role="img" aria-label="Download"/>
-                        </button>
                     </div>
                 </div>
             </div>
