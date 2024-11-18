@@ -10685,14 +10685,22 @@
     ChartFigure.template = "o-spreadsheet-ChartFigure";
     ChartFigure.components = { Menu };
 
+    /**
+     * Start listening to pointer events and apply the given callbacks.
+     *
+     * @returns A function to remove the listeners.
+     */
     function startDnd(onMouseMove, onMouseUp, onMouseDown = () => { }) {
-        const _onMouseUp = (ev) => {
-            onMouseUp(ev);
+        const removeListeners = () => {
             window.removeEventListener("mousedown", onMouseDown);
             window.removeEventListener("mouseup", _onMouseUp);
             window.removeEventListener("dragstart", _onDragStart);
             window.removeEventListener("mousemove", onMouseMove);
             window.removeEventListener("wheel", onMouseMove);
+        };
+        const _onMouseUp = (ev) => {
+            onMouseUp(ev);
+            removeListeners();
         };
         function _onDragStart(ev) {
             ev.preventDefault();
@@ -10702,6 +10710,7 @@
         window.addEventListener("dragstart", _onDragStart);
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("wheel", onMouseMove);
+        return removeListeners;
     }
     /**
      * Function to be used during a mousedown event, this function allows to
@@ -21382,6 +21391,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 y: 0,
                 width: 0,
                 height: 0,
+                cancelDnd: undefined,
             });
         }
         setup() {
@@ -21395,11 +21405,23 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 // new rendering
                 this.render();
             });
+            owl.onWillUpdateProps(() => {
+                var _a, _b;
+                const sheetId = this.env.model.getters.getActiveSheetId();
+                if (this.dnd.figId && !this.env.model.getters.getFigure(sheetId, this.dnd.figId)) {
+                    (_b = (_a = this.dnd).cancelDnd) === null || _b === void 0 ? void 0 : _b.call(_a);
+                    this.dnd.figId = undefined;
+                    this.dnd.cancelDnd = undefined;
+                }
+            });
         }
         getVisibleFigures() {
             const visibleFigures = this.env.model.getters.getVisibleFigures();
             if (this.dnd.figId && !visibleFigures.some((figure) => figure.id === this.dnd.figId)) {
-                visibleFigures.push(this.env.model.getters.getFigure(this.env.model.getters.getActiveSheetId(), this.dnd.figId));
+                const draggedFigure = this.env.model.getters.getFigure(this.env.model.getters.getActiveSheetId(), this.dnd.figId);
+                if (draggedFigure) {
+                    visibleFigures.push(draggedFigure);
+                }
             }
             return visibleFigures;
         }
@@ -21512,7 +21534,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.dnd.figId = undefined;
                 this.env.model.dispatch("UPDATE_FIGURE", { sheetId, id: figure.id, x, y });
             };
-            startDnd(onMouseMove, onMouseUp);
+            this.dnd.cancelDnd = startDnd(onMouseMove, onMouseUp);
         }
         startResize(figure, dirX, dirY, ev) {
             ev.stopPropagation();
@@ -21566,7 +21588,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     ...update,
                 });
             };
-            startDnd(onMouseMove, onMouseUp);
+            this.dnd.cancelDnd = startDnd(onMouseMove, onMouseUp);
         }
         getDndFigure() {
             const figure = this.getVisibleFigures().find((fig) => fig.id === this.dnd.figId);
@@ -43462,8 +43484,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.55';
-    __info__.date = '2024-11-13T15:37:39.251Z';
-    __info__.hash = '6984990';
+    __info__.date = '2024-11-18T10:41:53.370Z';
+    __info__.hash = 'd76d345';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
