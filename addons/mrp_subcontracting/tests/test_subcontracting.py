@@ -842,7 +842,8 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
 
     def test_subcontracting_rules_replication(self):
         """ Test activate/archive subcontracting location rules."""
-        reference_location_rules = self.env['stock.rule'].search(['|', ('location_src_id', '=', self.env.company.subcontracting_location_id.id), ('location_dest_id', '=', self.env.company.subcontracting_location_id.id)])
+        company_wh = self.env.ref("stock.warehouse0")
+        reference_location_rules = self.env['stock.rule'].search(['&', ('warehouse_id', '=', company_wh.id), '|', ('location_src_id', '=', self.env.company.subcontracting_location_id.id), ('location_dest_id', '=', self.env.company.subcontracting_location_id.id)])
         warehouse_related_rules = reference_location_rules.filtered(lambda r: r.warehouse_id)
         company_rules = reference_location_rules - warehouse_related_rules
         # Create a custom subcontracting location
@@ -853,18 +854,18 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
             'company_id': self.env.company.id,
             'is_subcontracting_location': True,
         })
-        custom_location_rules_count = self.env['stock.rule'].search_count(['|', ('location_src_id', '=', custom_subcontracting_location.id), ('location_dest_id', '=', custom_subcontracting_location.id)])
+        custom_location_rules_count = self.env['stock.rule'].search_count(['&', ('warehouse_id', '=', company_wh.id), '|', ('location_src_id', '=', custom_subcontracting_location.id), ('location_dest_id', '=', custom_subcontracting_location.id)])
         self.assertEqual(len(reference_location_rules), custom_location_rules_count)
         # Add a new warehouse
         warehouse = self.env['stock.warehouse'].create({
             'name': 'Additional Warehouse',
             'code': 'ADD'
         })
-        company_subcontracting_locations_rules_count = self.env['stock.rule'].search_count(['&', ('company_id', '=', warehouse.company_id.id), '|', ('location_src_id.is_subcontracting_location', '=', True), ('location_dest_id.is_subcontracting_location', '=', True)])
+        company_subcontracting_locations_rules_count = self.env['stock.rule'].search_count(['&', ('company_id', '=', warehouse.company_id.id), '|', ('location_src_id.is_subcontracting_location', '=', True), ('location_dest_id.is_subcontracting_location', '=', True), '|', ('warehouse_id', '=', warehouse.id), ('warehouse_id', '=', company_wh.id)])
         self.assertEqual(len(warehouse_related_rules) * 4 + len(company_rules) * 2, company_subcontracting_locations_rules_count)
         # Custom location no longer a subcontracting one
         custom_subcontracting_location.is_subcontracting_location = False
-        custom_location_rules_count = self.env['stock.rule'].search_count(['|', ('location_src_id', '=', custom_subcontracting_location.id), ('location_dest_id', '=', custom_subcontracting_location.id)])
+        custom_location_rules_count = self.env['stock.rule'].search_count(['&', ('warehouse_id', '=', company_wh.id), '|', ('location_src_id', '=', custom_subcontracting_location.id), ('location_dest_id', '=', custom_subcontracting_location.id)])
         self.assertEqual(custom_location_rules_count, 0)
 
     def test_subcontracting_date_warning(self):

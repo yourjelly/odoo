@@ -13,6 +13,11 @@ class ProductTemplate(models.Model):
         default=True,
     )
 
+    self_order_visible = fields.Boolean(
+        compute='_compute_self_order_visible',
+        store=False
+    )
+
     @api.onchange('available_in_pos')
     def _on_change_available_in_pos(self):
         for record in self:
@@ -31,6 +36,15 @@ class ProductTemplate(models.Model):
                 for product in record.product_variant_ids:
                     product._send_availability_status()
         return res
+
+    @api.depends('pos_categ_ids')
+    def _compute_self_order_visible(self):
+        for product in self:
+            product.self_order_visible = any(
+                config.self_ordering_mode != 'nothing'
+                for categ in product.pos_categ_ids
+                for config in categ.pos_config_ids
+            )
 
 class ProductProduct(models.Model):
     _inherit = "product.product"

@@ -42,6 +42,7 @@ export class PosKanbanRenderer extends KanbanRenderer {
         this.action = useService("action");
         this.posState = useState(this.props.initialPosState);
         this.loadScenario = useTrackedAsync(async ({ functionName, isRestaurant }) => {
+            console.log("functionname : ", functionName);
             return await this.callWithViewUpdate(async () => {
                 let isInstalledWithDemo = false;
                 if (isRestaurant && !this.posState.is_restaurant_installed) {
@@ -94,7 +95,7 @@ export class PosKanbanRenderer extends KanbanRenderer {
                 iconFile: "clothes-icon.png",
             },
             {
-                name: _t("Furnitures"),
+                name: _t("Furniture"),
                 description: _t("Stock, product configurator, replenishment, discounts"),
                 functionName: "load_onboarding_furniture_scenario",
                 iconFile: "furniture-icon.png",

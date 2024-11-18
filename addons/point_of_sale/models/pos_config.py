@@ -946,6 +946,10 @@ class PosConfig(models.Model):
             'point_of_sale.pos_category_others'
         ])
         journal, payment_methods_ids = self._create_journal_and_payment_methods(cash_journal_vals={'name': 'Cash Clothes Shop', 'show_on_dashboard': False})
+        warehouse = self.env['stock.warehouse'].create([{
+            'name': _('Clothes Shop Warehouse'),
+            'code': 'WH/CL',
+        }])
         config = self.env['pos.config'].create([{
             'name': _('Clothes Shop'),
             'company_id': self.env.company.id,
@@ -953,6 +957,7 @@ class PosConfig(models.Model):
             'payment_method_ids': payment_methods_ids,
             'limit_categories': True,
             'iface_available_categ_ids': clothes_categories,
+            'picking_type_id': warehouse.pos_type_id.id,
         }])
         self.env['ir.model.data']._update_xmlids([{
             'xml_id': self._get_suffixed_ref_name(ref_name),
@@ -971,6 +976,10 @@ class PosConfig(models.Model):
             'point_of_sale.pos_category_breads',
             'point_of_sale.pos_category_pastries',
         ])
+        warehouse = self.env['stock.warehouse'].create([{
+            'name': _('Bakery Warehouse'),
+            'code': 'WH/BA',
+        }])
         config = self.env['pos.config'].create({
             'name': _('Bakery Shop'),
             'company_id': self.env.company.id,
@@ -978,6 +987,8 @@ class PosConfig(models.Model):
             'payment_method_ids': payment_methods_ids,
             'limit_categories': True,
             'iface_available_categ_ids': bakery_categories,
+            'picking_type_id': warehouse.pos_type_id.id,
+
         })
         self.env['ir.model.data']._update_xmlids([{
             'xml_id': self._get_suffixed_ref_name(ref_name),
@@ -1000,6 +1011,10 @@ class PosConfig(models.Model):
             'point_of_sale.pos_category_desks',
             'point_of_sale.pos_category_chairs'
         ])
+        warehouse = self.env['stock.warehouse'].create([{
+            'name': _('Furniture Shop Warehouse'),
+            'code': 'WH/FU',
+        }])
         config = self.env['pos.config'].create([{
             'name': _('Furniture Shop'),
             'company_id': self.env.company.id,
@@ -1007,6 +1022,7 @@ class PosConfig(models.Model):
             'payment_method_ids': payment_methods_ids,
             'limit_categories': True,
             'iface_available_categ_ids': furniture_categories,
+            'picking_type_id': warehouse.pos_type_id.id,
         }])
         self.env['ir.model.data']._update_xmlids([{
             'xml_id': self._get_suffixed_ref_name(ref_name),

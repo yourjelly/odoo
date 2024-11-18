@@ -82,12 +82,18 @@ class PosConfig(models.Model):
         ref_name = 'pos_restaurant.pos_config_main_bar'
         if not self.env.ref(ref_name, raise_if_not_found=False):
             self._load_bar_data()
-
+        if self.env['ir.module.module'].search([('name', '=', 'l10n_be')]):
+            tax_alcohol = self.env['account.tax'].create({'name': '21% Alcohol / luxury', 'amount': 21, 'amount_type': 'percent', 'type_tax_use': 'sale'})
+            self.env['product.template'].search([('pos_categ_ids', 'in', [self.env.ref('pos_restaurant.pos_category_cocktails').id])]).write({'taxes_id': tax_alcohol})
         journal, payment_methods_ids = self._create_journal_and_payment_methods(cash_journal_vals={'name': 'Cash Bar', 'show_on_dashboard': False})
         bar_categories = self.get_categories([
             'pos_restaurant.pos_category_cocktails',
             'pos_restaurant.pos_category_soft_drinks',
         ])
+        warehouse = self.env['stock.warehouse'].create([{
+            'name': _('Bar Warehouse'),
+            'code': 'WH/BR',
+        }])
         config = self.env['pos.config'].create({
             'name': 'Bar',
             'company_id': self.env.company.id,
@@ -97,6 +103,7 @@ class PosConfig(models.Model):
             'iface_available_categ_ids': bar_categories,
             'iface_splitbill': True,
             'module_pos_restaurant': True,
+            'picking_type_id': warehouse.pos_type_id.id,
         })
         self.env['ir.model.data']._update_xmlids([{
             'xml_id': self._get_suffixed_ref_name(ref_name),
@@ -115,6 +122,10 @@ class PosConfig(models.Model):
             'pos_restaurant.food',
             'pos_restaurant.drinks',
         ])
+        warehouse = self.env['stock.warehouse'].create([{
+            'name': _('Restaurant Warehouse'),
+            'code': 'WH/RE',
+        }])
         config = self.env['pos.config'].create({
             'name': _('Restaurant'),
             'company_id': self.env.company.id,
@@ -124,6 +135,7 @@ class PosConfig(models.Model):
             'iface_available_categ_ids': restaurant_categories,
             'iface_splitbill': True,
             'module_pos_restaurant': True,
+            'picking_type_id': warehouse.pos_type_id.id,
         })
         self.env['ir.model.data']._update_xmlids([{
             'xml_id': self._get_suffixed_ref_name(ref_name),

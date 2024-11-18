@@ -765,7 +765,7 @@ class TestReorderingRule(TransactionCase):
         Suppose a 2-steps receipt
         This test ensures that an orderpoint with its route and supplied defined correctly works
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)])
+        warehouse = self.env.ref("stock.warehouse0")
         route_buy_id = self.ref('purchase_stock.route_warehouse0_buy')
 
         warehouse.reception_steps = 'two_steps'

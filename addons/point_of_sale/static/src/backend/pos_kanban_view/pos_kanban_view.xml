@@ -42,7 +42,9 @@
                         </div>
                     </div>
                     <p class="text-large">
-                        <a role="button" class="btn btn-lg btn-secondary fw-bolder" t-on-click="createNewProducts">
+                        <a role="button" class="btn btn-lg btn-secondary fw-bolder"
+                            t-on-click="createNewProducts"
+                            t-att-class="{ 'disabled': !posState.has_chart_template || loadScenario.status === 'loading' }">
                             Create my own products
                         </a>
                     </p>
