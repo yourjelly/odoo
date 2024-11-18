@@ -696,7 +696,7 @@ class expression(object):
 
         # normalize and prepare the expression for parsing
         domain = orm_domains.Domain(domain)
-        domain = domain._optimize(self.root_model)
+        domain = domain._optimize(self.root_model, orm_domains.OptimizationLevel.ALL_FOR_SQL)
         self.expression = domain
 
         # this object handles all the joins
