@@ -58,6 +58,8 @@ class PaymentPostProcessing(http.Controller):
                 raise Exception('retry')
             except Exception as e:
                 request.env.cr.rollback()
+                monitored_tx._log_message_on_linked_documents(e.args[0])
+                request.env.cr.commit()
                 _logger.exception(
                     "Encountered an error while post-processing transaction with id %s:\n%s",
                     monitored_tx.id, e
