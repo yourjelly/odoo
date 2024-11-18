@@ -37,7 +37,7 @@ class AccountMoveSendWizard(models.TransientModel):
     )
     pdf_report_id = fields.Many2one(
         comodel_name='ir.actions.report',
-        string="Invoice template",
+        string="Invoice report",
         domain="[('is_invoice_report', '=', True)]",
         compute='_compute_pdf_report_id',
         readonly=False,

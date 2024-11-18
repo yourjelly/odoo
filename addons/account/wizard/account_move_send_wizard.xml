@@ -19,13 +19,10 @@
                     <field name="sending_method_checkboxes" widget="account_json_checkboxes"/>
                 </div>
 
-
                 <!-- PDF template -->
                 <field name="pdf_report_id" invisible="1"/>
-                <group id="pdf_report" invisible="not display_pdf_report_id">
-                    <field name="pdf_report_id"
-                           class="w-50"
-                           options="{'no_create': True, 'no_edit': True}"/>
+                <group invisible="not display_pdf_report_id or 'email' in sending_methods">
+                    <field name="pdf_report_id" options="{'no_create': True, 'no_edit': True}"/>
                 </group>
 
                 <!-- Mail composer -->
@@ -38,6 +35,8 @@
                     <field name="render_model" invisible="1"/>
 
                     <group>
+                        <field name="pdf_report_id" options="{'no_create': True, 'no_edit': True}" invisible="not display_pdf_report_id"/>
+
                         <label for="mail_partner_ids" string="Recipients"/>
                         <div>
                             <widget name="mail_composer_recipient_list" thread_model_field="model" thread_id_field="res_ids"/>
