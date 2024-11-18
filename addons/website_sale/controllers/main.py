@@ -529,6 +529,12 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 'product_template_image_ids': image_create_data
             })
 
+    @route('/shop/check_email_exists', type='jsonrpc', auth='public')
+    def email_exists(self, email):
+        Partner = request.env['res.partner'].sudo()
+        existing_partner = Partner.search([('email', '=', email), ('active', '=', True)], limit=1)
+        return bool(existing_partner)
+
     @route(['/shop/product/clear-images'], type='jsonrpc', auth='user', website=True)
     def clear_product_images(self, product_product_id, product_template_id):
         """
@@ -1100,18 +1106,26 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 order_sudo.partner_shipping_id == order_sudo.partner_invoice_id
             )
 
+        # Retrieve the registrations data from the session
+        event_registrations = request.session.get('event_registrations', [])
+
+        # Retrieve the registrations data from the session
+        appointment = request.session.get('appointment_data', [])
+
         # Render the address form.
         address_form_values = self._prepare_address_form_values(
             order_sudo,
             partner_sudo,
             address_type=address_type,
             use_delivery_as_billing=use_delivery_as_billing,
+            registrations=event_registrations,
+            appointment=appointment,
             **query_params
         )
         return request.render('website_sale.address', address_form_values)
 
     def _prepare_address_form_values(
-        self, order_sudo, partner_sudo, address_type, use_delivery_as_billing, callback='', **kwargs
+        self, order_sudo, partner_sudo, address_type, use_delivery_as_billing, callback='', registrations=None, appointment=None, **kwargs
     ):
         """ Prepare and return the values to use to render the address form.
 
@@ -1177,6 +1191,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 )
             ),
             'vat_label': request.env._("VAT"),
+            'registrations': registrations,
+            'appointment': appointment,
         }
 
     @route(

@@ -73,6 +73,9 @@ class WebsiteEventSaleController(WebsiteEventController):
             # order does not contain any lines related to the event, meaning we are confirming only free tickets of this event
             return res
 
+        # Store registrations data in the session
+        request.session['event_registrations'] = registrations
+
         # we have at least one registration linked to a ticket -> sale mode activate
         if any(info['event_ticket_id'] for info in registrations):
             if order_sudo.amount_total:
