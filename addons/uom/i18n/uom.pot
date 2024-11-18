@@ -98,7 +98,7 @@ msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_day
-msgid "Days"
+msgid "Day(s)"
 msgstr ""
 
 #. module: uom
@@ -109,7 +109,7 @@ msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_dozen
-msgid "Dozens"
+msgid "Dozen(s)"
 msgstr ""
 
 #. module: uom
@@ -119,7 +119,7 @@ msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_hour
-msgid "Hours"
+msgid "Hour(s)"
 msgstr ""
 
 #. module: uom
@@ -306,7 +306,7 @@ msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_unit
-msgid "Units"
+msgid "Unit(s)"
 msgstr ""
 
 #. module: uom
