@@ -1,26 +1,21 @@
-import publicWidget from "@web/legacy/js/public/public_widget";
+import { Interaction } from "@website/core/interaction";
+import { registry } from "@web/core/registry";
+
 import { rpc } from "@web/core/network/rpc";
 
-publicWidget.registry.WebsiteControllerPageListingLayout = publicWidget.Widget.extend({
-    selector: ".o_website_listing_layout",
-    disabledInEditableMode: true,
-    events: {
-        "change .listing_layout_switcher input": "_onApplyLayoutChange",
-    },
-    
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
+class WebsiteControllerPageListingLayout extends Interaction {
+    static selector = ".o_website_listing_layout";
+    dynamicContent = {
+        ".listing_layout_switcher input": {
+            "t-on-change": this.onChange,
+        },
+    }
 
     /**
-     * @private
      * @param {Event} ev
      */
-    _onApplyLayoutChange(ev) {
-        const wysiwyg = this.options.wysiwyg;
-        if (wysiwyg) {
-            wysiwyg.odooEditor.observerUnactive("_onApplyLayoutChange");
-        }
+    onChange(ev) {
+        // this.options.wysiwyg?.odooEditor.observerUnactive("onChange");
         const clickedValue = ev.target.value;
         const isList = clickedValue === "list";
         if (!this.editableMode) {
@@ -38,14 +33,6 @@ publicWidget.registry.WebsiteControllerPageListingLayout = publicWidget.Widget.e
         });
 
         const el = document.querySelector(isList ? ".o_website_grid" : ".o_website_list");
-        this._toggle_view_mode(el, isList);
-
-        if (wysiwyg) {
-            wysiwyg.odooEditor.observerActive("_onApplyLayoutChange");
-        }
-    },
-
-    _toggle_view_mode(el, isList) {
         if (el) {
             el.classList.toggle("o_website_list", isList);
             el.classList.toggle("o_website_grid", !isList);
@@ -55,5 +42,10 @@ publicWidget.registry.WebsiteControllerPageListingLayout = publicWidget.Widget.e
                 card.classList = classList;
             });
         }
+        // this.options.wysiwyg?.odooEditor.observerActive("onChange");
     }
-});
+}
+
+registry
+    .category("website.active_elements")
+    .add("website.website_controller_page_listing_layout", WebsiteControllerPageListingLayout);
