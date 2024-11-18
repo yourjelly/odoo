@@ -10,10 +10,13 @@ from odoo.tools import pdf
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
 
+    # TODO (rugo) - Remove
     is_invoice_report = fields.Boolean(
         string="Invoice report",
         copy=True,
     )
+
+    filter_domain = fields.Char(string='Filter domain')
 
     def _render_qweb_pdf_prepare_streams(self, report_ref, data, res_ids=None):
         # Custom behavior for 'account.report_original_vendor_bill'.
