@@ -30,10 +30,10 @@ class AccountCodeMapping(models.Model):
         inverse='_inverse_code',
     )
 
-    def browse(self, ids=()):
+    def browse(self, ids=(), prefetch_ids=()):
         if isinstance(ids, str):
             ids = (ids,)
-        return super().browse(ids)
+        return super().browse(ids, prefetch_ids)
 
     def _search(self, domain, offset=0, limit=None, order=None) -> Query:
         # This method will populate this model's records in cache when the `code_mapping_ids`
