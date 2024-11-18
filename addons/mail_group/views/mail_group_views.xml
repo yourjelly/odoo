@@ -75,13 +75,13 @@
                                 class="oe_stat_button"
                                 icon="fa-commenting-o"
                                 help="Emails waiting an action for this group"
-                                invisible="not moderation">
+                                invisible="not (moderation and mail_group_message_moderation_count != 0)">
                             <field name="mail_group_message_moderation_count" widget="statinfo" string="To Review"/>
                         </button>
                         <button name="%(mail_group.mail_group_moderation_action)d"
                                 type="action"
                                 context="{'search_default_mail_group_id': id}"
-                                invisible="not moderation"
+                                invisible="not (moderation and moderation_rule_count != 0)"
                                 class="oe_stat_button"
                                 icon="fa-gavel"
                                 help="Moderated emails in this group">
