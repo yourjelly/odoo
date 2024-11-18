@@ -4,7 +4,7 @@
 import itertools
 
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from functools import partial
 from itertools import chain
 
@@ -487,6 +487,15 @@ class ResourceCalendar(models.Model):
     # Private Methods / Helpers
     # --------------------------------------------------
 
+    from math import modf
+    from datetime import time
+
+    def float_to_time(hour_float):
+        """Convert float (e.g., 13.5) to time object (13:30)."""
+        hours, fractional = divmod(hour_float, 1)
+        minutes = int(fractional * 60)
+        return time(int(hours), minutes)
+
     def _get_attendance_intervals_days_data(self, attendance_intervals):
         """
         helper function to compute duration of `intervals` that have
@@ -499,18 +508,48 @@ class ResourceCalendar(models.Model):
         """
         day_hours = defaultdict(float)
         day_days = defaultdict(float)
+
         for start, stop, meta in attendance_intervals:
-            # If the interval covers only a part of the original attendance, we
-            # take durations in days proportionally to what is left of the interval.
-            interval_hours = (stop - start).total_seconds() / 3600
-            day_hours[start.date()] += interval_hours
-            day_days[start.date()] += sum(meta.mapped('duration_days')) * interval_hours / sum(meta.mapped('duration_hours'))
+            # Fetch total hours and days from attendance metadata
+            original_duration_hours = sum(meta.mapped('duration_hours'))
+            original_duration_days = sum(meta.mapped('duration_days'))
+
+            if original_duration_hours == 0:
+                continue  # Skip invalid intervals with no hours
+
+            # Track if the leave interval overlaps any working period
+            has_overlap = False
+
+            for attendance in meta:
+                attendance_start = float_to_time(attendance.hour_from)
+                attendance_stop = float_to_time(attendance.hour_to)
+                attendance_duration = (datetime.combine(start.date(), attendance_stop) -
+                                    datetime.combine(start.date(), attendance_start)).total_seconds() / 3600
+
+                # Check if the leave interval overlaps with this attendance period
+                overlap_start = max(start.time(), attendance_start)
+                overlap_stop = min(stop.time(), attendance_stop)
+
+                if overlap_start < overlap_stop:  # There's an overlap
+                    has_overlap = True
+                    overlap_duration = (datetime.combine(start.date(), overlap_stop) -
+                                        datetime.combine(start.date(), overlap_start)).total_seconds() / 3600
+                    proportion = overlap_duration / attendance_duration
+
+                    day_hours[start.date()] += overlap_duration
+                    day_days[start.date()] += original_duration_days * proportion
+
+            # If no overlap is found for this day, explicitly set hours to 0
+            if not has_overlap:
+                day_hours[start.date()] += 0
+                day_days[start.date()] += 0
 
         return {
-            # Round the number of days to the closest 16th of a day.
             'days': float_round(sum(day_days[day] for day in day_days), precision_rounding=0.001),
             'hours': sum(day_hours.values()),
         }
+
+
 
     def _get_days_data(self, intervals, day_total):
         """

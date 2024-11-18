@@ -208,7 +208,7 @@ class HrLeave(models.Model):
     request_hour_to = fields.Float(string='Hour to')
     # used only when the leave is taken in half days
     request_date_from_period = fields.Selection([
-        ('am', 'Morning'), ('pm', 'Afternoon')],
+        ('am', 'Morning'), ('pm', 'Afternoon'), ('evening', 'Evening')],
         string="Date Period Start", default='am')
     # request type
     request_unit_half = fields.Boolean('Half Day', compute='_compute_request_unit_half', store=True, readonly=False)
@@ -301,7 +301,8 @@ class HrLeave(models.Model):
 
                 day_period = {
                     'am': 'morning',
-                    'pm': 'afternoon'
+                    'pm': 'afternoon',
+                    'evening': 'evening',
                 }.get(holiday.request_date_from_period, None) if holiday.request_unit_half else None
 
 
