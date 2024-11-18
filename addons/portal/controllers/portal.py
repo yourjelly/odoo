@@ -420,11 +420,11 @@ class CustomerPortal(Controller):
 
     def _get_mandatory_fields(self):
         """ This method is there so that we can override the mandatory fields """
-        return self.MANDATORY_BILLING_FIELDS
+        return list(self.MANDATORY_BILLING_FIELDS)
 
     def _get_optional_fields(self):
         """ This method is there so that we can override the optional fields """
-        return self.OPTIONAL_BILLING_FIELDS
+        return list(self.OPTIONAL_BILLING_FIELDS)
 
     def _document_check_access(self, model_name, document_id, access_token=None):
         """Check if current user is allowed to access the specified record.
