@@ -347,7 +347,7 @@ class ResUsers(models.Model):
             'image_1024', 'image_512', 'image_256', 'image_128', 'lang', 'tz',
             'tz_offset', 'groups_id', 'partner_id', 'write_date', 'action_id',
             'avatar_1920', 'avatar_1024', 'avatar_512', 'avatar_256', 'avatar_128',
-            'share', 'device_ids',
+            'share', 'device_ids', 'api_key_ids',
         ]
 
     @property
@@ -355,7 +355,7 @@ class ResUsers(models.Model):
         """ The list of fields a user can write on their own user record.
         In order to add fields, please override this property on model extensions.
         """
-        return ['signature', 'action_id', 'company_id', 'email', 'name', 'image_1920', 'lang', 'tz']
+        return ['signature', 'action_id', 'company_id', 'email', 'name', 'image_1920', 'lang', 'tz', 'api_key_ids']
 
     def _default_groups(self):
         """Default groups for employees
@@ -412,6 +412,8 @@ class ResUsers(models.Model):
                                  compute='_compute_accesses_count', compute_sudo=True)
     groups_count = fields.Integer('# Groups', help='Number of groups that apply to the current user',
                                   compute='_compute_accesses_count', compute_sudo=True)
+    user_group_warning = fields.Text(string="User Group Warning", compute="_compute_user_group_warning")
+    api_key_ids = fields.One2many('res.users.apikeys', 'user_id', string="API Keys")
 
     _login_key = models.Constraint("UNIQUE (login)",
         'You can not have two users with the same login!')
@@ -478,31 +480,52 @@ class ResUsers(models.Model):
           - { 'uid': 32, 'auth_method': 'webauthn',      'mfa': 'skip'    }
         :rtype: dict
         """
-        if not (credential['type'] == 'password' and credential['password']):
-            raise AccessDenied()
-        self.env.cr.execute(
-            "SELECT COALESCE(password, '') FROM res_users WHERE id=%s",
-            [self.env.user.id]
-        )
-        [hashed] = self.env.cr.fetchone()
-        valid, replacement = self._crypt_context()\
-            .verify_and_update(credential['password'], hashed)
-        if replacement is not None:
-            self._set_encrypted_password(self.env.user.id, replacement)
-            if request and self == self.env.user:
-                self.env.flush_all()
-                self.env.registry.clear_cache()
-                # update session token so the user does not get logged out
-                new_token = self.env.user._compute_session_token(request.session.sid)
-                request.session.session_token = new_token
+        env = env or {}
+        if 'interactive' not in env:
+            _logger.warning(
+                "_check_credentials without 'interactive' env key, assuming interactive login. \
+                Check calls and overrides to ensure the 'interactive' key is properly set in \
+                all _check_credentials environments"
+            )
 
-        if not valid:
-            raise AccessDenied()
-        return {
-            'uid': self.env.user.id,
-            'auth_method': 'password',
-            'mfa': 'default',
-        }
+        interactive = env.get('interactive', True)
+
+        if interactive or not self.env.user._rpc_api_keys_only():
+            if not (credential['type'] == 'password' and credential['password']):
+                raise AccessDenied()
+            self.env.cr.execute(
+                "SELECT COALESCE(password, '') FROM res_users WHERE id=%s",
+                [self.env.user.id]
+            )
+            [hashed] = self.env.cr.fetchone()
+            valid, replacement = self._crypt_context()\
+                .verify_and_update(credential['password'], hashed)
+            if replacement is not None:
+                self._set_encrypted_password(self.env.user.id, replacement)
+                if request and self == self.env.user:
+                    self.env.flush_all()
+                    self.env.registry.clear_cache()
+                    # update session token so the user does not get logged out
+                    new_token = self.env.user._compute_session_token(request.session.sid)
+                    request.session.session_token = new_token
+
+            if valid:
+                return {
+                    'uid': self.env.user.id,
+                    'auth_method': 'password',
+                    'mfa': 'default',
+                }
+
+        if not interactive:
+            # 'rpc' scope does not really exist, we basically require a global key (scope NULL)
+            if self.env['res.users.apikeys']._check_credentials(scope='rpc', key=credential['password']) == self.env.uid:
+                return {
+                    'uid': self.env.user.id,
+                    'auth_method': 'apikey',
+                    'mfa': 'default',
+                }
+
+        raise AccessDenied()
 
     def _compute_password(self):
         for user in self:
@@ -556,6 +579,16 @@ class ResUsers(models.Model):
     def _compute_res_users_settings_id(self):
         for user in self:
             user.res_users_settings_id = user.res_users_settings_ids and user.res_users_settings_ids[0]
+
+    @api.depends('groups_id', 'share')
+    @api.depends_context('show_user_group_warning')
+    def _compute_user_group_warning(self):
+        self.user_group_warning = False
+        if self._context.get('show_user_group_warning'):
+            for user in self.filtered_domain([('share', '=', False)]):
+                group_inheritance_warnings = self._prepare_warning_for_group_inheritance(user)
+                if group_inheritance_warnings:
+                    user.user_group_warning = group_inheritance_warnings
 
     @api.model
     def _search_res_users_settings_id(self, operator, operand):
@@ -649,18 +682,64 @@ class ResUsers(models.Model):
         """, tuple(group_ids), user_condition)))
 
     def onchange(self, values, field_names, fields_spec):
+        reified_fnames = [fname for fname in fields_spec if is_reified_group(fname)]
+        if reified_fnames:
+            values = {key: val for key, val in values.items() if key != 'groups_id'}
+            values = self._remove_reified_groups(values)
+
+            if any(is_reified_group(fname) for fname in field_names):
+                field_names = [fname for fname in field_names if not is_reified_group(fname)]
+                field_names.append('groups_id')
+
+            fields_spec = {
+                field_name: field_spec
+                for field_name, field_spec in fields_spec.items()
+                if not is_reified_group(field_name)
+            }
+            fields_spec['groups_id'] = {}
+
         # Hacky fix to access fields in `SELF_READABLE_FIELDS` in the onchange logic.
         # Put field values in the cache.
         if self == self.env.user:
             [self.sudo()[field_name] for field_name in self.SELF_READABLE_FIELDS]
-        return super().onchange(values, field_names, fields_spec)
+
+        result = super().onchange(values, field_names, fields_spec)
+
+        if reified_fnames and 'groups_id' in result.get('value', {}):
+            self._add_reified_groups(reified_fnames, result['value'])
+            result['value'].pop('groups_id', None)
+
+        return result
 
     def read(self, fields=None, load='_classic_read'):
+        # determine whether reified groups fields are required, and which ones
+        fields1 = fields or list(self.fields_get())
+        group_fields, other_fields = partition(is_reified_group, fields1)
+
+        # read regular fields (other_fields); add 'groups_id' if necessary
+        drop_groups_id = False
+        if group_fields and fields:
+            if 'groups_id' not in other_fields:
+                other_fields.append('groups_id')
+                drop_groups_id = True
+        else:
+            other_fields = fields
+
         readable = self.SELF_READABLE_FIELDS
         if fields and self == self.env.user and all(key in readable or key.startswith('context_') for key in fields):
             # safe fields only, so we read as super-user to bypass access rights
             self = self.sudo()
-        return super().read(fields=fields, load=load)
+
+        res = super().read(other_fields, load=load)
+
+        # post-process result to add reified group fields
+        if group_fields:
+            for values in res:
+                self._add_reified_groups(group_fields, values)
+                if drop_groups_id:
+                    values.pop('groups_id', None)
+
+        return res
 
     @api.model
     def check_field_access_rights(self, operation, field_names):
@@ -696,9 +775,29 @@ class ResUsers(models.Model):
                 raise AccessError(_('Invalid search criterion'))
         return super()._search(domain, offset, limit, order)
 
+    @api.model
+    def default_get(self, fields):
+        group_fields, fields = partition(is_reified_group, fields)
+        fields1 = (fields + ['groups_id']) if group_fields else fields
+        values = super().default_get(fields1)
+        self._add_reified_groups(group_fields, values)
+        return values
+
     @api.model_create_multi
     def create(self, vals_list):
-        users = super().create(vals_list)
+        new_vals_list = []
+        for values in vals_list:
+            values = self._remove_reified_groups(values)
+            if 'groups_id' in values:
+                # complete 'groups_id' with implied groups
+                user = self.new(values)
+                gs = user.groups_id._origin
+                gs = gs | gs.trans_implied_ids
+                values['groups_id'] = self._fields['groups_id'].convert_to_write(gs, user)
+            new_vals_list.append(values)
+        users = super().create(new_vals_list)
+        group_multi_company_id = self.env['ir.model.data']._xmlid_to_res_id(
+            'base.group_multi_company', raise_if_not_found=False)
         setting_vals = []
         for user in users:
             if not user.res_users_settings_ids and user._is_internal():
@@ -710,6 +809,11 @@ class ResUsers(models.Model):
             # Generate employee initals as avatar for internal users without image
             if not user.image_1920 and not user.share and user.name:
                 user.image_1920 = user.partner_id._avatar_generate_svg()
+            if group_multi_company_id:
+                if len(user.company_ids) <= 1 and group_multi_company_id in user.groups_id.ids:
+                    user.write({'groups_id': [Command.unlink(group_multi_company_id)]})
+                elif len(user.company_ids) > 1 and group_multi_company_id not in user.groups_id.ids:
+                    user.write({'groups_id': [Command.link(group_multi_company_id)]})
         if setting_vals:
             self.env['res.users.settings'].sudo().create(setting_vals)
         return users
@@ -724,6 +828,7 @@ class ResUsers(models.Model):
         return default_user and default_user in self
 
     def write(self, values):
+        values = self._remove_reified_groups(values)
         if values.get('active') and SUPERUSER_ID in self._ids:
             raise UserError(_("You cannot activate the superuser."))
         if values.get('active') == False and self._uid in self._ids:
@@ -775,6 +880,15 @@ class ResUsers(models.Model):
                 if env.user in self:
                     lazy_property.reset_all(env)
 
+        if 'company_ids' in values:
+            group_multi_company = self.env.ref('base.group_multi_company', False)
+            if group_multi_company:
+                for user in self:
+                    if len(user.company_ids) <= 1 and user.id in group_multi_company.users.ids:
+                        user.write({'groups_id': [Command.unlink(group_multi_company.id)]})
+                    elif len(user.company_ids) > 1 and user.id not in group_multi_company.users.ids:
+                        user.write({'groups_id': [Command.link(group_multi_company.id)]})
+
         # clear caches linked to the users
         if self.ids and 'groups_id' in values:
             # DLE P139: Calling invalidate_cache on a new, well you lost everything as you wont be able to take it back from the cache
@@ -789,6 +903,20 @@ class ResUsers(models.Model):
             self.env.registry.clear_cache()
 
         return res
+
+    @api.model
+    def new(self, values=None, origin=None, ref=None):
+        if values is None:
+            values = {}
+        values = self._remove_reified_groups(values)
+        user = super().new(values=values, origin=origin, ref=ref)
+        group_multi_company = self.env.ref('base.group_multi_company', False)
+        if group_multi_company and 'company_ids' in values:
+            if len(user.company_ids) <= 1 and user.id in group_multi_company.users.ids:
+                user.update({'groups_id': [Command.unlink(group_multi_company.id)]})
+            elif len(user.company_ids) > 1 and user.id not in group_multi_company.users.ids:
+                user.update({'groups_id': [Command.link(group_multi_company.id)]})
+        return user
 
     @api.ondelete(at_uninstall=True)
     def _unlink_except_master_data(self):
@@ -1430,6 +1558,173 @@ class ResUsers(models.Model):
         """
         return False
 
+    def _prepare_warning_for_group_inheritance(self, user):
+        """ Check (updated) groups configuration for user. If implieds groups
+        will be added back due to inheritance and hierarchy in groups return
+        a message explaining the missing groups.
+
+        :param res.users user: target user
+
+        :return: string to display in a warning
+        """
+        # Current groups of the user
+        current_groups = user.groups_id.filtered('trans_implied_ids')
+        current_groups_by_category = defaultdict(lambda: self.env['res.groups'])
+        for group in current_groups:
+            current_groups_by_category[group.category_id] |= group.trans_implied_ids.filtered(lambda grp: grp.category_id == group.category_id)
+
+        missing_groups = {}
+        # We don't want to show warning for "Technical" and "Extra Rights" groups
+        categories_to_ignore = self.env.ref('base.module_category_hidden') + self.env.ref('base.module_category_usability')
+        for group in current_groups:
+            # Get the updated group from current groups
+            missing_implied_groups = group.implied_ids - user.groups_id
+            # Get the missing group needed in updated group's category (For example, someone changes
+            # Sales: Admin to Sales: User, but Field Service is already set to Admin, so here in the
+            # 'Sales' category, we will at the minimum need Admin group)
+            missing_implied_groups = missing_implied_groups.filtered(
+                lambda g:
+                g.category_id not in (group.category_id | categories_to_ignore) and
+                g not in current_groups_by_category[g.category_id] and
+                (self.env.user.has_group('base.group_no_one') or g.category_id)
+            )
+            if missing_implied_groups:
+                # prepare missing group message, by categories
+                missing_groups[group] = ", ".join(
+                    f'"{missing_group.category_id.name or self.env._("Other")}: {missing_group.name}"'
+                    for missing_group in missing_implied_groups
+                )
+        return "\n".join(
+            self.env._(
+                'Since %(user)s is a/an "%(category)s: %(group)s", they will at least obtain the right %(missing_group_message)s',
+                user=user.name,
+                category=group.category_id.name or self.env._('Other'),
+                group=group.name,
+                missing_group_message=missing_group_message,
+            ) for group, missing_group_message in missing_groups.items()
+        )
+
+    def _remove_reified_groups(self, values):
+        """ return `values` without reified group fields """
+        add, rem = [], []
+        values1 = {}
+
+        for key, val in values.items():
+            if is_boolean_group(key):
+                (add if val else rem).append(get_boolean_group(key))
+            elif is_selection_groups(key):
+                rem += get_selection_groups(key)
+                if val:
+                    add.append(val)
+            else:
+                values1[key] = val
+
+        if 'groups_id' not in values and (add or rem):
+            added = self.env['res.groups'].sudo().browse(add)
+            added |= added.mapped('trans_implied_ids')
+            added_ids = added._ids
+            # remove group ids in `rem` and add group ids in `add`
+            # do not remove groups that are added by implied
+            values1['groups_id'] = list(itertools.chain(
+                zip(repeat(3), [gid for gid in rem if gid not in added_ids]),
+                zip(repeat(4), add)
+            ))
+
+        return values1
+
+    def _determine_fields_to_fetch(self, field_names, ignore_when_in_cache=False):
+        valid_fields = partition(is_reified_group, field_names)[1]
+        return super()._determine_fields_to_fetch(valid_fields, ignore_when_in_cache)
+
+    def _read_format(self, fnames, load='_classic_read'):
+        valid_fields = partition(is_reified_group, fnames)[1]
+        return super()._read_format(valid_fields, load)
+
+    def _add_reified_groups(self, fields, values):
+        """ add the given reified group fields into `values` """
+        gids = set(parse_m2m(values.get('groups_id') or []))
+        for f in fields:
+            if is_boolean_group(f):
+                values[f] = get_boolean_group(f) in gids
+            elif is_selection_groups(f):
+                # determine selection groups, in order
+                sel_groups = self.env['res.groups'].sudo().browse(get_selection_groups(f))
+                sel_order = {g: len(g.trans_implied_ids & sel_groups) for g in sel_groups}
+                sel_groups = sel_groups.sorted(key=sel_order.get)
+                # determine which ones are in gids
+                selected = [gid for gid in sel_groups.ids if gid in gids]
+                # if 'Internal User' is in the group, this is the "User Type" group
+                # and we need to show 'Internal User' selected, not Public/Portal.
+                if self.env.ref('base.group_user').id in selected:
+                    values[f] = self.env.ref('base.group_user').id
+                else:
+                    values[f] = selected and selected[-1] or False
+
+    @api.model
+    def fields_get(self, allfields=None, attributes=None):
+        res = super().fields_get(allfields, attributes=attributes)
+        # add reified groups fields
+        for app, kind, gs, _category_name in self.env['res.groups'].sudo().get_groups_by_application():
+            if kind == 'selection':
+                # 'User Type' should not be 'False'. A user is either 'employee', 'portal' or 'public' (required).
+                selection_vals = [(False, '')]
+                if app.xml_id == 'base.module_category_user_type':
+                    selection_vals = []
+                field_name = name_selection_groups(gs.ids)
+                if allfields and field_name not in allfields:
+                    continue
+                # selection group field
+                tips = []
+                if app.description:
+                    tips.append(app.description + '\n')
+                tips.extend('%s: %s' % (g.name, g.comment) for g in gs if g.comment)
+                res[field_name] = {
+                    'type': 'selection',
+                    'string': app.name or _('Other'),
+                    'selection': selection_vals + [(g.id, g.name) for g in gs],
+                    'help': '\n'.join(tips),
+                    'exportable': False,
+                    'selectable': False,
+                }
+            else:
+                # boolean group fields
+                for g in gs:
+                    field_name = name_boolean_group(g.id)
+                    if allfields and field_name not in allfields:
+                        continue
+                    res[field_name] = {
+                        'type': 'boolean',
+                        'string': g.name,
+                        'help': g.comment,
+                        'exportable': False,
+                        'selectable': False,
+                    }
+        # add self readable/writable fields
+        missing = set(self.SELF_WRITEABLE_FIELDS).union(self.SELF_READABLE_FIELDS).difference(res.keys())
+        if allfields:
+            missing = missing.intersection(allfields)
+        if missing:
+            self = self.sudo()  # noqa: PLW0642
+            res.update({
+                key: dict(values, readonly=key not in self.SELF_WRITEABLE_FIELDS, searchable=False)
+                for key, values in super().fields_get(missing, attributes).items()
+            })
+        return res
+
+    def _rpc_api_keys_only(self):
+        """ To be overridden if RPC access needs to be restricted to API keys, e.g. for 2FA """
+        return False
+
+    @check_identity
+    def api_key_wizard(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'res.users.apikeys.description',
+            'name': 'New API Key',
+            'target': 'new',
+            'views': [(False, 'form')],
+        }
+
 
 ResUsersPatchedInTest = ResUsers
 
@@ -1563,17 +1858,6 @@ class ResGroups(models.Model):  # noqa: F811
 class UsersImplied(models.Model):
     _name = 'res.users'
     _inherit = ['res.users']
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        for values in vals_list:
-            if 'groups_id' in values:
-                # complete 'groups_id' with implied groups
-                user = self.new(values)
-                gs = user.groups_id._origin
-                gs = gs | gs.trans_implied_ids
-                values['groups_id'] = self._fields['groups_id'].convert_to_write(gs, user)
-        return super().create(vals_list)
 
     def write(self, values):
         if not values.get('groups_id'):
@@ -1854,277 +2138,6 @@ class IrModuleCategory(models.Model):
         return res
 
 
-# pylint: disable=E0102
-class ResUsers(models.Model):  # noqa: F811
-    _inherit = 'res.users'
-
-    user_group_warning = fields.Text(string="User Group Warning", compute="_compute_user_group_warning")
-
-    @api.depends('groups_id', 'share')
-    @api.depends_context('show_user_group_warning')
-    def _compute_user_group_warning(self):
-        self.user_group_warning = False
-        if self._context.get('show_user_group_warning'):
-            for user in self.filtered_domain([('share', '=', False)]):
-                group_inheritance_warnings = self._prepare_warning_for_group_inheritance(user)
-                if group_inheritance_warnings:
-                    user.user_group_warning = group_inheritance_warnings
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        new_vals_list = []
-        for values in vals_list:
-            new_vals_list.append(self._remove_reified_groups(values))
-        users = super().create(new_vals_list)
-        group_multi_company_id = self.env['ir.model.data']._xmlid_to_res_id(
-            'base.group_multi_company', raise_if_not_found=False)
-        if group_multi_company_id:
-            for user in users:
-                if len(user.company_ids) <= 1 and group_multi_company_id in user.groups_id.ids:
-                    user.write({'groups_id': [Command.unlink(group_multi_company_id)]})
-                elif len(user.company_ids) > 1 and group_multi_company_id not in user.groups_id.ids:
-                    user.write({'groups_id': [Command.link(group_multi_company_id)]})
-        return users
-
-    def write(self, values):
-        values = self._remove_reified_groups(values)
-        res = super().write(values)
-        if 'company_ids' not in values:
-            return res
-        group_multi_company = self.env.ref('base.group_multi_company', False)
-        if group_multi_company:
-            for user in self:
-                if len(user.company_ids) <= 1 and user.id in group_multi_company.users.ids:
-                    user.write({'groups_id': [Command.unlink(group_multi_company.id)]})
-                elif len(user.company_ids) > 1 and user.id not in group_multi_company.users.ids:
-                    user.write({'groups_id': [Command.link(group_multi_company.id)]})
-        return res
-
-    @api.model
-    def new(self, values=None, origin=None, ref=None):
-        if values is None:
-            values = {}
-        values = self._remove_reified_groups(values)
-        user = super().new(values=values, origin=origin, ref=ref)
-        group_multi_company = self.env.ref('base.group_multi_company', False)
-        if group_multi_company and 'company_ids' in values:
-            if len(user.company_ids) <= 1 and user.id in group_multi_company.users.ids:
-                user.update({'groups_id': [Command.unlink(group_multi_company.id)]})
-            elif len(user.company_ids) > 1 and user.id not in group_multi_company.users.ids:
-                user.update({'groups_id': [Command.link(group_multi_company.id)]})
-        return user
-
-    def _prepare_warning_for_group_inheritance(self, user):
-        """ Check (updated) groups configuration for user. If implieds groups
-        will be added back due to inheritance and hierarchy in groups return
-        a message explaining the missing groups.
-
-        :param res.users user: target user
-
-        :return: string to display in a warning
-        """
-        # Current groups of the user
-        current_groups = user.groups_id.filtered('trans_implied_ids')
-        current_groups_by_category = defaultdict(lambda: self.env['res.groups'])
-        for group in current_groups:
-            current_groups_by_category[group.category_id] |= group.trans_implied_ids.filtered(lambda grp: grp.category_id == group.category_id)
-
-        missing_groups = {}
-        # We don't want to show warning for "Technical" and "Extra Rights" groups
-        categories_to_ignore = self.env.ref('base.module_category_hidden') + self.env.ref('base.module_category_usability')
-        for group in current_groups:
-            # Get the updated group from current groups
-            missing_implied_groups = group.implied_ids - user.groups_id
-            # Get the missing group needed in updated group's category (For example, someone changes
-            # Sales: Admin to Sales: User, but Field Service is already set to Admin, so here in the
-            # 'Sales' category, we will at the minimum need Admin group)
-            missing_implied_groups = missing_implied_groups.filtered(
-                lambda g:
-                g.category_id not in (group.category_id | categories_to_ignore) and
-                g not in current_groups_by_category[g.category_id] and
-                (self.env.user.has_group('base.group_no_one') or g.category_id)
-            )
-            if missing_implied_groups:
-                # prepare missing group message, by categories
-                missing_groups[group] = ", ".join(
-                    f'"{missing_group.category_id.name or self.env._("Other")}: {missing_group.name}"'
-                    for missing_group in missing_implied_groups
-                )
-        return "\n".join(
-            self.env._(
-                'Since %(user)s is a/an "%(category)s: %(group)s", they will at least obtain the right %(missing_group_message)s',
-                user=user.name,
-                category=group.category_id.name or self.env._('Other'),
-                group=group.name,
-                missing_group_message=missing_group_message,
-            ) for group, missing_group_message in missing_groups.items()
-        )
-
-    def _remove_reified_groups(self, values):
-        """ return `values` without reified group fields """
-        add, rem = [], []
-        values1 = {}
-
-        for key, val in values.items():
-            if is_boolean_group(key):
-                (add if val else rem).append(get_boolean_group(key))
-            elif is_selection_groups(key):
-                rem += get_selection_groups(key)
-                if val:
-                    add.append(val)
-            else:
-                values1[key] = val
-
-        if 'groups_id' not in values and (add or rem):
-            added = self.env['res.groups'].sudo().browse(add)
-            added |= added.mapped('trans_implied_ids')
-            added_ids = added._ids
-            # remove group ids in `rem` and add group ids in `add`
-            # do not remove groups that are added by implied
-            values1['groups_id'] = list(itertools.chain(
-                zip(repeat(3), [gid for gid in rem if gid not in added_ids]),
-                zip(repeat(4), add)
-            ))
-
-        return values1
-
-    @api.model
-    def default_get(self, fields):
-        group_fields, fields = partition(is_reified_group, fields)
-        fields1 = (fields + ['groups_id']) if group_fields else fields
-        values = super().default_get(fields1)
-        self._add_reified_groups(group_fields, values)
-        return values
-
-    def _determine_fields_to_fetch(self, field_names, ignore_when_in_cache=False):
-        valid_fields = partition(is_reified_group, field_names)[1]
-        return super()._determine_fields_to_fetch(valid_fields, ignore_when_in_cache)
-
-    def _read_format(self, fnames, load='_classic_read'):
-        valid_fields = partition(is_reified_group, fnames)[1]
-        return super()._read_format(valid_fields, load)
-
-    def onchange(self, values, field_names, fields_spec):
-        reified_fnames = [fname for fname in fields_spec if is_reified_group(fname)]
-        if reified_fnames:
-            values = {key: val for key, val in values.items() if key != 'groups_id'}
-            values = self._remove_reified_groups(values)
-
-            if any(is_reified_group(fname) for fname in field_names):
-                field_names = [fname for fname in field_names if not is_reified_group(fname)]
-                field_names.append('groups_id')
-
-            fields_spec = {
-                field_name: field_spec
-                for field_name, field_spec in fields_spec.items()
-                if not is_reified_group(field_name)
-            }
-            fields_spec['groups_id'] = {}
-
-        result = super().onchange(values, field_names, fields_spec)
-
-        if reified_fnames and 'groups_id' in result.get('value', {}):
-            self._add_reified_groups(reified_fnames, result['value'])
-            result['value'].pop('groups_id', None)
-
-        return result
-
-    def read(self, fields=None, load='_classic_read'):
-        # determine whether reified groups fields are required, and which ones
-        fields1 = fields or list(self.fields_get())
-        group_fields, other_fields = partition(is_reified_group, fields1)
-
-        # read regular fields (other_fields); add 'groups_id' if necessary
-        drop_groups_id = False
-        if group_fields and fields:
-            if 'groups_id' not in other_fields:
-                other_fields.append('groups_id')
-                drop_groups_id = True
-        else:
-            other_fields = fields
-
-        res = super().read(other_fields, load=load)
-
-        # post-process result to add reified group fields
-        if group_fields:
-            for values in res:
-                self._add_reified_groups(group_fields, values)
-                if drop_groups_id:
-                    values.pop('groups_id', None)
-        return res
-
-    def _add_reified_groups(self, fields, values):
-        """ add the given reified group fields into `values` """
-        gids = set(parse_m2m(values.get('groups_id') or []))
-        for f in fields:
-            if is_boolean_group(f):
-                values[f] = get_boolean_group(f) in gids
-            elif is_selection_groups(f):
-                # determine selection groups, in order
-                sel_groups = self.env['res.groups'].sudo().browse(get_selection_groups(f))
-                sel_order = {g: len(g.trans_implied_ids & sel_groups) for g in sel_groups}
-                sel_groups = sel_groups.sorted(key=sel_order.get)
-                # determine which ones are in gids
-                selected = [gid for gid in sel_groups.ids if gid in gids]
-                # if 'Internal User' is in the group, this is the "User Type" group
-                # and we need to show 'Internal User' selected, not Public/Portal.
-                if self.env.ref('base.group_user').id in selected:
-                    values[f] = self.env.ref('base.group_user').id
-                else:
-                    values[f] = selected and selected[-1] or False
-
-    @api.model
-    def fields_get(self, allfields=None, attributes=None):
-        res = super().fields_get(allfields, attributes=attributes)
-        # add reified groups fields
-        for app, kind, gs, _category_name in self.env['res.groups'].sudo().get_groups_by_application():
-            if kind == 'selection':
-                # 'User Type' should not be 'False'. A user is either 'employee', 'portal' or 'public' (required).
-                selection_vals = [(False, '')]
-                if app.xml_id == 'base.module_category_user_type':
-                    selection_vals = []
-                field_name = name_selection_groups(gs.ids)
-                if allfields and field_name not in allfields:
-                    continue
-                # selection group field
-                tips = []
-                if app.description:
-                    tips.append(app.description + '\n')
-                tips.extend('%s: %s' % (g.name, g.comment) for g in gs if g.comment)
-                res[field_name] = {
-                    'type': 'selection',
-                    'string': app.name or _('Other'),
-                    'selection': selection_vals + [(g.id, g.name) for g in gs],
-                    'help': '\n'.join(tips),
-                    'exportable': False,
-                    'selectable': False,
-                }
-            else:
-                # boolean group fields
-                for g in gs:
-                    field_name = name_boolean_group(g.id)
-                    if allfields and field_name not in allfields:
-                        continue
-                    res[field_name] = {
-                        'type': 'boolean',
-                        'string': g.name,
-                        'help': g.comment,
-                        'exportable': False,
-                        'selectable': False,
-                    }
-        # add self readable/writable fields
-        missing = set(self.SELF_WRITEABLE_FIELDS).union(self.SELF_READABLE_FIELDS).difference(res.keys())
-        if allfields:
-            missing = missing.intersection(allfields)
-        if missing:
-            self = self.sudo()  # noqa: PLW0642
-            res.update({
-                key: dict(values, readonly=key not in self.SELF_WRITEABLE_FIELDS, searchable=False)
-                for key, values in super().fields_get(missing, attributes).items()
-            })
-        return res
-
-
 class ResUsersIdentitycheck(models.TransientModel):
     """ Wizard used to re-check the user's credentials (password) and eventually
     revoke access to his account to every device he has an active session on.
@@ -2239,62 +2252,6 @@ KEY_CRYPT_CONTEXT = CryptContext(
     # attacks on API keys isn't much of a concern
     ['pbkdf2_sha512'], pbkdf2_sha512__rounds=6000,
 )
-
-
-# pylint: disable=E0102
-class ResUsers(models.Model):  # noqa: F811
-    _inherit = 'res.users'
-
-    api_key_ids = fields.One2many('res.users.apikeys', 'user_id', string="API Keys")
-
-    @property
-    def SELF_READABLE_FIELDS(self):
-        return super().SELF_READABLE_FIELDS + ['api_key_ids']
-
-    @property
-    def SELF_WRITEABLE_FIELDS(self):
-        return super().SELF_WRITEABLE_FIELDS + ['api_key_ids']
-
-    def _rpc_api_keys_only(self):
-        """ To be overridden if RPC access needs to be restricted to API keys, e.g. for 2FA """
-        return False
-
-    def _check_credentials(self, credential, user_agent_env):
-        user_agent_env = user_agent_env or {}
-        if user_agent_env.get('interactive', True):
-            if 'interactive' not in user_agent_env:
-                _logger.warning(
-                    "_check_credentials without 'interactive' env key, assuming interactive login. \
-                    Check calls and overrides to ensure the 'interactive' key is properly set in \
-                    all _check_credentials environments"
-                )
-            return super()._check_credentials(credential, user_agent_env)
-
-        if not self.env.user._rpc_api_keys_only():
-            try:
-                return super()._check_credentials(credential, user_agent_env)
-            except AccessDenied:
-                pass
-
-        # 'rpc' scope does not really exist, we basically require a global key (scope NULL)
-        if self.env['res.users.apikeys']._check_credentials(scope='rpc', key=credential['password']) == self.env.uid:
-            return {
-                'uid': self.env.user.id,
-                'auth_method': 'apikey',
-                'mfa': 'default',
-            }
-
-        raise AccessDenied()
-
-    @check_identity
-    def api_key_wizard(self):
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'res.users.apikeys.description',
-            'name': 'New API Key',
-            'target': 'new',
-            'views': [(False, 'form')],
-        }
 
 
 class ResUsersApikeys(models.Model):
