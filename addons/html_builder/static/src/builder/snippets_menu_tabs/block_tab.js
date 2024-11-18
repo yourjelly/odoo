@@ -55,23 +55,26 @@ export class BlockTab extends Component {
             onWillStartDrag: ({ element }) => {
                 copyOnDrag.clone(element);
             },
-            onDragStart: () => {
+            onDragStart: ({ element }) => {
                 copyOnDrag.insert();
-                this.props.editor.shared.dropzone.displayDropZone("p, img");
+                const { category } = element.dataset;
+                const selector = category === "snippet_groups" ? "section" : "p, img";
+                this.dropzonePlugin.displayDropZone(selector);
             },
             onDrag: ({ element }) => {
-                this.props.editor.shared.dropzone.dragElement(element);
+                this.dropzonePlugin.dragElement(element);
             },
             onDrop: ({ element }) => {
                 const { x, y, height, width } = element.getClientRects()[0];
                 const { category, id } = element.dataset;
                 const snippet = this.props.snippetModel.getSnippet(category, id);
-                this.props.editor.shared.dropzone.dropElement(snippet.content.cloneNode(true), {
-                    x,
-                    y,
-                    height,
-                    width,
-                });
+                const position = { x, y, height, width };
+                if (category === "snippet_groups") {
+                    this.openSnippetDialog(snippet, position);
+                    return;
+                }
+                const addElement = this.dropzonePlugin.getAddElement(position);
+                addElement(snippet.content.cloneNode(true));
             },
             onDragEnd: () => {
                 copyOnDrag.clean();
@@ -79,23 +82,27 @@ export class BlockTab extends Component {
         });
     }
 
-    openSnippetDialog(snippet) {
-        this.props.editor.shared.dropzone.displayDropZone("section");
+    get dropzonePlugin() {
+        return this.props.editor.shared.dropzone;
+    }
 
+    openSnippetDialog(snippet, position) {
+        if (!position) {
+            this.dropzonePlugin.displayDropZone("section");
+        }
+        const addElement = this.dropzonePlugin.getAddElement(position);
         this.dialog.add(
             AddSnippetDialog,
             {
                 selectedSnippet: snippet,
                 snippetModel: this.props.snippetModel,
                 selectSnippet: (snippet) => {
-                    this.props.editor.shared.dropzone.addElementToCenter(
-                        snippet.content.cloneNode(true)
-                    );
+                    addElement(snippet.content.cloneNode(true));
                 },
                 installModule: this.onClickInstall.bind(this),
             },
             {
-                onClose: () => this.props.editor.shared.dropzone.clearDropZone(),
+                onClose: () => this.dropzonePlugin.clearDropZone(),
             }
         );
     }
