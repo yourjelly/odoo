@@ -27,7 +27,7 @@ class TestManual(common.TestAr):
         self.assertEqual(invoice.l10n_latam_document_type_id, self.document_type['invoice_a'], 'selected document type should be Factura A')
         self._post(invoice)
         self.assertEqual(invoice.state, 'posted', 'invoice has not been validate in Odoo')
-        self.assertEqual(invoice.name, 'FA-A %05d-00000002' % self.journal.l10n_ar_afip_pos_number, 'Invoice number is wrong')
+        self.assertEqual(invoice.name, 'FA-A %05d-00000001' % self.journal.l10n_ar_afip_pos_number, 'Invoice number is wrong')
 
     def test_02_fiscal_position(self):
         # ADHOC SA > IVA Responsable Inscripto > Without Fiscal Positon
@@ -115,17 +115,6 @@ class TestManual(common.TestAr):
         doc_27_lu_a = self.env.ref('l10n_ar.dc_liq_uci_a')
         payment_term_id = self.env.ref("account.account_payment_term_end_following_month")
 
-        # 60, 61, 27, 28, 45, 46
-        # In this case manual numbering should be True and the latam document numer should be required
-        with self.assertRaisesRegex(AssertionError, 'l10n_latam_document_number is a required field'):
-            with Form(self.env['account.move'].with_context(default_move_type='out_invoice')) as invoice_form:
-                invoice_form.ref = "demo_liquido_producto_1: Vendor bill liquido producto (DOC 186)"
-                invoice_form.partner_id = self.res_partner_adhoc
-                invoice_form.invoice_payment_term_id = payment_term_id
-                invoice_form.journal_id = self.journal
-                invoice_form.l10n_latam_document_type_id = doc_27_lu_a
-            invoice = invoice_form.save()
-
         # Adding the document number will let us to save and validate the number without any problems
         with Form(self.env['account.move'].with_context(default_move_type='out_invoice')) as invoice_form:
             invoice_form.ref = "demo_liquido_producto_1: Vendor bill liquido producto (DOC 186)"
@@ -146,17 +135,6 @@ class TestManual(common.TestAr):
 
         doc_60_lp_a = self.env.ref('l10n_ar.dc_a_cvl')
         payment_term_id = self.env.ref("account.account_payment_term_end_following_month")
-
-        with self.assertRaisesRegex(AssertionError, 'l10n_latam_document_number is a required field'):
-            with Form(self.env['account.move'].with_context(default_move_type='in_invoice')) as bill_form:
-                bill_form.ref = "demo_liquido_producto_1: Vendor bill liquido producto (DOC 186)"
-                bill_form.partner_id = self.res_partner_adhoc
-                bill_form.invoice_payment_term_id = payment_term_id
-                bill_form.invoice_date = '2023-02-09'
-                bill_form.journal_id = purchase_not_pos_journal
-                bill_form.l10n_latam_document_type_id = doc_60_lp_a
-            bill = bill_form.save()
-
         # Create a new journal that is an AFIP POS
         purchase_pos_journal = self._create_journal('preprinted', data={'type': 'purchase', 'l10n_ar_is_pos': True})
 

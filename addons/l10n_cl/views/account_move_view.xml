@@ -19,7 +19,7 @@
             <field name="l10n_latam_document_number" position="attributes">
                 <attribute name="invisible">(not l10n_latam_use_documents or not l10n_latam_manual_document_number) and (not l10n_latam_use_documents or highest_name or state != 'draft') and (not l10n_latam_use_documents or not posted_before or state != 'draft' or country_code != 'CL')</attribute>
                 <attribute name="readonly">posted_before and state != 'draft'</attribute>
-                <attribute name="required">l10n_latam_manual_document_number or not highest_name</attribute>
+                <attribute name="required">(l10n_latam_manual_document_number or not highest_name) and state == 'posted'</attribute>
             </field>
         </field>
     </record>

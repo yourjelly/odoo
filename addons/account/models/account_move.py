@@ -80,7 +80,7 @@ class AccountMove(models.Model):
     _name = "account.move"
     _inherit = ['portal.mixin', 'mail.thread.main.attachment', 'mail.activity.mixin', 'sequence.mixin', 'product.catalog.mixin']
     _description = "Journal Entry"
-    _order = 'date desc, name desc, invoice_date desc, id desc'
+    _order = 'date desc, name desc, invoice_date desc, id'
     _mail_post_access = 'read'
     _check_company_auto = True
     _sequence_index = "journal_id"
@@ -116,6 +116,8 @@ class AccountMove(models.Model):
         tracking=True,
         index='trigram',
     )
+    name_placeholder_form = fields.Char(compute='_compute_name_placeholder_form')
+    name_placeholder_list = fields.Char(default='/')
     ref = fields.Char(
         string='Reference',
         copy=False,
@@ -866,32 +868,37 @@ class AccountMove(models.Model):
     @api.depends('posted_before', 'state', 'journal_id', 'date', 'move_type', 'origin_payment_id')
     def _compute_name(self):
         self = self.sorted(lambda m: (m.date, m.ref or '', m._origin.id))
-
         for move in self:
             if move.state == 'cancel':
                 continue
 
-            move_has_name = move.name and move.name != '/'
-            if move_has_name or move.state != 'posted':
-                if not move.posted_before and not move._sequence_matches_date():
+            move_has_name = move.name and move.name != "/"
+            if move_has_name or move.state != "posted":
+                if move_has_name and move.posted_before or move.state != "posted" and move._get_last_sequence():
+                    # The move either
+                    # - has a name and was posted before, or
+                    # - doesn't have a name, but is not the first in the period
+                    # so we don't recompute the name
+                    continue
+                elif move_has_name and not move.posted_before and not move._sequence_matches_date():
                     if move._get_last_sequence():
                         # The name does not match the date and the move is not the first in the period:
                         # Reset to draft
                         move.name = False
                         continue
-                else:
-                    if move_has_name and move.posted_before or not move_has_name and move._get_last_sequence():
-                        # The move either
-                        # - has a name and was posted before, or
-                        # - doesn't have a name, but is not the first in the period
-                        # so we don't recompute the name
-                        continue
-            if move.date and (not move_has_name or not move._sequence_matches_date()):
+            if move.date and (not move_has_name or move._get_last_sequence()) and move.state == "posted":
                 move._set_next_sequence()
 
-        self.filtered(lambda m: not m.name and not move.quick_edit_mode).name = '/'
         self._inverse_name()
 
+    @api.depends('journal_id', 'sequence_number', 'sequence_prefix')
+    def _compute_name_placeholder_form(self):
+        self.name_placeholder_form = False
+        for record in self.filtered(lambda move: not move.name or not move.posted_before):
+            if not (record._get_last_sequence() or record.state != "draft"):
+                sequence_format_string, sequence_format_values = self._get_sequence_format_param(self._get_starting_sequence())
+                sequence_format_values['seq'] = sequence_format_values['seq'] + 1
+                record.name_placeholder_form = sequence_format_string.format(**sequence_format_values)
 
     @api.depends('journal_id', 'date')
     def _compute_highest_name(self):
@@ -2279,7 +2286,7 @@ class AccountMove(models.Model):
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
         if not self.quick_edit_mode:
-            self.name = '/'
+            self.name = False
             self._compute_name()
 
     @api.onchange('invoice_cash_rounding_id')
