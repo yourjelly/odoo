@@ -323,6 +323,22 @@ class MailGatewayCommon(TestMailCommon):
         # Set a first message on public group to test update and hierarchy
         cls.fake_email = cls._create_gateway_message(cls.test_record, '123456')
 
+    def _auto_reply(self, force_to=False, force_rp=False):
+        """ Tool to automatically reply to last outgoing mail.
+
+        :param str forward: simulate a forwarding (which forces the To)
+        """
+        self.assertEqual(len(self._mails), 1)
+        mail = self._mails[0]
+        with self.mock_mail_gateway():
+            self.format_and_process(
+                MAIL_TEMPLATE,
+                mail['email_to'][0], force_to or mail['email_from'],
+                subject=f'Re: {mail["subject"]}',
+                return_path=force_rp or mail['email_to'][0],
+                debug_log=True,
+            )
+
     @classmethod
     def _create_gateway_message(cls, record, msg_id_prefix, **values):
         msg_values = {
@@ -1944,6 +1960,39 @@ class TestMailGatewayLoops(MailGatewayCommon):
 
         records = self.env['mail.test.gateway'].search([('name', 'ilike', 'Whitelist test alias loop %')])
         self.assertEqual(len(records), 10, msg='Email whitelisted should not have the restriction')
+
+    def test_routing_loop_forward_catchall(self):
+        """ Use case: broad email forward to catchall. Example: customer sends an
+        email to catchall. It bounces: to=customer, return-path=bounce. Autoreply
+        replies to bounce: to=bounce. It is forwarded to catchall. It bounces,
+        and hop we have a loop. """
+        customer_email = "customer@test.example.com"
+
+        with self.mock_mail_gateway():
+            self.format_and_process(
+                MAIL_TEMPLATE,
+                f'"Annoying Customer" <{customer_email}>',
+                f'"No Reply" <{self.alias_catchall}@{self.alias_domain}>, Unroutable <unroutable@{self.alias_domain}>',
+                subject=f'Should Bounce (initial)',
+                return_path=customer_email,
+            )
+        self.assertSentEmail(
+            f'"MAILER-DAEMON" <{self.alias_bounce}@{self.alias_domain}>',
+            [customer_email],
+            subject=f'Re: Should Bounce (initial)')
+        original_mail = self._mails
+
+        # auto-reply: write to bounce = no more bounce
+        self._auto_reply()
+        self.assertNotSentEmail()
+
+        # auto-reply but forwarded to catchall
+        self._mails = original_mail  # just to revert state prior to auto reply
+        self._auto_reply(force_to=f'{self.alias_catchall}@{self.alias_domain}')
+        self.assertSentEmail(
+            f'"MAILER-DAEMON" <{self.alias_bounce}@{self.alias_domain}>',
+            ['prout'],
+            subject=f'Re: Should Bounce (initial)')
 
 
 @tagged('mail_gateway', 'mail_thread')

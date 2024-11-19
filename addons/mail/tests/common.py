@@ -4,6 +4,7 @@
 import base64
 import email
 import email.policy
+import logging
 import time
 
 from collections import defaultdict
@@ -21,6 +22,8 @@ from odoo.addons.mail.models.mail_notification import MailNotification
 from odoo.tests import common, new_test_user
 from odoo.tools import email_normalize, formataddr, mute_logger, pycompat
 from odoo.tools.translate import code_translations
+
+_logger = logging.getLogger(__name__)
 
 mail_new_test_user = partial(new_test_user, context={'mail_create_nolog': True,
                                                      'mail_create_nosubscribe': True,
@@ -138,6 +141,13 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
         if not msg_id:
             msg_id = "<%.7f-test@iron.sky>" % (time.time())
 
+        if kwargs.pop('debug_log', False):
+            _logger.info(
+                '-- Simulate routing --\n-From: %s (Return-Path %s)\n-To: %s / CC: %s\n-Message-Id: %s / In-Reply-To: %s / References: %s',
+                email_from, return_path, to, cc, msg_id,
+                kwargs.get('extra', {}).get('In-Reply-To'),
+                kwargs.get('extra', {}).get('References'),
+            )
         mail = self.format(template, to=to, subject=subject, cc=cc,
                            return_path=return_path, extra=extra,
                            email_from=email_from, msg_id=msg_id,
