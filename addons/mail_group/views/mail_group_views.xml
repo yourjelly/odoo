@@ -126,9 +126,12 @@
                     <notebook>
                         <page name="privacy" string="Privacy">
                             <group>
-                                <field name="access_mode" widget="radio"/>
-                                <field name="access_group_id" invisible="access_mode != 'groups'" required="access_mode == 'groups'"/>
-                                <field name="alias_contact" invisible="1"/>
+                                <group>
+                                    <field name="access_mode" widget="radio"/>
+                                    <field name="access_group_id" invisible="access_mode != 'groups'"
+                                           required="access_mode == 'groups'"/>
+                                    <field name="alias_contact" invisible="1"/>
+                                </group>
                             </group>
                         </page>
                         <page name="moderation" string="Notify Members" invisible="not moderation">
