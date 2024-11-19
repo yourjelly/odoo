@@ -3,7 +3,7 @@
     'name': 'Denmark - Accounting',
     'icon': '/account/static/description/l10n.png',
     'countries': ['dk'],
-    'version': '1.2',
+    'version': '1.3',
     'author': 'Odoo House ApS, VK DATA ApS, FlexERP ApS',
     'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations.html',
     'category': 'Accounting/Localizations/Account Charts',
@@ -97,6 +97,7 @@ Produkt setup:
     'data': [
         'data/account_tax_report_data.xml',
         'data/account.account.tag.csv',
+        'views/account_journal_views.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
