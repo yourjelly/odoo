@@ -365,7 +365,7 @@ const LinkTools = Link.extend({
             // $editable, should be reviewed with OWL later anyway.
             editable: this.options.wysiwyg.odooEditor.editable,
             $editable: $(this.options.wysiwyg.odooEditor.editable),
-            withGradients: cssProperty === 'background-color',
+            withGradients: cssProperty === 'background-color' || cssProperty === 'color',
         });
         this.colorpickers[cssProperty] = colorpicker;
         this.colorpickersPromises[cssProperty] = colorpicker.appendTo(document.createDocumentFragment());
