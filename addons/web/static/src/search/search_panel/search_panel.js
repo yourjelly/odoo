@@ -60,7 +60,7 @@ export class SearchPanel extends Component {
             active: {},
             expanded: {},
             showMobileSearch: false,
-            sidebarExpanded: !this.env.searchModel.searchPanelInfo.fold,
+            sidebarExpanded: this.sections.length === 0 ? this.env.searchModel.searchPanelInfo.fold : !this.env.searchModel.searchPanelInfo.fold,
         });
         this.hasImportedState = false;
         this.root = useRef("root");
