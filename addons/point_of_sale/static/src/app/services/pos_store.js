@@ -1439,7 +1439,9 @@ export class PosStore extends Reactive {
             { webPrintFallback: true }
         );
         const nbrPrint = order.nb_print;
-        await this.data.write("pos.order", [order.id], { nb_print: nbrPrint + 1 });
+        if (typeof order.id === "number") {
+            await this.data.write("pos.order", [order.id], { nb_print: nbrPrint + 1 });
+        }
         return true;
     }
     getOrderChanges(skipped = false, order = this.get_order()) {
