@@ -4201,7 +4201,9 @@ class TestMrpOrder(TestMrpCommon):
     def test_update_qty_producing_done_MO_with_lot(self):
         """
         Test that increasing the qty producing of a done MO for a product tracked by lot
-        will create an additional sml for the final product with the same producing lot
+        will create an additional sml for the final product with the same producing lot.
+        And test that removing products from stock, then increasing the qty producing of the MO
+        results in the correct qty of tracked products in stock.
         """
         tracked_product = self.env['product.template'].create({
             'name': 'Super Product',
@@ -4214,7 +4216,7 @@ class TestMrpOrder(TestMrpCommon):
         })
         mo = self.env['mrp.production'].create({
             'product_id': tracked_product.product_variant_ids.id,
-            'product_uom_qty': 2.0,
+            'product_uom_qty': 5.0,
         })
         mo.action_generate_serial()
         producing_lot = mo.lot_producing_id
@@ -4222,9 +4224,17 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(mo.state, 'done')
         self.assertEqual(mo.move_finished_ids.lot_ids, producing_lot)
         self.assertEqual(mo.move_finished_ids.move_line_ids.mapped('lot_id'), producing_lot)
-        mo.qty_producing = 3.0
+        mo.qty_producing = 10.0
         self.assertTrue(all(sml.lot_id == producing_lot for sml in mo.move_finished_ids.move_line_ids))
-        self.assertEqual(sum(sml.quantity for sml in mo.move_finished_ids.move_line_ids), 3.0)
+        self.assertEqual(sum(sml.quantity for sml in mo.move_finished_ids.move_line_ids), 10.0)
+
+        # Simulate a sales order of 3 items, then update the qty producing
+        # from 10 to 15. There should be 15 - 3 = 12 tracked products in stock.
+        stock_location = self.env.ref('stock.stock_location_stock')
+        self.env['stock.quant']._update_available_quantity(tracked_product.product_variant_ids, stock_location, -3, lot_id=producing_lot)
+        mo.qty_producing = 15.0
+        with_lot = self.env['stock.quant']._get_available_quantity(tracked_product.product_variant_ids, stock_location, lot_id=producing_lot, strict=True, allow_negative=True)
+        self.assertEqual(with_lot, 12)
 
     def test_mrp_link_new_operations(self):
         """
