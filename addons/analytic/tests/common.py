@@ -44,6 +44,4 @@ class AnalyticCommon(BaseCommon):
 
     @classmethod
     def _enable_analytic_accounting(cls):
-        cls.env.ref('base.group_user').sudo().write({'implied_ids': [
-            (4, cls.env.ref('analytic.group_analytic_accounting').id),
-        ]})
+        cls.env.ref('base.group_user').sudo().implied_ids = cls.env.ref('analytic.group_analytic_accounting')
