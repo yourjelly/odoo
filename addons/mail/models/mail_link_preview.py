@@ -41,7 +41,7 @@ class MailLinkPreview(models.Model):
         requests_session = requests.Session()
         link_preview_values = []
         link_previews_by_url = {
-            preview.source_url: preview for preview in message.sudo().link_preview_ids
+            preview.source_url: preview for preview in message.sudo().link_preview_message_ids.link_preview_id
         }
         ignore_pattern = (
             re.compile(f"{re.escape(request_url)}(odoo|web|chat)(/|$|#|\\?)") if request_url else None
@@ -79,7 +79,7 @@ class MailLinkPreview(models.Model):
             link_previews += new_link_preview
         if link_previews := link_previews.sorted(key=lambda p: list(urls).index(p.source_url)):
             message._bus_send_store(message, {
-                "link_preview_ids": Store.many(message.link_preview_ids),
+                "link_preview_ids": Store.many(message.link_preview_message_ids.link_preview_id),
                 "link_preview_message_ids": Store.many(message.link_preview_message_ids)
             })
 
