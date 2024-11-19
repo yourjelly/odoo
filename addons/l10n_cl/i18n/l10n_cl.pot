@@ -97,6 +97,16 @@ msgid "<strong>Due Date:</strong>"
 msgstr ""
 
 #. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.tax_totals_widget
+msgid "<strong>Exempt Amount</strong>"
+msgstr ""
+
+#. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.tax_totals_widget
+msgid "<strong>Net Amount</strong>"
+msgstr ""
+
+#. module: l10n_cl
 #: model:l10n_latam.document.type,report_name:l10n_cl.dc_awb
 msgid "AWB"
 msgstr ""
@@ -1387,6 +1397,11 @@ msgstr ""
 msgid ""
 "The DIN document is intended to be used only with RUT 60805000-0 (Tesorería "
 "General de La República)"
+msgstr ""
+
+#. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.report_invoice_document
+msgid "The VAT tax of this boleta is:"
 msgstr ""
 
 #. module: l10n_cl

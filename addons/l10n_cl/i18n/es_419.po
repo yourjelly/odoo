@@ -109,6 +109,16 @@ msgid "<strong>Due Date:</strong>"
 msgstr "<strong>Fecha de vencimiento:</strong>"
 
 #. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.tax_totals_widget
+msgid "<strong>Exempt Amount</strong>"
+msgstr "<strong>Total sin Impuestos</strong>"
+
+#. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.tax_totals_widget
+msgid "<strong>Net Amount</strong>"
+msgstr "<strong>Total Neto</strong>"
+
+#. module: l10n_cl
 #: model:l10n_latam.document.type,report_name:l10n_cl.dc_awb
 msgid "AWB"
 msgstr ""
@@ -1416,6 +1426,11 @@ msgid ""
 msgstr ""
 "El documento “declaración de ingreso” (DIN) debe ser usado solamente para "
 "“Tesorería General de La República” (RUT 60805000-0)"
+
+#. module: l10n_cl
+#: model_terms:ir.ui.view,arch_db:l10n_cl.report_invoice_document
+msgid "The VAT tax of this boleta is:"
+msgstr "El IVA de esta boleta es:"
 
 #. module: l10n_cl
 #. odoo-python
