@@ -44,13 +44,12 @@ let pointsForProgramsCountedRules = {};
  * @returns {number} number of free items
  */
 function computeFreeQuantity(numberItems, n, m) {
-    const factor = Math.trunc(numberItems / (n + m));
+    const factor = Math.trunc(numberItems / (n ));
     const free = factor * m;
-    const charged = numberItems - free;
     // adjust the calculated free quantities
     const x = (factor + 1) * n;
     const y = x + (factor + 1) * m;
-    const adjustment = x <= charged && charged < y ? charged - x : 0;
+    const adjustment = x <= numberItems && numberItems < y ? numberItems - x : 0;
     return Math.floor(free + adjustment);
 }
 
@@ -1144,7 +1143,7 @@ patch(PosOrder.prototype, {
             return [
                 {
                     product_id: discountProduct,
-                    price_unit: new_price,
+                    price_unit: new_price, //tmam
                     qty: 1,
                     reward_id: reward,
                     is_reward_line: true,
@@ -1263,7 +1262,7 @@ patch(PosOrder.prototype, {
      */
     _computeUnclaimedFreeProductQty(reward, coupon_id, product, remainingPoints) {
         let claimed = 0;
-        let available = 0;
+        let available = 1;
         let shouldCorrectRemainingPoints = false;
         for (const line of this.get_orderlines()) {
             if (
@@ -1414,10 +1413,7 @@ patch(PosOrder.prototype, {
         return [
             {
                 product_id: reward.discount_line_product_id,
-                price_unit: -roundDecimals(
-                    product.get_price(this.pricelist_id, freeQuantity, 0, false, product),
-                    this.currency.decimal_places
-                ),
+                price_unit: 0,
                 tax_ids: product.taxes_id,
                 qty: freeQuantity,
                 reward_id: reward,
