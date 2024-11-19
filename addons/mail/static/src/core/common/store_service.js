@@ -535,7 +535,6 @@ export class Store extends BaseStore {
         if (recipientEmails.length) {
             Object.assign(params, {
                 partner_emails: recipientEmails,
-                partner_additional_values: recipientAdditionalValues,
             });
         }
         return params;
