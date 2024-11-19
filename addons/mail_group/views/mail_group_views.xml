@@ -49,7 +49,6 @@
                         class="btn btn-primary" name="action_join" string="Join"/>
                     <button type="object" invisible="not is_member"
                         class="btn btn-secondary" name="action_leave" string="Leave"/>
-                    <button name="action_send_guidelines" type="object" class="btn btn-secondary" string="Send Guidelines"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box" groups="base.group_user" invisible="not can_manage_group">
