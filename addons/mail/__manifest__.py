@@ -229,6 +229,8 @@ For more specific needs, you may also assign custom-defined actions
             'bus/static/src/workers/websocket_worker.js',
             'bus/static/src/workers/websocket_worker_utils.js',
 
+            'html_editor/static/src/**/*',
+
             'mail/static/src/model/**/*',
             'mail/static/src/core/common/**/*',
             'mail/static/src/core/public_web/**/*',
