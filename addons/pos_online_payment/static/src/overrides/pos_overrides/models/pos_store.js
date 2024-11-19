@@ -16,7 +16,7 @@ patch(PosStore.prototype, {
         });
     },
     async update_online_payments_data_with_server(order, next_online_payment_amount) {
-        if (!order.id) {
+        if (typeof order.id !== "number" || !order.id) {
             return false;
         }
         try {
