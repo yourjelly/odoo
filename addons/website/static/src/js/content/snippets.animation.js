@@ -319,8 +319,8 @@ var AnimationEffect = Class.extend(publicWidget.ParentedMixin, {
         // the "play" method again.
         var animationState = this._getStateCallback(elapsedTime, this._newEvent);
         if (!this._newEvent
-         && animationState !== undefined
-         && JSON.stringify(animationState) === JSON.stringify(this._animationLastState)) {
+            && animationState !== undefined
+            && JSON.stringify(animationState) === JSON.stringify(this._animationLastState)) {
             return;
         }
         this._animationLastState = animationState;
@@ -474,13 +474,13 @@ registry.slider = publicWidget.Widget.extend({
         $(window).on('resize.slider', debounce(() => this._computeHeights(), 250));
 
         // Initialize carousel and pause if in edit mode.
-        const options = this.editableMode ? {ride: false, pause: true} : undefined;
+        const options = this.editableMode ? { ride: false, pause: true } : undefined;
         window.Carousel.getOrCreateInstance(this.el, options);
 
         // Only for carousels having the `Carousel` and `CarouselItem` options
         // (i.e. matching the `section > .carousel` selector).
         if (this.editableMode && this.el.matches("section > .carousel")
-                && !this.options.wysiwyg.options.enableTranslation) {
+            && !this.options.wysiwyg.options.enableTranslation) {
             this.controlEls = this.el.querySelectorAll(".carousel-control-prev, .carousel-control-next");
             const indicatorEls = this.el.querySelectorAll(".carousel-indicators > *");
             // Deactivate the carousel controls to handle the slides manually in
@@ -518,7 +518,7 @@ registry.slider = publicWidget.Widget.extend({
         this.$('img').off('.slider');
 
         if (this.editableMode && this.el.matches("section > .carousel")
-                && !this.options.wysiwyg.options.enableTranslation) {
+            && !this.options.wysiwyg.options.enableTranslation) {
             // Restore the carousel controls.
             const indicatorEls = this.el.querySelectorAll(".carousel-indicators > *");
             this.options.wysiwyg.odooEditor.observerUnactive("restore_controls");
@@ -592,7 +592,7 @@ async function waitForCarouselToFinishSliding(carouselEl) {
         return;
     }
     return new Promise(resolve => {
-        carouselEl.addEventListener("slid.bs.carousel", () => resolve(), {once: true});
+        carouselEl.addEventListener("slid.bs.carousel", () => resolve(), { once: true });
     });
 }
 
@@ -636,7 +636,7 @@ publicWidget.registry.CarouselBootstrapUpgradeFix = publicWidget.Widget.extend({
             // we remove the bsRide.
             delete this.el.dataset.bsRide;
             await this._destroyCarouselInstance();
-            const options = this.editableMode ? {ride: false, pause: true} : undefined;
+            const options = this.editableMode ? { ride: false, pause: true } : undefined;
             window.Carousel.getOrCreateInstance(this.el, options);
         } else if (hasInterval && !this.el.dataset.bsRide) {
             // Re-add bsRide on carousels that don't have it but still have
@@ -650,7 +650,7 @@ publicWidget.registry.CarouselBootstrapUpgradeFix = publicWidget.Widget.extend({
             const snippetName = this.el.closest("[data-snippet]").dataset.snippet;
             this.el.dataset.bsRide = this.OLD_AUTO_SLIDING_SNIPPETS.includes(snippetName) ? "carousel" : "true";
             await this._destroyCarouselInstance();
-            const options = this.editableMode ? {ride: false, pause: true} : undefined;
+            const options = this.editableMode ? { ride: false, pause: true } : undefined;
             window.Carousel.getOrCreateInstance(this.el, options);
         }
     },
@@ -684,138 +684,6 @@ publicWidget.registry.CarouselBootstrapUpgradeFix = publicWidget.Widget.extend({
      */
     _onSlidCarousel(ev) {
         ev.currentTarget.classList.remove(CAROUSEL_SLIDING_CLASS);
-    },
-});
-
-registry.Parallax = Animation.extend({
-    selector: '.parallax',
-    disabledInEditableMode: false,
-    effects: [{
-        startEvents: 'scroll',
-        update: '_onWindowScroll',
-        enableInModal: true,
-    }],
-
-    /**
-     * @override
-     */
-    start: function () {
-        this._rebuild();
-        $(window).on('resize.animation_parallax', debounce(this._rebuild.bind(this), 500));
-        this.modalEl = this.$target[0].closest('.modal');
-        if (this.modalEl) {
-            $(this.modalEl).on('shown.bs.modal.animation_parallax', () => {
-                this._rebuild();
-                this.modalEl.dispatchEvent(new Event('scroll'));
-            });
-        }
-        return this._super.apply(this, arguments);
-    },
-    /**
-     * @override
-     */
-    destroy: function () {
-        this._super.apply(this, arguments);
-        this._updateBgCss({
-            transform: '',
-            top: '',
-            bottom: '',
-        });
-
-        $(window).off('.animation_parallax');
-        if (this.modalEl) {
-            $(this.modalEl).off('.animation_parallax');
-        }
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * Prepares the background element which will scroll at a different speed
-     * according to the viewport dimensions and other snippet parameters.
-     *
-     * @private
-     */
-    _rebuild: function () {
-        // Add/find bg DOM element to hold the parallax bg (support old v10.0 parallax)
-        this.$bg = this.$('> .s_parallax_bg');
-
-        // Get parallax speed
-        this.speed = parseFloat(this.$el.attr('data-scroll-background-ratio') || 0);
-
-        // Reset offset if parallax effect will not be performed and leave
-        var noParallaxSpeed = (this.speed === 0 || this.speed === 1);
-        if (noParallaxSpeed) {
-            return;
-        }
-
-        // Initialize parallax data according to snippet and viewport dimensions
-        this.viewport = document.body.clientHeight - $('#wrapwrap').position().top;
-        this.visibleArea = [this.$el.offset().top];
-        this.visibleArea.push(this.visibleArea[0] + this.$el.innerHeight() + this.viewport);
-        this.ratio = this.speed * (this.viewport / 10);
-
-        // Provide a "safe-area" to limit parallax
-        const absoluteRatio = Math.abs(this.ratio);
-        this._updateBgCss({
-            top: -absoluteRatio,
-            bottom: -absoluteRatio,
-        });
-    },
-    /**
-     * Updates the parallax background element style with the provided CSS
-     * values.
-     * If the editor is enabled, it deactivates the observer during the CSS
-     * update.
-     *
-     * @param {Object} cssValues - The CSS values to apply to the background.
-     */
-    _updateBgCss(cssValues) {
-        if (!this.$bg) {
-            // Safety net in case the `destroy` is called before the `start` is
-            // executed.
-            return;
-        }
-        if (this.options.wysiwyg) {
-            this.options.wysiwyg.odooEditor.observerUnactive('_updateBgCss');
-        }
-        this.$bg.css(cssValues);
-        if (this.options.wysiwyg) {
-            this.options.wysiwyg.odooEditor.observerActive('_updateBgCss');
-        }
-    },
-
-    //--------------------------------------------------------------------------
-    // Effects
-    //--------------------------------------------------------------------------
-
-    /**
-     * Describes how to update the snippet when the window scrolls.
-     *
-     * @private
-     * @param {integer} scrollOffset
-     */
-    _onWindowScroll: function (scrollOffset) {
-        // Speed == 0 is no effect and speed == 1 is handled by CSS only
-        if (this.speed === 0 || this.speed === 1) {
-            return;
-        }
-
-        // Perform translation if the element is visible only
-        var vpEndOffset = scrollOffset + this.viewport;
-        if (vpEndOffset >= this.visibleArea[0]
-         && vpEndOffset <= this.visibleArea[1]) {
-            this._updateBgCss({'transform': 'translateY(' + _getNormalizedPosition.call(this, vpEndOffset) + 'px)'});
-        }
-
-        function _getNormalizedPosition(pos) {
-            // Normalize scroll in a 1 to 0 range
-            var r = (pos - this.visibleArea[1]) / (this.visibleArea[0] - this.visibleArea[1]);
-            // Normalize accordingly to current options
-            return Math.round(this.ratio * (2 * r - 1));
-        }
     },
 });
 
@@ -1370,7 +1238,7 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
         // for events that otherwise don’t support it. (e.g. useful when
         // scrolling a modal)
         this.__onScrollWebsiteAnimate = throttleForAnimation(this._onScrollWebsiteAnimate.bind(this));
-        this.$scrollingTarget[0].addEventListener('scroll', this.__onScrollWebsiteAnimate, {capture: true});
+        this.$scrollingTarget[0].addEventListener('scroll', this.__onScrollWebsiteAnimate, { capture: true });
 
         $(window).on('resize.o_animate, shown.bs.modal.o_animate, slid.bs.carousel.o_animate, shown.bs.tab.o_animate, shown.bs.collapse.o_animate', () => {
             this.windowsHeight = $(window).height();
@@ -1393,7 +1261,7 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
             });
         $(window).off('.o_animate');
         this.__onScrollWebsiteAnimate.cancel();
-        this.$scrollingTarget[0].removeEventListener('scroll', this.__onScrollWebsiteAnimate, {capture: true});
+        this.$scrollingTarget[0].removeEventListener('scroll', this.__onScrollWebsiteAnimate, { capture: true });
         this.$scrollingElement[0].classList.remove('o_wanim_overflow_xy_hidden');
     },
 
@@ -1412,13 +1280,13 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
         setTimeout(() => {
             this._toggleOverflowXYHidden(true);
             $el
-            .css({"animation-play-state": "running"})
-            .addClass("o_animating")
-            .one('webkitAnimationEnd oanimationend msAnimationEnd animationend', () => {
-                $el.addClass("o_animated").removeClass("o_animating");
-                this._toggleOverflowXYHidden(false);
-                $(window).trigger("resize");
-            });
+                .css({ "animation-play-state": "running" })
+                .addClass("o_animating")
+                .one('webkitAnimationEnd oanimationend msAnimationEnd animationend', () => {
+                    $el.addClass("o_animated").removeClass("o_animating");
+                    this._toggleOverflowXYHidden(false);
+                    $(window).trigger("resize");
+                });
         });
     },
     /**
@@ -1427,13 +1295,13 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
      */
     _resetAnimation($el) {
         const animationName = $el.css("animation-name");
-        $el.css({"animation-name": "dummy-none", "animation-play-state": ""})
-           .removeClass("o_animated o_animating");
+        $el.css({ "animation-name": "dummy-none", "animation-play-state": "" })
+            .removeClass("o_animated o_animating");
 
         this._toggleOverflowXYHidden(false);
         // trigger a DOM reflow
         void $el[0].offsetWidth;
-        $el.css({'animation-name': animationName , 'animation-play-state': 'paused'});
+        $el.css({ 'animation-name': animationName, 'animation-play-state': 'paused' });
     },
     /**
      * Shows/hides the horizontal scrollbar and prevents flicker of the page
