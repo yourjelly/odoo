@@ -29,7 +29,40 @@ class AccountChartTemplate(models.AbstractModel):
             'mail.activity': self._get_demo_data_mail_activity(company),
             'res.partner.bank': self._get_demo_data_bank(company),
             'account.journal': self._get_demo_data_journal(company),
+            'product.template': self._get_demo_data_products(company),
         }
+
+    def _get_demo_products_xml_ids(self):
+        """ Return demo products to put taxes on"""
+        return [
+            "product.expense_product_product_template", "product.expense_hotel_product_template",
+            "product.product_product_1_product_template", "product.product_product_2_product_template",
+            "product.product_delivery_01_product_template", "product.product_delivery_02_product_template",
+            "product.product_order_01_product_template", "product.product_product_3_product_template",
+            "product.product_product_4_product_template", "product.product_product_5_product_template",
+            "product.product_product_6_product_template", "product.product_product_7_product_template",
+            "product.product_product_8_product_template", "product.product_product_9_product_template",
+            "product.product_product_10_product_template", "product.product_product_11_product_template",
+            "product.product_product_12_product_template", "product.product_product_13_product_template",
+            "product.product_product_16_product_template", "product.product_product_20_product_template",
+            "product.product_product_22_product_template", "product.product_product_24_product_template",
+            "product.product_template_acoustic_bloc_screens", "product.product_product_27_product_template",
+            "product.consu_delivery_03_product_template", "product.consu_delivery_02_product_template",
+            "product.consu_delivery_01_product_template", "product.product_product_local_delivery_product_template",
+            "product.product_product_furniture_product_template", "product.product_template_dining_table",
+            "product.desk_organizer_product_template", "product.desk_pad_product_template",
+            "product.monitor_stand_product_template", "product.office_combo_product_template"
+        ]
+
+    def _get_demo_data_products(self, company):
+        taxes = {}
+        if company.account_sale_tax_id:
+            taxes.update({'taxes_id': [Command.link(company.account_sale_tax_id.id)]})
+        if company.account_purchase_tax_id:
+            taxes.update({'supplier_taxes_id': [Command.link(company.account_purchase_tax_id.id)]})
+        if not taxes:
+            return {}
+        return {d: taxes for d in self._get_demo_products_xml_ids()}
 
     def _post_load_demo_data(self, company=False):
         invoices = (
