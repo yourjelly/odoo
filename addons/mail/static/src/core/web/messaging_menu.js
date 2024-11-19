@@ -44,11 +44,11 @@ export class MessagingMenu extends Component {
     }
 
     onClickThread(isMarkAsRead, thread) {
+        this.markAsRead(thread);
         if (!isMarkAsRead) {
             this.openDiscussion(thread);
             return;
         }
-        this.markAsRead(thread);
     }
 
     markAsRead(thread) {
