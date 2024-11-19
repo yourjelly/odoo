@@ -6,16 +6,16 @@ import {
 } from "../../core/helpers";
 import { pointerDown, hover } from "@odoo/hoot-dom";
 
-setupInteractionWhiteList("website.mega_menu_dropdown");
+setupInteractionWhiteList("website.dropdown_mega_menu");
 
-test("mega_menu_dropdown does nothing if there is no header#top", async () => {
+test("dropdown_mega_menu does nothing if there is no header#top", async () => {
     const { core } = await startInteractions(`
       <div></div>
     `);
     expect(core.interactions.length).toBe(0);
 });
 
-test("mega_menu_dropdown activate when there is a header#top", async () => {
+test("dropdown_mega_menu activate when there is a header#top", async () => {
     const { core } = await startInteractions(`
       <header id="top"></header>
     `);
