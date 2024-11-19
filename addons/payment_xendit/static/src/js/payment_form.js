@@ -121,7 +121,7 @@ paymentForm.include({
                 ...this._xenditGetPaymentDetails(paymentOptionId),
                 // Allow reusing tokens when the users wants to tokenize.
                 is_multiple_use: this.paymentContext.tokenizationRequested,
-                amount: processingValues.converted_amount,
+                amount: processingValues.rounded_amount,
             },
             (err, token) => this._xenditHandleResponse(err, token, processingValues),
         );
@@ -141,10 +141,10 @@ paymentForm.include({
             let err_message = err.message;
 
             // If the error is API_VALIDATION_ERROR: there's an invalid input
-            if(err.error_code == "API_VALIDATION_ERROR"){
+            if (err.error_code === 'API_VALIDATION_ERROR') {
                 let err_obj = err.errors[0]
                 // Issue is with string format for input
-                if(err_obj.type == "string.regex.base"){
+                if (err_obj.type === 'string.regex.base') {
                     err_message = err_obj.message
                 }
             }

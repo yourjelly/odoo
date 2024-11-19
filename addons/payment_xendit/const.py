@@ -7,7 +7,6 @@ SUPPORTED_CURRENCIES = [
 ]
 
 # To correctly allow lowest decimal place rounding
-# that is diverged from ISO4217
 # https://docs.xendit.co/payment-link/payment-channels
 CURRENCY_DECIMALS = {
     'IDR': 0,

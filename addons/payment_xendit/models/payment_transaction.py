@@ -10,6 +10,7 @@ from odoo.exceptions import ValidationError
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_xendit import const
+from odoo.tools import float_round
 
 
 _logger = logging.getLogger(__name__)
@@ -31,12 +32,11 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'xendit':
             return res
 
-        converted_amount = payment_utils.to_minor_currency_units(
-            self.amount, self.currency_id, const.CURRENCY_DECIMALS.get(self.currency_id.name)
-        )
-
+        rounding = const.CURRENCY_DECIMALS.get(self.currency_id.name) if self.currency_id.name in \
+            const.CURRENCY_DECIMALS else self.currency_id.decimal_places
+        rounded_amount = float_round(self.amount, rounding, rounding_method='DOWN')
         return {
-            'converted_amount': converted_amount
+            'rounded_amount': rounded_amount
         }
 
     def _get_specific_rendering_values(self, processing_values):
@@ -130,13 +130,13 @@ class PaymentTransaction(models.Model):
         :param str token_ref: The reference of the Xendit token to use to make the payment.
         :return: None
         """
-        converted_amount = payment_utils.to_minor_currency_units(
-            self.amount, self.currency_id, const.CURRENCY_DECIMALS.get(self.currency_id.name)
-        )
+        rounding = const.CURRENCY_DECIMALS.get(self.currency_id.name) if self.currency_id.name in \
+            const.CURRENCY_DECIMALS else self.currency_id.decimal_places
+        rounded_amount = float_round(self.amount, rounding, rounding_method='DOWN')
         payload = {
             'token_id': token_ref,
             'external_id': self.reference,
-            'amount': converted_amount,
+            'amount': rounded_amount,
             'currency': self.currency_id.name,
         }
         charge_notification_data = self.provider_id._xendit_make_request(
