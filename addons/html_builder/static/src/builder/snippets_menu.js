@@ -41,6 +41,7 @@ export class SnippetsMenu extends Component {
 
     setup() {
         // const actionService = useService("action");
+        this.a = 1;
         this.pages = [blockTab, customizeTab];
         this.state = useState({
             canUndo: false,
