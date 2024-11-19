@@ -698,6 +698,14 @@ class ResUsers(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for values in vals_list:
+            if 'groups_id' in values:
+                # complete 'groups_id' with implied groups
+                user = self.new(values)
+                gs = user.groups_id._origin
+                gs = gs | gs.trans_implied_ids
+                values['groups_id'] = self._fields['groups_id'].convert_to_write(gs, user)
+
         users = super().create(vals_list)
         setting_vals = []
         for user in users:
@@ -745,10 +753,12 @@ class ResUsers(models.Model):
                 self = self.sudo()
 
         old_groups = []
-        if 'groups_id' in values and self._apply_groups_to_existing_employees():
-            # if modify groups_id content, compute the delta of groups to apply
-            # the new ones to other existing users
-            old_groups = self._default_groups()
+        if 'groups_id' in values:
+            users_before = self.filtered(lambda u: u._is_internal())
+            if self._apply_groups_to_existing_employees():
+                # if modify groups_id content, compute the delta of groups to apply
+                # the new ones to other existing users
+                old_groups = self._default_groups()
 
         res = super().write(values)
 
@@ -759,6 +769,27 @@ class ResUsers(models.Model):
             if added_groups:
                 internal_users = self.env.ref('base.group_user').users - self
                 internal_users.write({'groups_id': [Command.link(gid) for gid in added_groups.ids]})
+
+        if 'groups_id' in values:
+            # Do not use `_is_internal` as it relies on the ormcache which is not yet invalidated
+            demoted_users = users_before.filtered(lambda u: self.env.ref("base.group_user") not in u.groups_id)
+            if demoted_users:
+                # demoted users are restricted to the assigned groups only
+                vals = {'groups_id': [Command.clear()] + values['groups_id']}
+                super(ResUsers, demoted_users).write(vals)
+            # add implied groups for all users (in batches)
+            users_batch = defaultdict(self.browse)
+            for user in self:
+                users_batch[user.groups_id] += user
+            # TODO: Check why
+            self.partner_id.invalidate_recordset(fnames=['partner_share'])
+            for groups, users in users_batch.items():
+                gs = set(concat(g.trans_implied_ids for g in groups))
+                vals = {'groups_id': [Command.link(g.id) for g in gs]}
+                super(ResUsers, users).write(vals)
+            # clear caches linked to the users
+            if self.ids:
+                self.env['ir.model.access'].call_cache_clearing_methods()
 
         if 'company_id' in values:
             for user in self:
@@ -774,12 +805,6 @@ class ResUsers(models.Model):
             for env in list(self.env.transaction.envs):
                 if env.user in self:
                     lazy_property.reset_all(env)
-
-        # clear caches linked to the users
-        if self.ids and 'groups_id' in values:
-            # DLE P139: Calling invalidate_cache on a new, well you lost everything as you wont be able to take it back from the cache
-            # `test_00_equipment_multicompany_user`
-            self.env['ir.model.access'].call_cache_clearing_methods()
 
         # per-method / per-model caches have been removed so the various
         # clear_cache/clear_caches methods pretty much just end up calling
@@ -1560,41 +1585,6 @@ class ResGroups(models.Model):  # noqa: F811
         return SetDefinitions(data)
 
 
-class UsersImplied(models.Model):
-    _name = 'res.users'
-    _inherit = ['res.users']
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        for values in vals_list:
-            if 'groups_id' in values:
-                # complete 'groups_id' with implied groups
-                user = self.new(values)
-                gs = user.groups_id._origin
-                gs = gs | gs.trans_implied_ids
-                values['groups_id'] = self._fields['groups_id'].convert_to_write(gs, user)
-        return super().create(vals_list)
-
-    def write(self, values):
-        if not values.get('groups_id'):
-            return super().write(values)
-        users_before = self.filtered(lambda u: u._is_internal())
-        res = super().write(values)
-        demoted_users = users_before.filtered(lambda u: not u._is_internal())
-        if demoted_users:
-            # demoted users are restricted to the assigned groups only
-            vals = {'groups_id': [Command.clear()] + values['groups_id']}
-            super(UsersImplied, demoted_users).write(vals)
-        # add implied groups for all users (in batches)
-        users_batch = defaultdict(self.browse)
-        for user in self:
-            users_batch[user.groups_id] += user
-        for groups, users in users_batch.items():
-            gs = set(concat(g.trans_implied_ids for g in groups))
-            vals = {'groups_id': [Command.link(g.id) for g in gs]}
-            super(UsersImplied, users).write(vals)
-        return res
-
 #
 # Virtual checkbox and selection for res.user form view
 #
@@ -1854,8 +1844,7 @@ class IrModuleCategory(models.Model):
         return res
 
 
-# pylint: disable=E0102
-class ResUsers(models.Model):  # noqa: F811
+class UsersView(models.Model):
     _inherit = 'res.users'
 
     user_group_warning = fields.Text(string="User Group Warning", compute="_compute_user_group_warning")
@@ -2241,8 +2230,7 @@ KEY_CRYPT_CONTEXT = CryptContext(
 )
 
 
-# pylint: disable=E0102
-class ResUsers(models.Model):  # noqa: F811
+class APIKeysUser(models.Model):
     _inherit = 'res.users'
 
     api_key_ids = fields.One2many('res.users.apikeys', 'user_id', string="API Keys")
