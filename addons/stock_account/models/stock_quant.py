@@ -4,8 +4,6 @@ from odoo import api, fields, models, _
 from odoo.tools.float_utils import float_is_zero
 from odoo.tools.misc import groupby
 
-from odoo.addons.stock_account import const
-
 
 class StockQuant(models.Model):
     _inherit = 'stock.quant'
@@ -19,7 +17,11 @@ class StockQuant(models.Model):
              " If empty, the inventory date will be used.")
     cost_method = fields.Selection(
         string="Cost Method",
-        selection=const.COST_METHOD,
+        selection=[
+            ('standard', "Standard Price"),
+            ('fifo', "First In First Out (FIFO)"),
+            ('average', "Average Cost (AVCO)"),
+        ],
         compute='_compute_cost_method',
     )
 

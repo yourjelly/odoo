@@ -32,7 +32,7 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
         cls.product_refrigerator = cls.env['product.product'].create({
             'name': 'Refrigerator',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_consumable').id,
+            'categ_id': cls.env.ref('product.product_category_goods').id,
         })
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.bom_refri = cls.env['mrp.bom'].create({

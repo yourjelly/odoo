@@ -33,7 +33,7 @@ class TestStockValuation(TransactionCase):
             # Ignore tax calculations for these tests.
             'supplier_taxes_id': False,
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_consumable').id,
+            'categ_id': cls.env.ref('product.product_category_goods').id,
         })
         Account = cls.env['account.account']
         cls.stock_input_account = Account.create({

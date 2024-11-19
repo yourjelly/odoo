@@ -62,12 +62,12 @@ class TestStockValuationBase(TransactionCase):
             'name': 'Product A',
             'is_storable': True,
             'default_code': 'prda',
-            'categ_id': cls.env.ref('product.product_category_consumable').id,
+            'categ_id': cls.env.ref('product.product_category_goods').id,
         })
         cls.product2 = cls.env['product.product'].create({
             'name': 'Product B',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_consumable').id,
+            'categ_id': cls.env.ref('product.product_category_goods').id,
         })
         cls.inventory_user = cls.env['res.users'].create({
             'name': 'Pauline Poivraisselle',
@@ -1920,7 +1920,7 @@ class TestStockValuation(TestStockValuationBase):
         product = self.env['product.product'].create({
             'name': 'product1',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_consumable').id,
+            'categ_id': self.env.ref('product.product_category_goods').id,
         })
         product.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self._make_in_move(product, 3, unit_cost=17)
@@ -1932,7 +1932,7 @@ class TestStockValuation(TestStockValuationBase):
         product = self.env['product.product'].create({
             'name': 'product1',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_consumable').id,
+            'categ_id': self.env.ref('product.product_category_goods').id,
         })
         product.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self._make_in_move(product, 5, unit_cost=17)
@@ -1945,7 +1945,7 @@ class TestStockValuation(TestStockValuationBase):
         product = self.env['product.product'].create({
             'name': 'product1',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_consumable').id,
+            'categ_id': self.env.ref('product.product_category_goods').id,
         })
         product.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self._make_in_move(product, 5, unit_cost=17)

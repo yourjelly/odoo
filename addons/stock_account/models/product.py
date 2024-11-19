@@ -8,20 +8,25 @@ from odoo.exceptions import ValidationError
 from collections import defaultdict
 from datetime import datetime
 
-from odoo.addons.stock_account import const
-
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     cost_method = fields.Selection(
         string="Cost Method",
-        selection=const.COST_METHOD,
+        selection=[
+            ('standard', "Standard Price"),
+            ('fifo', "First In First Out (FIFO)"),
+            ('average', "Average Cost (AVCO)"),
+        ],
         compute='_compute_cost_method',
     )
     valuation = fields.Selection(
         string="Valuation",
-        selection=const.VALUATION,
+        selection=[
+            ('manual_periodic', "Manual"),
+            ('real_time', "Automated"),
+        ],
         compute='_compute_valuation',
     )
     lot_valuated = fields.Boolean(
@@ -939,14 +944,21 @@ class ProductCategory(models.Model):
 
     property_valuation = fields.Selection(
         string="Inventory Valuation",
-        selection=const.VALUATION,
+        selection=[
+            ('manual_periodic', "Manual"),
+            ('real_time', "Automated"),
+        ],
         company_dependent=True, copy=True,
         help="""Manual: The accounting entries to value the inventory are not posted automatically.
         Automated: An accounting entry is automatically created to value the inventory when a product enters or leaves the company.
         """)
     property_cost_method = fields.Selection(
         string="Costing Method",
-        selection=const.COST_METHOD,
+        selection=[
+            ('standard', "Standard Price"),
+            ('fifo', "First In First Out (FIFO)"),
+            ('average', "Average Cost (AVCO)"),
+        ],
         company_dependent=True, copy=True,
         default=lambda self: self.env.company.cost_method,
         help="""Standard Price: The products are valued at their standard cost defined on the product.

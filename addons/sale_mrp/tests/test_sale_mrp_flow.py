@@ -580,7 +580,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         self.company = self.company_data['company']
         self.company.anglo_saxon_accounting = True
         self.partner = self.env['res.partner'].create({'name': 'My Test Partner'})
-        self.category = self.env.ref('product.product_category_consumable').copy({
+        self.category = self.env.ref('product.product_category_goods').copy({
             'name': 'Test category',
             'property_valuation': 'real_time',
             'property_cost_method': 'fifo',
@@ -1775,7 +1775,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         self.env.company.currency_id = self.env.ref('base.USD')
         self.env.company.anglo_saxon_accounting = True
         self.partner = self.env['res.partner'].create({'name': 'Test Partner'})
-        self.category = self.env.ref('product.product_category_consumable').copy({
+        self.category = self.env.ref('product.product_category_goods').copy({
             'name': 'Test category',
             'property_valuation': 'real_time',
             'property_cost_method': 'fifo',
@@ -1919,7 +1919,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
 
         # Create environment
         self.partner = self.env['res.partner'].create({'name': 'Test Partner'})
-        self.category = self.env.ref('product.product_category_consumable').copy({
+        self.category = self.env.ref('product.product_category_goods').copy({
             'name': 'Test category',
             'property_valuation': 'real_time',
             'property_cost_method': 'fifo',

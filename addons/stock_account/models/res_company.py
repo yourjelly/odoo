@@ -1,7 +1,5 @@
 from odoo import models, fields
 
-from odoo.addons.stock_account import const
-
 
 class ResCompany(models.Model):
     _inherit = "res.company"
@@ -10,7 +8,11 @@ class ResCompany(models.Model):
     account_production_wip_overhead_account_id = fields.Many2one('account.account', string='Production WIP Overhead Account', check_company=True)
     cost_method = fields.Selection(
         string="Cost Method",
-        selection=const.COST_METHOD,
+        selection=[
+            ('standard', "Standard Price"),
+            ('fifo', "First In First Out (FIFO)"),
+            ('average', "Average Cost (AVCO)"),
+        ],
         default='standard',
         required=True,
     )

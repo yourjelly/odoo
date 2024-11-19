@@ -28,7 +28,7 @@ class PurchaseTestCommon(TestStockCommon):
 
         cls.route_buy = cls.warehouse_1.buy_pull_id.route_id.id
         cls.route_mto = cls.warehouse_1.mto_pull_id.route_id.id
-        cls.categ_id = cls.env.ref('product.product_category_consumable').id
+        cls.categ_id = cls.env.ref('product.product_category_goods').id
 
         # Update product_1 with type, route and Delivery Lead Time
         cls.product_1.write({

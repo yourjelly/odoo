@@ -3,8 +3,8 @@
     <data noupdate="1">
 
         <!-- Categories -->
-        <record id="product_category_consumable" model="product.category">
-            <field name="name">Consumable</field>
+        <record id="product_category_goods" model="product.category">
+            <field name="name">Goods</field>
         </record>
         <record id="product_category_expenses" model="product.category">
             <field name="name">Expenses</field>

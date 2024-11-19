@@ -2584,7 +2584,7 @@ class TestSinglePicking(TestStockCommon):
             'name': "Lovely Product",
             'is_storable': True,
             'tracking': 'lot',
-            'categ_id': self.env.ref('product.product_category_consumable').id,
+            'categ_id': self.env.ref('product.product_category_goods').id,
         })
         # Use the removal strategy by alphabetical order of locations
         closest_strategy = self.env['product.removal'].search([('method', '=', 'closest')])

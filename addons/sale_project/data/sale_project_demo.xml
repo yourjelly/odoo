@@ -113,7 +113,7 @@
 
         <record id="product_product_screw_driver" model="product.product">
             <field name="name">Screw Driver</field>
-            <field name="categ_id" ref="product.product_category_consumable"/>
+            <field name="categ_id" ref="product.product_category_goods"/>
             <field name="standard_price">100.00</field>
             <field name="list_price">150.00</field>
             <field name="type">consu</field>

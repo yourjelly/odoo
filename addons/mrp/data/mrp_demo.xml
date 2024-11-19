@@ -157,7 +157,7 @@
         </record>
         <record id="product_product_computer_desk_bolt" model="product.product">
             <field name="name">Bolt</field>
-            <field name="categ_id" ref="product.product_category_consumable"/>
+            <field name="categ_id" ref="product.product_category_goods"/>
             <field name="standard_price">0.5</field>
             <field name="list_price">0.5</field>
             <field name="type">consu</field>
@@ -170,7 +170,7 @@
         </record>
         <record id="product_product_computer_desk_screw" model="product.product">
             <field name="name">Screw</field>
-            <field name="categ_id" ref="product.product_category_consumable"/>
+            <field name="categ_id" ref="product.product_category_goods"/>
             <field name="standard_price">0.1</field>
             <field name="list_price">0.2</field>
             <field name="type">consu</field>
