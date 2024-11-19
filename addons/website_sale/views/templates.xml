@@ -1908,7 +1908,7 @@
                          t-field="line.product_id.image_128"
                          t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'o_image_64_max rounded'}"/>
                     <div t-else="" class="o_image_64_contain invisible"/>
-                    <div class="flex-grow-1">
+                    <div class="flex-grow-1 text-overflow-ellipsis">
                         <t t-call="website_sale.cart_line_product_link">
                             <h6 t-field="line.name_short" class="d-inline align-top h6 fw-bold"/>
                         </t>
