@@ -4369,6 +4369,11 @@ var SnippetsMenu = Widget.extend({
                 this.trigger_up('request_save', data);
             }, true);
         }, this.$el[0].querySelector('button[data-action=save]'));
+        this.options.wysiwyg.leaveEditMode({
+            onLeave: () => {},
+            forceLeave: true,
+            reloadIframe: false,
+        });
     },
     /**
      * @private
