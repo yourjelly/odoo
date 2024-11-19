@@ -21,6 +21,12 @@ export class Attachment extends FileModelMixin(Record) {
     static insert(data) {
         return super.insert(...arguments);
     }
+    static _insert() {
+        /** @type {import("models").Attachment} */
+        const attachment = super._insert(...arguments);
+        attachment.message ??= attachment.message_ids?.[0];
+        return attachment;
+    }
     static new() {
         /** @type {import("models").Attachment} */
         const attachment = super.new(...arguments);

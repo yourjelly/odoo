@@ -69,6 +69,7 @@ class TestCloudStorageAttachmentController(
                                     ),
                                     "filename": "__init__.py",
                                     "id": attachment.id,
+                                    "message": False,
                                     "mimetype": "text/x-python",
                                     "name": "__init__.py",
                                     "res_name": False,
