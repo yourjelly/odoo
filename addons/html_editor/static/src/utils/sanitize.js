@@ -57,3 +57,26 @@ export function initElementForEdition(element, options = {}) {
         element.replaceChildren(...newChildren);
     }
 }
+
+export function fixContentForEditor(content) {
+    content = content.trim().replace(/<br>/g, "<br/>");
+    content = "<div>" + content + "</div>";
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(content, "application/xml");
+
+    // Find all <a> elements
+    const aElements = xmlDoc.getElementsByTagName("a");
+
+    // Process each <a> element
+    for (const a of aElements) {
+        // Add empty text nodes to force the xml to render it as non
+        // self-closing tag
+        if (!a.hasChildNodes()) {
+            a.appendChild(xmlDoc.createTextNode(""));
+        }
+    }
+
+    const serializer = new XMLSerializer();
+    const updatedString = serializer.serializeToString(xmlDoc).replace(/<br\/>/g, "<br>");
+    return updatedString.slice(5, -6);
+}

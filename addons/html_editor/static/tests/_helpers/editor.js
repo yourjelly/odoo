@@ -6,6 +6,7 @@ import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { getContent, getSelection, setContent } from "./selection";
 import { animationFrame } from "@odoo/hoot-mock";
 import { dispatchCleanForSave } from "./dispatch";
+import { fixContentForEditor } from "@html_editor/utils/sanitize";
 
 export const Direction = {
     BACKWARD: "BACKWARD",
@@ -23,7 +24,7 @@ class TestEditor extends Component {
 
     setup() {
         const props = this.props;
-        const content = props.content;
+        const content = fixContentForEditor(props.content);
         this.wysiwygProps = Object.assign({}, this.props.wysiwygProps);
         const iframe = this.props.wysiwygProps.iframe;
         const oldOnLoad = this.wysiwygProps.onLoad;

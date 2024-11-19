@@ -143,7 +143,7 @@ test("Can change an emoji banner", async () => {
 });
 
 test("add banner inside empty list", async () => {
-    const { el, editor } = await setupEditor("<ul><li>[]<br></li></ul>");
+    const { el, editor } = await setupEditor("<ul><li>[]<br/></li></ul>");
     await insertText(editor, "/bannerinfo");
     await press("enter");
     expect(getContent(el)).toBe(
