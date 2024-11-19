@@ -167,10 +167,10 @@ class Meeting(models.Model):
     allday = fields.Boolean('All Day', default=False)
     start_date = fields.Date(
         'Start Date', store=True, tracking=True,
-        compute='_compute_dates', inverse='_inverse_dates')
+        compute='_compute_dates', inverse='_inverse_dates', copy=True)
     stop_date = fields.Date(
         'End Date', store=True, tracking=True,
-        compute='_compute_dates', inverse='_inverse_dates')
+        compute='_compute_dates', inverse='_inverse_dates', copy=True)
     duration = fields.Float('Duration', compute='_compute_duration', store=True, readonly=False)
     # linked document
     res_id = fields.Many2oneReference('Document ID', model_field='res_model')
@@ -411,6 +411,10 @@ class Meeting(models.Model):
                     'start': startdate.replace(tzinfo=None),
                     'stop': enddate.replace(tzinfo=None)
                 })
+
+    # def copy_data(self, default=None):
+    #     vals_list = super().copy_data(default=default)
+    #     return [dict(vals, start_date= event.start_date, stop_date=event.stop_date) for event, vals in zip(self, vals_list)]
 
     @api.constrains('start', 'stop', 'start_date', 'stop_date')
     def _check_closing_date(self):
