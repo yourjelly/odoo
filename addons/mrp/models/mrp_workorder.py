@@ -399,6 +399,8 @@ class MrpWorkorder(models.Model):
             self.date_finished = self._calculate_date_finished()
 
     def _calculate_date_finished(self, date_finished=False):
+        if not self.workcenter_id.resource_calendar_id:
+            raise UserError(_('There is no defined calendar on workcenter %s.', self.workcenter_id.name))
         return self.workcenter_id.resource_calendar_id.plan_hours(
             self.duration_expected / 60.0, date_finished or self.date_start,
             compute_leaves=True, domain=[('time_type', 'in', ['leave', 'other'])]
