@@ -214,7 +214,6 @@ const dynamicSnippetOptions = options.Class.extend({
      */
     _renderCustomXML: async function (uiFragment) {
         await this._renderDynamicFiltersSelector(uiFragment);
-        await this._renderDynamicFilterTemplatesSelector(uiFragment);
     },
     /**
      * Renders the dynamic filter option selector content into the provided uiFragment.
@@ -243,15 +242,6 @@ const dynamicSnippetOptions = options.Class.extend({
             }
             selectUserValueWidgetElement.appendChild(button);
         }
-    },
-    /**
-     * Renders the template option selector content into the provided uiFragment.
-     * @param {HTMLElement} uiFragment
-     * @private
-     */
-    _renderDynamicFilterTemplatesSelector: async function (uiFragment) {
-        const templatesSelectorEl = uiFragment.querySelector('[data-name="template_opt"]');
-        return this._renderSelectUserValueWidgetButtons(templatesSelectorEl, this.dynamicFilterTemplates);
     },
     /**
      * Sets default options values.
