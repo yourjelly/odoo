@@ -207,11 +207,6 @@ class MailGroup(models.Model):
         if any(not moderator.email for group in self for moderator in group.moderator_ids):
             raise ValidationError(_('Moderators must have an email address.'))
 
-    @api.constrains('moderation_notify', 'moderation_notify_msg')
-    def _check_moderation_notify(self):
-        if any(group.moderation_notify and not group.moderation_notify_msg for group in self):
-            raise ValidationError(_('The notification message is missing.'))
-
     @api.constrains('moderation_guidelines', 'moderation_guidelines_msg')
     def _check_moderation_guidelines(self):
         if any(group.moderation_guidelines and not group.moderation_guidelines_msg for group in self):
@@ -347,7 +342,7 @@ class MailGroup(models.Model):
         elif moderation_rule and moderation_rule.status == 'ban':
             group_message.action_moderate_reject()
 
-        elif self.moderation_notify:
+        elif self.moderation_notify_msg:
             self.env['mail.mail'].sudo().create({
                 'author_id': self.env.user.partner_id.id,
                 'auto_delete': True,
