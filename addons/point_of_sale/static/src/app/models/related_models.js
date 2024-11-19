@@ -1,5 +1,6 @@
 import { reactive, toRaw } from "@odoo/owl";
-import { uuidv4, proxyTrapUtil, getAllGetters, lazyComputed } from "@point_of_sale/utils";
+import { uuidv4, proxyTrapUtil, lazyComputed } from "@point_of_sale/utils";
+import { Reactive } from "@web/core/utils/reactive";
 
 const ID_CONTAINER = {};
 
@@ -139,12 +140,17 @@ function processModelDefs(modelDefs) {
     return [inverseMap, modelDefs];
 }
 
-export class Base {
-    constructor({ models, records, model, proxyTrap }) {
+export class Base extends Reactive {
+    constructor({ models, records, model, proxyTrap, getters }) {
+        super();
         this.models = models;
         this.records = records;
         this.model = model;
-        return new Proxy(this, proxyTrap);
+        const instance = new Proxy(this, proxyTrap);
+        for (const [lazyName, func] of getters.values()) {
+            lazyComputed(instance, lazyName, func);
+        }
+        return instance;
     }
     /**
      * Called during instantiation when the instance is fully-populated with field values.
@@ -444,7 +450,11 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
         );
     }
 
-    const { withoutProxyTrap, isDisabled: isProxyTrapDisabled } = proxyTrapUtil;
+    const {
+        withoutProxyTrap,
+        isDisabled: isProxyTrapDisabled,
+        defineLazyGetterTrap,
+    } = proxyTrapUtil;
 
     const modelClassesAndProxyTrapsCache = {};
     function getClassAndProxyTrap(model) {
@@ -452,6 +462,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
             return modelClassesAndProxyTrapsCache[model];
         }
         const fields = getFields(model);
+        const ModelClass = modelClasses[model] || Base;
         const proxyTrap = {
             set(target, prop, value, receiver) {
                 if (isProxyTrapDisabled() || !(prop in fields)) {
@@ -469,53 +480,17 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
                 });
                 return updateRecord();
             },
-            get(target, prop, receiver) {
-                if (isProxyTrapDisabled() || !getters.has(prop)) {
-                    return Reflect.get(target, prop, receiver);
-                }
-                const getLazyGetterValue = withoutProxyTrap(() => {
-                    const [lazyName] = getters.get(prop);
-                    // For a getter, we should get the value from the receiver.
-                    // Because the receiver is linked to the reactivity.
-                    // We want to read the getter from it to make sure that the getter
-                    // is part of the reactivity as well.
-                    // To avoid infinite recursion, we disable this proxy trap
-                    // during the time the lazy getter is accessed.
-                    return receiver[lazyName];
-                });
-                return getLazyGetterValue();
-            },
+            get: defineLazyGetterTrap(ModelClass),
         };
 
-        const ModelClass = modelClasses[model] || Base;
-        const getters = new Map();
-        for (const [name, func] of getAllGetters(ModelClass.prototype)) {
-            if (name.startsWith("__") && name.endsWith("__")) {
-                continue;
-            }
-            getters.set(name, [
-                `__lazy_${name}`,
-                (obj) => {
-                    return func.call(obj);
-                },
-            ]);
-        }
-        class ModelWithLazyGetters extends ModelClass {
-            constructor(...args) {
-                const result = super(...args);
-                for (const [lazyName, func] of getters.values()) {
-                    lazyComputed(this, lazyName, func);
-                }
-                return result;
-            }
-        }
-        modelClassesAndProxyTrapsCache[model] = [ModelWithLazyGetters, proxyTrap];
-        return [ModelWithLazyGetters, proxyTrap];
+        modelClassesAndProxyTrapsCache[model] = [ModelClass, proxyTrap];
+        return [ModelClass, proxyTrap];
     }
 
     function instantiateModel(model, { models, records }) {
         const [Model, proxyTrap] = getClassAndProxyTrap(model);
-        return new Model({ models, records, model: models[model], proxyTrap });
+        const getters = proxyTrapUtil.getGetters(Model);
+        return new Model({ models, records, model: models[model], proxyTrap, getters });
     }
 
     const create = withoutProxyTrap(_create);

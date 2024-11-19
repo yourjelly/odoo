@@ -11,7 +11,6 @@ import {
     uuidv4,
     getOnNotified,
     Counter,
-    getAllGetters,
     lazyComputed,
     proxyTrapUtil,
 } from "@point_of_sale/utils";
@@ -65,32 +64,12 @@ export class PosStore extends Reactive {
     ];
     constructor() {
         super(...arguments);
-        const getters = new Map();
-        for (const [name, func] of getAllGetters(PosStore.prototype)) {
-            if (name.startsWith("__") && name.endsWith("__")) {
-                continue;
-            }
-            getters.set(name, [
-                `__lazy_${name}`,
-                (obj) => {
-                    return func.call(obj);
-                },
-            ]);
-        }
+        const getters = proxyTrapUtil.getGetters(PosStore);
         for (const [lazyName, func] of getters.values()) {
             lazyComputed(this, lazyName, func);
         }
         const proxiedInstance = new Proxy(this, {
-            get(target, prop, receiver) {
-                if (proxyTrapUtil.isDisabled() || !getters.has(prop)) {
-                    return Reflect.get(target, prop, receiver);
-                }
-                const getLazyGetterValue = proxyTrapUtil.withoutProxyTrap(() => {
-                    const [lazyName] = getters.get(prop);
-                    return receiver[lazyName];
-                });
-                return getLazyGetterValue();
-            },
+            get: proxyTrapUtil.defineLazyGetterTrap(PosStore),
         });
         this.ready = this.setup(...arguments).then(() => proxiedInstance);
     }

@@ -156,6 +156,27 @@ export function getAllGetters(proto) {
 }
 
 export const proxyTrapUtil = (function () {
+    const classGetters = new Map();
+
+    function getGetters(Class) {
+        if (!classGetters.has(Class)) {
+            const getters = new Map();
+            for (const [name, func] of getAllGetters(Class.prototype)) {
+                if (name.startsWith("__") && name.endsWith("__")) {
+                    continue;
+                }
+                getters.set(name, [
+                    `__lazy_${name}`,
+                    (obj) => {
+                        return func.call(obj);
+                    },
+                ]);
+            }
+            classGetters.set(Class, getters);
+        }
+        return classGetters.get(Class);
+    }
+
     let proxyTrapDisabled = 0;
     function withoutProxyTrap(fn) {
         return function (...args) {
@@ -167,11 +188,32 @@ export const proxyTrapUtil = (function () {
             }
         };
     }
+    function isDisabled() {
+        return proxyTrapDisabled > 0;
+    }
     return {
-        isDisabled() {
-            return proxyTrapDisabled > 0;
-        },
+        isDisabled,
         withoutProxyTrap,
+        defineLazyGetterTrap(Class) {
+            const getters = getGetters(Class);
+            return function get(target, prop, receiver) {
+                if (isDisabled() || !getters.has(prop)) {
+                    return Reflect.get(target, prop, receiver);
+                }
+                const getLazyGetterValue = withoutProxyTrap(() => {
+                    const [lazyName] = getters.get(prop);
+                    // For a getter, we should get the value from the receiver.
+                    // Because the receiver is linked to the reactivity.
+                    // We want to read the getter from it to make sure that the getter
+                    // is part of the reactivity as well.
+                    // To avoid infinite recursion, we disable this proxy trap
+                    // during the time the lazy getter is accessed.
+                    return receiver[lazyName];
+                });
+                return getLazyGetterValue();
+            };
+        },
+        getGetters,
     };
 })();
 
