@@ -1328,15 +1328,15 @@ class AccountTax(models.Model):
         )
         rate = base_line['rate']
         tax_details = base_line['tax_details'] = {
-            'total_excluded_currency': taxes_computation['total_excluded'],
-            'total_excluded': taxes_computation['total_excluded'] / rate if rate else 0.0,
-            'total_included_currency': taxes_computation['total_included'],
-            'total_included': taxes_computation['total_included'] / rate if rate else 0.0,
+            'raw_total_excluded_currency': taxes_computation['total_excluded'],
+            'raw_total_excluded': taxes_computation['total_excluded'] / rate if rate else 0.0,
+            'raw_total_included_currency': taxes_computation['total_included'],
+            'raw_total_included': taxes_computation['total_included'] / rate if rate else 0.0,
             'taxes_data': [],
         }
         if company.tax_calculation_rounding_method == 'round_per_line':
-            tax_details['total_excluded'] = company.currency_id.round(tax_details['total_excluded'])
-            tax_details['total_included'] = company.currency_id.round(tax_details['total_included'])
+            tax_details['raw_total_excluded'] = company.currency_id.round(tax_details['raw_total_excluded'])
+            tax_details['raw_total_included'] = company.currency_id.round(tax_details['raw_total_included'])
         for tax_data in taxes_computation['taxes_data']:
             tax_amount = tax_data['tax_amount'] / rate if rate else 0.0
             base_amount = tax_data['base_amount'] / rate if rate else 0.0
@@ -1345,10 +1345,10 @@ class AccountTax(models.Model):
                 base_amount = company.currency_id.round(base_amount)
             tax_details['taxes_data'].append({
                 **tax_data,
-                'tax_amount_currency': tax_data['tax_amount'],
-                'tax_amount': tax_amount,
-                'base_amount_currency': tax_data['base_amount'],
-                'base_amount': base_amount,
+                'raw_tax_amount_currency': tax_data['tax_amount'],
+                'raw_tax_amount': tax_amount,
+                'raw_base_amount_currency': tax_data['base_amount'],
+                'raw_base_amount': base_amount,
             })
 
     @api.model
@@ -1367,7 +1367,7 @@ class AccountTax(models.Model):
         This method performs all the rounding and take care of rounding issues that could appear when using the
         'round_globally' tax computation method, specially if some price included taxes are involved.
 
-        This method copy all float values in separated keys prefixed by 'raw_'.
+        This method copies all float prefixed with 'raw_' in the tax_details to the corresponding float without 'raw_'.
         In almost all countries, the round globally should be the tax computation method.
         When there is an EDI, we need the raw amounts to be reported with more decimals (usually 6 to 8).
         So if you need to report the price excluded amount for a single line, you need to use
@@ -1434,26 +1434,18 @@ class AccountTax(models.Model):
             tax_details = base_line['tax_details']
             tax_details['delta_base_amount_currency'] = 0.0
             tax_details['delta_base_amount'] = 0.0
-            tax_details['raw_total_excluded_currency'] = tax_details['total_excluded_currency']
-            tax_details['total_excluded_currency'] = currency.round(tax_details['total_excluded_currency'])
-            tax_details['raw_total_excluded'] = tax_details['total_excluded']
-            tax_details['total_excluded'] = company.currency_id.round(tax_details['total_excluded'])
-            tax_details['raw_total_included_currency'] = tax_details['total_included_currency']
-            tax_details['total_included_currency'] = currency.round(tax_details['total_included_currency'])
-            tax_details['raw_total_included'] = tax_details['total_included']
-            tax_details['total_included'] = company.currency_id.round(tax_details['total_included'])
+            tax_details['total_excluded_currency'] = currency.round(tax_details['raw_total_excluded_currency'])
+            tax_details['total_excluded'] = company.currency_id.round(tax_details['raw_total_excluded'])
+            tax_details['total_included_currency'] = currency.round(tax_details['raw_total_included_currency'])
+            tax_details['total_included'] = company.currency_id.round(tax_details['raw_total_included'])
 
             for tax_data in tax_details['taxes_data']:
                 tax = tax_data['tax']
 
-                tax_data['raw_tax_amount_currency'] = tax_data['tax_amount_currency']
-                tax_data['tax_amount_currency'] = currency.round(tax_data['tax_amount_currency'])
-                tax_data['raw_tax_amount'] = tax_data['tax_amount']
-                tax_data['tax_amount'] = company.currency_id.round(tax_data['tax_amount'])
-                tax_data['raw_base_amount_currency'] = tax_data['base_amount_currency']
-                tax_data['base_amount_currency'] = currency.round(tax_data['base_amount_currency'])
-                tax_data['raw_base_amount'] = tax_data['base_amount']
-                tax_data['base_amount'] = company.currency_id.round(tax_data['base_amount'])
+                tax_data['tax_amount_currency'] = currency.round(tax_data['raw_tax_amount_currency'])
+                tax_data['tax_amount'] = company.currency_id.round(tax_data['raw_tax_amount'])
+                tax_data['base_amount_currency'] = currency.round(tax_data['raw_base_amount_currency'])
+                tax_data['base_amount'] = company.currency_id.round(tax_data['raw_base_amount'])
 
                 key = (tax, currency, base_line['is_refund'])
                 amounts = total_per_tax[key]
@@ -1635,9 +1627,10 @@ class AccountTax(models.Model):
             }
             tax_reps_data = tax_data['tax_reps_data'] = []
             for tax_rep in tax_reps:
+                tax_amount_currency = tax_data.get('tax_amount_currency') or tax_data.get('raw_tax_amount_currency')
                 tax_rep_data = {
                     'tax_rep': tax_rep,
-                    'tax_amount_currency': currency.round(tax_data['tax_amount_currency'] * tax_rep.factor * tax_rep_sign),
+                    'tax_amount_currency': currency.round(tax_amount_currency * tax_rep.factor * tax_rep_sign),
                     'tax_amount': currency.round(tax_data['tax_amount'] * tax_rep.factor * tax_rep_sign),
                     'account': tax_rep._get_aml_target_tax_account(force_caba_exigibility=include_caba_tags) or base_line['account_id'],
                 }
@@ -2288,8 +2281,8 @@ class AccountTax(models.Model):
         self._add_accounting_data_to_base_line_tax_details(base_line, company, include_caba_tags=include_caba_tags)
 
         tax_details = base_line['tax_details']
-        total_void = total_excluded = tax_details['total_excluded_currency']
-        total_included = tax_details['total_included_currency']
+        total_void = total_excluded = tax_details['raw_total_excluded_currency']
+        total_included = tax_details['raw_total_included_currency']
 
         # Convert to the 'old' compute_all api.
         taxes = []
@@ -2301,7 +2294,7 @@ class AccountTax(models.Model):
                     'id': tax.id,
                     'name': partner and tax.with_context(lang=partner.lang).name or tax.name,
                     'amount': tax_rep_data['tax_amount_currency'],
-                    'base': tax_data['base_amount_currency'],
+                    'base': tax_data['raw_base_amount_currency'],
                     'sequence': tax.sequence,
                     'account_id': tax_rep_data['account'].id,
                     'analytic': tax.analytic,
@@ -2384,8 +2377,8 @@ class AccountTax(models.Model):
             def get_tax_key(tax_data):
                 return frozendict({'tax': tax_data['tax'], 'is_reverse_charge': tax_data['is_reverse_charge']})
 
-            base_line_fields = ('total_excluded_currency', 'total_excluded', 'total_included_currency', 'total_included')
-            tax_data_fields = ('base_amount_currency', 'base_amount', 'tax_amount_currency', 'tax_amount')
+            base_line_fields = ('raw_total_excluded_currency', 'raw_total_excluded', 'raw_total_included_currency', 'raw_total_included')
+            tax_data_fields = ('raw_base_amount_currency', 'raw_base_amount', 'raw_tax_amount_currency', 'raw_tax_amount')
 
             if is_zero:
                 for field in base_line_fields:
