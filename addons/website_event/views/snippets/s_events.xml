@@ -99,8 +99,6 @@
                       data-fields="[&quot;category_id&quot;]"
                       data-select-data-attribute=""
                       data-no-preview="true"/>
-    </xpath>
-    <xpath expr="//we-select[@data-name='template_opt']" position="after">
         <we-checkbox t-if="snippet_name == 'event_upcoming_snippet'"
             data-name="time_opt"
             string="Show time"
