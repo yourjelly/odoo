@@ -36,6 +36,8 @@ export class Composer extends Record {
     };
     /** @type {boolean} */
     forceCursorMove;
+    /** @type {boolean} */
+    emailAddSignature = true;
     isFocused = false;
     autofocus = 0;
 }

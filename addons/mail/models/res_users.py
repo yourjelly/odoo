@@ -288,6 +288,7 @@ class Users(models.Model):
                             "write_date",
                         ],
                         main_user_by_partner={self.env.user.partner_id: self.env.user},
+                        signature=self.env.user.signature
                     ),
                     "settings": settings._res_users_settings_format(),
                 }

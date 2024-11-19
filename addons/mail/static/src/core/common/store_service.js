@@ -506,7 +506,7 @@ export class Store extends BaseStore {
      * Get the parameters to pass to the message post route.
      */
     async getMessagePostParams({ body, postData, thread }) {
-        const { attachments, cannedResponseIds, isNote, mentionedChannels, mentionedPartners } =
+        const { attachments, cannedResponseIds, emailAddSignature, isNote, mentionedChannels, mentionedPartners } =
             postData;
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
         const validMentions = this.getMentionsFromText(body, {
@@ -532,6 +532,7 @@ export class Store extends BaseStore {
             body: await prettifyMessageContent(body, validMentions),
             message_type: "comment",
             subtype_xmlid: subtype,
+            email_add_signature: emailAddSignature
         };
         if (attachments.length) {
             postData.attachment_ids = attachments.map(({ id }) => id);

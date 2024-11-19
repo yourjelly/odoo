@@ -534,9 +534,12 @@ export class Composer extends Component {
             mentionedChannels: this.props.composer.mentionedChannels,
             mentionedPartners: this.props.composer.mentionedPartners,
         });
+        const signature = this.store.self.signature;
         const context = {
             default_attachment_ids: attachmentIds,
-            default_body: await prettifyMessageContent(body, validMentions),
+            default_email_add_signature: false,
+            default_body: await prettifyMessageContent(body, validMentions) +
+                ((this.props.composer.emailAddSignature && signature) ? ('<br>' + signature) : ''),
             default_model: this.thread.model,
             default_partner_ids:
                 this.props.type === "note"
@@ -651,6 +654,7 @@ export class Composer extends Component {
             mentionedChannels: composer.mentionedChannels || [],
             mentionedPartners: composer.mentionedPartners || [],
             cannedResponseIds: composer.cannedResponses.map((c) => c.id),
+            emailAddSignature: composer.emailAddSignature,
             parentId: this.props.messageToReplyTo?.message?.id,
         };
     }
@@ -685,6 +689,7 @@ export class Composer extends Component {
         this.suggestion?.clearRawMentions();
         this.suggestion?.clearCannedResponses();
         this.props.messageToReplyTo?.cancel();
+        this.props.composer.emailAddSignature = true;
     }
 
     async editMessage() {
@@ -736,18 +741,32 @@ export class Composer extends Component {
 
     saveContent() {
         const composer = toRaw(this.props.composer);
-        const fullComposerContent =
-            document
-                .querySelector(".o_mail_composer_form_view .note-editable")
-                ?.innerText.replace(/(\t|\n)+/g, "\n") ?? composer.text;
-        browser.localStorage.setItem(composer.localId, fullComposerContent);
+        const editable = document.querySelector(".o_mail_composer_form_view .note-editable");
+        let config = {};
+        if (editable) {
+            Object.assign(config, {
+                text: editable.innerText.replace(/(\t|\n)+/g, "\n"),
+                emailAddSignature: false
+            });
+        } else {
+            Object.assign(config, {
+                text: composer.text,
+                emailAddSignature: true
+            });
+        }
+        browser.localStorage.setItem(composer.localId, JSON.stringify(config));
     }
 
     restoreContent() {
         const composer = toRaw(this.props.composer);
-        const fullComposerContent = browser.localStorage.getItem(composer.localId);
-        if (fullComposerContent) {
-            composer.text = fullComposerContent;
-        }
+        try {
+            const config = JSON.parse(browser.localStorage.getItem(composer.localId));
+            if (config.text) {
+                composer.text = config.text;
+                composer.emailAddSignature = config.emailAddSignature;
+            }
+        } catch {
+            browser.localStorage.removeItem(composer.localId);
+        };
     }
 }
