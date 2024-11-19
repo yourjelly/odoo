@@ -192,3 +192,45 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
 
     return model;
 }
+
+export function _makeFieldFromPropertyDefinition(name, definition, relatedPropertyField) {
+    return {
+        name,
+        readonly: false,
+        relation: definition.comodel,
+        required: false,
+        searchable: false,
+        selection: definition.selection,
+        sortable: true,
+        store: true,
+        string: definition.string || name,
+        type: definition.type || "char",
+        relatedPropertyField,
+    };
+}
+
+export async function addPropertyFieldDefs(orm, resModel, context, fields, groupBy) {
+    const proms = [];
+    for (const gb of groupBy) {
+        if (gb in fields) {
+            continue;
+        }
+        const [fieldName] = gb.split(".");
+        const field = fields[fieldName];
+        if (field?.type === "properties") {
+            proms.push(
+                orm
+                    .call(resModel, "get_property_definition", [gb], {
+                        context,
+                    })
+                    .then((definition) => {
+                        fields[gb] = _makeFieldFromPropertyDefinition(gb, definition, field);
+                    })
+                    .catch(() => {
+                        fields[gb] = _makeFieldFromPropertyDefinition(gb, {}, field);
+                    })
+            );
+        }
+    }
+    return Promise.all(proms);
+}
