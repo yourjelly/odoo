@@ -8,6 +8,7 @@ from odoo.tools.misc import clean_context, formatLang
 from odoo.tools.translate import html_translate
 
 from collections import defaultdict
+from collections.abc import Iterable
 from markupsafe import Markup
 
 import ast
@@ -263,8 +264,8 @@ class AccountTax(models.Model):
             )
 
     def _search_price_include(self, operator, value):
-        if isinstance(value, bool):
-            tax_value = 'tax_included' if value else 'tax_excluded'
+        if isinstance(truth := next(iter(value), None), bool):
+            tax_value = 'tax_included' if truth else 'tax_excluded'
             return [
                 '|', ('price_include_override', operator, tax_value),
                     '&', ('price_include_override', '=', False),
@@ -488,9 +489,11 @@ class AccountTax(models.Model):
         return super()._search(domain, offset, limit, order)
 
     def _search_name(self, operator, value):
-        if operator not in ("ilike", "like") or not isinstance(value, str):
-            return [('name', operator, value)]
-        return [('name', operator, AccountTax._parse_name_search(value))]
+        if isinstance(value, str):
+            value = AccountTax._parse_name_search(value)
+        elif isinstance(value, Iterable):
+            value = [AccountTax._parse_name_search(v) if isinstance(v, str) else v for v in value]
+        return [('name', operator, value)]
 
     def _check_repartition_lines(self, lines):
         self.ensure_one()

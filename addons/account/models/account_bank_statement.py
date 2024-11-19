@@ -3,6 +3,7 @@ from contextlib import contextmanager
 
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
+from odoo.fields import Domain
 from odoo.tools.misc import formatLang
 
 
@@ -202,12 +203,11 @@ class AccountBankStatement(models.Model):
             stmt.problem_description = description
 
     def _search_is_valid(self, operator, value):
-        if operator not in ('=', '!=', '<>'):
-            raise UserError(_('Operation not supported'))
+        if operator != '=':
+            raise NotImplementedError
         invalid_ids = self._get_invalid_statement_ids(all_statements=True)
-        if operator in ('!=', '<>') and value or operator == '=' and not value:
-            return [('id', 'in', invalid_ids)]
-        return [('id', 'not in', invalid_ids)]
+        operator = 'not in' if value else 'in'
+        return [('id', operator, invalid_ids)]
 
     # -------------------------------------------------------------------------
     # BUSINESS METHODS

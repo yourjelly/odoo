@@ -467,8 +467,6 @@ class SlideChannel(models.Model):
             slide_channel.partner_ids = data.get(slide_channel, [])
 
     def _search_partner_ids(self, operator, value):
-        if isinstance(value, int) and operator == 'in':
-            value = [value]
         return [(
             'channel_partner_ids', 'in', self.env['slide.channel.partner'].sudo()._search(
                 [('partner_id', operator, value),
@@ -529,16 +527,14 @@ class SlideChannel(models.Model):
             channel.is_member_invited = channel.id in invitation_pending_channels_ids
 
     def _search_is_member(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
+        if operator != '=':
             raise NotImplementedError(_('Operation not supported'))
-        check_has_access = operator == '=' and value or operator == '!=' and not value
-        return [('id', 'in' if check_has_access else 'not in', self._search_is_member_channel_ids())]
+        return [('id', 'in' if value else 'not in', self._search_is_member_channel_ids())]
 
     def _search_is_member_invited(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
+        if operator != '=':
             raise NotImplementedError(_('Operation not supported'))
-        check_has_access = operator == '=' and value or operator == '!=' and not value
-        return [('id', 'in' if check_has_access else 'not in', self._search_is_member_channel_ids(invited=True))]
+        return [('id', 'in' if value else 'not in', self._search_is_member_channel_ids(invited=True))]
 
     def _search_is_member_channel_ids(self, invited=False):
         return self.env['slide.channel.partner'].sudo()._read_group(

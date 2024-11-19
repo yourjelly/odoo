@@ -57,19 +57,14 @@ class ProjectProject(models.Model):
 
     @api.model
     def _search_is_internal_project(self, operator, value):
-        if not isinstance(value, bool):
-            raise ValueError(_('Invalid value: %s', value))
-        if operator not in ['=', '!=']:
-            raise ValueError(_('Invalid operator: %s', operator))
+        if operator != '=':
+            raise ValueError(_('Unsupported operator'))
 
         Company = self.env['res.company']
         sql = Company._where_calc(
             [('internal_project_id', '!=', False)], active_test=False
         ).subselect("internal_project_id")
-        if (operator == '=' and value is True) or (operator == '!=' and value is False):
-            operator_new = 'in'
-        else:
-            operator_new = 'not in'
+        operator_new = 'in' if value else 'not in'
         return [('id', operator_new, sql)]
 
     @api.depends('allow_timesheets', 'timesheet_ids.unit_amount', 'allocated_hours')
@@ -87,9 +82,7 @@ class ProjectProject(models.Model):
 
     @api.model
     def _search_is_project_overtime(self, operator, value):
-        if not isinstance(value, bool):
-            raise ValueError(_('Invalid value: %s', value))
-        if operator not in ['=', '!=']:
+        if operator != '=':
             raise ValueError(_('Invalid operator: %s', operator))
 
         sql = SQL("""(
@@ -104,7 +97,7 @@ class ProjectProject(models.Model):
           GROUP BY Project.id
             HAVING ProjectProject.allocated_hours - SUM(Task.effective_hours) < 0
         )""")
-        if (operator == '=' and value is True) or (operator == '!=' and value is False):
+        if value:
             operator_new = 'in'
         else:
             operator_new = 'not in'

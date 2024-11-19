@@ -92,9 +92,10 @@ class DiscussChannelMember(models.Model):
                 member.is_self = True
 
     def _search_is_self(self, operator, operand):
-        is_in = (operator == "=" and operand) or (operator == "!=" and not operand)
+        if operator != '=':
+            raise NotImplementedError
         current_partner, current_guest = self.env["res.partner"]._get_current_persona()
-        if is_in:
+        if operand:
             return [
                 '|',
                 ("partner_id", "=", current_partner.id) if current_partner else expression.FALSE_LEAF,
@@ -107,7 +108,9 @@ class DiscussChannelMember(models.Model):
             ]
 
     def _search_is_pinned(self, operator, operand):
-        if (operator == "=" and operand) or (operator == "!=" and not operand):
+        if operator != '=':
+            raise NotImplementedError
+        if operand:
             return expression.OR([
                 [("unpin_dt", "=", False)],
                 [("last_interest_dt", ">=", self._field_to_sql(self._table, "unpin_dt"))],

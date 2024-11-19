@@ -20,7 +20,7 @@ from odoo.exceptions import ValidationError, AccessError, UserError
 from odoo.http import request
 from odoo.models import check_method_name
 from odoo.modules.module import get_resource_from_path
-from odoo.osv.expression import expression
+from odoo.osv import expression
 from odoo.tools import config, lazy_property, frozendict, SQL
 from odoo.tools.convert import _fix_multiple_roots
 from odoo.tools.misc import file_path, get_diff, ConstantMapping
@@ -301,10 +301,15 @@ actual arch.
             view.model_data_id = data['id']
 
     def _search_model_data_id(self, operator, value):
+        if operator in expression.NEGATIVE_TERM_OPERATORS:
+            operator = expression.TERM_OPERATORS_NEGATION[operator]
+            in_operator = 'not in'
+        else:
+            in_operator = 'in'
         name = 'name' if isinstance(value, str) else 'id'
         domain = [('model', '=', 'ir.ui.view'), (name, operator, value)]
-        data = self.env['ir.model.data'].sudo().search(domain)
-        return [('id', 'in', data.mapped('res_id'))]
+        query = self.env['ir.model.data'].sudo()._search(domain)
+        return [('id', in_operator, query.subselect('res_id'))]
 
     @api.depends('model')
     def _compute_model_id(self):
@@ -597,7 +602,7 @@ actual arch.
             return self.browse()
         self.browse().check_access('read')
         domain = self._get_inheriting_views_domain()
-        e = expression(domain, self.env['ir.ui.view'])
+        e = expression.expression(domain, self.env['ir.ui.view'])
         where_clause = e.query.where_clause
         assert e.query.from_clause == SQL.identifier('ir_ui_view'), f"Unexpected from clause: {e.query.from_clause}"
 

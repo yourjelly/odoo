@@ -103,13 +103,9 @@ class EventEvent(models.Model):
 
     @api.model
     def _search_is_participating(self, operator, value):
-        if operator not in ['=', '!=']:
+        if operator != '=':
             raise NotImplementedError(_('This operator is not supported'))
-        if not isinstance(value, bool):
-            raise UserError(_('Value should be True or False (not %)', value))
-        check_is_participating = operator == '=' and value or operator == '!=' and not value
-
-        return [('id', 'in' if check_is_participating else 'not in', self._fetch_is_participating_events().ids)]
+        return [('id', 'in' if value else 'not in', self._fetch_is_participating_events().ids)]
 
     @api.model
     def _fetch_is_participating_events(self):
@@ -163,11 +159,8 @@ class EventEvent(models.Model):
 
     @api.model
     def _search_is_visible_on_website(self, operator, value):
-        if operator not in ['=', '!=']:
+        if operator != '=':
             raise NotImplementedError(_('This operator is not supported'))
-        if not isinstance(value, bool):
-            raise UserError(_('Value should be True or False (not %)', value))
-        check_is_visible_on_website = operator == '=' and value or operator == '!=' and not value
         user = self.env.user
         domain = [('is_participating', '=', True)]
 
@@ -177,7 +170,7 @@ class EventEvent(models.Model):
             domain = expression.OR([domain, [('website_visibility', '=', 'public')]])
 
         event_ids = self.env['event.event']._search(domain)
-        return [('id', 'in' if check_is_visible_on_website else 'not in', event_ids)]
+        return [('id', 'in' if value else 'not in', event_ids)]
 
     @api.depends('website_url')
     def _compute_event_register_url(self):

@@ -13,17 +13,17 @@ class HrManagerDepartmentReport(models.AbstractModel):
         compute="_compute_has_department_manager_access")
 
     def _search_has_department_manager_access(self, operator, value):
-        supported_operators = ["="]
-        if operator not in supported_operators or not isinstance(value, bool):
+        if operator != '=':
             raise NotImplementedError()
-        if not value:
-            return [1, "=", 0]
         department_ids = self.env['hr.department']._search([('manager_id', 'in', self.env.user.employee_ids.ids)])
-        return [
+        domain = [
             '|',
                 ('employee_id.user_id', '=', self.env.user.id),
                 ('employee_id.department_id', 'child_of', department_ids.get_result_ids()),
         ]
+        if not value:
+            domain = ['!'] + domain
+        return domain
 
     def _compute_has_department_manager_access(self):
         department_ids = self.env['hr.department']._search([('manager_id', 'in', self.env.user.employee_ids.ids)])

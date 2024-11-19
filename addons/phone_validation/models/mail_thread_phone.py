@@ -74,6 +74,8 @@ class MailThreadPhone(models.AbstractModel):
                              where=f'{fname} IS NOT NULL')
 
     def _search_phone_mobile_search(self, operator, value):
+        if operator == 'in':
+            return expression.OR(self._search_phone_mobile_search('=', v) for v in value)
         value = value.strip() if isinstance(value, str) else value
         phone_fields = [
             fname for fname in self._phone_get_number_fields()

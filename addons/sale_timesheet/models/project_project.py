@@ -104,6 +104,8 @@ class ProjectProject(models.Model):
 
             :returns: the domain to find the expected projects.
         """
+        if operator == 'in':
+            return expression.OR(self._search_pricing_type('=', v) for v in value)
         if operator not in ('=', '!='):
             raise UserError(_('Operation not supported'))
         if not ((isinstance(value, bool) and value is False) or (isinstance(value, str) and value in ('task_rate', 'fixed_rate', 'employee_rate'))):

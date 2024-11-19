@@ -856,11 +856,18 @@ class DomainCondition(Domain):
                 _logger.error("Non-stored field %s cannot be searched.", field, stack_info=_logger.isEnabledFor(logging.DEBUG))
                 return _TRUE_DOMAIN
             operator, value = self.operator, self.value
-            if operator in ('in', 'not in') and len(value) == 1:
-                # a lot of implementations expect '=' or '!=' operators
-                # TODO adapt code to always handle 'in'
-                operator = '=' if operator == 'in' else '!='
-                value = next(iter(value))
+            if field.type == 'boolean' and operator in ('in', 'not in'):
+                if not isinstance(value, COLLECTION_TYPES):
+                    self._raise("Cannot compare %r to %s", self.field, type(value))
+                # special case to ease implementation: always use '='
+                truths = {bool(v) for v in value}
+                if len(truths) != 1:
+                    return Domain((operator == 'in') == bool(truths))
+                value = next(iter(truths))
+                if operator == 'in':
+                    value = not value
+                operator = '='
+            # TODO make operator always positive
             computed_domain = field.determine_domain(model, operator, value)
             return Domain(computed_domain)._optimize(model)
 
@@ -1210,6 +1217,8 @@ def _optimize_in_boolean(leaf, model):
     """b in [True, False]  =>  True"""
     value = leaf.value
     if leaf.operator not in ('in', 'not in') or not isinstance(value, COLLECTION_TYPES):
+        if not isinstance(value, (SQL, Query)):
+            _logger.warning("Comparing boolean with not a boolean value in %r", leaf)
         return leaf
     if not all(isinstance(v, bool) for v in value):
         if any(isinstance(v, str) for v in value):

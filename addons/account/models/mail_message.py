@@ -119,11 +119,11 @@ class MailMessage(models.Model):
             )
 
     def _search_account_audit_log_activated(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
+        if operator not in ('in', 'not in'):
             raise UserError(self.env._('Operation not supported'))
         return [('message_type', '=', 'notification')] + OR([
-            [('model', '=', model), ('res_id', 'in', self.env[model]._search(DOMAINS[model](operator, value)))]
-            for model in DOMAINS
+            [('model', '=', model), ('res_id', 'in', self.env[model]._search(domain_factory(operator, value)))]
+            for model, domain_factory in DOMAINS.items()
         ])
 
     def _compute_audit_log_related_record_id(self, model, fname):
@@ -137,7 +137,11 @@ class MailMessage(models.Model):
                 message[fname] = recs_by_id.get(message.res_id, False)
 
     def _search_audit_log_related_record_id(self, model, operator, value):
-        if operator in ['=', 'like', 'ilike', '!=', 'not ilike', 'not like'] and isinstance(value, str):
+        if (
+            operator in ['=', 'like', 'ilike', '!=', 'not ilike', 'not like'] and isinstance(value, str)
+        ) or (
+            operator in ('in', 'not in') and any(isinstance(v, str) for v in value)
+        ):
             res_id_domain = [('res_id', 'in', self.env[model]._search([('display_name', operator, value)]))]
         elif operator in ['=', 'in', '!=', 'not in']:
             res_id_domain = [('res_id', operator, value)]

@@ -41,8 +41,7 @@ class HrDepartment(models.Model):
             record.display_name = record.name
 
     def _search_has_read_access(self, operator, value):
-        supported_operators = ["="]
-        if operator not in supported_operators or not isinstance(value, bool):
+        if operator != '=':
             raise NotImplementedError()
         if not value:
             return [(1, "=", 0)]

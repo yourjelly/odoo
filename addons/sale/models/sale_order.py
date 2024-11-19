@@ -512,6 +512,11 @@ class SaleOrder(models.Model):
 
     def _search_invoice_ids(self, operator, value):
         if operator == 'in' and value:
+            falsy_domain = []
+            if False in value:
+                falsy_domain = self._search_invoice_ids('=', False)
+                if len(value) == 1:
+                    return falsy_domain
             self.env.cr.execute("""
                 SELECT array_agg(so.id)
                     FROM sale_order so
@@ -524,7 +529,7 @@ class SaleOrder(models.Model):
                     am.id = ANY(%s)
             """, (list(value),))
             so_ids = self.env.cr.fetchone()[0] or []
-            return [('id', 'in', so_ids)]
+            return [('id', 'in', so_ids)] + falsy_domain
         elif operator == '=' and not value:
             # special case for [('invoice_ids', '=', False)], i.e. "Invoices is not set"
             #
@@ -541,10 +546,10 @@ class SaleOrder(models.Model):
                 ('order_line.invoice_lines.move_id.move_type', 'in', ('out_invoice', 'out_refund'))
             ])
             return [('id', 'not in', order_ids)]
-        return [
-            ('order_line.invoice_lines.move_id.move_type', 'in', ('out_invoice', 'out_refund')),
-            ('order_line.invoice_lines.move_id', operator, value),
-        ]
+        return [('order_line.invoice_lines', 'any', [
+            ('move_id.move_type', 'in', ('out_invoice', 'out_refund')),
+            ('move_id', operator, value),
+        ])]
 
     @api.depends('state', 'order_line.invoice_status')
     def _compute_invoice_status(self):

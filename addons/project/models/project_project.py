@@ -67,9 +67,9 @@ class ProjectProject(models.Model):
 
     @api.model
     def _search_is_favorite(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
+        if operator != '=':
             raise NotImplementedError(_('Operation not supported'))
-        return [('favorite_user_ids', 'in' if (operator == '=') == value else 'not in', self.env.uid)]
+        return [('favorite_user_ids', 'in' if value else 'not in', self.env.uid)]
 
     def _compute_is_favorite(self):
         for project in self:
@@ -318,9 +318,7 @@ class ProjectProject(models.Model):
 
     @api.model
     def _search_is_milestone_exceeded(self, operator, value):
-        if not isinstance(value, bool):
-            raise ValueError(_('Invalid value: %s', value))
-        if operator not in ['=', '!=']:
+        if operator != '=':
             raise ValueError(_('Invalid operator: %s', operator))
 
         sql = SQL("""(
@@ -331,10 +329,7 @@ class ProjectProject(models.Model):
                AND P.allow_milestones IS true
                AND M.deadline <= CAST(now() AS date)
         )""")
-        if (operator == '=' and value is True) or (operator == '!=' and value is False):
-            operator_new = 'in'
-        else:
-            operator_new = 'not in'
+        operator_new = 'in' if value else 'not in'
         return [('id', operator_new, sql)]
 
     @api.depends('collaborator_ids', 'privacy_visibility')

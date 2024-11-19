@@ -378,21 +378,10 @@ class ProjectTask(models.Model):
             task.is_closed = task.state in CLOSED_STATES
 
     def _search_is_closed(self, operator, value):
-        if operator not in ('=', '!=') or not isinstance(value, bool):
-            raise NotImplementedError(_(
-                "The search does not support operator %(operator)s or value %(value)s.",
-                operator=operator,
-                value=value,
-            ))
-        if (operator == '!=' and value) or (operator == '=' and not value):
-            searched_states = self.OPEN_STATES
-        else:
-            searched_states = list(CLOSED_STATES.keys())
-        domain = [
-            ('state', 'in', searched_states)
-        ]
-        return domain
-
+        if operator != '=':
+            raise NotImplementedError
+        searched_states = list(CLOSED_STATES.keys()) if value else self.OPEN_STATES
+        return [('state', 'in', searched_states)]
 
     @property
     def OPEN_STATES(self):
@@ -679,7 +668,7 @@ class ProjectTask(models.Model):
             task.portal_user_names = format_list(self.env, task.user_ids.mapped('name'))
 
     def _search_portal_user_names(self, operator, value):
-        if operator != 'ilike' and not isinstance(value, str):
+        if operator != 'ilike' or not isinstance(value, str):
             raise ValidationError(_('Not Implemented.'))
 
         sql = SQL("""(
@@ -1423,19 +1412,16 @@ class ProjectTask(models.Model):
             task.has_late_and_unreached_milestone = task.allow_milestones and task.milestone_id.id in late_milestones
 
     def _search_has_late_and_unreached_milestone(self, operator, value):
-        if operator not in ('=', '!=') or not isinstance(value, bool):
-            raise NotImplementedError(_(
-                "The search does not support operator %(operator)s or value %(value)s.",
-                operator=operator,
-                value=value,
-            ))
+        if operator != '=':
+            raise NotImplementedError
         domain = [
             ('allow_milestones', '=', True),
             ('milestone_id', '!=', False),
             ('milestone_id.is_reached', '=', False),
             ('milestone_id.deadline', '!=', False), ('milestone_id.deadline', '<', fields.Date.today())
         ]
-        if (operator == '!=' and value) or (operator == '=' and not value):
+        if not value:
+            domain = expression.normalize_domain(domain)
             domain.insert(0, expression.NOT_OPERATOR)
             domain = expression.distribute_not(domain)
         return domain

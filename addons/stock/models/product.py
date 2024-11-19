@@ -4,6 +4,7 @@
 import operator as py_operator
 from ast import literal_eval
 from collections import defaultdict
+from collections.abc import Iterable
 from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
@@ -19,7 +20,9 @@ OPERATORS = {
     '<=': py_operator.le,
     '>=': py_operator.ge,
     '=': py_operator.eq,
-    '!=': py_operator.ne
+    '!=': py_operator.ne,
+    'in': lambda elem, container: elem in container,
+    'not in': lambda elem, container: elem not in container,
 }
 
 
@@ -361,30 +364,19 @@ class ProductProduct(models.Model):
         return self._search_product_quantity(operator, value, 'free_qty')
 
     def _search_product_quantity(self, operator, value, field):
-        # TDE FIXME: should probably clean the search methods
-        # to prevent sql injections
-        if field not in ('qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty', 'free_qty'):
-            raise UserError(_('Invalid domain left operand %s', field))
-        if operator not in ('<', '>', '=', '!=', '<=', '>='):
-            raise UserError(_('Invalid domain operator %s', operator))
-        if not isinstance(value, (float, int)):
-            raise UserError(_("Invalid domain right operand '%s'. It must be of type Integer/Float", value))
-
-        # TODO: Still optimization possible when searching virtual quantities
-        ids = []
         # Order the search on `id` to prevent the default order on the product name which slows
-        # down the search because of the join on the translation table to get the translated names.
-        for product in self.with_context(prefetch_fields=False).search([], order='id'):
-            if OPERATORS[operator](product[field], value):
-                ids.append(product.id)
+        # down the search.
+        ids = self.with_context(prefetch_fields=False).search([], order='id').filtered_domain([(field, operator, value)]).ids
         return [('id', 'in', ids)]
 
     def _search_qty_available_new(self, operator, value, lot_id=False, owner_id=False, package_id=False):
         ''' Optimized method which doesn't search on stock.moves, only on stock.quants. '''
-        if operator not in ('<', '>', '=', '!=', '<=', '>='):
+        if operator not in OPERATORS:
             raise UserError(_('Invalid domain operator %s', operator))
-        if not isinstance(value, (float, int)):
-            raise UserError(_("Invalid domain right operand '%s'. It must be of type Integer/Float", value))
+        if isinstance(value, Iterable) and not isinstance(value, str):
+            value = {float(v) for v in value}
+        else:
+            value = float(value)
 
         product_ids = set()
         domain_quant = self._get_domain_locations()[0]
@@ -397,18 +389,15 @@ class ProductProduct(models.Model):
         quants_groupby = self.env['stock.quant']._read_group(domain_quant, ['product_id'], ['quantity:sum'])
 
         # check if we need include zero values in result
-        include_zero = (
-            value < 0.0 and operator in ('>', '>=') or
-            value > 0.0 and operator in ('<', '<=') or
-            value == 0.0 and operator in ('>=', '<=', '=')
-        )
+        op = OPERATORS[operator]
+        include_zero = op(0.0, value)
 
         processed_product_ids = set()
         for product, quantity_sum in quants_groupby:
             product_id = product.id
             if include_zero:
                 processed_product_ids.add(product_id)
-            if OPERATORS[operator](quantity_sum, value):
+            if op(quantity_sum, value):
                 product_ids.add(product_id)
 
         if include_zero:
@@ -1069,16 +1058,19 @@ class ProductCategory(models.Model):
             category.total_route_ids = category.route_ids | category.parent_route_ids
 
     def _search_filter_for_stock_putaway_rule(self, operator, value):
-        assert operator == '='
-        assert value
+        if operator != '=':
+            raise NotImplementedError
 
+        domain = expression.TRUE_DOMAIN
         active_model = self.env.context.get('active_model')
         if active_model in ('product.template', 'product.product') and self.env.context.get('active_id'):
             product = self.env[active_model].browse(self.env.context.get('active_id'))
             product = product.exists()
             if product:
-                return [('id', '=', product.categ_id.id)]
-        return []
+                domain = [('id', '=', product.categ_id.id)]
+        if not value:
+            domain = ['!', *domain]
+        return domain
 
 
 class ProductPackaging(models.Model):

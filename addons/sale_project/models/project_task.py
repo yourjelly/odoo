@@ -182,15 +182,15 @@ class ProjectTask(models.Model):
 
     @api.model
     def _search_task_to_invoice(self, operator, value):
+        if operator != '=':
+            raise NotImplementedError
         sql = SQL("""(
             SELECT so.id
             FROM sale_order so
             WHERE so.invoice_status != 'invoiced'
                 AND so.invoice_status != 'no'
         )""")
-        operator_new = 'in'
-        if (bool(operator == '=') ^ bool(value)):
-            operator_new = 'not in'
+        operator_new = 'in' if value else 'not in'
         return [('sale_order_id', operator_new, sql)]
 
     @api.onchange('sale_line_id')

@@ -54,11 +54,11 @@ class HrEmployeeBase(models.AbstractModel):
                 employee.is_subordinate = employee in subordinates
 
     def _search_is_subordinate(self, operator, value):
-        if operator not in ('=', '!=') or not isinstance(value, bool):
+        if operator != '=':
             raise UserError(_('Operation not supported'))
         # Double negation
         if not value:
-            operator = '!=' if operator == '=' else '='
+            operator = '!='
         if not self.env.user.employee_id.subordinate_ids:
             return [('id', operator, self.env.user.employee_id.id)]
         return (['!'] if operator == '!=' else []) + [('id', 'in', self.env.user.employee_id.subordinate_ids.ids)]

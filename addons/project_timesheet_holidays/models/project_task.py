@@ -26,7 +26,7 @@ class ProjectTask(models.Model):
         (self - timeoff_tasks).is_timeoff_task = False
 
     def _search_is_timeoff_task(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
+        if operator != '=':
             raise NotImplementedError(_('Operation not supported'))
         leave_type_read_group = self.env['hr.leave.type']._read_group(
             [('timesheet_task_id', '!=', False)],
@@ -36,6 +36,4 @@ class ProjectTask(models.Model):
         [timeoff_tasks] = leave_type_read_group[0]
         if self.env.company.leave_timesheet_task_id:
             timeoff_tasks |= self.env.company.leave_timesheet_task_id
-        if operator == '!=':
-            value = not value
         return [('id', 'in' if value else 'not in', timeoff_tasks.ids)]

@@ -257,12 +257,9 @@ class WebsitePublishedMultiMixin(WebsitePublishedMixin):
             record.is_published = record.website_published
 
     def _search_website_published(self, operator, value):
-        if not isinstance(value, bool) or operator not in ('=', '!='):
+        if operator != '=':
             logger.warning('unsupported search on website_published: %s, %s', operator, value)
-            return [()]
-
-        if operator in expression.NEGATIVE_TERM_OPERATORS:
-            value = not value
+            return expression.FALSE_DOMAIN
 
         current_website_id = self._context.get('website_id')
         is_published = [('is_published', '=', value)]

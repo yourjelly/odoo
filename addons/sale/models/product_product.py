@@ -66,12 +66,12 @@ class ProductProduct(models.Model):
             product.product_catalog_product_is_in_sale_order = bool(data.get(product.id, 0))
 
     def _search_product_is_in_sale_order(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
+        if operator != '=':
             raise UserError(_("Operation not supported"))
         product_ids = self.env['sale.order.line'].search([
             ('order_id', 'in', [self.env.context.get('order_id', '')]),
         ]).product_id.ids
-        return [('id', 'in', product_ids)]
+        return [('id', 'in' if value else 'not in', product_ids)]
 
     def action_view_sales(self):
         action = self.env["ir.actions.actions"]._for_xml_id("sale.report_all_channels_sales_action")

@@ -218,9 +218,9 @@ class StockPickingType(models.Model):
 
     @api.model
     def _search_is_favorite(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
+        if operator != '=':
             raise NotImplementedError(_('Operation not supported'))
-        return [('favorite_user_ids', 'in' if (operator == '=') == value else 'not in', self.env.uid)]
+        return [('favorite_user_ids', 'in' if value else 'not in', self.env.uid)]
 
     def _compute_is_favorite(self):
         for picking_type in self:
@@ -299,6 +299,8 @@ class StockPickingType(models.Model):
     @api.model
     def _search_display_name(self, operator, value):
         # Try to reverse the `display_name` structure
+        if operator == 'in':
+            return expression.OR(self._search_display_name('=', v) for v in value)
         parts = isinstance(value, str) and value.split(': ')
         if parts and len(parts) == 2:
             return ['&', ('warehouse_id.name', operator, parts[0]), ('name', operator, parts[1])]
@@ -725,6 +727,8 @@ class StockPicking(models.Model):
             picking.has_deadline_issue = picking.date_deadline and picking.date_deadline < picking.scheduled_date or False
 
     def _search_date_category(self, operator, value):
+        if operator == 'in':
+            return expression.OR(self._search_date_category('=', v) for v in value)
         if operator != '=':
             raise NotImplementedError(_('Operation not supported'))
         search_domain = self.date_category_to_domain(value)
@@ -984,10 +988,11 @@ class StockPicking(models.Model):
         if not value:
             raise UserError(_('Search not supported without a value.'))
 
-        selected_picking_ids = []
-        for picking in self.env['stock.picking'].search([('state', 'not in', ('done', 'cancel', 'draft'))]):
-            if picking.move_ids._match_searched_availability(operator, value, _get_comparison_date):
-                selected_picking_ids.append(picking.id)
+        selected_picking_ids = [
+            picking.id
+            for picking in self.env['stock.picking'].search([('state', 'not in', ('done', 'cancel', 'draft'))], order='id')
+            if picking.move_ids._match_searched_availability(operator, value, _get_comparison_date)
+        ]
         return [('id', 'in', selected_picking_ids)]
 
     def _get_show_allocation(self, picking_type_id):

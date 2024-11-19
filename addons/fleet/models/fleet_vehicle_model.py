@@ -81,17 +81,8 @@ class FleetVehicleModel(models.Model):
 
     @api.model
     def _search_vehicle_count(self, operator, value):
-        if operator not in ['=', '!=', '<', '>'] or not isinstance(value, int):
-            raise NotImplementedError(_('Operation not supported.'))
         fleet_models = self.env['fleet.vehicle.model'].search([])
-        if operator == '=':
-            fleet_models = fleet_models.filtered(lambda m: m.vehicle_count == value)
-        elif operator == '!=':
-            fleet_models = fleet_models.filtered(lambda m: m.vehicle_count != value)
-        elif operator == '<':
-            fleet_models = fleet_models.filtered(lambda m: m.vehicle_count < value)
-        elif operator == '>':
-            fleet_models = fleet_models.filtered(lambda m: m.vehicle_count > value)
+        fleet_models = fleet_models.filtered_domain([('vehicle_count', operator, value)])
         return [('id', 'in', fleet_models.ids)]
 
     def action_model_vehicle(self):

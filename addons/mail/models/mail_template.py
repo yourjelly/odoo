@@ -131,7 +131,7 @@ class MailTemplate(models.Model):
 
     @api.model
     def _search_template_category(self, operator, value):
-        if operator in ['in', 'not in'] and isinstance(value, list):
+        if operator in ['in', 'not in']:
             value_templates = self.env['mail.template'].search([]).filtered(
                 lambda t: t.template_category in value
             )

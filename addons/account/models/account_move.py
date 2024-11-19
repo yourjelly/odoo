@@ -14,6 +14,7 @@ import re
 from textwrap import shorten
 
 from odoo import api, fields, models, _, Command, SUPERUSER_ID, modules, tools
+from odoo.fields import Domain
 from odoo.tools.sql import column_exists, create_column
 from odoo.addons.account.tools import format_structured_reference_iso
 from odoo.exceptions import UserError, ValidationError, AccessError, RedirectWarning
@@ -900,11 +901,9 @@ class AccountMove(models.Model):
             move.secured = bool(move.inalterable_hash)
 
     def _search_secured(self, operator, value):
-        if operator not in ['=', '!='] or value not in [True, False]:
+        if operator != '=':
             raise UserError(_('Operation not supported'))
-
-        want_secured = (operator == '=') == value
-        return [('inalterable_hash', '!=' if want_secured else '=', False)]
+        return [('inalterable_hash', '!=' if value else '=', False)]
 
     @api.depends('line_ids.account_id.account_type')
     def _compute_always_tax_exigible(self):
@@ -1999,7 +1998,7 @@ class AccountMove(models.Model):
             move.next_payment_date = min([line.payment_date for line in move.line_ids.filtered(lambda l: l.payment_date and not l.reconciled)], default=False)
 
     def _search_next_payment_date(self, operator, value):
-        if operator not in ('=', '<', '<='):
+        if operator not in ('in', '=', '<', '<='):
             raise UserError(self.env._('Operation not supported'))
         return [('line_ids', 'any', [('reconciled', '=', False), ('payment_date', operator, value)])]
 

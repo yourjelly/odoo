@@ -414,9 +414,12 @@ class AccountAccount(models.Model):
             record.root_id = self.env['account.root']._from_account_code(record.placeholder_code)
 
     def _search_account_root(self, operator, value):
-        if operator in ['=', 'child_of']:
-            root = self.env['account.root'].browse(value)
-            return [('placeholder_code', '=like', root.name + ('' if operator == '=' and not root.parent_id else '%'))]
+        if operator in ('in', 'child_of'):
+            roots = self.env['account.root'].browse(value)
+            return Domain.OR(
+                ('placeholder_code', '=like', root.name + ('' if operator == 'in' and not root.parent_id else '%'))
+                for root in roots
+            )
         raise NotImplementedError
 
     def _search_panel_domain_image(self, field_name, domain, set_count=False, limit=False):
@@ -469,15 +472,13 @@ class AccountAccount(models.Model):
             account.group_id = group_by_code[account.code]
 
     def _search_used(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
-            raise UserError(_('Operation not supported'))
         if operator != '=':
-            value = not value
-        self._cr.execute("""
+            raise UserError(_('Operation not supported'))
+        rows = self.env.execute_query("""
             SELECT id FROM account_account account
             WHERE EXISTS (SELECT 1 FROM account_move_line aml WHERE aml.account_id = account.id LIMIT 1)
         """)
-        return [('id', 'in' if value else 'not in', [r[0] for r in self._cr.fetchall()])]
+        return [('id', 'in' if value else 'not in', [r[0] for r in rows])]
 
     def _compute_used(self):
         ids = set(self._search_used('=', True)[0][2])
@@ -637,11 +638,11 @@ class AccountAccount(models.Model):
             account.include_initial_balance = account.internal_group not in ['income', 'expense']
 
     def _search_include_initial_balance(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
+        if operator not in ('=', '!=') or (truth := next(iter(value), None)) is None:
             raise UserError(_('Operation not supported'))
-        if operator != '=':
-            value = not value
-        return [('internal_group', 'not in' if value else 'in', ['income', 'expense'])]
+        if operator != 'in':
+            truth = not truth
+        return [('internal_group', 'not in' if truth else 'in', ['income', 'expense'])]
 
     def _get_internal_group(self, account_type):
         return account_type.split('_', maxsplit=1)[0]
@@ -799,6 +800,12 @@ class AccountAccount(models.Model):
         name = value or ''
         if operator in ('=', '!='):
             domain = ['|', ('code', '=', name.split(' ')[0]), ('name', operator, name)]
+        elif operator in ('in', 'not in'):
+            names = name
+            domain = expression.OR(
+                ['|', ('code', '=', name.split(' ')[0]), ('name', operator, name)]
+                for name in names
+            )
         else:
             domain = ['|', ('code', '=like', name.split(' ')[0] + '%'), ('name', operator, name)]
         if operator in expression.NEGATIVE_TERM_OPERATORS:
@@ -1440,6 +1447,14 @@ class AccountGroup(models.Model):
     @api.model
     def _search_display_name(self, operator, value):
         domain = []
+        if operator in ('in', 'not in'):
+            names = value
+            domain = expression.OR(
+                ['|', ('code', '=', name.split(' ')[0]), ('name', operator, name)]
+                for name in names
+            )
+            if operator == 'not in':
+                domain = ['!'] + domain
         if operator != 'ilike' or (value or '').strip():
             criteria_operator = ['|'] if operator not in expression.NEGATIVE_TERM_OPERATORS else ['&', '!']
             name_domain = criteria_operator + [('code_prefix_start', '=ilike', value + '%'), ('name', operator, value)]

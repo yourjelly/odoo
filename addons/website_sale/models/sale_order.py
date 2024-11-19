@@ -107,6 +107,8 @@ class SaleOrder(models.Model):
                 ], limit=1)
 
     def _search_abandoned_cart(self, operator, value):
+        if operator != '=':
+            raise NotImplementedError
         website_ids = self.env['website'].search_read(fields=['id', 'cart_abandoned_delay', 'partner_id'])
         deadlines = [[
             '&', '&',
@@ -121,7 +123,7 @@ class SaleOrder(models.Model):
         abandoned_domain.extend(expression.OR(deadlines))
         abandoned_domain = expression.normalize_domain(abandoned_domain)
         # is_abandoned domain possibilities
-        if (operator not in expression.NEGATIVE_TERM_OPERATORS and value) or (operator in expression.NEGATIVE_TERM_OPERATORS and not value):
+        if value:
             return abandoned_domain
         return expression.distribute_not(['!'] + abandoned_domain)  # negative domain
 

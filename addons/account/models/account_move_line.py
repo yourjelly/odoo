@@ -1062,6 +1062,8 @@ class AccountMoveLine(models.Model):
             line.payment_date = line.discount_date if line.discount_date and date.today() <= line.discount_date else line.date_maturity
 
     def _search_payment_date(self, operator, value):
+        if operator == 'in':
+            return Domain.OR(self._search_payment_date('=', v) for v in value)
         if operator == '=':
             operator = '<='
         return [

@@ -197,13 +197,16 @@ class MailActivityMixin(models.AbstractModel):
             record.activity_date_deadline = next(iter(activities), activities).date_deadline
 
     def _search_activity_date_deadline(self, operator, operand):
-        if operator == '=' and not operand:
+        if (operator == 'in' and not any(operand)) or (operator == '=' and not operand):
             return [('activity_ids', '=', False)]
         return [('activity_ids.date_deadline', operator, operand)]
 
     @api.model
     def _search_activity_user_id(self, operator, operand):
-        if isinstance(operand, bool) and ((operator == '=' and not operand) or (operator == '!=' and operand)):
+        if (operator == 'in' and not any(operand)) or (
+            isinstance(operand, bool)
+            and ((operator == '=' and not operand) or (operator == '!=' and operand))
+        ):
             return [('activity_ids', '=', False)]
         return [('activity_ids', 'any', [('active', 'in', [True, False]), ('user_id', operator, operand)])]
 

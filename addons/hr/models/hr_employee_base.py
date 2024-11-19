@@ -91,12 +91,14 @@ class HrEmployeeBase(models.AbstractModel):
                 employee.newly_hired = employee[new_hire_field] > new_hire_date
 
     def _search_newly_hired(self, operator, value):
+        if operator != '=':
+            raise NotImplementedError
         new_hire_field = self._get_new_hire_field()
         new_hires = self.env['hr.employee'].sudo().search([
             (new_hire_field, '>', fields.Datetime.now() - timedelta(days=90))
         ])
 
-        op = 'in' if value and operator == '=' or not value and operator != '=' else 'not in'
+        op = 'in' if value else 'not in'
         return [('id', op, new_hires.ids)]
 
     @api.depends("work_location_id.name", "work_location_id.location_type")
@@ -137,13 +139,13 @@ class HrEmployeeBase(models.AbstractModel):
                 employee.member_of_department = employee.department_id in child_departments
 
     def _search_part_of_department(self, operator, value):
-        if operator not in ('=', '!=') or not isinstance(value, bool):
+        if operator != '=':
             raise UserError(_('Operation not supported'))
 
         user_employee = self._get_valid_employee_for_user()
         # Double negation
         if not value:
-            operator = '!=' if operator == '=' else '='
+            operator = '!='
         if not user_employee.department_id:
             return [('id', operator, user_employee.id)]
         return (['!'] if operator == '!=' else []) + [('department_id', 'child_of', user_employee.department_id.id)]

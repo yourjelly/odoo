@@ -200,9 +200,11 @@ class StockQuant(models.Model):
                 quant.is_outdated = True
 
     def _search_is_outdated(self, operator, value):
+        if operator != '=':
+            raise NotImplementedError
         quant_ids = self.search([('inventory_quantity_set', '=', True)])
         quant_ids = quant_ids.filtered(lambda quant: float_compare(quant.inventory_quantity - quant.inventory_diff_quantity, quant.quantity, precision_rounding=quant.product_uom_id.rounding)).ids
-        return [('id', 'in', quant_ids)]
+        return [('id', 'in' if value else 'not in', quant_ids)]
 
     @api.depends('quantity')
     def _compute_inventory_quantity_auto_apply(self):
@@ -234,14 +236,11 @@ class StockQuant(models.Model):
 
     def _search_on_hand(self, operator, value):
         """Handle the "on_hand" filter, indirectly calling `_get_domain_locations`."""
-        if operator not in ['=', '!='] or not isinstance(value, bool):
+        if operator != '=':
             raise UserError(_('Operation not supported'))
         domain_loc = self.env['product.product']._get_domain_locations()[0]
         quant_query = self.env['stock.quant']._search(domain_loc)
-        if (operator == '!=' and value is True) or (operator == '=' and value is False):
-            domain_operator = 'not in'
-        else:
-            domain_operator = 'in'
+        domain_operator = 'in' if value else 'not in'
         return [('id', domain_operator, quant_query)]
 
     def copy(self, default=None):
@@ -1574,14 +1573,13 @@ class StockQuantPackage(models.Model):
                 package.valid_sscc = check_barcode_encoding(package.name, 'sscc')
 
     def _search_owner(self, operator, value):
-        if value:
-            packs = self.search([('quant_ids.owner_id', operator, value)])
+        if operator in expression.NEGATIVE_TERM_OPERATORS:
+            positive_operator = expression.TERM_OPERATORS_NEGATION[operator]
+            negation = ['!']
         else:
-            packs = self.search([('quant_ids', operator, value)])
-        if packs:
-            return [('id', 'in', packs.ids)]
-        else:
-            return [('id', '=', False)]
+            positive_operator = operator
+            negation = []
+        return [*negation, ('quant_ids.owner_id', positive_operator, value)]
 
     def write(self, vals):
         if 'location_id' in vals:

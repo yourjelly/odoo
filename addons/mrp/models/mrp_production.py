@@ -798,10 +798,8 @@ class MrpProduction(models.Model):
             production.show_produce = state_ok and not qty_none_or_all
 
     def _search_is_delayed(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
-            raise UserError(_('Operation not supported'))
         if operator != '=':
-            value = not value
+            raise UserError(_('Operation not supported'))
         sub_query = self._search([
             ('state', 'in', ['confirmed', 'progress', 'to_close']),
             ('date_deadline', '!=', False),
@@ -820,12 +818,19 @@ class MrpProduction(models.Model):
             )
 
     def _search_date_category(self, operator, value):
-        if operator != '=':
+        if operator == '=':
+            operator = 'in'
+            value = [value]
+        if operator != 'in':
             raise NotImplementedError(_('Operation not supported'))
-        search_domain = self.env['stock.picking'].date_category_to_domain(value)
-        return expression.AND([
-            [('date_start', operator, value)] for operator, value in search_domain
-        ])
+        dates = value
+        return expression.OR(
+            expression.AND(
+                [('date_start', operator, value)]
+                for operator, value in self.env['stock.picking'].date_category_to_domain(date)
+            )
+            for date in dates
+        )
 
     @api.onchange('qty_producing', 'lot_producing_id')
     def _onchange_producing(self):
