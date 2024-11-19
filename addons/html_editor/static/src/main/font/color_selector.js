@@ -87,6 +87,7 @@ export class ColorSelector extends Component {
         const color = this.processColorFromEvent(ev);
         this.applyColor(color);
         this.dropdown.close();
+        this.defaultColor = color?.toLowerCase();
     }
 
     onColorPreview(ev) {
