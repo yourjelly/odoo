@@ -3240,7 +3240,7 @@ class BaseModel(metaclass=MetaModel):
             value = None
         # Write value if non-NULL, except for booleans for which False means
         # the same as NULL - this saves us an expensive query on large tables.
-        necessary = (value is not None) if field.type != 'boolean' else value
+        necessary = (value is not None) if field.type != 'boolean' or field.required else value
         if necessary:
             _logger.debug("Table '%s': setting default value of new column %s to %r",
                           self._table, column_name, value)
